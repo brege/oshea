@@ -8,12 +8,15 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
 
   Define new document types with custom processing, configurations (local `*.config.yaml`), CSS, and data structures. Existing types are implemented as plugins:
   
-  - [`cv`](plugins/cv)
-  - [`recipe`](recipe)
-  - [`cover-letter`](cover-letter)
-  - [`recipe-book`](plugins/recipe-book)
   - [`default`](plugins/default)
-  - [`recipe-book`](recipe-book)
+  - [`cv`](plugins/cv)
+  - [`cover-letter`](cover-letter)
+  - [`recipe`](recipe)
+  - [`recipe-book`](plugins/recipe-book)
+
+  And a batch export extension:
+
+  - [`hugo-export-each`](plugins/hugo-export-each)
 
 * **Versatile Conversions**
   * Convert single Markdown files to PDF using type-specific plugins.
@@ -23,6 +26,14 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
   * A main `config.yaml` for global settings and plugin registration.
   * Each plugin manages its own local configuration for PDF options, CSS, and behavior.
   * Supports YAML front matter for metadata and dynamic content substitution (including date variables).
+
+### Examples
+
+| [CV Layout](plugins/cv)                                       | [Cover Letter Layout](plugins/cover-letter)                           | [Recipe Layout](plugins/recipe)                        |
+| :-----------------------------------: | :----------------------------------: | :---------------------------------: |
+| <img src="examples/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="examples/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="examples/screenshots/example-recipe.png" alt="Recipe Sreenshot" width="300"/> |
+
+
 
 ## Prerequisites
 
@@ -69,7 +80,7 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
 
 ### Commands
 
-#### Type: `convert <markdownFile> --plugin <pluginName>`
+#### Type 1: `convert <markdownFile> --plugin <pluginName>`
 
   Converts a single Markdown file to PDF using the specified document type plugin.
 
@@ -99,7 +110,7 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
     md-to-pdf convert examples/example-recipe.md --plugin recipe --outdir ./output_pdfs --filename my-dish.pdf
     ```
 
-#### Type: `generate <pluginName> [plugin-specific-options...]`
+#### Type 2: `generate <pluginName> [plugin-specific-options...]`
 
   Generates a document using a specified plugin. This command is suitable for plugins that might not take a single Markdown file as primary input (like [`recipe-book`](plugins/recipe-book)) or require more complex arguments.
 
@@ -136,7 +147,7 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
     --filename "Family Cookbook.pdf"
   ```
 
-#### Type: `hugo-export-each <sourceDir> --base-plugin <pluginName>`
+#### Type 3: `hugo-export-each <sourceDir> --base-plugin <pluginName>`
 
 Batch exports individual PDFs from a Hugo content directory. Each item is processed using the specified base plugin for styling. PDFs are saved alongside their source Markdown files.
 

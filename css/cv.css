@@ -1,0 +1,121 @@
+/* css/cv.css */
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 9pt;
+  line-height: 1.45;
+  margin: 1cm; /* Note: Puppeteer margins from config.yaml will likely define the PDF's printable area. */
+              /* This body margin primarily affects direct HTML viewing. */
+}
+
+a {
+  color: rgb(0, 0, 0, 0.75);
+  text-decoration: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #000;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+h1 { font-size: 1.8em; }
+h2 { font-size: 1.5em; }
+h3 { font-size: 1.2em; }
+h4 { font-size: 1em; }
+h5 { font-size: 0.9em; }
+h6 { font-size: 0.8em; }
+
+p {
+  margin-top: 0; /* Consistent with other CSS files */
+  margin-bottom: 1em;
+}
+
+ul, ol {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+  padding-left: 1.5em;
+}
+
+li {
+  margin-bottom: 0.4em;
+}
+
+strong {
+  font-weight: bold;
+}
+
+/* Consistent code block styling with default.css */
+code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  background-color: #f0f0f0;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em; /* Slightly smaller for code */
+}
+
+pre {
+  background-color: #f0f0f0;
+  border: 1px solid #cccccc;
+  padding: 1em;
+  overflow-x: auto;
+  border-radius: 4px;
+  font-size: 0.9em; /* Match code font size or set as desired */
+  margin-top: 0.5em;  /* Added for spacing */
+  margin-bottom: 1em; /* Added for spacing */
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border: none;
+  font-size: inherit; /* Inherit from <pre> */
+}
+
+blockquote {
+  border-left: 4px solid #ccc;
+  padding-left: 1em;
+  margin-left: 1em; /* Keep margin-left for blockquote indentation */
+  margin-top: 1em;
+  margin-bottom: 1em;
+  font-style: italic;
+}
+
+/* Print specific styles */
+@media print {
+  @page {
+    margin: 1cm; /* This should ideally match config.yaml for 'cv' type if preferCSSPageSize were true */
+  }
+
+  body {
+    font-size: 9pt; /* Maintain CV font size for print */
+    color: #000 !important;
+    background-color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  a {
+    color: rgb(0, 0, 0, 0.75) !important; /* Maintain link color style for CV if desired, or use #000 */
+    text-decoration: none !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid; /* Good for headings */
+  }
+
+  p, ul, ol, blockquote, pre, figure, table { /* Added p, figure, table */
+    page-break-inside: avoid; /* Good for content blocks */
+  }
+
+  img {
+    max-width: 100% !important; /* Ensure images scale down */
+    display: block;
+    margin: 0.5em auto;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,19 @@
+# plugins/default/default.config.yaml
+description: "Default plugin for generic Markdown documents."
+# Points to the handler script within this plugin's directory.
+# This script will, in turn, utilize the common src/default_handler.js.
+handler_script: "index.js"
+css_files:
+  - "default.css" # Points to plugins/default/default.css
+pdf_options:
+  format: "Letter" # Default PDF format for this type
+  margin: # Default margins for this type
+    top: "1in"
+    right: "1in"
+    bottom: "1in"
+    left: "1in"
+toc_options: # Default Table of Contents settings
+  enabled: false
+# Processing flags for default Markdown files
+inject_fm_title_as_h1: true # Standard behavior: if 'title' in front matter, use as H1
+aggressiveHeadingCleanup: false # Don't aggressively remove existing H1/H2 by default

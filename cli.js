@@ -4,9 +4,7 @@
 
 /**
  * @fileoverview Command Line Interface (CLI) entry point for the md-to-pdf application.
- * Handles argument parsing, configuration loading, and delegates tasks to appropriate modules
- * for Markdown to PDF conversion, recipe book generation, and Hugo content processing.
- * @version 1.2.0 // Version bump for --config fix
+ * @version 1.5.1 // Version bump for yargs strictness fix in generate
  * @date 2025-05-18
  */
 
@@ -17,26 +15,14 @@ const { spawn } = require('child_process');
 
 const {
     loadConfig,
-    getTypeConfig,
 } = require('./src/markdown_utils');
 
-const DocumentProcessor = require('./src/document_processor');
-const RecipeBookBuilder = require('./src/recipe_book_builder');
+const PluginManager = require('./src/PluginManager');
 const HugoExportEach = require('./src/hugo_export_each');
 
-// Default config path, used if --config option is not provided
 const DEFAULT_CONFIG_FILE_PATH = path.join(__dirname, 'config.yaml');
 
-/**
- * Attempts to open a generated PDF file using the configured PDF viewer.
- * Logs a message if a viewer is not configured or if opening fails.
- * The viewer is spawned as a detached process.
- *
- * @param {string} pdfPath - The absolute path to the PDF file.
- * @param {string} viewerCommand - The command string for the PDF viewer (e.g., "firefox", "xdg-open").
- */
 function openPdf(pdfPath, viewerCommand) {
-    // ... (openPdf function remains the same)
     if (!viewerCommand) {
         console.log(`PDF viewer not configured. PDF generated at: ${pdfPath}`);
         return;
@@ -59,37 +45,36 @@ function openPdf(pdfPath, viewerCommand) {
     }
 }
 
-/**
- * Main application function. Parses CLI arguments, loads configuration,
- * and executes the requested command.
- * @async
- */
 async function main() {
-    // Define global options first
     const argvBuilder = yargs(hideBin(process.argv))
         .scriptName("md-to-pdf")
         .usage("Usage: $0 <command> [options]")
-        .option('config', { // <<< DEFINE --config AS A GLOBAL OPTION
+        .option('config', {
             describe: 'Path to a custom YAML configuration file.',
             type: 'string',
-            normalize: true, // Ensures the path is normalized
-            default: DEFAULT_CONFIG_FILE_PATH // Use default if not provided
+            normalize: true,
+            default: DEFAULT_CONFIG_FILE_PATH
         })
         .alias("help", "h")
         .alias("version", "v")
-        .demandCommand(1, "You need to specify a command (convert, book, or hugo-export-each).")
-        .strict() // Catches unrecognized options (like --config if not defined globally)
+        .demandCommand(1, "You need to specify a command.")
+        .strict() // Global strict mode
         .epilogue("For more information, refer to the README.md file.");
 
-    // Now add commands, they will inherit the global options
     argvBuilder.command(
             "convert <markdownFile>",
-            "Convert a single Markdown file to PDF.",
-            (y) => { // Command-specific options
+            "Convert a single Markdown file to PDF using a specified plugin.",
+            (y) => {
                 y.positional("markdownFile", {
                     describe: "Path to the input Markdown file.",
                     type: "string",
                     normalize: true,
+                })
+                .option("plugin", {
+                    alias: "p",
+                    describe: "Document type plugin to use (e.g., 'default', 'cv', 'recipe').",
+                    type: "string",
+                    default: "default",
                 })
                 .option("outdir", {
                     alias: "o",
@@ -102,44 +87,40 @@ async function main() {
                     describe: "Specific name for the output PDF file. If not provided, a name will be generated.",
                     type: "string",
                 })
-                .option("type", {
-                    alias: "t",
-                    describe: "Document type (e.g., 'cv', 'recipe', 'default'). Determines configuration and CSS.",
-                    type: "string",
-                    default: "default",
-                })
                 .option("no-open", {
                     describe: "Prevents automatically opening the generated PDF.",
                     type: "boolean",
                     default: false,
                 });
             },
-            async (args) => { // Handler for 'convert'
+            async (args) => {
                 let fullConfig;
                 try {
-                    // Use args.config which yargs has now populated
                     fullConfig = await loadConfig(args.config);
                 } catch (error) {
                     console.error(`ERROR: Failed to load configuration from '${args.config}': ${error.message}`);
                     process.exit(1);
                 }
-                // ... rest of the convert handler logic ...
                 try {
-                    console.log(`Processing 'convert' command for: ${args.markdownFile}`);
-                    const docTypeConfig = getTypeConfig(fullConfig, args.type);
-                    const outputDir = args.outdir || path.dirname(args.markdownFile);
-
-                    const processor = new DocumentProcessor();
-                    const generatedPdfPath = await processor.process(
-                        args.markdownFile,
-                        docTypeConfig,
-                        outputDir,
-                        args.filename,
-                        fullConfig
+                    console.log(`Processing 'convert' for: ${args.markdownFile} using plugin: ${args.plugin}`);
+                    const pluginManager = new PluginManager(fullConfig);
+                    const outputDir = args.outdir ? path.resolve(args.outdir) : path.dirname(args.markdownFile);
+                    const dataForPlugin = { markdownFilePath: args.markdownFile };
+                    
+                    const generatedPdfPath = await pluginManager.invokeHandler(
+                        args.plugin, dataForPlugin, outputDir, args.filename
                     );
 
-                    if (generatedPdfPath && !args.noOpen && docTypeConfig.pdf_viewer) {
-                        openPdf(generatedPdfPath, docTypeConfig.pdf_viewer);
+                    if (generatedPdfPath) {
+                        console.log(`Successfully generated PDF: ${generatedPdfPath}`);
+                        if (!args.noOpen && fullConfig.pdf_viewer) {
+                            openPdf(generatedPdfPath, fullConfig.pdf_viewer);
+                        } else if (!args.noOpen) {
+                            console.log(`PDF viewer not configured in main config. PDF is at: ${generatedPdfPath}`);
+                        }
+                    } else {
+                        console.error(`ERROR: PDF generation failed for plugin '${args.plugin}'.`);
+                        process.exit(1);
                     }
                     console.log("Convert command finished.");
                 } catch (error) {
@@ -150,60 +131,77 @@ async function main() {
             }
         )
         .command(
-            "book <recipesBaseDir>",
-            "Create a recipe book PDF from a directory of recipes.",
-            (y) => { // Command-specific options
-                y.positional("recipesBaseDir", {
-                    describe: "Base directory containing recipe Markdown files/subdirectories.",
+            "generate <pluginName>",
+            "Generate a document using a specified plugin and its specific options.",
+            (y) => {
+                y.positional("pluginName", {
+                    describe: "The name of the plugin to use.",
                     type: "string",
-                    normalize: true,
                 })
                 .option("outdir", {
                     alias: "o",
-                    describe: "Output directory for the recipe book PDF. Defaults to current directory.",
+                    describe: "Output directory for the PDF. Defaults to current directory.",
                     type: "string",
                     default: ".",
                     normalize: true,
                 })
                 .option("filename", {
                     alias: "f",
-                    describe: "Specific name for the output PDF file.",
+                    describe: "Specific name for the output PDF file. If not provided, a name will be generated by the plugin.",
                     type: "string",
-                    default: "recipe-book.pdf",
                 })
                 .option("no-open", {
                     describe: "Prevents automatically opening the generated PDF.",
                     type: "boolean",
                     default: false,
-                });
+                })
+                .strict(false); // <--- FIX: Disable strictness for this command's options
             },
-            async (args) => { // Handler for 'book'
+            async (args) => {
                 let fullConfig;
                 try {
-                    fullConfig = await loadConfig(args.config); // Use args.config
+                    fullConfig = await loadConfig(args.config);
                 } catch (error) {
                     console.error(`ERROR: Failed to load configuration from '${args.config}': ${error.message}`);
                     process.exit(1);
                 }
-                // ... rest of the book handler logic ...
                 try {
-                    console.log(`Processing 'book' command for directory: ${args.recipesBaseDir}`);
-                    const recipeBookConfig = getTypeConfig(fullConfig, 'recipe-book');
+                    console.log(`Processing 'generate' command for plugin: ${args.pluginName}`);
+                    const pluginManager = new PluginManager(fullConfig);
 
-                    const builder = new RecipeBookBuilder();
-                    const generatedPdfPath = await builder.build(
-                        args.recipesBaseDir,
-                        recipeBookConfig,
-                        args.outdir,
-                        args.filename
+                    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'noOpen', 'config', 'help', 'h', 'version', 'v', '$0', '_'];
+                    const cliArgsForPlugin = {};
+                    for (const key in args) {
+                        if (!knownGenerateOptions.includes(key) && Object.prototype.hasOwnProperty.call(args, key)) {
+                            // Yargs converts kebab-case to camelCase, so --recipes-base-dir becomes recipesBaseDir in args
+                            cliArgsForPlugin[key] = args[key];
+                        }
+                    }
+                    
+                    const dataForPlugin = { cliArgs: cliArgsForPlugin };
+                    const outputFilename = args.filename;
+
+                    const generatedPdfPath = await pluginManager.invokeHandler(
+                        args.pluginName,
+                        dataForPlugin,
+                        path.resolve(args.outdir),
+                        outputFilename
                     );
 
-                    if (generatedPdfPath && !args.noOpen && recipeBookConfig.pdf_viewer) {
-                        openPdf(generatedPdfPath, recipeBookConfig.pdf_viewer);
+                    if (generatedPdfPath) {
+                        console.log(`Successfully generated PDF via plugin '${args.pluginName}': ${generatedPdfPath}`);
+                        if (!args.noOpen && fullConfig.pdf_viewer) {
+                            openPdf(generatedPdfPath, fullConfig.pdf_viewer);
+                        } else if (!args.noOpen) {
+                            console.log(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
+                        }
+                    } else {
+                        console.error(`ERROR: PDF generation failed for plugin '${args.pluginName}'.`);
+                        process.exit(1);
                     }
-                    console.log("Book command finished.");
+                    console.log("Generate command finished.");
                 } catch (error) {
-                    console.error(`ERROR in 'book' command: ${error.message}`);
+                    console.error(`ERROR in 'generate' command for plugin '${args.pluginName}': ${error.message}`);
                     if (error.stack) console.error(error.stack);
                     process.exit(1);
                 }
@@ -211,21 +209,21 @@ async function main() {
         )
         .command(
             "hugo-export-each <sourceDir>",
-            "Batch export individual PDFs from a Hugo content directory (slug-author-date.pdf naming).",
-            (y) => { // Command-specific options
+            "Batch export individual PDFs from a Hugo content directory.",
+            (y) => {
                 y.positional("sourceDir", {
-                    describe: "Path to the source directory containing Hugo recipes (e.g., 'content/recipes').",
+                    describe: "Path to the source directory containing Hugo recipes.",
                     type: "string",
                     normalize: true,
                 })
-                .option("base-type", {
-                    alias: "t", // Changed from 'itemBaseType' in yargs to 'base-type' to match common CLI style
-                    describe: "Base document type from config.yaml to use for styling each item (e.g., 'recipe').",
+                .option("base-plugin", { // Corrected option name definition
+                    alias: "p",
+                    describe: "Base document type plugin to use for styling each item (e.g., 'recipe').",
                     type: "string",
                     default: "recipe",
                 })
-                .option("hugo-ruleset", { // Changed from 'hugoRuleset'
-                    describe: "Key in config.yaml under 'hugo_export_each' for specific processing rules (e.g., 'default_rules').",
+                .option("hugo-ruleset", {
+                    describe: "Key in config.yaml under 'hugo_export_each' for specific processing rules.",
                     type: "string",
                     default: "default_rules",
                 })
@@ -235,43 +233,41 @@ async function main() {
                     default: true,
                 });
             },
-            async (args) => { // Handler for 'hugo-export-each'
+            async (args) => {
                 let fullConfig;
                 try {
-                    fullConfig = await loadConfig(args.config); // Use args.config
+                    fullConfig = await loadConfig(args.config);
                 } catch (error) {
                     console.error(`ERROR: Failed to load configuration from '${args.config}': ${error.message}`);
                     process.exit(1);
                 }
-                // ... rest of the hugo-export-each handler logic ...
                 try {
-                    console.log(`Processing 'hugo-export-each' command for directory: ${args.sourceDir}`);
-                    const itemBaseConfig = getTypeConfig(fullConfig, args.baseType); // args.baseType is correct from yargs
-                    
-                    const hugoExportRules = (fullConfig.hugo_export_each && fullConfig.hugo_export_each[args.hugoRuleset]) // args.hugoRuleset
+                    console.log(`Processing 'hugo-export-each' for dir: ${args.sourceDir} using base plugin: ${args.basePlugin}`);
+                    const pluginManager = new PluginManager(fullConfig);
+                    const pluginDetails = await pluginManager.getPluginDetails(args.basePlugin);
+
+                    if (!pluginDetails || !pluginDetails.config) {
+                        throw new Error(`Base plugin '${args.basePlugin}' not found or its configuration failed to load.`);
+                    }
+                    const itemBasePluginConfig = pluginDetails.config;
+                    const itemBasePluginPath = pluginDetails.basePath;
+
+                    const hugoExportRules = (fullConfig.hugo_export_each && fullConfig.hugo_export_each[args.hugoRuleset])
                         ? fullConfig.hugo_export_each[args.hugoRuleset]
                         : {};
-
-                    if (Object.keys(hugoExportRules).length === 0 && args.hugoRuleset !== "default_rules" && fullConfig.hugo_export_each && !fullConfig.hugo_export_each[args.hugoRuleset]) {
-                        console.warn(`WARN: Hugo export ruleset '${args.hugoRuleset}' not found under 'hugo_export_each' in config.yaml. Using minimal/default Hugo processing rules.`);
-                    } else if (Object.keys(hugoExportRules).length === 0 && args.hugoRuleset === "default_rules" && (!fullConfig.hugo_export_each || !fullConfig.hugo_export_each.default_rules)) {
-                        console.warn(`WARN: Default Hugo export ruleset 'default_rules' not found under 'hugo_export_each' in config.yaml. Minimal Hugo processing will occur.`);
-                    }
-
+                    
                     const exporter = new HugoExportEach();
                     const generatedPdfPaths = await exporter.exportAllPdfs(
                         args.sourceDir,
-                        itemBaseConfig,
+                        itemBasePluginConfig,
                         hugoExportRules,
                         fullConfig,
-                        args.noOpen
+                        args.noOpen,
+                        itemBasePluginPath
                     );
 
-                    if (!args.noOpen && itemBaseConfig.pdf_viewer && generatedPdfPaths.length > 0) {
-                        console.log("Batch export finished. Attempting to open the first generated PDF as per --no-open=false.");
-                        openPdf(generatedPdfPaths[0], itemBaseConfig.pdf_viewer);
-                    } else if (!args.noOpen && !itemBaseConfig.pdf_viewer && generatedPdfPaths.length > 0) {
-                        console.log("Batch export finished. PDFs generated but cannot be opened (no PDF viewer configured for type).")
+                    if (!args.noOpen && fullConfig.pdf_viewer && generatedPdfPaths.length > 0) {
+                        openPdf(generatedPdfPaths[0], fullConfig.pdf_viewer);
                     }
                     console.log("Hugo export-each command finished.");
                 } catch (error) {
@@ -282,19 +278,9 @@ async function main() {
             }
         );
 
-    // Parse the arguments after all commands and options are defined.
-    // Yargs will populate `args` in each handler with both global and command-specific options.
     const parsedArgs = argvBuilder.parse();
-
-    // Note: The actual command execution logic is now within each command's handler.
-    // The `loadConfig` call is moved into each handler to use `args.config`.
-    // If `loadConfig` was intended to be called only once, you'd parse earlier,
-    // load config, and then pass `fullConfig` into the handlers. But since `--config`
-    // is now a dynamic option, loading it inside the handler based on `args.config` is correct.
 }
 
-// --- Global Error Handling ---
-// ... (remains the same)
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     if (reason instanceof Error && reason.stack) {
@@ -311,7 +297,6 @@ process.on('uncaughtException', (error) => {
     process.exit(1);
 });
 
-// --- Script Execution ---
 if (require.main === module) {
     main();
 }

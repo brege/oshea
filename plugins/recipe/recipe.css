@@ -1,0 +1,88 @@
+/* css/recipe.css */
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11pt;
+  line-height: 1.5;
+  margin: 0.5in; /* Note: Puppeteer margins from config.yaml will likely define the PDF's printable area. */
+                 /* This body margin primarily affects direct HTML viewing or if preferCSSPageSize is true. */
+  color: #000;
+  background-color: #fff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #000;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+/* Specific styling for H3, often used for "Ingredients", "Directions" */
+h3 {
+  font-size: 16pt; /* Or use em, e.g., 1.4em */
+  border-bottom: 1px solid #000;
+  padding-bottom: 0.2em;
+  margin-top: 1.5em; /* More space before major sections */
+}
+
+h1 { font-size: 1.8em; } /* Example, if H1 is used for main recipe title */
+h2 { font-size: 1.5em; } /* Example, if H2 is used */
+
+ul, ol {
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+  padding-left: 1.5em; /* Standard indent for lists */
+}
+
+li {
+  margin-bottom: 0.5em;
+}
+
+p { /* Adding basic paragraph styling for completeness */
+  margin-top: 0;
+  margin-bottom: 0.75em;
+}
+
+strong {
+  font-weight: bold;
+}
+
+a {
+  color: #000; /* Black links for recipes */
+  text-decoration: none;
+  font-weight: bold; /* Make links stand out if they are not colored */
+}
+
+/* Print specific styles */
+@media print {
+  @page {
+    margin: 0.5in; /* Should align with config.yaml for 'recipe' type if preferCSSPageSize true */
+  }
+
+  body {
+    font-size: 11pt; /* Maintain recipe font size */
+    color: #000 !important;
+    background-color: #fff !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid; /* Prevent page break immediately after a heading */
+  }
+
+  p, ul, ol, li { /* Added p, li */
+    page-break-inside: avoid; /* Prevent these elements from breaking across pages */
+  }
+
+  img {
+    max-width: 100% !important; /* Ensure images scale down */
+    display: block;
+    margin: 0.5em auto; /* Center images if they are block */
+    page-break-inside: avoid;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

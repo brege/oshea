@@ -1,0 +1,38 @@
+# development files
+dev/
+
+# Node dependencies
+node_modules/
+
+# PDF outputs and other build artifacts
+*.pdf
+
+# Logs and temp files
+*.log
+*.tmp
+
+# macOS system files
+.DS_Store
+
+# Editor/IDE junk
+.vscode/
+*.swp
+*.swo
+*~
+
+# User should copy config.yaml.example to config.yaml
+config.yaml
+config/
+
+# Optional: ignore built shell outputs if any
+# *.sh.bak
+
+# Optional: npm debug files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Optional: ignore output directories (if you add one later)
+# dist/
+# build/
+

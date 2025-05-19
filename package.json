@@ -1,0 +1,51 @@
+{
+  "name": "md-to-pdf",
+  "version": "0.1.0",
+  "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
+  "main": "cli.js",
+  "bin": {
+    "md-to-pdf": "./cli.js"
+  },
+  "scripts": {
+    "start": "node cli.js",
+    "convert": "node cli.js convert",
+    "book": "node cli.js book",
+    "hugo-export-each": "node cli.js hugo-export-each",
+    "test": "node test/run-tests.js",
+    "test:keep-output": "KEEP_OUTPUT=true node test/run-tests.js"
+  },
+  "keywords": [
+    "markdown",
+    "pdf",
+    "puppeteer",
+    "conversion",
+    "cli",
+    "hugo",
+    "recipe",
+    "cv",
+    "front-matter",
+    "gray-matter"
+  ],
+  "author": "Wyatt Brege/@brege",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brege/md-to-pdf.git"
+  },
+  "bugs": {
+    "url": "https://github.com/brege/md-to-pdf/issues"
+  },
+  "homepage": "https://github.com/brege/md-to-pdf#readme",
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^4.1.0",
+    "markdown-it": "^14.0.0",
+    "markdown-it-anchor": "^8.6.7", 
+    "markdown-it-toc-done-right": "^4.2.0",
+    "puppeteer": "^22.0.0",
+    "yargs": "^17.7.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

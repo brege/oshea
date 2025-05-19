@@ -1,0 +1,110 @@
+/* css/cover-letter.css */
+
+/* --- Base Styles --- */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 10.5pt; /* Slightly larger than a typical CV for readability */
+  line-height: 1.45; /* Comfortable line spacing */
+  color: #333333;    /* Dark gray for text, less harsh than pure black */
+  background-color: #ffffff;
+  margin: 0; /* Page margins are controlled by Puppeteer options from config.yaml */
+}
+
+/* --- Links --- */
+a {
+  color: #0056b3; /* A standard blue for links */
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* --- Headings (Less common in cover letter body, but good for consistency) --- */
+h1, h2, h3, h4, h5, h6 {
+  color: #222222; /* Slightly darker than body text for emphasis */
+  margin-top: 1.2em;
+  margin-bottom: 0.6em;
+  line-height: 1.2;
+  font-weight: 600; /* Semi-bold for headings */
+}
+
+/* Relative font sizes for headings based on body font-size */
+h1 { font-size: 1.8em; } /* e.g., 10.5pt * 1.8 = ~19pt */
+h2 { font-size: 1.5em; } /* ~16pt */
+h3 { font-size: 1.3em; } /* ~14pt */
+h4 { font-size: 1.1em; } /* ~11.5pt */
+h5 { font-size: 1.0em; }
+h6 { font-size: 0.9em; }
+
+/* --- Paragraphs and Text Elements --- */
+p {
+  margin-top: 0;
+  margin-bottom: 0.85em; /* Standard paragraph spacing */
+  text-align: left;   /* Or 'justify' for a more formal block look */
+}
+
+strong, b {
+  font-weight: 600; /* Ensure bold is sufficiently distinct */
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background-color: #cccccc;
+  margin: 2em 0;
+}
+
+/* --- Address Blocks & Letter Structure --- */
+/*
+  No specific classes are assumed for address blocks from the Markdown template.
+  They will typically be a series of <p> tags or just plain text lines
+  converted to <p> by the Markdown parser.
+  The default paragraph styling (and line height from body) should suffice
+  for standard letter formatting. If more specific styling for address blocks
+  (e.g., tighter line spacing) is needed, classes would need to be added to
+  the Markdown template for those sections, or more complex CSS selectors used.
+*/
+
+/* Example: If you had a specific class for the sender's address block in Markdown:
+.sender-address p,
+.recipient-address p {
+  margin-bottom: 0.1em; // Tighter spacing for address lines
+  line-height: 1.2;     // Adjust line height specifically for addresses
+}
+*/
+
+/* --- Print-Specific Styles --- */
+@media print {
+  @page {
+    margin: 1in; /* This should align with 'cover-letter' type's margin in config.yaml */
+                 /* if preferCSSPageSize were true. Currently, Puppeteer's options rule. */
+  }
+
+  body {
+    font-size: 10.5pt; /* Ensure font size is maintained for print */
+    color: #000000 !important; /* Force black text for printing */
+    background-color: #ffffff !important; /* Force white background */
+    -webkit-print-color-adjust: exact; /* Ensure background/colors print in WebKit */
+    color-adjust: exact; /* Standard property for color printing */
+  }
+
+  a {
+    color: #000000 !important; /* Make links black for print */
+    text-decoration: none !important; /* Avoid underlines on links in print */
+  }
+
+  /* Avoid page breaks inside paragraphs or list items where possible */
+  p, li, blockquote { /* Added figure, table for completeness, though less common in CLs */
+    page-break-inside: avoid;
+  }
+
+  /* Avoid page breaks after headings where possible */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  .no-print {
+    display: none !important; /* Hide elements marked with .no-print */
+  }
+}

@@ -1,264 +1,306 @@
-# Markdown to PDF Converter (md-to-pdf)
+# md-to-pdf: Markdown to PDF Converter 
 
-A versatile Node.js command-line tool to convert Markdown files into professionally styled PDFs. Ideal for CVs, cover letters, recipes, recipe books, and batch exporting Hugo content. It leverages `markdown-it` for robust Markdown parsing and Puppeteer (headless Chromium) for high-quality PDF generation.
+A Node.js command-line tool that converts Markdown files into styled PDFs. It uses an extensible document type plugin system, making it suitable for CVs, cover letters, recipes, recipe books, and batch exporting Hugo content. The tool uses `markdown-it` for Markdown parsing and Puppeteer (headless Chromium) for PDF generation.
 
 ## Features
 
-* Convert single Markdown files to PDF with type-specific styling (CV, Cover Letter, Recipe, etc.).
-* Generate a combined PDF recipe book from a directory of Markdown recipe files, including an optional cover page and table of contents.
-* Batch export individual PDFs from a Hugo content directory (e.g., recipes), with customizable slug-author-date naming conventions.
-* Highly configurable via a `config.yaml` file for global and document-type-specific settings (CSS, PDF options, shortcode removal, and more).
-* Supports front matter (YAML) in Markdown files for metadata and dynamic content substitution.
-* Automatic H1 heading injection from front matter title (configurable per type).
-* Customizable CSS for fine-grained control over PDF appearance.
+* **Extensible Plugin System** 
+
+  Define new document types with custom processing, configurations (local `*.config.yaml`), CSS, and data structures. Existing types are implemented as plugins:
+  
+  - [`cv`](plugins/cv)
+  - [`recipe`](recipe)
+  - [`cover-letter`](cover-letter)
+  - [`recipe-book`](plugins/recipe-book)
+  - [`default`](plugins/default)
+  - [`recipe-book`](recipe-book)
+
+* **Versatile Conversions**
+  * Convert single Markdown files to PDF using type-specific plugins.
+  * Generate combined PDF recipe books with optional covers and tables of contents.
+  * Batch export individual PDFs from Hugo content directories with specific naming and styling.
+* **Highly Configurable**
+  * A main `config.yaml` for global settings and plugin registration.
+  * Each plugin manages its own local configuration for PDF options, CSS, and behavior.
+  * Supports YAML front matter for metadata and dynamic content substitution (including date variables).
 
 ## Prerequisites
 
 * **Node.js:** Version 18.0.0 or higher is recommended. Download from [nodejs.org](https://nodejs.org/).
-* **npm (Node Package Manager):** Usually included with Node.js. Used for installing project dependencies.
+* **npm (Node Package Manager):** Usually included with Node.js.
 
 ## Installation
 
-1.  **Clone the repository (or download the source):**
+1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/brege/md-cv-to-pdf.git
-    cd md-cv-to-pdf
+    git clone https://github.com/brege/md-to-pdf.git
+    cd md-to-pdf
     ```
 
 2.  **Install dependencies:**
-    This command installs necessary packages including `yargs`, `js-yaml`, `gray-matter`, `markdown-it`, and `puppeteer`. Puppeteer will also download a compatible version of Chromium (this might take a few minutes on the first run).
+    
     ```bash
     npm install
     ```
+    This installs packages and downloads a Chromium version for Puppeteer, which may take a few minutes initially.
 
 3.  **Configuration:**
-    * Copy the example configuration file to create your own working configuration:
-        ```bash
-        cp config.example.yaml config.yaml
-        ```
-    * Review and customize `config.yaml` to suit your needs (e.g., `pdf_viewer` command, default PDF options, document type settings). See the "Configuration" section below and the comments within `config.example.yaml` for details.
+    ```bash
+    cp config.example.yaml config.yaml
+    ```
+    This file primarily handles global settings (like `pdf_viewer`) and registers available document type plugins. Detailed plugin configurations are in their respective directories (e.g., [`plugins/cv/cv.config.yaml`](plugins/cv/cv.config.yaml)). See [Plugin Archetypes](#plugin-archetype).
 
 4.  **(Optional) Make the CLI globally available:**
-    If you want to run the command as just `md-to-pdf` from any directory, you can link the package globally:
+    To run `md-to-pdf` from any directory:
     ```bash
-    sudo npm link 
+    npm link
     ```
-    Alternatively, you can run it from the project root using `node cli.js ...` or `npx . ...`.
+    (You might need `sudo` depending on your npm setup. Alternatively, run from the project root using `node ./cli.js ...`.)
 
 ## Usage
 
-The primary interface is `cli.js`. If you've linked the package globally, you can use `md-to-pdf`. Otherwise, from the project root, use `node cli.js`.
+The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`. Otherwise, from the project root, use `node ./cli.js`.
 
 **Global Option:**
 
-* `--config <path_to_config.yaml>`: Specify a custom path to a YAML configuration file. If not provided, the tool looks for `config.yaml` in the directory where `cli.js` is located (project root).
+* `--config <path_to_config.yaml>`: Specify a custom path to your main YAML configuration file. Defaults to `config.yaml` in the project root.
 
-    Example: `node cli.js convert mydoc.md --config /path/to/my/custom_config.yaml`
+    Example: `md-to-pdf convert examples/example-cv.md --plugin cv --config my-custom-settings.yaml`
 
 ### Commands
 
-#### 1. `convert <markdownFile>`
+#### Type: `convert <markdownFile> --plugin <pluginName>`
 
-Converts a single Markdown file to PDF.
+  Converts a single Markdown file to PDF using the specified document type plugin.
 
-**Syntax:**
-```bash
-node cli.js convert <markdownFile> [options]
-# or if globally linked:
-# md-to-pdf convert <markdownFile> [options]
+  **Syntax:**
+  ```bash
+  md-to-pdf convert <markdownFile> --plugin <pluginName> [options]
+  ```
+
+  **Arguments & Options:**
+
+  ```bash
+  <markdownFile>                # Required, Path to the input Markdown file
+  -p, --plugin <pluginName>     # Required, but defaults to plugins/default
+  -o, --outdir <directory>      # Output directory for the PDF. Defaults to the input file's directory.
+  -f, --filename <name.pdf>     # Specify the exact output PDF filename
+  --no-open                     # Prevents automatically opening the generated PDF.
+  ```
+
+  **Examples:**
+
+  * Convert a CV using the [`cv`](plugins/cv) plugin:
+    ```bash
+    md-to-pdf convert examples/example-cv.md --plugin cv
+    ```
+  * Convert a recipe, specifying output:
+    ```bash
+    md-to-pdf convert examples/example-recipe.md --plugin recipe --outdir ./output_pdfs --filename my-dish.pdf
+    ```
+
+#### Type: `generate <pluginName> [plugin-specific-options...]`
+
+  Generates a document using a specified plugin. This command is suitable for plugins that might not take a single Markdown file as primary input (like [`recipe-book`](plugins/recipe-book)) or require more complex arguments.
+
+  **Syntax:**
+
+  ```bash
+  md-to-pdf generate <pluginName> [options_for_the_plugin...] --outdir <directory> --filename <name.pdf>
+  ```
+
+  **Arguments & Options:**
+
+  * `<pluginName>`: (Required) The name of the plugin to use.
+  * `[plugin-specific-options...]`: Additional options required by the specific plugin (e.g., `--recipes-base-dir`). Consult the plugin's documentation or its `*.config.yaml`.
+  * `-o, --outdir <directory>`: Output directory. Defaults to the current directory.
+  * `-f, --filename <name.pdf>`: Specific output PDF name.
+  * `--no-open`: Prevents auto-opening.
+
+  ```bash
+  <pluginName>                  # Required, Name of the plugin to use
+  [plugin-specific-options...]  # Additional options required by the specific plugin
+  --recipes-base-dir <path>     # Required, Path to the directory containing recipe Markdown files
+  -o, --outdir <directory>      # Output directory. Defaults to the current directory.
+  -f, --filename <name.pdf>     # Specific output PDF name.
+  --no-open                     # Prevents auto-opening.
+  ```
+
+  **Example (Recipe Book):**
+  The `recipe-book` plugin is invoked using the `generate` command:
+
+  ```bash
+  md-to-pdf generate recipe-book \
+    --recipes-base-dir examples/hugo-example \
+    --outdir ./my_cookbooks \
+    --filename "Family Cookbook.pdf"
+  ```
+
+#### Type: `hugo-export-each <sourceDir> --base-plugin <pluginName>`
+
+Batch exports individual PDFs from a Hugo content directory. Each item is processed using the specified base plugin for styling. PDFs are saved alongside their source Markdown files.
+
+  **Syntax:**
+
+  ```bash
+  md-to-pdf hugo-export-each <sourceDir> --base-plugin <pluginName> [options]
+  ```
+
+  **Arguments & Options:**
+
+  ```bash
+  <sourceDir>                   # Required, Path to the source directory containing Hugo content items
+  --base-plugin <pluginName>    # Required, defaults to `recipe` or as configured
+  --hugo-ruleset <rulesetName>  # The key in `config.yaml` under `hugo_export_each` for specific processing rules
+  --no-open                     # Prevents auto-opening (default is `true` for this batch command)
+  ```
+
+  **Example:**
+
+  ```bash
+  md-to-pdf hugo-export-each examples/hugo-example --base-plugin recipe
+  ```
+
+## Configuration
+
+Configuration is managed via a main `config.yaml` and individual plugin configurations located within a [`plugins/`](plugins/) directory (by convention).
+
+### Main `config.yaml`
+
+Located at the project root (or specified by `--config`), this file handles global settings and plugin registration. Here's an illustrative structure:
+
+```yaml
+# config.yaml (Main Application Configuration)
+
+# --- Global Settings ---
+pdf_viewer: "firefox" # Or null, "xdg-open", "open -a Preview", etc.
+
+global_pdf_options:
+  format: "Letter"
+  printBackground: true
+  margin:
+    top: "1in"
+    right: "1in"
+    bottom: "1in"
+    left: "1in"
+  # displayHeaderFooter: true
+  # headerTemplate: "<div>Page <span class='pageNumber'></span> of <span class='totalPages'></span></div>"
+  # footerTemplate: "<div>{{ .title }}</div>"
+
+global_remove_shortcodes:
+  - "" # Removes HTML comments # - "{{% .* %}}" # Example: Remove a class of shortcodes
+
+# --- Document Type Plugin Registrations ---
+# Maps a plugin name (used with CLI commands) to the path of its
+# specific configuration file. Paths are relative to this main config file.
+document_type_plugins:
+  default: "plugins/default/default.config.yaml"
+  cv: "plugins/cv/cv.config.yaml"
+  recipe: "plugins/recipe/recipe.config.yaml"
+  "recipe-book": "plugins/recipe-book/recipe-book.config.yaml" # Quoting needed if key has special chars
+  "cover-letter": "plugins/cover-letter/cover-letter.config.yaml"
+  # menu: "path/to/your/custom_plugins/menu/menu.config.yaml"
+  # "business-card": "plugins/business-card/business-card.config.yaml"
 ```
-
-**Arguments & Options:**
-
-  * `<markdownFile>`: (Required) Path to the input Markdown file.
-  * `-o, --outdir <directory>`: Output directory for the PDF. Defaults to the input file's directory.
-  * `-f, --filename <name.pdf>`: Specify the exact output PDF filename. If not provided, a name will be generated based on front matter (title, author, date from the processed front matter) or the input filename if those fields are not present.
-  * `-t, --type <documentType>`: Specify the document type (e.g., `cv`, `recipe`, `cover-letter`). This corresponds to a key under `document_types` in `config.yaml` and determines CSS, PDF options, and other type-specific settings. Defaults to `default`.
-  * `--no-open`: Prevents automatically opening the generated PDF, even if a `pdf_viewer` is configured in `config.yaml`.
-
-**Examples:**
-
-  * Convert a CV using settings for the `cv` type:
-    ```bash
-    node cli.js convert examples/example-cv.md --type cv
-    ```
-  * Convert a recipe to a specific output directory and force a filename:
-    ```bash
-    node cli.js convert examples/example-recipe.md --type recipe --outdir ./output_pdfs --filename my-awesome-dish.pdf
-    ```
-  * Convert a cover letter using the default output directory:
-    ```bash
-    node cli.js convert examples/example-cover-letter.md --type cover-letter
-    ```
-
-#### 2\. `book <recipesBaseDir>`
-
-Creates a single, combined PDF recipe book from a directory of recipe Markdown files. Recipes are typically expected to be in subdirectories of `<recipesBaseDir>`, each containing an `index.md` file (Hugo-like structure).
-
-**Syntax:**
-
-```bash
-node cli.js book <recipesBaseDir> [options]
-```
-
-**Arguments & Options:**
-
-  * `<recipesBaseDir>`: (Required) Path to the base directory containing recipe Markdown files/subdirectories.
-  * `-o, --outdir <directory>`: Output directory for the recipe book PDF. Defaults to the current working directory (`.`).
-  * `-f, --filename <name.pdf>`: Specific name for the output recipe book PDF. Defaults to `recipe-book.pdf`.
-  * `--no-open`: Prevents automatically opening the generated PDF.
-
-**Example:**
-
-  * Create a recipe book from recipes located in `examples/hugo-example/`:
-    ```bash
-    node cli.js book examples/hugo-example --outdir ./my_cookbooks --filename "Family Favorites Cookbook.pdf"
-    ```
-
-#### 3\. `hugo-export-each <sourceDir>`
-
-Batch exports individual PDFs from a Hugo content directory (e.g., a directory of recipes). PDFs are typically named using a "slug-author-date.pdf" convention and saved alongside their source Markdown files by default.
-
-**Syntax:**
-
-```bash
-node cli.js hugo-export-each <sourceDir> [options]
-```
-
-**Arguments & Options:**
-
-  * `<sourceDir>`: (Required) Path to the source directory containing Hugo content items (e.g., `my-hugo-site/content/recipes`).
-  * `-t, --base-type <documentType>`: The base document type from `config.yaml` (e.g., `recipe`) to use for styling and PDF options for each exported item. Defaults to `recipe`.
-  * `--hugo-ruleset <rulesetName>`: The key in `config.yaml` under the `hugo_export_each` section that defines specific processing rules (like author extraction regex and Hugo-specific shortcode removal) for this batch export. Defaults to `default_rules`.
-  * `--no-open`: Prevents automatically opening the generated PDFs. For this batch command, the default is `true` (PDFs are *not* opened automatically). Set to `--no-open=false` to attempt opening (e.g., the first one).
-
-**Example:**
-
-  * Export all recipes from a Hugo content directory using the `recipe` type for styling and the `default_rules` for Hugo processing:
-    ```bash
-    node cli.js hugo-export-each path/to/hugo/content/posts --base-type recipe --hugo-ruleset default_rules
-    ```
-
-## Configuration (`config.yaml`)
-
-The application's behavior is heavily controlled by `config.yaml`. You should copy `config.example.yaml` to `config.yaml` and customize it. The `config.example.yaml` file is thoroughly commented to explain all available options.
-
-Key sections include:
-
-  * **`pdf_viewer`**: Command to open PDFs (e.g., `firefox`, `evince`, or `null` to disable).
-  * **`global_pdf_options`**: Default Puppeteer PDF options (e.g., `format`, `margin`, `printBackground`, `headerTemplate`, `footerTemplate`, `displayHeaderFooter`).
-  * **`global_remove_shortcodes`**: An array of regular expression patterns (as strings) to remove content globally from all documents *before* Markdown rendering.
-  * **`document_types`**: Define configurations for different types of documents (e.g., `default`, `cv`, `recipe`, `recipe-book`, `cover-letter`). Each type can specify:
-      * `description`: A brief note about the type.
-      * `css_files`: An array of CSS filenames (expected in the `css/` directory) to apply for styling.
-      * `pdf_options`: Type-specific overrides for `global_pdf_options`.
-      * `toc_options`: Settings for table of contents generation (e.g., `enabled`, `placeholder` string in Markdown, `level` of headings to include, `listType`).
-      * `cover_page`: (Primarily for `recipe-book`) Settings for an automatically generated cover page (`enabled`, `title`, `subtitle`, `author`).
-      * `remove_shortcodes_patterns`: Type-specific regex patterns for shortcode removal, applied after any `global_remove_shortcodes`.
-      * `inject_fm_title_as_h1`: (Boolean) If `true`, the `title` from the document's front matter will be injected as the main H1 heading.
-      * `aggressiveHeadingCleanup`: (Boolean) If `inject_fm_title_as_h1` is `true`, setting this also to `true` will attempt to remove any pre-existing H1 or H2 headings from the Markdown content before injecting the new title. This is useful for recipe book items or content where titles might already exist in the body.
-  * **`hugo_export_each`**: Configuration specific to the `hugo-export-each` command. This section contains one or more "rulesets" (e.g., `default_rules`). Each ruleset can define:
-      * `author_extraction_regex`: A regex (as a string) to extract author name(s) from the *body content* of the Markdown file (not from front matter). The first capture group is used.
-      * `author_is_list_regex`: An optional regex (as a string) to check if the full line matched by `author_extraction_regex` implies multiple authors (e.g., "Chefs:" vs "Chef:"). If it matches and multiple authors are implied by comma separation in the captured group, the author slug may be formatted as "firstauthor-et-al".
-      * `additional_shortcodes_to_remove`: An array of regex patterns for Hugo-specific shortcodes that should be removed from items processed by this command. These are applied after `global_remove_shortcodes`.
-
-## CSS Styling
-
-  * Create your custom CSS files and place them in the `css/` directory at the project root.
-  * In `config.yaml`, link these CSS files to your document types using the `css_files` array (e.g., `css_files: ["common.css", "recipe_specific.css"]`).
-  * The order of CSS files in the array matters for the cascade.
-  * A basic `css/default.css` is provided as a starting point. Other examples like `cv.css`, `recipe.css`, etc., are also included.
+        
+**`hugo_export_each` Settings:** Configuration for the [`hugo-export-each`](plugins/hugo-export-each) command, including rulesets for author extraction and Hugo-specific shortcode removal.
 
 ## Front Matter and Placeholders
 
-Markdown files can include YAML front matter at the beginning for metadata and to enable dynamic content substitution within the document.
+Markdown files can include YAML front matter for metadata and to enable dynamic content substitution.
 
 **Example Front Matter:**
 
 ```yaml
 ---
-title: "My Awesome Document"
-author: "John Doe"
-date: "2025-05-18" # Can be a fixed date or a placeholder
-custom_var: "Some Custom Value"
-# 'type' in front matter is not currently used to select config; use --type CLI arg.
+title: "My Document Title"
+author: "Author Name"
+date: "{{ .CurrentDateISO }}" # Uses a dynamic date placeholder
+custom_data:
+  key: "Some value"
 ---
 
-The rest of your Markdown content goes here. You can use placeholders like {{ .custom_var }} or {{ .CurrentDateFormatted }}.
+Content with `{{ .custom_data.key }}` and today's date: `{{ .CurrentDateFormatted }}`.
 ```
 
 **Dynamic Placeholders:**
 
-The system supports substituting placeholders in your Markdown content and also within string values in your front matter itself. This allows for creating dynamic and reusable templates.
+  * **Syntax:** `{{ .key }}` or `{{ .path.to.key }}` (e.g., `{{ .custom_data.key }}`). The `.` refers to the root of the data context (processed front matter).
+  * **Automatic Date Placeholders:**
+      * `{{ .CurrentDateFormatted }}`: Current date, long format (e.g., "May 19, 2025").
+      * `{{ .CurrentDateISO }}`: Current date, `YYYY-MM-DD` format.
 
-  * **Syntax:** Placeholders use the format `{{ .key }}` or `{{ .path.to.key }}` (e.g., `{{ .contact.email }}`). The leading dot `.` indicates the root of the data context (which is the processed front matter).
+## Plugin Archetype 
 
-  * **Front Matter Referencing:** You can reference other front matter keys within front matter string values:
+To extend `md-to-pdf` with a new document type (e.g., "businesscard"):
 
-    ```yaml
-    ---
-    person:
-      firstName: "Jane"
-      lastName: "Doe"
-    greeting: "Hello, {{ .person.firstName }}!"
-    documentTitle: "Status Report - {{ .person.lastName }}, {{ .person.firstName }}"
-    ---
+1.  **Directory Structure:** Create `plugins/businesscard/` containing:
+
+    ```bash
+    plugins/
+    └── business-card/
+        ├── business-card.config.yaml  # Configuration shown above
+        ├── index.js                   # The handler_script (Node.js module)
+        ├── business-card-styles.css   # CSS file(s)
+        ├── data/                      # Optional: For YAML/JSON data files
+        │   └── contacts.yaml
+        └── templates/                 # Optional: For HTML/Markdown template snippets
+            └── card-layout.html
     ```
 
-  * **Automatic Date Placeholders:** Two special date placeholders are automatically available for use in your Markdown content or front matter string values:
 
-      * `{{ .CurrentDateFormatted }}`: Inserts the current date when the script is run, in a long, human-readable format (e.g., "May 18, 2025").
-      * `{{ .CurrentDateISO }}`: Inserts the current date in `YYYY-MM-DD` format.
-
-    **Example (Cover Letter):**
+2.  **Registration:** Add your plugin to the `document_type_plugins` section in your main `config.yaml`:
 
     ```yaml
-    ---
-    # In your Markdown front matter:
-    applicantName: "Dr. Jane Doe"
-    jobId: "XYZ-123"
-    date: "{{ .CurrentDateFormatted }}" # For display in the letter body
-    # filename_date_part: "{{ .CurrentDateISO }}" # If you wanted to use it for filename logic via FM
-    title: "Cover Letter - {{ .applicantName }} for {{ .jobId }}"
-    ---
-
-    **{{ .date }}**
-
-    Dear Hiring Committee,
-
-    I am writing to apply for position {{ .jobId }}...
+    document_type_plugins:
+      # ... other plugins ...
+      businesscard: "plugins/businesscard/businesscard.config.yaml"
     ```
 
-    When processed, `{{ .date }}` in the body would become (e.g.) "May 18, 2025". The `title` in front matter would also resolve its placeholders.
+3.  **Configuration:** Edit the `businesscard.config.yaml` file with the desired configuration.
 
-**Filename Generation:**
-When the `--filename` option is *not* used with the `convert` command, the output PDF filename is automatically generated based on available front matter fields (`title`, `author`, `date`) from the *processed* front matter, or falls back to the input Markdown filename.
+    ```yaml
+    # Example: plugins/business-card/business-card.config.yaml
 
-## Examples
+    description: "Generates printable business cards with precise dimensions."
+    handler_script: "index.js" # relative to plugins/business-card/
 
-The `examples/` directory contains sample Markdown files to demonstrate various features and document types:
+    css_files:
+      - "business-card-styles.css" # relative to plugins/business-card/
 
-  * `example-cv.md`
-  * `example-cover-letter.md` (demonstrates placeholder usage)
-  * `example-recipe.md`
-  * `hugo-example/`: A directory structured like Hugo content (subdirectories with `index.md`), useful for testing the `book` and `hugo-export-each` commands.
+    pdf_options: # This plugin's PDF settings
+      width: "3.5in"
+      height: "2in"
+      # Margins are often set to zero for trim-size outputs;
+      margin: { top: "0in", bottom: "0in", left: "0in", right: "0in" }
+      printBackground: true
+
+    toc_options: { enabled: false } # Unlikely for business cards
+    cover_page_options: { enabled: false } # Unlikely for business cards
+
+    remove_shortcodes_patterns: [] 
+
+    processing_flags:
+      inject_fm_title_as_h1: false
+
+    custom_settings:
+      default_template: "modern-compact" # e.g., to select a layout defined in CSS/handler
+      # data_input_method: "frontmatter_list" # Hint for the handler
+    ```
+
+For a practical understanding, examining the refactored plugins like [`plugins/cv/`](plugins/cv/) or the base [`plugins/default/`](plugins/default/) will be helpful. Adding corresponding test cases in [`test/run-tests.js`](test/run-tests.js) is also a good practice.
 
 ## Testing
 
-The project includes an integration test suite to verify core functionality.
+The project includes an integration test suite.
+```bash
+npm test
+```
+Test scripts and configurations are in [`test/`](test/), and [`test/config.test.yaml`](test/config.test.yaml), which should reflect the plugin structure.
 
-  * Test scripts and configurations are located in the `test/` directory.
-  * To run the tests, execute the following command from the project root:
-    ```bash
-    npm test
-    ```
-  * For more details on the testing setup and how to run tests or add new ones, please refer to `test/README.md`.
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome\! If you are an AI assistant (like Gemini) helping with the codebase, please refer to the guidelines in `GEMINI.md` for our interaction protocol.
+For more details, see [`test/README.md`](test#readme).
 
 ## License
 
-This project is licensed under the MIT License. (You might want to add a `LICENSE` file to your repository with the MIT License text if you haven't already).
+This project is licensed under the [MIT License](LICENSE). 
 

@@ -1,0 +1,37 @@
+# plugins/recipe-book/recipe-book.config.yaml
+description: "Plugin for creating a combined Recipe Book PDF."
+handler_script: "index.js" # Points to plugins/recipe-book/index.js
+
+# CSS files for this plugin, resolved relative to this plugin's directory.
+# It uses base recipe styles and specific book styles.
+css_files:
+  - "recipe.css"
+  - "recipe-book.css"
+
+# PDF generation options specific to Recipe Books.
+pdf_options:
+  margin:
+    top: "0.8in"
+    right: "0.8in"
+    bottom: "0.8in"
+    left: "0.8in"
+  # Inherits other global PDF options.
+
+# Cover page settings.
+cover_page:
+  enabled: true
+  title: "My Recipe Book" # Default title, can be overridden by user in their main config if we allow plugin config overrides
+  subtitle: ""
+  author: "The Chef"
+
+# Table of Contents settings.
+toc_options:
+  enabled: true
+  placeholder: "%%RECIPE_BOOK_TOC%%" # Placeholder string in combined Markdown
+  level: [1] # Include H1 headings in TOC (recipe titles)
+  listType: "ol"
+
+# Shortcodes to remove from the combined content of the recipe book.
+remove_shortcodes_patterns:
+  - "{{%\\s*recipe\\s*%}}"
+  - "{{%\\s*/recipe\\s*%}}"

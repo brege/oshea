@@ -28,12 +28,12 @@ const testCases = [
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-cv.md'),
-            '--type', 'cv',
+            '--plugin', 'cv', // Updated from --type
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-cv.pdf',
         ],
         expectedOutputs: [
-            { filePath: 'test-cv.pdf', minSize: 1000 }, // This passed, minSize can be adjusted
+            { filePath: 'test-cv.pdf', minSize: 1000 },
         ],
     },
     {
@@ -41,11 +41,11 @@ const testCases = [
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-cv.md'),
-            '--type', 'cv',
+            '--plugin', 'cv', // Updated from --type
             '--outdir', TEST_OUTPUT_BASE_DIR,
         ],
         expectedOutputs: [
-            { filePath: 'example-curriculum-vitae.pdf', minSize: 1000 }, // CORRECTED - NO DATE
+            { filePath: 'example-curriculum-vitae.pdf', minSize: 1000 },
         ],
     },
     {
@@ -53,12 +53,12 @@ const testCases = [
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-cover-letter.md'),
-            '--type', 'cover-letter',
+            '--plugin', 'cover-letter', // Updated from --type
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-cover-letter.pdf',
         ],
         expectedOutputs: [
-            { filePath: 'test-cover-letter.pdf', minSize: 1000 }, // This passed, minSize can be adjusted
+            { filePath: 'test-cover-letter.pdf', minSize: 1000 },
         ],
     },
     {
@@ -66,23 +66,24 @@ const testCases = [
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-recipe.md'),
-            '--type', 'recipe',
+            '--plugin', 'recipe', // Updated from --type
             '--outdir', TEST_OUTPUT_BASE_DIR,
         ],
         expectedOutputs: [
-            { filePath: 'example-recipe-title.pdf', minSize: 1000 }, // CORRECTED - NO DATE
+            { filePath: 'example-recipe-title.pdf', minSize: 1000 },
         ],
     },
     {
         description: "Recipe Book: Create recipe book from Hugo examples",
         commandArgs: [
-            'book',
-            HUGO_EXAMPLE_SOURCE_IN_EXAMPLES,
+            'generate', // Updated from 'book'
+            'recipe-book', // Plugin name
+            '--recipes-base-dir', HUGO_EXAMPLE_SOURCE_IN_EXAMPLES, // Specific option for recipe-book plugin
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-recipe-book.pdf',
         ],
         expectedOutputs: [
-            { filePath: 'test-recipe-book.pdf', minSize: 50000 }, // Adjusted minSize based on previous success
+            { filePath: 'test-recipe-book.pdf', minSize: 50000 },
         ],
     },
     {
@@ -90,7 +91,7 @@ const testCases = [
         commandArgs: [
             'hugo-export-each',
             HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT,
-            '--base-type', 'recipe',
+            '--base-plugin', 'recipe', // Updated from --base-type
             '--hugo-ruleset', 'default_rules',
         ],
         expectedOutputs: [
@@ -142,13 +143,15 @@ async function runCliCommand(argsArray) {
     try {
         const { stdout, stderr } = await execAsync(command, { cwd: PROJECT_ROOT });
         if (stdout) console.log('  stdout:\n', stdout);
-        // Only log stderr if it contains actual content
         const stderrContent = stderr && stderr.trim();
         if (stderrContent) {
+            // Yargs help output often goes to stderr when an unknown arg is encountered,
+            // which isn't necessarily an "error" for the test if the script still exits 0.
+            // However, if execAsync throws, it's a failure.
             console.warn('  stderr:\n', stderr);
         }
         return { success: true, stdout, stderr };
-    } catch (error) {
+    } catch (error) { // This 'error' object is from execAsync, meaning the command likely exited non-zero
         console.error(`  Error executing command (cli.js likely exited with error): ${error.message}`);
         if (error.stdout && error.stdout.trim()) console.error('  stdout (on error):\n', error.stdout);
         if (error.stderr && error.stderr.trim()) console.error('  stderr (on error):\n', error.stderr);
@@ -195,14 +198,15 @@ async function runTests() {
                 }
             }
             
-            if(testCasePassed) { // Only run command if pre-test setup (if any) passed
+            if(testCasePassed) {
                 const result = await runCliCommand(testCase.commandArgs);
-                if (!result.success) { // This means cli.js exited with an error or execAsync caught an error
+                if (!result.success) { 
                     testCasePassed = false;
-                    // Error details already logged by runCliCommand
+                    // Error details already logged by runCliCommand if execAsync caught an error.
+                    // If stderr had content but success was true (e.g. help text), that's not a failure here.
+                    // A failure is specifically when execAsync throws.
                     console.error(`  RESULT: Command execution failed for: ${testCase.description}`);
                 } else {
-                    // Command succeeded (cli.js exited 0), now check outputs
                     for (const expected of testCase.expectedOutputs) {
                         try {
                             await checkFile(TEST_OUTPUT_BASE_DIR, expected.filePath, expected.minSize);

@@ -9,7 +9,7 @@ const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class ConfigResolver {
-    constructor(mainConfigPathFromCli) {
+    constructor(mainConfigPathFromCli, useFactoryDefaultsOnly = false) { // Added useFactoryDefaultsOnly
         this.projectRoot = path.resolve(__dirname, '..');
         this.defaultMainConfigPath = path.join(this.projectRoot, 'config.yaml');
 
@@ -22,11 +22,13 @@ class ConfigResolver {
         this.projectManifestBaseDir = this.projectManifestConfigPath ? path.dirname(this.projectManifestConfigPath) : null;
 
         this.primaryMainConfig = null;
-        this.primaryMainConfigPathActual = null; // **** NEW: To store the path of the loaded primary main config ****
+        this.primaryMainConfigPathActual = null; 
         
         this.loadedPluginConfigsCache = {};
         this._rawPluginYamlCache = {};
-        this._lastEffectiveConfigSources = null; // **** NEW: To store sources for the last getEffectiveConfig call ****
+        this._lastEffectiveConfigSources = null;
+
+        this.useFactoryDefaultsOnly = useFactoryDefaultsOnly; // Store the flag
     }
 
     // **** NEW METHOD to get sources for watcher ****
@@ -37,7 +39,11 @@ class ConfigResolver {
     }
 
     async _loadProjectManifestConfig() {
-        // ... (no changes from previous version)
+        // If factory defaults are on, don't load project manifest
+        if (this.useFactoryDefaultsOnly) {
+            this.projectManifestConfig = {}; // Ensure it's an empty object
+            return this.projectManifestConfig;
+        }
         if (this.projectManifestConfig) return this.projectManifestConfig;
         if (!this.projectManifestConfigPath) return null;
 
@@ -64,7 +70,11 @@ class ConfigResolver {
         let configPathToLoad = this.defaultMainConfigPath;
         let loadedFrom = "bundled default";
 
-        if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
+        // If factory defaults, only use bundled default.
+        if (this.useFactoryDefaultsOnly) {
+            configPathToLoad = this.defaultMainConfigPath;
+            loadedFrom = "bundled default (due to --factory-defaults)";
+        } else if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
             configPathToLoad = this.projectManifestConfigPath;
             loadedFrom = "project (from --config)";
         } else if (fs.existsSync(this.xdgGlobalConfigPath)) {
@@ -73,18 +83,30 @@ class ConfigResolver {
         } else if (!fs.existsSync(this.defaultMainConfigPath)) {
              console.warn(`WARN: Default main configuration file '${this.defaultMainConfigPath}' not found. Using empty config for global settings.`);
              this.primaryMainConfig = {};
-             this.primaryMainConfigPathActual = null; // **** Track actual path ****
+             this.primaryMainConfigPathActual = null; 
              return this.primaryMainConfig;
         }
         
         try {
+            console.log(`INFO: Loading primary main configuration from: ${configPathToLoad} (${loadedFrom})`);
             this.primaryMainConfig = await loadYamlConfig(configPathToLoad);
-            this.primaryMainConfigPathActual = configPathToLoad; // **** Track actual path ****
+            this.primaryMainConfigPathActual = configPathToLoad; 
             return this.primaryMainConfig;
         } catch (error) {
             console.error(`ERROR loading primary main configuration from '${configPathToLoad}': ${error.message}`);
+            // Fallback to bundled default if a higher precedence one fails and factory defaults are not active
+            if (configPathToLoad !== this.defaultMainConfigPath && !this.useFactoryDefaultsOnly && fs.existsSync(this.defaultMainConfigPath)) {
+                console.warn(`WARN: Falling back to bundled default main configuration: ${this.defaultMainConfigPath}`);
+                try {
+                    this.primaryMainConfig = await loadYamlConfig(this.defaultMainConfigPath);
+                    this.primaryMainConfigPathActual = this.defaultMainConfigPath;
+                    return this.primaryMainConfig;
+                } catch (fallbackError) {
+                    console.error(`ERROR loading fallback bundled default main configuration: ${fallbackError.message}`);
+                }
+            }
             this.primaryMainConfig = {};
-            this.primaryMainConfigPathActual = null; // **** Track actual path ****
+            this.primaryMainConfigPathActual = null; 
             return this.primaryMainConfig;
         }
     }
@@ -112,7 +134,7 @@ class ConfigResolver {
             }
             const inherit_css = rawConfig.inherit_css === true; 
             
-            const result = { rawConfig, resolvedCssPaths, inherit_css, actualPath: configFilePath }; // **** Add actualPath ****
+            const result = { rawConfig, resolvedCssPaths, inherit_css, actualPath: configFilePath }; 
             this._rawPluginYamlCache[configFilePath] = result;
             return result;
         } catch (error) {
@@ -145,7 +167,14 @@ class ConfigResolver {
     async getEffectiveConfig(pluginName) {
         // ... (initial cache check no change)
         if (this.loadedPluginConfigsCache[pluginName]) {
-            return this.loadedPluginConfigsCache[pluginName];
+            // If factoryDefaults is on, we should not use cache from a non-factoryDefaults run.
+            // However, the cache key could be `pluginName + (this.useFactoryDefaultsOnly ? '_fd' : '')`
+            // For now, let's simply recompute if factoryDefaults state changes behavior.
+            // A simple approach: if useFactoryDefaultsOnly is true, always recompute unless it was cached with it true.
+            // This check is a bit simplistic; a more robust cache key might be needed if performance is an issue.
+             if (this.loadedPluginConfigsCache[pluginName]._wasFactoryDefaults === this.useFactoryDefaultsOnly) {
+                 return this.loadedPluginConfigsCache[pluginName];
+             }
         }
 
         // **** NEW: Initialize sources for this resolution ****
@@ -155,15 +184,15 @@ class ConfigResolver {
             cssFiles: [] // Final list of CSS files
         };
 
-        const primaryMainConfig = await this._loadPrimaryMainConfig();
-        if (this.primaryMainConfigPathActual) { // Store the path of the main config that was loaded
+        const primaryMainConfig = await this._loadPrimaryMainConfig(); // This now respects useFactoryDefaultsOnly
+        if (this.primaryMainConfigPathActual) { 
             loadedConfigSourcePaths.mainConfigPath = this.primaryMainConfigPathActual;
         }
 
         let currentMergedConfig = {};
         let currentCssPaths = [];
 
-        // Layer 0: Bundled Plugin Defaults
+        // Layer 0: Bundled Plugin Defaults (Always loaded)
         const bundledPluginConfigFileName = pluginName + PLUGIN_CONFIG_FILENAME_SUFFIX;
         const bundledPluginDir = path.join(this.projectRoot, 'plugins', pluginName);
         const bundledPluginConfigPath = path.join(bundledPluginDir, bundledPluginConfigFileName);
@@ -178,63 +207,56 @@ class ConfigResolver {
         }
         const bundledPluginBasePath = bundledPluginDir;
 
-        // Layer 1: XDG User Defaults for the specific plugin
-        const xdgPluginDir = path.join(this.xdgBaseDir, pluginName);
-        const xdgPluginConfigPath = path.join(xdgPluginDir, bundledPluginConfigFileName);
-        
-        const layer1Data = await this._loadSingleConfigLayer(xdgPluginConfigPath, xdgPluginDir);
-        if (layer1Data && layer1Data.rawConfig) {
-            currentMergedConfig = this._deepMerge(currentMergedConfig, layer1Data.rawConfig);
-            if (layer1Data.actualPath) loadedConfigSourcePaths.pluginConfigPaths.push(layer1Data.actualPath);
-            if (layer1Data.rawConfig.css_files !== undefined) {
-                if (layer1Data.inherit_css) {
-                    currentCssPaths.push(...layer1Data.resolvedCssPaths);
-                } else {
-                    currentCssPaths = layer1Data.resolvedCssPaths;
+        // Skip XDG and Project layers if factory defaults are enabled
+        if (!this.useFactoryDefaultsOnly) {
+            // Layer 1: XDG User Defaults for the specific plugin
+            const xdgPluginDir = path.join(this.xdgBaseDir, pluginName);
+            const xdgPluginConfigPath = path.join(xdgPluginDir, bundledPluginConfigFileName);
+            
+            const layer1Data = await this._loadSingleConfigLayer(xdgPluginConfigPath, xdgPluginDir);
+            if (layer1Data && layer1Data.rawConfig) {
+                currentMergedConfig = this._deepMerge(currentMergedConfig, layer1Data.rawConfig);
+                if (layer1Data.actualPath) loadedConfigSourcePaths.pluginConfigPaths.push(layer1Data.actualPath);
+                if (layer1Data.rawConfig.css_files !== undefined) {
+                    if (layer1Data.inherit_css) {
+                        currentCssPaths.push(...layer1Data.resolvedCssPaths);
+                    } else {
+                        currentCssPaths = layer1Data.resolvedCssPaths;
+                    }
                 }
             }
-        }
-        
-        // Layer 2: Project-Specific Config (from --config)
-        const projectManifestConfig = await this._loadProjectManifestConfig();
-        let projectPluginSpecificConfigPathAbs = null; // Store for later potential watching
-        if (projectManifestConfig && projectManifestConfig.document_type_plugins) {
-            const projectPluginSpecificConfigPathRel = projectManifestConfig.document_type_plugins[pluginName];
-            if (projectPluginSpecificConfigPathRel && this.projectManifestBaseDir) {
-                projectPluginSpecificConfigPathAbs = path.resolve(this.projectManifestBaseDir, projectPluginSpecificConfigPathRel);
-                const projectPluginSpecificAssetsBasePath = path.dirname(projectPluginSpecificConfigPathAbs);
-                
-                const layer2Data = await this._loadSingleConfigLayer(projectPluginSpecificConfigPathAbs, projectPluginSpecificAssetsBasePath);
-                if (layer2Data && layer2Data.rawConfig) {
-                    currentMergedConfig = this._deepMerge(currentMergedConfig, layer2Data.rawConfig);
-                    if (layer2Data.actualPath) loadedConfigSourcePaths.pluginConfigPaths.push(layer2Data.actualPath);
-                    if (layer2Data.rawConfig.css_files !== undefined) {
-                        if (layer2Data.inherit_css) {
-                            currentCssPaths.push(...layer2Data.resolvedCssPaths);
-                        } else {
-                            currentCssPaths = layer2Data.resolvedCssPaths;
+            
+            // Layer 2: Project-Specific Config (from --config)
+            const projectManifestConfig = await this._loadProjectManifestConfig(); // This also respects useFactoryDefaultsOnly for its own loading
+            let projectPluginSpecificConfigPathAbs = null; 
+            if (projectManifestConfig && projectManifestConfig.document_type_plugins) {
+                const projectPluginSpecificConfigPathRel = projectManifestConfig.document_type_plugins[pluginName];
+                if (projectPluginSpecificConfigPathRel && this.projectManifestBaseDir) {
+                    projectPluginSpecificConfigPathAbs = path.resolve(this.projectManifestBaseDir, projectPluginSpecificConfigPathRel);
+                    const projectPluginSpecificAssetsBasePath = path.dirname(projectPluginSpecificConfigPathAbs);
+                    
+                    const layer2Data = await this._loadSingleConfigLayer(projectPluginSpecificConfigPathAbs, projectPluginSpecificAssetsBasePath);
+                    if (layer2Data && layer2Data.rawConfig) {
+                        currentMergedConfig = this._deepMerge(currentMergedConfig, layer2Data.rawConfig);
+                        if (layer2Data.actualPath) loadedConfigSourcePaths.pluginConfigPaths.push(layer2Data.actualPath);
+                        if (layer2Data.rawConfig.css_files !== undefined) {
+                            if (layer2Data.inherit_css) {
+                                currentCssPaths.push(...layer2Data.resolvedCssPaths);
+                            } else {
+                                currentCssPaths = layer2Data.resolvedCssPaths;
+                            }
                         }
                     }
                 }
             }
-        }
-        // Add project manifest itself and project plugin specific config to sources if they were used
-        if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
-             // Ensure we only add if it was successfully identified as a manifest and used
-            if (projectManifestConfig && projectManifestConfig.document_type_plugins && projectManifestConfig.document_type_plugins[pluginName]) {
-                 if (loadedConfigSourcePaths.mainConfigPath !== this.projectManifestConfigPath) {
-                    // If primaryMainConfig wasn't the project manifest, add manifest as a watched source
-                    // This scenario occurs if primaryMainConfig came from XDG global or bundled, but --config was still used
-                    // for plugin-specific redirection.
-                    // However, _loadPrimaryMainConfig prioritizes projectManifestConfigPath. So mainConfigPath should already be it if it exists.
-                 }
-                 // The projectManifestConfigPath IS ALREADY this.primaryMainConfigPathActual if it was loaded by _loadPrimaryMainConfig.
-                 // The projectPluginSpecificConfigPathAbs should be added if it was loaded.
-                 if (projectPluginSpecificConfigPathAbs && fs.existsSync(projectPluginSpecificConfigPathAbs)) {
-                     loadedConfigSourcePaths.pluginConfigPaths.push(projectPluginSpecificConfigPathAbs);
-                 }
+            if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
+                if (projectManifestConfig && projectManifestConfig.document_type_plugins && projectManifestConfig.document_type_plugins[pluginName]) {
+                     if (projectPluginSpecificConfigPathAbs && fs.existsSync(projectPluginSpecificConfigPathAbs)) {
+                         loadedConfigSourcePaths.pluginConfigPaths.push(projectPluginSpecificConfigPathAbs);
+                     }
+                }
             }
-        }
+        } // End of if (!this.useFactoryDefaultsOnly)
 
 
         if (primaryMainConfig.global_pdf_options) {
@@ -264,11 +286,12 @@ class ConfigResolver {
             pluginSpecificConfig: currentMergedConfig,
             mainConfig: primaryMainConfig, 
             pluginBasePath: bundledPluginBasePath, 
-            handlerScriptPath: handlerScriptPath
+            handlerScriptPath: handlerScriptPath,
+            _wasFactoryDefaults: this.useFactoryDefaultsOnly // For cache check
         };
         
         this.loadedPluginConfigsCache[pluginName] = effectiveDetails;
-        this._lastEffectiveConfigSources = loadedConfigSourcePaths; // **** Store the sources ****
+        this._lastEffectiveConfigSources = loadedConfigSourcePaths; 
         return effectiveDetails;
     }
 }

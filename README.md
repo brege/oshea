@@ -4,9 +4,7 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
 
 ## Features
 
-* **Extensible Plugin System** 
-
-  Define new document types with custom processing, configurations (local `*.config.yaml`), CSS, and data structures. Existing types are implemented as plugins:
+* **Extensible Plugin System** Define new document types with custom processing, configurations (local `*.config.yaml`), CSS, and data structures. Existing types are implemented as plugins:
   
   - [`default`](plugins/default)
   - [`cv`](plugins/cv)
@@ -26,6 +24,8 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
   * A main `config.yaml` for global settings and plugin registration.
   * Each plugin manages its own local configuration for PDF options, CSS, and behavior.
   * Supports YAML front matter for metadata and dynamic content substitution (including date variables).
+* **Watch Mode**
+  * Use the `--watch` flag with `convert` and `generate` commands to automatically re-generate PDFs when source Markdown, plugin configurations, or plugin CSS files are modified.
 
 ### Examples
 
@@ -89,88 +89,94 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
   md-to-pdf convert <markdownFile> --plugin <pluginName> [options]
   ```
 
-  **Arguments & Options:**
+**Arguments & Options:**
 
-  ```bash
-  <markdownFile>                # Required, Path to the input Markdown file
-  -p, --plugin <pluginName>     # Required, but defaults to plugins/default
-  -o, --outdir <directory>      # Output directory for the PDF. Defaults to the input file's directory.
-  -f, --filename <name.pdf>     # Specify the exact output PDF filename
-  --no-open                     # Prevents automatically opening the generated PDF.
-  ```
+```text
+<markdownFile>                  Required, Path to the input Markdown file
+-p, --plugin <pluginName>       Required, but defaults to plugins/default
+-o, --outdir <directory>        Output directory for the PDF. Defaults to the input file's directory.
+-f, --filename <name.pdf>       Specify the exact output PDF filename
+--no-open                       Prevents automatically opening the generated PDF.
+-w, --watch                     Enable watch mode to automatically rebuild on file changes.
+```
 
-  **Examples:**
+**Examples:**
 
-  * Convert a CV using the [`cv`](plugins/cv) plugin:
+  * Convert a CV using the [`cv`](plugins/cv) plugin and watch for changes:
+
     ```bash
-    md-to-pdf convert examples/example-cv.md --plugin cv
+    md-to-pdf convert examples/example-cv.md --plugin cv --watch
     ```
+
   * Convert a recipe, specifying output:
+  
     ```bash
-    md-to-pdf convert examples/example-recipe.md --plugin recipe --outdir ./output_pdfs --filename my-dish.pdf
+    md-to-pdf convert examples/example-recipe.md \
+        --plugin recipe \
+        --outdir ./output_pdfs \
+        --filename my-dish.pdf
     ```
 
 #### Type 2: `generate <pluginName> [plugin-specific-options...]`
 
-  Generates a document using a specified plugin. This command is suitable for plugins that might not take a single Markdown file as primary input (like [`recipe-book`](plugins/recipe-book)) or require more complex arguments.
+Generates a document using a specified plugin. This command is suitable for plugins that might not take a single Markdown file as primary input (like [`recipe-book`](plugins/recipe-book)) or require more complex arguments.
 
-  **Syntax:**
+**Syntax:**
 
-  ```bash
-  md-to-pdf generate <pluginName> [options_for_the_plugin...] --outdir <directory> --filename <name.pdf>
-  ```
+```bash
+md-to-pdf generate <pluginName> \
+    [options_for_the_plugin...] \
+    --outdir <directory> \
+    --filename <name.pdf>
+```
 
-  **Arguments & Options:**
+**Arguments & Options:**
 
-  * `<pluginName>`: (Required) The name of the plugin to use.
-  * `[plugin-specific-options...]`: Additional options required by the specific plugin (e.g., `--recipes-base-dir`). Consult the plugin's documentation or its `*.config.yaml`.
-  * `-o, --outdir <directory>`: Output directory. Defaults to the current directory.
-  * `-f, --filename <name.pdf>`: Specific output PDF name.
-  * `--no-open`: Prevents auto-opening.
+```text
+<pluginName>                    Required, Name of the plugin to use
+[plugin-specific-options...]    Additional options required by the specific plugin
+    --recipes-base-dir <path>   Required for recipe-book, Path to the directory containing recipe Markdown files
+-o, --outdir <directory>        Output directory. Defaults to the current directory.
+-f, --filename <name.pdf>       Specific output PDF name.
+--no-open                       Prevents auto-opening.
+-w, --watch                     Enable watch mode.
+```
 
-  ```bash
-  <pluginName>                  # Required, Name of the plugin to use
-  [plugin-specific-options...]  # Additional options required by the specific plugin
-  --recipes-base-dir <path>     # Required, Path to the directory containing recipe Markdown files
-  -o, --outdir <directory>      # Output directory. Defaults to the current directory.
-  -f, --filename <name.pdf>     # Specific output PDF name.
-  --no-open                     # Prevents auto-opening.
-  ```
+**Example (Recipe Book):**
+The `recipe-book` plugin is invoked using the `generate` command:
 
-  **Example (Recipe Book):**
-  The `recipe-book` plugin is invoked using the `generate` command:
-
-  ```bash
-  md-to-pdf generate recipe-book \
-    --recipes-base-dir examples/hugo-example \
-    --outdir ./my_cookbooks \
-    --filename "Family Cookbook.pdf"
-  ```
+```bash
+md-to-pdf generate recipe-book \
+  --recipes-base-dir examples/hugo-example \
+  --outdir ./my_cookbooks \
+  --filename "Family Cookbook.pdf" \
+  --watch
+```
 
 #### Type 3: `hugo-export-each <sourceDir> --base-plugin <pluginName>`
 
-Batch exports individual PDFs from a Hugo content directory. Each item is processed using the specified base plugin for styling. PDFs are saved alongside their source Markdown files.
+  Batch exports individual PDFs from a Hugo content directory. Each item is processed using the specified base plugin for styling. PDFs are saved alongside their source Markdown files. *(Watch mode is not currently supported for this command).*
 
-  **Syntax:**
+**Syntax:**
 
-  ```bash
-  md-to-pdf hugo-export-each <sourceDir> --base-plugin <pluginName> [options]
-  ```
+```bash
+md-to-pdf hugo-export-each <sourceDir> --base-plugin <pluginName> [options]
+```
 
-  **Arguments & Options:**
+**Arguments & Options:**
 
-  ```bash
-  <sourceDir>                   # Required, Path to the source directory containing Hugo content items
-  --base-plugin <pluginName>    # Required, defaults to `recipe` or as configured
-  --hugo-ruleset <rulesetName>  # The key in `config.yaml` under `hugo_export_each` for specific processing rules
-  --no-open                     # Prevents auto-opening (default is `true` for this batch command)
-  ```
+```text
+<sourceDir>                   Required, Path to the source directory containing Hugo content items
+--base-plugin <pluginName>    Required, defaults to `recipe` or as configured
+--hugo-ruleset <rulesetName>  The key in `config.yaml` under `hugo_export_each` for specific processing rules
+--no-open                     Prevents auto-opening (default is `true` for this batch command)
+```
 
-  **Example:**
+**Example:**
 
-  ```bash
-  md-to-pdf hugo-export-each examples/hugo-example --base-plugin recipe
-  ```
+```bash
+md-to-pdf hugo-export-each examples/hugo-example --base-plugin recipe
+```
 
 ## Configuration
 
@@ -213,7 +219,7 @@ document_type_plugins:
   # menu: "path/to/your/custom_plugins/menu/menu.config.yaml"
   # "business-card": "plugins/business-card/business-card.config.yaml"
 ```
-        
+
 **`hugo_export_each` Settings:** Configuration for the [`hugo-export-each`](plugins/hugo-export-each) command, including rulesets for author extraction and Hugo-specific shortcode removal.
 
 ## Front Matter and Placeholders
@@ -231,21 +237,22 @@ custom_data:
   key: "Some value"
 ---
 
-Content with `{{ .custom_data.key }}` and today's date: `{{ .CurrentDateFormatted }}`.
+Content with {{ .custom_data.key }} and today's date: {{ .CurrentDateFormatted }}.
 ```
 
 **Dynamic Placeholders:**
 
   * **Syntax:** `{{ .key }}` or `{{ .path.to.key }}` (e.g., `{{ .custom_data.key }}`). The `.` refers to the root of the data context (processed front matter).
+  
   * **Automatic Date Placeholders:**
       * `{{ .CurrentDateFormatted }}`: Current date, long format (e.g., "May 19, 2025").
       * `{{ .CurrentDateISO }}`: Current date, `YYYY-MM-DD` format.
 
-## Plugin Archetype 
+## Plugin Archetype
 
 To extend `md-to-pdf` with a new document type (e.g., "businesscard"):
 
-1.  **Directory Structure:** Create `plugins/businesscard/` containing:
+1. **Directory Structure:** Create `plugins/businesscard/` containing:
 
     ```bash
     plugins/
@@ -259,8 +266,7 @@ To extend `md-to-pdf` with a new document type (e.g., "businesscard"):
             └── card-layout.html
     ```
 
-
-2.  **Registration:** Add your plugin to the `document_type_plugins` section in your main `config.yaml`:
+2. **Registration:** Add your plugin to the `document_type_plugins` section in your main `config.yaml`:
 
     ```yaml
     document_type_plugins:
@@ -268,7 +274,7 @@ To extend `md-to-pdf` with a new document type (e.g., "businesscard"):
       businesscard: "plugins/businesscard/businesscard.config.yaml"
     ```
 
-3.  **Configuration:** Edit the `businesscard.config.yaml` file with the desired configuration.
+3. **Configuration:** Edit the `businesscard.config.yaml` file with the desired configuration.
 
     ```yaml
     # Example: plugins/business-card/business-card.config.yaml
@@ -277,14 +283,14 @@ To extend `md-to-pdf` with a new document type (e.g., "businesscard"):
     handler_script: "index.js" # relative to plugins/business-card/
 
     css_files:
-      - "business-card-styles.css" # relative to plugins/business-card/
+    - "business-card-styles.css" # relative to plugins/business-card/
 
     pdf_options: # This plugin's PDF settings
-      width: "3.5in"
-      height: "2in"
-      # Margins are often set to zero for trim-size outputs;
-      margin: { top: "0in", bottom: "0in", left: "0in", right: "0in" }
-      printBackground: true
+    width: "3.5in"
+    height: "2in"
+    # Margins are often set to zero for trim-size outputs;
+    margin: { top: "0in", bottom: "0in", left: "0in", right: "0in" }
+    printBackground: true
 
     toc_options: { enabled: false } # Unlikely for business cards
     cover_page_options: { enabled: false } # Unlikely for business cards
@@ -292,11 +298,11 @@ To extend `md-to-pdf` with a new document type (e.g., "businesscard"):
     remove_shortcodes_patterns: [] 
 
     processing_flags:
-      inject_fm_title_as_h1: false
+    inject_fm_title_as_h1: false
 
     custom_settings:
-      default_template: "modern-compact" # e.g., to select a layout defined in CSS/handler
-      # data_input_method: "frontmatter_list" # Hint for the handler
+    default_template: "modern-compact" # e.g., to select a layout defined in CSS/handler
+    # data_input_method: "frontmatter_list" # Hint for the handler
     ```
 
 For a practical understanding, examining the refactored plugins like [`plugins/cv/`](plugins/cv/) or the base [`plugins/default/`](plugins/default/) will be helpful. Adding corresponding test cases in [`test/run-tests.js`](test/run-tests.js) is also a good practice.
@@ -304,14 +310,16 @@ For a practical understanding, examining the refactored plugins like [`plugins/c
 ## Testing
 
 The project includes an integration test suite.
+
 ```bash
 npm test
 ```
+
 Test scripts and configurations are in [`test/`](test/), and [`test/config.test.yaml`](test/config.test.yaml), which should reflect the plugin structure.
 
 For more details, see [`test/README.md`](test#readme).
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE). 
+This project is licensed under the [MIT License](LICENSE).
 

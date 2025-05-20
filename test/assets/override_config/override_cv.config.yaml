@@ -1,0 +1,18 @@
+# test/assets/override_config/override_cv.config.yaml
+# Contains the actual 'cv' plugin overrides for this test project.
+
+description: "CV Test with Project-Specific Overrides (e.g., A5 format, green theme)"
+
+pdf_options:
+  format: "A5" # Different from default Letter/A4 used in other tests
+  margin:
+    top: "0.6in" # Slightly different margins
+    right: "0.6in"
+    bottom: "0.6in"
+    left: "0.6in"
+
+css_files:
+  - "./override_cv_style.css" # Path relative to this override_cv.config.yaml
+
+inherit_css: false # Ensures only this project's CSS is used, replacing bundled/XDG
+

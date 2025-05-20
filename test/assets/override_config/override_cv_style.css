@@ -1,0 +1,14 @@
+/* test/assets/override_config/override_cv_style.css */
+/* A very distinctive style for testing project-specific CSS override. */
+body {
+  background-color: lightgreen !important;
+  border: 3px solid darkgreen !important;
+}
+h1, h2, h3 {
+  color: darkgreen !important;
+  font-family: "Comic Sans MS", cursive, sans-serif !important;
+}
+p {
+  font-style: italic !important;
+  color: #556B2F !important; /* DarkOliveGreen */
+}

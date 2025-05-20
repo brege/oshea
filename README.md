@@ -4,7 +4,7 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
 
 ## Features
 
-* **Extensible Plugin System** Define new document types with custom processing, configurations (local `*.config.yaml`), CSS, and data structures. Existing types are implemented as plugins:
+* **Extensible Plugin System** Define new document types with custom processing, configurations (local `*.config.yaml`), CSS, and data structures. Existing types are implemented as **plugins**:
   
   - [`default`](plugins/default)
   - [`cv`](plugins/cv)
@@ -12,19 +12,21 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
   - [`recipe`](recipe)
   - [`recipe-book`](plugins/recipe-book)
 
-  And a batch export extension:
+  And a batch export **extension**:
 
   - [`hugo-export-each`](plugins/hugo-export-each)
 
-* **Versatile Conversions**
-  * Convert single Markdown files to PDF using type-specific plugins.
-  * Generate combined PDF recipe books with optional covers and tables of contents.
-  * Batch export individual PDFs from Hugo content directories with specific naming and styling.
-* **Highly Configurable**
+* **Versatility**
+  * **Singletons**: Convert single Markdown files to PDF using type-specific plugins.
+  * **Collections**: Generate combined PDF recipe books with optional covers and tables of contents.
+  * **Batch Export**: Batch export individual PDFs from Hugo content directories with specific naming and styling.
+
+* **Configurability**
   * A main `config.yaml` for global settings and plugin registration.
   * Each plugin manages its own local configuration for PDF options, CSS, and behavior.
-  * Supports YAML front matter for metadata and dynamic content substitution (including date variables).
-  * Use the `--config` flag for project-specific settings, taking highest precedence.
+  * YAML front matter in Markdown files for metadata and dynamic content substitution.
+  * A `--config` flag for project-specific settings, allowing manifestation of stylistic profiles.
+
 * **Watch Mode**
   * Use the `--watch` flag with `convert` and `generate` commands to automatically re-generate PDFs when source Markdown, plugin configurations, or plugin CSS files are modified.
 
@@ -54,9 +56,9 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
     ```bash
     npm install
     ```
-    This installs packages and downloads a Chromium version for Puppeteer, which may take a few minutes initially.
+    This installs required packages and downloads a standalone version of Chromium (for [Puppeteer](https://pptr.dev/) to render intermediate HTML to PDF), and [Chokidar](https://github.com/paulmillr/chokidar) for auto-refreshing your PDF viewer (evince, Firefox, etc).
 
-3.  **Configuration:**
+3.  **Initialize Configuration:**
     ```bash
     cp config.example.yaml config.yaml
     ```
@@ -81,7 +83,15 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
 
 ### Commands
 
-#### Type 1: `convert <markdownFile> --plugin <pluginName>`
+There are three main command types:
+
+  - **Type 1 -- Singletons**: Converting single Markdown files to PDFs.
+  
+  - **Type 2 -- Collections**: Generate combined PDF (recipe books) from multiple Markdown files, supporting covers and tables of contents.
+  
+  - **Type 3 -- Batch Export**: Batch export individual PDFs from Hugo content directories.
+
+### Type 1 -- Singletons: `convert <markdownFile> --plugin <pluginName>`
 
   Converts a single Markdown file to PDF using the specified document type plugin.
 
@@ -118,7 +128,7 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
         --filename my-dish.pdf
     ```
 
-#### Type 2: `generate <pluginName> [plugin-specific-options...]`
+### Type 2 -- Collections: `generate <pluginName> [plugin-specific-options...]`
 
 Generates a document using a specified plugin. This command is suitable for plugins that might not take a single Markdown file as primary input (like [`recipe-book`](plugins/recipe-book)) or require more complex arguments.
 
@@ -154,7 +164,7 @@ md-to-pdf generate recipe-book \
   --watch
 ```
 
-#### Type 3: `hugo-export-each <sourceDir> --base-plugin <pluginName>`
+### Type 3 -- Batch Export: `hugo-export-each <sourceDir> --base-plugin <pluginName>`
 
   Batch exports individual PDFs from a Hugo content directory. Each item is processed using the specified base plugin for styling. PDFs are saved alongside their source Markdown files. *(Watch mode is not currently supported for this command).*
 
@@ -221,7 +231,7 @@ document_type_plugins:
   # "business-card": "plugins/business-card/business-card.config.yaml"
 ```
 
-**`hugo_export_each` Settings:** Configuration for the [`hugo-export-each`](plugins/hugo-export-each) command, including rulesets for author extraction and Hugo-specific shortcode removal.
+Configuration for the [`hugo-export-each`](plugins/hugo-export-each) command, including rulesets for author extraction and Hugo-specific shortcode removal, is a top-level extension.
 
 ### Configuration Lookup Order
 
@@ -327,7 +337,7 @@ Content with {{ .custom_data.key }} and today's date: {{ .CurrentDateFormatted }
       * `{{ .CurrentDateFormatted }}`: Current date, long format (e.g., "May 19, 2025").
       * `{{ .CurrentDateISO }}`: Current date, `YYYY-MM-DD` format.
 
-## Plugin Archetype
+## Plugin Archetypes
 
 To extend `md-to-pdf` with a new document type (e.g., "businesscard"):
 

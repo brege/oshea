@@ -41,16 +41,13 @@ function openPdf(pdfPath, viewerCommand) {
 // executorFunction will be executeConversion or executeGeneration
 async function commonCommandHandler(args, executorFunction, commandType) {
     try {
-        const configResolver = new ConfigResolver(args.config); // Pass path from --config
+        const configResolver = new ConfigResolver(args.config); 
 
         if (args.watch) {
-            // The watch handler needs to be adapted to the new ConfigResolver model.
-            // For now, it will create a new ConfigResolver on each change.
-            await setupWatch(args, 
-                null, // oldMainConfig - no longer passed directly like this
-                null, // oldPluginManager - no longer passed directly
-                async (watchedArgs, _ /*oldConf*/, __ /*oldPm*/) => {
-                    // Create a new ConfigResolver for each rebuild in watch mode
+            // Pass the configResolver instance to setupWatch
+            await setupWatch(args, configResolver, // Pass resolver instead of old nulls
+                async (watchedArgs) => { // Simplified executor for watch
+                    // Create a new ConfigResolver for each rebuild to pick up config changes
                     const currentConfigResolver = new ConfigResolver(watchedArgs.config);
                     await executorFunction(watchedArgs, currentConfigResolver);
                 }

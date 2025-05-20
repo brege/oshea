@@ -4,13 +4,11 @@
  * @fileoverview Module responsible for generating PDF documents from HTML content
  * using Puppeteer. It handles HTML page construction, CSS injection,
  * and Puppeteer's PDF rendering process.
- * @version 1.1.0 // Version bump for comment refinement
- * @date 2025-05-18
  */
 
 const puppeteer = require('puppeteer');
 const path = require('path'); // Used for deriving a default document title from the output filename.
-// const fs = require('fs'); // Only needed if actively using the debug HTML dump
+// const fs = require('fs'); // Only needed if actively using the debug HTML dump 
 
 /**
  * Generates a PDF from a given HTML string, applying CSS and PDF options via Puppeteer.
@@ -19,13 +17,13 @@ const path = require('path'); // Used for deriving a default document title from
  * @param {string} htmlBodyContent - The HTML content for the body of the document.
  * This module will wrap it in a full HTML structure.
  * @param {string} outputPdfPath - The absolute path where the PDF will be saved.
- * @param {Object} pdfOptions - Puppeteer's PDF options (e.g., format, margin, printBackground).
- * Refer to Puppeteer documentation for all available options.
+ * @param {Object} pdfOptionsFromConfig - Puppeteer's PDF options (e.g., format, margin, printBackground, landscape)
+ * from the resolved configuration. Refer to Puppeteer documentation for all available options.
  * @param {Array<string>} cssFileContentsArray - An array where each element is the string content of a CSS file.
  * @returns {Promise<void>} A promise that resolves when the PDF has been generated.
  * @throws {Error} If PDF generation fails at any stage (Puppeteer launch, page setup, or PDF writing).
  */
-async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileContentsArray) {
+async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptionsFromConfig, cssFileContentsArray) {
     let browser;
     try {
         const combinedCss = cssFileContentsArray.join('\n\n/* --- Next CSS File --- */\n\n');
@@ -57,25 +55,36 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--font-render-hinting=none', // Can improve font rendering consistency across platforms.
-                // '--disable-dev-shm-usage', // Often useful in constrained CI/Docker environments.
+                '--font-render-hinting=none', // Can improve font rendering consistency across platforms. 
+                // '--disable-dev-shm-usage', // Often useful in constrained CI/Docker environments. 
             ],
-            // headless: "new", // Uncomment for the new headless mode if issues arise with the default.
+            // headless: "new", // Uncomment for the new headless mode if issues arise with the default. 
         });
 
         const page = await browser.newPage();
 
         await page.setContent(fullHtmlPage, {
-            waitUntil: 'networkidle0', // Waits until network connections are idle.
+            waitUntil: 'networkidle0', // Waits until network connections are idle. 
         });
 
-        const puppeteerPdfOptions = {
-            path: outputPdfPath,
-            format: pdfOptions.format || 'A4',
-            printBackground: pdfOptions.printBackground === undefined ? true : pdfOptions.printBackground,
-            margin: pdfOptions.margin || { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' },
-            // preferCSSPageSize: true, // Set to true if @page size in CSS should dictate dimensions.
-        };
+        // Start with all options from the resolved configuration
+        const puppeteerPdfOptions = { ...pdfOptionsFromConfig };
+
+        // Explicitly set the output path
+        puppeteerPdfOptions.path = outputPdfPath;
+
+        // Apply defaults for core Puppeteer options if they were not present in pdfOptionsFromConfig
+        if (puppeteerPdfOptions.format === undefined) {
+            puppeteerPdfOptions.format = 'A4'; // Default format
+        }
+        if (puppeteerPdfOptions.printBackground === undefined) {
+            puppeteerPdfOptions.printBackground = true; // Default printBackground
+        }
+        if (puppeteerPdfOptions.margin === undefined) {
+            puppeteerPdfOptions.margin = { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }; // Default margins
+        }
+        // Other options like 'landscape', 'width', 'height', 'scale', etc.,
+        // if present in pdfOptionsFromConfig, will be passed through due to the spread operator.
 
         await page.pdf(puppeteerPdfOptions);
 

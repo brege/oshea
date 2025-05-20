@@ -3,6 +3,10 @@
 
 description: "CV Test with Project-Specific Overrides (e.g., A5 format, green theme)"
 
+# Add handler_script pointing to the bundled CV plugin's handler
+# Path is relative from this file (test/assets/override_config/) to plugins/cv/
+handler_script: "../../../plugins/cv/index.js"
+
 pdf_options:
   format: "A5" # Different from default Letter/A4 used in other tests
   margin:
@@ -15,4 +19,3 @@ css_files:
   - "./override_cv_style.css" # Path relative to this override_cv.config.yaml
 
 inherit_css: false # Ensures only this project's CSS is used, replacing bundled/XDG
-

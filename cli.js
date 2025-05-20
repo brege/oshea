@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs'); // For existsSync, if needed directly in CLI
 const { spawn } = require('child_process');
 
-const ConfigResolver = require('./src/ConfigResolver'); // **** ADDED ****
+const ConfigResolver = require('./src/ConfigResolver'); 
 const PluginManager = require('./src/PluginManager');
 const HugoExportEach = require('./src/hugo_export_each');
 const { setupWatch } = require('./src/watch_handler');
@@ -41,14 +41,16 @@ function openPdf(pdfPath, viewerCommand) {
 // executorFunction will be executeConversion or executeGeneration
 async function commonCommandHandler(args, executorFunction, commandType) {
     try {
-        const configResolver = new ConfigResolver(args.config); 
+        // Pass the factoryDefaults flag to ConfigResolver
+        const configResolver = new ConfigResolver(args.config, args.factoryDefaults); 
 
         if (args.watch) {
             // Pass the configResolver instance to setupWatch
-            await setupWatch(args, configResolver, // Pass resolver instead of old nulls
+            await setupWatch(args, configResolver, 
                 async (watchedArgs) => { // Simplified executor for watch
                     // Create a new ConfigResolver for each rebuild to pick up config changes
-                    const currentConfigResolver = new ConfigResolver(watchedArgs.config);
+                    // and respect factoryDefaults
+                    const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults);
                     await executorFunction(watchedArgs, currentConfigResolver);
                 }
             );
@@ -107,7 +109,7 @@ async function executeGeneration(args, configResolver) {
     const effectiveConfig = await configResolver.getEffectiveConfig(args.pluginName);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
-    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_'];
+    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd']; 
     const cliArgsForPlugin = {};
     for (const key in args) {
         if (!knownGenerateOptions.includes(key) && Object.prototype.hasOwnProperty.call(args, key)) {
@@ -153,6 +155,12 @@ async function main() {
             type: 'string',
             normalize: true,
         })
+        .option('factory-defaults', { 
+            alias: ['factory-default', 'fd'], 
+            describe: 'Use only bundled default configurations, ignoring user (XDG) and project (--config) overrides.',
+            type: 'boolean',
+            default: false,
+        })
         .alias("help", "h")
         .alias("version", "v")
         .demandCommand(1, "You need to specify a command.")
@@ -169,6 +177,7 @@ async function main() {
                 .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
                 .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
                 .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
+                // factory-defaults is global, so it's available here
             },
             (args) => commonCommandHandler(args, executeConversion, 'convert')
         )
@@ -180,8 +189,9 @@ async function main() {
                 .option("outdir", { alias: "o", describe: "Output directory.", type: "string", default: "."})
                 .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string"})
                 .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true})
-                .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false})
-                .strict(false);
+                .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false});
+                // factory-defaults is global
+                y.strict(false);
             },
             (args) => commonCommandHandler(args, executeGeneration, 'generate')
         )
@@ -193,11 +203,13 @@ async function main() {
                 .option("base-plugin", { alias: "p", describe: "Base plugin for styling.", type: "string", default: "recipe"})
                 .option("hugo-ruleset", { describe: "Ruleset from config.yaml.", type: "string", default: "default_rules"})
                 .option("open", { describe: "Open the first PDF.", type: "boolean", default: false });
+                // factory-defaults is global
             },
             async (args) => { // Not using commonCommandHandler due to unique setup
                 try {
                     console.log(`Processing 'hugo-export-each' for dir: ${args.sourceDir} using base plugin: ${args.basePlugin}`);
-                    const configResolver = new ConfigResolver(args.config);
+                    // Pass factoryDefaults to ConfigResolver for hugo-export-each
+                    const configResolver = new ConfigResolver(args.config, args.factoryDefaults); 
                     
                     const effectiveBasePluginConfigDetails = await configResolver.getEffectiveConfig(args.basePlugin);
                     if (!effectiveBasePluginConfigDetails) {
@@ -234,8 +246,8 @@ async function main() {
             }
         );
 
-    const parsedArgs = await argvBuilder.argv; // Use await for yargs completion
-    if (!parsedArgs._[0] && Object.keys(parsedArgs).length <= 2) { // Crude check if only $0 and _ are present
+    const parsedArgs = await argvBuilder.argv; 
+    if (!parsedArgs._[0] && Object.keys(parsedArgs).length <= 2) { 
         argvBuilder.showHelp();
     }
 }

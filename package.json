@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {

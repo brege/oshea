@@ -80,8 +80,8 @@ class RecipeBookHandler {
             const { data: frontMatter, content: contentWithoutFm } = extractFrontMatter(rawRecipeContent);
             
             const patternsToRemove = [
-                ...(globalConfig.global_remove_shortcodes || []), // Global shortcodes first
-                ...(pluginSpecificConfig.remove_shortcodes_patterns || []) // Then recipe-book specific ones
+                ...(globalConfig.global_remove_shortcodes || []), 
+                ...(pluginSpecificConfig.remove_shortcodes_patterns || []) 
             ];
             const cleanedContent = removeShortcodes(contentWithoutFm, patternsToRemove);
 
@@ -89,7 +89,7 @@ class RecipeBookHandler {
             const processedRecipeMarkdown = ensureAndPreprocessHeading(
                 cleanedContent,
                 recipeTitle,
-                true // isRecipeBookItem = true for aggressive cleanup
+                true 
             );
             combinedMarkdown += processedRecipeMarkdown;
             combinedMarkdown += "\n\n<div style=\"page-break-before: always;\"></div>\n\n";

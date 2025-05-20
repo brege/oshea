@@ -4,16 +4,13 @@
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
-const fs = require('fs'); // For existsSync, if needed directly in CLI
+const fs = require('fs'); 
 const { spawn } = require('child_process');
 
-const ConfigResolver = require('./src/ConfigResolver'); 
+const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
 const HugoExportEach = require('./src/hugo_export_each');
 const { setupWatch } = require('./src/watch_handler');
-
-// DEFAULT_CONFIG_FILE_PATH is now handled by ConfigResolver internally
-// const DEFAULT_CONFIG_FILE_PATH = path.join(__dirname, 'config.yaml');
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -38,18 +35,13 @@ function openPdf(pdfPath, viewerCommand) {
     }
 }
 
-// executorFunction will be executeConversion or executeGeneration
 async function commonCommandHandler(args, executorFunction, commandType) {
     try {
-        // Pass the factoryDefaults flag to ConfigResolver
         const configResolver = new ConfigResolver(args.config, args.factoryDefaults); 
 
         if (args.watch) {
-            // Pass the configResolver instance to setupWatch
             await setupWatch(args, configResolver, 
-                async (watchedArgs) => { // Simplified executor for watch
-                    // Create a new ConfigResolver for each rebuild to pick up config changes
-                    // and respect factoryDefaults
+                async (watchedArgs) => { 
                     const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults);
                     await executorFunction(watchedArgs, currentConfigResolver);
                 }
@@ -66,12 +58,10 @@ async function commonCommandHandler(args, executorFunction, commandType) {
     }
 }
 
-
 async function executeConversion(args, configResolver) {
     console.log(`Processing 'convert' for: ${args.markdownFile} using plugin: ${args.plugin}`);
     
     const effectiveConfig = await configResolver.getEffectiveConfig(args.plugin);
-    // effectiveConfig.mainConfig will contain the loaded main YAML for pdf_viewer etc.
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
     const resolvedMarkdownPath = path.resolve(args.markdownFile);
@@ -94,11 +84,8 @@ async function executeConversion(args, configResolver) {
             openPdf(generatedPdfPath, viewer);
         } else if (args.open && !viewer) {
             console.log(`PDF viewer not configured in main config. PDF is at: ${generatedPdfPath}`);
-        } else if (!args.open) {
-            // console.log(`PDF opening disabled via --no-open. PDF is at: ${generatedPdfPath}`); // Noisy
-        }
+        } 
     } else {
-         // Error already logged by invokeHandler or getEffectiveConfig
         if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.plugin}'.`);
     }
 }
@@ -109,7 +96,7 @@ async function executeGeneration(args, configResolver) {
     const effectiveConfig = await configResolver.getEffectiveConfig(args.pluginName);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
-    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd']; 
+    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd'];
     const cliArgsForPlugin = {};
     for (const key in args) {
         if (!knownGenerateOptions.includes(key) && Object.prototype.hasOwnProperty.call(args, key)) {
@@ -137,17 +124,15 @@ async function executeGeneration(args, configResolver) {
             openPdf(generatedPdfPath, viewer);
         } else if (args.open && !viewer) {
             console.log(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
-        } else if (!args.open) {
-            // console.log(`PDF opening disabled via --no-open. PDF is at: ${generatedPdfPath}`);
         }
     } else {
         if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.pluginName}'.`);
     }
 }
 
-
 async function main() {
     const argvBuilder = yargs(hideBin(process.argv))
+        .parserConfiguration({'short-option-groups': false}) 
         .scriptName("md-to-pdf")
         .usage("Usage: $0 <command> [options]")
         .option('config', {
@@ -170,27 +155,25 @@ async function main() {
     argvBuilder.command(
             "convert <markdownFile>",
             "Convert a single Markdown file to PDF using a specified plugin.",
-            (y) => { /* options */
+            (y) => { 
                 y.positional("markdownFile", { describe: "Path to the input Markdown file.", type: "string" })
                 .option("plugin", { alias: "p", describe: "Plugin to use.", type: "string", default: "default" })
                 .option("outdir", { alias: "o", describe: "Output directory.", type: "string" })
                 .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
                 .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
                 .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
-                // factory-defaults is global, so it's available here
             },
             (args) => commonCommandHandler(args, executeConversion, 'convert')
         )
         .command(
             "generate <pluginName>",
             "Generate a document using a specified plugin.",
-            (y) => { /* options */
+            (y) => { 
                 y.positional("pluginName", { describe: "Name of the plugin.", type: "string"})
                 .option("outdir", { alias: "o", describe: "Output directory.", type: "string", default: "."})
-                .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string"})
+                .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" }) 
                 .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true})
                 .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false});
-                // factory-defaults is global
                 y.strict(false);
             },
             (args) => commonCommandHandler(args, executeGeneration, 'generate')
@@ -198,17 +181,15 @@ async function main() {
         .command(
             "hugo-export-each <sourceDir>",
             "Batch export PDFs from a Hugo content directory.",
-            (y) => { /* options */
+            (y) => { 
                 y.positional("sourceDir", { describe: "Hugo content source directory.", type: "string"})
                 .option("base-plugin", { alias: "p", describe: "Base plugin for styling.", type: "string", default: "recipe"})
                 .option("hugo-ruleset", { describe: "Ruleset from config.yaml.", type: "string", default: "default_rules"})
                 .option("open", { describe: "Open the first PDF.", type: "boolean", default: false });
-                // factory-defaults is global
             },
-            async (args) => { // Not using commonCommandHandler due to unique setup
+            async (args) => { 
                 try {
                     console.log(`Processing 'hugo-export-each' for dir: ${args.sourceDir} using base plugin: ${args.basePlugin}`);
-                    // Pass factoryDefaults to ConfigResolver for hugo-export-each
                     const configResolver = new ConfigResolver(args.config, args.factoryDefaults); 
                     
                     const effectiveBasePluginConfigDetails = await configResolver.getEffectiveConfig(args.basePlugin);
@@ -252,7 +233,6 @@ async function main() {
     }
 }
 
-// identiques error handlers...
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     if (reason instanceof Error && reason.stack) {

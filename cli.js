@@ -1,29 +1,19 @@
 #!/usr/bin/env node
-
 // cli.js
-
-/**
- * @fileoverview Command Line Interface (CLI) entry point for the md-to-pdf application.
- * @version 1.6.1 // Version bump for watch handler refactor
- * @date 2025-05-19
- */
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
-// fs and fss are no longer directly needed here for watch logic parts
+const fs = require('fs'); // For existsSync, if needed directly in CLI
 const { spawn } = require('child_process');
-// chokidar is now in watch_handler.js
 
-const {
-    loadConfig,
-} = require('./src/markdown_utils');
-
+const ConfigResolver = require('./src/ConfigResolver'); // **** ADDED ****
 const PluginManager = require('./src/PluginManager');
 const HugoExportEach = require('./src/hugo_export_each');
-const { setupWatch } = require('./src/watch_handler'); // Import the new watch handler
+const { setupWatch } = require('./src/watch_handler');
 
-const DEFAULT_CONFIG_FILE_PATH = path.join(__dirname, 'config.yaml');
+// DEFAULT_CONFIG_FILE_PATH is now handled by ConfigResolver internally
+// const DEFAULT_CONFIG_FILE_PATH = path.join(__dirname, 'config.yaml');
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -48,33 +38,78 @@ function openPdf(pdfPath, viewerCommand) {
     }
 }
 
-async function executeConversion(args, fullConfig, pluginManager) {
-    console.log(`Processing 'convert' for: ${args.markdownFile} using plugin: ${args.plugin}`);
-    const outputDir = args.outdir ? path.resolve(args.outdir) : path.dirname(args.markdownFile);
-    const dataForPlugin = { markdownFilePath: args.markdownFile };
+// executorFunction will be executeConversion or executeGeneration
+async function commonCommandHandler(args, executorFunction, commandType) {
+    try {
+        const configResolver = new ConfigResolver(args.config); // Pass path from --config
 
-    const generatedPdfPath = await pluginManager.invokeHandler(
-        args.plugin, dataForPlugin, outputDir, args.filename
-    );
-
-    if (generatedPdfPath) {
-        console.log(`Successfully generated PDF: ${generatedPdfPath}`);
-        if (args.open && fullConfig.pdf_viewer) {
-            openPdf(generatedPdfPath, fullConfig.pdf_viewer);
-        } else if (args.open && !fullConfig.pdf_viewer) {
-            console.log(`PDF viewer not configured in main config. PDF is at: ${generatedPdfPath}`);
-        } else if (!args.open) {
-            console.log(`PDF opening disabled via --no-open. PDF is at: ${generatedPdfPath}`);
+        if (args.watch) {
+            // The watch handler needs to be adapted to the new ConfigResolver model.
+            // For now, it will create a new ConfigResolver on each change.
+            await setupWatch(args, 
+                null, // oldMainConfig - no longer passed directly like this
+                null, // oldPluginManager - no longer passed directly
+                async (watchedArgs, _ /*oldConf*/, __ /*oldPm*/) => {
+                    // Create a new ConfigResolver for each rebuild in watch mode
+                    const currentConfigResolver = new ConfigResolver(watchedArgs.config);
+                    await executorFunction(watchedArgs, currentConfigResolver);
+                }
+            );
+        } else {
+            await executorFunction(args, configResolver);
+            console.log(`${commandType} command finished.`);
         }
-        // No return needed here if not in watch mode, or let watch_handler handle it
-    } else {
-        console.error(`ERROR: PDF generation failed for plugin '${args.plugin}'.`);
+    } catch (error) {
+        const pluginNameForError = args.plugin || args.pluginName || 'N/A';
+        console.error(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`);
+        if (error.stack && !args.watch) console.error(error.stack);
         if (!args.watch) process.exit(1);
     }
 }
 
-async function executeGeneration(args, fullConfig, pluginManager) {
+
+async function executeConversion(args, configResolver) {
+    console.log(`Processing 'convert' for: ${args.markdownFile} using plugin: ${args.plugin}`);
+    
+    const effectiveConfig = await configResolver.getEffectiveConfig(args.plugin);
+    // effectiveConfig.mainConfig will contain the loaded main YAML for pdf_viewer etc.
+    const mainLoadedConfig = effectiveConfig.mainConfig;
+
+    const resolvedMarkdownPath = path.resolve(args.markdownFile);
+    const outputDir = args.outdir ? path.resolve(args.outdir) : path.dirname(resolvedMarkdownPath);
+    const dataForPlugin = { markdownFilePath: resolvedMarkdownPath };
+
+    const pluginManager = new PluginManager();
+    const generatedPdfPath = await pluginManager.invokeHandler(
+        args.plugin,
+        effectiveConfig,
+        dataForPlugin,
+        outputDir,
+        args.filename
+    );
+
+    if (generatedPdfPath) {
+        console.log(`Successfully generated PDF: ${generatedPdfPath}`);
+        const viewer = mainLoadedConfig.pdf_viewer;
+        if (args.open && viewer) {
+            openPdf(generatedPdfPath, viewer);
+        } else if (args.open && !viewer) {
+            console.log(`PDF viewer not configured in main config. PDF is at: ${generatedPdfPath}`);
+        } else if (!args.open) {
+            // console.log(`PDF opening disabled via --no-open. PDF is at: ${generatedPdfPath}`); // Noisy
+        }
+    } else {
+         // Error already logged by invokeHandler or getEffectiveConfig
+        if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.plugin}'.`);
+    }
+}
+
+async function executeGeneration(args, configResolver) {
     console.log(`Processing 'generate' command for plugin: ${args.pluginName}`);
+
+    const effectiveConfig = await configResolver.getEffectiveConfig(args.pluginName);
+    const mainLoadedConfig = effectiveConfig.mainConfig;
+
     const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_'];
     const cliArgsForPlugin = {};
     for (const key in args) {
@@ -87,8 +122,10 @@ async function executeGeneration(args, fullConfig, pluginManager) {
     const outputFilename = args.filename;
     const outputDir = path.resolve(args.outdir);
 
+    const pluginManager = new PluginManager();
     const generatedPdfPath = await pluginManager.invokeHandler(
         args.pluginName,
+        effectiveConfig,
         dataForPlugin,
         outputDir,
         outputFilename
@@ -96,18 +133,19 @@ async function executeGeneration(args, fullConfig, pluginManager) {
 
     if (generatedPdfPath) {
         console.log(`Successfully generated PDF via plugin '${args.pluginName}': ${generatedPdfPath}`);
-        if (args.open && fullConfig.pdf_viewer) {
-            openPdf(generatedPdfPath, fullConfig.pdf_viewer);
-        } else if (args.open && !fullConfig.pdf_viewer) {
+        const viewer = mainLoadedConfig.pdf_viewer;
+        if (args.open && viewer) {
+            openPdf(generatedPdfPath, viewer);
+        } else if (args.open && !viewer) {
             console.log(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
         } else if (!args.open) {
-            console.log(`PDF opening disabled via --no-open. PDF is at: ${generatedPdfPath}`);
+            // console.log(`PDF opening disabled via --no-open. PDF is at: ${generatedPdfPath}`);
         }
     } else {
-        console.error(`ERROR: PDF generation failed for plugin '${args.pluginName}'.`);
-        if (!args.watch) process.exit(1);
+        if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.pluginName}'.`);
     }
 }
+
 
 async function main() {
     const argvBuilder = yargs(hideBin(process.argv))
@@ -117,7 +155,6 @@ async function main() {
             describe: 'Path to a custom YAML configuration file.',
             type: 'string',
             normalize: true,
-            default: DEFAULT_CONFIG_FILE_PATH
         })
         .alias("help", "h")
         .alias("version", "v")
@@ -128,185 +165,68 @@ async function main() {
     argvBuilder.command(
             "convert <markdownFile>",
             "Convert a single Markdown file to PDF using a specified plugin.",
-            (y) => {
-                y.positional("markdownFile", {
-                    describe: "Path to the input Markdown file.",
-                    type: "string",
-                    normalize: true,
-                })
-                .option("plugin", {
-                    alias: "p",
-                    describe: "Document type plugin to use (e.g., 'default', 'cv', 'recipe').",
-                    type: "string",
-                    default: "default",
-                })
-                .option("outdir", {
-                    alias: "o",
-                    describe: "Output directory for the PDF. Defaults to input file's directory.",
-                    type: "string",
-                    normalize: true,
-                })
-                .option("filename", {
-                    alias: "f",
-                    describe: "Specific name for the output PDF file. If not provided, a name will be generated.",
-                    type: "string",
-                })
-                .option("open", {
-                    describe: "Automatically open the generated PDF. Use --no-open to disable.",
-                    type: "boolean",
-                    default: true,
-                })
-                .option("watch", {
-                    alias: "w",
-                    describe: "Enable watch mode to automatically rebuild on file changes.",
-                    type: "boolean",
-                    default: false,
-                });
+            (y) => { /* options */
+                y.positional("markdownFile", { describe: "Path to the input Markdown file.", type: "string" })
+                .option("plugin", { alias: "p", describe: "Plugin to use.", type: "string", default: "default" })
+                .option("outdir", { alias: "o", describe: "Output directory.", type: "string" })
+                .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
+                .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
+                .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
             },
-            async (args) => {
-                let fullConfig;
-                try {
-                    fullConfig = await loadConfig(args.config);
-                } catch (error) {
-                    console.error(`ERROR: Failed to load configuration from '${args.config}': ${error.message}`);
-                    process.exit(1);
-                }
-                try {
-                    const pluginManager = new PluginManager(fullConfig);
-                    if (args.watch) {
-                        await setupWatch(args, fullConfig, pluginManager, executeConversion);
-                    } else {
-                        await executeConversion(args, fullConfig, pluginManager);
-                        console.log("Convert command finished.");
-                    }
-                } catch (error) {
-                    console.error(`ERROR in 'convert' command: ${error.message}`);
-                    if (error.stack) console.error(error.stack);
-                    process.exit(1);
-                }
-            }
+            (args) => commonCommandHandler(args, executeConversion, 'convert')
         )
         .command(
             "generate <pluginName>",
-            "Generate a document using a specified plugin and its specific options.",
-            (y) => {
-                y.positional("pluginName", {
-                    describe: "The name of the plugin to use.",
-                    type: "string",
-                })
-                .option("outdir", {
-                    alias: "o",
-                    describe: "Output directory for the PDF. Defaults to current directory.",
-                    type: "string",
-                    default: ".",
-                    normalize: true,
-                })
-                .option("filename", {
-                    alias: "f",
-                    describe: "Specific name for the output PDF file. If not provided, a name will be generated by the plugin.",
-                    type: "string",
-                })
-                .option("open", {
-                    describe: "Automatically open the generated PDF. Use --no-open to disable.",
-                    type: "boolean",
-                    default: true,
-                })
-                .option("watch", {
-                    alias: "w",
-                    describe: "Enable watch mode to automatically rebuild on file changes.",
-                    type: "boolean",
-                    default: false,
-                })
+            "Generate a document using a specified plugin.",
+            (y) => { /* options */
+                y.positional("pluginName", { describe: "Name of the plugin.", type: "string"})
+                .option("outdir", { alias: "o", describe: "Output directory.", type: "string", default: "."})
+                .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string"})
+                .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true})
+                .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false})
                 .strict(false);
             },
-            async (args) => {
-                let fullConfig;
-                try {
-                    fullConfig = await loadConfig(args.config);
-                } catch (error) {
-                    console.error(`ERROR: Failed to load configuration from '${args.config}': ${error.message}`);
-                    process.exit(1);
-                }
-                try {
-                    const pluginManager = new PluginManager(fullConfig);
-                     if (args.watch) {
-                        await setupWatch(args, fullConfig, pluginManager, executeGeneration);
-                    } else {
-                        await executeGeneration(args, fullConfig, pluginManager);
-                        console.log("Generate command finished.");
-                    }
-                } catch (error) {
-                    console.error(`ERROR in 'generate' command for plugin '${args.pluginName}': ${error.message}`);
-                    if (error.stack) console.error(error.stack);
-                    process.exit(1);
-                }
-            }
+            (args) => commonCommandHandler(args, executeGeneration, 'generate')
         )
         .command(
             "hugo-export-each <sourceDir>",
-            "Batch export individual PDFs from a Hugo content directory.",
-            (y) => {
-                y.positional("sourceDir", {
-                    describe: "Path to the source directory containing Hugo recipes.",
-                    type: "string",
-                    normalize: true,
-                })
-                .option("base-plugin", {
-                    alias: "p",
-                    describe: "Base document type plugin to use for styling each item (e.g., 'recipe').",
-                    type: "string",
-                    default: "recipe",
-                })
-                .option("hugo-ruleset", {
-                    describe: "Key in config.yaml under 'hugo_export_each' for specific processing rules.",
-                    type: "string",
-                    default: "default_rules",
-                })
-                .option("open", {
-                    describe: "Automatically open the first generated PDF. Use --no-open to disable.",
-                    type: "boolean",
-                    default: false,
-                });
+            "Batch export PDFs from a Hugo content directory.",
+            (y) => { /* options */
+                y.positional("sourceDir", { describe: "Hugo content source directory.", type: "string"})
+                .option("base-plugin", { alias: "p", describe: "Base plugin for styling.", type: "string", default: "recipe"})
+                .option("hugo-ruleset", { describe: "Ruleset from config.yaml.", type: "string", default: "default_rules"})
+                .option("open", { describe: "Open the first PDF.", type: "boolean", default: false });
             },
-            async (args) => {
-                let fullConfig;
-                try {
-                    fullConfig = await loadConfig(args.config);
-                } catch (error) {
-                    console.error(`ERROR: Failed to load configuration from '${args.config}': ${error.message}`);
-                    process.exit(1);
-                }
+            async (args) => { // Not using commonCommandHandler due to unique setup
                 try {
                     console.log(`Processing 'hugo-export-each' for dir: ${args.sourceDir} using base plugin: ${args.basePlugin}`);
-                    const pluginManager = new PluginManager(fullConfig);
-                    const pluginDetails = await pluginManager.getPluginDetails(args.basePlugin);
-
-                    if (!pluginDetails || !pluginDetails.config) {
-                        throw new Error(`Base plugin '${args.basePlugin}' not found or its configuration failed to load.`);
+                    const configResolver = new ConfigResolver(args.config);
+                    
+                    const effectiveBasePluginConfigDetails = await configResolver.getEffectiveConfig(args.basePlugin);
+                    if (!effectiveBasePluginConfigDetails) {
+                        throw new Error(`Base plugin '${args.basePlugin}' could not be resolved by ConfigResolver.`);
                     }
-                    const itemBasePluginConfig = pluginDetails.config;
-                    const itemBasePluginPath = pluginDetails.basePath;
 
-                    const hugoExportRules = (fullConfig.hugo_export_each && fullConfig.hugo_export_each[args.hugoRuleset])
-                        ? fullConfig.hugo_export_each[args.hugoRuleset]
+                    const mainLoadedConfig = effectiveBasePluginConfigDetails.mainConfig;
+                    const hugoExportRules = (mainLoadedConfig.hugo_export_each && mainLoadedConfig.hugo_export_each[args.hugoRuleset])
+                        ? mainLoadedConfig.hugo_export_each[args.hugoRuleset]
                         : {};
                     
                     const exporter = new HugoExportEach();
                     const generatedPdfPaths = await exporter.exportAllPdfs(
-                        args.sourceDir,
-                        itemBasePluginConfig,
+                        path.resolve(args.sourceDir),
+                        effectiveBasePluginConfigDetails.pluginSpecificConfig,
                         hugoExportRules,
-                        fullConfig,
+                        mainLoadedConfig,
                         !args.open,
-                        itemBasePluginPath
+                        effectiveBasePluginConfigDetails.pluginBasePath
                     );
 
-                    if (args.open && fullConfig.pdf_viewer && generatedPdfPaths.length > 0) {
-                        openPdf(generatedPdfPaths[0], fullConfig.pdf_viewer);
-                    } else if (args.open && !fullConfig.pdf_viewer && generatedPdfPaths.length > 0){
+                    const viewer = mainLoadedConfig.pdf_viewer;
+                    if (args.open && viewer && generatedPdfPaths.length > 0) {
+                        openPdf(generatedPdfPaths[0], viewer);
+                    } else if (args.open && !viewer && generatedPdfPaths.length > 0){
                         console.log(`PDF viewer not configured. First PDF is at: ${generatedPdfPaths[0]}`);
-                    } else if (!args.open && generatedPdfPaths.length > 0){
-                        console.log(`PDF opening disabled via --no-open. PDFs generated.`);
                     }
                     console.log("Hugo export-each command finished.");
                 } catch (error) {
@@ -317,10 +237,13 @@ async function main() {
             }
         );
 
-    const parsedArgs = argvBuilder.parse();
-
+    const parsedArgs = await argvBuilder.argv; // Use await for yargs completion
+    if (!parsedArgs._[0] && Object.keys(parsedArgs).length <= 2) { // Crude check if only $0 and _ are present
+        argvBuilder.showHelp();
+    }
 }
 
+// identiques error handlers...
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     if (reason instanceof Error && reason.stack) {
@@ -328,7 +251,6 @@ process.on('unhandledRejection', (reason, promise) => {
     }
     process.exit(1);
 });
-
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
     if (error.stack) {

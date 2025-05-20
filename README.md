@@ -24,6 +24,7 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
   * A main `config.yaml` for global settings and plugin registration.
   * Each plugin manages its own local configuration for PDF options, CSS, and behavior.
   * Supports YAML front matter for metadata and dynamic content substitution (including date variables).
+  * Use the `--config` flag for project-specific settings, taking highest precedence.
 * **Watch Mode**
   * Use the `--watch` flag with `convert` and `generate` commands to automatically re-generate PDFs when source Markdown, plugin configurations, or plugin CSS files are modified.
 
@@ -221,6 +222,84 @@ document_type_plugins:
 ```
 
 **`hugo_export_each` Settings:** Configuration for the [`hugo-export-each`](plugins/hugo-export-each) command, including rulesets for author extraction and Hugo-specific shortcode removal.
+
+### Configuration Lookup Order
+
+From lowest precedence (1) to highest (3):
+
+1.  **Pre-configured (Lowest):**
+
+    The main files in this repository, `config.yaml` and:
+    - [`plugins/<pluginName>/<pluginName>.config.yaml`](plugins/),
+    - [`plugins/<pluginName>/<pluginName>.css`](plugins/)
+
+2.  **XDG User Defaults (Optional):**
+
+    Customize plugins globally by creating a similar structure in your XDG config directory:
+    
+    - **`~/.config/md-to-pdf/`**
+
+    These override pre-configured defaults, making this method useful for personalization, globally.
+
+    *Example XDG Structure:*
+    ```
+    ~/.config/md-to-pdf/
+    ├── config.yaml                   # For global settings (e.g., 'pdf_viewer')
+    ├── cv/
+    │   ├── cv.config.yaml            # CV-specific overrides
+    │   └── cv.css                    # Custom default CV styles
+    └── cover-letter/
+        ├── cover-letter.config.yaml  # Cover letter-specific overrides
+        └── cover-letter.css          # Custom default cover letter styles
+    ```
+
+    In `~/.config/md-to-pdf/cv/cv.config.yaml`, you can redefine `pdf_options`, customize `css_files`, etc.
+
+
+3.  **Project-Specific Overrides via `--config` (Highest):**
+
+    Use 
+
+    - **`--config /path/to/your_project_main.yaml`**
+
+    for project-specific settings. This `your_project_main.yaml` acts as a manifest, pointing to other YAML files within your project that detail plugin configurations for that project.
+
+    *Example Project Structure with different CV styles:*
+
+    ```
+    my_cvs/
+    ├── academic-cv/
+    │   ├── main.academic.yaml          # This is passed to --config
+    │   ├── cv.academic.config.yaml
+    │   └── cv.academic.css
+    └── data-science-cv/
+        ├── main.datasci.yaml           # This is passed to --config
+        ├── cv.datasci.config.yaml
+        └── cv.datasci.css
+    ```
+
+    *Example `my_cvs/academic-cv/main.academic.yaml`:*
+
+    ```yaml
+    document_type_plugins:
+      cv: "./cv.academic.config.yaml"   # Relative to main.academic.yaml, or absolute
+    ```
+
+    *CLI Call:*
+
+    ```bash
+    md-to-pdf convert my_academic_cv.md \
+        --plugin cv \
+        --config my_cvs/academic-cv/main.academic.yaml
+
+    md-to-pdf convert my_data_science_cv.md ...
+    ```
+
+**CSS Merging with `inherit_css`:**
+
+  * `inherit_css: true` - Appends this layer's CSS files to those from lower layers.
+  * `inherit_css: false` - Replaces all lower-layer CSS files (and [`default.css`](plugins/default/default.css)) with those from this layer.
+
 
 ## Front Matter and Placeholders
 

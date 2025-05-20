@@ -105,6 +105,34 @@ const testCases = [
             console.log(`  Copied ${HUGO_EXAMPLE_SOURCE_IN_EXAMPLES} to ${HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT} for hugo-export-each test.`);
         }
     },
+    {
+        description: "Project Config: Convert CV with project-specific config override (A5 format, custom CSS)",
+        commandArgs: [
+            'convert',
+            path.join(EXAMPLES_DIR, 'example-cv.md'), // Use a standard example CV markdown
+            '--plugin', 'cv',
+            '--config', path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml'), // **** UPDATED PATH ****
+            '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--filename', 'test-cv-project-override.pdf',
+            '--no-open', // Important for automated tests
+        ],
+        expectedOutputs: [
+            // The A5 format and different margins might result in a different file size
+            // compared to the default Letter/A4 CVs. Min size is a basic check.
+            { filePath: 'test-cv-project-override.pdf', minSize: 1000 }, // Adjust minSize if needed
+        ],
+        preTestSetup: async () => {
+            // Ensure the test asset directory and files exist.
+            const testAssetConfigPath = path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml'); // **** UPDATED PATH ****
+            if (!fss.existsSync(testAssetConfigPath)) {
+                // This is more of a sanity check; these files should be part of the repo.
+                console.error(`ERROR: Test asset config file not found: ${testAssetConfigPath}`);
+                throw new Error(`Test asset config file not found: ${testAssetConfigPath}. Make sure test assets are in place.`);
+            }
+            // Log that we are using specific assets for this test.
+            console.log(`  Using project override config: ${testAssetConfigPath}`);
+        }
+    },
 ];
 
 // --- Helper Functions ---
@@ -138,20 +166,27 @@ async function cleanupTestDirectory(keepOutput = false) {
 }
 
 async function runCliCommand(argsArray) {
-    const command = `node "${CLI_SCRIPT_PATH}" ${argsArray.join(' ')} --config "${TEST_CONFIG_PATH}"`;
+    // Check if the test case's arguments already include a --config option
+    const hasCustomConfig = argsArray.some(arg => arg === '--config' || arg.startsWith('--config='));
+    
+    let command = `node "${CLI_SCRIPT_PATH}" ${argsArray.join(' ')}`;
+    
+    if (!hasCustomConfig) {
+        // If no --config is in argsArray, append the default test config
+        command += ` --config "${TEST_CONFIG_PATH}"`;
+    }
+    // If argsArray already has --config, we don't append the default one.
+
     console.log(`  Executing: ${command}`);
     try {
         const { stdout, stderr } = await execAsync(command, { cwd: PROJECT_ROOT });
         if (stdout) console.log('  stdout:\n', stdout);
         const stderrContent = stderr && stderr.trim();
         if (stderrContent) {
-            // Yargs help output often goes to stderr when an unknown arg is encountered,
-            // which isn't necessarily an "error" for the test if the script still exits 0.
-            // However, if execAsync throws, it's a failure.
             console.warn('  stderr:\n', stderr);
         }
         return { success: true, stdout, stderr };
-    } catch (error) { // This 'error' object is from execAsync, meaning the command likely exited non-zero
+    } catch (error) { 
         console.error(`  Error executing command (cli.js likely exited with error): ${error.message}`);
         if (error.stdout && error.stdout.trim()) console.error('  stdout (on error):\n', error.stdout);
         if (error.stderr && error.stderr.trim()) console.error('  stderr (on error):\n', error.stderr);

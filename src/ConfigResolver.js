@@ -2,85 +2,89 @@
 const fs = require('fs');
 const fsp = require('fs').promises;
 const path = require('path');
-const os = require('os'); // Added for XDG path
+const os = require('os');
 const { loadConfig: loadYamlConfig } = require('./markdown_utils');
 
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
-const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml'; // e.g., cv.config.yaml
+const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class ConfigResolver {
     constructor(mainConfigPathFromCli) {
-        this.projectRoot = path.resolve(__dirname, '..'); // For bundled plugins
-        this.defaultMainConfigPath = path.join(this.projectRoot, 'config.yaml');
-        
-        // Determine XDG Config Home
+        this.projectRoot = path.resolve(__dirname, '..');
+        this.defaultMainConfigPath = path.join(this.projectRoot, 'config.yaml'); // Bundled global config
+
         const xdgConfigHome = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
         this.xdgBaseDir = path.join(xdgConfigHome, XDG_CONFIG_DIR_NAME);
+        this.xdgGlobalConfigPath = path.join(this.xdgBaseDir, 'config.yaml');
 
-        // Main config (from CLI or default path) - will be loaded when first needed
-        this.cliOrGlobalMainConfigPath = mainConfigPathFromCli; // Path from --config, or undefined
-        this.mainConfig = null; // Stores the global config (from CLI or XDG global or default tool's global)
+        this.projectManifestConfigPath = mainConfigPathFromCli; // Path from --config to the project's "main" config
+        this.projectManifestConfig = null; // Loaded on demand if path is given
+        this.projectManifestBaseDir = this.projectManifestConfigPath ? path.dirname(this.projectManifestConfigPath) : null;
+
+        this.primaryMainConfig = null; // For global settings like pdf_viewer, global_pdf_options
         
-        this.loadedPluginConfigsCache = {}; // Cache for fully resolved { effectiveConfig, pluginBasePath, handlerScriptPath }
-        this._rawPluginYamlCache = {}; // Cache for raw loaded yamls to avoid re-reading { path: {rawConfig, basePathForAssets, inherit_css} }
+        this.loadedPluginConfigsCache = {}; 
+        this._rawPluginYamlCache = {}; 
     }
 
-    /**
-     * Loads the primary main/global configuration file.
-     * Priority:
-     * 1. Path from --config CLI argument (this.cliOrGlobalMainConfigPath if set)
-     * 2. XDG global config (~/.config/md-to-pdf/config.yaml)
-     * 3. Bundled default config (md-to-pdf-install-dir/config.yaml)
-     * @returns {Promise<Object>} The loaded main configuration object.
-     * @private
-     */
+    async _loadProjectManifestConfig() {
+        if (this.projectManifestConfig) return this.projectManifestConfig;
+        if (!this.projectManifestConfigPath) return null;
+
+        if (!fs.existsSync(this.projectManifestConfigPath)) {
+            console.warn(`WARN: Project manifest configuration file (from --config) '${this.projectManifestConfigPath}' not found.`);
+            this.projectManifestConfig = {}; // Set to empty to avoid re-attempts
+            return this.projectManifestConfig;
+        }
+        try {
+            this.projectManifestConfig = await loadYamlConfig(this.projectManifestConfigPath);
+            return this.projectManifestConfig;
+        } catch (error) {
+            console.error(`ERROR loading project manifest configuration from '${this.projectManifestConfigPath}': ${error.message}`);
+            this.projectManifestConfig = {}; // Set to empty on error
+            return this.projectManifestConfig;
+        }
+    }
+
     async _loadPrimaryMainConfig() {
-        if (this.mainConfig) {
-            return this.mainConfig;
+        if (this.primaryMainConfig) {
+            return this.primaryMainConfig;
         }
 
-        let configPathToLoad = this.defaultMainConfigPath; // Fallback to bundled
-        const xdgGlobalConfigPath = path.join(this.xdgBaseDir, 'config.yaml');
+        let configPathToLoad = this.defaultMainConfigPath; 
+        let loadedFrom = "bundled default";
 
-        if (this.cliOrGlobalMainConfigPath && fs.existsSync(this.cliOrGlobalMainConfigPath)) {
-            configPathToLoad = this.cliOrGlobalMainConfigPath;
-        } else if (fs.existsSync(xdgGlobalConfigPath)) {
-            configPathToLoad = xdgGlobalConfigPath;
-        } else if (!fs.existsSync(this.defaultMainConfigPath)){
-             console.warn(`WARN: Default main configuration file '${this.defaultMainConfigPath}' not found. Using empty config.`);
-             this.mainConfig = {};
-             return this.mainConfig;
+        if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
+            // If --config is used, it takes precedence for global settings too
+            configPathToLoad = this.projectManifestConfigPath;
+            loadedFrom = "project (from --config)";
+        } else if (fs.existsSync(this.xdgGlobalConfigPath)) {
+            configPathToLoad = this.xdgGlobalConfigPath;
+            loadedFrom = "XDG global";
+        } else if (!fs.existsSync(this.defaultMainConfigPath)) {
+             console.warn(`WARN: Default main configuration file '${this.defaultMainConfigPath}' not found. Using empty config for global settings.`);
+             this.primaryMainConfig = {};
+             return this.primaryMainConfig;
         }
         
         try {
-            console.log(`Loading main configuration from: ${configPathToLoad}`);
-            this.mainConfig = await loadYamlConfig(configPathToLoad);
-            return this.mainConfig;
+            // console.log(`Loading primary main configuration (for globals) from: ${configPathToLoad} (${loadedFrom})`);
+            this.primaryMainConfig = await loadYamlConfig(configPathToLoad);
+            return this.primaryMainConfig;
         } catch (error) {
-            console.error(`ERROR loading main configuration from '${configPathToLoad}': ${error.message}`);
-            // Fallback to an empty config if loading fails, to allow plugins to still load their defaults
-            this.mainConfig = {}; 
-            return this.mainConfig;
+            console.error(`ERROR loading primary main configuration from '${configPathToLoad}': ${error.message}`);
+            this.primaryMainConfig = {}; 
+            return this.primaryMainConfig;
         }
     }
     
-    /**
-     * Loads a single layer of plugin-specific configuration (e.g., bundled, xdg, or project).
-     * @param {string} configFilePath Absolute path to the plugin's .config.yaml file.
-     * @param {string} assetsBasePath Absolute path to the directory where assets (CSS) for this config layer are located.
-     * @returns {Promise<{rawConfig: Object, resolvedCssPaths: string[], inherit_css: boolean}|null>}
-     * Returns null if configFilePath does not exist.
-     * @private
-     */
     async _loadSingleConfigLayer(configFilePath, assetsBasePath) {
         if (this._rawPluginYamlCache[configFilePath]) {
             return this._rawPluginYamlCache[configFilePath];
         }
-
-        if (!fs.existsSync(configFilePath)) {
-            return null; // Layer doesn't exist
+        if (!configFilePath || !fs.existsSync(configFilePath)) { // Added check for configFilePath
+            return null; 
         }
-
         try {
             const rawConfig = await loadYamlConfig(configFilePath);
             let resolvedCssPaths = [];
@@ -92,16 +96,16 @@ class ConfigResolver {
                     }
                     if (path.isAbsolute(cssFile)) return cssFile;
                     return path.resolve(assetsBasePath, cssFile);
-                }).filter(Boolean); // Remove nulls from invalid entries
+                }).filter(Boolean);
             }
-            const inherit_css = rawConfig.inherit_css === true; // Defaults to false if not true
+            const inherit_css = rawConfig.inherit_css === true; 
             
             const result = { rawConfig, resolvedCssPaths, inherit_css };
             this._rawPluginYamlCache[configFilePath] = result;
             return result;
         } catch (error) {
             console.error(`ERROR loading plugin configuration layer from '${configFilePath}': ${error.message}`);
-            return { rawConfig: {}, resolvedCssPaths: [], inherit_css: false }; // Return empty on error to not break chain
+            return { rawConfig: {}, resolvedCssPaths: [], inherit_css: false };
         }
     }
 
@@ -113,10 +117,8 @@ class ConfigResolver {
         const output = { ...target };
         if (this._isObject(target) && this._isObject(source)) {
             Object.keys(source).forEach(key => {
-                // Do not merge 'css_files' or 'inherit_css' directly with deepMerge,
-                // they are handled by the specific layering logic.
                 if (key === 'css_files' || key === 'inherit_css') {
-                    if (source[key] !== undefined) { // Only take from source if defined
+                    if (source[key] !== undefined) {
                         output[key] = source[key];
                     }
                 } else if (this._isObject(source[key]) && key in target && this._isObject(target[key])) {
@@ -134,7 +136,7 @@ class ConfigResolver {
             return this.loadedPluginConfigsCache[pluginName];
         }
 
-        const mainConfig = await this._loadPrimaryMainConfig(); // Loads CLI-provided, or XDG global, or bundled default config.yaml
+        const primaryMainConfig = await this._loadPrimaryMainConfig();
         let currentMergedConfig = {};
         let currentCssPaths = [];
 
@@ -145,22 +147,21 @@ class ConfigResolver {
         
         const layer0Data = await this._loadSingleConfigLayer(bundledPluginConfigPath, bundledPluginDir);
         if (layer0Data && layer0Data.rawConfig) {
-            currentMergedConfig = layer0Data.rawConfig;
+            currentMergedConfig = layer0Data.rawConfig; // Start with bundled as base
             currentCssPaths = layer0Data.resolvedCssPaths || [];
         } else {
-            // This is a critical failure - bundled plugin config must exist if plugin is valid
             throw new Error(`Bundled configuration for plugin '${pluginName}' not found at '${bundledPluginConfigPath}'.`);
         }
-        const bundledPluginBasePath = bundledPluginDir; // Base path for the handler script
+        const bundledPluginBasePath = bundledPluginDir;
 
         // Layer 1: XDG User Defaults for the specific plugin
         const xdgPluginDir = path.join(this.xdgBaseDir, pluginName);
-        const xdgPluginConfigPath = path.join(xdgPluginDir, bundledPluginConfigFileName); // e.g., ~/.config/md-to-pdf/cv/cv.config.yaml
+        const xdgPluginConfigPath = path.join(xdgPluginDir, bundledPluginConfigFileName);
         
         const layer1Data = await this._loadSingleConfigLayer(xdgPluginConfigPath, xdgPluginDir);
         if (layer1Data && layer1Data.rawConfig) {
             currentMergedConfig = this._deepMerge(currentMergedConfig, layer1Data.rawConfig);
-            if (layer1Data.rawConfig.css_files !== undefined) { // Check if css_files key exists
+            if (layer1Data.rawConfig.css_files !== undefined) {
                 if (layer1Data.inherit_css) {
                     currentCssPaths.push(...layer1Data.resolvedCssPaths);
                 } else {
@@ -169,16 +170,43 @@ class ConfigResolver {
             }
         }
         
-        // (Layer 2: Project-Specific Config will be added here in the next step)
-
-        // Finalize: Merge global PDF options from the loaded mainConfig
-        if (mainConfig.global_pdf_options) {
-            currentMergedConfig.pdf_options = this._deepMerge(
-                mainConfig.global_pdf_options, // Base
-                currentMergedConfig.pdf_options || {}  // Overrides
-            );
+        // Layer 2: Project-Specific Config (from --config)
+        const projectManifestConfig = await this._loadProjectManifestConfig(); // Load the file passed to --config
+        if (projectManifestConfig && projectManifestConfig.document_type_plugins) {
+            const projectPluginSpecificConfigPathRel = projectManifestConfig.document_type_plugins[pluginName];
+            if (projectPluginSpecificConfigPathRel && this.projectManifestBaseDir) {
+                const projectPluginSpecificConfigPathAbs = path.resolve(this.projectManifestBaseDir, projectPluginSpecificConfigPathRel);
+                const projectPluginSpecificAssetsBasePath = path.dirname(projectPluginSpecificConfigPathAbs);
+                
+                const layer2Data = await this._loadSingleConfigLayer(projectPluginSpecificConfigPathAbs, projectPluginSpecificAssetsBasePath);
+                if (layer2Data && layer2Data.rawConfig) {
+                    currentMergedConfig = this._deepMerge(currentMergedConfig, layer2Data.rawConfig);
+                    if (layer2Data.rawConfig.css_files !== undefined) {
+                        if (layer2Data.inherit_css) {
+                            currentCssPaths.push(...layer2Data.resolvedCssPaths);
+                        } else {
+                            currentCssPaths = layer2Data.resolvedCssPaths;
+                        }
+                    }
+                }
+            }
         }
-        currentMergedConfig.css_files = [...new Set(currentCssPaths)]; // Deduplicate CSS paths
+
+        // Finalize: Merge global PDF options from the primaryMainConfig
+        if (primaryMainConfig.global_pdf_options) {
+            currentMergedConfig.pdf_options = this._deepMerge(
+                 primaryMainConfig.global_pdf_options, // Base for globals
+                 currentMergedConfig.pdf_options || {}  // Plugin's current PDF options become the overrides
+            );
+             // Ensure the plugin's specific margins (if any) are preserved if they were more specific than global
+            if (currentMergedConfig.pdf_options.margin && primaryMainConfig.global_pdf_options.margin) {
+                 currentMergedConfig.pdf_options.margin = this._deepMerge(
+                    primaryMainConfig.global_pdf_options.margin,
+                    currentMergedConfig.pdf_options.margin 
+                );
+            }
+        }
+        currentMergedConfig.css_files = [...new Set(currentCssPaths)]; 
 
         if (!currentMergedConfig.handler_script) {
             throw new Error(`Handler script not specified in effective configuration for plugin '${pluginName}'.`);
@@ -190,8 +218,8 @@ class ConfigResolver {
 
         const effectiveDetails = {
             pluginSpecificConfig: currentMergedConfig,
-            mainConfig: mainConfig,
-            pluginBasePath: bundledPluginBasePath, // For handler's own relative assets
+            mainConfig: primaryMainConfig, // This is the config used for global settings
+            pluginBasePath: bundledPluginBasePath, 
             handlerScriptPath: handlerScriptPath
         };
         

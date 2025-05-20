@@ -1,6 +1,9 @@
 # development files
 dev/
 
+# devlopment/interaction documents
+docs/
+
 # Node dependencies
 node_modules/
 

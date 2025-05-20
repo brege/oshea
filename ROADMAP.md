@@ -52,6 +52,27 @@ This document outlines the planned major features and enhancements for future ve
     
     * Updated documentation and passing test suite.
 
+
+## Version 0.2.1: Watch Mode Implementation (Current Task)
+
+* **Goal:** Implement a `--watch` flag for the `convert` and `generate` commands to automatically rebuild PDFs on source file changes.
+
+* **Key Features:**
+
+    * `--watch` CLI option added to `convert` and `generate` commands.
+
+    * Uses `chokidar` to monitor:
+        * Input Markdown file (for `convert`).
+        * Relevant input sources for `generate` (e.g., `recipesBaseDir` for `recipe-book`).
+        * Active plugin's CSS file(s).
+        * Active plugin's configuration file.
+        * Main `config.yaml`.
+    
+    * Re-triggers PDF generation on detected changes.
+    
+    * Provides console feedback for watch status and rebuilds.
+
+
 ## Version 0.3.0: Enhanced Configuration System
 
 * **Goal:** Provide a more flexible and user-friendly way to manage and override configurations.
@@ -77,19 +98,12 @@ This document outlines the planned major features and enhancements for future ve
 * **Plugin Management CLI Commands:**
 
     * `md-to-pdf plugin list`: Lists all currently registered and available plugins with their descriptions (from their config files).
+
     * `(Consider) md-to-pdf plugin enable/disable <pluginName>`: Could manage the registration entries in the main `config.yaml`.
 
 * **Plugin-Specific Help for `generate` command:** Allow plugins to define and expose help text for their specific options when a user runs `md-to-pdf generate <pluginName> --help` (or a similar mechanism).
 
 ## Future Considerations (Post v0.4.0 / Parallel Tracks)
-
-* **Watch Mode (`--watch`):**
-
-    * **Description:** Implement a watch mode that automatically re-runs conversions when input Markdown files or relevant plugin assets (CSS, configs) are modified.
-
-    * **Benefit:** Improves development speed and allows for live-preview-like workflows.
-    
-    * **Implementation Notes:** Could use libraries like `chokidar`. For PDF, this would re-generate the PDF. For a true live HTML preview, it might involve serving generated HTML locally and using browser live-reload techniques.
 
 * **Math Support (e.g., LaTeX via KaTeX/MathJax):**
     

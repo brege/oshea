@@ -201,8 +201,8 @@ class DefaultHandler {
         
         const htmlBodyContent = renderMarkdownToHtml(
             markdownToRender,
-            pluginSpecificConfig.toc_options, // TOC options from plugin config
-            mergedPdfOptions.anchor_options // Anchor options from merged PDF options
+            pluginSpecificConfig.toc_options,
+            mergedPdfOptions.anchor_options 
         );
 
         const cssFileContentsArray = [];
@@ -216,14 +216,19 @@ class DefaultHandler {
                 console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'})`);
             }
         }
-         if (cssFileContentsArray.length === 0 && cssFiles.length > 0) {
-            console.warn(`WARN: No CSS files were actually loaded for plugin, though some were specified: ${cssFiles.join(', ')}. Check paths relative to ${pluginBasePath}.`);
+        if (cssFileContentsArray.length === 0 && cssFiles.length > 0) {
+            const allAbsolute = cssFiles.every(f => path.isAbsolute(f));
+            let hint = `Check paths relative to ${pluginBasePath}.`;
+            if (allAbsolute) {
+                hint = `Ensure the absolute paths specified exist and are readable: ${cssFiles.join(', ')}`;
+            }
+            console.warn(`WARN: No CSS files were actually loaded by the handler, though some were specified. ${hint}`);
         }
 
         await generatePdf(
             htmlBodyContent,
             outputPdfPath,
-            mergedPdfOptions, // Use the merged PDF options
+            mergedPdfOptions, 
             cssFileContentsArray
         );
 

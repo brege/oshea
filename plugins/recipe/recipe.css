@@ -55,10 +55,6 @@ a {
 
 /* Print specific styles */
 @media print {
-  @page {
-    margin: 0.5in; /* Should align with config.yaml for 'recipe' type if preferCSSPageSize true */
-  }
-
   body {
     font-size: 11pt; /* Maintain recipe font size */
     color: #000 !important;

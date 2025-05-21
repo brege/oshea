@@ -88,6 +88,8 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
 * `--config <path_to_config.yaml>`: Specify a custom path to your main project-specific YAML configuration file. This file can register project-local plugins and override settings.
 * `--factory-defaults` (or `--fd`): Use only bundled default configurations and plugins, ignoring user (XDG) and project (`--config`) configurations. Useful for debugging or getting a "vanilla" output.
 
+**For a quick reference guide, see the [Cheat Sheet](CHEATSHEET.md).**
+
 ### Commands
 
 There are three main command types:
@@ -195,6 +197,26 @@ md-to-pdf hugo-export-each <sourceDir> --base-plugin <pluginName> [options]
 ```bash
 md-to-pdf hugo-export-each examples/hugo-example --base-plugin recipe
 ```
+
+### Plugin Management Commands
+
+#### `md-to-pdf plugin list     # [--factory-defaults, --config ...]`
+
+```bash
+Discovering plugins...
+
+Found 5 plugin(s):
+
+  Name: cover-letter
+    Description: Plugin for Cover Letter documents.
+    Source: Bundled
+    Config: /home/notroot/Build/md-to-pdf/plugins/cover-letter/cover-letter.config.yaml
+  ---
+  Name: cv
+  [...]
+```
+
+This command lists all available plugins and their current status (enabled/disabled).  Useful for tracking down hierarchical snares.
 
 ## Configuration
 

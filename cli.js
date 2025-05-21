@@ -11,6 +11,7 @@ const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
 const HugoExportEach = require('./src/hugo_export_each');
 const { setupWatch } = require('./src/watch_handler');
+const PluginRegistryBuilder = require('./src/PluginRegistryBuilder'); // Added
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -174,7 +175,7 @@ async function main() {
                 .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" }) 
                 .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true})
                 .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false});
-                y.strict(false);
+                y.strict(false); // Allows plugin-specific options
             },
             (args) => commonCommandHandler(args, executeGeneration, 'generate')
         )
@@ -225,7 +226,52 @@ async function main() {
                     process.exit(1);
                 }
             }
+        )
+        .command( // New "plugin" command group
+            "plugin <subcommand>",
+            "Manage plugins.",
+            (pluginYargs) => {
+                pluginYargs.command(
+                    "list",
+                    "List all discoverable plugins.",
+                    // No specific options for 'list' itself beyond global ones
+                    () => {}, 
+                    async (args) => {
+                        try {
+                            console.log("Discovering plugins...");
+                            // Pass global --config and --factory-defaults to the builder
+                            const builder = new PluginRegistryBuilder(
+                                path.resolve(__dirname), // projectRoot for builder
+                                null, // xdgBaseDir (builder will resolve it)
+                                args.config, 
+                                args.factoryDefaults
+                            );
+                            const pluginDetailsList = await builder.getAllPluginDetails();
+
+                            if (pluginDetailsList.length === 0) {
+                                console.log("No plugins found or registered.");
+                                return;
+                            }
+
+                            console.log(`\nFound ${pluginDetailsList.length} plugin(s):\n`);
+                            pluginDetailsList.forEach(plugin => {
+                                console.log(`  Name: ${plugin.name}`);
+                                console.log(`    Description: ${plugin.description}`);
+                                console.log(`    Source: ${plugin.registrationSourceDisplay}`);
+                                console.log(`    Config: ${plugin.configPath}`);
+                                console.log(`  ---`);
+                            });
+                        } catch (error) {
+                            console.error(`ERROR listing plugins: ${error.message}`);
+                            if (error.stack) console.error(error.stack);
+                            process.exit(1);
+                        }
+                    }
+                );
+                // Future "plugin create <name>" could go here
+            }
         );
+
 
     const parsedArgs = await argvBuilder.argv; 
     if (!parsedArgs._[0] && Object.keys(parsedArgs).length <= 2) { 

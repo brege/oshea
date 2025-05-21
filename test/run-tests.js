@@ -20,6 +20,9 @@ const TEST_OUTPUT_BASE_DIR = path.join(TEST_DIR, TEST_OUTPUT_DIR_NAME);
 const HUGO_EXAMPLE_SOURCE_IN_EXAMPLES = path.join(EXAMPLES_DIR, 'hugo-example');
 const HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT = path.join(TEST_OUTPUT_BASE_DIR, 'hugo-example-source');
 
+const CREATED_PLUGINS_SUBDIR = 'created_plugins_test'; // To avoid conflict if user has 'created_plugins'
+const CREATED_PLUGINS_DIR = path.join(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_SUBDIR);
+
 
 // --- Test Cases ---
 const testCases = [
@@ -164,9 +167,115 @@ const testCases = [
             { filePath: 'math-test-document.pdf', minSize: 1000 }, // Adjust minSize if needed
         ],
     },
+    // --- md-to-pdf plugin create Test Cases ---
+    {
+        description: "CLI: plugin create - Basic plugin scaffolding",
+        commandArgs: ['plugin', 'create', 'scaffold-test1', '--dir', CREATED_PLUGINS_DIR],
+        expectedOutputs: [], 
+        postTestChecks: async (testCaseOutputDir, result) => { 
+            if (!result.success) throw new Error(`CLI command failed unexpectedly: ${result.error?.message || 'Unknown error'}`);
+            const pluginDir = path.join(CREATED_PLUGINS_DIR, 'scaffold-test1');
+            if (!fss.existsSync(pluginDir)) throw new Error(`Plugin directory not created: ${pluginDir}`);
+
+            const expectedFiles = [
+                { name: 'scaffold-test1.config.yaml', contains: ["description: \"A new scaffold-test1 plugin for [purpose].\"", "handler_script: \"index.js\"", "css_files:", "- \"scaffold-test1.css\""] },
+                { name: 'index.js', contains: ["class ScaffoldTest1Handler", "constructor(coreUtils)", "new coreUtils.DefaultHandler()"] },
+                { name: 'scaffold-test1.css', contains: ["/* scaffold-test1/scaffold-test1.css */"] }
+            ];
+            for (const file of expectedFiles) {
+                const filePath = path.join(pluginDir, file.name);
+                await checkFile(pluginDir, file.name, 10); 
+                const content = await readFileContent(filePath);
+                for (const str of file.contains) {
+                    if (!content.includes(str)) throw new Error(`File ${file.name} does not contain expected string: "${str}"`);
+                }
+            }
+            if (!result.stdout || !result.stdout.includes("Plugin 'scaffold-test1' created successfully")) {
+                 throw new Error(`Success message not found in stdout. Stdout: ${result.stdout}`);
+            }
+        }
+    },
+    {
+        description: "CLI: plugin create - Error on existing directory without --force",
+        commandArgs: ['plugin', 'create', 'scaffold-test1', '--dir', CREATED_PLUGINS_DIR], 
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (result.success) throw new Error("Command succeeded but should have failed (directory exists).");
+            const stderr = result.stderr || result.error?.stderr || "";
+            if (!stderr.includes("ERROR: Plugin directory") || !stderr.includes("already exists. Use --force to overwrite.")) {
+                throw new Error(`Expected error message about existing directory not found in stderr. Stderr: ${stderr}`);
+            }
+        }
+    },
+    {
+        description: "CLI: plugin create - Overwrite existing directory with --force",
+        commandArgs: ['plugin', 'create', 'scaffold-test1', '--dir', CREATED_PLUGINS_DIR, '--force'],
+        expectedOutputs: [],
+        preTestSetup: async () => {
+            const pluginDir = path.join(CREATED_PLUGINS_DIR, 'scaffold-test1');
+            if (!fss.existsSync(pluginDir)) { 
+                await fs.mkdir(pluginDir, { recursive: true });
+            }
+            await fs.writeFile(path.join(pluginDir, 'dummy.txt'), 'this should ideally be gone or ignored');
+        },
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed unexpectedly with --force: ${result.error?.message}`);
+            const pluginDir = path.join(CREATED_PLUGINS_DIR, 'scaffold-test1');
+            const configFilePath = path.join(pluginDir, 'scaffold-test1.config.yaml');
+            await checkFile(pluginDir, 'scaffold-test1.config.yaml', 10);
+            const content = await readFileContent(configFilePath);
+            if (!content.includes("description: \"A new scaffold-test1 plugin for [purpose].\"")) {
+                throw new Error("Config file content incorrect after --force overwrite.");
+            }
+            if (!result.stdout || !result.stdout.includes("Plugin 'scaffold-test1' created successfully")) {
+                 throw new Error(`Success message not found in stdout for --force. Stdout: ${result.stdout}`);
+            }
+             if (fss.existsSync(path.join(pluginDir, 'dummy.txt'))) {
+                // This is acceptable based on current scaffolder logic (overwrite files, not dir)
+                console.log("  INFO: --force did not remove extraneous 'dummy.txt' file, files were overwritten.");
+            }
+        }
+    },
+    {
+        description: "CLI: plugin create - Invalid plugin name (custom validation)",
+        commandArgs: ['plugin', 'create', 'bad!name', '--dir', CREATED_PLUGINS_DIR], // Using 'bad!name'
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (result.success) throw new Error("Command succeeded but should have failed (invalid name).");
+            const stderr = result.stderr || result.error?.stderr || "";
+            // Check for the error message from plugin_scaffolder.js, matching "bad!name"
+            if (!stderr.includes("ERROR: Invalid plugin name: \"bad!name\". Name must be alphanumeric and can contain hyphens, but not start/end with them.")) {
+                throw new Error(`Expected custom error message about invalid plugin name "bad!name" not found in stderr. Stderr: ${stderr}`);
+            }
+        }
+    },
+    {
+        description: "CLI: plugin create - With a hyphenated name",
+        commandArgs: ['plugin', 'create', 'my-hyphen-plugin', '--dir', CREATED_PLUGINS_DIR],
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed unexpectedly: ${result.error?.message}`);
+            const pluginDir = path.join(CREATED_PLUGINS_DIR, 'my-hyphen-plugin');
+            if (!fss.existsSync(pluginDir)) throw new Error(`Plugin directory not created: ${pluginDir}`);
+            await checkFile(pluginDir, 'my-hyphen-plugin.config.yaml', 10);
+            await checkFile(pluginDir, 'index.js', 10);
+            await checkFile(pluginDir, 'my-hyphen-plugin.css', 10);
+            const indexContent = await readFileContent(path.join(pluginDir, 'index.js'));
+            if (!indexContent.includes("class MyHyphenPluginHandler")) {
+                throw new Error("Generated index.js does not have correctly cased className 'MyHyphenPluginHandler'");
+            }
+        }
+    },
 ];
 
 // --- Helper Functions ---
+async function readFileContent(filePath) {
+    if (!fss.existsSync(filePath)) {
+        throw new Error(`File not found for content check: ${filePath}`);
+    }
+    return fs.readFile(filePath, 'utf8');
+}
+
 async function setupTestDirectory() {
     try {
         if (fss.existsSync(TEST_OUTPUT_BASE_DIR)) {
@@ -175,6 +284,13 @@ async function setupTestDirectory() {
         }
         console.log(`Creating test output directory: ${TEST_OUTPUT_BASE_DIR}`);
         await fs.mkdir(TEST_OUTPUT_BASE_DIR, { recursive: true });
+        // Also ensure the dedicated dir for created plugins is made if tests rely on it existing.
+        // However, plugin_scaffolder.js uses recursive:true, so it can create its base if needed.
+        // For clarity, we can create it here too.
+        if (!fss.existsSync(CREATED_PLUGINS_DIR)) {
+            await fs.mkdir(CREATED_PLUGINS_DIR, {recursive: true});
+        }
+
     } catch (error) {
         console.error(`Error setting up test directory: ${error.message}`);
         throw error;
@@ -197,16 +313,14 @@ async function cleanupTestDirectory(keepOutput = false) {
 }
 
 async function runCliCommand(argsArray) {
-    // Check if the test case's arguments already include a --config option
     const hasCustomConfig = argsArray.some(arg => arg === '--config' || arg.startsWith('--config='));
+    const isPluginCommand = argsArray[0] === 'plugin'; // 'plugin create' should not get default --config
     
     let command = `node "${CLI_SCRIPT_PATH}" ${argsArray.join(' ')}`;
     
-    if (!hasCustomConfig) {
-        // If no --config is in argsArray, append the default test config
+    if (!hasCustomConfig && !isPluginCommand) {
         command += ` --config "${TEST_CONFIG_PATH}"`;
     }
-    // If argsArray already has --config, we don't append the default one.
 
     console.log(`  Executing: ${command}`);
     try {
@@ -214,14 +328,17 @@ async function runCliCommand(argsArray) {
         if (stdout) console.log('  stdout:\n', stdout);
         const stderrContent = stderr && stderr.trim();
         if (stderrContent) {
+            // Log stderr as warning, but don't fail the command *solely* on stderr content
+            // unless execAsync itself throws (which it does for non-zero exit codes).
             console.warn('  stderr:\n', stderr);
         }
         return { success: true, stdout, stderr };
     } catch (error) { 
+        // error object from execAsync contains stdout and stderr properties
         console.error(`  Error executing command (cli.js likely exited with error): ${error.message}`);
         if (error.stdout && error.stdout.trim()) console.error('  stdout (on error):\n', error.stdout);
         if (error.stderr && error.stderr.trim()) console.error('  stderr (on error):\n', error.stderr);
-        return { success: false, error };
+        return { success: false, error, stdout: error.stdout, stderr: error.stderr }; // Pass along stdout/stderr from error
     }
 }
 
@@ -257,6 +374,7 @@ async function runTests() {
 
             if (testCase.preTestSetup) {
                 try {
+                    console.log("  Running pre-test setup...");
                     await testCase.preTestSetup();
                 } catch (setupError) {
                     console.error(`  ERROR during pre-test setup: ${setupError.message}`);
@@ -264,25 +382,55 @@ async function runTests() {
                 }
             }
             
-            if(testCasePassed) {
-                const result = await runCliCommand(testCase.commandArgs);
-                if (!result.success) { 
+            let result = { success: false, stdout: '', stderr: '', error: null };
+            if(testCasePassed) { // Only run command if pre-test setup passed
+                result = await runCliCommand(testCase.commandArgs);
+                if (!result.success && !testCase.postTestChecks) { 
+                    // If command failed AND there's no postTestCheck to validate the failure,
+                    // then it's an unexpected failure.
+                    // If postTestChecks exists, it's responsible for deciding if failure was expected.
                     testCasePassed = false;
-                    // Error details already logged by runCliCommand if execAsync caught an error.
-                    // If stderr had content but success was true (e.g. help text), that's not a failure here.
-                    // A failure is specifically when execAsync throws.
                     console.error(`  RESULT: Command execution failed for: ${testCase.description}`);
-                } else {
-                    for (const expected of testCase.expectedOutputs) {
-                        try {
-                            await checkFile(TEST_OUTPUT_BASE_DIR, expected.filePath, expected.minSize);
-                        } catch (checkError) {
-                            console.error(`  RESULT: FAILED check for ${expected.filePath}: ${checkError.message}`);
-                            testCasePassed = false;
+                } else if (testCase.expectedOutputs && testCase.expectedOutputs.length > 0) {
+                    // This block is for PDF generation tests
+                    if (!result.success) { // If command failed but was expected to produce PDFs
+                        testCasePassed = false;
+                         console.error(`  RESULT: Command failed, cannot check expected PDF outputs for: ${testCase.description}`);
+                    } else {
+                        for (const expected of testCase.expectedOutputs) {
+                            try {
+                                await checkFile(TEST_OUTPUT_BASE_DIR, expected.filePath, expected.minSize);
+                            } catch (checkError) {
+                                console.error(`  RESULT: FAILED PDF check for ${expected.filePath}: ${checkError.message}`);
+                                testCasePassed = false;
+                            }
                         }
                     }
                 }
             }
+
+            if (testCase.postTestChecks) {
+                if (testCasePassed || (!testCasePassed && result.error) ) { // Allow postTestChecks to validate expected failures
+                    try {
+                        console.log("  Running post-test checks...");
+                        await testCase.postTestChecks(TEST_OUTPUT_BASE_DIR, result);
+                         if (result.success && testCase.description.includes("Error on existing") || testCase.description.includes("Invalid plugin name")){
+                            // If an error test somehow passed the command, mark test as failed.
+                            // This happens if result.success was true but postTestChecks expected it to be false
+                            // and didn't throw an error itself. This logic might need refinement based on how
+                            // postTestChecks signals "expected failure verified".
+                            // A simpler way: postTestChecks should throw if an expected failure isn't seen.
+                        }
+                    } catch (postCheckError) {
+                        console.error(`  RESULT: FAILED post-test check: ${postCheckError.message}`);
+                        if(postCheckError.stack) console.error(postCheckError.stack);
+                        testCasePassed = false;
+                    }
+                } else if (!testCasePassed && !result.error){
+                     console.error(`  SKIPPING post-test checks as pre-command steps failed for: ${testCase.description}`);
+                }
+            }
+
 
             if (testCasePassed) {
                 console.log(`  PASSED: ${testCase.description}`);

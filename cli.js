@@ -11,7 +11,8 @@ const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
 const HugoExportEach = require('./src/hugo_export_each');
 const { setupWatch } = require('./src/watch_handler');
-const PluginRegistryBuilder = require('./src/PluginRegistryBuilder'); // Added
+const PluginRegistryBuilder = require('./src/PluginRegistryBuilder');
+const { scaffoldPlugin } = require('./src/plugin_scaffolder'); 
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -227,22 +228,20 @@ async function main() {
                 }
             }
         )
-        .command( // New "plugin" command group
+        .command( 
             "plugin <subcommand>",
             "Manage plugins.",
             (pluginYargs) => {
                 pluginYargs.command(
                     "list",
                     "List all discoverable plugins.",
-                    // No specific options for 'list' itself beyond global ones
                     () => {}, 
                     async (args) => {
                         try {
                             console.log("Discovering plugins...");
-                            // Pass global --config and --factory-defaults to the builder
                             const builder = new PluginRegistryBuilder(
-                                path.resolve(__dirname), // projectRoot for builder
-                                null, // xdgBaseDir (builder will resolve it)
+                                path.resolve(__dirname), 
+                                null, 
                                 args.config, 
                                 args.factoryDefaults
                             );
@@ -267,8 +266,44 @@ async function main() {
                             process.exit(1);
                         }
                     }
-                );
-                // Future "plugin create <name>" could go here
+                )
+                .command( 
+                    "create <pluginName>",
+                    "Create a new plugin boilerplate.",
+                    (y) => {
+                        y.positional("pluginName", {
+                            describe: "Name for the new plugin.",
+                            type: "string"
+                        })
+                        .option("dir", {
+                            describe: "Directory to create the plugin in. Defaults to current directory.",
+                            type: "string",
+                            normalize: true 
+                        })
+                        .option("force", {
+                            describe: "Overwrite existing plugin directory if it exists.",
+                            type: "boolean",
+                            default: false
+                        });
+                    },
+                    async (args) => {
+                        try {
+                            // console.log(`Executing 'plugin create' for: ${args.pluginName}`); // Moved to scaffolder
+                            const success = await scaffoldPlugin(args.pluginName, args.dir, args.force);
+                            if (success) {
+                                // console.log(`Plugin boilerplate for '${args.pluginName}' creation successful.`); // Scaffolder logs this
+                            } else {
+                                // console.error(`Failed to create plugin boilerplate for '${args.pluginName}'.`); // Scaffolder logs this
+                                process.exit(1); // Ensure exit with error code if scaffoldPlugin returns false
+                            }
+                        } catch (error) {
+                            console.error(`ERROR during 'plugin create ${args.pluginName}': ${error.message}`);
+                            if (error.stack) console.error(error.stack);
+                            process.exit(1);
+                        }
+                    }
+                )
+                .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create).");
             }
         );
 

@@ -106,7 +106,9 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     md-to-pdf convert my_doc.md --plugin default --factory-defaults
     ```
 
-**9. List Discoverable Plugins**
+## Plugin Management Commands
+
+**1. List Discoverable Plugins**
 
   * Lists all plugins found via Bundled, XDG, and Project configurations.
   * Shows name, description, registration source, and config file path for each.
@@ -117,9 +119,23 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     md-to-pdf plugin list --factory-defaults
     ```
 
+**2. Create Plugin Boilerplate**
+
+  * Generates a starting structure for a new plugin.
+
+    ```bash
+    md-to-pdf plugin create <your-plugin-name> [--dir <output-directory>] [--force]
+    ```
+    Example:
+    ```bash
+    md-to-pdf plugin create my-invoice --dir ./custom-plugins
+    ```
+    This creates `./custom-plugins/my-invoice/` with `my-invoice.config.yaml`, `index.js`, and `my-invoice.css`.
+    Remember to register the new plugin in a `config.yaml` file afterwards.
+
 ## Config Snippets (`config.yaml`)
 
-**PDF Viewer:**
+### PDF Viewer
 
 ```yaml
 # ~/.config/md-to-pdf/config.yaml OR project's config.yaml
@@ -129,7 +145,7 @@ pdf_viewer: xdg-open # Linux
 # pdf_viewer: firefox # Also an excellent choice
 ```
 
-**Global PDF Options (e.g., Page Size, Margins):**
+### Global PDF Options (e.g., Page Size, Margins)
 
 ```yaml
 # In global_pdf_options:
@@ -138,7 +154,7 @@ margin: { top: "0.75in", bottom: "0.75in", left: "1in", right: "1in" }
 printBackground: true
 ```
 
-**Enabling Math (KaTeX) & Custom Macros:**
+### Enabling Math (KaTeX) & Custom Macros
 
 ```yaml
 math_rendering:
@@ -152,15 +168,17 @@ math_rendering:
       "\\boldvec": "\\mathbf{#1}"
 ```
 
-**Registering a Custom Plugin:**
-(Assuming your plugin `my-notes` is in `~/my_md_plugins/my-notes-plugin/`)
+### Registering a Custom Plugin
+(Assuming your plugin `my-notes`'s config is at `~/my_md_plugins/my-notes-plugin/my-notes.config.yaml`)
 
 ```yaml
 # In ~/.config/md-to-pdf/config.yaml OR project's --config file
 document_type_plugins:
   # Bundled plugin overrides maybe listed here...
   # Custom plugin:
-  my-notes: "~/my_md_plugins/my-notes-plugin/my-notes.config.yaml"
+  my-notes: "~/my_md_plugins/my-notes-plugin/my-notes.config.yaml" 
+  # For a plugin created by `md-to-pdf plugin create my-notes --dir .`
+  # my-notes: "./my-notes/my-notes.config.yaml" # If config is in project root
 ```
 
 ## Markdown & Front Matter Essentials
@@ -201,17 +219,19 @@ md-to-pdf convert examples/example-front-matter.md --plugin default --outdir out
     md-to-pdf convert examples/example-math.md --plugin default --outdir output
     ```
 
-## Plugin Creation Basics
+## Plugin Creation Basics (using `plugin create`)
 
-1.  **Directory Structure** (e.g., for `my-custom-plugin`):
+1.  **Generate Boilerplate**:
+    ```bash
+    md-to-pdf plugin create my-custom-plugin --dir ./path/to/where/plugins_live
     ```
-    my-custom-plugin/
-    ├── my-custom-plugin.config.yaml  # Defines CSS, handler, PDF options
-    ├── index.js                      # Node.js handler logic
-    └── my-custom-plugin.css          # Styles
-    ```
-2.  **Register** in a `config.yaml` (see "Registering a Custom Plugin" above).
-3.  **Invoke**: `md-to-pdf convert my_file.md --plugin my-custom-plugin`
+    This creates `my-custom-plugin/` containing:
+    * `my-custom-plugin.config.yaml`
+    * `index.js` (handler expecting `coreUtils` in constructor)
+    * `my-custom-plugin.css`
+2.  **Customize**: Edit the generated files. The `index.js` handler will already be set up to use `DefaultHandler` via dependency injection.
+3.  **Register**: Add your plugin to a `config.yaml` (see "[Registering a Custom Plugin](#registering-a-custom-plugin)" above).
+4.  **Invoke**: `md-to-pdf convert my_file.md --plugin my-custom-plugin`
 
 ## Configuration Layers
 
@@ -225,7 +245,7 @@ Overrides apply in this order (highest wins):
 
   * **CSS Not Working?** Check paths in `css_files` (relative to the `*.config.yaml` they are in). Is `inherit_css: false` in an override, replacing all prior CSS?
   * **Math Issues?** Ensure `math_rendering.enabled: true`. Check delimiters and LaTeX syntax.
-  * **Plugin Unknown?** Verify registration in `document_type_plugins` and path correctness. Use `md-to-pdf plugin list` (once implemented).
+  * **Plugin Unknown?** Verify registration in `document_type_plugins` and path correctness. Use `md-to-pdf plugin list`.
 
 ---
 

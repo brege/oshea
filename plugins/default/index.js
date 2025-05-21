@@ -1,16 +1,11 @@
 // plugins/default/index.js
-const path = require('path');
-
-// Resolve the path to src/default_handler.js relative to the current file
-// current file: project_root/plugins/default/index.js
-// target file: project_root/src/default_handler.js
-const DefaultHandler = require(path.resolve(__dirname, '../../src/default_handler.js'));
+// No direct require for DefaultHandler or other core utilities needed here
 
 class PluginDefaultHandler {
-    constructor() {
+    constructor(coreUtils) { // coreUtils will be injected by PluginManager
         // This class acts as the standardized entry point for this specific plugin type.
-        // The actual reusable Markdown processing logic resides in src/default_handler.js
-        this.handler = new DefaultHandler();
+        // The actual reusable Markdown processing logic resides in DefaultHandler.
+        this.handler = new coreUtils.DefaultHandler();
     }
 
     /**

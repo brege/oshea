@@ -1,14 +1,8 @@
 // plugins/cover-letter/index.js
-const path = require('path');
-
-// Resolve the path to src/default_handler.js relative to the current file
-const DefaultHandler = require(path.resolve(__dirname, '../../src/default_handler.js'));
 
 class PluginCoverLetterHandler {
-    constructor() {
-        // This class acts as the standardized entry point for the Cover Letter plugin type.
-        // The actual reusable Markdown processing logic resides in src/default_handler.js
-        this.handler = new DefaultHandler();
+    constructor(coreUtils) { // coreUtils will be injected by PluginManager
+        this.handler = new coreUtils.DefaultHandler();
     }
 
     /**
@@ -22,10 +16,8 @@ class PluginCoverLetterHandler {
      * @returns {Promise<string>} The absolute path to the generated PDF file.
      */
     async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
-        // Simply delegate to the common DefaultHandler's generate method
         return this.handler.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath);
     }
 }
 
-// Export the class for PluginManager to instantiate
 module.exports = PluginCoverLetterHandler;

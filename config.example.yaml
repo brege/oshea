@@ -40,6 +40,22 @@ global_remove_shortcodes:
   - "" # Example: Removes HTML comments # - "\\[some_shortcode\\].*?\\[/some_shortcode\\]" # Example: A custom shortcode pair (regex needs careful escaping)
   # - "{{%.*?%}}" # Example: Remove Hugo-like shortcodes (use with caution)
 
+# --- Math Rendering Settings ---
+# Configuration for LaTeX-style math rendering.
+math_rendering:
+  enabled: true # Set to true to enable math rendering, false to disable.
+  engine: "katex" # Currently, "katex" is the only supported engine.
+  # Options to pass directly to the KaTeX library.
+  # See https://katex.org/docs/options.html for all available options.
+  katex_options:
+    throwOnError: false # Recommended: false (renders faulty math as LaTeX source)
+                        # true (throws an error and stops processing)
+    # Example: Define custom macros
+    # macros:
+    #   "\\RR": "\\mathbb{R}"
+    #   "\\boldvec": "\\mathbf{#1}"
+    # colorIsTextColor: true # If you want \color to behave like LaTeX's \textcolor
+
 # --- Document Type Specific Configurations (Old Style - DEPRECATED) ---
 # The 'document_types' section is now deprecated for types managed by the plugin system.
 # It might be removed entirely in future versions or used only for truly exceptional, non-plugin cases.

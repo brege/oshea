@@ -9,15 +9,13 @@ const {
     renderMarkdownToHtml,
     generateSlug,
     ensureAndPreprocessHeading,
-    // We might not need getTypeConfig here if pluginSpecificConfig is rich enough
 } = require('./markdown_utils');
 
 const { generatePdf } = require('./pdf_generator');
+const mathIntegration = require('./math_integration'); // Added for Step 0
 
-// Helper functions from original DocumentProcessor (resolvePath, substitutePlaceholdersInString, substituteAllPlaceholders)
-// These should be kept or moved to markdown_utils if they are generic enough.
-// For now, let's assume they are part of this default_handler's scope or imported.
-
+// Helper functions (resolvePath, substitutePlaceholdersInString, substituteAllPlaceholders)
+// ... (these functions remain unchanged)
 /**
  * Resolves a dot-separated path string against an object.
  * Case-insensitive for the first key, case-sensitive for subsequent keys.
@@ -111,7 +109,6 @@ function substituteAllPlaceholders(mainContent, initialFrontMatterData) {
     return { processedFmData: processingContext, processedContent: processedMainContent };
 }
 
-
 class DefaultHandler {
     /**
      * Default processing logic for Markdown files.
@@ -156,7 +153,7 @@ class DefaultHandler {
             let dateStrForFilename = '';
             const dateValueFromFM = resolvePath(processedFmData, 'date');
              if (dateValueFromFM) {
-                if (dateValueFromFM === processedFmData.CurrentDateISO) { // Check against resolved dynamic date
+                if (dateValueFromFM === processedFmData.CurrentDateISO) {
                     dateStrForFilename = processedFmData.CurrentDateISO;
                 } else if (typeof dateValueFromFM === 'string') {
                     const match = dateValueFromFM.match(/^\d{4}-\d{2}-\d{2}/);
@@ -188,12 +185,10 @@ class DefaultHandler {
              console.warn(`WARN: Document "${markdownFilePath}" does not appear to have an H1 title.`);
         }
 
-
-        // Merge PDF options: global -> plugin-specific
         const mergedPdfOptions = {
             ...(globalConfig.global_pdf_options || {}),
             ...(pluginSpecificConfig.pdf_options || {}),
-            margin: { // Deep merge margins
+            margin: { 
                 ...((globalConfig.global_pdf_options || {}).margin || {}),
                 ...((pluginSpecificConfig.pdf_options || {}).margin || {}),
             }
@@ -202,13 +197,21 @@ class DefaultHandler {
         const htmlBodyContent = renderMarkdownToHtml(
             markdownToRender,
             pluginSpecificConfig.toc_options,
-            mergedPdfOptions.anchor_options 
+            mergedPdfOptions.anchor_options,
+            pluginSpecificConfig.math_rendering 
         );
 
         const cssFileContentsArray = [];
-        const cssFiles = pluginSpecificConfig.css_files || [];
-        for (const cssFileName of cssFiles) {
-            // CSS files are resolved relative to the plugin's base path
+        // Add math CSS first (if any, via stub in Step 0)
+        if (pluginSpecificConfig.math_rendering && pluginSpecificConfig.math_rendering.enabled) {
+            const mathCssStrings = await mathIntegration.getMathCssContent(pluginSpecificConfig.math_rendering);
+            if (mathCssStrings && mathCssStrings.length > 0) {
+                cssFileContentsArray.unshift(...mathCssStrings); // Prepend math CSS
+            }
+        }
+
+        const pluginCssFiles = pluginSpecificConfig.css_files || [];
+        for (const cssFileName of pluginCssFiles) {
             const cssFilePath = path.resolve(pluginBasePath, cssFileName);
             if (fss.existsSync(cssFilePath)) {
                 cssFileContentsArray.push(await fs.readFile(cssFilePath, 'utf8'));
@@ -216,13 +219,21 @@ class DefaultHandler {
                 console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'})`);
             }
         }
-        if (cssFileContentsArray.length === 0 && cssFiles.length > 0) {
-            const allAbsolute = cssFiles.every(f => path.isAbsolute(f));
-            let hint = `Check paths relative to ${pluginBasePath}.`;
-            if (allAbsolute) {
-                hint = `Ensure the absolute paths specified exist and are readable: ${cssFiles.join(', ')}`;
+        if (cssFileContentsArray.length === 0 && (pluginCssFiles.length > 0 || (pluginSpecificConfig.math_rendering && pluginSpecificConfig.math_rendering.enabled))) {
+            // Adjusted warning condition slightly
+            let warningMsg = `WARN: No CSS files were actually loaded by the handler.`;
+            if (pluginCssFiles.length > 0) {
+                const allAbsolute = pluginCssFiles.every(f => path.isAbsolute(f));
+                let hint = `Check plugin CSS paths relative to ${pluginBasePath}.`;
+                if (allAbsolute) {
+                    hint = `Ensure the absolute plugin CSS paths specified exist and are readable: ${pluginCssFiles.join(', ')}`;
+                }
+                warningMsg += ` Plugin CSS files specified: ${pluginCssFiles.join(', ')}. ${hint}`;
             }
-            console.warn(`WARN: No CSS files were actually loaded by the handler, though some were specified. ${hint}`);
+            if (pluginSpecificConfig.math_rendering && pluginSpecificConfig.math_rendering.enabled) {
+                warningMsg += ` Math rendering was enabled, but its CSS might also be missing.`;
+            }
+            console.warn(warningMsg);
         }
 
         await generatePdf(

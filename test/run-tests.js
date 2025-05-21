@@ -133,6 +133,23 @@ const testCases = [
             console.log(`  Using project override config: ${testAssetConfigPath}`);
         }
     },
+    { 
+        description: "Custom Plugin: Convert business card example using 'business-card' plugin",
+        commandArgs: [
+            'convert',
+            path.join(TEST_DIR, 'assets', 'example-business-card.md'), // Path to the new example markdown
+            '--plugin', 'business-card',
+            // Uses the default TEST_CONFIG_PATH (test/config.test.yaml) which now registers 'business-card'
+            '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--filename', 'test-business-card.pdf',
+            '--no-open',
+        ],
+        expectedOutputs: [
+            // Business cards are small, so minSize can be lower. Adjust if needed.
+            { filePath: 'test-business-card.pdf', minSize: 500 },
+        ],
+        // No preTestSetup needed as files are part of the source tree
+    },
 ];
 
 // --- Helper Functions ---

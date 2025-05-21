@@ -1,0 +1,17 @@
+# test/custom_plugins/business-card/business-card.config.yaml
+description: "A simple business card plugin for testing."
+handler_script: "index.js"
+css_files:
+  - "business-card.css"
+pdf_options:
+  width: "3.5in"
+  height: "2in"
+  margin:
+    top: "0.1in"
+    bottom: "0.1in"
+    left: "0.1in"
+    right: "0.1in"
+# Ensure printBackground is true if your CSS uses background colors/images
+  printBackground: true
+# Optional: Add inject_fm_title_as_h1: false if title isn't meant to be a heading
+# inject_fm_title_as_h1: false

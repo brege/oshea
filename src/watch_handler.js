@@ -1,61 +1,112 @@
 // src/watch_handler.js
 const path = require('path');
 const fsp = require('fs').promises;
-const fs = require('fs'); 
+const fs = require('fs');
 const chokidar = require('chokidar');
 const ConfigResolver = require('./ConfigResolver');
 
-async function setupWatch(args, configResolverForInitialPaths, commandExecutor) { // **** MODIFIED SIGNATURE ****
+async function setupWatch(args, configResolverForInitialPaths, commandExecutor) {
     let isProcessing = false;
     let needsRebuild = false;
     let watcher = null;
-    let watchedPaths = []; 
+    let watchedPaths = [];
 
-    const collectWatchablePaths = async (currentConfigResolver, currentArgs) => { // **** MODIFIED SIGNATURE ****
+    const collectWatchablePaths = async (currentConfigResolver, currentArgs) => {
         const files = new Set();
-        // Use the passed configResolver
-        const configResolver = currentConfigResolver; 
+        const configResolver = currentConfigResolver;
 
         try {
             const effectiveConfig = await configResolver.getEffectiveConfig(currentArgs.plugin || currentArgs.pluginName);
+            const pluginSpecificConfig = effectiveConfig.pluginSpecificConfig;
+            const pluginBasePath = effectiveConfig.pluginBasePath;
 
             if (currentArgs.markdownFile && fs.existsSync(currentArgs.markdownFile)) {
                 files.add(path.resolve(currentArgs.markdownFile));
             }
 
-            if ((currentArgs.plugin || currentArgs.pluginName) === 'recipe-book' && currentArgs.recipesBaseDir) {
-                const recipesBaseDir = path.resolve(currentArgs.recipesBaseDir);
-                if (fs.existsSync(recipesBaseDir)) {
-                    files.add(recipesBaseDir); 
-                    try {
-                        const dirents = await fsp.readdir(recipesBaseDir, { withFileTypes: true });
-                        for (const dirent of dirents) {
-                            const fullSubPath = path.join(recipesBaseDir, dirent.name);
-                            if (dirent.isDirectory()) {
-                                files.add(fullSubPath); 
-                                const potentialIndexFile = path.join(fullSubPath, 'index.md');
-                                if (fs.existsSync(potentialIndexFile)) {
-                                    files.add(potentialIndexFile);
-                                }
-                            } else if (dirent.isFile() && dirent.name.endsWith('.md')) {
-                                files.add(fullSubPath);
+            // Add plugin-declared watch_sources
+            if (pluginSpecificConfig && Array.isArray(pluginSpecificConfig.watch_sources)) {
+                for (const sourceEntry of pluginSpecificConfig.watch_sources) {
+                    if (!sourceEntry || typeof sourceEntry !== 'object') {
+                        console.warn(`WARN (watcher): Invalid entry in watch_sources for plugin '${currentArgs.plugin || currentArgs.pluginName}'. Skipping.`);
+                        continue;
+                    }
+
+                    let resolvedPathToAdd = null;
+
+                    if (sourceEntry.path_from_cli_arg && typeof sourceEntry.path_from_cli_arg === 'string') {
+                        const cliValue = currentArgs[sourceEntry.path_from_cli_arg];
+                        if (cliValue && typeof cliValue === 'string') {
+                            resolvedPathToAdd = path.resolve(cliValue);
+                        } else {
+                            console.warn(`WARN (watcher): CLI argument '${sourceEntry.path_from_cli_arg}' not found or invalid for watch_sources in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`);
+                        }
+                    } else if (sourceEntry.path && typeof sourceEntry.path === 'string') {
+                        // Placeholder substitution for paths like "{{ cliArgs.someDir }}/data.json"
+                        let pathValue = sourceEntry.path;
+                        const placeholderRegex = /\{\{\s*cliArgs\.([\w-]+)\s*\}\}/g;
+                        let match;
+                        while ((match = placeholderRegex.exec(pathValue)) !== null) {
+                            const argName = match[1];
+                            if (currentArgs[argName] !== undefined) {
+                                pathValue = pathValue.replace(match[0], currentArgs[argName]);
+                            } else {
+                                console.warn(`WARN (watcher): CLI argument '${argName}' in placeholder not found for watch_sources path '${sourceEntry.path}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`);
                             }
                         }
-                    } catch (e) {
-                        console.warn(`WARN (watcher): Could not list recipe-book source directory: ${e.message}`);
+                        resolvedPathToAdd = path.resolve(pluginBasePath, pathValue);
+                    } else if (sourceEntry.type === 'glob' && sourceEntry.pattern && typeof sourceEntry.pattern === 'string') {
+                        let globPattern = sourceEntry.pattern;
+                        let globBase = pluginBasePath; // Default base path
+
+                        if (sourceEntry.base_path_from_cli_arg && currentArgs[sourceEntry.base_path_from_cli_arg]) {
+                            globBase = path.resolve(currentArgs[sourceEntry.base_path_from_cli_arg]);
+                        }
+                        
+                        // Placeholder substitution for glob patterns and base paths
+                        const placeholderRegex = /\{\{\s*cliArgs\.([\w-]+)\s*\}\}/g;
+                        let match;
+                        while ((match = placeholderRegex.exec(globPattern)) !== null) {
+                            const argName = match[1];
+                            if (currentArgs[argName] !== undefined) {
+                                globPattern = globPattern.replace(match[0], currentArgs[argName]);
+                            } else {
+                                console.warn(`WARN (watcher): CLI argument '${argName}' in placeholder not found for watch_sources glob pattern '${sourceEntry.pattern}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`);
+                            }
+                        }
+                        // Note: globBase itself could also contain placeholders if we decide to support that,
+                        // but the proposal focuses placeholders within 'path' or 'pattern'.
+
+                        if (path.isAbsolute(globPattern)) {
+                            resolvedPathToAdd = globPattern;
+                        } else {
+                            resolvedPathToAdd = path.join(globBase, globPattern);
+                        }
+                    }
+
+
+                    if (resolvedPathToAdd) {
+                        if (sourceEntry.type !== 'glob' && !fs.existsSync(resolvedPathToAdd)) {
+                            console.warn(`WARN (watcher): Declared watch path does not exist: ${resolvedPathToAdd} (from plugin '${currentArgs.plugin || currentArgs.pluginName}')`);
+                        } else {
+                            files.add(resolvedPathToAdd);
+                            console.log(`INFO (watcher): Added to watch list from plugin '${currentArgs.plugin || currentArgs.pluginName}': ${resolvedPathToAdd}`);
+                        }
+                    } else if (sourceEntry.type !== 'glob') {
+                        console.warn(`WARN (watcher): Could not resolve path for a watch_sources entry in plugin '${currentArgs.plugin || currentArgs.pluginName}': ${JSON.stringify(sourceEntry)}`);
                     }
                 }
             }
 
-            const configSources = configResolver.getConfigFileSources(); 
-            
+            const configSources = configResolver.getConfigFileSources();
+
             if (configSources.mainConfigPath && fs.existsSync(configSources.mainConfigPath)) {
                 files.add(configSources.mainConfigPath);
             }
             configSources.pluginConfigPaths.forEach(p => {
                 if (p && fs.existsSync(p)) files.add(p);
             });
-            configSources.cssFiles.forEach(cssPath => { 
+            configSources.cssFiles.forEach(cssPath => {
                 if (fs.existsSync(cssPath)) files.add(cssPath);
             });
 
@@ -68,13 +119,11 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
             if (currentArgs.markdownFile && fs.existsSync(currentArgs.markdownFile)) {
                 files.add(path.resolve(currentArgs.markdownFile));
             }
-            if (currentArgs.config && fs.existsSync(currentArgs.config)) { 
-                 files.add(path.resolve(currentArgs.config));
+            if (currentArgs.config && fs.existsSync(currentArgs.config)) {
+                files.add(path.resolve(currentArgs.config));
             }
         }
-        
-        // Add tool's own default config.yaml and XDG global config.yaml from the resolver instance itself
-        // These are fixed paths known by the resolver, not dependent on getEffectiveConfig result for *their own paths*
+
         if (configResolver.defaultMainConfigPath && fs.existsSync(configResolver.defaultMainConfigPath)) {
             files.add(configResolver.defaultMainConfigPath);
         }
@@ -95,19 +144,15 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
         console.log(`\nDetected ${event} in: ${filePathTrigger}. Rebuilding...`);
 
         try {
-            // commandExecutor (the async wrapper from cli.js) handles creating a new ConfigResolver
-            // and calling executeConversion/Generation
-            await commandExecutor(args); 
+            await commandExecutor(args);
 
-            // After a successful build, re-evaluate paths to watch
-            // Create a new ConfigResolver for the current state of args.config
-            const newConfigResolverForPaths = new ConfigResolver(args.config);
-            const newWatchedPaths = await collectWatchablePaths(newConfigResolverForPaths, args); // **** PASS RESOLVER ****
+            const newConfigResolverForPaths = new ConfigResolver(args.config, args.factoryDefaults);
+            const newWatchedPaths = await collectWatchablePaths(newConfigResolverForPaths, args);
 
             const pathsToAdd = newWatchedPaths.filter(p => !watchedPaths.includes(p));
             const pathsToRemove = watchedPaths.filter(p => !newWatchedPaths.includes(p));
 
-            if (watcher) { 
+            if (watcher) {
                 if (pathsToRemove.length > 0) {
                     watcher.unwatch(pathsToRemove);
                 }
@@ -135,16 +180,16 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
                     } else {
                         needsRebuild = true;
                     }
-                }, 250); 
+                }, 250);
             } else {
                 console.log("Watching for further changes...");
             }
         }
     };
-   
+
     try {
-        // Use the configResolverForInitialPaths passed from cli.js for the first collection
-        watchedPaths = await collectWatchablePaths(configResolverForInitialPaths, args); // **** PASS RESOLVER ****
+        const initialConfigResolver = new ConfigResolver(args.config, args.factoryDefaults);
+        watchedPaths = await collectWatchablePaths(initialConfigResolver, args);
     } catch (e) {
         console.error(`ERROR: Failed to collect initial paths for watcher: ${e.message}`);
         watchedPaths = [];
@@ -156,8 +201,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
     if (watchedPaths.length === 0) {
         console.warn("WARN: Watch mode activated, but no files could be identified to watch. Executing command once.");
         try {
-            // commandExecutor from cli.js takes (args) and handles ConfigResolver internally
-            await commandExecutor(args); 
+            await commandExecutor(args);
         } catch(e) {
             console.error(`ERROR during single execution in watch mode (no files watched): ${e.message}`);
         }
@@ -167,12 +211,12 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
     console.log("\nWatch mode active. Initially monitoring:");
     watchedPaths.forEach(f => console.log(`  - ${f}`));
     console.log("Press Ctrl+C to exit.");
-    
+
     watcher = chokidar.watch(watchedPaths, {
         persistent: true,
         ignoreInitial: true,
         awaitWriteFinish: {
-           stabilityThreshold: 300, 
+           stabilityThreshold: 300,
            pollInterval: 100
         }
     });
@@ -187,8 +231,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
 
     try {
         console.log("Performing initial build for watch mode...");
-        // commandExecutor from cli.js takes (args) and handles ConfigResolver internally
-        await commandExecutor(args); 
+        await commandExecutor(args);
     } catch (e) {
         console.error(`ERROR during initial build in watch mode: ${e.message}`);
     }

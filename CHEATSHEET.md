@@ -117,7 +117,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     md-to-pdf plugin list --factory-defaults
     ```
 
-## Key Configuration Snippets (`config.yaml`)
+## Config Snippets (`config.yaml`)
 
 **PDF Viewer:**
 

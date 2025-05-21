@@ -28,7 +28,6 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptionsFromConfig,
     try {
         const combinedCss = cssFileContentsArray.join('\n\n/* --- Next CSS File --- */\n\n');
 
-        // Use the PDF filename (without extension) as the default HTML document title.
         const documentTitle = path.basename(outputPdfPath, '.pdf');
 
         const fullHtmlPage = `
@@ -46,52 +45,45 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptionsFromConfig,
         </body>
         </html>`;
 
-        // For debugging: uncomment to save the HTML sent to Puppeteer.
-        // const debugHtmlPath = outputPdfPath.replace(/\.pdf$/, '_debug_page.html');
-        // fs.writeFileSync(debugHtmlPath, fullHtmlPage, 'utf8');
-        // console.log(`DEBUG: Full HTML page for PDF generation saved to: ${debugHtmlPath}`);
-
         browser = await puppeteer.launch({
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--font-render-hinting=none', // Can improve font rendering consistency across platforms. 
-                // '--disable-dev-shm-usage', // Often useful in constrained CI/Docker environments. 
+                '--font-render-hinting=none',
             ],
-            // headless: "new", // Uncomment for the new headless mode if issues arise with the default. 
         });
 
         const page = await browser.newPage();
 
         await page.setContent(fullHtmlPage, {
-            waitUntil: 'networkidle0', // Waits until network connections are idle. 
+            waitUntil: 'networkidle0', 
         });
 
-        // Start with all options from the resolved configuration
         const puppeteerPdfOptions = { ...pdfOptionsFromConfig };
-
-        // Explicitly set the output path
         puppeteerPdfOptions.path = outputPdfPath;
 
-        // Apply defaults for core Puppeteer options if they were not present in pdfOptionsFromConfig
-        if (puppeteerPdfOptions.format === undefined) {
-            puppeteerPdfOptions.format = 'A4'; // Default format
+        // If specific width or height are provided by the plugin, ensure 'format' is removed
+        // to prioritize explicit dimensions over a standard page format.
+        if (puppeteerPdfOptions.width || puppeteerPdfOptions.height) {
+            delete puppeteerPdfOptions.format;
+        }
+
+        // Apply defaults for core Puppeteer options if they were not present
+        if (!puppeteerPdfOptions.width && !puppeteerPdfOptions.height && puppeteerPdfOptions.format === undefined) {
+            puppeteerPdfOptions.format = 'A4'; 
         }
         if (puppeteerPdfOptions.printBackground === undefined) {
-            puppeteerPdfOptions.printBackground = true; // Default printBackground
+            puppeteerPdfOptions.printBackground = true; 
         }
         if (puppeteerPdfOptions.margin === undefined) {
-            puppeteerPdfOptions.margin = { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' }; // Default margins
+            puppeteerPdfOptions.margin = { top: '1cm', right: '1cm', bottom: '1cm', left: '1cm' };
         }
-        // Other options like 'landscape', 'width', 'height', 'scale', etc.,
-        // if present in pdfOptionsFromConfig, will be passed through due to the spread operator.
-
+        
         await page.pdf(puppeteerPdfOptions);
 
     } catch (error) {
-        // Augment error with context for better diagnostics.
         const errorMessage = `Error during PDF generation for "${outputPdfPath}": ${error.message}`;
-        console.error(errorMessage, error.stack); // Log stack for easier debugging.
+        console.error(errorMessage, error.stack);
         throw new Error(errorMessage);
     } finally {
         if (browser) {

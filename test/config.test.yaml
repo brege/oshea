@@ -18,13 +18,16 @@ global_remove_shortcodes:
 
 # --- Document Type Plugin Registrations ---
 # Paths are relative to this main config file's location (the 'test/' directory).
-# They should point to the actual plugin config files in the project's 'plugins/' directory.
+# They should point to the actual plugin config files in the project's 'plugins/' directory
+# or the custom test plugins directory.
 document_type_plugins:
   default: "../plugins/default/default.config.yaml"
   cv: "../plugins/cv/cv.config.yaml"
   cover-letter: "../plugins/cover-letter/cover-letter.config.yaml"
   recipe: "../plugins/recipe/recipe.config.yaml" 
   recipe-book: "../plugins/recipe-book/recipe-book.config.yaml"
+  # Register the new custom business-card plugin for testing user-defined plugins
+  business-card: "./custom_plugins/business-card/business-card.config.yaml" # Path relative to test/config.test.yaml
 
 # --- Document Type Specific Configurations (OLD STYLE - DEPRECATED) ---
 document_types: {}

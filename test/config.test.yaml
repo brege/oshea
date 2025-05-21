@@ -16,6 +16,16 @@ global_pdf_options:
 global_remove_shortcodes:
   - "" 
 
+# --- Math Rendering Settings for Tests ---
+math_rendering:
+  enabled: true # Enable math rendering for tests
+  engine: "katex"
+  katex_options:
+    throwOnError: false # Don't stop tests for a single KaTeX error
+    trust: false        # Ensure security with untrusted content
+    macros: # Example if tests needed specific macros
+      "\\RR": "\\mathbb{R}"
+
 # --- Document Type Plugin Registrations ---
 # Paths are relative to this main config file's location (the 'test/' directory).
 # They should point to the actual plugin config files in the project's 'plugins/' directory

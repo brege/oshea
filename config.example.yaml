@@ -1,132 +1,68 @@
 # config.example.yaml
-# Example configuration for md-to-pdf v0.2.0+
-# This file demonstrates how to set up global options and register document type plugins.
+# Main configuration for md-to-pdf.
 
 # --- Global Settings ---
 
-# pdf_viewer: Command to open PDFs after generation.
-# Examples: "firefox", "evince", "open -a Preview" (for macOS), "start msedge" (for Windows).
-# Set to null or remove/comment out this line to disable auto-opening.
-pdf_viewer: null
+# pdf_viewer: Command to open PDFs after generation (e.g., "xdg-open", "evince", "firefox").
+# Set to null or comment out to disable auto-opening.
+pdf_viewer: xdg-open # null
 
-# global_pdf_options: Default Puppeteer PDF options applied to all document types
-# unless overridden by a specific plugin's configuration.
-# Refer to Puppeteer documentation for all available options:
-# https://pptr.dev/api/puppeteer.pdfoptions
+# global_pdf_options: Default Puppeteer PDF options.
+# See https://pptr.dev/api/puppeteer.pdfoptions for all available options.
 global_pdf_options:
   format: "Letter" # Common paper sizes: Letter, Legal, A3, A4, A5, etc.
-  printBackground: true # Whether to print background graphics (colors, images).
-  margin: # Default page margins. Can be a string (e.g. "1in") or an object.
-          # Units can be: px, in, cm, mm.
+  printBackground: true # Print background graphics.
+  margin: # Page margins (units: px, in, cm, mm).
     top: "1in"
     right: "1in"
     bottom: "1in"
     left: "1in"
   # displayHeaderFooter: false # Set to true to enable header/footer.
-  # headerTemplate: "<div>Header: Page <span class='pageNumber'></span> of <span class='totalPages'></span></div>" # HTML template for the print header.
-                                # Special classes for pagination: pageNumber, totalPages.
-                                # Placeholders like {{ .title }} or {{ .CurrentDateFormatted }} from front matter can be used.
-  # footerTemplate: "<div>Footer: {{ .author }} - {{ .CurrentDateISO }}</div>" # HTML template for the print footer.
-  # preferCSSPageSize: false # If true, uses @page size declarations from CSS to control page dimensions.
-  # anchor_options: # Options for markdown-it-anchor (used for generating heading IDs)
-  #   level: [1, 2, 3, 4, 5, 6] # Which heading levels to add anchors to.
-  #   permalink: false          # Set to true or an object to add permalink symbols next to headings.
-                                # e.g., permalink: anchorPlugin.permalink.headerLink()
+  # headerTemplate: "<div>Header: Page <span class='pageNumber'></span> of <span class='totalPages'></span></div>"
+  # footerTemplate: "<div>Footer: {{ .author }} - {{ .CurrentDateISO }}</div>"
+  # anchor_options: # Options for markdown-it-anchor.
+  #   level: [1, 2, 3, 4, 5, 6]
+  #   permalink: false
 
-# global_remove_shortcodes: An array of regular expression patterns (as strings)
-# to remove content globally from all documents *before* Markdown rendering.
-# Useful for stripping out CMS-specific shortcodes, comments, or other unwanted markup.
+# global_remove_shortcodes: Array of regex patterns (strings) to remove content globally.
 global_remove_shortcodes:
-  - "" # Example: Removes HTML comments # - "\\[some_shortcode\\].*?\\[/some_shortcode\\]" # Example: A custom shortcode pair (regex needs careful escaping)
-  # - "{{%.*?%}}" # Example: Remove Hugo-like shortcodes (use with caution)
+  - "" # Example: "" to remove HTML comments.
 
-# --- Math Rendering Settings ---
-# Configuration for LaTeX-style math rendering.
+# --- Math Rendering Settings (KaTeX) ---
 math_rendering:
-  enabled: true # Set to true to enable math rendering, false to disable.
-  engine: "katex" # Currently, "katex" is the only supported engine.
-  # Options to pass directly to the KaTeX library.
-  # See https://katex.org/docs/options.html for all available options.
+  enabled: true     # true to enable math rendering, false to disable.
+  engine: "katex"   # Currently only "katex" is supported.
+  # Options for KaTeX: https://katex.org/docs/options.html
   katex_options:
-    throwOnError: false # Recommended: false (renders faulty math as LaTeX source)
-                        # true (throws an error and stops processing)
-    # Example: Define custom macros
-    # macros:
+    throwOnError: false # false: renders errors as LaTeX source; true: throws error.
+    trust: false        # SECURITY: false is recommended. Set to true only if Markdown source is fully trusted.
+    # macros:           # Define custom LaTeX macros.
     #   "\\RR": "\\mathbb{R}"
     #   "\\boldvec": "\\mathbf{#1}"
-    # colorIsTextColor: true # If you want \color to behave like LaTeX's \textcolor
-
-# --- Document Type Specific Configurations (Old Style - DEPRECATED) ---
-# The 'document_types' section is now deprecated for types managed by the plugin system.
-# It might be removed entirely in future versions or used only for truly exceptional, non-plugin cases.
-# All primary document types (default, cv, recipe, etc.) are now configured via the plugin system below.
-document_types: {}
-  # Example of a legacy type (if any were to remain temporarily, which is not the case for built-ins now):
-  # some_legacy_type_not_yet_a_plugin:
-  #   description: "A type still using the old direct configuration method."
-  #   css_files: ["path/to/legacy.css"] # Path would be relative to project root 'css/' dir if following old pattern
-  #   pdf_options: { format: "A3" }
-
 
 # --- Document Type Plugin Registrations ---
-# This section is the new way to define and enable document types.
-# It maps a "plugin name" (which you'd use with `md-to-pdf convert --plugin <pluginName>`
-# or `md-to-pdf generate <pluginName>`) to the path of that plugin's specific
-# configuration file.
-# Paths to plugin configuration files should be relative to this main config.yaml file's location (project root).
+# Maps a "plugin name" (used with --plugin) to its configuration file path.
+# Paths are relative to this main config.yaml file's location.
 document_type_plugins:
-  # 'default' is a good fallback plugin for generic Markdown files.
-  # Its configuration (CSS, PDF options, handler) is in plugins/default/default.config.yaml
   default: "plugins/default/default.config.yaml"
-
-  # Curriculum Vitae plugin:
   cv: "plugins/cv/cv.config.yaml"
-
-  # Cover Letter plugin:
   cover-letter: "plugins/cover-letter/cover-letter.config.yaml"
-
-  # Single Recipe plugin:
   recipe: "plugins/recipe/recipe.config.yaml"
-
-  # Recipe Book plugin (typically invoked via `md-to-pdf generate recipe-book --recipes-base-dir ...`):
   recipe-book: "plugins/recipe-book/recipe-book.config.yaml"
-
-  # Example for adding a new custom plugin (if you create one):
-  # my-custom-report: "path/to/my/custom-plugins/report/report.config.yaml"
-
+  # Example for a custom plugin:
+  # my-custom-plugin: "path/to/my/custom-plugins/my-plugin/my-plugin.config.yaml"
 
 # --- Hugo Export Each Command Specific Configuration ---
-# Settings for the 'hugo-export-each' command. This command is a specialized utility
-# and not a document type plugin itself, but it uses a base plugin for styling.
 hugo_export_each:
-  # You can define multiple "rulesets" here.
-  # The --hugo-ruleset CLI option selects which one to use.
-  default_rules: # A default ruleset
-    # Regex to extract author name(s) from the *body content* of Hugo Markdown files.
-    # The first capture group is used for the author slug in the PDF filename.
-    # Example: Matches "Chef: John Doe" or "**Chefs**: Jane Doe, Jim Raynor"
+  # Define rulesets for the 'hugo-export-each' command.
+  default_rules:
+    # Regex to extract author from Markdown body for PDF filename. First capture group is used.
     author_extraction_regex: "^[ \\t]*\\**(?:Chef|Chefs):\\s*\\**([^\\*<\\n\\r]+)"
-
-    # Optional regex to check if the matched author line implies a list (e.g., starts with "Chefs:").
-    # If it matches & the captured group has commas, the generated filename might use "firstauthor-et-al".
+    # Optional: Regex to check if author line implies a list (for "et-al" in filename).
     author_is_list_regex: "^[ \\t]*\\**(?:Chefs):"
-
-    # Additional shortcodes to remove specifically from Hugo content processed by this command.
-    # These are applied *after* any 'global_remove_shortcodes'.
+    # Additional shortcodes to remove specifically for this command/ruleset.
     additional_shortcodes_to_remove:
-      - "{{%\\s*recipe\\s*%}}"        # Example: Hugo recipe shortcode start
-      - "{{%\\s*/recipe\\s*%}}"       # Example: Hugo recipe shortcode end
-      - "{{<\\s*figure.*?>}}"        # Example: Hugo figure shortcode (basic match)
-      - "{{<\\s*ref\\s+[^>]*?>}}"    # Example: Hugo ref shortcode
-      - "{{<\\s*gallery\\s*>}}"      # Example: Hugo gallery shortcode (basic match)
-    # pdf_options: # You can also define PDF options here that would apply specifically to
-                   # items processed by this 'default_rules' ruleset for hugo-export-each,
-                   # potentially overriding the base plugin's PDF options.
-                   # These would need to be merged by the HugoExportEach module.
-    #   margin: { top: "1.2in", bottom: "1.2in", left: "1.1in", right: "1.1in" }
-
-  # You could define another ruleset:
-  # blog_posts_rules:
-  #   author_extraction_regex: "author:\\s*(.*)"
-  #   additional_shortcodes_to_remove:
-  #     - "{{<\\s*toc\\s*>}}"
+      - "{{%\\s*recipe\\s*%}}"
+      - "{{%\\s*/recipe\\s*%}}"
+      - "{{<\\s*figure.*?>}}"
+      - "{{<\\s*ref\\s+[^>]*?>}}"

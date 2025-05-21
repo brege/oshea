@@ -1,6 +1,6 @@
 # md-to-pdf: Markdown to PDF Converter 
 
-A Node.js command-line tool that converts Markdown files into styled PDFs. It uses an extensible document type plugin system, making it suitable for CVs, cover letters, recipes, recipe books, and batch exporting Hugo content. The tool uses `markdown-it` for Markdown parsing and Puppeteer (headless Chromium) for PDF generation.
+A [Node.js](https://nodejs.org/) command-line tool that converts [Markdown](https://daringfireball.net/projects/markdown/) files into styled PDFs. It uses an extensible document type plugin system, making it suitable for CVs, cover letters, recipes, recipe books, and batch exporting Hugo content. The tool uses [`markdown-it`](https://github.com/markdown-it/markdown-it) for Markdown parsing and [Puppeteer](https://pptr.dev/) (headless Chromium) for PDF generation.
 
 ## Features
 
@@ -31,7 +31,7 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
 * **Watch Mode**
   * Use the `--watch` flag with `convert` and `generate` commands to automatically re-generate PDFs when source Markdown, plugin configurations, or plugin CSS files are modified.
 
-* **LaTeX Math Rendering**: Displays mathematical notation using KaTeX. Inline math is supported with `$...$` and display math with `$$...$$`. Other common LaTeX delimiters like `\(...\)` and `\[...\]` are not currently supported. See [`config.example.yaml`](config.example.yaml) for an example.
+* **[LaTeX](https://en.wikipedia.org/wiki/LaTeX) Math Rendering**: Displays mathematical notation using [KaTeX](https://katex.org/). Inline math is supported with `$...$` and display math with `$$...$$`. Other common LaTeX delimiters like `\(...\)` and `\[...\]` are not currently supported. See [`config.example.yaml`](config.example.yaml) for an example.
 
 ### Examples
 
@@ -44,6 +44,11 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
 
 * **Node.js:** Version 18.0.0 or higher is recommended. Download from [nodejs.org](https://nodejs.org/).
 * **npm (Node Package Manager):** Usually included with Node.js.
+
+```bash
+node -v
+npm -v
+```
 
 ## Installation
 
@@ -168,7 +173,7 @@ md-to-pdf generate recipe-book \
 
 ### Type 3 -- Batch Export: `hugo-export-each <sourceDir> --base-plugin <pluginName>`
 
-Batch exports individual PDFs from a Hugo content directory. Each item is processed using the specified base plugin for styling. PDFs are saved alongside their source Markdown files. *(Watch mode is not currently supported for this command).*
+Batch exports individual PDFs from a [Hugo](https://gohugo.io/) content directory. Each item is processed using the specified base plugin for styling. PDFs are saved alongside their source Markdown files. Watch mode is not supported for this command.
 
 **Syntax:**
 
@@ -195,7 +200,7 @@ md-to-pdf hugo-export-each examples/hugo-example --base-plugin recipe
 
 `md-to-pdf` uses a layered configuration system. This allows you to set global defaults and then override them for your specific user needs (via XDG configuration) or for individual projects (via a project-specific configuration file passed with `--config`).
 
-This section focuses on how to customize **global settings** (like `pdf_viewer`) and the **settings of existing plugins** (like changing CSS or PDF options for the bundled `cv` or `recipe` plugins). For details on creating entirely new plugins and how they are discovered, see the "[Creating and Using Custom Plugins](creating-and-using-custom-plugins)" section.
+This section focuses on how to customize **global settings** (like `pdf_viewer`) and the **settings of existing plugins** (like changing CSS or PDF options for the bundled `cv` or `recipe` plugins). For details on creating entirely new plugins and how they are discovered, see the "[Creating and Using Custom Plugins](#creating-and-using-custom-plugins)" section.
 
 ### Configuration Layers and Precedence
 
@@ -292,7 +297,7 @@ When `css_files` are specified in an override layer (XDG or Project plugin-speci
 
 Markdown files can include YAML front matter for metadata and to enable dynamic content substitution.
 
-**Example Front Matter:**
+#### Example Front Matter
 
 ```yaml
 ---
@@ -306,21 +311,21 @@ custom_data:
 Content with {{ .custom_data.key }} and today's date: {{ .CurrentDateFormatted }}.
 ```
 
-**Dynamic Placeholders:**
+### Dynamic Placeholders
 
-  * **Syntax:** `{{ .key }}` or `{{ .path.to.key }}` (e.g., `{{ .custom_data.key }}`). The `.` refers to the root of the data context (processed front matter).
+* **Syntax:** `{{ .key }}` or `{{ .path.to.key }}` (e.g., `{{ .custom_data.key }}`). The `.` refers to the root of the data context (processed front matter).
 
-  * **Automatic Date Placeholders:**
+* **Automatic Date Placeholders:**
 
-      * `{{ .CurrentDateFormatted }}`: Current date, long format (e.g., "May 19, 2025").
-      * `{{ .CurrentDateISO }}`: Current date, `YYYY-MM-DD` format.
+    * `{{ .CurrentDateFormatted }}`: Current date, long format (e.g., "May 19, 2025").
+    * `{{ .CurrentDateISO }}`: Current date, `YYYY-MM-DD` format.
 
 
 ## Creating and Using Custom Plugins
 
 You can extend `md-to-pdf` by creating your own plugins. This allows you to define custom document structures, processing logic, styling, and PDF options. This section explains how to create a plugin and make it known to `md-to-pdf`.
 
-**1. Plugin Directory Structure:**
+### 1\. Plugin Directory Structure
 
 Create a directory for your plugin. This directory can be located anywhere, for example:
 
@@ -337,38 +342,42 @@ my_plugins/
     └── business-card.css         # CSS file(s) for styling
 ```
 
-**2. Essential Plugin Files:**
+The next steps outline how to create and use a **business card** plugin, start to finish.
 
-  * **`<pluginName>.config.yaml` (e.g., `business-card.config.yaml`):**
-    This is your plugin's manifest. It must define:
+### 2\. Essential Plugin Files
 
-      * `handler_script`: Path to your plugin's Node.js handler module (e.g., `"index.js"`), relative to *this config file*.
+  1. **Plugin Manifest `business-card.config.yaml`:**
       
-      * It should also typically define `description`, `css_files` (relative to this file), and `pdf_options`.
+     This is your plugin's manifest. It must define:
+
+     * `handler_script`: Path to your plugin's Node.js handler module (e.g., `"index.js"`), relative to *this config file*.
+      
+     * It should also typically define `description`, `css_files` (relative to this file), and `pdf_options`.
     
-    *Example `business-card.config.yaml`*:
+     **`business-card.config.yaml`**
 
 
-    ```yaml
-    # my_plugins/business-card/business-card.config.yaml
-    description: "A simple business card plugin."
-    handler_script: "index.js"
-    css_files: ["business-card.css"]
-    pdf_options:
-      width: "3.5in"
-      height: "2in"
-      margin: { top: "0.1in", bottom: "0.1in", left: "0.1in", right: "0.1in" }
-      printBackground: true
-    inject_fm_title_as_h1: false
-    ```
+     ```yaml
+     # my_plugins/business-card/business-card.config.yaml
+     description: "A simple business card plugin."
+     handler_script: "index.js"
+     css_files: ["business-card.css"]
+     pdf_options:
+       width: "3.5in"
+       height: "2in"
+       margin: { top: "0.1in", bottom: "0.1in", left: "0.1in", right: "0.1in" }
+       printBackground: true
+     inject_fm_title_as_h1: false
+     ```
 
-  * **Handler Script (e.g., `index.js`):**
+  2. **Handler Script `index.js`:**
 
-    A Node.js module exporting a class or object with an async `generate` method. See bundled plugins like `plugins/default/index.js` for an example using `DefaultHandler`, or `plugins/recipe-book/index.js` for a custom handler.
+     A Node.js module exporting a class or object with an async `generate` method. See bundled plugins like `plugins/default/index.js` for an example using `DefaultHandler`, or `plugins/recipe-book/index.js` for a custom handler.
 
-  * **CSS File(s) (e.g., `business-card.css`):** Standard CSS.
+  3. **CSS File(s) `business-card.css`:** Standard CSS applies.
 
-**3. Registering Your Custom Plugin:**
+### 3\. Registering Your Custom Plugin
+
 For `md-to-pdf` to find and use your plugin, you must register it by adding an entry to the `document_type_plugins` section of a main configuration file:
 
   * **For User-Global Custom Plugins (XDG):**
@@ -395,7 +404,8 @@ For `md-to-pdf` to find and use your plugin, you must register it by adding an e
 
     The path to your plugin's `<pluginName>.config.yaml` is resolved relative to the main project config file it's listed in--the one that you line with `--config ...`--or, more strictly, can be an absolute path.
 
-**4. Using Your Plugin:**
+### 4\. Using Your Plugin
+
 Once registered, use the `plugin-cli-name` you defined:
 
 ```bash
@@ -404,6 +414,7 @@ md-to-pdf convert path/to/data.md --plugin business-card [--config your_project_
 ```
 
 The system uses a hierarchy (*Project* \> *XDG* \> *Bundled*) to decide which registration to use if multiple main configs define a plugin with the same `plugin-cli-name`. The settings within your plugin's `<pliginName>.config.yaml` can still be overridden via the XDG or Project layers as described in the main ["Configuration"](#configuration) section if needed, though this may be less common for custom plugins which usually define their primary behavior in their own config files.
+
 
 ## Testing
 
@@ -415,7 +426,7 @@ npm test
 
 Test scripts and configurations are in [`test/`](test/), and [`test/config.test.yaml`](test/config.test.yaml), which should reflect the plugin structure.
 
-For more details, see [`test/README.md`](test%23readme).
+For more details, see [`test/README.md`](test#readme).
 
 ## License
 

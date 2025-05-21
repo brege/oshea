@@ -3,16 +3,14 @@ const fs = require('fs').promises;
 const fss = require('fs'); // Synchronous for operations like existsSync
 const path = require('path');
 
-const {
-    extractFrontMatter,
-    removeShortcodes,
-    renderMarkdownToHtml,
-    ensureAndPreprocessHeading,
-} = require(path.resolve(__dirname, '../../src/markdown_utils'));
-
-const { generatePdf } = require(path.resolve(__dirname, '../../src/pdf_generator'));
+// Utilities will be injected via constructor
 
 class RecipeBookHandler {
+    constructor(coreUtils) {
+        this.markdownUtils = coreUtils.markdownUtils;
+        this.pdfGenerator = coreUtils.pdfGenerator;
+    }
+
     /**
      * Builds a recipe book PDF.
      * @param {Object} data - Expected to contain `cliArgs.recipesBaseDir` when invoked via 'generate' command.
@@ -24,6 +22,9 @@ class RecipeBookHandler {
      * @returns {Promise<string>} The absolute path to the generated PDF file.
      */
     async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt = "recipe-book.pdf", pluginBasePath) {
+        const { extractFrontMatter, removeShortcodes, renderMarkdownToHtml, ensureAndPreprocessHeading } = this.markdownUtils;
+        const { generatePdf } = this.pdfGenerator;
+
         const recipesBaseDir = data.cliArgs && data.cliArgs.recipesBaseDir;
 
         if (!recipesBaseDir) {

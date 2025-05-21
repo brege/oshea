@@ -1,5 +1,15 @@
 // src/PluginManager.js
 const path = require('path');
+const DefaultHandler = require('./default_handler');
+const markdownUtils = require('./markdown_utils');
+const pdfGenerator = require('./pdf_generator');
+
+// Object containing core utilities to be injected into plugins
+const coreUtils = {
+    DefaultHandler,
+    markdownUtils,
+    pdfGenerator
+};
 
 class PluginManager {
     /**
@@ -41,8 +51,15 @@ class PluginManager {
             let handlerInstance;
 
             if (typeof HandlerModule === 'function' && HandlerModule.prototype && HandlerModule.prototype.constructor.name === HandlerModule.name) {
-                handlerInstance = new HandlerModule();
+                // Pass coreUtils to the constructor
+                handlerInstance = new HandlerModule(coreUtils);
             } else if (HandlerModule && typeof HandlerModule.generate === 'function') {
+                // For plain objects exporting a generate function, constructor injection isn't direct.
+                // This pattern is now discouraged if coreUtils are needed.
+                // The generate signature would need to change or plugins adopt the class pattern.
+                // For now, we assume if it's not a class, it doesn't need coreUtils injected this way.
+                // Or, it might have its own way of getting them (not ideal).
+                console.warn(`WARN: Plugin '${pluginName}' is not a class. Core utilities cannot be injected via constructor.`);
                 handlerInstance = HandlerModule;
             } else {
                 throw new Error(`Handler module '${handlerScriptPath}' for plugin '${pluginName}' does not export a class or a 'generate' function.`);
@@ -52,6 +69,8 @@ class PluginManager {
                 throw new Error(`Handler instance for plugin '${pluginName}' does not have a 'generate' method.`);
             }
 
+            // If generate signature were to be changed for non-class plugins:
+            // return await handlerInstance.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath, coreUtils);
             return await handlerInstance.generate(
                 data,
                 pluginSpecificConfig,

@@ -150,6 +150,20 @@ const testCases = [
         ],
         // No preTestSetup needed as files are part of the source tree
     },
+    {
+        description: "Math Rendering: Convert example math document",
+        commandArgs: [
+            'convert',
+            path.join(EXAMPLES_DIR, 'example-math.md'),
+            '--plugin', 'default',
+            '--outdir', TEST_OUTPUT_BASE_DIR,
+            // Filename will be 'math-test-document.pdf' based on title in front matter
+            '--no-open',
+        ],
+        expectedOutputs: [
+            { filePath: 'math-test-document.pdf', minSize: 1000 }, // Adjust minSize if needed
+        ],
+    },
 ];
 
 // --- Helper Functions ---

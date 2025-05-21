@@ -222,7 +222,6 @@ class ConfigResolver {
         const primaryMainConfig = this.primaryMainConfig || {};
 
         // --- Layer 0: Plugin's Own Default Configuration ---
-        // Get path from the new mergedPluginRegistry
         const pluginOwnConfigPath = this.mergedPluginRegistry ? this.mergedPluginRegistry[pluginName] : null;
 
         if (!pluginOwnConfigPath) {
@@ -243,13 +242,11 @@ class ConfigResolver {
             currentMergedConfig = layer0Data.rawConfig;
             currentCssPaths = layer0Data.resolvedCssPaths || [];
         } else {
-            // This should ideally be caught by the existsSync check above, but good to have.
             throw new Error(`Failed to load plugin's own configuration for '${pluginName}' from '${pluginOwnConfigPath}'.`);
         }
 
         // --- Layer 1 & 2: XDG and Project-Specific Setting Overrides ---
         if (!this.useFactoryDefaultsOnly) {
-            // Layer 1: XDG User Defaults for the specific plugin's settings
             const xdgPluginSettingsOverrideFilename = pluginName + PLUGIN_CONFIG_FILENAME_SUFFIX; 
             const xdgPluginSettingsOverrideDir = path.join(this.xdgBaseDir, pluginName);
             const xdgPluginSettingsOverridePath = path.join(xdgPluginSettingsOverrideDir, xdgPluginSettingsOverrideFilename); 
@@ -269,7 +266,6 @@ class ConfigResolver {
                 }
             }
             
-            // Layer 2: Project-Specific Settings Override for the specific plugin
             const projectManifest = await this._loadProjectManifestConfig(); 
 
             if (projectManifest && projectManifest.document_type_plugins) {
@@ -310,11 +306,13 @@ class ConfigResolver {
             }
         }
 
+        // Merge global PDF options into plugin's PDF options
         if (primaryMainConfig.global_pdf_options) {
             currentMergedConfig.pdf_options = this._deepMerge(
                  primaryMainConfig.global_pdf_options, 
                  currentMergedConfig.pdf_options || {}  
             );
+            // Ensure margin object is also deep merged correctly if both exist
             if (currentMergedConfig.pdf_options && currentMergedConfig.pdf_options.margin && primaryMainConfig.global_pdf_options.margin) {
                  currentMergedConfig.pdf_options.margin = this._deepMerge(
                     primaryMainConfig.global_pdf_options.margin,
@@ -322,6 +320,31 @@ class ConfigResolver {
                 );
             }
         }
+        
+        // Merge global math_rendering options into plugin's math_rendering options
+        const pluginOwnMathRendering = currentMergedConfig.math_rendering || {}; // Math rendering from plugin's own file(s)
+        let effectiveMathRenderingConfig = primaryMainConfig.math_rendering || {}; // Base is global
+
+        // ---- START DEBUG LOGS for ConfigResolver ----
+        console.log('[ConfigResolver] primaryMainConfig.math_rendering (Global Base):', JSON.stringify(primaryMainConfig.math_rendering, null, 2));
+        console.log('[ConfigResolver] Plugin\'s own math_rendering (before merge with global):', JSON.stringify(pluginOwnMathRendering, null, 2));
+        // ---- END DEBUG LOGS for ConfigResolver ----
+
+        effectiveMathRenderingConfig = this._deepMerge(effectiveMathRenderingConfig, pluginOwnMathRendering);
+        
+        // Specifically deep merge katex_options if they exist from either source into the effective config
+        if ((primaryMainConfig.math_rendering && primaryMainConfig.math_rendering.katex_options) || (pluginOwnMathRendering && pluginOwnMathRendering.katex_options)) {
+            effectiveMathRenderingConfig.katex_options = this._deepMerge(
+                (primaryMainConfig.math_rendering && primaryMainConfig.math_rendering.katex_options) || {},
+                (pluginOwnMathRendering && pluginOwnMathRendering.katex_options) || {}
+            );
+        }
+        currentMergedConfig.math_rendering = effectiveMathRenderingConfig;
+
+        // ---- START DEBUG LOGS for ConfigResolver (Final) ----
+        console.log('[ConfigResolver] Final currentMergedConfig.math_rendering for plugin:', JSON.stringify(currentMergedConfig.math_rendering, null, 2));
+        // ---- END DEBUG LOGS for ConfigResolver (Final) ----
+
         currentMergedConfig.css_files = [...new Set(currentCssPaths.filter(p => fs.existsSync(p)))]; 
         loadedConfigSourcePaths.cssFiles = currentMergedConfig.css_files; 
 

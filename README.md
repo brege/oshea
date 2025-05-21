@@ -31,6 +31,8 @@ A Node.js command-line tool that converts Markdown files into styled PDFs. It us
 * **Watch Mode**
   * Use the `--watch` flag with `convert` and `generate` commands to automatically re-generate PDFs when source Markdown, plugin configurations, or plugin CSS files are modified.
 
+* **LaTeX Math Rendering**: Displays mathematical notation using KaTeX. Inline math is supported with `$...$` and display math with `$$...$$`. Other common LaTeX delimiters like `\(...\)` and `\[...\]` are not currently supported. See [`config.example.yaml`](config.example.yaml) for an example.
+
 ### Examples
 
 | [CV Layout](plugins/cv)                                       | [Cover Letter Layout](plugins/cover-letter)                           | [Recipe Layout](plugins/recipe)                        |

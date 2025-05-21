@@ -90,8 +90,6 @@ class ConfigResolver {
             this.primaryMainConfig = this.primaryMainConfig || {};
         }
 
-        // Check if registry needs rebuild due to factoryDefaults status change
-        // or if it was never built.
         if (this.mergedPluginRegistry && typeof this.mergedPluginRegistry === 'object' && this.mergedPluginRegistry._builtWithFactoryDefaults !== this.useFactoryDefaultsOnly) {
             needsRegistryBuild = true;
         }
@@ -103,8 +101,8 @@ class ConfigResolver {
                 this.projectManifestConfigPath,
                 this.useFactoryDefaultsOnly
             );
-            this.mergedPluginRegistry = await registryBuilder.build();
-            // Add a marker to know how it was built, for future checks if factoryDefaults changes
+            // Corrected method call: buildRegistry() instead of build()
+            this.mergedPluginRegistry = await registryBuilder.buildRegistry(); 
             if(this.mergedPluginRegistry) this.mergedPluginRegistry._builtWithFactoryDefaults = this.useFactoryDefaultsOnly;
         }
     }
@@ -116,40 +114,31 @@ class ConfigResolver {
     }
 
     async _loadProjectManifestConfig() { 
-        // This method ensures this.projectManifestConfig is loaded if a path was given
-        // and it wasn't already loaded as the primaryMainConfig.
-        // It's used for Layer 2 overrides.
-        await this._initializeResolverIfNeeded(); // Ensures primaryMainConfig is attempted first.
+        await this._initializeResolverIfNeeded(); 
     
-        // If projectManifestConfigPath was given, but it wasn't the one loaded as primaryMainConfig
         if (this.projectManifestConfigPath && 
             this.projectManifestConfigPath !== this.primaryMainConfigPathActual && 
             !this.useFactoryDefaultsOnly && 
             fs.existsSync(this.projectManifestConfigPath)) {
             
-            // Avoid reloading if it was somehow already loaded and matches the path
             if (this.projectManifestConfig && this.projectManifestConfig._sourcePath === this.projectManifestConfigPath) {
                  return this.projectManifestConfig;
             }
             try {
-                // console.log(`INFO: Additionally loading project manifest (from --config) for Layer 2 plugin setting overrides: ${this.projectManifestConfigPath}`);
                 this.projectManifestConfig = await loadYamlConfig(this.projectManifestConfigPath);
-                if(this.projectManifestConfig) this.projectManifestConfig._sourcePath = this.projectManifestConfigPath; // Mark its source for caching
+                if(this.projectManifestConfig) this.projectManifestConfig._sourcePath = this.projectManifestConfigPath; 
             } catch (error) {
                 console.warn(`WARN: Could not load additional project manifest from ${this.projectManifestConfigPath} for project overrides: ${error.message}`);
-                this.projectManifestConfig = {}; // Set to empty to avoid repeated attempts
+                this.projectManifestConfig = {}; 
             }
-        } else if (this.projectManifestConfigPath === this.primaryMainConfigPathActual) {
-            // It *was* the primary, so this.projectManifestConfig should be populated.
-            // (Handled by _initializeResolverIfNeeded)
         } else if (!this.projectManifestConfigPath) {
-             this.projectManifestConfig = null; // No manifest path provided.
+             this.projectManifestConfig = null; 
         }
         return this.projectManifestConfig || {}; 
     }
     
     async _loadSingleConfigLayer(configFilePath, assetsBasePath) {
-        const cacheKey = `${configFilePath}-${assetsBasePath}`; // Ensure assetsBasePath is part of cache key
+        const cacheKey = `${configFilePath}-${assetsBasePath}`; 
         if (this._rawPluginYamlCache[cacheKey]) {
             return this._rawPluginYamlCache[cacheKey];
         }
@@ -221,17 +210,19 @@ class ConfigResolver {
         };
         const primaryMainConfig = this.primaryMainConfig || {};
 
-        // --- Layer 0: Plugin's Own Default Configuration ---
-        const pluginOwnConfigPath = this.mergedPluginRegistry ? this.mergedPluginRegistry[pluginName] : null;
+        const pluginRegistryEntry = this.mergedPluginRegistry ? this.mergedPluginRegistry[pluginName] : null;
 
-        if (!pluginOwnConfigPath) {
+        if (!pluginRegistryEntry || !pluginRegistryEntry.configPath) {
             throw new Error(`Plugin '${pluginName}' is not registered or its configuration path could not be resolved. Registry: ${JSON.stringify(this.mergedPluginRegistry)}. Check document_type_plugins in your main config files.`);
         }
+        
+        const pluginOwnConfigPath = pluginRegistryEntry.configPath;
+
         if (!fs.existsSync(pluginOwnConfigPath)) {
             throw new Error(`Configuration file for plugin '${pluginName}' not found at registered path: '${pluginOwnConfigPath}'. This path was found in the merged plugin registry.`);
         }
         const actualPluginBasePath = path.dirname(pluginOwnConfigPath);
-        if (pluginOwnConfigPath) loadedConfigSourcePaths.pluginConfigPaths.push(pluginOwnConfigPath);
+        loadedConfigSourcePaths.pluginConfigPaths.push(pluginOwnConfigPath);
 
 
         const layer0Data = await this._loadSingleConfigLayer(pluginOwnConfigPath, actualPluginBasePath);
@@ -245,7 +236,6 @@ class ConfigResolver {
             throw new Error(`Failed to load plugin's own configuration for '${pluginName}' from '${pluginOwnConfigPath}'.`);
         }
 
-        // --- Layer 1 & 2: XDG and Project-Specific Setting Overrides ---
         if (!this.useFactoryDefaultsOnly) {
             const xdgPluginSettingsOverrideFilename = pluginName + PLUGIN_CONFIG_FILENAME_SUFFIX; 
             const xdgPluginSettingsOverrideDir = path.join(this.xdgBaseDir, pluginName);
@@ -306,13 +296,11 @@ class ConfigResolver {
             }
         }
 
-        // Merge global PDF options into plugin's PDF options
         if (primaryMainConfig.global_pdf_options) {
             currentMergedConfig.pdf_options = this._deepMerge(
                  primaryMainConfig.global_pdf_options, 
                  currentMergedConfig.pdf_options || {}  
             );
-            // Ensure margin object is also deep merged correctly if both exist
             if (currentMergedConfig.pdf_options && currentMergedConfig.pdf_options.margin && primaryMainConfig.global_pdf_options.margin) {
                  currentMergedConfig.pdf_options.margin = this._deepMerge(
                     primaryMainConfig.global_pdf_options.margin,
@@ -321,18 +309,11 @@ class ConfigResolver {
             }
         }
         
-        // Merge global math_rendering options into plugin's math_rendering options
-        const pluginOwnMathRendering = currentMergedConfig.math_rendering || {}; // Math rendering from plugin's own file(s)
-        let effectiveMathRenderingConfig = primaryMainConfig.math_rendering || {}; // Base is global
-
-        // ---- START DEBUG LOGS for ConfigResolver ----
-        console.log('[ConfigResolver] primaryMainConfig.math_rendering (Global Base):', JSON.stringify(primaryMainConfig.math_rendering, null, 2));
-        console.log('[ConfigResolver] Plugin\'s own math_rendering (before merge with global):', JSON.stringify(pluginOwnMathRendering, null, 2));
-        // ---- END DEBUG LOGS for ConfigResolver ----
+        const pluginOwnMathRendering = currentMergedConfig.math_rendering || {}; 
+        let effectiveMathRenderingConfig = primaryMainConfig.math_rendering || {}; 
 
         effectiveMathRenderingConfig = this._deepMerge(effectiveMathRenderingConfig, pluginOwnMathRendering);
         
-        // Specifically deep merge katex_options if they exist from either source into the effective config
         if ((primaryMainConfig.math_rendering && primaryMainConfig.math_rendering.katex_options) || (pluginOwnMathRendering && pluginOwnMathRendering.katex_options)) {
             effectiveMathRenderingConfig.katex_options = this._deepMerge(
                 (primaryMainConfig.math_rendering && primaryMainConfig.math_rendering.katex_options) || {},
@@ -340,10 +321,6 @@ class ConfigResolver {
             );
         }
         currentMergedConfig.math_rendering = effectiveMathRenderingConfig;
-
-        // ---- START DEBUG LOGS for ConfigResolver (Final) ----
-        console.log('[ConfigResolver] Final currentMergedConfig.math_rendering for plugin:', JSON.stringify(currentMergedConfig.math_rendering, null, 2));
-        // ---- END DEBUG LOGS for ConfigResolver (Final) ----
 
         currentMergedConfig.css_files = [...new Set(currentCssPaths.filter(p => fs.existsSync(p)))]; 
         loadedConfigSourcePaths.cssFiles = currentMergedConfig.css_files; 

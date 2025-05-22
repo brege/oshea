@@ -37,7 +37,7 @@ A [Node.js](https://nodejs.org/) command-line tool that converts [Markdown](http
 
 | [CV Layout](plugins/cv)                                       | [Cover Letter Layout](plugins/cover-letter)                           | [Recipe Layout](plugins/recipe)                        |
 | :-----------------------------------: | :----------------------------------: | :---------------------------------: |
-| <img src="examples/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="examples/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="examples/screenshots/example-recipe.png" alt="Recipe Sreenshot" width="300"/> |
+| <img src="docs/images/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="docs/images/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="docs/images/screenshots/example-recipe.png" alt="Recipe Sreenshot" width="300"/> |
 
 
 ## Prerequisites
@@ -88,7 +88,7 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
 * `--config <path_to_config.yaml>`: Specify a custom path to your main project-specific YAML configuration file. This file can register project-local plugins and override settings.
 * `--factory-defaults` (or `--fd`): Use only bundled default configurations and plugins, ignoring user (XDG) and project (`--config`) configurations. Useful for debugging or getting a "vanilla" output.
 
-**For a quick reference guide, see the [Cheat Sheet](CHEATSHEET.md).**
+**For a quick reference guide, see the [Cheat Sheet](docs/cheat-sheet.md).**
 
 ### Commands
 

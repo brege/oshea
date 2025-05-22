@@ -181,6 +181,8 @@ document_type_plugins:
   # my-notes: "./my-notes/my-notes.config.yaml" # If config is in project root
 ```
 
+More details in the [Plugin Development Guide](./plugin-development.md).
+
 ## Markdown & Front Matter Essentials
 
 **Front Matter for Metadata & Placeholders:**
@@ -230,7 +232,7 @@ md-to-pdf convert examples/example-front-matter.md --plugin default --outdir out
     * `index.js` (handler expecting `coreUtils` in constructor)
     * `my-custom-plugin.css`
 2.  **Customize**: Edit the generated files. The `index.js` handler will already be set up to use `DefaultHandler` via dependency injection.
-3.  **Register**: Add your plugin to a `config.yaml` (see "[Registering a Custom Plugin](#registering-a-custom-plugin)" above).
+3.  **Register**: Add your plugin to a `config.yaml` (see [Registering a Custom Plugin](#registering-a-custom-plugin) above).
 4.  **Invoke**: `md-to-pdf convert my_file.md --plugin my-custom-plugin`
 
 ## Configuration Layers
@@ -245,9 +247,9 @@ Overrides apply in this order (highest wins):
 
   * **CSS Not Working?** Check paths in `css_files` (relative to the `*.config.yaml` they are in). Is `inherit_css: false` in an override, replacing all prior CSS?
   * **Math Issues?** Ensure `math.enabled: true`. Check delimiters and LaTeX syntax.
-  * **Plugin Unknown?** Verify registration in `document_type_plugins` and path correctness. Use `md-to-pdf plugin list`.
+  * **Plugin Unknown?** Verify registration in `document_type_plugins` and path correctness (see the [Plugin Development Guide](./plugin-development.md) for details). Use `md-to-pdf plugin list`. 
 
 ---
 
-Refer to the full [`README.md`](README.md) for detailed explanations.
+Refer to the full [`README.md`](../README.md) for detailed explanations.
 

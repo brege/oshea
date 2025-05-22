@@ -20,6 +20,10 @@ pdf_options:
 toc_options:
   enabled: false
 
+# Math rendering for this plugin (defaulting to disabled)
+math:
+  enabled: false
+
 # Shortcodes to remove for recipe files (e.g., Hugo's recipe shortcodes).
 remove_shortcodes_patterns:
   - "{{%\\s*recipe\\s*%}}"

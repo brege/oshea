@@ -198,13 +198,13 @@ class DefaultHandler {
             markdownToRender,
             pluginSpecificConfig.toc_options,
             mergedPdfOptions.anchor_options,
-            pluginSpecificConfig.math_rendering 
+            pluginSpecificConfig.math // Updated key
         );
 
         const cssFileContentsArray = [];
-        // Add math CSS first (if any, via stub in Step 0)
-        if (pluginSpecificConfig.math_rendering && pluginSpecificConfig.math_rendering.enabled) {
-            const mathCssStrings = await mathIntegration.getMathCssContent(pluginSpecificConfig.math_rendering);
+        // Add math CSS first (if any)
+        if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) { // Updated key
+            const mathCssStrings = await mathIntegration.getMathCssContent(pluginSpecificConfig.math); // Updated key
             if (mathCssStrings && mathCssStrings.length > 0) {
                 cssFileContentsArray.unshift(...mathCssStrings); // Prepend math CSS
             }
@@ -219,7 +219,7 @@ class DefaultHandler {
                 console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'})`);
             }
         }
-        if (cssFileContentsArray.length === 0 && (pluginCssFiles.length > 0 || (pluginSpecificConfig.math_rendering && pluginSpecificConfig.math_rendering.enabled))) {
+        if (cssFileContentsArray.length === 0 && (pluginCssFiles.length > 0 || (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled))) { // Updated key
             // Adjusted warning condition slightly
             let warningMsg = `WARN: No CSS files were actually loaded by the handler.`;
             if (pluginCssFiles.length > 0) {
@@ -230,7 +230,7 @@ class DefaultHandler {
                 }
                 warningMsg += ` Plugin CSS files specified: ${pluginCssFiles.join(', ')}. ${hint}`;
             }
-            if (pluginSpecificConfig.math_rendering && pluginSpecificConfig.math_rendering.enabled) {
+            if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) { // Updated key
                 warningMsg += ` Math rendering was enabled, but its CSS might also be missing.`;
             }
             console.warn(warningMsg);

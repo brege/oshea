@@ -15,3 +15,7 @@ pdf_options:
   printBackground: true
 # Optional: Add inject_fm_title_as_h1: false if title isn't meant to be a heading
 # inject_fm_title_as_h1: false
+
+# Math rendering for this plugin (defaulting to disabled)
+math:
+  enabled: false

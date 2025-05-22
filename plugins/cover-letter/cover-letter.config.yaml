@@ -22,6 +22,10 @@ pdf_options:
 toc_options:
   enabled: false
 
+# Math rendering for this plugin (defaulting to disabled)
+math:
+  enabled: false
+
 # Processing flags for Cover Letters.
 # Typically, the 'title' from front matter is for PDF metadata, not an H1 in the document.
 inject_fm_title_as_h1: false

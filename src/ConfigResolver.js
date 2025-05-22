@@ -309,18 +309,18 @@ class ConfigResolver {
             }
         }
         
-        const pluginOwnMathRendering = currentMergedConfig.math_rendering || {}; 
-        let effectiveMathRenderingConfig = primaryMainConfig.math_rendering || {}; 
+        const pluginOwnMathConfig = currentMergedConfig.math || {};
+        let effectiveMathConfig = primaryMainConfig.math || {};
 
-        effectiveMathRenderingConfig = this._deepMerge(effectiveMathRenderingConfig, pluginOwnMathRendering);
+        effectiveMathConfig = this._deepMerge(effectiveMathConfig, pluginOwnMathConfig);
         
-        if ((primaryMainConfig.math_rendering && primaryMainConfig.math_rendering.katex_options) || (pluginOwnMathRendering && pluginOwnMathRendering.katex_options)) {
-            effectiveMathRenderingConfig.katex_options = this._deepMerge(
-                (primaryMainConfig.math_rendering && primaryMainConfig.math_rendering.katex_options) || {},
-                (pluginOwnMathRendering && pluginOwnMathRendering.katex_options) || {}
+        if ((primaryMainConfig.math && primaryMainConfig.math.katex_options) || (pluginOwnMathConfig && pluginOwnMathConfig.katex_options)) {
+            effectiveMathConfig.katex_options = this._deepMerge(
+                (primaryMainConfig.math && primaryMainConfig.math.katex_options) || {},
+                (pluginOwnMathConfig && pluginOwnMathConfig.katex_options) || {}
             );
         }
-        currentMergedConfig.math_rendering = effectiveMathRenderingConfig;
+        currentMergedConfig.math = effectiveMathConfig;
 
         currentMergedConfig.css_files = [...new Set(currentCssPaths.filter(p => fs.existsSync(p)))]; 
         loadedConfigSourcePaths.cssFiles = currentMergedConfig.css_files; 

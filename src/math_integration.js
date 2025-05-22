@@ -15,10 +15,10 @@ const KATEX_CSS_PATH = path.resolve(__dirname, '../assets/css/katex.min.css');
 /**
  * Configures a MarkdownIt instance for math rendering using KaTeX.
  * @param {Object} mdInstance - The MarkdownIt instance.
- * @param {Object} mathRenderingConfig - The math rendering configuration object.
+ * @param {Object} mathConfig - The math rendering configuration object.
  */
-function configureMarkdownItForMath(mdInstance, mathRenderingConfig) {
-    if (mathRenderingConfig && mathRenderingConfig.enabled && mathRenderingConfig.engine === 'katex') {
+function configureMarkdownItForMath(mdInstance, mathConfig) {
+    if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
         let katexPluginModule;
         try {
             katexPluginModule = require('@vscode/markdown-it-katex');
@@ -39,7 +39,7 @@ function configureMarkdownItForMath(mdInstance, mathRenderingConfig) {
             return;
         }
         
-        const currentKatexOptions = mathRenderingConfig.katex_options || {};
+        const currentKatexOptions = mathConfig.katex_options || {};
         // console.log("INFO: Applying KaTeX plugin to markdown-it with options:", JSON.stringify(currentKatexOptions, null, 2)); // Kept for verbosity
         
         try {
@@ -56,12 +56,12 @@ function configureMarkdownItForMath(mdInstance, mathRenderingConfig) {
 
 /**
  * Retrieves the content of the KaTeX CSS file if math rendering is enabled.
- * @param {Object} mathRenderingConfig - The math rendering configuration object.
+ * @param {Object} mathConfig - The math rendering configuration object.
  * @returns {Promise<Array<string>>} A promise that resolves to an array containing KaTeX CSS content as a string,
  * or an empty array if not applicable or file not found.
  */
-async function getMathCssContent(mathRenderingConfig) {
-    if (mathRenderingConfig && mathRenderingConfig.enabled && mathRenderingConfig.engine === 'katex') {
+async function getMathCssContent(mathConfig) {
+    if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
         console.log(`[math_integration.js] getMathCssContent: Checking for KaTeX CSS at ${KATEX_CSS_PATH}`); 
 
         if (fss.existsSync(KATEX_CSS_PATH)) {

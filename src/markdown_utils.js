@@ -92,7 +92,7 @@ function getTypeConfig(fullConfig, docType) {
         css_files: cssFiles,
         pdf_options: resolvedPdfOptions,
         toc_options: typeSettings.toc_options || { enabled: false },
-        // math_rendering options are now fully resolved by ConfigResolver and passed separately.
+        math: typeSettings.math || { enabled: false }, // Updated key
         cover_page: typeSettings.cover_page || { enabled: false },
         remove_shortcodes_patterns: resolvedShortcodePatterns,
         hugo_specific_options: typeSettings.hugo_specific_options || {},
@@ -149,11 +149,11 @@ function removeShortcodes(content, patterns) {
  * @param {string} markdownContent - The Markdown content to render.
  * @param {Object} [tocOptions={enabled: false}] - Configuration for the Table of Contents plugin.
  * @param {Object} [anchorOptions={}] - Configuration for the anchor plugin (markdown-it-anchor).
- * @param {Object} [mathRenderingOptions=null] - Configuration for math rendering.
+ * @param {Object} [mathConfig=null] - Configuration for math rendering.
  * @param {MarkdownIt} [mdInstance] - Optional. A pre-configured instance of MarkdownIt. If not provided, a new one is created.
  * @returns {string} The rendered HTML string (body content).
  */
-function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, anchorOptions = {}, mathRenderingOptions = null, mdInstance) {
+function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, anchorOptions = {}, mathConfig = null, mdInstance) {
     const md = mdInstance || new MarkdownIt({
         html: true,
         xhtmlOut: false,
@@ -177,8 +177,8 @@ function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, 
     }
 
     // Call the math integration module to configure the md instance
-    if (mathRenderingOptions && mathRenderingOptions.enabled) {
-        mathIntegration.configureMarkdownItForMath(md, mathRenderingOptions);
+    if (mathConfig && mathConfig.enabled) {
+        mathIntegration.configureMarkdownItForMath(md, mathConfig);
     }
 
     return md.render(markdownContent);

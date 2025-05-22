@@ -25,6 +25,10 @@ toc_options:
   level: [1]
   listType: "ol"
 
+# Math rendering for this plugin (defaulting to disabled)
+math:
+  enabled: false
+
 remove_shortcodes_patterns:
   - "{{%\\s*recipe\\s*%}}"
   - "{{%\\s*/recipe\\s*%}}"

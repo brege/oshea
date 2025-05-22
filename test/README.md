@@ -1,6 +1,6 @@
 # Test Suite for md-to-pdf
 
-This directory contains the integration test suite for the `md-to-pdf` Node.js application. The tests are designed to verify the core functionalities of the `cli.js` script, including:
+This directory contains the integration test suite for the [`md-to-pdf`](../) Node.js application. The tests are designed to verify the core functionalities of the [`cli.js`](../cli.js) script, including:
 
 * Single Markdown file conversion for different document types (CV, Cover Letter, Recipe) using the plugin architecture.
 * Recipe book generation via the "recipe-book" plugin.
@@ -9,17 +9,23 @@ This directory contains the integration test suite for the `md-to-pdf` Node.js a
 
 ## Directory Contents
 
-* **`run-tests.js`**: The main Node.js script that executes all test cases. It uses `cli.js` to perform actions and then checks for expected outcomes (e.g., PDF generation, file/directory creation, correct error messages).
-* **`config.test.yaml`**: A dedicated configuration file used by `run-tests.js` for PDF generation tests. It ensures predictable behavior during tests, such as disabling the PDF viewer and using fixed settings. It defines global test settings and registers the necessary document type plugins.
-* **`assets/`**: Contains mock configuration files and CSS used for testing specific override scenarios (e.g., project-specific configs for the `cv` plugin).
-* **`custom_plugins/`**: Contains a dummy "business-card" plugin used to test the loading and functionality of user-defined plugins located outside the main project's `plugins/` directory.
-* **`test_output/`**: (Automatically generated during test runs) This directory is created by `run-tests.js` to store all PDF files and any other artifacts (like scaffolded plugins from `plugin create` tests) generated during the tests. It is cleaned up after tests complete, unless the `KEEP_OUTPUT=true` environment variable is set or the `--keep-output` flag is used when running the tests.
-    * `test_output/hugo-example-source/`: A copy of the main `examples/hugo-example/` directory is placed here during the `hugo-export-each` test to ensure generated PDFs are contained within the test output area.
-    * `test_output/created_plugins_test/`: Subdirectory specifically used by `plugin create` tests to scaffold new plugin boilerplates, ensuring they are also managed by the cleanup process.
+* [**`run-tests.js`**](run-tests.js): The main Node.js script that executes all test cases. It uses `cli.js` to perform actions and then checks for expected outcomes (e.g., PDF generation, file/directory creation, correct error messages).
+
+* [**`config.test.yaml`**](config.test.yaml): A dedicated configuration file used by [`run-tests.js`](run-tests.js) for PDF generation tests. It defines global test settings and registers the necessary document type plugins.
+
+* [**`assets/`**](assets/): Contains mock configuration files and CSS used for testing specific override scenarios.
+
+* [**`custom_plugins/`**](custom_plugins/): Contains a dummy "business-card" plugin used to test the loading and functionality of user-defined plugins located outside the main project's [`plugins/`](plugins/) directory.
+
+* **`test_output/`**: Automatically generated during test runs.  It is cleaned up after tests complete.
+
+    * `test_output/hugo-example-source/`: A copy of the `examples/hugo-example/` directory that `hugo-export-each` tests to ensure generated PDFs are contained within the test output area.
+
+    * `test_output/created_plugins_test/`: Subdirectory specifically used by `plugin create` tests to scaffold new plugin boilerplates.
 
 ## Running Tests
 
-To run the test suite:
+To run tests:
 
 1.  Ensure you are in the project's root directory.
 2.  Make sure all project dependencies are installed (`npm install`).
@@ -27,21 +33,17 @@ To run the test suite:
 
     ```bash
     npm test
-    ```
-    (This assumes you have updated the `scripts.test` entry in your main `package.json` to `node test/run-tests.js`)
-
-    Alternatively, you can run the script directly:
-
-    ```bash
+    # or
     node test/run-tests.js
     ```
 
 ### Test Output
 
 The script will print output to the console indicating:
+
 * Which test is currently running.
-* The `cli.js` command being executed.
-* Stdout/stderr from `cli.js`.
+* The [`cli.js`](../cli.js) command being executed.
+* Stdout/stderr from [`cli.js`](../cli.js).
 * Success or failure status for each file check (existence, size, content) or behavioral check.
 * A summary of tests passed and failed.
 
@@ -51,24 +53,19 @@ The script will exit with code `0` if all tests pass, and `1` if any test fails.
 
 To inspect the generated PDFs or scaffolded plugins after a test run, you can prevent the `test_output/` directory from being automatically deleted:
 
-* **Using an environment variable:**
+* **Using an environment variable on the command line:*
 
     ```bash
     KEEP_OUTPUT=true npm test
     # or
     KEEP_OUTPUT=true node test/run-tests.js
-    ```
-
-* **Using a command-line flag:**
-
-    ```bash
+    # or
     node test/run-tests.js --keep-output
     ```
 
 ## Test Cases
 
-The specific test cases are defined within `test/run-tests.js`. They utilize example Markdown files, assets, and test configurations. Below is a summary of what each test aims to achieve. *(Note: Most PDF generation commands implicitly use `--config test/config.test.yaml` as defined in `run-tests.js`)*.
-
+The specific test cases are defined within [`test/run-tests.js`](run-tests.js). They utilize example Markdown files, assets, and test configurations. Below is a summary of what each test aims to achieve. 
 ### PDF Generation Tests
 
 1.  **CV: Convert with Explicit Filename**
@@ -136,7 +133,7 @@ The specific test cases are defined within `test/run-tests.js`. They utilize exa
 
 ### `plugin create` Tests
 
-The test suite verifies the `md-to-pdf plugin create` command with several distinct scenarios. These are defined in `test/run-tests.js`.
+The test suite verifies the `md-to-pdf plugin create` command with several distinct scenarios. These are defined in [`test/run-tests.js`](run-tests.js).
 
 1.  **Basic Plugin Scaffolding:**
     * Command:
@@ -186,35 +183,58 @@ The test suite verifies the `md-to-pdf plugin create` command with several disti
         ```
     * Expected: Test PASSED. Creates plugin `my-hyphen-plugin`. The `index.js` file contains a class named `MyHyphenPluginHandler`.
 
-For exact file content checks or other specific assertions, refer to the `postTestChecks` functions in `test/run-tests.js`.
+For exact file content checks or other specific assertions, refer to the `postTestChecks` functions in [`test/run-tests.js`](run-tests.js).
 
 ## Adding New Tests
 
 The process for adding new tests depends on the type of functionality you are testing:
 
-**1. Testing Document Conversion Plugins:**
-   (e.g., for a new plugin like "my-brochure" or a new scenario for an existing plugin)
+### Testing Document Conversion Plugins
 
-* **Input Files:** Place example Markdown files in `examples/` or test-specific assets in `test/assets/`.
-* **Plugin Registration:** If it's a new plugin, register it in `test/config.test.yaml` under `document_type_plugins` (e.g., `my-brochure: "plugins/my-brochure/my-brochure.config.yaml"`).
-* **Test Case Object:** Define:
-    * `description`: What the test does.
-    * `commandArgs`: The CLI arguments for `convert` or `generate` (e.g., `['convert', 'examples/my-brochure.md', '--plugin', 'my-brochure']`). Ensure outputs go to `TEST_OUTPUT_BASE_DIR`.
-    * `expectedOutputs`: An array specifying expected PDF names and minimum sizes (e.g., `{ filePath: 'my-brochure.pdf', minSize: 1000 }`).
-    * `preTestSetup` (Optional): For setup actions like copying files.
+* **Plugin Creation:** Create a new plugin in [`plugins/`](../plugins/) (or a new plugin like "my-brochure" or a new scenario for an existing plugin).
 
-**2. Testing CLI Commands or Other Tool Features:**
-   (e.g., for `plugin list`, `plugin create` options, or options like `--factory-defaults`)
+* **Input Files:** Place example Markdown files in [`examples/`](../examples/) or test-specific assets in [`test/assets/`](assets/).
+
+* **Plugin Registration:** If it's a new plugin, register it in [`test/config.test.yaml`](config.test.yaml) under `document_type_plugins` (e.g., `my-brochure: "plugins/my-brochure/my-brochure.config.yaml"`).
 
 * **Test Case Object:** Define:
+
+    * `description` - what the test does.
+
+    * `commandArgs`: The CLI arguments for `convert` or `generate`
+
+      - `['convert', 'examples/my-brochure.md', '--plugin', 'my-brochure']`
+      - Ensure outputs go to `TEST_OUTPUT_BASE_DIR`.
+    
+    * `expectedOutputs`: An array specifying expected PDF names and minimum sizes 
+      - e.g. `{ filePath: 'my-brochure.pdf', minSize: 1000 }`
+    
+    * `preTestSetup`: For setup actions like copying files.
+
+### Testing CLI Commands or Other Tool Features
+
+   Examples include: `plugin list`, `plugin create`, `--factory-defaults`, etc.
+
+* **Test Case Object:** Define:
+
     * `description`: What the test does.
+    
     * `commandArgs`: The CLI arguments for the command being tested.
+    
     * `postTestChecks`: An **async function** that receives a `result` object (containing `success` status, `stdout`, `stderr` from the command). This is where you'll make your assertions:
-        * Check `result.success` (e.g., to verify a command failed when expected).
-        * Examine `result.stdout` or `result.stderr` for specific messages.
-        * Confirm file/directory creation or content (using `fss.existsSync()` or the `readFileContent` helper in `run-tests.js`).
+        
+        * `result.success` - check to verify a command failed when expected.
+        * `result.stdout` or `result.stderr` - check for specific messages.
+        * `fss.existsSync()` or`readFileContent` helper in [`run-tests.js`](run-tests.js) - check for file/directory creation .
+
     * `preTestSetup` (Optional): For setting up specific file system states.
 
 **General Tips for New Tests:**
-* Direct all test outputs and created artifacts to subdirectories within `TEST_OUTPUT_BASE_DIR` (e.g., `CREATED_PLUGINS_DIR` for `plugin create` tests) to ensure they are correctly cleaned up.
-* Refer to existing entries in `test/run-tests.js` for concrete examples of different test case structures.
+  
+  * Direct all test outputs and created artifacts to subdirectories within `TEST_OUTPUT_BASE_DIR` 
+    
+    - e.g. `CREATED_PLUGINS_DIR` for `plugin create` tests
+
+    to ensure they are correctly cleaned up.
+
+  * Refer to existing entries in [`test/run-tests.js`](run-tests.js) for concrete examples of different test case structures.

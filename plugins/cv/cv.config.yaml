@@ -22,6 +22,10 @@ pdf_options:
 toc_options:
   enabled: false
 
+# Math rendering for this plugin (defaulting to disabled)
+math:
+  enabled: false
+
 # Processing flags for CVs.
 # 'title' from front matter (e.g., your name) will be injected as the main H1.
 inject_fm_title_as_h1: true

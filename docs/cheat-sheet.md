@@ -80,7 +80,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 
 **6. Convert a Document with Math (KaTeX)**
 
-  * Assumes `math_rendering` is enabled in `config.yaml` or plugin config.
+  * Assumes `math` is enabled in `config.yaml` or plugin config.
   * Uses the `default` plugin (or any plugin that supports math).
   * Input file: `examples/example-math.md`
 
@@ -157,7 +157,7 @@ printBackground: true
 ### Enabling Math (KaTeX) & Custom Macros
 
 ```yaml
-math_rendering:
+math:
   enabled: true
   engine: "katex" # Currently only katex
   katex_options:
@@ -244,7 +244,7 @@ Overrides apply in this order (highest wins):
 ## Troubleshooting
 
   * **CSS Not Working?** Check paths in `css_files` (relative to the `*.config.yaml` they are in). Is `inherit_css: false` in an override, replacing all prior CSS?
-  * **Math Issues?** Ensure `math_rendering.enabled: true`. Check delimiters and LaTeX syntax.
+  * **Math Issues?** Ensure `math.enabled: true`. Check delimiters and LaTeX syntax.
   * **Plugin Unknown?** Verify registration in `document_type_plugins` and path correctness. Use `md-to-pdf plugin list`.
 
 ---

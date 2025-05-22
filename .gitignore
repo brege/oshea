@@ -2,7 +2,7 @@
 dev/
 
 # devlopment/interaction documents
-docs/
+docs-devel/
 
 # Node dependencies
 node_modules/

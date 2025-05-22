@@ -15,10 +15,7 @@ A [Node.js](https://nodejs.org/) command-line tool that converts [Markdown](http
   - [`cover-letter`](plugins/cover-letter)
   - [`recipe`](plugins/recipe)
   - [`recipe-book`](plugins/recipe-book)
-
-  And a batch export **extension**:
-
-  - [`hugo-export-each`](plugins/hugo-export-each) -- This is a command, not a plugin type itself, but uses a base plugin for styling.
+  - [`hugo-export-each`](plugins/hugo-export-each) - special **extension** - is a command that uses a base plugin for styling.
 
 * **Versatility**
   * **Singletons**: Convert single Markdown files to PDF using type-specific plugins.
@@ -26,17 +23,16 @@ A [Node.js](https://nodejs.org/) command-line tool that converts [Markdown](http
   * **Batch Export**: Batch export individual PDFs from Hugo content directories with specific naming and styling.
 
 * **Configurability**
-  * A main `config.yaml` for global settings and **plugin registration**.
-  * Each plugin manages its own local configuration for PDF options, CSS, and behavior, which can be overridden.
-  * YAML front matter in Markdown files for metadata and dynamic content substitution.
-  * A `--config` flag for project-specific settings, allowing manifestation of stylistic profiles and registration of project-local plugins.
-  * User-level (XDG) configuration for global defaults and registration of user-specific plugins.
-  * For details on how these layers interact, see the Configuration Overview below and the [Plugin Development Guide](docs/plugin-development.md) for advanced scenarios.
+  * Set global options and register plugins in a main `config.yaml`.
+  * Control plugin appearance and behavior through a 3-tier configuration system: Bundled Defaults < XDG User Settings < Project-Specific Settings (via `--config`).
+  * Use YAML front matter within Markdown files for document-specific data and placeholders.
+  * *The "Configuration" section below explains these features in detail. For creating new plugins, see the [Plugin Development Guide](docs/plugin-development.md).*
 
 * **Watch Mode**
   * Use the `--watch` flag with `convert` and `generate` commands to automatically re-generate PDFs when source Markdown, plugin configurations, or plugin CSS files are modified.
 
-* **[LaTeX](https://en.wikipedia.org/wiki/LaTeX) Math Rendering**: Displays mathematical notation using [KaTeX](https://katex.org/). Inline math is supported with `$...$` and display math with `$$...$$`. Other common LaTeX delimiters like `\(...\)` and `\[...\]` are not currently supported. See [`config.example.yaml`](config.example.yaml) for an example.
+* **[LaTeX](https://en.wikipedia.org/wiki/LaTeX) Math Rendering**
+  * Displays mathematical notation using [KaTeX](https://katex.org/). Inline math is supported with `$...$` and display math with `$$...$$`. Other common LaTeX delimiters like `\(...\)` and `\[...\]` are not currently supported. See [`config.example.yaml`](config.example.yaml) for an example.
 
 ### Examples
 

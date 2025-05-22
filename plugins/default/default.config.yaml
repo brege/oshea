@@ -14,6 +14,11 @@ pdf_options:
     left: "1in"
 toc_options: # Default Table of Contents settings
   enabled: false
+
+# Math rendering for this plugin (defaulting to disabled)
+math:
+  enabled: false
+
 # Processing flags for default Markdown files
 inject_fm_title_as_h1: true # Standard behavior: if 'title' in front matter, use as H1
 aggressiveHeadingCleanup: false # Don't aggressively remove existing H1/H2 by default

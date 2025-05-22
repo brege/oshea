@@ -19,3 +19,7 @@ css_files:
   - "./override_cv_style.css" # Path relative to this override_cv.config.yaml
 
 inherit_css: false # Ensures only this project's CSS is used, replacing bundled/XDG
+
+# Math rendering for this plugin (defaulting to disabled)
+math:
+  enabled: false

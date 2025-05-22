@@ -29,7 +29,7 @@ global_remove_shortcodes:
   - "" # Example: "" to remove HTML comments.
 
 # --- Math Rendering Settings (KaTeX) ---
-math_rendering:
+math:
   enabled: true     # true to enable math rendering, false to disable.
   engine: "katex"   # Currently only "katex" is supported.
   # Options for KaTeX: https://katex.org/docs/options.html

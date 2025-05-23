@@ -541,7 +541,34 @@ body { /* Styles applied to the Puppeteer page context */
 /* ... other styles ... */
 ```
 
-This "advanced-card" example illustrates how to take full control when the standard `DefaultHandler` doesn't meet your needs, allowing for complex layouts, dynamic data, and custom processing of Markdown content.
+This **advanced-card** example illustrates how to take full control when the standard `DefaultHandler` doesn't meet your needs, allowing for complex layouts, dynamic data, and custom processing of Markdown content.
+
+#### Execution
+
+To compile and view the [`advanced-card-example.md`](../examples/custom_plugin_showcase/advanced-card/advanced-card-example.md) using this **advanced-card** plugin, which should be registered in a main `config.yaml` pointing to
+
+[`examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml`](../examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml),
+
+run the following command:
+
+```bash
+md_file=examples/custom_plugin_showcase/advanced-card/advanced-card-example.md
+md-to-pdf convert $md_file --plugin advanced-card --outdir ./test_output --watch
+```
+This also highlights the use of the `--watch` flag, which is quite handy when iterating CSS and JavaScript tweaks.
+
+You can find the full source code for this **advanced-card** plugin, including the example Markdown file, in the 
+
+[`examples/custom_plugin_showcase/advanced-card/`](../examples/custom_plugin_showcase/advanced-card/)
+
+directory, which contains
+```bash
+examples/custom_plugin_showcase/advanced-card/
+├── advanced-card.config.yaml   # Plugin configuration
+├── advanced-card.css           # Custom CSS
+├── advanced-card-example.md    # Example Markdown
+└── index.js                    # Plugin handler
+```
 
 ## Other Advanced Topics
 

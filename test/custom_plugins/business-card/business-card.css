@@ -1,43 +1,62 @@
 /* test/custom_plugins/business-card/business-card.css */
+/* Revised for a cleaner, more professional intermediate example */
+
 body {
-  font-family: Arial, sans-serif;
-  font-size: 8pt;
-  text-align: center;
-  background-color: #fff; /* Ensure background is white if printBackground is true */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box; /* Ensure padding/border don't expand beyond width/height */
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt; /* Base font size for the card */
+    line-height: 1.4;
+    color: #333333; /* Default text color */
+    background-color: #ffffff; /* Ensure background for PDF printing */
+    margin: 0;
+    padding: 15px; /* Inner padding for the card content from the PDF edges */
+    width: 100%;   /* Ensure body takes full dimensions set by Puppeteer PDF options */
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Attempts to vertically center content if it's short */
 }
 
-/* Remove default h1 margins if it's used, or style .name directly */
+/* Targets the H1 generated from '# {{ name }}' in the Markdown */
 h1 {
-  font-size: 12pt;
-  font-weight: bold;
-  margin: 5px 0;
-  color: #000;
+    font-size: 14pt; /* Larger, prominent name */
+    font-weight: bold;
+    color: #000000; /* Black for name */
+    margin: 0 0 3px 0; /* Tight margin below name */
+    text-align: left; /* Left align for a standard look */
 }
 
+/* Targets paragraphs. The example markdown will produce:
+   <p>{{ title }}</p>
+   <p>{{ phone }} | {{ email }} | {{ website }}</p>
+*/
 p {
-  font-size: 7pt;
-  margin: 2px 0;
-  color: #333;
+    margin: 2px 0; /* Default tight margins for paragraphs */
+    text-align: left; /* Left align paragraphs */
 }
 
-.name {
-  font-size: 12pt;
-  font-weight: bold;
-  margin-bottom: 5px;
+/* Style for the title paragraph, assuming it's the first <p> after <h1> */
+/* This will style the '{{ title }}' line */
+h1 + p {
+    font-size: 9pt;
+    color: #444444; /* Dark gray for the title */
+    margin-bottom: 10px; /* More space after the title */
 }
 
-.title {
-  font-size: 8pt;
-  margin-bottom: 10px;
+/* Style for the contact info paragraph, assuming it's the paragraph after the title's paragraph */
+/* This will style the '{{ phone }} | {{ email }} | {{ website }}' line */
+h1 + p + p {
+    font-size: 7.5pt; /* Smaller for contact details */
+    color: #555555;
+    line-height: 1.5; /* Slightly more line height if contact info wraps */
 }
 
-.contact-info {
-  font-size: 7pt;
+/* If you wanted to add a horizontal rule between title and contact,
+   you would add <hr> in your example-business-card.md and style it here:
+hr {
+    border: 0;
+    height: 1px;
+    background-color: #dddddd;
+    margin: 8px 0;
 }
+*/

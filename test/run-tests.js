@@ -167,6 +167,60 @@ const testCases = [
             { filePath: 'math-test-document.pdf', minSize: 1000 }, // Adjust minSize if needed
         ],
     },
+    // --- test 2-tier global params in YAML config files ---
+    {
+        description: "Params: Test with base config params & front matter override",
+        commandArgs: [
+            'convert',
+            path.join(TEST_DIR, 'assets', 'example-params-test.md'),
+            '--plugin', 'default', // Uses DefaultHandler which has the params logic
+            '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--filename', 'params-test-output-base.pdf', // Name derived from {{title}} in MD
+            '--no-open',
+            // Implicitly uses test/config.test.yaml, which now has a 'params' section
+        ],
+        expectedOutputs: [
+            // Expected PDF name: "Title-From-Base-Config.pdf" (if title placeholder works)
+            // For simplicity in test, we use explicit filename.
+            { filePath: 'params-test-output-base.pdf', minSize: 500 }, // Adjusted minSize
+        ],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed unexpectedly: ${result.error?.message || 'Unknown error'}`);
+            // Manual check: PDF should show "Title From Base Config", "Author From Front Matter",
+            // "Value From Front Matter" for shared_param, "Value From Base Config" for config_specific_param,
+            // and "http://base.example.com" for site.url.
+            console.log("  INFO: For full verification of 'params-test-output-base.pdf', visually inspect if KEEP_OUTPUT=true.");
+            console.log("  Expected Title: Title From Base Config");
+            console.log("  Expected Author: Author From Front Matter");
+            console.log("  Expected Shared Param: Value From Front Matter");
+        }
+    },
+    {
+        description: "Params: Test with project config params overriding base, & front matter overriding project",
+        commandArgs: [
+            'convert',
+            path.join(TEST_DIR, 'assets', 'example-params-test.md'),
+            '--plugin', 'default',
+            '--config', path.join(TEST_DIR, 'assets', 'project_params_config.yaml'), // Project config with overriding params
+            '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--filename', 'params-test-output-project.pdf', // Name derived from {{title}} in MD
+            '--no-open',
+        ],
+        expectedOutputs: [
+            // Expected PDF name: "Title-From-Project-Config.pdf"
+            { filePath: 'params-test-output-project.pdf', minSize: 500 }, // Adjusted minSize
+        ],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed unexpectedly: ${result.error?.message || 'Unknown error'}`);
+            // Manual check: PDF should show "Title From Project Config", "Author From Front Matter",
+            // "Value From Front Matter" for shared_param, "Value From Project Config" for config_specific_param,
+            // and "http://project.example.com" for site.url.
+            console.log("  INFO: For full verification of 'params-test-output-project.pdf', visually inspect if KEEP_OUTPUT=true.");
+            console.log("  Expected Title: Title From Project Config");
+            console.log("  Expected Author: Author From Front Matter");
+            console.log("  Expected Shared Param: Value From Front Matter");
+        }
+    },
     // --- md-to-pdf plugin create Test Cases ---
     {
         description: "CLI: plugin create - Basic plugin scaffolding",

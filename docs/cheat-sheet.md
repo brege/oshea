@@ -168,8 +168,41 @@ math:
       "\\boldvec": "\\mathbf{#1}"
 ```
 
+
+### Defining Global Parameters (`params`)
+
+Define reusable key-value pairs in your main `config.yaml` that can be used as placeholders in Markdown. These are merged with document front matter, with front matter taking precedence.
+
+```yaml
+# In your main config.yaml (e.g., ~/.config/md-to-pdf/config.yaml or project's --config file)
+params:
+  site:
+    name: "My Awesome Site"
+    url: "https://example.com"
+  authorContact:
+    name: "Default Author"
+    email: "author@example.com"
+  projectVersion: "1.0.0"
+```
+
+Markdown:
+```markdown
+---
+title: "My Page"
+authorContact: # This will override the authorContact.name from params
+  name: "Page Specific Author"
+---
+
+# Welcome to {{ .site.name }}!
+
+This page is by {{ .authorContact.name }}.
+Site version: {{ .projectVersion }}.
+Contact us at {{ .authorContact.email }}.
+```
+
 ### Registering a Custom Plugin
-(Assuming your plugin `my-notes`'s config is at `~/my_md_plugins/my-notes-plugin/my-notes.config.yaml`)
+
+Assuming your plugin `my-notes`'s config is at `~/my_md_plugins/my-notes-plugin/my-notes.config.yaml`.
 
 ```yaml
 # In ~/.config/md-to-pdf/config.yaml OR project's --config file
@@ -182,6 +215,7 @@ document_type_plugins:
 ```
 
 More details in the [Plugin Development Guide](./plugin-development.md).
+
 
 ## Markdown & Front Matter Essentials
 

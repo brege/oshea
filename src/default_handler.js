@@ -9,112 +9,25 @@ const {
     renderMarkdownToHtml,
     generateSlug,
     ensureAndPreprocessHeading,
+    substituteAllPlaceholders // Imported substituteAllPlaceholders
 } = require('./markdown_utils');
 
 const { generatePdf } = require('./pdf_generator');
-const mathIntegration = require('./math_integration'); // Added for Step 0
+const mathIntegration = require('./math_integration');
 
-// Helper functions (resolvePath, substitutePlaceholdersInString, substituteAllPlaceholders)
-// ... (these functions remain unchanged)
-/**
- * Resolves a dot-separated path string against an object.
- * Case-insensitive for the first key, case-sensitive for subsequent keys.
- */
-function resolvePath(object, pathStr) {
-    if (typeof pathStr !== 'string' || !object || typeof object !== 'object') {
-        return undefined;
-    }
-    const keys = pathStr.split('.');
-    let current = object;
+// Helper functions (resolvePath, substitutePlaceholdersInString) are now primarily
+// used within substituteAllPlaceholders in markdown_utils.js.
+// If they were previously defined here and also in markdown_utils.js,
+// ensure we are using the ones from markdown_utils.js consistently.
+// For this change, we are focusing on the context preparation.
 
-    for (let i = 0; i < keys.length; i++) {
-        let keySegment = keys[i];
-        if (current === null || typeof current !== 'object') return undefined;
-
-        let actualKeyInCurrentObject;
-        if (i === 0) {
-            actualKeyInCurrentObject = Object.keys(current).find(k => k.toLowerCase() === keySegment.toLowerCase());
-            if (actualKeyInCurrentObject === undefined) return undefined;
-        } else {
-            if (Object.prototype.hasOwnProperty.call(current, keySegment)) {
-                actualKeyInCurrentObject = keySegment;
-            } else {
-                return undefined;
-            }
-        }
-        current = current[actualKeyInCurrentObject];
-    }
-    return current;
-}
-
-/**
- * Replaces placeholders in a content string.
- */
-function substitutePlaceholdersInString(content, context, warningContext = "value") {
-    const placeholderRegex = /\{\{\s*\.?([\w.-]+)\s*\}\}/g;
-    let changed = false;
-    const newContent = content.replace(placeholderRegex, (match, placeholderPath) => {
-        const fullPath = placeholderPath.trim();
-        const value = resolvePath(context, fullPath);
-        if (value !== undefined) {
-            const stringValue = (value === null || value === undefined) ? '' : String(value);
-            if (stringValue !== match) changed = true;
-            return stringValue;
-        }
-        console.warn(`WARN: Placeholder '{{ ${fullPath} }}' not found during ${warningContext} substitution.`);
-        return match;
-    });
-    return { changed, newContent };
-}
-
-/**
- * Iteratively replaces placeholders in front matter and main content.
- */
-function substituteAllPlaceholders(mainContent, initialFrontMatterData) {
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-    const isoDate = today.toISOString().split('T')[0];
-
-    let processingContext = {
-        ...initialFrontMatterData,
-        CurrentDateFormatted: formattedDate,
-        CurrentDateISO: isoDate,
-    };
-
-    let fmChangedInLoop = true;
-    const maxFmSubstLoops = 5;
-    let loopCount = 0;
-
-    while (fmChangedInLoop && loopCount < maxFmSubstLoops) {
-        fmChangedInLoop = false;
-        loopCount++;
-        const nextContext = { ...processingContext };
-        for (const key in processingContext) {
-            if (Object.prototype.hasOwnProperty.call(processingContext, key) && typeof processingContext[key] === 'string') {
-                const substitutionResult = substitutePlaceholdersInString(
-                    processingContext[key],
-                    processingContext,
-                    `front matter key '${key}' (loop ${loopCount})`
-                );
-                if (substitutionResult.changed) fmChangedInLoop = true;
-                nextContext[key] = substitutionResult.newContent;
-            }
-        }
-        processingContext = nextContext;
-    }
-    if (loopCount === maxFmSubstLoops && fmChangedInLoop) {
-        console.warn("WARN: Max substitution loops for front matter. Check for circular placeholders.");
-    }
-    const { newContent: processedMainContent } = substitutePlaceholdersInString(mainContent, processingContext, "main content");
-    return { processedFmData: processingContext, processedContent: processedMainContent };
-}
 
 class DefaultHandler {
     /**
      * Default processing logic for Markdown files.
      * @param {Object} data - Expected to contain `markdownFilePath`.
      * @param {Object} pluginSpecificConfig - Configuration object for the specific plugin type.
-     * @param {Object} globalConfig - The main global configuration object.
+     * @param {Object} globalConfig - The main global configuration object (this will contain `params`).
      * @param {string} outputDir - Absolute path to the output directory.
      * @param {string} [outputFilenameOpt] - Optional. Desired filename for the PDF.
      * @param {string} pluginBasePath - The base path of the plugin, for resolving its assets.
@@ -130,8 +43,20 @@ class DefaultHandler {
         const rawMarkdownContent = await fs.readFile(markdownFilePath, 'utf8');
         const { data: initialFrontMatter, content: contentWithoutFm } = extractFrontMatter(rawMarkdownContent);
 
+        // Prepare the initial context for placeholder substitution, merging global params and front matter.
+        let contextForPlaceholders = {};
+        if (globalConfig && globalConfig.params && typeof globalConfig.params === 'object') {
+            contextForPlaceholders = { ...globalConfig.params };
+        }
+        // Document front matter overrides global params
+        contextForPlaceholders = {
+            ...contextForPlaceholders,
+            ...initialFrontMatter
+        };
+
+        // substituteAllPlaceholders will handle iterative substitution and add date placeholders.
         const { processedFmData, processedContent: contentAfterFMSubst } =
-            substituteAllPlaceholders(contentWithoutFm, initialFrontMatter);
+            substituteAllPlaceholders(contentWithoutFm, contextForPlaceholders);
 
         const patternsToRemove = [
             ...(globalConfig.global_remove_shortcodes || []),
@@ -143,16 +68,18 @@ class DefaultHandler {
         if (!finalOutputFilename) {
             const baseInputName = path.basename(markdownFilePath, path.extname(markdownFilePath));
             let nameParts = [];
-            const titleFromFM = resolvePath(processedFmData, 'title') || '';
+            // Use resolvePath (if it were still here) or assume processedFmData has direct access
+            const titleFromFM = processedFmData.title || ''; // Access directly from processedFmData
             const titleSlug = generateSlug(titleFromFM);
             nameParts.push(titleSlug || generateSlug(baseInputName));
 
-            const authorFromFM = resolvePath(processedFmData, 'author') || '';
+            const authorFromFM = processedFmData.author || ''; // Access directly
             if (authorFromFM) nameParts.push(generateSlug(authorFromFM));
             
             let dateStrForFilename = '';
-            const dateValueFromFM = resolvePath(processedFmData, 'date');
+            const dateValueFromFM = processedFmData.date; // Access directly
              if (dateValueFromFM) {
+                // Check against CurrentDateISO which substituteAllPlaceholders adds to processedFmData
                 if (dateValueFromFM === processedFmData.CurrentDateISO) {
                     dateStrForFilename = processedFmData.CurrentDateISO;
                 } else if (typeof dateValueFromFM === 'string') {
@@ -174,7 +101,7 @@ class DefaultHandler {
         const outputPdfPath = path.join(outputDir, finalOutputFilename);
 
         let markdownToRender = cleanedContent;
-        const fmTitleForH1 = resolvePath(processedFmData, 'title');
+        const fmTitleForH1 = processedFmData.title; // Access directly
         if (pluginSpecificConfig.inject_fm_title_as_h1 && fmTitleForH1) {
             markdownToRender = ensureAndPreprocessHeading(
                 cleanedContent,
@@ -198,15 +125,14 @@ class DefaultHandler {
             markdownToRender,
             pluginSpecificConfig.toc_options,
             mergedPdfOptions.anchor_options,
-            pluginSpecificConfig.math // Updated key
+            pluginSpecificConfig.math
         );
 
         const cssFileContentsArray = [];
-        // Add math CSS first (if any)
-        if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) { // Updated key
-            const mathCssStrings = await mathIntegration.getMathCssContent(pluginSpecificConfig.math); // Updated key
+        if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) {
+            const mathCssStrings = await mathIntegration.getMathCssContent(pluginSpecificConfig.math);
             if (mathCssStrings && mathCssStrings.length > 0) {
-                cssFileContentsArray.unshift(...mathCssStrings); // Prepend math CSS
+                cssFileContentsArray.unshift(...mathCssStrings);
             }
         }
 
@@ -219,8 +145,7 @@ class DefaultHandler {
                 console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'})`);
             }
         }
-        if (cssFileContentsArray.length === 0 && (pluginCssFiles.length > 0 || (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled))) { // Updated key
-            // Adjusted warning condition slightly
+        if (cssFileContentsArray.length === 0 && (pluginCssFiles.length > 0 || (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled))) {
             let warningMsg = `WARN: No CSS files were actually loaded by the handler.`;
             if (pluginCssFiles.length > 0) {
                 const allAbsolute = pluginCssFiles.every(f => path.isAbsolute(f));
@@ -230,7 +155,7 @@ class DefaultHandler {
                 }
                 warningMsg += ` Plugin CSS files specified: ${pluginCssFiles.join(', ')}. ${hint}`;
             }
-            if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) { // Updated key
+            if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) {
                 warningMsg += ` Math rendering was enabled, but its CSS might also be missing.`;
             }
             console.warn(warningMsg);

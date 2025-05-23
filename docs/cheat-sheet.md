@@ -68,17 +68,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
         --watch
     ```
 
-**5. Batch Export Hugo Recipes**
-
-  * Exports all recipes from a Hugo content folder.
-  * Uses the `recipe` plugin for styling each exported PDF.
-  * PDF names will be auto-generated (e.g., `slug-author-date.pdf`).
-
-    ```bash
-    md-to-pdf hugo-export-each ./my_hugo_site/content/posts/recipes --base-plugin recipe
-    ```
-
-**6. Convert a Document with Math (KaTeX)**
+**5. Convert a Document with Math (KaTeX)**
 
   * Assumes `math` is enabled in `config.yaml` or plugin config.
   * Uses the `default` plugin (or any plugin that supports math).
@@ -88,7 +78,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     md-to-pdf convert examples/example-math.md --plugin default --outdir output
     ```
 
-**7. Using a Project-Specific Configuration**
+**6. Using a Project-Specific Configuration**
 
   * Overrides bundled/XDG settings with those in `project.config.yaml`.
   * Useful for project-specific styles or plugin registrations.
@@ -97,13 +87,35 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     md-to-pdf convert my_report.md --plugin report --config ./configs/project.config.yaml
     ```
 
-**8. Using Only Factory Defaults**
+**7. Using Only Factory Defaults**
 
   * Ignores all XDG and project-specific (`--config`) configurations.
   * Useful for debugging or getting a "vanilla" output.
 
     ```bash
     md-to-pdf convert my_doc.md --plugin default --factory-defaults
+    ```
+
+**8. Batch Processing 'Eaches'**
+
+  * For batch operations (e.g., converting all recipes from a Hugo content folder or other collections), `md-to-pdf` now recommends using external scripts.
+  * See the [Batch Processing Guide](./batch-processing-guide.md) for examples in Node.js and Bash.
+    
+    **Bash Example**
+    
+    ```bash
+    ./scripts/batch_convert_hugo_recipes.sh ./examples/hugo-example \
+                                            ./batch_output/hugo_recipes_bash \
+                                            recipe
+    ```
+
+    **Node.js Example**
+    
+    ```bash
+    node ./scripts/batch_convert_hugo_recipes.js \
+        --source-dir ./examples/hugo-example \
+        --output-dir ./batch_output/hugo_recipes_node \
+        --base-plugin recipe
     ```
 
 ## Plugin Management Commands

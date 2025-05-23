@@ -9,7 +9,7 @@ const { spawn } = require('child_process');
 
 const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
-const HugoExportEach = require('./src/hugo_export_each');
+// const HugoExportEach = require('./src/hugo_export_each'); // Removed
 const { setupWatch } = require('./src/watch_handler');
 const PluginRegistryBuilder = require('./src/PluginRegistryBuilder');
 const { scaffoldPlugin } = require('./src/plugin_scaffolder'); 
@@ -180,54 +180,6 @@ async function main() {
             },
             (args) => commonCommandHandler(args, executeGeneration, 'generate')
         )
-        .command(
-            "hugo-export-each <sourceDir>",
-            "Batch export PDFs from a Hugo content directory.",
-            (y) => { 
-                y.positional("sourceDir", { describe: "Hugo content source directory.", type: "string"})
-                .option("base-plugin", { alias: "p", describe: "Base plugin for styling.", type: "string", default: "recipe"})
-                .option("hugo-ruleset", { describe: "Ruleset from config.yaml.", type: "string", default: "default_rules"})
-                .option("open", { describe: "Open the first PDF.", type: "boolean", default: false });
-            },
-            async (args) => { 
-                try {
-                    console.log(`Processing 'hugo-export-each' for dir: ${args.sourceDir} using base plugin: ${args.basePlugin}`);
-                    const configResolver = new ConfigResolver(args.config, args.factoryDefaults); 
-                    
-                    const effectiveBasePluginConfigDetails = await configResolver.getEffectiveConfig(args.basePlugin);
-                    if (!effectiveBasePluginConfigDetails) {
-                        throw new Error(`Base plugin '${args.basePlugin}' could not be resolved by ConfigResolver.`);
-                    }
-
-                    const mainLoadedConfig = effectiveBasePluginConfigDetails.mainConfig;
-                    const hugoExportRules = (mainLoadedConfig.hugo_export_each && mainLoadedConfig.hugo_export_each[args.hugoRuleset])
-                        ? mainLoadedConfig.hugo_export_each[args.hugoRuleset]
-                        : {};
-                    
-                    const exporter = new HugoExportEach();
-                    const generatedPdfPaths = await exporter.exportAllPdfs(
-                        path.resolve(args.sourceDir),
-                        effectiveBasePluginConfigDetails.pluginSpecificConfig,
-                        hugoExportRules,
-                        mainLoadedConfig,
-                        !args.open,
-                        effectiveBasePluginConfigDetails.pluginBasePath
-                    );
-
-                    const viewer = mainLoadedConfig.pdf_viewer;
-                    if (args.open && viewer && generatedPdfPaths.length > 0) {
-                        openPdf(generatedPdfPaths[0], viewer);
-                    } else if (args.open && !viewer && generatedPdfPaths.length > 0){
-                        console.log(`PDF viewer not configured. First PDF is at: ${generatedPdfPaths[0]}`);
-                    }
-                    console.log("Hugo export-each command finished.");
-                } catch (error) {
-                    console.error(`ERROR in 'hugo-export-each' command: ${error.message}`);
-                    if (error.stack) console.error(error.stack);
-                    process.exit(1);
-                }
-            }
-        )
         .command( 
             "plugin <subcommand>",
             "Manage plugins.",
@@ -306,7 +258,6 @@ async function main() {
                 .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create).");
             }
         );
-
 
     const parsedArgs = await argvBuilder.argv; 
     if (!parsedArgs._[0] && Object.keys(parsedArgs).length <= 2) { 

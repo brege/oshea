@@ -56,10 +56,12 @@ This YAML file is the manifest for your plugin. It defines its properties and be
         
         Example:
 
-            katex_options:
-              throwOnError: false
-              trust: false # Recommended for security
-              macros: { "\\RR": "\\mathbb{R}" }
+            math: # Corrected from katex_options to math as top-level key
+              enabled: true
+              katex_options:
+                throwOnError: false
+                trust: false # Recommended for security
+                macros: { "\\RR": "\\mathbb{R}" }
 
 * `toc_options` (object, optional): Configuration for Table of Contents generation.
     
@@ -71,9 +73,9 @@ This YAML file is the manifest for your plugin. It defines its properties and be
           level: [1, 2, 3]       # Heading levels to include
           listType: "ul"         # 'ul' or 'ol'
 
-* `inject_fm_title_as_h1` (boolean, optional): If `true`, uses the `title` from front matter as the main H1 heading of the document. Default is often `true` for simple document plugins.
+* `inject_fm_title_as_h1` (boolean, optional): If `true`, uses the `title` from front matter as the main H1 heading of the document. Default is often `true` for simple document plugins. For handlers that generate custom HTML, this should typically be `false`.
 
-* `aggressiveHeadingCleanup` (boolean, optional): If `true`, attempts to remove existing H1/H2 headings from the Markdown content, useful if `inject_fm_title_as_h1` is also true to prevent duplicate titles.
+* `aggressiveHeadingCleanup` (boolean, optional): If `true`, attempts to remove existing H1/H2 headings from the Markdown content, useful if `inject_fm_title_as_h1` is also true to prevent duplicate titles. Often `false` for custom HTML handlers.
 
 * `watch_sources` (array of objects, optional): Defines additional files or directories for `md-to-pdf` to monitor in `--watch` mode.
     
@@ -99,26 +101,38 @@ The script must export a class. This class should have:
 2.  An asynchronous `generate(...)` method.
 
 **`coreUtils` Object:**
-The constructor receives an object with the following utilities:
-* `DefaultHandler`: The standard handler class, useful for delegating common Markdown-to-HTML processing.
-* `markdownUtils`: An object containing various helper functions (e.g., `extractFrontMatter`, `renderMarkdownToHtml`, `substitutePlaceholdersInString`).
-* `pdfGenerator`: An object with the `generatePdf` function.
 
-**`generate` Method Signature:**
+The `constructor` receives an object with the following utilities, injected by `PluginManager.js`:
+
+| Utility         | Description                                                                                                                                |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| `DefaultHandler`  | The standard handler class. Useful for plugins that need common Markdown-to-HTML processing but with custom configurations or minor tweaks. |
+| `markdownUtils` | An object with helper functions like `extractFrontMatter()`, `renderMarkdownToHtml()`, `substituteAllPlaceholders()`, and `generateSlug()`.      |
+| `pdfGenerator`  | An object with the `generatePdf()` function for direct PDF creation from an HTML string, CSS, and PDF options.                             |
+
+**`generate` Method Signature and Parameters:**
+
+The `generate` method is the core of your plugin's logic. It must have the following signature:
 
 ```javascript
 async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath)
-```
+````
 
-  * `data` (object): Input data for the plugin. For `convert` commands, this usually contains `markdownFilePath`. For `generate` commands, it often contains `cliArgs` passed from the command line.
-  * `pluginSpecificConfig` (object): The resolved configuration object for this specific plugin (from its `<plugin-name>.config.yaml`, potentially merged with overrides).
-  * `globalConfig` (object): The main global configuration object (from the primary `config.yaml` used by `md-to-pdf`).
-  * `outputDir` (string): Absolute path to the directory where the output PDF should be saved.
-  * `outputFilenameOpt` (string, optional): The desired filename for the PDF, if specified by the user.
-  * `pluginBasePath` (string): The absolute path to the root directory of this plugin. Useful for resolving other assets within the plugin.
-  * **Returns**: `Promise<string>` - The absolute path to the generated PDF file.
+Here's a breakdown of its parameters:
+
+| Parameter           | Type             | Description                                                                                                                                                              |
+|---------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `data`              | `object`         | Input data for the plugin. For `convert` commands, this usually contains `{ markdownFilePath: 'path/to/file.md' }`. For `generate` commands, it often contains `{ cliArgs: {...} }` with arguments passed after the plugin name. |
+| `pluginSpecificConfig` | `object`         | The fully resolved configuration object specifically for this plugin instance. This includes settings from the plugin's own `<plugin-name>.config.yaml` merged with any applicable XDG or project-level overrides. |
+| `globalConfig`      | `object`         | The main global configuration object loaded by `md-to-pdf` (e.g., from `config.yaml` in the project root, XDG directory, or specified via `--config`). This object includes global `params` and `global_pdf_options`. |
+| `outputDir`         | `string`         | The absolute path to the directory where the output PDF file should be saved.                                                                                              |
+| `outputFilenameOpt` | `string` (opt)   | The desired filename for the PDF (e.g., "my-document.pdf"), if specified by the user via the `--filename` option. If not provided, the plugin should generate a suitable name. |
+| `pluginBasePath`    | `string`         | The absolute path to the root directory of the plugin (i.e., the directory containing its `<plugin-name>.config.yaml`). This is crucial for resolving relative paths to assets like CSS files or templates within the plugin. |
+| **Returns** | `Promise<string>` | The method must return a Promise that resolves to a string containing the absolute path to the generated PDF file.                                                       |
 
 **Example: Simple Handler using `DefaultHandler`**
+
+This is suitable for plugins that largely follow standard Markdown processing but need specific CSS, PDF options, or minor pre/post processing.
 
 ```javascript
 // my-invoice/index.js
@@ -145,8 +159,6 @@ class MyInvoiceHandler {
 }
 module.exports = MyInvoiceHandler;
 ```
-
-For fully custom HTML generation, you would not use `this.handler.generate`. Instead, you would construct the HTML string yourself and then likely use `this.pdfGenerator.generatePdf(...)` directly if you also need to bypass `DefaultHandler`'s PDF options resolution (though `DefaultHandler` does a good job of consolidating CSS and options for `pdfGenerator`).
 
 ### 3\. CSS Files
 
@@ -245,7 +257,6 @@ md-to-pdf convert path/to/document.md --plugin <your-plugin-cli-name> --config p
 
 The `--factory-defaults` flag will cause `md-to-pdf` to ignore XDG and Project configurations. This means only bundled plugins (registered in the tool's internal `config.yaml`) would be available, and their settings would not be overridden by XDG/Project layers. Custom plugins registered outside the bundled scope would not be found when this flag is active.
 
-
 ## Getting Started: Scaffolding a New Plugin with `plugin create`
 
 The easiest way to start a new plugin is with the `plugin create` command. This command generates a boilerplate directory structure and essential files for a simple plugin.
@@ -260,7 +271,9 @@ md-to-pdf plugin create <new-plugin-name> [--dir <target-directory>] [--force]
   * `--dir <target-directory>`: (Optional) The directory *within which* your new plugin folder will be created. Defaults to the current working directory.
   * `--force`: (Optional) If the target plugin directory already exists, this flag allows overwriting its contents.
 
-**Example: Creating a "business-card" plugin**
+### Example: Creating a "business-card" plugin
+
+<img src="images/screenshots/example-business-card.png" alt="Example Business Card Screenshot" width="500"/>
 
 ```bash
 md-to-pdf plugin create business-card --dir ./my_custom_plugins
@@ -279,21 +292,22 @@ This command will create the following structure:
 **Generated Files:**
 
   * **`business-card.config.yaml`**: A basic configuration manifest. You'll customize fields like `description`, `pdf_options` (e.g., to set specific dimensions for a business card), etc.
-    
-      ```yaml
-      # my_plugins/business-card/business-card.config.yaml 
-      description: "A new business-card plugin for [purpose]."
-      handler_script: "index.js"
-      css_files:
-        - "business-card.css"
-      pdf_options:
-        format: "Letter" # You would change this, e.g., width: "3.5in", height: "2in"
-        margin: { top: "1in", right: "1in", bottom: "1in", left: "1in" }
-      math:
-        enabled: false
-      ```
+
+    ```yaml
+    # my_plugins/business-card/business-card.config.yaml 
+    description: "A new business-card plugin for [purpose]."
+    handler_script: "index.js"
+    css_files:
+      - "business-card.css"
+    pdf_options:
+      format: "Letter" # You would change this, e.g., width: "3.5in", height: "2in"
+      margin: { top: "1in", right: "1in", bottom: "1in", left: "1in" }
+    math:
+      enabled: false
+    ```
 
   * **`index.js`**: A handler script that uses `DefaultHandler` by default. You can modify this for custom logic.
+
     ```javascript
     // my_plugins/business-card/index.js 
     class BusinessCardHandler { // Name will be based on your plugin name
@@ -307,6 +321,7 @@ This command will create the following structure:
     }
     module.exports = BusinessCardHandler;
     ```
+
   * **`business-card.css`**: A placeholder CSS file for your custom styles.
 
 **Next Steps After Scaffolding:**
@@ -315,16 +330,220 @@ This command will create the following structure:
 2.  **Register**: Add your plugin to a main `config.yaml` as described in the "Plugin Discovery and Registration" section.
 3.  **Test**: Use your plugin with the `md-to-pdf convert` or `generate` command.
 
-**Command:**
-```bash
-md-to-pdf convert ~/Documents/my_business_card.md --plugin business-card --watch
-```
+For a complete, working example of a custom "business-card" plugin, you can also inspect the one used in our test kit located at [`test/custom_plugins/business-card/`](../test/custom_plugins/business-card/).
 
-For a complete, working example of a custom "business-card" plugin, you can also inspect the one used in our test kit located at [test/custom_plugins/business-card/](../test/custom_plugins/business-card/).
+To compile and view the sample [`example-business-card.md`](../test/assets/example-business-card.md) using the test `business-card` plugin, which is registered in [`test/config.test.yaml`](../test/config.test.yaml)
+
+```bash
+md-to-pdf convert test/assets/example-business-card.md --plugin business-card --config test/config.test.yaml --outdir ./test_output
+```
 
 Refer to the [cheat-sheet.md](cheat-sheet.md#plugin-management-commands) for more command syntax details.
 
-## Advanced Topics
+## Advanced Example: 'advanced-card' Plugin for Custom HTML and Dynamic Content
+
+The standard Markdown-to-HTML conversion offered by `DefaultHandler` leaves a lot to be desired. You might need a highly specific HTML structure, want to integrate dynamic content (like a QR code), or process the Markdown body in a unique way. **This is the where the extendability of the custom plugin handler comes in.**
+
+<img src="images/screenshots/advanced-business-card.png" alt="Advanced Business Card Screenshot" width="500"/>
+
+The **advanced-card** plugin serves as an example of this. It generates a business card where:
+
+  * The main content (name, title, company, contact details) is written directly in the Markdown file's body using standard Markdown syntax (e.g., H1 for name, H2 for title).
+  * Front matter is used for auxiliary data like a website URL (for a QR code) or branding colors.
+  * A QR code is dynamically generated.
+  * The plugin constructs a custom HTML layout and directly calls the PDF generation utility.
+
+**Location:** [`examples/custom_plugin_showcase/advanced-card/`](../examples/custom_plugin_showcase/advanced-card/)
+
+### Why a Custom Handler for "advanced-card"?
+
+* **Precise Layout Control:** Business cards have specific layout requirements that are easier to achieve with custom HTML and CSS than by trying to style generic Markdown output.
+
+* **Dynamic Content Integration:** We want to include a QR code whose data can come from front matter or global parameters.
+
+* **Processing Markdown Body:** Instead of just relying on front matter for all data, this example shows how to take the Markdown content written by the user (e.g., their name as an H1, title as H2) and incorporate that rendered HTML into a custom card structure.
+
+### 1\. Example Markdown (`advanced-card-example.md`)
+
+The user provides card details using standard Markdown formatting.
+
+```markdown
+---
+# Front matter for auxiliary data
+website: "https://www.innovatech.example.com/evance" # Used for QR if qr_data is not set
+qr_data: "mailto:e.vance@innovatech.example.com"     # Specific data for the QR code
+brandingColor: "#2a9d8f"                             # Custom branding color for top border
+---
+
+# Dr. Eleanor Vance
+## Lead Research Scientist
+### Innovatech Solutions Ltd.
+
+**Email:** e.vance@innovatech.example.com  
+**Phone:** +1-555-0102  
+**Web:** [innovatech.example.com/evance](https://www.innovatech.example.com/evance)
+
+*Creative Solutions through Scientific Excellence*
+```
+
+You could, of course, configure your name, phone number, email, etc in the front matter--or, better yet, in the `params:` portion of your global `config.yaml` file--but for readability we only add dynamic parameters in this example.  E.g., `**Web:** [{{ .website }}]({{ .website }})`.
+
+### 2\. Plugin Configuration (`advanced-card.config.yaml`)
+
+This config defines the card's dimensions and other essential settings.
+
+```yaml
+# examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml
+description: "An advanced card plugin demonstrating custom HTML from Markdown body and dynamic content."
+handler_script: "index.js"
+css_files:
+  - "advanced-card.css"
+
+pdf_options:
+  width: "3.5in"  # Standard business card width
+  height: "2in"   # Standard business card height
+  margin:
+    top: "0.15in"
+    right: "0.15in"
+    bottom: "0.15in"
+    left: "0.15in"
+  printBackground: true # Important for cards that use background colors/images
+
+inject_fm_title_as_h1: false    # H1 comes from Markdown body
+aggressiveHeadingCleanup: false
+math:
+  enabled: false
+```
+
+**Key points:**
+
+  * `width` and `height` are set for a typical business card.
+  * `margin` is kept small.
+  * `printBackground: true` ensures CSS backgrounds are rendered in the PDF.
+  * `inject_fm_title_as_h1: false` is crucial because the main heading (the person's name) will come from the H1 tag in the Markdown body.
+
+### 3\. Handler Script (`advanced-card/index.js`) Snippet
+
+The handler reads the Markdown, renders its body to HTML, prepares dynamic data (QR code), and constructs the final HTML for the card.
+
+```javascript
+// examples/custom_plugin_showcase/advanced-card/index.js
+const fs = require('fs').promises;
+const fss = require('fs'); // Synchronous for operations like existsSync
+const path = require('path');
+
+class AdvancedCardHandler {
+    constructor(coreUtils) {
+        this.markdownUtils = coreUtils.markdownUtils;
+        this.pdfGenerator = coreUtils.pdfGenerator;
+    }
+
+    async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
+        const { markdownFilePath } = data;
+        // ... (error checking for markdownFilePath) ...
+
+        const rawMarkdownContent = await fs.readFile(markdownFilePath, 'utf8');
+        const { data: fm, content: markdownBody } = this.markdownUtils.extractFrontMatter(rawMarkdownContent);
+        const globalParams = globalConfig.params || {};
+
+        // Render the main Markdown body to HTML
+        const renderedMarkdownHtml = this.markdownUtils.renderMarkdownToHtml(
+            markdownBody,
+            pluginSpecificConfig.toc_options,
+            (pluginSpecificConfig.pdf_options || {}).anchor_options, // Pass anchor options
+            pluginSpecificConfig.math
+        );
+
+        // Determine QR code data and URL
+        const qrDataSource = fm.qr_data || fm.website || globalParams.defaultWebsite || '[https://example.com](https://example.com)';
+        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(qrDataSource)}`;
+        const cardBrandingColor = fm.brandingColor || globalParams.defaultBrandingColor || '#333';
+
+        // Construct custom HTML layout, injecting the rendered Markdown
+        const htmlBodyContent = `
+            <div class="card-container" style="border-top: 5px solid ${cardBrandingColor};">
+                <div class="main-content-from-markdown">
+                    ${renderedMarkdownHtml}
+                </div>
+                <div class="qr-code-section">
+                    <img src="${qrCodeUrl}" alt="QR Code for ${qrDataSource}">
+                </div>
+                ${globalParams.companyLogoUrl ? `<img src="${globalParams.companyLogoUrl}" alt="Company Logo" class="company-logo">` : ''}
+            </div>
+        `;
+
+        const cardNameForFile = fm.name || (markdownBody.split('\n')[0].replace(/^#+\s*/, '')) || 'advanced-card';
+        const baseOutputFilename = outputFilenameOpt || `${this.markdownUtils.generateSlug(cardNameForFile)}.pdf`;
+        const finalOutputPdfPath = path.join(outputDir, baseOutputFilename);
+
+        // Merge PDF options (plugin's own config should define card dimensions)
+        const pdfOptions = { /* ... merge global and plugin-specific pdf_options ... */ };
+        if (pdfOptions.width || pdfOptions.height) { delete pdfOptions.format; }
+
+
+        // Load CSS files
+        const cssFileContentsArray = [];
+        // ... (logic to load CSS files specified in pluginSpecificConfig.css_files) ...
+
+        // Generate PDF directly
+        await this.pdfGenerator.generatePdf(
+            htmlBodyContent,
+            finalOutputPdfPath,
+            pdfOptions,
+            cssFileContentsArray
+        );
+        return finalOutputPdfPath;
+    }
+}
+module.exports = AdvancedCardHandler;
+```
+
+**How the handler works:**
+
+  * It uses `this.markdownUtils.extractFrontMatter` and `this.markdownUtils.renderMarkdownToHtml` to process the input.
+  * It constructs `htmlBodyContent` by injecting `renderedMarkdownHtml` into a custom `div` structure. This structure also includes a placeholder for the QR code and an optional company logo (from global params).
+  * It uses `this.pdfGenerator.generatePdf` to directly render the PDF from this custom HTML string, its own CSS, and specific PDF options.
+
+### 4\. CSS Styling (`advanced-card/advanced-card.css`) Snippet
+
+The CSS targets the custom HTML structure and the standard HTML elements generated from the Markdown body.
+
+```css
+/* examples/custom_plugin_showcase/advanced-card/advanced-card.css */
+body { /* Styles applied to the Puppeteer page context */
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 9pt; /* Base for card */
+    /* ... other body styles ... */
+}
+.card-container {
+    width: 100%; height: 100%;
+    padding: 10px;
+    position: relative; /* For absolute positioning of QR */
+    overflow: hidden;
+    /* ... other container styles ... */
+}
+.main-content-from-markdown {
+    line-height: 1.3;
+    padding-bottom: 5px; /* To prevent overlap with QR */
+}
+.main-content-from-markdown h1 { font-size: 14pt; /* ... */ }
+.main-content-from-markdown h2 { font-size: 12pt; /* ... */ }
+.main-content-from-markdown h3 { font-size: 10pt; /* ... */ }
+.main-content-from-markdown p  { font-size: 8pt;  /* ... */ }
+
+.qr-code-section {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    width: 46px; height: 46px;
+}
+.qr-code-section img { width: 100%; height: 100%; }
+/* ... other styles ... */
+```
+
+This "advanced-card" example illustrates how to take full control when the standard `DefaultHandler` doesn't meet your needs, allowing for complex layouts, dynamic data, and custom processing of Markdown content.
+
+## Other Advanced Topics
 
 ### Using `watch_sources`
 
@@ -344,5 +563,4 @@ async generate(data, pluginSpecificConfig, /* ...other args */) {
     // ... rest of your logic
 }
 ```
-
 

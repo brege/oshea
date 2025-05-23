@@ -18,7 +18,7 @@ const TEST_OUTPUT_DIR_NAME = 'test_output';
 const TEST_OUTPUT_BASE_DIR = path.join(TEST_DIR, TEST_OUTPUT_DIR_NAME);
 
 const HUGO_EXAMPLE_SOURCE_IN_EXAMPLES = path.join(EXAMPLES_DIR, 'hugo-example');
-const HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT = path.join(TEST_OUTPUT_BASE_DIR, 'hugo-example-source');
+// const HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT = path.join(TEST_OUTPUT_BASE_DIR, 'hugo-example-source'); // Removed
 
 const CREATED_PLUGINS_SUBDIR = 'created_plugins_test'; // To avoid conflict if user has 'created_plugins'
 const CREATED_PLUGINS_DIR = path.join(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_SUBDIR);
@@ -88,25 +88,6 @@ const testCases = [
         expectedOutputs: [
             { filePath: 'test-recipe-book.pdf', minSize: 50000 },
         ],
-    },
-    {
-        description: "Batch Hugo PDF Export: Export each recipe from copied Hugo source",
-        commandArgs: [
-            'hugo-export-each',
-            HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT,
-            '--base-plugin', 'recipe', // Updated from --base-type
-            '--hugo-ruleset', 'default_rules',
-        ],
-        expectedOutputs: [
-            { filePath: path.join('hugo-example-source', 'recipe-one', 'recipe-one-culinary-enthusiast-2023-10-27.pdf'), minSize: 5000 }, 
-            { filePath: path.join('hugo-example-source', 'recipe-two', 'recipe-two-artisan-baker-inspired-by-ken-forkish-2024-03-15.pdf'), minSize: 5000 }, 
-            { filePath: path.join('hugo-example-source', 'recipe-three', 'recipe-three-culinary-explorer-2024-01-20.pdf'), minSize: 5000 }, 
-        ],
-        preTestSetup: async () => {
-            await fs.mkdir(path.dirname(HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT), { recursive: true });
-            await fs.cp(HUGO_EXAMPLE_SOURCE_IN_EXAMPLES, HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT, { recursive: true });
-            console.log(`  Copied ${HUGO_EXAMPLE_SOURCE_IN_EXAMPLES} to ${HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT} for hugo-export-each test.`);
-        }
     },
     {
         description: "Project Config: Convert CV with project-specific config override (A5 format, custom CSS)",

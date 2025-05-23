@@ -52,17 +52,4 @@ document_type_plugins:
   # Example for a custom plugin:
   # my-custom-plugin: "path/to/my/custom-plugins/my-plugin/my-plugin.config.yaml"
 
-# --- Hugo Export Each Command Specific Configuration ---
-hugo_export_each:
-  # Define rulesets for the 'hugo-export-each' command.
-  default_rules:
-    # Regex to extract author from Markdown body for PDF filename. First capture group is used.
-    author_extraction_regex: "^[ \\t]*\\**(?:Chef|Chefs):\\s*\\**([^\\*<\\n\\r]+)"
-    # Optional: Regex to check if author line implies a list (for "et-al" in filename).
-    author_is_list_regex: "^[ \\t]*\\**(?:Chefs):"
-    # Additional shortcodes to remove specifically for this command/ruleset.
-    additional_shortcodes_to_remove:
-      - "{{%\\s*recipe\\s*%}}"
-      - "{{%\\s*/recipe\\s*%}}"
-      - "{{<\\s*figure.*?>}}"
-      - "{{<\\s*ref\\s+[^>]*?>}}"
+# --- Hugo Export Each Command Specific Configuration --- Section Removed ---

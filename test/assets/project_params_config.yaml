@@ -1,0 +1,15 @@
+# dev/test/assets/project_params_config.yaml
+# This project config will be loaded via --config for a test scenario.
+# Its 'params' will override any 'params' from test/config.test.yaml (the base test config).
+
+params:
+  title_param: "Title From Project Config"    # Overrides base
+  author_param: "Author From Project Config" # Overrides base, but FM will override this
+  shared_param: "Value From Project Config"  # Overrides base, but FM will override this
+  config_specific_param: "Value From Project Config"
+  site:
+    url: "http://project.example.com"      # Overrides base
+  deeply:
+    nested:
+      value: "Project Nested Value"        # Overrides base
+  fallback_param: "Project Fallback Value" # Overrides base

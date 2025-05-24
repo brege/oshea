@@ -3,29 +3,30 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { loadConfig: loadYamlConfig } = require('./markdown_utils');
-const PluginRegistryBuilder = require('./PluginRegistryBuilder'); // Require the new module
+const PluginRegistryBuilder = require('./PluginRegistryBuilder'); 
 
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
-const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml'; // Used for XDG/Project override file names
+const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml'; 
 
 class ConfigResolver {
     constructor(mainConfigPathFromCli, useFactoryDefaultsOnly = false) {
         this.projectRoot = path.resolve(__dirname, '..');
-        this.defaultMainConfigPath = path.join(this.projectRoot, 'config.yaml');
+        this.defaultMainConfigPath = path.join(this.projectRoot, 'config.yaml'); // Standard bundled main config
+        this.factoryDefaultMainConfigPath = path.join(this.projectRoot, 'config.example.yaml'); // True factory defaults
 
         const xdgConfigHome = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
         this.xdgBaseDir = path.join(xdgConfigHome, XDG_CONFIG_DIR_NAME);
         this.xdgGlobalConfigPath = path.join(this.xdgBaseDir, 'config.yaml');
 
         this.projectManifestConfigPath = mainConfigPathFromCli;
-        this.projectManifestConfig = null; // To store the loaded project manifest content if --config is used
+        this.projectManifestConfig = null; 
         this.projectManifestBaseDir = this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath) ? path.dirname(this.projectManifestConfigPath) : null;
 
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
 
         this.primaryMainConfig = null;
         this.primaryMainConfigPathActual = null;
-        this.mergedPluginRegistry = null; // Will be set by _initializeResolverIfNeeded
+        this.mergedPluginRegistry = null; 
 
         this.loadedPluginConfigsCache = {};
         this._rawPluginYamlCache = {};
@@ -36,56 +37,63 @@ class ConfigResolver {
         let needsRegistryBuild = this.mergedPluginRegistry === null;
 
         if (this.primaryMainConfig === null) {
-            let configPathToLoad = this.defaultMainConfigPath;
-            let loadedFrom = "bundled default";
+            let configPathToLoad;
+            let loadedFromReason = "";
 
             if (this.useFactoryDefaultsOnly) {
-                configPathToLoad = this.defaultMainConfigPath;
-                loadedFrom = "bundled default (due to --factory-defaults)";
+                configPathToLoad = this.factoryDefaultMainConfigPath;
+                loadedFromReason = `factory default source (${path.basename(this.factoryDefaultMainConfigPath)})`;
+                if (!fs.existsSync(configPathToLoad)) {
+                    console.error(`CRITICAL: Factory default configuration file '${configPathToLoad}' not found. This file is essential for --factory-defaults mode.`);
+                    this.primaryMainConfig = {}; // Proceed with empty config
+                    this.primaryMainConfigPathActual = null;
+                }
             } else if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
                 configPathToLoad = this.projectManifestConfigPath;
-                loadedFrom = "project (from --config)";
+                loadedFromReason = "project (from --config)";
             } else if (fs.existsSync(this.xdgGlobalConfigPath)) {
                 configPathToLoad = this.xdgGlobalConfigPath;
-                loadedFrom = "XDG global";
-            } else if (!fs.existsSync(this.defaultMainConfigPath)) {
-                console.warn(`WARN: Default main configuration file '${this.defaultMainConfigPath}' not found. Using empty config for global settings.`);
-                this.primaryMainConfig = {};
-                this.primaryMainConfigPathActual = null;
-                if (configPathToLoad === this.projectManifestConfigPath) {
-                    this.projectManifestConfig = this.primaryMainConfig;
+                loadedFromReason = "XDG global";
+            } else {
+                // Try project root config.yaml first as the "bundled" main if user created it
+                if (fs.existsSync(this.defaultMainConfigPath)) {
+                    configPathToLoad = this.defaultMainConfigPath;
+                    loadedFromReason = `bundled main (${path.basename(this.defaultMainConfigPath)})`;
+                } else {
+                    // If projectRoot/config.yaml doesn't exist, fall back to config.example.yaml
+                    console.warn(`WARN: Main config file '${this.defaultMainConfigPath}' not found. Using factory defaults '${this.factoryDefaultMainConfigPath}' as a last resort.`);
+                    configPathToLoad = this.factoryDefaultMainConfigPath;
+                    loadedFromReason = `factory default source (${path.basename(this.factoryDefaultMainConfigPath)}) (as fallback)`;
+                    if (!fs.existsSync(configPathToLoad)) {
+                        console.error(`CRITICAL: Fallback factory default configuration file '${configPathToLoad}' also not found.`);
+                        this.primaryMainConfig = {};
+                        this.primaryMainConfigPathActual = null;
+                    }
                 }
             }
             
-            if (this.primaryMainConfig === null) {
+            if (this.primaryMainConfig === null && configPathToLoad && fs.existsSync(configPathToLoad)) {
                 try {
-                    console.log(`INFO: Loading primary main configuration from: ${configPathToLoad} (${loadedFrom})`);
+                    console.log(`INFO: Loading primary main configuration from: ${configPathToLoad} (${loadedFromReason})`);
                     this.primaryMainConfig = await loadYamlConfig(configPathToLoad);
                     this.primaryMainConfigPathActual = configPathToLoad;
                     if (configPathToLoad === this.projectManifestConfigPath) {
-                        // If the project manifest was loaded as the primary, store its content.
                         this.projectManifestConfig = this.primaryMainConfig;
                     }
                 } catch (error) {
                     console.error(`ERROR loading primary main configuration from '${configPathToLoad}': ${error.message}`);
-                    if (configPathToLoad !== this.defaultMainConfigPath && !this.useFactoryDefaultsOnly && fs.existsSync(this.defaultMainConfigPath)) {
-                        console.warn(`WARN: Falling back to bundled default main configuration: ${this.defaultMainConfigPath}`);
-                        try {
-                            this.primaryMainConfig = await loadYamlConfig(this.defaultMainConfigPath);
-                            this.primaryMainConfigPathActual = this.defaultMainConfigPath;
-                        } catch (fallbackError) {
-                            console.error(`ERROR loading fallback bundled default main configuration: ${fallbackError.message}`);
-                            this.primaryMainConfig = {};
-                            this.primaryMainConfigPathActual = null;
-                        }
-                    } else {
-                        this.primaryMainConfig = {};
-                        this.primaryMainConfigPathActual = null;
-                    }
-                    if (configPathToLoad === this.projectManifestConfigPath) {
-                        this.projectManifestConfig = this.primaryMainConfig; // Ensure it's set even on error
-                    }
+                    // Fallback to an empty config if any error occurs during load
+                    this.primaryMainConfig = {};
+                    this.primaryMainConfigPathActual = null;
                 }
+            } else if (this.primaryMainConfig === null) { // If no valid path was determined or it didn't exist
+                 this.primaryMainConfig = {};
+                 this.primaryMainConfigPathActual = null;
+                 if (configPathToLoad) { // Only warn if we attempted a path
+                    console.warn(`WARN: Primary main configuration file '${configPathToLoad}' could not be loaded or found. Using empty global settings.`);
+                 } else {
+                    console.warn(`WARN: No primary main configuration file could be identified. Using empty global settings.`);
+                 }
             }
             this.primaryMainConfig = this.primaryMainConfig || {};
         }
@@ -101,7 +109,6 @@ class ConfigResolver {
                 this.projectManifestConfigPath,
                 this.useFactoryDefaultsOnly
             );
-            // Corrected method call: buildRegistry() instead of build()
             this.mergedPluginRegistry = await registryBuilder.buildRegistry(); 
             if(this.mergedPluginRegistry) this.mergedPluginRegistry._builtWithFactoryDefaults = this.useFactoryDefaultsOnly;
         }

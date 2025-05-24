@@ -169,6 +169,58 @@ Standard CSS files used to style your document. Paths are specified in your plug
   * `data/`: For storing static data files (e.g., JSON, YAML) that your plugin might use.
   * `templates/`: If your plugin uses a templating engine (like Handlebars, EJS) for HTML generation, you can store template files here.
 
+## Providing Plugin-Specific Help via CLI
+
+Usage:
+```bash
+md-to-pdf plugin help <your-plugin-name>
+```
+
+To enable this for a plugin, you need to include a `cli_help` key within the YAML front matter of your plugin's `README.md` file. The `md-to-pdf` tool will use its Markdown utilities to extract and display this text.
+
+#### Plugin Help Mechanism
+
+Create or update a `README.md` file in the root of your plugin's directory (e.g., `my-custom-plugins/my-invoice/README.md`). Add a YAML front matter block at the top of this file with a `cli_help` key. The value of this key should be a multiline string containing the help text you want to display.
+
+#### Example
+
+`README.md` for `my-invoice` plugin:**
+
+```markdown
+---
+cli_help: |
+  Plugin: my-invoice
+  Description: Generates professional invoices from Markdown files.
+
+  Key Features:
+    - Customizable templates.
+    - Supports line items, taxes, and discounts.
+    - Outputs clean, well-formatted PDFs.
+
+  Expected Front Matter:
+    - `invoice_number`: (string) Unique invoice identifier.
+    - `client_name`: (string) Name of the client.
+    - `items`: (array) List of line items, each with 'description', 'quantity', 'price'.
+    - `tax_rate`: (number, optional) Percentage tax rate.
+
+  Configuration Notes (my-invoice.config.yaml):
+    - `css_files`: Path to CSS for invoice styling.
+    - `pdf_options`: Page size, margins.
+    - `template_file`: (optional) Path to a custom HTML template for the invoice.
+
+  Example Usage:
+    md-to-pdf convert new_invoice.md --plugin my-invoice
+---
+
+# My Invoice Plugin (`my-invoice`)
+
+This plugin helps you create professional invoices from simple Markdown files...
+```
+
+Keep this help text current with your plugin's features.
+
+If a plugin's `README.md` is missing, or if the `cli_help` key is absent from its front matter, `md-to-pdf plugin help <pluginName>` will display the plugin's `description` from its `*.config.yaml` file as a fallback.
+
 ## Plugin Discovery and Registration
 
 For `md-to-pdf` to recognize and use your custom plugin, it must be "registered." Registration involves telling `md-to-pdf` the name you want to use to invoke your plugin and where to find its main configuration file (`<plugin-name>.config.yaml`).
@@ -386,7 +438,7 @@ brandingColor: "#2a9d8f"                             # Custom branding color for
 *Creative Solutions through Scientific Excellence*
 ```
 
-You could, of course, configure your name, phone number, email, etc in the front matter--or, better yet, in the `params:` portion of your global `config.yaml` file--but for readability we only add dynamic parameters in this example.  E.g., `**Web:** [{{ .website }}]({{ .website }})`.
+You could, of course, configure your name, phone number, email, etc in the front matter--or, better yet, in the `params:` portion of your global `config.yaml` file--but for readability we only add dynamic parameters in this example. E.g., `**Web:** [{{ .website }}]({{ .website }})`.
 
 ### 2\. Plugin Configuration (`advanced-card.config.yaml`)
 

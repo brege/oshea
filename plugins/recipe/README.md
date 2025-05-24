@@ -1,0 +1,33 @@
+---
+cli_help: |
+  Plugin: recipe
+  Description: Handles individual recipe documents.
+
+  Features:
+    - Formats recipes for easy reading and printing.
+    - Supports common recipe sections like Ingredients and Directions.
+    - Uses specific CSS for a clean recipe layout.
+
+  Front Matter Fields:
+    - title: (string) The name of the recipe. Used for PDF metadata and as the main H1 heading.
+    - author: (string, optional) The author or source of the recipe.
+    - date: (string or date, optional) Date of creation or last update.
+    - tags: (array of strings, optional) Keywords for the recipe.
+    - (Other custom fields relevant to recipes can be used as placeholders)
+
+  Configuration Notes (recipe.config.yaml):
+    - css_files: Specifies the CSS to use (e.g., "recipe.css").
+    - pdf_options: Controls page size, margins, etc.
+    - inject_fm_title_as_h1: Typically true.
+    - aggressiveHeadingCleanup: Typically true to avoid duplicate titles if the Markdown also contains an H1.
+    - remove_shortcodes_patterns: Can be used to clean Hugo-specific or other shortcodes.
+
+  Example Usage:
+    md-to-pdf convert my_favorite_recipe.md --plugin recipe
+---
+
+# Recipe Plugin (`recipe`)
+
+This plugin is tailored for converting Markdown files formatted as individual recipes into well-structured PDF documents.
+
+It typically uses the `title` field from the front matter as the main H1 heading and applies specific styling to make ingredients, directions, and other recipe elements clear and easy to follow.

@@ -157,6 +157,91 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     md-to-pdf plugin help cv
     ```
 
+## Configuration Inspection
+
+**1. Display Active Global Configuration**
+
+  * Shows paths to active main configuration files and key global settings.
+  * Respects global `--config` and `--factory-defaults` flags.
+
+    ```bash
+    md-to-pdf config
+    ```
+    Output with XDG config active:
+    ```
+    # Configuration Sources:
+    #   Primary Main Config Loaded: /home/user/.config/md-to-pdf/config.yaml (XDG Global)
+    #   Considered Bundled Main Config (config.yaml): /path/to/md-to-pdf/config.yaml
+
+    # Active Global Configuration:
+
+    pdf_viewer: xdg-open
+    global_pdf_options:
+      format: Letter
+      # ... more global settings ...
+    params:
+      some_global_param: "value"
+    # ... etc. ...
+
+    # Note: This shows the global settings from the primary main configuration file.
+    # To see the full effective configuration for a specific plugin, use 'md-to-pdf config --plugin <pluginName>'.
+    ```
+
+**2. Display Effective Configuration for a Specific Plugin**
+
+  * Shows the fully resolved configuration for the specified plugin, including all applied overrides and merged global settings.
+  * Also details the source files that contributed to this configuration.
+  * Respects global `--config` and `--factory-defaults` flags.
+
+    ```bash
+    md-to-pdf config --plugin cv
+    ```
+    Example Output:
+    ```
+    # Effective configuration for plugin: cv
+
+    description: Plugin for Curriculum Vitae (CV) documents.
+    handler_script: index.js
+    css_files:
+      - /path/to/md-to-pdf/plugins/cv/cv.css
+    pdf_options:
+      format: A4
+      # ... other effective PDF options for cv ...
+    # ... etc. ...
+
+    # Source Information:
+    #   Plugin Base Path: /path/to/md-to-pdf/plugins/cv
+    #   Handler Script Path: /path/to/md-to-pdf/plugins/cv/index.js
+    #   Contributing Configuration Files (most specific last):
+    #     - Primary Main Config (for global settings): /home/user/.config/md-to-pdf/config.yaml
+    #     - /path/to/md-to-pdf/plugins/cv/cv.config.yaml
+
+    # Resolved CSS Files (order matters):
+    #     - /path/to/md-to-pdf/plugins/cv/cv.css
+    ```
+
+**3. Display Pure Configuration (for Copy-Pasting)**
+
+  * Use the `--pure` flag with `md-to-pdf config` (with or without `--plugin`) to output only the raw YAML configuration data.
+  * This strips all comments, headers, and informational text, making it suitable for copying into a configuration file.
+
+    ```bash
+    md-to-pdf config --pure
+    md-to-pdf config --plugin cv --pure
+    ```
+    Example Output for `md-to-pdf config --plugin cv --pure`:
+    ```yaml
+    description: Plugin for Curriculum Vitae (CV) documents.
+    handler_script: index.js
+    css_files:
+      - /path/to/md-to-pdf/plugins/cv/cv.css
+    pdf_options:
+      format: A4
+      # ... etc. ...
+    # ... only the YAML content ...
+    ```
+
+
 ## Config Snippets (`config.yaml`)
 
 ### PDF Viewer

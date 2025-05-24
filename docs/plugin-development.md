@@ -293,6 +293,34 @@ When `css_files` are specified in an override layer (XDG or Project):
   * `inherit_css: true`: Appends CSS files from the current layer to those from lower layers.
   * `inherit_css: false` (default): Replaces all CSS from lower layers with only those from the current layer.
 
+### Verifying Your Plugin's Effective Configuration
+
+As you develop and configure your plugin, especially when dealing with multiple layers of configuration (your plugin's defaults, XDG user overrides, and project-specific overrides), it can be beneficial to see the final, effective configuration that `md-to-pdf` will use for your plugin--either for debugging or testing.
+
+The `md-to-pdf config` command is designed for this purpose.
+
+To inspect the full effective configuration for your plugin, including all merged settings and resolved paths:
+
+```bash
+md-to-pdf config --plugin <your-plugin-name>
+```
+
+This command displays:
+
+* The complete `pluginSpecificConfig` object that your plugin's handler script will receive. This object includes settings from your plugin's own `*.config.yaml`, merged with any applicable XDG or project-level overrides, and also incorporates relevant global settings (like `global_pdf_options` and `math` settings from the main configuration).
+* **Source Information**:
+    * The `pluginBasePath` (the root directory of your plugin).
+    * The resolved `handlerScriptPath`.
+    * A list of "Contributing Configuration Files," showing the main configuration file used for global settings, your plugin's own configuration file, and any XDG or project-specific override files that were loaded and merged.
+* **Resolved CSS Files**: The final list of CSS file paths that will be applied, in order.
+
+If you want to see only the raw YAML output of the `pluginSpecificConfig` (for example, to copy parts of it into an override file or for quick inspection), you can use the `--pure` flag:
+
+```bash
+md-to-pdf config --plugin <your-plugin-name> --pure
+```
+
+
 ## Using Your Custom Plugin
 
 Once registered, invoke your plugin using the name you defined in the `document_type_plugins` section:

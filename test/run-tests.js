@@ -4,6 +4,7 @@ const fss = require('fs'); // Sync operations
 const path = require('path');
 const { exec } = require('child_process');
 const util = require('util');
+const yaml = require('js-yaml');
 
 const execAsync = util.promisify(exec);
 
@@ -26,6 +27,109 @@ const CREATED_PLUGINS_DIR = path.join(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_SUBD
 
 // --- Test Cases ---
 const testCases = [
+    // --- md-to-pdf config Test Cases ---
+    {
+        description: "CLI: config - Display global config (implicitly uses test/config.test.yaml)",
+        commandArgs: ['config'],
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            const normalizedTestConfigPath = path.normalize(TEST_CONFIG_PATH);
+            if (!stdout.includes("# Configuration Sources:")) throw new Error("Missing '# Configuration Sources:' heading.");
+            if (!stdout.includes(normalizedTestConfigPath) || !stdout.includes("(Project --config)")) throw new Error(`Stdout does not correctly show '${normalizedTestConfigPath}' as 'Project --config'. Output:\n${stdout}`);
+            if (!stdout.includes("# Active Global Configuration:")) throw new Error("Missing '# Active Global Configuration:' heading.");
+            if (!stdout.includes("pdf_viewer: null")) throw new Error("Missing 'pdf_viewer: null'.");
+            if (!stdout.includes("title_param: Title From Base Config")) throw new Error("Missing 'params: title_param'.");
+            if (!stdout.includes("default: ../plugins/default/default.config.yaml")) throw new Error("Missing default plugin registration.");
+        }
+    },
+    {
+        description: "CLI: config --pure - Display pure global config (implicitly uses test/config.test.yaml)",
+        commandArgs: ['config', '--pure'],
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            if (stdout.includes("# Configuration Sources:")) throw new Error("Found commented header in --pure output.");
+            if (stdout.includes("# Note:")) throw new Error("Found note in --pure output.");
+            try {
+                const parsedYaml = yaml.load(stdout);
+                if (parsedYaml.pdf_viewer !== null) throw new Error("Incorrect pdf_viewer in --pure output.");
+                if (!parsedYaml.global_pdf_options || parsedYaml.global_pdf_options.format !== "Letter") throw new Error("Incorrect global_pdf_options.format in --pure output.");
+                if (!parsedYaml.params || parsedYaml.params.title_param !== "Title From Base Config") throw new Error("Incorrect params.title_param in --pure output.");
+            } catch (e) {
+                throw new Error(`Failed to parse --pure output as YAML: ${e.message}\nOutput:\n${stdout}`);
+            }
+        }
+    },
+    {
+        description: "CLI: config --factory-defaults - Display factory default global config",
+        commandArgs: ['config', '--factory-defaults'],
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            const normalizedFactoryConfigPath = path.normalize(path.join(PROJECT_ROOT, 'config.example.yaml'));
+            if (!stdout.includes(normalizedFactoryConfigPath) || !stdout.includes("(Factory Default:")) throw new Error(`Stdout does not show factory default config path correctly. Output:\n${stdout}`);
+            if (!stdout.includes("pdf_viewer: xdg-open")) throw new Error("Missing 'pdf_viewer: xdg-open' from factory defaults.");
+            if (!stdout.includes("default: ./plugins/default/default.config.yaml")) throw new Error("Missing default plugin registration from factory defaults.");
+        }
+    },
+    {
+        description: "CLI: config --plugin default - Display config for 'default' plugin",
+        commandArgs: ['config', '--plugin', 'default'],
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            const normalizedTestConfigPath = path.normalize(TEST_CONFIG_PATH);
+            const normalizedDefaultPluginConfigPath = path.normalize(path.join(PROJECT_ROOT, './plugins/default/default.config.yaml'));
+            const normalizedDefaultPluginCssPath = path.normalize(path.join(PROJECT_ROOT, './plugins/default/default.css'));
+
+            if (!stdout.includes("# Effective configuration for plugin: default")) throw new Error("Missing plugin config header.");
+            if (!stdout.includes("description: Default plugin for generic Markdown documents.")) throw new Error("Missing plugin description.");
+            if (!stdout.includes("format: Letter")) throw new Error("Missing merged global PDF option 'format: Letter'."); // from test/config.test.yaml
+            if (!stdout.includes("# Source Information:")) throw new Error("Missing '# Source Information:' heading.");
+            if (!stdout.includes(normalizedDefaultPluginConfigPath)) throw new Error(`Missing plugin's own config path '${normalizedDefaultPluginConfigPath}'.`);
+            if (!stdout.includes(normalizedTestConfigPath)) throw new Error(`Missing main config path '${normalizedTestConfigPath}'.`);
+            if (!stdout.includes(normalizedDefaultPluginCssPath)) throw new Error(`Missing resolved CSS path '${normalizedDefaultPluginCssPath}'.`);
+        }
+    },
+    {
+        description: "CLI: config --plugin default --pure - Display pure config for 'default' plugin",
+        commandArgs: ['config', '--plugin', 'default', '--pure'],
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            if (stdout.includes("# Effective configuration for plugin:")) throw new Error("Found commented header in --pure plugin output.");
+            try {
+                const parsedYaml = yaml.load(stdout);
+                if (parsedYaml.description !== "Default plugin for generic Markdown documents.") throw new Error("Incorrect description in --pure plugin output.");
+                if (!parsedYaml.pdf_options || parsedYaml.pdf_options.format !== "Letter") throw new Error("Incorrect pdf_options.format in --pure plugin output.");
+            } catch (e) {
+                throw new Error(`Failed to parse --pure plugin output as YAML: ${e.message}\nOutput:\n${stdout}`);
+            }
+        }
+    },
+    {
+        description: "CLI: config --plugin cv --config <path_to_override_cv_test.yaml> - Test project-specific plugin override display",
+        commandArgs: ['config', '--plugin', 'cv', '--config', path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml')],
+        expectedOutputs: [],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            const normalizedOverrideCvConfigPath = path.normalize(path.join(TEST_DIR, 'assets', 'override_config', 'override_cv.config.yaml'));
+            const normalizedOverrideCvCssPath = path.normalize(path.join(TEST_DIR, 'assets', 'override_config', 'override_cv_style.css'));
+            
+            if (!stdout.includes("format: A5")) throw new Error("Missing 'format: A5' from override_cv.config.yaml.");
+            if (!stdout.includes(normalizedOverrideCvConfigPath)) throw new Error(`Missing override config path '${normalizedOverrideCvConfigPath}'.`);
+            if (!stdout.includes(normalizedOverrideCvCssPath)) throw new Error(`Missing overridden CSS path '${normalizedOverrideCvCssPath}'.`);
+            if (!stdout.includes("description: CV Test with Project-Specific Overrides")) throw new Error("Missing overridden description.");
+        }
+    },    
+    // --- md-to-pdf CLI Test Cases ---
     {
         description: "CV: Convert example CV with explicit filename",
         commandArgs: [

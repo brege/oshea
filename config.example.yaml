@@ -44,11 +44,12 @@ math:
 # Maps a "plugin name" (used with --plugin) to its configuration file path.
 # Paths are relative to this main config.yaml file's location.
 document_type_plugins:
-  default: "plugins/default/default.config.yaml"
-  cv: "plugins/cv/cv.config.yaml"
-  cover-letter: "plugins/cover-letter/cover-letter.config.yaml"
-  recipe: "plugins/recipe/recipe.config.yaml"
-  recipe-book: "plugins/recipe-book/recipe-book.config.yaml"
+  default: "./plugins/default/default.config.yaml"
+  cv: "./plugins/cv/cv.config.yaml"
+  cover-letter: "./plugins/cover-letter/cover-letter.config.yaml"
+  recipe: "./plugins/recipe/recipe.config.yaml"
+  recipe-book: "./plugins/recipe-book/recipe-book.config.yaml"
+  advanced-card: "./examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml"
   # Example for a custom plugin:
   # my-custom-plugin: "path/to/my/custom-plugins/my-plugin/my-plugin.config.yaml"
 

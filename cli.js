@@ -6,14 +6,15 @@ const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs'); 
 const { spawn } = require('child_process');
+// const yaml = require('js-yaml'); // No longer needed here directly for config display
 
 const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
-// const HugoExportEach = require('./src/hugo_export_each'); // Removed
 const { setupWatch } = require('./src/watch_handler');
 const PluginRegistryBuilder = require('./src/PluginRegistryBuilder');
 const { scaffoldPlugin } = require('./src/plugin_scaffolder'); 
-const { displayPluginHelp } = require('./src/get_help'); // Added for plugin help
+const { displayPluginHelp } = require('./src/get_help'); 
+const { displayConfig } = require('./src/config_display'); // Import the new display function
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -51,7 +52,7 @@ async function commonCommandHandler(args, executorFunction, commandType) {
             );
         } else {
             await executorFunction(args, configResolver);
-            console.log(`${commandType} command finished.`);
+            // Removed "command finished" log for config command, handled by displayConfig itself if needed
         }
     } catch (error) {
         const pluginNameForError = args.plugin || args.pluginName || 'N/A';
@@ -91,6 +92,7 @@ async function executeConversion(args, configResolver) {
     } else {
         if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.plugin}'.`);
     }
+    console.log(`convert command finished.`); // Added back here
 }
 
 async function executeGeneration(args, configResolver) {
@@ -131,6 +133,7 @@ async function executeGeneration(args, configResolver) {
     } else {
         if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.pluginName}'.`);
     }
+    console.log(`generate command finished.`); // Added back here
 }
 
 async function main() {
@@ -139,7 +142,7 @@ async function main() {
         .scriptName("md-to-pdf")
         .usage("Usage: $0 <command> [options]")
         .option('config', {
-            describe: 'Path to a custom YAML configuration file.',
+            describe: 'Path to a custom YAML configuration file. This acts as the project-specific main config.',
             type: 'string',
             normalize: true,
         })
@@ -170,14 +173,14 @@ async function main() {
         )
         .command(
             "generate <pluginName>",
-            "Generate a document using a specified plugin.",
+            "Generate a document using a specified plugin that requires complex inputs.",
             (y) => { 
                 y.positional("pluginName", { describe: "Name of the plugin.", type: "string"})
                 .option("outdir", { alias: "o", describe: "Output directory.", type: "string", default: "."})
                 .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" }) 
                 .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true})
                 .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false});
-                y.strict(false); // Allows plugin-specific options
+                y.strict(false); 
             },
             (args) => commonCommandHandler(args, executeGeneration, 'generate')
         )
@@ -252,7 +255,7 @@ async function main() {
                         }
                     }
                 )
-                .command( // New "help" subcommand for plugins
+                .command( 
                     "help <pluginName>",
                     "Display detailed help for a specific plugin.",
                     (y) => {
@@ -263,7 +266,6 @@ async function main() {
                     },
                     async (args) => {
                         try {
-                            // The global --config and --factory-defaults are available in args
                             await displayPluginHelp(args.pluginName, args);
                         } catch (error) {
                             console.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
@@ -273,6 +275,25 @@ async function main() {
                     }
                 )
                 .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create, help).");
+            }
+        )
+        .command( 
+            "config",
+            "Display active configuration settings. Use --pure for config-only output.", // Updated description
+            (y) => {
+                y.option("plugin", {
+                    alias: "p",
+                    describe: "Display effective configuration for a specific plugin.",
+                    type: "string"
+                })
+                .option("pure", { // New option
+                    describe: "Output only the raw configuration data, suitable for piping or copying.",
+                    type: "boolean",
+                    default: false
+                });
+            },
+            async (args) => {
+                await displayConfig(args); 
             }
         );
 

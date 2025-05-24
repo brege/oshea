@@ -74,7 +74,11 @@ class ConfigResolver {
             
             if (this.primaryMainConfig === null && configPathToLoad && fs.existsSync(configPathToLoad)) {
                 try {
-                    console.log(`INFO: Loading primary main configuration from: ${configPathToLoad} (${loadedFromReason})`);
+                    // if output level is debug, print the config path
+                    if (process.env.DEBUG) {
+                        console.log(`INFO: Loading primary main configuration from: ${configPathToLoad} (${loadedFromReason})`);
+                    }
+                    //console.log(`INFO: Loading primary main configuration from: ${configPathToLoad} (${loadedFromReason})`);
                     this.primaryMainConfig = await loadYamlConfig(configPathToLoad);
                     this.primaryMainConfigPathActual = configPathToLoad;
                     if (configPathToLoad === this.projectManifestConfigPath) {

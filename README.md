@@ -158,6 +158,13 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
         ```bash
         md-to-pdf plugin create my-invoice --dir ./custom-plugins
         ```
+      * **`config`**: Inspect the active configuration settings.
+        *Example:*
+        ```bash
+        md-to-pdf config
+        md-to-pdf config --plugin cv
+        md-to-pdf config --plugin cv --pure
+        ```
 
 For detailed syntax, all available options, and more examples for each command, please refer to the [Cheat Sheet](docs/cheat-sheet.md#core-commands--common-use-cases). For processing multiple files in a batch, see the [Batch Processing Guide](docs/batch-processing-guide.md).
 
@@ -241,6 +248,13 @@ Settings are resolved by looking through up to three layers for the main configu
         ```
 
     The project's main config file (passed via `--config`) is also the place to register project-local custom plugins. See the [Plugin Development Guide](docs/plugin-development.md) for details on registration.
+
+#### Verifying Your Configuration
+To see exactly which configuration files are being loaded and what the final effective settings are for the tool globally or for a specific plugin, use the `md-to-pdf config` command. Adding the `--pure` flag will output only the raw YAML. This is very helpful for debugging your setup.
+
+```bash
+md-to-pdf config    # [--plugin cv] [--pure]
+```
 
 #### Overriding Plugin Settings
 

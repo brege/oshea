@@ -13,6 +13,7 @@ const PluginManager = require('./src/PluginManager');
 const { setupWatch } = require('./src/watch_handler');
 const PluginRegistryBuilder = require('./src/PluginRegistryBuilder');
 const { scaffoldPlugin } = require('./src/plugin_scaffolder'); 
+const { displayPluginHelp } = require('./src/get_help'); // Added for plugin help
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -240,13 +241,9 @@ async function main() {
                     },
                     async (args) => {
                         try {
-                            // console.log(`Executing 'plugin create' for: ${args.pluginName}`); // Moved to scaffolder
                             const success = await scaffoldPlugin(args.pluginName, args.dir, args.force);
-                            if (success) {
-                                // console.log(`Plugin boilerplate for '${args.pluginName}' creation successful.`); // Scaffolder logs this
-                            } else {
-                                // console.error(`Failed to create plugin boilerplate for '${args.pluginName}'.`); // Scaffolder logs this
-                                process.exit(1); // Ensure exit with error code if scaffoldPlugin returns false
+                            if (!success) {
+                                process.exit(1);
                             }
                         } catch (error) {
                             console.error(`ERROR during 'plugin create ${args.pluginName}': ${error.message}`);
@@ -255,7 +252,27 @@ async function main() {
                         }
                     }
                 )
-                .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create).");
+                .command( // New "help" subcommand for plugins
+                    "help <pluginName>",
+                    "Display detailed help for a specific plugin.",
+                    (y) => {
+                        y.positional("pluginName", {
+                            describe: "Name of the plugin for which to display help.",
+                            type: "string"
+                        });
+                    },
+                    async (args) => {
+                        try {
+                            // The global --config and --factory-defaults are available in args
+                            await displayPluginHelp(args.pluginName, args);
+                        } catch (error) {
+                            console.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
+                            if (error.stack) console.error(error.stack);
+                            process.exit(1);
+                        }
+                    }
+                )
+                .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create, help).");
             }
         );
 

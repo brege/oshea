@@ -145,6 +145,18 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     This creates `./custom-plugins/my-invoice/` with `my-invoice.config.yaml`, `index.js`, and `my-invoice.css`.
     Remember to register the new plugin in a `config.yaml` file afterwards.
 
+**3. Get Help for a Specific Plugin**
+
+  * Displays detailed help information for a named plugin, sourced from its `README.md` front matter.
+
+    ```bash
+    md-to-pdf plugin help <pluginName>
+    ```
+    Example:
+    ```bash
+    md-to-pdf plugin help cv
+    ```
+
 ## Config Snippets (`config.yaml`)
 
 ### PDF Viewer

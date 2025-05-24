@@ -39,6 +39,8 @@ pdf_options:
 # watch_sources: # Example to show users how to add more
 #   - type: "file"
 #     path: "data/my-data.json" # Relative to this config file
+math:
+  enabled: false # Default math to disabled for new plugins
 `;
 }
 
@@ -86,6 +88,52 @@ body {
 }
 
 /**
+ * Generates the content for the README.md file.
+ * @param {string} pluginName - The name of the plugin.
+ * @returns {string} The Markdown content.
+ */
+function generatePluginReadmeMdContent(pluginName) {
+    return `---
+cli_help: |
+  Plugin: ${pluginName}
+  Description: [Provide a concise description of what your plugin does.]
+
+  Features:
+    - [Feature 1]
+    - [Feature 2]
+
+  Expected Front Matter:
+    - field_name: (type) Description of expected front matter field.
+    - another_field: (type, optional) Another field.
+
+  Configuration Notes (${pluginName}.config.yaml):
+    - css_files: Point to your custom CSS.
+    - pdf_options: Adjust page size, margins, etc.
+
+  Example Usage:
+    md-to-pdf convert document.md --plugin ${pluginName}
+---
+
+# ${pluginName} Plugin
+
+This is the README for the \`${pluginName}\` plugin.
+
+## Overview
+
+[Detailed description of your plugin, its purpose, and how it works.]
+
+## Usage
+
+[Explain how to use the plugin, any specific Markdown structure it expects, etc.]
+
+## Configuration
+
+[Detail any important configuration options from \`${pluginName}.config.yaml\` that users might want to customize.]
+`;
+}
+
+
+/**
  * Main function to scaffold a new plugin.
  * @param {string} pluginName - The name of the plugin to create.
  * @param {string} [baseDirOpt] - The directory where the plugin folder should be created. Defaults to CWD.
@@ -106,10 +154,6 @@ async function scaffoldPlugin(pluginName, baseDirOpt, force = false) {
     if (fss.existsSync(pluginDir)) {
         if (force) {
             console.warn(`WARN: Plugin directory '${pluginDir}' already exists. --force is enabled, so it will be overwritten.`);
-            // It's safer to remove and recreate for a clean slate,
-            // but ensure this is the desired behavior (proposal implies overwriting contents).
-            // For simplicity here, we'll just proceed to write files which will overwrite.
-            // A more robust --force might involve `fs.rm(pluginDir, { recursive: true, force: true })` first.
         } else {
             console.error(`ERROR: Plugin directory '${pluginDir}' already exists. Use --force to overwrite.`);
             return false;
@@ -132,6 +176,10 @@ async function scaffoldPlugin(pluginName, baseDirOpt, force = false) {
                 name: `${pluginName}.css`,
                 content: generatePluginCssContent(pluginName),
             },
+            { // New file
+                name: `README.md`,
+                content: generatePluginReadmeMdContent(pluginName),
+            }
         ];
 
         for (const file of filesToCreate) {
@@ -142,9 +190,9 @@ async function scaffoldPlugin(pluginName, baseDirOpt, force = false) {
 
         console.log(`INFO: Plugin '${pluginName}' created successfully at ${pluginDir}`);
         console.log(`INFO: Next steps:`);
-        console.log(`  1. Customize the generated files in '${pluginDir}'.`);
+        console.log(`  1. Customize the generated files in '${pluginDir}', especially README.md and its 'cli_help' section.`);
         console.log(`  2. Register your new plugin in a main config.yaml's 'document_type_plugins' section:`);
-        console.log(`     Example: your-plugin-name: "${path.relative(process.cwd(), pluginDir)}/${pluginName}.config.yaml"`);
+        console.log(`     Example: ${pluginName}: "${path.relative(process.cwd(), pluginDir)}/${pluginName}.config.yaml"`);
         return true;
 
     } catch (error) {

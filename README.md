@@ -143,11 +143,15 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
     ```
 
   * **`plugin`**: A group of subcommands for managing plugins.
-
       * `plugin list`: Lists all discoverable plugins.
         *Example:*
         ```bash
         md-to-pdf plugin list
+        ```
+      * `plugin create <pluginName>`: Generates a boilerplate for a new plugin.
+        *Example:*
+        ```bash
+        md-to-pdf plugin create my-invoice --dir ./custom-plugins
         ```
       * `plugin create <pluginName>`: Generates a boilerplate for a new plugin.
         *Example:*

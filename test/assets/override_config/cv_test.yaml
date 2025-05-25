@@ -1,11 +1,22 @@
 # test/assets/override_config/cv_test.yaml
-# This is the file passed to the --config CLI flag for the test.
+# This is the main project config file, passed via --config.
+# It defines direct overrides for the 'cv' plugin.
+# The 'cv' plugin itself is assumed to be registered via a lower-precedence
+# mechanism (e.g., config.example.yaml, which is used as a fallback
+# if this file doesn't register 'cv' under a 'plugins:' key).
 
-document_type_plugins:
-  cv: "./override_cv.config.yaml" # Path relative to the cv_test.yaml file
-
-# We can also test overriding a global option here if desired,
-# e.g., to ensure it's picked up by ConfigResolver._loadPrimaryMainConfig()
-# For this test, we'll focus on the plugin override.
-# global_pdf_options:
-#   printBackground: false # Example global override for this project config
+cv: # Top-level key matching the plugin name, providing overrides
+  description: "CV Test with Project-Specific Overrides (e.g., A5 format, green theme)"
+  pdf_options:
+    format: "A5"
+    margin:
+      top: "0.6in"
+      right: "0.6in"
+      bottom: "0.6in"
+      left: "0.6in"
+  css_files:
+    # Path relative to this cv_test.yaml file
+    - "./override_cv_style.css"
+  inherit_css: false
+  math:
+    enabled: false

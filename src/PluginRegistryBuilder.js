@@ -28,7 +28,7 @@ class PluginRegistryBuilder {
         this.projectManifestBaseDir = this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath) ? path.dirname(this.projectManifestConfigPath) : null;
 
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
-        this._builtRegistry = null;
+        this._builtRegistry = null; // Ensure cache is null on new instance
     }
 
     _resolveAlias(alias, aliasValue, basePathDefiningAlias) {
@@ -49,18 +49,17 @@ class PluginRegistryBuilder {
 
     _resolvePluginConfigPath(rawPath, basePathForMainConfig, currentAliases) {
         if (typeof rawPath !== 'string' || rawPath.trim() === '') return null;
+        
         let resolvedPath = rawPath;
         const aliasParts = rawPath.split(':');
         if (aliasParts.length > 1 && currentAliases && currentAliases[aliasParts[0]]) {
             const aliasName = aliasParts[0];
             const pathWithinAlias = aliasParts.slice(1).join(':');
-            const resolvedAliasBasePath = currentAliases[aliasName]; // Already resolved to absolute by _getPluginRegistrationsFromFile
+            const resolvedAliasBasePath = currentAliases[aliasName];
             if (resolvedAliasBasePath) {
                 resolvedPath = path.join(resolvedAliasBasePath, pathWithinAlias);
-                 // Path after alias substitution is now effectively absolute or needs to be treated as such if alias target was absolute
             } else {
-                // This case should ideally not be hit if currentAliases are pre-resolved, but as a fallback:
-                console.warn(`WARN (PluginRegistryBuilder): Alias '${aliasName}' used in path '${rawPath}' was not pre-resolved or is invalid.`);
+                // console.warn(`WARN (PluginRegistryBuilder): Alias '${aliasName}' used in path '${rawPath}' was not pre-resolved or is invalid.`); // Already warned by _getPluginRegistrationsFromFile if alias target is bad
                 return null;
             }
         } else if (resolvedPath.startsWith('~/') || resolvedPath.startsWith('~\\')) {
@@ -69,25 +68,26 @@ class PluginRegistryBuilder {
         
         if (!path.isAbsolute(resolvedPath)) {
             if (!basePathForMainConfig) {
-                 console.warn(`WARN (PluginRegistryBuilder): Cannot resolve relative plugin config path '${rawPath}' because its base path (basePathForMainConfig) could not be determined.`);
+                 console.warn(`WARN (PluginRegistryBuilder): Cannot resolve relative plugin config path '${rawPath}' because its base path (basePathForMainConfig) could not be determined. Skipping registration for this entry.`);
                  return null;
             }
             resolvedPath = path.resolve(basePathForMainConfig, resolvedPath);
         }
         
-        // Final check: ensure the path points to a file, not a directory
         try {
             if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
                 return resolvedPath;
             } else if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
-                console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' resolved to a directory, not a file: '${resolvedPath}'. Skipping.`);
+                console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to '${resolvedPath}') points to a directory, not a file. Skipping registration for this entry.`);
+                return null;
+            } else {
+                console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to '${resolvedPath}') does not exist. Skipping registration for this entry.`);
                 return null;
             }
-        } catch (e) { // Catches errors from fs.statSync if path exists but is inaccessible, etc.
-            console.warn(`WARN (PluginRegistryBuilder): Error accessing resolved plugin configuration path '${resolvedPath}' for raw path '${rawPath}': ${e.message}. Skipping.`);
+        } catch (e) { 
+            console.warn(`WARN (PluginRegistryBuilder): Error accessing resolved plugin configuration path '${resolvedPath}' for raw path '${rawPath}': ${e.message}. Skipping registration for this entry.`);
             return null;
         }
-        return null; // Path does not exist or is not a file
     }
 
     async _getPluginRegistrationsFromFile(mainConfigFilePath, basePathForMainConfig, sourceType) {
@@ -105,13 +105,13 @@ class PluginRegistryBuilder {
                     if (resolvedAliasTarget) {
                         currentAliases[alias] = resolvedAliasTarget;
                     } else {
-                        console.warn(`WARN (PluginRegistryBuilder): Invalid or unresolvable target for alias '${alias}: ${aliasPathRaw}' in '${mainConfigFilePath}'. This alias will be ignored.`);
+                        // Warning moved to _resolveAlias or when alias is used
                     }
                 }
             }
 
-            if (config && config.plugins && typeof config.plugins === 'object') { // Changed from document_type_plugins to plugins
-                for (const [pluginName, pluginConfPathRaw] of Object.entries(config.plugins)) { // Changed from document_type_plugins to plugins
+            if (config && config.plugins && typeof config.plugins === 'object') {
+                for (const [pluginName, pluginConfPathRaw] of Object.entries(config.plugins)) {
                     const resolvedPath = this._resolvePluginConfigPath(pluginConfPathRaw, basePathForMainConfig, currentAliases);
                     if (resolvedPath) { 
                         registrations[pluginName] = {
@@ -120,9 +120,7 @@ class PluginRegistryBuilder {
                             sourceType: sourceType
                         };
                     } else {
-                         if (!pluginConfPathRaw.includes(':') || !currentAliases[pluginConfPathRaw.split(':')[0]]) { 
-                            console.warn(`WARN (PluginRegistryBuilder): Plugin '${pluginName}' registered in '${mainConfigFilePath}' points to a non-existent or invalid config file: '${pluginConfPathRaw}' (resolved to '${resolvedPath || pluginConfPathRaw}')`);
-                        }
+                        // Warnings are now handled within _resolvePluginConfigPath
                     }
                 }
             }
@@ -134,9 +132,14 @@ class PluginRegistryBuilder {
     }
 
     async buildRegistry() {
-        if (this._builtRegistry && this._builtRegistry.builtWithFactoryDefaults === this.useFactoryDefaultsOnly) {
+        // Check cache, now including projectManifestConfigPath
+        if (this._builtRegistry && 
+            this._builtRegistry.builtWithFactoryDefaults === this.useFactoryDefaultsOnly &&
+            this._builtRegistry.projectManifestPathUsed === this.projectManifestConfigPath) {
+            // console.log(`DEBUG (PluginRegistryBuilder): Returning cached registry for projectManifest: ${this.projectManifestConfigPath}`);
             return this._builtRegistry.registry;
         }
+        // console.log(`DEBUG (PluginRegistryBuilder): Building new registry. useFactoryDefaultsOnly: ${this.useFactoryDefaultsOnly}, projectManifestConfigPath: ${this.projectManifestConfigPath}`);
 
         let registry = {};
         let sourcePathForInitialRegistrations;
@@ -166,22 +169,28 @@ class PluginRegistryBuilder {
         
         if (sourcePathForInitialRegistrations) { 
             const initialRegistrations = await this._getPluginRegistrationsFromFile(sourcePathForInitialRegistrations, baseDirForInitialRegistrations, initialRegistrationsSourceType);
-            registry = { ...registry, ...initialRegistrations };
+            registry = {...registry, ...initialRegistrations};
         }
-
 
         if (!this.useFactoryDefaultsOnly) {
             if (fs.existsSync(this.xdgGlobalConfigPath)) {
                 const xdgRegistrations = await this._getPluginRegistrationsFromFile(this.xdgGlobalConfigPath, this.xdgBaseDir, "XDG Global");
-                registry = { ...registry, ...xdgRegistrations };
+                registry = {...registry, ...xdgRegistrations};
             }
 
             if (this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath)) {
                 const projectRegistrations = await this._getPluginRegistrationsFromFile(this.projectManifestConfigPath, this.projectManifestBaseDir, "Project Manifest (--config)");
-                registry = { ...registry, ...projectRegistrations };
+                registry = {...registry, ...projectRegistrations}; // Ensure projectRegistrations overwrite
             }
         }
-        this._builtRegistry = { registry, builtWithFactoryDefaults: this.useFactoryDefaultsOnly };
+        this._builtRegistry = { 
+            registry, 
+            builtWithFactoryDefaults: this.useFactoryDefaultsOnly,
+            projectManifestPathUsed: this.projectManifestConfigPath // Store the manifest path used for this build
+        };
+        // if (registry.cv && process.env.DEBUG) { // Temp debug for CV
+        //     console.log(`DEBUG (PluginRegistryBuilder buildRegistry): Final 'cv' entry: ${JSON.stringify(registry.cv, null, 2)}`);
+        // }
         return registry;
     }
 
@@ -224,8 +233,6 @@ class PluginRegistryBuilder {
                         registrationSourceDisplay = `${registrationInfo.sourceType} (${definedInFilename})`;
                     }
                 }
-
-
                 pluginDetailsList.push({
                     name: pluginName,
                     description: description,

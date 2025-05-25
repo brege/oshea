@@ -19,9 +19,8 @@ const TEST_OUTPUT_DIR_NAME = 'test_output';
 const TEST_OUTPUT_BASE_DIR = path.join(TEST_DIR, TEST_OUTPUT_DIR_NAME);
 
 const HUGO_EXAMPLE_SOURCE_IN_EXAMPLES = path.join(EXAMPLES_DIR, 'hugo-example');
-// const HUGO_EXAMPLE_SOURCE_IN_TEST_OUTPUT = path.join(TEST_OUTPUT_BASE_DIR, 'hugo-example-source'); // Removed
 
-const CREATED_PLUGINS_SUBDIR = 'created_plugins_test'; // To avoid conflict if user has 'created_plugins'
+const CREATED_PLUGINS_SUBDIR = 'created_plugins_test'; 
 const CREATED_PLUGINS_DIR = path.join(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_SUBDIR);
 
 
@@ -29,8 +28,8 @@ const CREATED_PLUGINS_DIR = path.join(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_SUBD
 const testCases = [
     // --- md-to-pdf config Test Cases ---
     {
-        description: "CLI: config - Display global config (implicitly uses test/config.test.yaml)",
-        commandArgs: ['config'],
+        description: "CLI: config - Display global config (explicitly using test/config.test.yaml)", // Modified description
+        commandArgs: ['config', '--config', TEST_CONFIG_PATH], // Explicitly add --config
         expectedOutputs: [],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
@@ -41,12 +40,14 @@ const testCases = [
             if (!stdout.includes("# Active Global Configuration:")) throw new Error("Missing '# Active Global Configuration:' heading.");
             if (!stdout.includes("pdf_viewer: null")) throw new Error("Missing 'pdf_viewer: null'.");
             if (!stdout.includes("title_param: Title From Base Config")) throw new Error("Missing 'params: title_param'.");
-            if (!stdout.includes("default: ../plugins/default/default.config.yaml")) throw new Error("Missing default plugin registration.");
+            if (!stdout.includes("plugins:")) throw new Error("Missing 'plugins:' section header.");
+            if (!stdout.includes("default: ../plugins/default/default.config.yaml")) throw new Error("Missing default plugin registration under 'plugins'.");
+            if (!stdout.includes("description: Test Override for Default Plugin")) throw new Error("Missing inline override 'default:' block's description.");
         }
     },
     {
-        description: "CLI: config --pure - Display pure global config (implicitly uses test/config.test.yaml)",
-        commandArgs: ['config', '--pure'],
+        description: "CLI: config --pure - Display pure global config (explicitly using test/config.test.yaml)", // Modified description
+        commandArgs: ['config', '--pure', '--config', TEST_CONFIG_PATH], // Explicitly add --config
         expectedOutputs: [],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
@@ -58,6 +59,8 @@ const testCases = [
                 if (parsedYaml.pdf_viewer !== null) throw new Error("Incorrect pdf_viewer in --pure output.");
                 if (!parsedYaml.global_pdf_options || parsedYaml.global_pdf_options.format !== "Letter") throw new Error("Incorrect global_pdf_options.format in --pure output.");
                 if (!parsedYaml.params || parsedYaml.params.title_param !== "Title From Base Config") throw new Error("Incorrect params.title_param in --pure output.");
+                if (!parsedYaml.plugins || !parsedYaml.plugins.default) throw new Error("Missing 'plugins.default' registration in --pure output.");
+                if (!parsedYaml.default || parsedYaml.default.description !== "Test Override for Default Plugin") throw new Error("Missing or incorrect inline override 'default.description' in --pure output.");
             } catch (e) {
                 throw new Error(`Failed to parse --pure output as YAML: ${e.message}\nOutput:\n${stdout}`);
             }
@@ -65,7 +68,7 @@ const testCases = [
     },
     {
         description: "CLI: config --factory-defaults - Display factory default global config",
-        commandArgs: ['config', '--factory-defaults'],
+        commandArgs: ['config', '--factory-defaults'], 
         expectedOutputs: [],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
@@ -73,12 +76,13 @@ const testCases = [
             const normalizedFactoryConfigPath = path.normalize(path.join(PROJECT_ROOT, 'config.example.yaml'));
             if (!stdout.includes(normalizedFactoryConfigPath) || !stdout.includes("(Factory Default:")) throw new Error(`Stdout does not show factory default config path correctly. Output:\n${stdout}`);
             if (!stdout.includes("pdf_viewer: xdg-open")) throw new Error("Missing 'pdf_viewer: xdg-open' from factory defaults.");
-            if (!stdout.includes("default: ./plugins/default/default.config.yaml")) throw new Error("Missing default plugin registration from factory defaults.");
+            if (!stdout.includes("plugins:")) throw new Error("Missing 'plugins:' section in factory defaults output.");
+            if (!stdout.includes("default: ./plugins/default/default.config.yaml")) throw new Error("Missing default plugin registration from factory defaults 'plugins' key.");
         }
     },
     {
-        description: "CLI: config --plugin default - Display config for 'default' plugin",
-        commandArgs: ['config', '--plugin', 'default'],
+        description: "CLI: config --plugin default - Display config for 'default' plugin with inline override",
+        commandArgs: ['config', '--plugin', 'default', '--config', TEST_CONFIG_PATH],
         expectedOutputs: [],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
@@ -88,17 +92,19 @@ const testCases = [
             const normalizedDefaultPluginCssPath = path.normalize(path.join(PROJECT_ROOT, './plugins/default/default.css'));
 
             if (!stdout.includes("# Effective configuration for plugin: default")) throw new Error("Missing plugin config header.");
-            if (!stdout.includes("description: Default plugin for generic Markdown documents.")) throw new Error("Missing plugin description.");
-            if (!stdout.includes("format: Letter")) throw new Error("Missing merged global PDF option 'format: Letter'."); // from test/config.test.yaml
+            if (!stdout.includes("description: Test Override for Default Plugin")) throw new Error("Missing overridden plugin description 'Test Override for Default Plugin'.");
+            if (!stdout.includes("format: A5")) throw new Error("Missing overridden PDF option 'format: A5'.");
+            if (!stdout.includes("top: 0.5in")) throw new Error("Missing overridden PDF margin top '0.5in'.");
             if (!stdout.includes("# Source Information:")) throw new Error("Missing '# Source Information:' heading.");
             if (!stdout.includes(normalizedDefaultPluginConfigPath)) throw new Error(`Missing plugin's own config path '${normalizedDefaultPluginConfigPath}'.`);
             if (!stdout.includes(normalizedTestConfigPath)) throw new Error(`Missing main config path '${normalizedTestConfigPath}'.`);
             if (!stdout.includes(normalizedDefaultPluginCssPath)) throw new Error(`Missing resolved CSS path '${normalizedDefaultPluginCssPath}'.`);
+            if (!stdout.includes(`Inline override from project main config: ${normalizedTestConfigPath}`)) throw new Error("Missing source info for inline project override.");
         }
     },
     {
-        description: "CLI: config --plugin default --pure - Display pure config for 'default' plugin",
-        commandArgs: ['config', '--plugin', 'default', '--pure'],
+        description: "CLI: config --plugin default --pure - Display pure config for 'default' plugin with inline override",
+        commandArgs: ['config', '--plugin', 'default', '--pure', '--config', TEST_CONFIG_PATH],
         expectedOutputs: [],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
@@ -106,36 +112,41 @@ const testCases = [
             if (stdout.includes("# Effective configuration for plugin:")) throw new Error("Found commented header in --pure plugin output.");
             try {
                 const parsedYaml = yaml.load(stdout);
-                if (parsedYaml.description !== "Default plugin for generic Markdown documents.") throw new Error("Incorrect description in --pure plugin output.");
-                if (!parsedYaml.pdf_options || parsedYaml.pdf_options.format !== "Letter") throw new Error("Incorrect pdf_options.format in --pure plugin output.");
+                if (parsedYaml.description !== "Test Override for Default Plugin") throw new Error(`Incorrect overridden description in --pure plugin output. Expected 'Test Override for Default Plugin', got '${parsedYaml.description}'.`);
+                if (!parsedYaml.pdf_options || parsedYaml.pdf_options.format !== "A5") throw new Error(`Incorrect overridden pdf_options.format in --pure plugin output. Expected 'A5', got '${parsedYaml.pdf_options?.format}'.`);
+                if (!parsedYaml.pdf_options.margin || parsedYaml.pdf_options.margin.top !== "0.5in") throw new Error(`Incorrect overridden pdf_options.margin.top in --pure plugin output. Expected '0.5in', got '${parsedYaml.pdf_options?.margin?.top}'.`);
             } catch (e) {
                 throw new Error(`Failed to parse --pure plugin output as YAML: ${e.message}\nOutput:\n${stdout}`);
             }
         }
     },
-    {
+{
         description: "CLI: config --plugin cv --config <path_to_override_cv_test.yaml> - Test project-specific plugin override display",
         commandArgs: ['config', '--plugin', 'cv', '--config', path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml')],
         expectedOutputs: [],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
             const stdout = result.stdout || "";
-            const normalizedOverrideCvConfigPath = path.normalize(path.join(TEST_DIR, 'assets', 'override_config', 'override_cv.config.yaml'));
-            const normalizedOverrideCvCssPath = path.normalize(path.join(TEST_DIR, 'assets', 'override_config', 'override_cv_style.css'));
+            // const normalizedProjectOverrideConfigPath = path.normalize(path.join(TEST_DIR, 'assets', 'override_config', 'override_cv.config.yaml')); // OLD check
+            const expectedOverrideSourceString = `Inline override from project main config: ${path.normalize(path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml'))}`; // NEW check for inline override source
+            const normalizedProjectOverrideCssPath = path.normalize(path.join(TEST_DIR, 'assets', 'override_config', 'override_cv_style.css'));
             
-            if (!stdout.includes("format: A5")) throw new Error("Missing 'format: A5' from override_cv.config.yaml.");
-            if (!stdout.includes(normalizedOverrideCvConfigPath)) throw new Error(`Missing override config path '${normalizedOverrideCvConfigPath}'.`);
-            if (!stdout.includes(normalizedOverrideCvCssPath)) throw new Error(`Missing overridden CSS path '${normalizedOverrideCvCssPath}'.`);
-            if (!stdout.includes("description: CV Test with Project-Specific Overrides")) throw new Error("Missing overridden description.");
+            if (!stdout.includes("description: CV Test with Project-Specific Overrides (e.g., A5 format, green theme)")) throw new Error("Missing overridden description from cv_test.yaml's inline override.");
+            if (!stdout.includes("format: A5")) throw new Error("Missing 'format: A5' from cv_test.yaml's inline override.");
+            
+            // Check if the "Contributing Configuration Files" section lists the cv_test.yaml as the source of an inline override for the project.
+            if (!stdout.includes(expectedOverrideSourceString)) throw new Error(`Missing expected source string for inline override: '${expectedOverrideSourceString}'. Check 'Contributing Configuration Files' in output. Full stdout:\n${stdout}`);
+            
+            if (!stdout.includes(normalizedProjectOverrideCssPath)) throw new Error(`Missing overridden CSS path '${normalizedProjectOverrideCssPath}'.`);
         }
-    },    
+    },   
     // --- md-to-pdf CLI Test Cases ---
     {
         description: "CV: Convert example CV with explicit filename",
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-cv.md'),
-            '--plugin', 'cv', // Updated from --type
+            '--plugin', 'cv', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-cv.pdf',
         ],
@@ -148,7 +159,7 @@ const testCases = [
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-cv.md'),
-            '--plugin', 'cv', // Updated from --type
+            '--plugin', 'cv', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
         ],
         expectedOutputs: [
@@ -160,7 +171,7 @@ const testCases = [
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-cover-letter.md'),
-            '--plugin', 'cover-letter', // Updated from --type
+            '--plugin', 'cover-letter', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-cover-letter.pdf',
         ],
@@ -173,7 +184,7 @@ const testCases = [
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-recipe.md'),
-            '--plugin', 'recipe', // Updated from --type
+            '--plugin', 'recipe', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
         ],
         expectedOutputs: [
@@ -183,9 +194,9 @@ const testCases = [
     {
         description: "Recipe Book: Create recipe book from Hugo examples",
         commandArgs: [
-            'generate', // Updated from 'book'
-            'recipe-book', // Plugin name
-            '--recipes-base-dir', HUGO_EXAMPLE_SOURCE_IN_EXAMPLES, // Specific option for recipe-book plugin
+            'generate', 
+            'recipe-book', 
+            '--recipes-base-dir', HUGO_EXAMPLE_SOURCE_IN_EXAMPLES, 
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-recipe-book.pdf',
         ],
@@ -197,27 +208,22 @@ const testCases = [
         description: "Project Config: Convert CV with project-specific config override (A5 format, custom CSS)",
         commandArgs: [
             'convert',
-            path.join(EXAMPLES_DIR, 'example-cv.md'), // Use a standard example CV markdown
+            path.join(EXAMPLES_DIR, 'example-cv.md'), 
             '--plugin', 'cv',
-            '--config', path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml'), // **** UPDATED PATH ****
+            '--config', path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml'), 
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-cv-project-override.pdf',
-            '--no-open', // Important for automated tests
+            '--no-open', 
         ],
         expectedOutputs: [
-            // The A5 format and different margins might result in a different file size
-            // compared to the default Letter/A4 CVs. Min size is a basic check.
-            { filePath: 'test-cv-project-override.pdf', minSize: 1000 }, // Adjust minSize if needed
+            { filePath: 'test-cv-project-override.pdf', minSize: 1000 }, 
         ],
         preTestSetup: async () => {
-            // Ensure the test asset directory and files exist.
-            const testAssetConfigPath = path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml'); // **** UPDATED PATH ****
+            const testAssetConfigPath = path.join(TEST_DIR, 'assets', 'override_config', 'cv_test.yaml'); 
             if (!fss.existsSync(testAssetConfigPath)) {
-                // This is more of a sanity check; these files should be part of the repo.
                 console.error(`ERROR: Test asset config file not found: ${testAssetConfigPath}`);
                 throw new Error(`Test asset config file not found: ${testAssetConfigPath}. Make sure test assets are in place.`);
             }
-            // Log that we are using specific assets for this test.
             console.log(`  Using project override config: ${testAssetConfigPath}`);
         }
     },
@@ -225,57 +231,50 @@ const testCases = [
         description: "Custom Plugin: Convert business card example using 'business-card' plugin",
         commandArgs: [
             'convert',
-            path.join(TEST_DIR, 'assets', 'example-business-card.md'), // Path to the new example markdown
+            path.join(TEST_DIR, 'assets', 'example-business-card.md'), 
             '--plugin', 'business-card',
-            // Uses the default TEST_CONFIG_PATH (test/config.test.yaml) which now registers 'business-card'
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-business-card.pdf',
             '--no-open',
         ],
         expectedOutputs: [
-            // Business cards are small, so minSize can be lower. Adjust if needed.
             { filePath: 'test-business-card.pdf', minSize: 500 },
         ],
-        // No preTestSetup needed as files are part of the source tree
     },
     {
         description: "Math Rendering: Convert example math document",
         commandArgs: [
             'convert',
             path.join(EXAMPLES_DIR, 'example-math.md'),
-            '--plugin', 'default',
+            '--plugin', 'default', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
-            // Filename will be 'math-test-document.pdf' based on title in front matter
             '--no-open',
         ],
         expectedOutputs: [
-            { filePath: 'math-test-document.pdf', minSize: 1000 }, // Adjust minSize if needed
+            { filePath: 'math-test-document.pdf', minSize: 1000 }, 
         ],
+        postTestChecks: async (testCaseOutputDir, result) => { 
+            if (!result.success) throw new Error(`CLI command failed unexpectedly: ${result.error?.message || 'Unknown error'}`);
+            console.log("  INFO: Math rendering test PDF generated. For A5 format verification, visually inspect or use 'md-to-pdf config --plugin default'.");
+        }
     },
-    // --- test 2-tier global params in YAML config files ---
     {
         description: "Params: Test with base config params & front matter override",
         commandArgs: [
             'convert',
             path.join(TEST_DIR, 'assets', 'example-params-test.md'),
-            '--plugin', 'default', // Uses DefaultHandler which has the params logic
+            '--plugin', 'default', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
-            '--filename', 'params-test-output-base.pdf', // Name derived from {{title}} in MD
+            '--filename', 'params-test-output-base.pdf', 
             '--no-open',
-            // Implicitly uses test/config.test.yaml, which now has a 'params' section
         ],
         expectedOutputs: [
-            // Expected PDF name: "Title-From-Base-Config.pdf" (if title placeholder works)
-            // For simplicity in test, we use explicit filename.
-            { filePath: 'params-test-output-base.pdf', minSize: 500 }, // Adjusted minSize
+            { filePath: 'params-test-output-base.pdf', minSize: 500 }, 
         ],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed unexpectedly: ${result.error?.message || 'Unknown error'}`);
-            // Manual check: PDF should show "Title From Base Config", "Author From Front Matter",
-            // "Value From Front Matter" for shared_param, "Value From Base Config" for config_specific_param,
-            // and "http://base.example.com" for site.url.
             console.log("  INFO: For full verification of 'params-test-output-base.pdf', visually inspect if KEEP_OUTPUT=true.");
-            console.log("  Expected Title: Title From Base Config");
+            console.log("  Expected Title: Title From Base Config (then overridden by inline 'default' in test/config.test.yaml, then by front matter)");
             console.log("  Expected Author: Author From Front Matter");
             console.log("  Expected Shared Param: Value From Front Matter");
         }
@@ -286,22 +285,18 @@ const testCases = [
             'convert',
             path.join(TEST_DIR, 'assets', 'example-params-test.md'),
             '--plugin', 'default',
-            '--config', path.join(TEST_DIR, 'assets', 'project_params_config.yaml'), // Project config with overriding params
+            '--config', path.join(TEST_DIR, 'assets', 'project_params_config.yaml'), 
             '--outdir', TEST_OUTPUT_BASE_DIR,
-            '--filename', 'params-test-output-project.pdf', // Name derived from {{title}} in MD
+            '--filename', 'params-test-output-project.pdf', 
             '--no-open',
         ],
         expectedOutputs: [
-            // Expected PDF name: "Title-From-Project-Config.pdf"
-            { filePath: 'params-test-output-project.pdf', minSize: 500 }, // Adjusted minSize
+            { filePath: 'params-test-output-project.pdf', minSize: 500 }, 
         ],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (!result.success) throw new Error(`CLI command failed unexpectedly: ${result.error?.message || 'Unknown error'}`);
-            // Manual check: PDF should show "Title From Project Config", "Author From Front Matter",
-            // "Value From Front Matter" for shared_param, "Value From Project Config" for config_specific_param,
-            // and "http://project.example.com" for site.url.
             console.log("  INFO: For full verification of 'params-test-output-project.pdf', visually inspect if KEEP_OUTPUT=true.");
-            console.log("  Expected Title: Title From Project Config");
+            console.log("  Expected Title: Title From Project Config (then overridden by front matter)");
             console.log("  Expected Author: Author From Front Matter");
             console.log("  Expected Shared Param: Value From Front Matter");
         }
@@ -319,7 +314,8 @@ const testCases = [
             const expectedFiles = [
                 { name: 'scaffold-test1.config.yaml', contains: ["description: \"A new scaffold-test1 plugin for [purpose].\"", "handler_script: \"index.js\"", "css_files:", "- \"scaffold-test1.css\""] },
                 { name: 'index.js', contains: ["class ScaffoldTest1Handler", "constructor(coreUtils)", "new coreUtils.DefaultHandler()"] },
-                { name: 'scaffold-test1.css', contains: ["/* scaffold-test1/scaffold-test1.css */"] }
+                { name: 'scaffold-test1.css', contains: ["/* scaffold-test1/scaffold-test1.css */"] },
+                { name: 'README.md', contains: ["Plugin: scaffold-test1", "cli_help: |"] }
             ];
             for (const file of expectedFiles) {
                 const filePath = path.join(pluginDir, file.name);
@@ -331,6 +327,9 @@ const testCases = [
             }
             if (!result.stdout || !result.stdout.includes("Plugin 'scaffold-test1' created successfully")) {
                  throw new Error(`Success message not found in stdout. Stdout: ${result.stdout}`);
+            }
+             if (!result.stdout.includes("Register your new plugin in a main config.yaml's 'plugins' section:")) { 
+                throw new Error("Plugin create success message does not mention 'plugins' key for registration.");
             }
         }
     },
@@ -370,19 +369,17 @@ const testCases = [
                  throw new Error(`Success message not found in stdout for --force. Stdout: ${result.stdout}`);
             }
              if (fss.existsSync(path.join(pluginDir, 'dummy.txt'))) {
-                // This is acceptable based on current scaffolder logic (overwrite files, not dir)
                 console.log("  INFO: --force did not remove extraneous 'dummy.txt' file, files were overwritten.");
             }
         }
     },
     {
         description: "CLI: plugin create - Invalid plugin name (custom validation)",
-        commandArgs: ['plugin', 'create', 'bad!name', '--dir', CREATED_PLUGINS_DIR], // Using 'bad!name'
+        commandArgs: ['plugin', 'create', 'bad!name', '--dir', CREATED_PLUGINS_DIR], 
         expectedOutputs: [],
         postTestChecks: async (testCaseOutputDir, result) => {
             if (result.success) throw new Error("Command succeeded but should have failed (invalid name).");
             const stderr = result.stderr || result.error?.stderr || "";
-            // Check for the error message from plugin_scaffolder.js, matching "bad!name"
             if (!stderr.includes("ERROR: Invalid plugin name: \"bad!name\". Name must be alphanumeric and can contain hyphens, but not start/end with them.")) {
                 throw new Error(`Expected custom error message about invalid plugin name "bad!name" not found in stderr. Stderr: ${stderr}`);
             }
@@ -423,9 +420,6 @@ async function setupTestDirectory() {
         }
         console.log(`Creating test output directory: ${TEST_OUTPUT_BASE_DIR}`);
         await fs.mkdir(TEST_OUTPUT_BASE_DIR, { recursive: true });
-        // Also ensure the dedicated dir for created plugins is made if tests rely on it existing.
-        // However, plugin_scaffolder.js uses recursive:true, so it can create its base if needed.
-        // For clarity, we can create it here too.
         if (!fss.existsSync(CREATED_PLUGINS_DIR)) {
             await fs.mkdir(CREATED_PLUGINS_DIR, {recursive: true});
         }
@@ -452,14 +446,30 @@ async function cleanupTestDirectory(keepOutput = false) {
 }
 
 async function runCliCommand(argsArray) {
-    const hasCustomConfig = argsArray.some(arg => arg === '--config' || arg.startsWith('--config='));
-    const isPluginCommand = argsArray[0] === 'plugin'; // 'plugin create' should not get default --config
+    const cliArgs = [...argsArray]; 
+    const hasCustomConfig = cliArgs.some(arg => arg === '--config' || arg.startsWith('--config='));
+    const isPluginCommand = cliArgs[0] === 'plugin';
+    // For 'config' command, only add default TEST_CONFIG_PATH if it's NOT the one being explicitly tested
+    // and no other --config is present.
+    const isConfigCommandAndNotImplicitlyTestingDefault = cliArgs[0] === 'config' && !cliArgs.includes(TEST_CONFIG_PATH);
     
-    let command = `node "${CLI_SCRIPT_PATH}" ${argsArray.join(' ')}`;
+    let command = `node "${CLI_SCRIPT_PATH}" ${cliArgs.join(' ')}`;
     
-    if (!hasCustomConfig && !isPluginCommand) {
-        command += ` --config "${TEST_CONFIG_PATH}"`;
+    if (!hasCustomConfig && 
+        !cliArgs.includes('--factory-defaults') && 
+        !cliArgs.includes('--factory-default') && 
+        !cliArgs.includes('-fd') &&
+        !isPluginCommand && 
+        !isConfigCommandAndNotImplicitlyTestingDefault) { // Logic for adding default test config
+        if (!(cliArgs[0] === 'config' && cliArgs.length === 1)) { // Don't add for plain `md-to-pdf config`
+             // Add default test config for convert/generate if no other config specified
+             // AND for `md-to-pdf config --plugin <name>` if no other config specified
+            if (cliArgs[0] !== 'config' || (cliArgs[0] === 'config' && cliArgs.includes('--plugin'))) {
+                 command += ` --config "${TEST_CONFIG_PATH}"`;
+            }
+        }
     }
+
 
     console.log(`  Executing: ${command}`);
     try {
@@ -467,17 +477,14 @@ async function runCliCommand(argsArray) {
         if (stdout) console.log('  stdout:\n', stdout);
         const stderrContent = stderr && stderr.trim();
         if (stderrContent) {
-            // Log stderr as warning, but don't fail the command *solely* on stderr content
-            // unless execAsync itself throws (which it does for non-zero exit codes).
             console.warn('  stderr:\n', stderr);
         }
         return { success: true, stdout, stderr };
     } catch (error) { 
-        // error object from execAsync contains stdout and stderr properties
         console.error(`  Error executing command (cli.js likely exited with error): ${error.message}`);
         if (error.stdout && error.stdout.trim()) console.error('  stdout (on error):\n', error.stdout);
         if (error.stderr && error.stderr.trim()) console.error('  stderr (on error):\n', error.stderr);
-        return { success: false, error, stdout: error.stdout, stderr: error.stderr }; // Pass along stdout/stderr from error
+        return { success: false, error, stdout: error.stdout, stderr: error.stderr }; 
     }
 }
 
@@ -522,17 +529,13 @@ async function runTests() {
             }
             
             let result = { success: false, stdout: '', stderr: '', error: null };
-            if(testCasePassed) { // Only run command if pre-test setup passed
+            if(testCasePassed) { 
                 result = await runCliCommand(testCase.commandArgs);
                 if (!result.success && !testCase.postTestChecks) { 
-                    // If command failed AND there's no postTestCheck to validate the failure,
-                    // then it's an unexpected failure.
-                    // If postTestChecks exists, it's responsible for deciding if failure was expected.
                     testCasePassed = false;
                     console.error(`  RESULT: Command execution failed for: ${testCase.description}`);
                 } else if (testCase.expectedOutputs && testCase.expectedOutputs.length > 0) {
-                    // This block is for PDF generation tests
-                    if (!result.success) { // If command failed but was expected to produce PDFs
+                    if (!result.success) { 
                         testCasePassed = false;
                          console.error(`  RESULT: Command failed, cannot check expected PDF outputs for: ${testCase.description}`);
                     } else {
@@ -549,17 +552,10 @@ async function runTests() {
             }
 
             if (testCase.postTestChecks) {
-                if (testCasePassed || (!testCasePassed && result.error) ) { // Allow postTestChecks to validate expected failures
+                if (testCasePassed || (!testCasePassed && result.error) ) { 
                     try {
                         console.log("  Running post-test checks...");
                         await testCase.postTestChecks(TEST_OUTPUT_BASE_DIR, result);
-                         if (result.success && testCase.description.includes("Error on existing") || testCase.description.includes("Invalid plugin name")){
-                            // If an error test somehow passed the command, mark test as failed.
-                            // This happens if result.success was true but postTestChecks expected it to be false
-                            // and didn't throw an error itself. This logic might need refinement based on how
-                            // postTestChecks signals "expected failure verified".
-                            // A simpler way: postTestChecks should throw if an expected failure isn't seen.
-                        }
                     } catch (postCheckError) {
                         console.error(`  RESULT: FAILED post-test check: ${postCheckError.message}`);
                         if(postCheckError.stack) console.error(postCheckError.stack);

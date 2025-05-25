@@ -110,18 +110,17 @@ class PluginRegistryBuilder {
                 }
             }
 
-            if (config && config.document_type_plugins && typeof config.document_type_plugins === 'object') {
-                for (const [pluginName, pluginConfPathRaw] of Object.entries(config.document_type_plugins)) {
+            if (config && config.plugins && typeof config.plugins === 'object') { // Changed from document_type_plugins to plugins
+                for (const [pluginName, pluginConfPathRaw] of Object.entries(config.plugins)) { // Changed from document_type_plugins to plugins
                     const resolvedPath = this._resolvePluginConfigPath(pluginConfPathRaw, basePathForMainConfig, currentAliases);
-                    if (resolvedPath) { // _resolvePluginConfigPath now includes the isFile check and returns null if not a file
+                    if (resolvedPath) { 
                         registrations[pluginName] = {
                             configPath: resolvedPath,
                             definedIn: mainConfigFilePath,
                             sourceType: sourceType
                         };
                     } else {
-                        // Warning is now more specific within _resolvePluginConfigPath or if path does not exist after alias resolution
-                         if (!pluginConfPathRaw.includes(':') || !currentAliases[pluginConfPathRaw.split(':')[0]]) { // Avoid double warning if alias itself was bad
+                         if (!pluginConfPathRaw.includes(':') || !currentAliases[pluginConfPathRaw.split(':')[0]]) { 
                             console.warn(`WARN (PluginRegistryBuilder): Plugin '${pluginName}' registered in '${mainConfigFilePath}' points to a non-existent or invalid config file: '${pluginConfPathRaw}' (resolved to '${resolvedPath || pluginConfPathRaw}')`);
                         }
                     }
@@ -149,7 +148,7 @@ class PluginRegistryBuilder {
             initialRegistrationsSourceType = `Factory Default (${path.basename(this.factoryDefaultMainConfigPath)})`;
             if (!fs.existsSync(sourcePathForInitialRegistrations)) {
                 console.error(`CRITICAL (PluginRegistryBuilder): Factory default config '${sourcePathForInitialRegistrations}' not found. Cannot load factory default plugin registrations.`);
-                 sourcePathForInitialRegistrations = null; // Prevent attempt to load
+                 sourcePathForInitialRegistrations = null; 
             }
         } else {
             if (fs.existsSync(this.bundledMainConfigPath)) {
@@ -161,11 +160,11 @@ class PluginRegistryBuilder {
                 initialRegistrationsSourceType = `Factory Default Fallback (${path.basename(this.factoryDefaultMainConfigPath)})`;
             } else {
                  console.error(`CRITICAL (PluginRegistryBuilder): Neither '${this.bundledMainConfigPath}' nor '${this.factoryDefaultMainConfigPath}' found. Cannot load initial plugin registrations.`);
-                 sourcePathForInitialRegistrations = null; // Prevent attempt to load
+                 sourcePathForInitialRegistrations = null; 
             }
         }
         
-        if (sourcePathForInitialRegistrations) { // Check if a path was actually set
+        if (sourcePathForInitialRegistrations) { 
             const initialRegistrations = await this._getPluginRegistrationsFromFile(sourcePathForInitialRegistrations, baseDirForInitialRegistrations, initialRegistrationsSourceType);
             registry = { ...registry, ...initialRegistrations };
         }
@@ -196,7 +195,6 @@ class PluginRegistryBuilder {
                 let description = "N/A";
                 try {
                     if (registrationInfo.configPath && fs.existsSync(registrationInfo.configPath)) {
-                        // Ensure it's a file before trying to load as YAML
                         if (fs.statSync(registrationInfo.configPath).isFile()) {
                             const pluginConfig = await loadYamlConfig(registrationInfo.configPath);
                             description = pluginConfig.description || "N/A";

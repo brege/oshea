@@ -39,11 +39,11 @@ params:
       value: "Base Nested Value"
   fallback_param: "Base Fallback Value"
 
-# --- Document Type Plugin Registrations ---
+# --- Plugin Registrations --- # Changed from Document Type Plugin Registrations
 # Paths are relative to this main config file's location (the 'test/' directory).
 # They should point to the actual plugin config files in the project's 'plugins/' directory
 # or the custom test plugins directory.
-document_type_plugins:
+plugins: # Changed from document_type_plugins
   default: "../plugins/default/default.config.yaml"
   cv: "../plugins/cv/cv.config.yaml"
   cover-letter: "../plugins/cover-letter/cover-letter.config.yaml"
@@ -51,4 +51,18 @@ document_type_plugins:
   recipe-book: "../plugins/recipe-book/recipe-book.config.yaml"
   business-card: "./custom_plugins/business-card/business-card.config.yaml" 
 
-# --- Hugo Export Each Command Specific Configuration --- Section Removed ---
+# --- Inline Plugin Overrides for Testing (Beets-Inspired) ---
+# Example: Override the 'default' plugin settings for tests
+default: # Matches 'default' key in 'plugins'
+  description: "Test Override for Default Plugin"
+  pdf_options:
+    format: "A5" # Override the default plugin's 'Letter' format
+    margin: { top: "0.5in", bottom: "0.5in" } # Merges with and overrides default's margins
+  # css_files will inherit from the default plugin's config unless specified here
+  # with inherit_css: false
+
+business-card: # Matches 'business-card' key in 'plugins'
+  description: "Test Override for Business Card Plugin"
+  # Example of adding a param specifically for this plugin context if its handler used it
+  # plugin_params: 
+  #   card_theme: "dark_mode_test"

@@ -26,7 +26,7 @@ A [Node.js](https://nodejs.org/) command-line tool that converts [Markdown](http
 **Resume**
 ```bash
 md-to-pdf convert resume.md --plugin cv
-````
+```
 
 **Cover Letter**
 
@@ -53,7 +53,7 @@ md-to-pdf convert cover-letter.md --plugin cover-letter
   * **Configurability**
 
     * Set global options and register plugins in a main `config.yaml`.
-    * Control plugin appearance and behavior through a 3-tier configuration system: Bundled Defaults \< XDG User Settings \< Project-Specific Settings (via `--config`).
+    * Control plugin appearance and behavior through a 3-tier configuration system: Bundled Defaults \< XDG User Settings \< Project-Specific Settings (via `--config`). Plugin settings can be overridden by pointing to a separate file or by defining them inline within the main XDG/Project config.
     * Use YAML front matter within Markdown files for document-specific data and placeholders.
     * *The [Configuration](#configuration) section below explains these features in detail. For creating new plugins, see the [Plugin Development Guide](docs/plugin-development.md).*
 
@@ -67,7 +67,7 @@ md-to-pdf convert cover-letter.md --plugin cover-letter
 
 ### Examples
 
-| [CV Layout](plugins/cv)                                       | [Cover Letter Layout](plugins/cover-letter)                           | [Recipe Layout](plugins/recipe)                        |
+| [CV Layout](plugins/cv)                     | [Cover Letter Layout](plugins/cover-letter)               | [Recipe Layout](plugins/recipe)            |
 | :-----------------------------------: | :----------------------------------: | :---------------------------------: |
 | <img src="docs/images/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="docs/images/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="docs/images/screenshots/example-recipe.png" alt="Recipe Sreenshot" width="300"/> |
 
@@ -77,6 +77,7 @@ md-to-pdf convert cover-letter.md --plugin cover-letter
   * **npm (Node Package Manager):** Usually included with Node.js.
 
 ##### Verify Installation
+
 ```bash
 node -v
 npm -v
@@ -86,34 +87,34 @@ npm -v
 
 1.  **Clone the repository:**
 
-    ```bash
-    git clone https://github.com/brege/md-to-pdf.git
-    cd md-to-pdf
-    ```
+  ```bash
+  git clone https://github.com/brege/md-to-pdf
+  cd md-to-pdf
+  ```
 
 2.  **Install dependencies:**
 
-    ```bash
-    npm install
-    ```
+  ```bash
+  npm install
+  ```
 
-    This installs required packages and downloads a standalone version of Chromium (for [Puppeteer](https://pptr.dev/) to render intermediate HTML to PDF), and [Chokidar](https://github.com/paulmillr/chokidar) for auto-refreshing your PDF viewer.
+  This installs required packages and downloads a standalone version of Chromium (for [Puppeteer](https://pptr.dev/) to render intermediate HTML to PDF), and [Chokidar](https://github.com/paulmillr/chokidar) for auto-refreshing your PDF viewer.
 
 3.  **Initialize Configuration (Optional but Recommended):**
-    If you intend to customize global settings or add your own user-level plugins, you can copy the example configuration:
+  If you intend to customize global settings or add your own user-level plugins, you can copy the example configuration:
 
-    ```bash
-    cp config.example.yaml config.yaml
-    ```
+  ```bash
+  cp config.example.yaml config.yaml
+  ```
 
-    This bundled `config.yaml` primarily handles registration of built-in plugins and can be used for global tool settings (like `pdf_viewer`). You can also set up user-level configurations (see [Configuration Lookup Order](#configuration-lookup-order) and the [Plugin Development Guide](docs/plugin-development.md).
+  This bundled `config.yaml` primarily handles registration of built-in plugins (under the `plugins` key) and can be used for global tool settings (like `pdf_viewer`). You can also set up user-level configurations (see [Configuration Lookup Order](#configuration-lookup-order) and the [Plugin Development Guide](docs/plugin-development.md).
 
 4.  **(Optional) Make the CLI globally available:**
-    To run `md-to-pdf` from any directory:
+  To run `md-to-pdf` from any directory:
 
-    ```bash
-    npm link
-    ```
+  ```bash
+  npm link
+  ```
 
 ## Usage
 
@@ -122,150 +123,133 @@ The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`
 **Global Options:**
 
   * `--config <path_to_config.yaml>`: Specify a custom path to your main project-specific YAML configuration file. This file can register project-local plugins and override settings.
+  * `--outdir <directory>` (for `convert` and `generate`): Specifies the output directory for the PDF. For the `convert` command, if this is not provided, the PDF will be saved to a system temporary directory (e.g., `/tmp/md-to-pdf-output/`), and the full path will be logged.
   * `--factory-defaults` (or `--fd`): Use only bundled default configurations and plugins, ignoring user (XDG) and project (`--config`) configurations. Useful for debugging or getting a "vanilla" output.
 
 ### Commands Overview
 
-`md-to-pdf` offers several commands for different conversion and generation tasks:
+`md-to-pdf` has several commands for different conversion and generation tasks:
 
-  * **`convert`**: For converting single Markdown files to PDF using a specific plugin.
-    *Example:*
+  * **`convert`**: For converting single Markdown files to PDF using a specific plugin. If `--outdir` is not specified, output defaults to a system temporary directory.
 
-    ```bash
-    md-to-pdf convert my_document.md --plugin cv --outdir ./pdfs
-    ```
+  *Example:*
+  ```bash
+  md-to-pdf convert my_document.md --plugin cv --outdir ./pdfs
+  # Example without --outdir (output goes to temp)
+  md-to-pdf convert another_doc.md --plugin default
+  ```
 
   * **`generate`**: For plugins that require more complex inputs or generate documents from sources other than a single Markdown file (e.g., recipe books).
-    *Example (Recipe Book):*
+  *Example (Recipe Book):*
 
     ```bash
-    md-to-pdf generate recipe-book --recipes-base-dir ./my-recipes --filename "FamilyCookbook.pdf"
+    md-to-pdf generate recipe-book --recipes-base-dir examples/hugo-example --filename "FamilyCookbook.pdf"
     ```
 
   * **`plugin`**: A group of subcommands for managing plugins.
-      * `plugin list`: Lists all discoverable plugins.
-        *Example:*
-        ```bash
-        md-to-pdf plugin list
-        ```
-      * `plugin create <pluginName>`: Generates a boilerplate for a new plugin.
-        *Example:*
-        ```bash
-        md-to-pdf plugin create my-invoice --dir ./custom-plugins
-        ```
-      * `plugin create <pluginName>`: Generates a boilerplate for a new plugin.
-        *Example:*
-        ```bash
-        md-to-pdf plugin create my-invoice --dir ./custom-plugins
-        ```
-      * **`config`**: Inspect the active configuration settings.
-        *Example:*
-        ```bash
-        md-to-pdf config
-        md-to-pdf config --plugin cv
-        md-to-pdf config --plugin cv --pure
-        ```
+
+    * `plugin list`: Lists all discoverable plugins.
+      ```bash
+      md-to-pdf plugin list
+      ```
+
+    * `plugin create <pluginName>`: Generates a boilerplate for a new plugin.
+      ```bash
+      md-to-pdf plugin create my-invoice # [--dir ./custom-plugins]
+      ```
+
+    * `plugin help <pluginName>`: Displays detailed help for a specific plugin.
+      ```bash
+      md-to-pdf plugin help cv
+      ```
+
+  * **`config`**: Subcommand to inspect the active configuration settings.
+    ```bash
+    md-to-pdf config
+    md-to-pdf config --plugin cv
+    md-to-pdf config --plugin cv --pure
+    ```
 
 For detailed syntax, all available options, and more examples for each command, please refer to the [Cheat Sheet](docs/cheat-sheet.md#core-commands--common-use-cases). For processing multiple files in a batch, see the [Batch Processing Guide](docs/batch-processing-guide.md).
 
+
+
 ## Configuration
 
-`md-to-pdf` uses a layered configuration system. This allows you to set global defaults (including global `params` for placeholder data, as described below) and then override them for your specific user needs (via XDG configuration) or for individual projects (via a project-specific configuration file passed with `--config`).
+`md-to-pdf` uses a layered system for settings. This lets you have base settings, personal defaults, and project-specific changes.
 
-This section focuses on how to customize **global settings** (like `pdf_viewer` and `params`) and the **settings of existing plugins** (like changing CSS or PDF options for the bundled `cv` or `recipe` plugins). For details on creating entirely new plugins from scratch, refer to the [Plugin Development Guide](docs/plugin-development.md).
+### Main `config.yaml` Locations & Precedence
 
-### Configuration Layers and Precedence
+`md-to-pdf` looks for a main `config.yaml` to load global settings (like `pdf_viewer`, global `params` for placeholders) and register plugins. The first one found in this order is used:
 
-Settings are resolved by looking through up to three layers for the main configuration file (`config.yaml`), with later layers overriding earlier ones. The global `params` for placeholder substitution are loaded from the single active main `config.yaml` determined by this precedence.
+1.  **Project-Specific**  - Highest precedence
+      
+    `--config <your-project-config.yaml>`
 
-1.  **Bundled Defaults (Lowest - Factory Settings):**
+2.  **User-Global** - Medium: your personal defaults
 
-    If you installed this repository in `~/md-to-pdf/`:
+    `~/.config/md-to-pdf/config.yaml`
 
-      * **Main Config:** The `~/md-to-pdf/config.yaml` file (at the root of the `md-to-pdf` installation). This file defines default global settings (like `global_pdf_options`), can define default `params` (see below), and registers the paths to the standard bundled plugins (e.g., [`cv`](plugins/cv/), [`recipe`](plugins/recipe/) through its `document_type_plugins` section.
-      * **Plugin Defaults:** Each bundled plugin ([`plugins/cv/`](plugins/cv)) has its own `<pluginName>.config.yaml` ([`cv.config.yaml`](plugins/cv/cv.config.yaml)) that defines its default behavior, CSS files, and PDF options.
+3.  **Bundled:** `config.yaml` in the `md-to-pdf` installation directory - Lowest precedence (fallback to tool defaults)
 
-    Unless you want to maintain a fork of this repository, it is best to use the following methods to edit stylesheets and plugin behavior.
+### Customizing Plugin Settings
 
-2.  **XDG User Defaults (Optional - Personal Settings):**
+Each plugin (e.g., `cv`, `recipe`) starts with its own default settings (from its `<pluginName>.config.yaml` file, like `plugins/cv/cv.config.yaml`). You can override these defaults:
 
-    The typical location is `~/.config/md-to-pdf/` on Linux. You should configure personal global defaults here (including user-level `params`) or customize any plugin's behavior for all your projects.
+1.  **For Your User (Personal Defaults)**
 
-      * **Global User Settings:** Create `~/.config/md-to-pdf/config.yaml` to override tool-wide settings like `pdf_viewer`, `global_pdf_options`, or define your user-level `params`.
-        ```yaml
-        # ~/.config/md-to-pdf/config.yaml
-        pdf_viewer: "evince" 
-        global_pdf_options:
-          format: "A4"                              # Your preferred default paper size
-        params:
-          defaultAuthor: "My User Name"
-        ```
-      * **Plugin-Specific User Overrides:** To override settings for a specific plugin (e.g., the bundled `cv` plugin), create a directory and file like `~/.config/md-to-pdf/cv/cv.config.yaml`.
-        ```yaml
-        # ~/.config/md-to-pdf/cv/cv.config.yaml
-        # Overrides for the 'cv' plugin (e.g., to change its default CSS or margins)
-        description: "My custom default CV style."
-        css_files: ["./my_personal_cv_style.css"]   # Path relative to this file
-        inherit_css: false                          # Use only my CSS
-        pdf_options:
-          margin: { top: "0.8in", bottom: "0.8in" }
-        ```
-        Place `my_personal_cv_style.css` in `~/.config/md-to-pdf/cv/`.
+    Edit your user-global `~/.config/md-to-pdf/config.yaml`. Add a top-level section with the plugin's name:
 
-    This XDG config location **`~/.config/md-to-pdf/config.yaml`** can also be used to register your own custom plugins. See [Plugin Development Guide](docs/plugin-development.md).
+    ```yaml
+    # In ~/.config/md-to-pdf/config.yaml
+    # ... other global settings like pdf_viewer, params ...
 
-3.  **Project-Specific Configuration (Highest - Project Settings):**
+    plugins: # Register any custom plugins for your user here
+      my-notes-plugin: "~/my_plugins/notes/notes.config.yaml"
 
-    Use the `--config /path/to/your_project_main.yaml` CLI flag.
+    cv: # Overrides for the 'cv' plugin for your user
+      description: "My personal CV style"
+      pdf_options:
+        format: "A4"
+        margin: { top: "0.75in" }
+      css_files: ["~/.config/md-to-pdf/styles/my_cv_theme.css"] # Path to your custom CSS
+      # inherit_css: false # Default is false, replaces plugin's CSS. Set to true to append.
+    ```
 
-      * **Project Specific Settings:** The `your_project_main.yaml` file can override any global settings (including `params`) from the Bundled or XDG layers.
-        ```yaml
-        # /path/to/your_project_main.yaml
-        pdf_viewer: "firefox"                       # Project-specific viewer
-        global_pdf_options:
-          format: "Letter"
-        params:
-          projectSpecificValue: "123-ABC" 
-        ```
-      * **Project Plugin-Specific Overrides:** This `your_project_main.yaml` can also point to other YAML files within your project that provide further overrides for specific plugins.
-        ```yaml
-        # /path/to/your_project_main.yaml (continued)
-        # This 'document_type_plugins' section here can EITHER register new project-local
-        # plugins
-        # OR 
-        # point to files that override settings for existing (bundled/XDG) plugins.
-        document_type_plugins:
-          cv: "./project_cv_overrides.config.yaml"  # Path relative to your_project_main.yaml
-          recipe: "./my_project_recipe_style.config.yaml"
-        ```
-        Then, `./project_cv_overrides.config.yaml` would contain only the settings you want to change for the `cv` plugin within this project:
-        ```yaml
-        # ./project_cv_overrides.config.yaml
-        description: "CV settings for My Special Project"
-        css_files: ["./project_specific_cv.css"]      # Path relative to this override file
-        pdf_options:
-          format: "Legal"
-        ```
+    Asset paths like `css_files` here are resolved relative to `~/.config/md-to-pdf/config.yaml` or can be absolute/tilde-expanded.
 
-    The project's main config file (passed via `--config`) is also the place to register project-local custom plugins. See the [Plugin Development Guide](docs/plugin-development.md) for details on registration.
+2.  **For a Specific Project**
+
+    Edit your project's main configuration file (the one you use with `--config`). Add a top-level section with the plugin's name:
+
+    ```yaml
+    # In your project's main config.yaml (e.g., my_project/project_settings.yaml)
+    # ... other project global settings ...
+
+    plugins: # Register any project-local plugins here
+      project-special-report: "./_plugins/report-style/report.config.yaml"
+
+    cv: # Overrides for the 'cv' plugin specifically for THIS project
+      description: "CV style for Project Alpha"
+      pdf_options: { paperSize: "Letter" } # "format" is also valid, "paperSize" might be a typo in my thinking
+      css_files: ["./cv_styles/project_alpha_cv.css"] # Path relative to this project_settings.yaml
+    ```
+
+    Asset paths like `css_files` here are resolved relative to this project configuration file.
+
+##### Important Notes on Overrides
+
+  * The `plugins` key within a main `config.yaml` is for registering the base location of plugin configuration files
+  
+    `plugins: { myplugin: "./path/to/myplugin.config.yaml" }`
+
+  * The top-level keys (like `cv:` in the examples above) are for *overriding settings* of an already registered plugin.
+  
+  * For more advanced plugin management, including creating new plugins, see the [Plugin Development Guide](docs/plugin-development.md).
 
 #### Verifying Your Configuration
-To see exactly which configuration files are being loaded and what the final effective settings are for the tool globally or for a specific plugin, use the `md-to-pdf config` command. Adding the `--pure` flag will output only the raw YAML. This is very helpful for debugging your setup.
 
-```bash
-md-to-pdf config    # [--plugin cv] [--pure]
-```
-
-#### Overriding Plugin Settings
-
-To change how a specific plugin like `cv` looks or behaves, you can create a `cv.config.yaml` in your XDG folder (`~/.config/md-to-pdf/cv/`) for user-wide changes, or point to a project-specific override file from your project's main config (used with `--config`) for project-only changes.
-
-#### CSS Merging with `inherit_css`
-
-When `css_files` are specified in an override layer (XDG or Project plugin-specific):
-
-  * `inherit_css: true` (boolean): Appends the CSS files from the current layer to those from lower layers.
-  * `inherit_css: false` (boolean, default if not specified): Replaces all CSS files from lower layers with only those from the current layer.
+Use `md-to-pdf config` to see the active global settings. Use `md-to-pdf config --plugin <name>` to see the final, merged settings for a specific plugin, which is very helpful for debugging.
 
 ### Global `params`, Front Matter, and Placeholders
 
@@ -273,9 +257,9 @@ When `css_files` are specified in an override layer (XDG or Project plugin-speci
 
 #### Defining Global Parameters (`params`)
 
-You can define reusable key-value pairs in your active main `config.yaml` (Bundled, XDG, or Project-specific) under a top-level `params:` key. These values become globally available as placeholders.
+You can define reusable key-value pairs in your active main `config.yaml` (Bundled, User, or Project-specific) under a top-level `params:` key. These values become globally available as placeholders.
 
-**Example in `config.yaml`:**
+##### Example in `config.yaml`
 
 ```yaml
 params:
@@ -292,7 +276,7 @@ params:
 
 Markdown files can include YAML front matter for document-specific metadata and data.
 
-**Example Front Matter:**
+##### Example Front Matter
 
 ```yaml
 ---
@@ -310,6 +294,8 @@ Site theme: {{ .site.defaultTheme }}.
 Contact via: {{ .contact.email }}.
 ```
 
+**TODO:** Considering adding plugin keys in the front matter for automatic plugin configuration...
+
 #### Placeholder Context and Precedence
 
 When placeholders are processed (primarily by `DefaultHandler`-based plugins):
@@ -317,19 +303,22 @@ When placeholders are processed (primarily by `DefaultHandler`-based plugins):
 1.  Global `params` from your active main `config.yaml` are loaded.
 2.  The document's YAML front matter is loaded.
 3.  These two data sources are merged to create the context for placeholders.
-4.  **Front matter takes precedence:** If a key exists in both the document's front matter and the global `params`, the value from the front matter will be used for that document. For nested objects, the override happens at the level the key is defined in front matter (e.g., defining `contact:` in front matter replaces the whole `contact:` object from `params`).
+4.  **Front matter takes precedence.** If a key exists in both the document's front matter and the global `params`, the value from the front matter will be used for that document. For nested objects, the override happens at the level the key is defined in front matter (e.g., defining `contact:` in front matter replaces the whole `contact:` object from `params`).
 5.  **Automatic Date Placeholders** are also added to the context:
-      * `{{ .CurrentDateFormatted }}`: Current date in a long format (e.g., "May 22, 2025").
-      * `{{ .CurrentDateISO }}`: Current date in `YYYY-MM-DD` format.
+    * `{{ .CurrentDateFormatted }}`: Current date in a long format (e.g., "May 22, 2025").
+    * `{{ .CurrentDateISO }}`: Current date in `YYYY-MM-DD` format.
 
 #### Placeholder Syntax
 
-  * **Syntax:** `{{ .key }}` or `{{ .path.to.key }}` (e.g., `{{ .custom_data.key }}` or `{{ .site.name }}`). The leading `.` refers to the root of the combined data context.
-  * The system supports iterative substitution, so a placeholder in `params` or front matter can itself contain another placeholder (e.g., `copyrightYear` example above).
+* **Syntax:** `{{ .key }}` or `{{ .path.to.key }}` like `{{ .custom_data.key }}` or `{{ .site.name }}`). The leading `.` refers to the root of the combined data context.
+
+* The system supports iterative substitution, so a placeholder in `params` or front matter can itself contain another placeholder (e.g., `copyrightYear` example above).
+
 
 ## Batch Processing 'Eaches'
 
 To process multiple Markdown files in a batch job (e.g., converting all recipes in a directory to individual PDFs, or all chapters of a manual), example external scripts that call the `md-to-pdf convert` command for each file can be found in [`scripts/`](scripts/).  The **[Batch Processing Guide](docs/batch-processing-guide.md)** provides examples of how to do this with a Node.js wrapper and through a fairly simple bash script.
+
 
 ## Creating and Using Custom Plugins
 
@@ -337,10 +326,10 @@ To process multiple Markdown files in a batch job (e.g., converting all recipes 
 
 **For a comprehensive guide on plugin development, including directory structure, handler scripts, registration, and advanced configuration, please see the [Plugin Development Guide](docs/plugin-development.md).**
 
+
 ## Testing
 
 The project includes an integration test suite.
-
 ```bash
 npm test
 ```
@@ -348,6 +337,7 @@ npm test
 Test scripts and configurations are in [`test/`](test/), and [`test/config.test.yaml`](test/config.test.yaml), which should reflect the plugin structure.
 
 For more details, see [`test/README.md`](test#readme).
+
 
 ## License
 

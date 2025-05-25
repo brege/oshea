@@ -2,6 +2,7 @@
 
 This document serves as a reference for creating and managing custom plugins for the `md-to-pdf` tool. For general usage, basic configuration, and quick examples, please refer to the main [README.md](../README.md) and the [cheat-sheet.md](cheat-sheet.md).
 
+
 ## Plugin Anatomy
 
 A plugin for `md-to-pdf` is a self-contained directory that bundles configuration, styling, and logic for processing a specific type of Markdown document.
@@ -16,11 +17,13 @@ Typically, a plugin resides in its own directory. For example, a plugin named `m
         ├── index.js                # Node.js handler script
         └── my-invoice.css          # Custom CSS styles
 
-### 1. Plugin Configuration (`<plugin-name>.config.yaml`)
+### 1. Plugin Configuration 
+
+#### `<plugin-name>.config.yaml`
 
 This YAML file is the manifest for your plugin. It defines its properties and behavior.
 
-**Key Fields:**
+**Key Fields**
 
 * `description` (string): A brief description of the plugin.
 
@@ -56,7 +59,7 @@ This YAML file is the manifest for your plugin. It defines its properties and be
         
         Example:
 
-            math: # Corrected from katex_options to math as top-level key
+            math:
               enabled: true
               katex_options:
                 throwOnError: false
@@ -90,7 +93,9 @@ This YAML file is the manifest for your plugin. It defines its properties and be
             base_path_from_cli_arg: "projectRoot" # Base for the glob pattern
             pattern: "templates/**/*.hbs"
 
-### 2. Handler Script (`index.js`)
+### 2. Handler Script 
+
+#### `index.js`
 
 The handler script is a Node.js module responsible for processing the input data and generating the HTML content that will be converted to PDF.
 
@@ -116,15 +121,15 @@ The `generate` method is the core of your plugin's logic. It must have the follo
 
 ```javascript
 async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath)
-````
+```
 
 Here's a breakdown of its parameters:
 
 | Parameter           | Type             | Description                                                                                                                                                              |
 |---------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `data`              | `object`         | Input data for the plugin. For `convert` commands, this usually contains `{ markdownFilePath: 'path/to/file.md' }`. For `generate` commands, it often contains `{ cliArgs: {...} }` with arguments passed after the plugin name. |
-| `pluginSpecificConfig` | `object`         | The fully resolved configuration object specifically for this plugin instance. This includes settings from the plugin's own `<plugin-name>.config.yaml` merged with any applicable XDG or project-level overrides. |
-| `globalConfig`      | `object`         | The main global configuration object loaded by `md-to-pdf` (e.g., from `config.yaml` in the project root, XDG directory, or specified via `--config`). This object includes global `params` and `global_pdf_options`. |
+| `pluginSpecificConfig` | `object`         | The fully resolved configuration object specifically for this plugin instance. This includes settings from the plugin's own `<plugin-name>.config.yaml` merged with any applicable user-global or project-level overrides. |
+| `globalConfig`      | `object`         | The main global configuration object loaded by `md-to-pdf` (e.g., from `config.yaml` in the project root, user's config directory, or specified via `--config`). This object includes global `params` and `global_pdf_options`. |
 | `outputDir`         | `string`         | The absolute path to the directory where the output PDF file should be saved.                                                                                              |
 | `outputFilenameOpt` | `string` (opt)   | The desired filename for the PDF (e.g., "my-document.pdf"), if specified by the user via the `--filename` option. If not provided, the plugin should generate a suitable name. |
 | `pluginBasePath`    | `string`         | The absolute path to the root directory of the plugin (i.e., the directory containing its `<plugin-name>.config.yaml`). This is crucial for resolving relative paths to assets like CSS files or templates within the plugin. |
@@ -162,6 +167,7 @@ module.exports = MyInvoiceHandler;
 
 ### 3\. CSS Files
 
+
 Standard CSS files used to style your document. Paths are specified in your plugin's `css_files` array and are resolved relative to the plugin's `<plugin-name>.config.yaml`.
 
 ### Optional Directories
@@ -169,9 +175,11 @@ Standard CSS files used to style your document. Paths are specified in your plug
   * `data/`: For storing static data files (e.g., JSON, YAML) that your plugin might use.
   * `templates/`: If your plugin uses a templating engine (like Handlebars, EJS) for HTML generation, you can store template files here.
 
+
 ## Providing Plugin-Specific Help via CLI
 
 Usage:
+
 ```bash
 md-to-pdf plugin help <your-plugin-name>
 ```
@@ -184,7 +192,7 @@ Create or update a `README.md` file in the root of your plugin's directory (e.g.
 
 #### Example
 
-`README.md` for `my-invoice` plugin:**
+`README.md` for `my-invoice` plugin:
 
 ```markdown
 ---
@@ -225,17 +233,17 @@ If a plugin's `README.md` is missing, or if the `cli_help` key is absent from it
 
 For `md-to-pdf` to recognize and use your custom plugin, it must be "registered." Registration involves telling `md-to-pdf` the name you want to use to invoke your plugin and where to find its main configuration file (`<plugin-name>.config.yaml`).
 
-This is done by adding an entry to the `document_type_plugins` section of a main `config.yaml` file.
+This is done by adding an entry to the `plugins` section of a main `config.yaml` file.
 
 **Registration Locations:**
 
-1.  **XDG User-Global Plugins (`~/.config/md-to-pdf/config.yaml`):**
+1.  **User-Global Plugins (`~/.config/md-to-pdf/config.yaml`):**
     Plugins registered here are available for your user across all projects.
     Create or edit `~/.config/md-to-pdf/config.yaml`:
 
     ```yaml
     # ~/.config/md-to-pdf/config.yaml
-    document_type_plugins:
+    plugins:
       # cli-name-for-plugin: "/path/to/your/plugin/directory/plugin.config.yaml"
       my-invoice: "~/.my_custom_plugins/my-invoice/my-invoice.config.yaml"
       another-plugin: "/opt/shared-md-plugins/another-plugin/another-plugin.config.yaml"
@@ -249,7 +257,7 @@ This is done by adding an entry to the `document_type_plugins` section of a main
 
     ```yaml
     # my_project/project_config.yaml
-    document_type_plugins:
+    plugins:
       # cli-name-for-plugin: "./relative/path/to/plugin/config.yaml"
       project-report: "./md_plugins/project-report/project-report.config.yaml"
       # You can also use absolute paths or tilde paths here
@@ -258,44 +266,89 @@ This is done by adding an entry to the `document_type_plugins` section of a main
     Paths are resolved relative to the location of *this* project main config file, but absolute paths or `~` are also supported.
 
 **Plugin Registration Precedence:**
-If a plugin name is registered in multiple main configuration files (Bundled, XDG, Project), the Project registration takes precedence, then XDG, then Bundled.
+If a plugin name is registered in multiple main configuration files (Bundled, User-Global, Project), the Project registration takes precedence, then User-Global, then Bundled.
 
 ## Configuration Layers & Override Precedence for Custom Plugins
 
-Even for your custom plugins, the 3-tier configuration system of `md-to-pdf` applies. This means the settings defined in your plugin's own `<plugin-name>.config.yaml` can be further customized at the user (XDG) or project level without modifying your plugin's original files.
+Even for your custom plugins, the 3-tier configuration system of `md-to-pdf` applies. This means the settings defined in your plugin's own `<plugin-name>.config.yaml` can be further customized at the user (globally) or project level without modifying your plugin's original files.
 
 1.  **Layer 0: Plugin's Own Defaults (Lowest Precedence for Overrides)**
     This is the `<plugin-name>.config.yaml` file within your plugin's directory. It defines the baseline behavior and appearance of your plugin.
 
-2.  **Layer 1: XDG User Overrides (Middle Precedence)**
-    A user can create a file at `~/.config/md-to-pdf/<plugin-name>/<plugin-name>.config.yaml` (e.g., `~/.config/md-to-pdf/my-invoice/my-invoice.config.yaml`) to override specific settings from your plugin's Layer 0 config.
-    For example, if your `my-invoice.config.yaml` defines A4 paper, a user can create an XDG override to change it to Letter for their personal global preference. CSS files specified here are resolved relative to this XDG override file's directory.
+2.  **Layer 1: User-Global Overrides (Middle Precedence)**
+    You can override a plugin's settings for your user in two main ways:
+
+      * **Inline Override (Recommended for Simplicity):** In your user-global `~/.config/md-to-pdf/config.yaml`, add a top-level key matching the plugin's registered name. Settings here will override the plugin's defaults.
+
+        ```yaml
+        # ~/.config/md-to-pdf/config.yaml
+        # ... other global settings like pdf_viewer, global_params ...
+        plugins: # Your plugin (e.g., my-invoice) must be registered here or in a lower tier
+          my-invoice: "~/.my_custom_plugins/my-invoice/my-invoice.config.yaml"
+
+        my-invoice: # This is an inline override for the 'my-invoice' plugin
+          description: "My personalized invoice style"
+          pdf_options:
+            format: "Letter" # Changed from A4
+          css_files: ["~/.config/md-to-pdf/custom_styles/invoice_user.css"] # Path relative to this file or absolute/tilde
+          inherit_css: false # Default, replaces plugin's own CSS
+        ```
+
+        *Asset paths (like `css_files`) in inline overrides are resolved relative to the main configuration file containing the block (in this case, `~/.config/md-to-pdf/config.yaml`) or can be absolute/tilde-expanded.*
+
+      * **Separate File Override:** Create a dedicated override file at `~/.config/md-to-pdf/<plugin-name>/<plugin-name>.config.yaml` (e.g., `~/.config/md-to-pdf/my-invoice/my-invoice.config.yaml`). Settings in this file override the plugin's Layer 0 defaults. CSS files specified here are resolved relative to *this separate override file's* directory.
+
+        ```yaml
+        # ~/.config/md-to-pdf/my-invoice/my-invoice.config.yaml
+        description: "My personalized invoice style (from separate XDG file)"
+        pdf_options:
+          format: "Letter"
+        css_files: ["./invoice_user_alt.css"] # Path relative to this file
+        ```
 
 3.  **Layer 2: Project-Specific Overrides (Highest Precedence)**
-    If a project's main configuration (passed via `--config`) includes an entry in its `document_type_plugins` that points to another YAML file *specifically to override settings for your plugin*, those settings will take highest precedence.
-    For example, in `my_project/project_config.yaml`:
+    When using a project-specific main configuration file (via `--config project_config.yaml`), you can override plugin settings specifically for that project.
 
-    ```yaml
-    document_type_plugins:
-      # This tells md-to-pdf to use "my-invoice" plugin, but apply further overrides
-      # from the 'clientX_invoice_style.yaml' file for this project.
-      # Note: The "my-invoice" plugin itself must have already been registered via
-      # its own `<plugin-name>.config.yaml` in an XDG or another project config
-      # (or be a bundled one). This entry is for *overriding an existing registration's settings*.
-      my-invoice: "./style_overrides/clientX_invoice_style.yaml"
-    ```
+      * **Inline Override (Recommended for Simplicity):** In your `project_config.yaml`, add a top-level key matching the plugin's registered name.
 
-    Then, `my_project/style_overrides/clientX_invoice_style.yaml` would contain only the settings to change for `my-invoice` within this specific project (e.g., different CSS, different margins). CSS files specified in `clientX_invoice_style.yaml` are resolved relative to *its* directory.
+        ```yaml
+        # /path/to/project_config.yaml
+        # ... other project global settings ...
+        plugins: # Project-local plugins or plugins from other tiers are assumed registered
+          # cv: "path/to/bundled/cv.config.yaml" # Example if re-registering or defining a new base
+
+        cv: # Inline override for the 'cv' plugin for this project
+          description: "Special CV style for Project Omega"
+          pdf_options:
+            margin: { top: "0.5in", bottom: "0.5in" }
+          css_files: ["./styles/omega_cv.css"] # Path relative to this project_config.yaml
+          inherit_css: false
+        ```
+
+        *Asset paths (like `css_files`) in these inline project overrides are resolved relative to the main project configuration file (e.g., `project_config.yaml`).*
+
+      * **Separate File Override (Alternative for Projects):** In your `project_config.yaml`, under the `plugins` key, you can point an existing plugin name to a *different YAML file* that contains only the override settings.
+
+        ```yaml
+        # /path/to/project_config.yaml
+        plugins:
+          # This tells md-to-pdf to apply further overrides to the 'my-invoice' plugin
+          # from the 'project_invoice_style.yaml' file for this project.
+          # 'my-invoice' must have been registered already (e.g., in user-global config).
+          my-invoice: "./style_overrides/project_invoice_style.yaml"
+        ```
+
+        Then, `project_invoice_style.yaml` would contain only the settings to change for `my-invoice` (e.g., different CSS, margins). CSS files specified there are resolved relative to *its own directory*.
 
 **CSS Merging (`inherit_css`):**
-When `css_files` are specified in an override layer (XDG or Project):
+When `css_files` are specified in an override layer (User-Global or Project, whether inline or in a separate file):
 
   * `inherit_css: true`: Appends CSS files from the current layer to those from lower layers.
   * `inherit_css: false` (default): Replaces all CSS from lower layers with only those from the current layer.
 
 ### Verifying Your Plugin's Effective Configuration
 
-As you develop and configure your plugin, especially when dealing with multiple layers of configuration (your plugin's defaults, XDG user overrides, and project-specific overrides), it can be beneficial to see the final, effective configuration that `md-to-pdf` will use for your plugin--either for debugging or testing.
+As you develop and configure your plugin, especially when dealing with multiple layers of configuration, it can be beneficial to see the final, effective configuration that `md-to-pdf` will use.
 
 The `md-to-pdf config` command is designed for this purpose.
 
@@ -307,12 +360,12 @@ md-to-pdf config --plugin <your-plugin-name>
 
 This command displays:
 
-* The complete `pluginSpecificConfig` object that your plugin's handler script will receive. This object includes settings from your plugin's own `*.config.yaml`, merged with any applicable XDG or project-level overrides, and also incorporates relevant global settings (like `global_pdf_options` and `math` settings from the main configuration).
-* **Source Information**:
-    * The `pluginBasePath` (the root directory of your plugin).
-    * The resolved `handlerScriptPath`.
-    * A list of "Contributing Configuration Files," showing the main configuration file used for global settings, your plugin's own configuration file, and any XDG or project-specific override files that were loaded and merged.
-* **Resolved CSS Files**: The final list of CSS file paths that will be applied, in order.
+  * The complete `pluginSpecificConfig` object that your plugin's handler script will receive. This object includes settings from your plugin's own `*.config.yaml`, merged with any applicable user-global or project-level overrides, and also incorporates relevant global settings (like `global_pdf_options` and `math` settings from the main configuration).
+  * **Source Information**:
+      * The `pluginBasePath` (the root directory of your plugin).
+      * The resolved `handlerScriptPath`.
+      * A list of "Contributing Configuration Files," showing the main configuration file used for global settings, your plugin's own configuration file, and any user-global or project-specific override files (or notes about inline overrides) that were loaded and merged.
+  * **Resolved CSS Files**: The final list of CSS file paths that will be applied, in order.
 
 If you want to see only the raw YAML output of the `pluginSpecificConfig` (for example, to copy parts of it into an override file or for quick inspection), you can use the `--pure` flag:
 
@@ -320,10 +373,9 @@ If you want to see only the raw YAML output of the `pluginSpecificConfig` (for e
 md-to-pdf config --plugin <your-plugin-name> --pure
 ```
 
-
 ## Using Your Custom Plugin
 
-Once registered, invoke your plugin using the name you defined in the `document_type_plugins` section:
+Once registered, invoke your plugin using the name you defined in the `plugins` section:
 
 ```bash
 md-to-pdf convert path/to/document.md --plugin <your-plugin-cli-name>
@@ -335,7 +387,7 @@ If the plugin is registered in a project-specific configuration, you must includ
 md-to-pdf convert path/to/document.md --plugin <your-plugin-cli-name> --config path/to/your_project_main.yaml
 ```
 
-The `--factory-defaults` flag will cause `md-to-pdf` to ignore XDG and Project configurations. This means only bundled plugins (registered in the tool's internal `config.yaml`) would be available, and their settings would not be overridden by XDG/Project layers. Custom plugins registered outside the bundled scope would not be found when this flag is active.
+The `--factory-defaults` flag will cause `md-to-pdf` to ignore user-global and project configurations. This means only bundled plugins (registered in the tool's internal `config.yaml`) would be available, and their settings would not be overridden by user/project layers. Custom plugins registered outside the bundled scope would not be found when this flag is active.
 
 ## Getting Started: Scaffolding a New Plugin with `plugin create`
 
@@ -353,7 +405,7 @@ md-to-pdf plugin create <new-plugin-name> [--dir <target-directory>] [--force]
 
 ### Example: Creating a "business-card" plugin
 
-<img src="images/screenshots/example-business-card.png" alt="Example Business Card Screenshot" width="500"/>
+\<img src="images/screenshots/example-business-card.png" alt="Example Business Card Screenshot" width="500"/\>
 
 ```bash
 md-to-pdf plugin create business-card --dir ./my_custom_plugins
@@ -424,7 +476,7 @@ Refer to the [cheat-sheet.md](cheat-sheet.md#plugin-management-commands) for mor
 
 The standard Markdown-to-HTML conversion offered by `DefaultHandler` leaves a lot to be desired. You might need a highly specific HTML structure, want to integrate dynamic content (like a QR code), or process the Markdown body in a unique way. **This is the where the extendability of the custom plugin handler comes in.**
 
-<img src="images/screenshots/advanced-business-card.png" alt="Advanced Business Card Screenshot" width="500"/>
+\<img src="images/screenshots/advanced-business-card.png" alt="Advanced Business Card Screenshot" width="500"/\>
 
 The **advanced-card** plugin serves as an example of this. It generates a business card where:
 
@@ -437,13 +489,15 @@ The **advanced-card** plugin serves as an example of this. It generates a busine
 
 ### Why a Custom Handler for "advanced-card"?
 
-* **Precise Layout Control:** Business cards have specific layout requirements that are easier to achieve with custom HTML and CSS than by trying to style generic Markdown output.
+  * **Precise Layout Control:** Business cards have specific layout requirements that are easier to achieve with custom HTML and CSS than by trying to style generic Markdown output.
 
-* **Dynamic Content Integration:** We want to include a QR code whose data can come from front matter or global parameters.
+  * **Dynamic Content Integration:** We want to include a QR code whose data can come from front matter or global parameters.
 
-* **Processing Markdown Body:** Instead of just relying on front matter for all data, this example shows how to take the Markdown content written by the user (e.g., their name as an H1, title as H2) and incorporate that rendered HTML into a custom card structure.
+  * **Processing Markdown Body:** Instead of just relying on front matter for all data, this example shows how to take the Markdown content written by the user (e.g., their name as an H1, title as H2) and incorporate that rendered HTML into a custom card structure.
 
-### 1\. Example Markdown (`advanced-card-example.md`)
+### 1\. Example Markdown 
+
+#### `advanced-card-example.md`
 
 The user provides card details using standard Markdown formatting.
 
@@ -468,7 +522,9 @@ brandingColor: "#2a9d8f"                             # Custom branding color for
 
 You could, of course, configure your name, phone number, email, etc in the front matter--or, better yet, in the `params:` portion of your global `config.yaml` file--but for readability we only add dynamic parameters in this example. E.g., `**Web:** [{{ .website }}]({{ .website }})`.
 
-### 2\. Plugin Configuration (`advanced-card.config.yaml`)
+### 2\. Plugin Configuration
+
+#### `advanced-card.config.yaml`
 
 This config defines the card's dimensions and other essential settings.
 
@@ -495,14 +551,16 @@ math:
   enabled: false
 ```
 
-**Key points:**
+**Key Points**
 
   * `width` and `height` are set for a typical business card.
   * `margin` is kept small.
   * `printBackground: true` ensures CSS backgrounds are rendered in the PDF.
   * `inject_fm_title_as_h1: false` is crucial because the main heading (the person's name) will come from the H1 tag in the Markdown body.
 
-### 3\. Handler Script (`advanced-card/index.js`) Snippet
+### 3\. Handler Script Snippet
+
+#### `advanced-card/index.js`
 
 The handler reads the Markdown, renders its body to HTML, prepares dynamic data (QR code), and constructs the final HTML for the card.
 
@@ -584,7 +642,10 @@ module.exports = AdvancedCardHandler;
   * It constructs `htmlBodyContent` by injecting `renderedMarkdownHtml` into a custom `div` structure. This structure also includes a placeholder for the QR code and an optional company logo (from global params).
   * It uses `this.pdfGenerator.generatePdf` to directly render the PDF from this custom HTML string, its own CSS, and specific PDF options.
 
-### 4\. CSS Styling (`advanced-card/advanced-card.css`) Snippet
+### 4\. CSS Styling Snippet 
+
+#### `advanced-card/advanced-card.css`
+
 
 The CSS targets the custom HTML structure and the standard HTML elements generated from the Markdown body.
 
@@ -623,7 +684,7 @@ body { /* Styles applied to the Puppeteer page context */
 
 This **advanced-card** example illustrates how to take full control when the standard `DefaultHandler` doesn't meet your needs, allowing for complex layouts, dynamic data, and custom processing of Markdown content.
 
-#### Execution
+### 5\. Execution
 
 To compile and view the [`advanced-card-example.md`](../examples/custom_plugin_showcase/advanced-card/advanced-card-example.md) using this **advanced-card** plugin, which should be registered in a main `config.yaml` pointing to
 
@@ -635,13 +696,15 @@ run the following command:
 md_file=examples/custom_plugin_showcase/advanced-card/advanced-card-example.md
 md-to-pdf convert $md_file --plugin advanced-card --outdir ./test_output --watch
 ```
+
 This also highlights the use of the `--watch` flag, which is quite handy when iterating CSS and JavaScript tweaks.
 
-You can find the full source code for this **advanced-card** plugin, including the example Markdown file, in the 
+You can find the full source code for this **advanced-card** plugin, including the example Markdown file, in the
 
 [`examples/custom_plugin_showcase/advanced-card/`](../examples/custom_plugin_showcase/advanced-card/)
 
 directory, which contains
+
 ```bash
 examples/custom_plugin_showcase/advanced-card/
 ├── advanced-card.config.yaml   # Plugin configuration

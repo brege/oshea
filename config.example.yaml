@@ -55,7 +55,7 @@ math:
 # --- Plugin Directory Aliases ---
 # Define shorthand aliases for common plugin directories.
 # These aliases are scoped to the configuration file they are defined in.
-# An alias defined here can be used in 'plugins' within THIS file. # Changed from document_type_plugins
+# An alias defined here can be used in 'plugins' within THIS file.
 # Paths for alias targets can be absolute, tilde-expanded (~), or relative (./ or ../)
 # to THIS config file's directory.
 #
@@ -66,7 +66,7 @@ math:
 #   my_local_collection: "~/Documents/my-md-to-pdf-plugins"
 #   community_checkout: "./community_plugins/plugins-from-brege"
 
-# --- Plugin Registrations --- # Changed from Document Type Plugin Registrations
+# --- Plugin Registrations ---
 # Maps a "plugin name" (used with --plugin) to its configuration file path.
 # Paths can be:
 #  1. Absolute (e.g., /path/to/plugin/plugin.config.yaml)
@@ -77,8 +77,8 @@ math:
 #
 # Note: If using an alias, it must be defined in the 'plugin_directory_aliases'
 # section of THIS specific configuration file. Aliases do not automatically
-# cascade from other configuration tiers (e.g., XDG aliases are not known here unless redefined).
-plugins: # Changed from document_type_plugins
+# cascade from other configuration tiers (e.g., user-global aliases are not known here unless redefined).
+plugins:
   default: "./plugins/default/default.config.yaml"
   cv: "./plugins/cv/cv.config.yaml"
   cover-letter: "./plugins/cover-letter/cover-letter.config.yaml"
@@ -88,15 +88,16 @@ plugins: # Changed from document_type_plugins
 
   # Examples using aliases (these would require uncommenting and defining them above):
   # default: "core:default/default.config.yaml"
-  # advanced-card-red: "community_checkout:advanced-card-red/advanced-card.config.yaml"
+  # advanced-card-red: "community_checkout:advanced-card-red/advanced-card-red.config.yaml"
   # my-example-plugin: "my_local_collection:example1/example1.config.yaml"
 
-# --- Inline Plugin Overrides (Beets-Inspired) ---
+# --- Inline Plugin Overrides ---
 # For any plugin name defined above in 'plugins' (e.g., 'cv'),
 # you can create a top-level block here with the same name to provide overrides.
-# Settings here will take precedence over the plugin's own default config.
-# If this were an XDG or Project config, these overrides would take precedence
-# over bundled settings.
+# Settings here will take precedence over the plugin's own default config if this
+# file is loaded as the primary main configuration.
+# If this were a user-global or project-specific config, these overrides would
+# take precedence over bundled or lower-tier settings.
 #
 # cv: # This 'cv' matches a key in 'plugins'
 #   description: "My Custom CV Style (from main config.example.yaml)"

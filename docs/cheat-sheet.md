@@ -7,11 +7,12 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 **1. Convert a Basic Markdown File (Default Plugin)**
 
   * Uses the `default` plugin.
-  * Outputs to the same directory as the input.
+  * Outputs to a system temporary directory by default.
   * Auto-opens PDF if `pdf_viewer` is set.
 
     ```bash
     md-to-pdf convert my_document.md
+    # PDF will be in /tmp/md-to-pdf-output/ or similar
     ```
 
 **2. Convert a CV (Specific Plugin & Output)**
@@ -80,7 +81,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 
 **6. Using a Project-Specific Configuration**
 
-  * Overrides bundled/XDG settings with those in `project.config.yaml`.
+  * Overrides bundled/user settings with those in `project.config.yaml`.
   * Useful for project-specific styles or plugin registrations.
 
     ```bash
@@ -89,7 +90,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 
 **7. Using Only Factory Defaults**
 
-  * Ignores all XDG and project-specific (`--config`) configurations.
+  * Ignores all user-global and project-specific (`--config`) configurations.
   * Useful for debugging or getting a "vanilla" output.
 
     ```bash
@@ -122,7 +123,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 
 **1. List Discoverable Plugins**
 
-  * Lists all plugins found via Bundled, XDG, and Project configurations.
+  * Lists all plugins found via Bundled, User-Global, and Project configurations.
   * Shows name, description, registration source, and config file path for each.
   * Respects global `--config` and `--factory-defaults` flags.
     
@@ -142,7 +143,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     ```bash
     md-to-pdf plugin create my-invoice --dir ./custom-plugins
     ```
-    This creates `./custom-plugins/my-invoice/` with `my-invoice.config.yaml`, `index.js`, and `my-invoice.css`.
+    This creates `./custom-plugins/my-invoice/` with `my-invoice.config.yaml`, `index.js`, `my-invoice.css`, and `README.md`.
     Remember to register the new plugin in a `config.yaml` file afterwards.
 
 **3. Get Help for a Specific Plugin**
@@ -161,16 +162,16 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 
 **1. Display Active Global Configuration**
 
-  * Shows paths to active main configuration files and key global settings.
+  * Shows paths to active main configuration files and global settings.
   * Respects global `--config` and `--factory-defaults` flags.
 
     ```bash
     md-to-pdf config
     ```
-    Output with XDG config active:
+    Output with User-Global config active:
     ```
     # Configuration Sources:
-    #   Primary Main Config Loaded: /home/user/.config/md-to-pdf/config.yaml (XDG Global)
+    #   Primary Main Config Loaded: /home/user/.config/md-to-pdf/config.yaml (User-Global)
     #   Considered Bundled Main Config (config.yaml): /path/to/md-to-pdf/config.yaml
 
     # Active Global Configuration:
@@ -215,6 +216,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
     #   Contributing Configuration Files (most specific last):
     #     - Primary Main Config (for global settings): /home/user/.config/md-to-pdf/config.yaml
     #     - /path/to/md-to-pdf/plugins/cv/cv.config.yaml
+    #     - Inline override from user-global main config: /home/user/.config/md-to-pdf/config.yaml
 
     # Resolved CSS Files (order matters):
     #     - /path/to/md-to-pdf/plugins/cv/cv.css
@@ -277,7 +279,6 @@ math:
       "\\boldvec": "\\mathbf{#1}"
 ```
 
-
 ### Defining Global Parameters (`params`)
 
 Define reusable key-value pairs in your main `config.yaml` that can be used as placeholders in Markdown. These are merged with document front matter, with front matter taking precedence.
@@ -287,7 +288,7 @@ Define reusable key-value pairs in your main `config.yaml` that can be used as p
 params:
   site:
     name: "My Awesome Site"
-    url: "https://example.com"
+    url: "[https://example.com](https://example.com)"
   authorContact:
     name: "Default Author"
     email: "author@example.com"
@@ -295,6 +296,7 @@ params:
 ```
 
 Markdown:
+
 ```markdown
 ---
 title: "My Page"
@@ -315,16 +317,36 @@ Assuming your plugin `my-notes`'s config is at `~/my_md_plugins/my-notes-plugin/
 
 ```yaml
 # In ~/.config/md-to-pdf/config.yaml OR project's --config file
-document_type_plugins:
-  # Bundled plugin overrides maybe listed here...
-  # Custom plugin:
+plugins:
+  # Bundled plugin overrides may be listed here as top-level keys...
+  # Custom plugin registration:
   my-notes: "~/my_md_plugins/my-notes-plugin/my-notes.config.yaml" 
   # For a plugin created by `md-to-pdf plugin create my-notes --dir .`
   # my-notes: "./my-notes/my-notes.config.yaml" # If config is in project root
 ```
 
-More details in the [Plugin Development Guide](./plugin-development.md).
+### Overriding Plugin Settings (Inline)
 
+In your main `config.yaml` (user-global or project-specific), you can override settings for any registered plugin by adding a top-level key with the plugin's name.
+
+```yaml
+# In ~/.config/md-to-pdf/config.yaml OR project's --config file
+# Assuming 'cv' and 'recipe' plugins are already registered (e.g., bundled or custom)
+
+cv: # Inline override for the 'cv' plugin
+  description: "My customized CV settings"
+  pdf_options:
+    format: "Executive"
+  css_files: ["./styles/custom_cv.css"] # Path relative to this config.yaml
+  inherit_css: false # Replaces 'cv' plugin's default CSS
+
+recipe: # Inline override for 'recipe'
+  pdf_options:
+    margin: { top: "0.5in", bottom: "0.5in" }
+  # Other 'recipe' settings like 'css_files' will use their defaults if not specified here.
+```
+
+More details in the [Plugin Development Guide](./plugin-development.md).
 
 ## Markdown & Front Matter Essentials
 
@@ -357,40 +379,64 @@ md-to-pdf convert examples/example-front-matter.md --plugin default --outdir out
   * Inline: `The equation is $E = mc^2$.`
   * Display: `$$ f(x) = \\int_{-\\infty}^\\infty \\hat{f}(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi $$`
   * These won't work: `\\( ... \\)` (inline), `\\[ ... \\]` (display)
-
   * **Example**
-
     ```bash
-    md-to-pdf convert examples/example-math.md --plugin default --outdir output
+    md-to-pdf convert examples/example-math.md --plugin default 
     ```
 
-## Plugin Creation Basics (using `plugin create`)
 
-1.  **Generate Boilerplate**:
+## Plugin Creation Basics - `plugin create`
+
+1.  **Generate Boilerplate**
     ```bash
     md-to-pdf plugin create my-custom-plugin --dir ./path/to/where/plugins_live
     ```
     This creates `my-custom-plugin/` containing:
-    * `my-custom-plugin.config.yaml`
-    * `index.js` (handler expecting `coreUtils` in constructor)
-    * `my-custom-plugin.css`
-2.  **Customize**: Edit the generated files. The `index.js` handler will already be set up to use `DefaultHandler` via dependency injection.
-3.  **Register**: Add your plugin to a `config.yaml` (see [Registering a Custom Plugin](#registering-a-custom-plugin) above).
-4.  **Invoke**: `md-to-pdf convert my_file.md --plugin my-custom-plugin`
+      * `my-custom-plugin.config.yaml`
+      * `index.js` (handler expecting `coreUtils` in constructor)
+      * `my-custom-plugin.css`
+      * `README.md` (with `cli_help` section)
+
+2.  **Customize**
+
+    Edit the generated files. The `index.js` handler will already be set up to use `DefaultHandler` via dependency injection.
+
+3.  **Register**
+
+    Add your plugin to a `config.yaml` (see [Registering a Custom Plugin](#registering-a-custom-plugin) above).
+4.  **Invoke**
+
+    `md-to-pdf convert my_file.md --plugin my-custom-plugin`
 
 ## Configuration Layers
 
-Overrides apply in this order (highest wins):
+Overrides apply in the following order (highest wins).
 
-1.  Project (`--config your_project.yaml`)
-2.  XDG User (`~/.config/md-to-pdf/config.yaml` & `~/.config/md-to-pdf/<plugin>/<plugin>.config.yaml`)
-3.  Bundled (tool's default `config.yaml` & `plugins/<plugin>/<plugin>.config.yaml`)
+1.  **Project**
+    
+    `--config your_project.yaml` -- at CLI
+2.  **User-Global**
+    - `~/.config/md-to-pdf/config.yaml` 
+    - `~/.config/md-to-pdf/<plugin>/<plugin>.config.yaml` -- for separate file overrides
+3.  **Bundled**
+    - `config.yaml` -- repo fallback 
+    - `plugins/<plugin>/<plugin>.config.yaml` -- in this repo's plugins directory
 
 ## Troubleshooting
 
-  * **CSS Not Working?** Check paths in `css_files` (relative to the `*.config.yaml` they are in). Is `inherit_css: false` in an override, replacing all prior CSS?
-  * **Math Issues?** Ensure `math.enabled: true`. Check delimiters and LaTeX syntax.
-  * **Plugin Unknown?** Verify registration in `document_type_plugins` and path correctness (see the [Plugin Development Guide](./plugin-development.md) for details). Use `md-to-pdf plugin list`. 
+  * **CSS Not Working?** Check paths in `css_files` (relative to the `*.config.yaml` they are in, or the main config for inline overrides). Is `inherit_css: false` in an override, replacing all prior CSS?
+  
+  * **Math Issues?** Ensure `math.enabled: true`. Check delimiters and LaTeX syntax.  Use
+
+    Only `$$...$$`, `$...$` work with this implementation of KaTeX.
+  
+  * **Plugin Unknown?** Verify registration in `plugins` and path correctness (see the [Plugin Development Guide](./plugin-development.md)). Use
+    
+    `md-to-pdf plugin list`.
+
+  * **What config am I using?** See [Configuration Layers](#configuration-layers). Use 
+
+    `md-to-pdf config`.
 
 ---
 

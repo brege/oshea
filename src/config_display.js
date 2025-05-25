@@ -46,7 +46,7 @@ async function displayGlobalConfig(configResolver, isPure) {
             mainConfigPath !== configResolver.factoryDefaultMainConfigPath) { 
              console.log(`#   Considered Bundled Main Config (${path.basename(configResolver.defaultMainConfigPath)}): ${configResolver.defaultMainConfigPath}`);
         }
-        console.log("\n# Active Global Configuration:\n\n"); // Header with two newlines after
+        console.log("# Active Global Configuration:\n"); // Header with two newlines after
     }
     
     const configToDump = { ...mainConfig };
@@ -68,7 +68,7 @@ async function displayPluginConfig(configResolver, pluginName, isPure) {
 
     if (!isPure) {
         // Header for the plugin config section, followed by two newlines
-        console.log(`\n# Effective configuration for plugin: ${pluginName}\n\n`);
+        console.log(`# Effective configuration for plugin: ${pluginName}\n`);
     }
 
     console.log(yaml.dump(effectiveConfig.pluginSpecificConfig, { indent: 2, sortKeys: true, lineWidth: -1, noRefs: true }));

@@ -40,9 +40,44 @@ math:
     #   "\\RR": "\\mathbb{R}"
     #   "\\boldvec": "\\mathbf{#1}"
 
+# --- Global Parameters for Placeholders (`params`) ---
+# Define reusable key-value pairs here. They are merged with document front matter
+# (front matter takes precedence).
+# params:
+#   site:
+#     name: "My Awesome Project"
+#     url: "https://project.example.com"
+#   authorInfo:
+#     name: "Default Author"
+#     email: "contact@example.com"
+
+
+# --- Plugin Directory Aliases ---
+# Define shorthand aliases for common plugin directories.
+# These aliases are scoped to the configuration file they are defined in.
+# An alias defined here can be used in 'document_type_plugins' within THIS file.
+# Paths for alias targets can be absolute, tilde-expanded (~), or relative (./ or ../)
+# to THIS config file's directory.
+#
+# Example:
+# plugin_directory_aliases:
+#   core: "./plugins"  # Assuming this config.example.yaml is at project root
+#   examples: "./examples/custom_plugin_showcase"
+#   my_local_collection: "~/Documents/my-md-to-pdf-plugins"
+#   community_checkout: "./community_plugins/plugins-from-brege"
+
 # --- Document Type Plugin Registrations ---
 # Maps a "plugin name" (used with --plugin) to its configuration file path.
-# Paths are relative to this main config.yaml file's location.
+# Paths can be:
+#  1. Absolute (e.g., /path/to/plugin/plugin.config.yaml)
+#  2. Tilde-expanded (e.g., ~/my_plugins/plugin/plugin.config.yaml)
+#  3. Relative to this main config.yaml file's location (e.g., ./plugins/cv/cv.config.yaml)
+#  4. Using an alias defined in 'plugin_directory_aliases' *within this same file*
+#     (e.g., if 'core:' is aliased to './plugins', then 'core:cv/cv.config.yaml')
+#
+# Note: If using an alias, it must be defined in the 'plugin_directory_aliases'
+# section of THIS specific configuration file. Aliases do not automatically
+# cascade from other configuration tiers (e.g., XDG aliases are not known here unless redefined).
 document_type_plugins:
   default: "./plugins/default/default.config.yaml"
   cv: "./plugins/cv/cv.config.yaml"
@@ -50,7 +85,9 @@ document_type_plugins:
   recipe: "./plugins/recipe/recipe.config.yaml"
   recipe-book: "./plugins/recipe-book/recipe-book.config.yaml"
   advanced-card: "./examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml"
-  # Example for a custom plugin:
-  # my-custom-plugin: "path/to/my/custom-plugins/my-plugin/my-plugin.config.yaml"
 
-# --- Hugo Export Each Command Specific Configuration --- Section Removed ---
+  # Examples using aliases (these would require uncommenting and defining them above):
+  # default: "core:default/default.config.yaml"
+  # advanced-card-red: "community_checkout:advanced-card-red/advanced-card.config.yaml"
+  # my-example-plugin: "my_local_collection:example1/example1.config.yaml"
+

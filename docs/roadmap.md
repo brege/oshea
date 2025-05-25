@@ -43,7 +43,7 @@ See the [version history](https://github.com/brege/md-to-pdf/commits/main/ROADMA
     * Documentation updated for users and plugin authors.
     * `plugin create` boilerplate now includes `README.md` with `cli_help` stub.
 
-## Version 0.5.4: Configuration Transparency (Proposed)
+## [Version 0.5.4][v0.5.4]: Configuration Transparency (Proposed)
   * **Goal:** Improve the transparency and debuggability of the configuration system.
   * **Key Features:**
     * **New CLI Command `md-to-pdf config`:** Implement a command to display the active configuration settings.
@@ -120,3 +120,4 @@ See the [version history](https://github.com/brege/md-to-pdf/commits/main/ROADMA
 [v0.5.1]: https://github.com/brege/md-to-pdf/releases/tag/v0.5.1
 [v0.5.2]: https://github.com/brege/md-to-pdf/releases/tag/v0.5.2
 [v0.5.3]: https://github.com/brege/md-to-pdf/releases/tag/v0.5.3
+[v0.5.4]: https://github.com/brege/md-to-pdf/releases/tag/v0.5.4

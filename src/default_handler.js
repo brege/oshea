@@ -9,30 +9,13 @@ const {
     renderMarkdownToHtml,
     generateSlug,
     ensureAndPreprocessHeading,
-    substituteAllPlaceholders // Imported substituteAllPlaceholders
+    substituteAllPlaceholders
 } = require('./markdown_utils');
 
 const { generatePdf } = require('./pdf_generator');
 const mathIntegration = require('./math_integration');
 
-// Helper functions (resolvePath, substitutePlaceholdersInString) are now primarily
-// used within substituteAllPlaceholders in markdown_utils.js.
-// If they were previously defined here and also in markdown_utils.js,
-// ensure we are using the ones from markdown_utils.js consistently.
-// For this change, we are focusing on the context preparation.
-
-
 class DefaultHandler {
-    /**
-     * Default processing logic for Markdown files.
-     * @param {Object} data - Expected to contain `markdownFilePath`.
-     * @param {Object} pluginSpecificConfig - Configuration object for the specific plugin type.
-     * @param {Object} globalConfig - The main global configuration object (this will contain `params`).
-     * @param {string} outputDir - Absolute path to the output directory.
-     * @param {string} [outputFilenameOpt] - Optional. Desired filename for the PDF.
-     * @param {string} pluginBasePath - The base path of the plugin, for resolving its assets.
-     * @returns {Promise<string>} The absolute path to the generated PDF file.
-     */
     async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
         const { markdownFilePath } = data;
         if (!markdownFilePath || !fss.existsSync(markdownFilePath)) {
@@ -43,18 +26,24 @@ class DefaultHandler {
         const rawMarkdownContent = await fs.readFile(markdownFilePath, 'utf8');
         const { data: initialFrontMatter, content: contentWithoutFm } = extractFrontMatter(rawMarkdownContent);
 
-        // Prepare the initial context for placeholder substitution, merging global params and front matter.
         let contextForPlaceholders = {};
+
         if (globalConfig && globalConfig.params && typeof globalConfig.params === 'object') {
             contextForPlaceholders = { ...globalConfig.params };
         }
-        // Document front matter overrides global params
+
+        if (pluginSpecificConfig && pluginSpecificConfig.params && typeof pluginSpecificConfig.params === 'object') {
+            contextForPlaceholders = {
+                ...contextForPlaceholders,
+                ...pluginSpecificConfig.params
+            };
+        }
+
         contextForPlaceholders = {
             ...contextForPlaceholders,
             ...initialFrontMatter
         };
 
-        // substituteAllPlaceholders will handle iterative substitution and add date placeholders.
         const { processedFmData, processedContent: contentAfterFMSubst } =
             substituteAllPlaceholders(contentWithoutFm, contextForPlaceholders);
 
@@ -68,18 +57,16 @@ class DefaultHandler {
         if (!finalOutputFilename) {
             const baseInputName = path.basename(markdownFilePath, path.extname(markdownFilePath));
             let nameParts = [];
-            // Use resolvePath (if it were still here) or assume processedFmData has direct access
-            const titleFromFM = processedFmData.title || ''; // Access directly from processedFmData
+            const titleFromFM = processedFmData.title || '';
             const titleSlug = generateSlug(titleFromFM);
             nameParts.push(titleSlug || generateSlug(baseInputName));
 
-            const authorFromFM = processedFmData.author || ''; // Access directly
+            const authorFromFM = processedFmData.author || '';
             if (authorFromFM) nameParts.push(generateSlug(authorFromFM));
             
             let dateStrForFilename = '';
-            const dateValueFromFM = processedFmData.date; // Access directly
+            const dateValueFromFM = processedFmData.date;
              if (dateValueFromFM) {
-                // Check against CurrentDateISO which substituteAllPlaceholders adds to processedFmData
                 if (dateValueFromFM === processedFmData.CurrentDateISO) {
                     dateStrForFilename = processedFmData.CurrentDateISO;
                 } else if (typeof dateValueFromFM === 'string') {
@@ -101,7 +88,7 @@ class DefaultHandler {
         const outputPdfPath = path.join(outputDir, finalOutputFilename);
 
         let markdownToRender = cleanedContent;
-        const fmTitleForH1 = processedFmData.title; // Access directly
+        const fmTitleForH1 = processedFmData.title;
         if (pluginSpecificConfig.inject_fm_title_as_h1 && fmTitleForH1) {
             markdownToRender = ensureAndPreprocessHeading(
                 cleanedContent,
@@ -142,13 +129,18 @@ class DefaultHandler {
             if (fss.existsSync(cssFilePath)) {
                 cssFileContentsArray.push(await fs.readFile(cssFilePath, 'utf8'));
             } else {
-                console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'})`);
+                if (path.isAbsolute(cssFileName) && fss.existsSync(cssFileName)) {
+                    cssFileContentsArray.push(await fs.readFile(cssFileName, 'utf8'));
+                } else {
+                    console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'}) (original path in config: ${cssFileName})`);
+                }
             }
         }
+
         if (cssFileContentsArray.length === 0 && (pluginCssFiles.length > 0 || (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled))) {
             let warningMsg = `WARN: No CSS files were actually loaded by the handler.`;
             if (pluginCssFiles.length > 0) {
-                const allAbsolute = pluginCssFiles.every(f => path.isAbsolute(f));
+                const allAbsolute = pluginCssFiles.every(f => typeof f === 'string' && path.isAbsolute(f));
                 let hint = `Check plugin CSS paths relative to ${pluginBasePath}.`;
                 if (allAbsolute) {
                     hint = `Ensure the absolute plugin CSS paths specified exist and are readable: ${pluginCssFiles.join(', ')}`;

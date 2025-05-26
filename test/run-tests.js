@@ -23,6 +23,11 @@ const HUGO_EXAMPLE_SOURCE_IN_EXAMPLES = path.join(EXAMPLES_DIR, 'hugo-example');
 const CREATED_PLUGINS_SUBDIR = 'created_plugins_test'; 
 const CREATED_PLUGINS_DIR = path.join(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_SUBDIR);
 
+const FM_CV_SPEC_MD_PATH = path.join(TEST_DIR, 'assets', 'front_matter_tests', 'fm_specifies_cv.md');
+const LOCAL_CONFIG_DOC_MD_PATH = path.join(TEST_DIR, 'assets', 'local_config_tests', 'doc_with_local_config.md');
+const LOCAL_CONFIG_DOC_YAML_PATH = path.join(TEST_DIR, 'assets', 'local_config_tests', 'doc_with_local_config.config.yaml'); // For verification checks if needed
+const LOCAL_CONFIG_DOC_CSS_PATH = path.join(TEST_DIR, 'assets', 'local_config_tests', 'local_test_style.css'); // For verification checks if needed
+
 
 // --- Test Cases ---
 const testCases = [
@@ -495,6 +500,82 @@ md_to_pdf_plugin: "cv"
             }
         }
     },
+    // Test local config relative to the MD file
+    {
+        description: "Front Matter: Convert document specifying 'cv' plugin in front matter (using static asset)",
+        commandArgs: [
+            'convert',
+            FM_CV_SPEC_MD_PATH, // Use static asset path
+            '--outdir', path.join(TEST_OUTPUT_BASE_DIR, 'fm_plugin_output'),
+            '--filename', 'test-fm-specifies-cv.pdf',
+            '--no-open'
+        ],
+        // No preTestSetup or postTestCleanup needed for dynamic file creation
+        expectedOutputs: [
+            { filePath: path.join('fm_plugin_output', 'test-fm-specifies-cv.pdf'), minSize: 1000 },
+        ],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            if (!stdout.includes("Using plugin 'cv' (determined via front matter in 'fm_specifies_cv.md')")) {
+                throw new Error("Stdout does not confirm 'cv' plugin was used via front matter. Output:\n" + stdout);
+            }
+            console.log("  OK: Correct plugin ('cv' from front matter) reported in stdout.");
+        }
+    },
+    {
+        description: "Front Matter: CLI --plugin 'recipe' overrides 'cv' in front matter (using static asset)",
+        commandArgs: [
+            'convert',
+            FM_CV_SPEC_MD_PATH, // Use static asset path
+            '--plugin', 'recipe', // CLI specifies 'recipe'
+            '--outdir', path.join(TEST_OUTPUT_BASE_DIR, 'fm_override_output'),
+            '--filename', 'test-fm-cli-overrides-cv.pdf',
+            '--no-open'
+        ],
+        expectedOutputs: [
+            { filePath: path.join('fm_override_output', 'test-fm-cli-overrides-cv.pdf'), minSize: 1000 },
+        ],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            if (!stdout.includes("Plugin 'recipe' specified via CLI, overriding front matter plugin 'cv'.")) {
+                throw new Error("Stdout does not confirm CLI override message. Output:\n" + stdout);
+            }
+            if (!stdout.includes("Using plugin 'recipe' (determined via CLI option)")) {
+                 throw new Error("Stdout does not confirm 'recipe' plugin was used via CLI. Output:\n" + stdout);
+            }
+            console.log("  OK: Correct plugin ('recipe' from CLI) and override message reported.");
+        }
+    },
+    {
+        description: "Local Config: Convert doc with plugin AND overrides from local <filename>.config.yaml (static assets)",
+        commandArgs: [
+            'convert',
+            LOCAL_CONFIG_DOC_MD_PATH, 
+            '--outdir', path.join(TEST_OUTPUT_BASE_DIR, 'local_config_static_output'),
+            '--filename', 'test-local-config-static.pdf',
+            '--no-open'
+            // Implicitly uses test/config.test.yaml for base global settings
+        ],
+        preTestSetup: async() => {
+            await fs.mkdir(path.join(TEST_OUTPUT_BASE_DIR, 'local_config_static_output'), { recursive: true });
+        },
+        expectedOutputs: [
+            { filePath: path.join('local_config_static_output', 'test-local-config-static.pdf'), minSize: 500 }, // A6 is small
+        ],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            const expectedPluginSourceString = `local '${'doc_with_local_config.config.yaml'}'`;
+            if (!stdout.includes(`Using plugin 'recipe' (determined via ${expectedPluginSourceString})`)) {
+                throw new Error(`Stdout does not confirm 'recipe' plugin was used via ${expectedPluginSourceString}. Output:\n${stdout}`);
+            }
+            console.log(`  OK: Correct plugin ('recipe' from ${expectedPluginSourceString}) reported in stdout.`);
+            console.log("  INFO: For full verification of overrides (A6 format, green bg, specific text), inspect the PDF with KEEP_OUTPUT=true.");
+        }
+    },
+
 ];
 
 // --- Helper Functions ---

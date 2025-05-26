@@ -56,7 +56,7 @@ async function commonCommandHandler(args, executorFunction, commandType) {
             await executorFunction(args, configResolver);
         }
     } catch (error) {
-        const pluginNameForError = args.plugin || args.pluginName || (typeof args.pluginSpec === 'string' ? args.pluginSpec : 'N/A') ;
+        const pluginNameForError = args.pluginSpec || args.plugin || args.pluginName || 'N/A';
         console.error(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`);
         if (error.stack && !args.watch) console.error(error.stack);
         if (!args.watch) process.exit(1);
@@ -64,30 +64,30 @@ async function commonCommandHandler(args, executorFunction, commandType) {
 }
 
 async function executeConversion(args, configResolver) {
-    const { pluginSpec, source: pluginSource } = await determinePluginToUse(args, 'default');
+    const { pluginSpec, source: pluginSource, localConfigOverrides } = await determinePluginToUse(args, 'default');
     args.pluginSpec = pluginSpec; 
 
     console.log(`Processing 'convert' for: ${args.markdownFile}`);
 
-    const effectiveConfig = await configResolver.getEffectiveConfig(pluginSpec);
+    const resolvedMarkdownPath = path.resolve(args.markdownFile);
+
+    // Pass localConfigOverrides AND resolvedMarkdownPath to getEffectiveConfig
+    const effectiveConfig = await configResolver.getEffectiveConfig(pluginSpec, localConfigOverrides, resolvedMarkdownPath);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
-    const resolvedMarkdownPath = path.resolve(args.markdownFile);
     let outputDir;
-
     if (args.outdir) {
         outputDir = path.resolve(args.outdir);
     } else {
         outputDir = path.join(os.tmpdir(), 'md-to-pdf-output');
-        // In lazy load, this info might be redundant if the determinePluginToUse already logged something similar
-        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { // Avoid redundant logging in simple lazy load
+        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { 
             console.log(`INFO: No output directory specified. Defaulting to temporary directory: ${outputDir}`);
         }
     }
 
     if (!fs.existsSync(outputDir)) {
         await fsp.mkdir(outputDir, { recursive: true });
-        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { // Avoid redundant logging
+        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { 
              console.log(`INFO: Created output directory: ${outputDir}`);
         }
     }
@@ -96,7 +96,7 @@ async function executeConversion(args, configResolver) {
 
     const pluginManager = new PluginManager();
     const generatedPdfPath = await pluginManager.invokeHandler(
-        pluginSpec,
+        pluginSpec, 
         effectiveConfig,
         dataForPlugin,
         outputDir,
@@ -104,7 +104,7 @@ async function executeConversion(args, configResolver) {
     );
 
     if (generatedPdfPath) {
-        console.log(`Successfully generated PDF with plugin '${pluginSpec}' (determined via ${pluginSource}): ${generatedPdfPath}`);
+        console.log(`Successfully generated PDF with plugin '${pluginSpec}': ${generatedPdfPath}`);
         const viewer = mainLoadedConfig.pdf_viewer;
         if (args.open && viewer) {
             openPdf(generatedPdfPath, viewer);
@@ -124,7 +124,9 @@ async function executeGeneration(args, configResolver) {
     args.pluginSpec = pluginToUse; 
     console.log(`Processing 'generate' command for plugin: ${pluginToUse}`);
 
-    const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse);
+    // For 'generate', markdownFilePath is not directly applicable for localConfigOverrides resolution in the same way.
+    // So, pass null for markdownFilePath. localConfigOverrides would also likely be null.
+    const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse, null, null);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
     const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd', 'pluginSpec', 'isLazyLoad'];
@@ -170,7 +172,7 @@ async function executeGeneration(args, configResolver) {
 async function main() {
     const cliOptionsForConvert = (y) => {
         y.positional("markdownFile", { describe: "Path to the input Markdown file.", type: "string" })
-            .option("plugin", { alias: "p", describe: "Plugin to use (name or path). Overrides front matter.", type: "string" })
+            .option("plugin", { alias: "p", describe: "Plugin to use (name or path). Overrides front matter and local .config.yaml.", type: "string" })
             .option("outdir", { alias: "o", describe: "Output directory. Defaults to a system temporary directory if not specified.", type: "string" })
             .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
             .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
@@ -198,7 +200,7 @@ async function main() {
             cliOptionsForConvert, 
             async (args) => {
                 if (args.markdownFile) {
-                    args.isLazyLoad = true; // Mark as lazy load
+                    args.isLazyLoad = true; 
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
                 } else {
                     argvBuilder.showHelp();
@@ -210,7 +212,7 @@ async function main() {
             "Convert a single Markdown file to PDF using a specified plugin.",
             cliOptionsForConvert, 
             (args) => {
-                args.isLazyLoad = false; // Explicit convert is not lazy load
+                args.isLazyLoad = false; 
                 commonCommandHandler(args, executeConversion, 'convert (explicit)');
             }
         )
@@ -226,7 +228,7 @@ async function main() {
                 y.strict(false); 
             },
             (args) => {
-                args.isLazyLoad = false; // Explicit generate is not lazy load
+                args.isLazyLoad = false;
                 commonCommandHandler(args, executeGeneration, 'generate');
             }
         )
@@ -242,11 +244,11 @@ async function main() {
                         try {
                             console.log("Discovering plugins...");
                             const builder = new PluginRegistryBuilder(
-                                path.resolve(__dirname), 
+                                path.resolve(__dirname, ".."), 
                                 null, 
                                 args.config, 
                                 args.factoryDefaults,
-                                args.isLazyLoad || false // Pass lazy load status
+                                args.isLazyLoad || false 
                             );
                             const pluginDetailsList = await builder.getAllPluginDetails();
 
@@ -313,7 +315,7 @@ async function main() {
                     },
                     async (args) => {
                         try {
-                            args.isLazyLoad = false; // Not a lazy load context for plugin help
+                            args.isLazyLoad = false; 
                             await displayPluginHelp(args.pluginName, args);
                         } catch (error) {
                             console.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
@@ -342,7 +344,7 @@ async function main() {
                 });
             },
             async (args) => {
-                args.isLazyLoad = false; // Not a lazy load context for config display
+                args.isLazyLoad = false; 
                 await displayConfig(args);
             }
         )

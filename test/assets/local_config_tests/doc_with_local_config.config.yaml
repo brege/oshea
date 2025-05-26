@@ -1,0 +1,23 @@
+# Specifies the plugin to use for doc_with_local_config.md
+# and provides document-specific overrides.
+plugin: "recipe"
+
+# Document-specific parameters
+# These will override any global `params` or params from test/config.test.yaml for this document.
+params:
+  title: "Title From Local *.config.yaml!"
+  local_config_specific_param: "Hello from local_config_tests/doc_with_local_config.config.yaml!"
+  shared_param: "Overridden by Local Config" # Overrides shared_param from test/config.test.yaml
+
+# Plugin-specific overrides for the 'recipe' plugin, only for this document.
+recipe:
+  description: "Special recipe style via local <filename>.config.yaml"
+  pdf_options:
+    format: "A6" # A very small, distinct format for testing
+    margin: { top: "0.15in", bottom: "0.15in", left: "0.15in", right: "0.15in" }
+    printBackground: true
+  css_files:
+    - "./local_test_style.css" # Path relative to this local config file
+  inherit_css: false # Use ONLY this CSS for this document
+  # Example of overriding a plugin-specific boolean:
+  # inject_fm_title_as_h1: false # Assuming 'recipe' usually has this true

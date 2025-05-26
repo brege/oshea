@@ -5,8 +5,8 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs');
-const os = require('os'); // Added os module
-const fsp = require('fs').promises; // For promises version of mkdir
+const os = require('os');
+const fsp = require('fs').promises;
 
 const { spawn } = require('child_process');
 
@@ -17,6 +17,7 @@ const PluginRegistryBuilder = require('./src/PluginRegistryBuilder');
 const { scaffoldPlugin } = require('./src/plugin_scaffolder');
 const { displayPluginHelp } = require('./src/get_help');
 const { displayConfig } = require('./src/config_display');
+const { determinePluginToUse } = require('./src/plugin_determiner');
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -43,20 +44,19 @@ function openPdf(pdfPath, viewerCommand) {
 
 async function commonCommandHandler(args, executorFunction, commandType) {
     try {
-        const configResolver = new ConfigResolver(args.config, args.factoryDefaults);
-
         if (args.watch) {
-            await setupWatch(args, configResolver,
+            await setupWatch(args, null,
                 async (watchedArgs) => {
-                    const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults);
+                    const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults, watchedArgs.isLazyLoad || false);
                     await executorFunction(watchedArgs, currentConfigResolver);
                 }
             );
         } else {
+            const configResolver = new ConfigResolver(args.config, args.factoryDefaults, args.isLazyLoad || false);
             await executorFunction(args, configResolver);
         }
     } catch (error) {
-        const pluginNameForError = args.plugin || args.pluginName || 'N/A';
+        const pluginNameForError = args.plugin || args.pluginName || (typeof args.pluginSpec === 'string' ? args.pluginSpec : 'N/A') ;
         console.error(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`);
         if (error.stack && !args.watch) console.error(error.stack);
         if (!args.watch) process.exit(1);
@@ -64,9 +64,12 @@ async function commonCommandHandler(args, executorFunction, commandType) {
 }
 
 async function executeConversion(args, configResolver) {
-    console.log(`Processing 'convert' for: ${args.markdownFile} using plugin: ${args.plugin}`);
+    const { pluginSpec, source: pluginSource } = await determinePluginToUse(args, 'default');
+    args.pluginSpec = pluginSpec; 
 
-    const effectiveConfig = await configResolver.getEffectiveConfig(args.plugin);
+    console.log(`Processing 'convert' for: ${args.markdownFile}`);
+
+    const effectiveConfig = await configResolver.getEffectiveConfig(pluginSpec);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
     const resolvedMarkdownPath = path.resolve(args.markdownFile);
@@ -75,54 +78,56 @@ async function executeConversion(args, configResolver) {
     if (args.outdir) {
         outputDir = path.resolve(args.outdir);
     } else {
-        // Default to a subdirectory in the system's temporary directory
         outputDir = path.join(os.tmpdir(), 'md-to-pdf-output');
-        console.log(`INFO: No output directory specified. Defaulting to temporary directory: ${outputDir}`);
+        // In lazy load, this info might be redundant if the determinePluginToUse already logged something similar
+        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { // Avoid redundant logging in simple lazy load
+            console.log(`INFO: No output directory specified. Defaulting to temporary directory: ${outputDir}`);
+        }
     }
 
-    // Ensure the output directory exists
     if (!fs.existsSync(outputDir)) {
         await fsp.mkdir(outputDir, { recursive: true });
-        console.log(`INFO: Created output directory: ${outputDir}`);
+        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { // Avoid redundant logging
+             console.log(`INFO: Created output directory: ${outputDir}`);
+        }
     }
-
 
     const dataForPlugin = { markdownFilePath: resolvedMarkdownPath };
 
     const pluginManager = new PluginManager();
     const generatedPdfPath = await pluginManager.invokeHandler(
-        args.plugin,
+        pluginSpec,
         effectiveConfig,
         dataForPlugin,
-        outputDir, // Use the potentially temporary outputDir
+        outputDir,
         args.filename
     );
 
     if (generatedPdfPath) {
-        console.log(`Successfully generated PDF: ${generatedPdfPath}`); // This line now correctly logs the potentially temporary path
+        console.log(`Successfully generated PDF with plugin '${pluginSpec}' (determined via ${pluginSource}): ${generatedPdfPath}`);
         const viewer = mainLoadedConfig.pdf_viewer;
         if (args.open && viewer) {
             openPdf(generatedPdfPath, viewer);
         } else if (args.open && !viewer) {
-            // If defaulting to temp dir and no viewer, user especially needs to know the path
             console.log(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
         } else if (!args.open && !args.outdir) {
-            // If not opening and output was defaulted to temp, inform user.
             console.log(`PDF saved to temporary directory: ${generatedPdfPath}`);
         }
     } else {
-        if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.plugin}'.`);
+        if (!args.watch) throw new Error(`PDF generation failed for plugin '${pluginSpec}' (determined via ${pluginSource}).`);
     }
     console.log(`convert command finished.`);
 }
 
 async function executeGeneration(args, configResolver) {
-    console.log(`Processing 'generate' command for plugin: ${args.pluginName}`);
+    const pluginToUse = args.pluginName;
+    args.pluginSpec = pluginToUse; 
+    console.log(`Processing 'generate' command for plugin: ${pluginToUse}`);
 
-    const effectiveConfig = await configResolver.getEffectiveConfig(args.pluginName);
+    const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
-    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd'];
+    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd', 'pluginSpec', 'isLazyLoad'];
     const cliArgsForPlugin = {};
     for (const key in args) {
         if (!knownGenerateOptions.includes(key) && Object.prototype.hasOwnProperty.call(args, key)) {
@@ -134,7 +139,6 @@ async function executeGeneration(args, configResolver) {
     const outputFilename = args.filename;
     const outputDir = path.resolve(args.outdir);
 
-    // Ensure the output directory exists for generate command as well
     if (!fs.existsSync(outputDir)) {
         await fsp.mkdir(outputDir, { recursive: true });
         console.log(`INFO: Created output directory: ${outputDir}`);
@@ -142,7 +146,7 @@ async function executeGeneration(args, configResolver) {
 
     const pluginManager = new PluginManager();
     const generatedPdfPath = await pluginManager.invokeHandler(
-        args.pluginName,
+        pluginToUse,
         effectiveConfig,
         dataForPlugin,
         outputDir,
@@ -150,7 +154,7 @@ async function executeGeneration(args, configResolver) {
     );
 
     if (generatedPdfPath) {
-        console.log(`Successfully generated PDF via plugin '${args.pluginName}': ${generatedPdfPath}`);
+        console.log(`Successfully generated PDF via plugin '${pluginToUse}': ${generatedPdfPath}`);
         const viewer = mainLoadedConfig.pdf_viewer;
         if (args.open && viewer) {
             openPdf(generatedPdfPath, viewer);
@@ -158,16 +162,25 @@ async function executeGeneration(args, configResolver) {
             console.log(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
         }
     } else {
-        if (!args.watch) throw new Error(`PDF generation failed for plugin '${args.pluginName}'.`);
+        if (!args.watch) throw new Error(`PDF generation failed for plugin '${pluginToUse}'.`);
     }
     console.log(`generate command finished.`);
 }
 
 async function main() {
+    const cliOptionsForConvert = (y) => {
+        y.positional("markdownFile", { describe: "Path to the input Markdown file.", type: "string" })
+            .option("plugin", { alias: "p", describe: "Plugin to use (name or path). Overrides front matter.", type: "string" })
+            .option("outdir", { alias: "o", describe: "Output directory. Defaults to a system temporary directory if not specified.", type: "string" })
+            .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
+            .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
+            .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
+    };
+
     const argvBuilder = yargs(hideBin(process.argv))
-        .parserConfiguration({'short-option-groups': false})
+        .parserConfiguration({ 'short-option-groups': false })
         .scriptName("md-to-pdf")
-        .usage("Usage: $0 <command> [options]")
+        .usage("Usage: $0 <command_or_markdown_file> [options]")
         .option('config', {
             describe: 'Path to a custom YAML configuration file. This acts as the project-specific main config.',
             type: 'string',
@@ -179,37 +192,43 @@ async function main() {
             type: 'boolean',
             default: false,
         })
-        .alias("help", "h")
-        .alias("version", "v")
-        .demandCommand(1, "You need to specify a command.")
-        .strict()
-        .epilogue("For more information, refer to the README.md file.");
-
-    argvBuilder.command(
+        .command(
+            '$0 [markdownFile]',
+            "Converts a Markdown file to PDF. If markdownFile is provided, implicitly acts as 'convert'.",
+            cliOptionsForConvert, 
+            async (args) => {
+                if (args.markdownFile) {
+                    args.isLazyLoad = true; // Mark as lazy load
+                    await commonCommandHandler(args, executeConversion, 'convert (implicit)');
+                } else {
+                    argvBuilder.showHelp();
+                }
+            }
+        )
+        .command(
             "convert <markdownFile>",
             "Convert a single Markdown file to PDF using a specified plugin.",
-            (y) => {
-                y.positional("markdownFile", { describe: "Path to the input Markdown file.", type: "string" })
-                .option("plugin", { alias: "p", describe: "Plugin to use.", type: "string", default: "default" })
-                .option("outdir", { alias: "o", describe: "Output directory. Defaults to a system temporary directory if not specified.", type: "string" }) // Updated description
-                .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
-                .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
-                .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
-            },
-            (args) => commonCommandHandler(args, executeConversion, 'convert')
+            cliOptionsForConvert, 
+            (args) => {
+                args.isLazyLoad = false; // Explicit convert is not lazy load
+                commonCommandHandler(args, executeConversion, 'convert (explicit)');
+            }
         )
         .command(
             "generate <pluginName>",
             "Generate a document using a specified plugin that requires complex inputs.",
             (y) => {
-                y.positional("pluginName", { describe: "Name of the plugin.", type: "string"})
-                .option("outdir", { alias: "o", describe: "Output directory.", type: "string", default: "."})
-                .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
-                .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true})
-                .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false});
-                y.strict(false);
+                y.positional("pluginName", { describe: "Name of the plugin.", type: "string" })
+                    .option("outdir", { alias: "o", describe: "Output directory.", type: "string", default: "." })
+                    .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
+                    .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
+                    .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
+                y.strict(false); 
             },
-            (args) => commonCommandHandler(args, executeGeneration, 'generate')
+            (args) => {
+                args.isLazyLoad = false; // Explicit generate is not lazy load
+                commonCommandHandler(args, executeGeneration, 'generate');
+            }
         )
         .command(
             "plugin <subcommand>",
@@ -218,15 +237,16 @@ async function main() {
                 pluginYargs.command(
                     "list",
                     "List all discoverable plugins.",
-                    () => {},
+                    () => {}, 
                     async (args) => {
                         try {
                             console.log("Discovering plugins...");
                             const builder = new PluginRegistryBuilder(
-                                path.resolve(__dirname),
-                                null,
-                                args.config,
-                                args.factoryDefaults
+                                path.resolve(__dirname), 
+                                null, 
+                                args.config, 
+                                args.factoryDefaults,
+                                args.isLazyLoad || false // Pass lazy load status
                             );
                             const pluginDetailsList = await builder.getAllPluginDetails();
 
@@ -293,6 +313,7 @@ async function main() {
                     },
                     async (args) => {
                         try {
+                            args.isLazyLoad = false; // Not a lazy load context for plugin help
                             await displayPluginHelp(args.pluginName, args);
                         } catch (error) {
                             console.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
@@ -301,7 +322,8 @@ async function main() {
                         }
                     }
                 )
-                .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create, help).");
+                .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create, help).")
+                .strict(); 
             }
         )
         .command(
@@ -320,13 +342,38 @@ async function main() {
                 });
             },
             async (args) => {
+                args.isLazyLoad = false; // Not a lazy load context for config display
                 await displayConfig(args);
             }
-        );
+        )
+        .alias("help", "h")
+        .alias("version", "v")
+        .strict() 
+        .fail((msg, err, yargsInstance) => { 
+            if (err) throw err; 
+            if (msg && msg.includes("Unknown argument")) { 
+                 const firstArg = process.argv[2]; 
+                 if(firstArg && !['convert', 'generate', 'plugin', 'config', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
+                     console.error(`ERROR: ${msg}`);
+                     console.error(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`);
+                     yargsInstance.showHelp();
+                     process.exit(1);
+                 }
+            }
+            console.error(msg || "An error occurred.");
+            if (msg) console.error("For usage details, run with --help.");
+            process.exit(1);
+        })
+        .epilogue("For more information, refer to the README.md file.");
 
     const parsedArgs = await argvBuilder.argv;
-    if (!parsedArgs._[0] && Object.keys(parsedArgs).length <= 2) {
-        argvBuilder.showHelp();
+
+    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config'].includes(parsedArgs.$0))) {
+        const knownCommands = ['convert', 'generate', 'plugin', 'config'];
+        const commandGiven = knownCommands.some(cmd => parsedArgs._.includes(cmd));
+        if (!commandGiven && !parsedArgs.markdownFile) {
+             argvBuilder.showHelp();
+        }
     }
 }
 
@@ -349,4 +396,4 @@ if (require.main === module) {
     main();
 }
 
-module.exports = { openPdf }; 
+module.exports = { openPdf };

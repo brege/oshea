@@ -7,7 +7,7 @@ const { loadConfig: loadYamlConfig } = require('./markdown_utils');
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
 
 class PluginRegistryBuilder {
-    constructor(projectRoot, xdgBaseDir, projectManifestConfigPath, useFactoryDefaultsOnly = false) {
+    constructor(projectRoot, xdgBaseDir, projectManifestConfigPath, useFactoryDefaultsOnly = false, isLazyLoadMode = false) { // Added isLazyLoadMode
         this.projectRoot = projectRoot;
         if (!this.projectRoot || typeof this.projectRoot !== 'string') {
             throw new Error("PluginRegistryBuilder: projectRoot must be a valid path string.");
@@ -15,6 +15,7 @@ class PluginRegistryBuilder {
 
         this.bundledMainConfigPath = path.join(this.projectRoot, 'config.yaml');
         this.factoryDefaultMainConfigPath = path.join(this.projectRoot, 'config.example.yaml');
+        this.isLazyLoadMode = isLazyLoadMode; // Store the flag
 
         if (!xdgBaseDir || typeof xdgBaseDir !== 'string') {
             const xdgConfigHome = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
@@ -28,7 +29,7 @@ class PluginRegistryBuilder {
         this.projectManifestBaseDir = this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath) ? path.dirname(this.projectManifestConfigPath) : null;
 
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
-        this._builtRegistry = null; // Ensure cache is null on new instance
+        this._builtRegistry = null; 
     }
 
     _resolveAlias(alias, aliasValue, basePathDefiningAlias) {
@@ -59,7 +60,6 @@ class PluginRegistryBuilder {
             if (resolvedAliasBasePath) {
                 resolvedPath = path.join(resolvedAliasBasePath, pathWithinAlias);
             } else {
-                // console.warn(`WARN (PluginRegistryBuilder): Alias '${aliasName}' used in path '${rawPath}' was not pre-resolved or is invalid.`); // Already warned by _getPluginRegistrationsFromFile if alias target is bad
                 return null;
             }
         } else if (resolvedPath.startsWith('~/') || resolvedPath.startsWith('~\\')) {
@@ -78,7 +78,21 @@ class PluginRegistryBuilder {
             if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
                 return resolvedPath;
             } else if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
-                console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to '${resolvedPath}') points to a directory, not a file. Skipping registration for this entry.`);
+                // If it's a directory, try to find <dirname>.config.yaml inside it
+                const dirName = path.basename(resolvedPath);
+                const conventionalConfigPath = path.join(resolvedPath, `${dirName}.config.yaml`);
+                if (fs.existsSync(conventionalConfigPath) && fs.statSync(conventionalConfigPath).isFile()) {
+                    return conventionalConfigPath;
+                }
+                // Fallback: try to find *any* *.config.yaml in the directory
+                const filesInDir = fs.readdirSync(resolvedPath);
+                const alternativeConfig = filesInDir.find(f => f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX));
+                if (alternativeConfig) {
+                    const altPath = path.join(resolvedPath, alternativeConfig);
+                     console.log(`INFO (PluginRegistryBuilder): Using '${alternativeConfig}' as config for plugin directory specified by '${rawPath}' (resolved to '${resolvedPath}').`);
+                    return altPath;
+                }
+                console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to directory '${resolvedPath}') does not contain a suitable *.config.yaml file. Skipping registration.`);
                 return null;
             } else {
                 console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to '${resolvedPath}') does not exist. Skipping registration for this entry.`);
@@ -104,8 +118,6 @@ class PluginRegistryBuilder {
                     const resolvedAliasTarget = this._resolveAlias(alias, aliasPathRaw, basePathForMainConfig);
                     if (resolvedAliasTarget) {
                         currentAliases[alias] = resolvedAliasTarget;
-                    } else {
-                        // Warning moved to _resolveAlias or when alias is used
                     }
                 }
             }
@@ -119,8 +131,6 @@ class PluginRegistryBuilder {
                             definedIn: mainConfigFilePath,
                             sourceType: sourceType
                         };
-                    } else {
-                        // Warnings are now handled within _resolvePluginConfigPath
                     }
                 }
             }
@@ -132,14 +142,12 @@ class PluginRegistryBuilder {
     }
 
     async buildRegistry() {
-        // Check cache, now including projectManifestConfigPath
         if (this._builtRegistry && 
             this._builtRegistry.builtWithFactoryDefaults === this.useFactoryDefaultsOnly &&
-            this._builtRegistry.projectManifestPathUsed === this.projectManifestConfigPath) {
-            // console.log(`DEBUG (PluginRegistryBuilder): Returning cached registry for projectManifest: ${this.projectManifestConfigPath}`);
+            this._builtRegistry.projectManifestPathUsed === this.projectManifestConfigPath &&
+            this._builtRegistry.isLazyLoadMode === this.isLazyLoadMode) { // Check lazy load mode for cache
             return this._builtRegistry.registry;
         }
-        // console.log(`DEBUG (PluginRegistryBuilder): Building new registry. useFactoryDefaultsOnly: ${this.useFactoryDefaultsOnly}, projectManifestConfigPath: ${this.projectManifestConfigPath}`);
 
         let registry = {};
         let sourcePathForInitialRegistrations;
@@ -158,7 +166,9 @@ class PluginRegistryBuilder {
                 sourcePathForInitialRegistrations = this.bundledMainConfigPath;
                 initialRegistrationsSourceType = `Bundled Main (${path.basename(this.bundledMainConfigPath)})`;
             } else if (fs.existsSync(this.factoryDefaultMainConfigPath)) {
-                console.warn(`WARN (PluginRegistryBuilder): Main config '${this.bundledMainConfigPath}' not found. Using '${this.factoryDefaultMainConfigPath}' for initial plugin registrations.`);
+                if (!this.isLazyLoadMode) { // Suppress warning in lazy load mode
+                    console.warn(`WARN (PluginRegistryBuilder): Main config '${this.bundledMainConfigPath}' not found. Using '${this.factoryDefaultMainConfigPath}' for initial plugin registrations.`);
+                }
                 sourcePathForInitialRegistrations = this.factoryDefaultMainConfigPath;
                 initialRegistrationsSourceType = `Factory Default Fallback (${path.basename(this.factoryDefaultMainConfigPath)})`;
             } else {
@@ -180,17 +190,15 @@ class PluginRegistryBuilder {
 
             if (this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath)) {
                 const projectRegistrations = await this._getPluginRegistrationsFromFile(this.projectManifestConfigPath, this.projectManifestBaseDir, "Project Manifest (--config)");
-                registry = {...registry, ...projectRegistrations}; // Ensure projectRegistrations overwrite
+                registry = {...registry, ...projectRegistrations}; 
             }
         }
         this._builtRegistry = { 
             registry, 
             builtWithFactoryDefaults: this.useFactoryDefaultsOnly,
-            projectManifestPathUsed: this.projectManifestConfigPath // Store the manifest path used for this build
+            projectManifestPathUsed: this.projectManifestConfigPath,
+            isLazyLoadMode: this.isLazyLoadMode // Cache lazy load mode
         };
-        // if (registry.cv && process.env.DEBUG) { // Temp debug for CV
-        //     console.log(`DEBUG (PluginRegistryBuilder buildRegistry): Final 'cv' entry: ${JSON.stringify(registry.cv, null, 2)}`);
-        // }
         return registry;
     }
 

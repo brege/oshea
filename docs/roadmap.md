@@ -72,6 +72,22 @@ See the [version history](https://github.com/brege/md-to-pdf/commits/main/ROADMA
     * **API Stability Review:** If a programmatic API is more formally defined by this point, review for stability.
     * **Documentation Finalization:** Complete review and polish of all user and developer documentation.
 
+## Known Bugs
+
+[issue-1]
+  * **Description:** Placeholder double-curly-brace syntax within code blocks inside a markdown file throws WARNings.
+  * State: **OPEN**
+  * Observed: v0.6.2, v0.6.3
+  * When rendering a markdown document containing:
+    ```
+    \`\`\`
+    {{ some.variable }}
+    \`\`\`
+    ```
+    stdout contains the following warning:
+    `WARN: Placeholder '{{ custom_data.key }}' not found during main content substitution.`
+
+
 ## Shelved/Reconsidered Features
 
 * **Named Plugin Variants:**

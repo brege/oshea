@@ -1,52 +1,55 @@
 // src/config_display.js
 const fs = require('fs');
 const yaml = require('js-yaml');
-const path = require('path'); // Added: require the path module
-const ConfigResolver = require('./ConfigResolver');
+const path = require('path');
+const ConfigResolver = require('./ConfigResolver'); // Assuming ConfigResolver is correctly imported
 
 async function displayGlobalConfig(configResolver, isPure) {
-    await configResolver._initializeResolverIfNeeded();
+    // Ensure ConfigResolver is initialized to get primaryMainConfigLoadReason
+    await configResolver._initializeResolverIfNeeded(); 
     const mainConfig = configResolver.primaryMainConfig || {};
     const mainConfigPath = configResolver.primaryMainConfigPathActual;
+    const loadReason = configResolver.primaryMainConfigLoadReason; // Get the stored reason
 
     if (!isPure) {
         console.log("# Configuration Sources:");
         if (mainConfigPath) {
             let sourceTypeMessage = "";
-            if (configResolver.useFactoryDefaultsOnly) {
+            if (configResolver.useFactoryDefaultsOnly && loadReason === "factory default") { // More specific check
                 sourceTypeMessage = `(Factory Default: ${path.basename(mainConfigPath)})`;
-            } else if (mainConfigPath === configResolver.projectManifestConfigPath) {
+            } else if (loadReason === "project (from --config)") {
                 sourceTypeMessage = "(Project --config)";
-            } else if (mainConfigPath === configResolver.xdgGlobalConfigPath) {
+            } else if (loadReason === "XDG global") {
                 sourceTypeMessage = "(XDG Global)";
-            } else if (mainConfigPath === configResolver.defaultMainConfigPath) {
+            } else if (loadReason === "bundled main") {
                 sourceTypeMessage = `(Bundled Main: ${path.basename(mainConfigPath)})`;
-            } else if (mainConfigPath === configResolver.factoryDefaultMainConfigPath) { 
+            } else if (loadReason === "factory default fallback") {
                 sourceTypeMessage = `(Factory Default Fallback: ${path.basename(mainConfigPath)})`;
+            } else if (loadReason) { // Fallback for any other defined reason
+                 sourceTypeMessage = `(${loadReason})`;
             }
             console.log(`#   Primary Main Config Loaded: ${mainConfigPath} ${sourceTypeMessage}`);
         } else {
             console.log("#   Primary Main Config: (Using internal defaults as no file was loaded/found)");
         }
 
+        // Logic for considered paths can be refined if MainConfigLoader exposes them too
         if (!configResolver.useFactoryDefaultsOnly) {
-            if (configResolver.projectManifestConfigPath && 
-                fs.existsSync(configResolver.projectManifestConfigPath) && 
-                configResolver.projectManifestConfigPath !== mainConfigPath) {
-                console.log(`#   Considered Project Manifest (--config): ${configResolver.projectManifestConfigPath}`);
+            const xdgConfigDetails = await configResolver.mainConfigLoader.getXdgMainConfig();
+            const projectConfigDetails = await configResolver.mainConfigLoader.getProjectManifestConfig();
+
+            if (projectConfigDetails.path && fs.existsSync(projectConfigDetails.path) && projectConfigDetails.path !== mainConfigPath) {
+                console.log(`#   Considered Project Manifest (--config): ${projectConfigDetails.path}`);
             }
-            if (fs.existsSync(configResolver.xdgGlobalConfigPath) && 
-                configResolver.xdgGlobalConfigPath !== mainConfigPath &&
-                (!configResolver.projectManifestConfigPath || configResolver.projectManifestConfigPath !== configResolver.xdgGlobalConfigPath)) {
-                 console.log(`#   Considered XDG Global Config: ${configResolver.xdgGlobalConfigPath}`);
+            if (xdgConfigDetails.path && fs.existsSync(xdgConfigDetails.path) && xdgConfigDetails.path !== mainConfigPath && (!projectConfigDetails.path || projectConfigDetails.path !== xdgConfigDetails.path)) {
+                 console.log(`#   Considered XDG Global Config: ${xdgConfigDetails.path}`);
             }
         }
-        if (fs.existsSync(configResolver.defaultMainConfigPath) && 
-            configResolver.defaultMainConfigPath !== mainConfigPath &&
-            mainConfigPath !== configResolver.factoryDefaultMainConfigPath) { 
-             console.log(`#   Considered Bundled Main Config (${path.basename(configResolver.defaultMainConfigPath)}): ${configResolver.defaultMainConfigPath}`);
+        const bundledMainDefaultPath = configResolver.mainConfigLoader.defaultMainConfigPath;
+        if (fs.existsSync(bundledMainDefaultPath) && bundledMainDefaultPath !== mainConfigPath && mainConfigPath !== configResolver.mainConfigLoader.factoryDefaultMainConfigPath ) {
+             console.log(`#   Considered Bundled Main Config (${path.basename(bundledMainDefaultPath)}): ${bundledMainDefaultPath}`);
         }
-        console.log("# Active Global Configuration:\n"); // Header with two newlines after
+        console.log("# Active Global Configuration:\n");
     }
     
     const configToDump = { ...mainConfig };
@@ -60,14 +63,14 @@ async function displayGlobalConfig(configResolver, isPure) {
     }
 }
 
+// displayPluginConfig remains the same as its source reporting logic is within PluginConfigLoader
 async function displayPluginConfig(configResolver, pluginName, isPure) {
-    await configResolver._initializeResolverIfNeeded();
+    await configResolver._initializeResolverIfNeeded(); // Ensures mainConfigLoader runs
     
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginName);
     const configSources = configResolver.getConfigFileSources();
 
     if (!isPure) {
-        // Header for the plugin config section, followed by two newlines
         console.log(`# Effective configuration for plugin: ${pluginName}\n`);
     }
 
@@ -93,9 +96,11 @@ async function displayPluginConfig(configResolver, pluginName, isPure) {
     }
 }
 
+
 async function displayConfig(args) {
     try {
-        const configResolver = new ConfigResolver(args.config, args.factoryDefaults);
+        // Pass isLazyLoad as false for the config command context
+        const configResolver = new ConfigResolver(args.config, args.factoryDefaults, false); 
         if (args.plugin) {
             await displayPluginConfig(configResolver, args.plugin, args.pure);
         } else {

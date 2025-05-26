@@ -402,6 +402,99 @@ const testCases = [
             }
         }
     },
+    // --- Lazy Load Tests ---
+    {
+        description: "Front Matter: Convert document specifying 'cv' plugin in front matter",
+        commandArgs: [
+            // Using explicit convert command first for simplicity, 
+            // can add a separate test for lazy load if needed.
+            'convert', 
+            path.join(TEST_DIR, 'assets', 'test-fm-plugin.md'),
+            '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--filename', 'test-fm-plugin-cv-output.pdf',
+            '--no-open' 
+            // No --plugin flag here, so it should pick up from front matter
+        ],
+        preTestSetup: async () => {
+            const fmPluginTestMdPath = path.join(TEST_DIR, 'assets', 'test-fm-plugin.md');
+            const fmPluginTestMdContent = `---
+title: "FM Plugin Test Doc"
+md_to_pdf_plugin: "cv"
+---
+
+# Document Title Should Be Handled by CV Plugin
+
+This document explicitly requests the 'cv' plugin via front matter.`;
+            await fs.writeFile(fmPluginTestMdPath, fmPluginTestMdContent);
+            console.log(`  Created test file: ${fmPluginTestMdPath}`);
+        },
+        expectedOutputs: [
+            { filePath: 'test-fm-plugin-cv-output.pdf', minSize: 1000 }, // Basic check for PDF generation
+        ],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            // Check if the log indicates 'cv' plugin was used due to front matter
+            if (!stdout.includes("Using plugin 'cv' (determined via front matter in 'test-fm-plugin.md')")) {
+                throw new Error("Stdout does not confirm 'cv' plugin was used via front matter. Output:\n" + stdout);
+            }
+            console.log("  OK: Correct plugin ('cv' from front matter) reported in stdout.");
+        },
+        postTestCleanup: async () => {
+            const fmPluginTestMdPath = path.join(TEST_DIR, 'assets', 'test-fm-plugin.md');
+            if (fss.existsSync(fmPluginTestMdPath)) {
+                await fs.unlink(fmPluginTestMdPath);
+                console.log(`  Cleaned up test file: ${fmPluginTestMdPath}`);
+            }
+        }
+    },
+    // Test CLI override of front matter plugin
+    {
+        description: "Front Matter: CLI --plugin 'recipe' overrides 'cv' plugin in front matter",
+        commandArgs: [
+            'convert',
+            path.join(TEST_DIR, 'assets', 'test-fm-plugin.md'), // Uses the same MD file created above
+            '--plugin', 'recipe', // CLI specifies 'recipe'
+            '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--filename', 'test-fm-plugin-recipe-override.pdf',
+            '--no-open'
+        ],
+        // preTestSetup is not strictly needed if previous test creates the file and it's not cleaned up
+        // but to make it standalone, we can ensure it exists or re-create it.
+        // For now, assume test-fm-plugin.md exists from previous test or we add setup.
+        preTestSetup: async () => { // Ensure the file exists for this test too
+            const fmPluginTestMdPath = path.join(TEST_DIR, 'assets', 'test-fm-plugin.md');
+            if (!fss.existsSync(fmPluginTestMdPath)) {
+                 const fmPluginTestMdContent = `---
+title: "FM Plugin Test Doc for Override"
+md_to_pdf_plugin: "cv" 
+---
+# Content`;
+                await fs.writeFile(fmPluginTestMdPath, fmPluginTestMdContent);
+            }
+        },
+        expectedOutputs: [
+            { filePath: 'test-fm-plugin-recipe-override.pdf', minSize: 1000 },
+        ],
+        postTestChecks: async (testCaseOutputDir, result) => {
+            if (!result.success) throw new Error(`CLI command failed: ${result.error?.message || 'Unknown error'}`);
+            const stdout = result.stdout || "";
+            if (!stdout.includes("Plugin 'recipe' specified via CLI, overriding front matter plugin 'cv'.")) {
+                throw new Error("Stdout does not confirm CLI override message. Output:\n" + stdout);
+            }
+            if (!stdout.includes("Using plugin 'recipe' (determined via CLI option)")) {
+                 throw new Error("Stdout does not confirm 'recipe' plugin was used via CLI. Output:\n" + stdout);
+            }
+            console.log("  OK: Correct plugin ('recipe' from CLI) and override message reported.");
+        },
+        postTestCleanup: async () => { // Cleanup the MD file after all related tests
+            const fmPluginTestMdPath = path.join(TEST_DIR, 'assets', 'test-fm-plugin.md');
+            if (fss.existsSync(fmPluginTestMdPath)) {
+                await fs.unlink(fmPluginTestMdPath);
+                console.log(`  Cleaned up test file: ${fmPluginTestMdPath}`);
+            }
+        }
+    },
 ];
 
 // --- Helper Functions ---

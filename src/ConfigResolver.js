@@ -38,7 +38,7 @@ class ConfigResolver {
         const primary = await this.mainConfigLoader.getPrimaryMainConfig();
         this.primaryMainConfig = primary.config;
         this.primaryMainConfigPathActual = primary.path;
-        this.primaryMainConfigLoadReason = primary.reason;
+        this.primaryMainConfigLoadReason = primary.reason; // Store this reason
 
         const xdg = await this.mainConfigLoader.getXdgMainConfig();
         const project = await this.mainConfigLoader.getProjectManifestConfig();
@@ -52,19 +52,26 @@ class ConfigResolver {
         const currentProjectManifestPath = project.path;
         let needsRegistryBuild = this.mergedPluginRegistry === null ||
                                  (this.mergedPluginRegistry._builtWithFactoryDefaults !== this.useFactoryDefaultsOnly) ||
-                                 (this._lastProjectManifestPathForRegistry !== currentProjectManifestPath);
+                                 (this._lastProjectManifestPathForRegistry !== currentProjectManifestPath) ||
+                                 (this.mergedPluginRegistry.isLazyLoadMode !== this.isLazyLoadMode) || // also check if lazy load mode changed
+                                 (this.mergedPluginRegistry.primaryMainConfigLoadReason !== this.primaryMainConfigLoadReason); // and if reason changed
+
 
         if (needsRegistryBuild) {
             if (process.env.DEBUG) {
-                console.log(`DEBUG (ConfigResolver): Rebuilding plugin registry. ProjectManifestPath: ${currentProjectManifestPath}, FactoryDefaults: ${this.useFactoryDefaultsOnly}, LazyLoad: ${this.isLazyLoadMode}`);
+                console.log(`DEBUG (ConfigResolver): Rebuilding plugin registry. ProjectManifestPath: ${currentProjectManifestPath}, FactoryDefaults: ${this.useFactoryDefaultsOnly}, LazyLoad: ${this.isLazyLoadMode}, PrimaryLoadReason: ${this.primaryMainConfigLoadReason}`);
             }
             const registryBuilder = new PluginRegistryBuilder(
                 this.projectRoot, xdg.baseDir, currentProjectManifestPath,
-                this.useFactoryDefaultsOnly, this.isLazyLoadMode
+                this.useFactoryDefaultsOnly,
+                this.isLazyLoadMode,
+                this.primaryMainConfigLoadReason // Pass the reason
             );
             this.mergedPluginRegistry = await registryBuilder.buildRegistry();
             if (this.mergedPluginRegistry) {
                 this.mergedPluginRegistry._builtWithFactoryDefaults = this.useFactoryDefaultsOnly;
+                this.mergedPluginRegistry.isLazyLoadMode = this.isLazyLoadMode; // Cache these for next check
+                this.mergedPluginRegistry.primaryMainConfigLoadReason = this.primaryMainConfigLoadReason;
             }
             this._lastProjectManifestPathForRegistry = currentProjectManifestPath;
         }
@@ -119,7 +126,25 @@ class ConfigResolver {
                 if (resolvedPathSpec.startsWith('~/') || resolvedPathSpec.startsWith('~\\')) {
                     resolvedPathSpec = path.join(os.homedir(), resolvedPathSpec.substring(2));
                 } else {
-                    throw new Error(`Relative plugin path specification '${pluginSpec}' must be resolved to an absolute path before calling getEffectiveConfig, or use a registered plugin name.`);
+                    // For path specs originating from front matter or local config, they should be resolved by plugin_determiner
+                    // If it reaches here as relative and not tilde-expanded, it's an issue or needs context from markdownFilePath.
+                    // However, plugin_determiner now resolves them to absolute if from FM or local config.
+                    // This path should only be hit if CLI provides a direct relative path NOT starting with './' or '../'
+                    // which yargs might resolve against CWD. For robustness, ensure it's absolute.
+                    // For now, assume plugin_determiner has made it absolute if it was from FM/local.
+                     if (markdownFilePath && (pluginSpec.startsWith('./') || pluginSpec.startsWith('../'))) {
+                        // This case should ideally be handled before getEffectiveConfig,
+                        // e.g. by plugin_determiner.js resolving paths relative to the MD file or local config.
+                        // If pluginSpec is truly meant to be relative to CWD, then path.resolve(pluginSpec) is fine.
+                        // But if it was from FM, it's relative to the MD file.
+                        // For safety, let's assume if it's relative here, it implies CWD or already resolved.
+                        console.warn(`WARN (ConfigResolver): Plugin path spec '${pluginSpec}' is relative. Resolving from CWD. It should ideally be absolute if from front matter or local config.`);
+                        resolvedPathSpec = path.resolve(pluginSpec);
+                    } else if (!path.isAbsolute(resolvedPathSpec)) {
+                        // If still not absolute, it's problematic without a clear base.
+                        // This indicates an issue in how pluginSpec was determined or passed.
+                        throw new Error(`Relative plugin path specification '${pluginSpec}' must be resolved to an absolute path before calling getEffectiveConfig if not from CLI CWD, or use a registered plugin name.`);
+                    }
                 }
             }
             if (!fs.existsSync(resolvedPathSpec)) {
@@ -182,7 +207,7 @@ class ConfigResolver {
             throw new Error(`Failed to load plugin's own base configuration for '${nominalPluginNameForLookup}' from '${pluginOwnConfigPath}'.`);
         }
         loadedConfigSourcePaths.pluginConfigPaths.push(pluginOwnConfigPath);
-        
+
         const originalHandlerScript = layer0Data.rawConfig.handler_script;
         if (!originalHandlerScript) {
             throw new Error(`'handler_script' not defined in plugin '${nominalPluginNameForLookup}'s own configuration file: ${pluginOwnConfigPath}`);
@@ -194,42 +219,38 @@ class ConfigResolver {
         } = await this.pluginConfigLoader.applyOverrideLayers(
             nominalPluginNameForLookup, layer0Data, loadedConfigSourcePaths.pluginConfigPaths
         );
-        
+
         let currentMergedConfig = configAfterXLPOlayers;
         let currentCssPaths = cssAfterXLPOlayers;
 
-        // Apply localConfigOverrides (from <filename>.config.yaml) - HIGHEST PRECEDENCE for plugin-specific settings
         if (localConfigOverrides && Object.keys(localConfigOverrides).length > 0) {
             if (process.env.DEBUG) {
                  console.log(`DEBUG (ConfigResolver): Applying localConfigOverrides for ${nominalPluginNameForLookup}:`, JSON.stringify(localConfigOverrides));
             }
             currentMergedConfig = deepMerge(currentMergedConfig, localConfigOverrides);
-            
+
             if (localConfigOverrides.css_files && markdownFilePath) {
-                const localConfigDir = path.dirname(markdownFilePath); // CSS paths are relative to the MD file's dir
+                const localConfigDir = path.dirname(markdownFilePath);
                 currentCssPaths = AssetResolver.resolveAndMergeCss(
                     localConfigOverrides.css_files,
                     localConfigDir,
-                    currentCssPaths, // Pass the CSS list accumulated so far
+                    currentCssPaths,
                     localConfigOverrides.inherit_css === true,
                     nominalPluginNameForLookup,
                     `${path.basename(markdownFilePath, path.extname(markdownFilePath))}.config.yaml`
                 );
             }
-            // Add to contributing paths if it had meaningful content beyond 'plugin' key
             const localConfigFilenameForLog = markdownFilePath ? `${path.basename(markdownFilePath, path.extname(markdownFilePath))}.config.yaml` : "<filename>.config.yaml";
             loadedConfigSourcePaths.pluginConfigPaths.push(`Local file override from '${localConfigFilenameForLog}'`);
         }
 
         currentMergedConfig.handler_script = originalHandlerScript;
 
-        // Merge global PDF options and math settings from the primary main config
         if (this.primaryMainConfig.global_pdf_options) {
             currentMergedConfig.pdf_options = deepMerge(
                 this.primaryMainConfig.global_pdf_options,
                 currentMergedConfig.pdf_options || {}
             );
-            // Ensure margin object itself is deep merged if present in both
             if (this.primaryMainConfig.global_pdf_options.margin && (currentMergedConfig.pdf_options || {}).margin) {
                 currentMergedConfig.pdf_options.margin = deepMerge(
                     this.primaryMainConfig.global_pdf_options.margin,
@@ -239,9 +260,8 @@ class ConfigResolver {
         }
 
         const pluginOwnMathConfig = currentMergedConfig.math || {};
-        let effectiveMathConfig = this.primaryMainConfig.math || {}; // Start with global math config
-        effectiveMathConfig = deepMerge(effectiveMathConfig, pluginOwnMathConfig); // Merge plugin's math config over global
-        // Ensure katex_options object itself is deep merged
+        let effectiveMathConfig = this.primaryMainConfig.math || {};
+        effectiveMathConfig = deepMerge(effectiveMathConfig, pluginOwnMathConfig);
         if ((this.primaryMainConfig.math && this.primaryMainConfig.math.katex_options) || (pluginOwnMathConfig.katex_options)) {
             effectiveMathConfig.katex_options = deepMerge(
                 (this.primaryMainConfig.math && this.primaryMainConfig.math.katex_options) || {},

@@ -5,9 +5,10 @@ const os = require('os');
 const { loadConfig: loadYamlConfig } = require('./markdown_utils');
 
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
+const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class PluginRegistryBuilder {
-    constructor(projectRoot, xdgBaseDir, projectManifestConfigPath, useFactoryDefaultsOnly = false, isLazyLoadMode = false) { // Added isLazyLoadMode
+    constructor(projectRoot, xdgBaseDir, projectManifestConfigPath, useFactoryDefaultsOnly = false, isLazyLoadMode = false, primaryMainConfigLoadReason = null) {
         this.projectRoot = projectRoot;
         if (!this.projectRoot || typeof this.projectRoot !== 'string') {
             throw new Error("PluginRegistryBuilder: projectRoot must be a valid path string.");
@@ -15,7 +16,8 @@ class PluginRegistryBuilder {
 
         this.bundledMainConfigPath = path.join(this.projectRoot, 'config.yaml');
         this.factoryDefaultMainConfigPath = path.join(this.projectRoot, 'config.example.yaml');
-        this.isLazyLoadMode = isLazyLoadMode; // Store the flag
+        this.isLazyLoadMode = isLazyLoadMode;
+        this.primaryMainConfigLoadReason = primaryMainConfigLoadReason; // Store this
 
         if (!xdgBaseDir || typeof xdgBaseDir !== 'string') {
             const xdgConfigHome = process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config');
@@ -29,7 +31,7 @@ class PluginRegistryBuilder {
         this.projectManifestBaseDir = this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath) ? path.dirname(this.projectManifestConfigPath) : null;
 
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
-        this._builtRegistry = null; 
+        this._builtRegistry = null;
     }
 
     _resolveAlias(alias, aliasValue, basePathDefiningAlias) {
@@ -50,7 +52,7 @@ class PluginRegistryBuilder {
 
     _resolvePluginConfigPath(rawPath, basePathForMainConfig, currentAliases) {
         if (typeof rawPath !== 'string' || rawPath.trim() === '') return null;
-        
+
         let resolvedPath = rawPath;
         const aliasParts = rawPath.split(':');
         if (aliasParts.length > 1 && currentAliases && currentAliases[aliasParts[0]]) {
@@ -60,12 +62,13 @@ class PluginRegistryBuilder {
             if (resolvedAliasBasePath) {
                 resolvedPath = path.join(resolvedAliasBasePath, pathWithinAlias);
             } else {
+                console.warn(`WARN (PluginRegistryBuilder): Alias '${aliasName}' used in plugin path '${rawPath}' could not be resolved to a base path. Skipping registration.`);
                 return null;
             }
         } else if (resolvedPath.startsWith('~/') || resolvedPath.startsWith('~\\')) {
             resolvedPath = path.join(os.homedir(), resolvedPath.substring(2));
         }
-        
+
         if (!path.isAbsolute(resolvedPath)) {
             if (!basePathForMainConfig) {
                  console.warn(`WARN (PluginRegistryBuilder): Cannot resolve relative plugin config path '${rawPath}' because its base path (basePathForMainConfig) could not be determined. Skipping registration for this entry.`);
@@ -73,18 +76,16 @@ class PluginRegistryBuilder {
             }
             resolvedPath = path.resolve(basePathForMainConfig, resolvedPath);
         }
-        
+
         try {
             if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
                 return resolvedPath;
             } else if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
-                // If it's a directory, try to find <dirname>.config.yaml inside it
                 const dirName = path.basename(resolvedPath);
-                const conventionalConfigPath = path.join(resolvedPath, `${dirName}.config.yaml`);
+                const conventionalConfigPath = path.join(resolvedPath, `${dirName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
                 if (fs.existsSync(conventionalConfigPath) && fs.statSync(conventionalConfigPath).isFile()) {
                     return conventionalConfigPath;
                 }
-                // Fallback: try to find *any* *.config.yaml in the directory
                 const filesInDir = fs.readdirSync(resolvedPath);
                 const alternativeConfig = filesInDir.find(f => f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX));
                 if (alternativeConfig) {
@@ -98,7 +99,7 @@ class PluginRegistryBuilder {
                 console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to '${resolvedPath}') does not exist. Skipping registration for this entry.`);
                 return null;
             }
-        } catch (e) { 
+        } catch (e) {
             console.warn(`WARN (PluginRegistryBuilder): Error accessing resolved plugin configuration path '${resolvedPath}' for raw path '${rawPath}': ${e.message}. Skipping registration for this entry.`);
             return null;
         }
@@ -125,7 +126,7 @@ class PluginRegistryBuilder {
             if (config && config.plugins && typeof config.plugins === 'object') {
                 for (const [pluginName, pluginConfPathRaw] of Object.entries(config.plugins)) {
                     const resolvedPath = this._resolvePluginConfigPath(pluginConfPathRaw, basePathForMainConfig, currentAliases);
-                    if (resolvedPath) { 
+                    if (resolvedPath) {
                         registrations[pluginName] = {
                             configPath: resolvedPath,
                             definedIn: mainConfigFilePath,
@@ -142,10 +143,11 @@ class PluginRegistryBuilder {
     }
 
     async buildRegistry() {
-        if (this._builtRegistry && 
+        if (this._builtRegistry &&
             this._builtRegistry.builtWithFactoryDefaults === this.useFactoryDefaultsOnly &&
             this._builtRegistry.projectManifestPathUsed === this.projectManifestConfigPath &&
-            this._builtRegistry.isLazyLoadMode === this.isLazyLoadMode) { // Check lazy load mode for cache
+            this._builtRegistry.isLazyLoadMode === this.isLazyLoadMode &&
+            this._builtRegistry.primaryMainConfigLoadReason === this.primaryMainConfigLoadReason) {
             return this._builtRegistry.registry;
         }
 
@@ -159,25 +161,31 @@ class PluginRegistryBuilder {
             initialRegistrationsSourceType = `Factory Default (${path.basename(this.factoryDefaultMainConfigPath)})`;
             if (!fs.existsSync(sourcePathForInitialRegistrations)) {
                 console.error(`CRITICAL (PluginRegistryBuilder): Factory default config '${sourcePathForInitialRegistrations}' not found. Cannot load factory default plugin registrations.`);
-                 sourcePathForInitialRegistrations = null; 
+                 sourcePathForInitialRegistrations = null;
             }
         } else {
-            if (fs.existsSync(this.bundledMainConfigPath)) {
-                sourcePathForInitialRegistrations = this.bundledMainConfigPath;
-                initialRegistrationsSourceType = `Bundled Main (${path.basename(this.bundledMainConfigPath)})`;
-            } else if (fs.existsSync(this.factoryDefaultMainConfigPath)) {
-                if (!this.isLazyLoadMode) { // Suppress warning in lazy load mode
-                    console.warn(`WARN (PluginRegistryBuilder): Main config '${this.bundledMainConfigPath}' not found. Using '${this.factoryDefaultMainConfigPath}' for initial plugin registrations.`);
-                }
+            // If not using factory defaults, the primary source for "bundled" definitions is config.example.yaml
+            if (fs.existsSync(this.factoryDefaultMainConfigPath)) {
                 sourcePathForInitialRegistrations = this.factoryDefaultMainConfigPath;
-                initialRegistrationsSourceType = `Factory Default Fallback (${path.basename(this.factoryDefaultMainConfigPath)})`;
+                initialRegistrationsSourceType = `Bundled Definitions (${path.basename(this.factoryDefaultMainConfigPath)})`;
+
+                // Conditional warning based on primaryMainConfigLoadReason
+                const shouldWarn = !this.isLazyLoadMode &&
+                                   !fs.existsSync(this.bundledMainConfigPath) && // config.yaml at root is missing
+                                   (this.primaryMainConfigLoadReason === "bundled main" || // Indicates MainConfigLoader *expected* project root config.yaml but didn't find it as primary
+                                    this.primaryMainConfigLoadReason === "factory default fallback" || // Indicates MainConfigLoader fell back for global settings
+                                    this.primaryMainConfigLoadReason === "none found"); // No global config found at all
+
+                if (shouldWarn) {
+                    console.warn(`WARN (PluginRegistryBuilder): Project root config '${this.bundledMainConfigPath}' not found, and no user-level main config (XDG or --config) was primary for global settings. Using '${this.factoryDefaultMainConfigPath}' for bundled plugin definitions.`);
+                }
             } else {
-                 console.error(`CRITICAL (PluginRegistryBuilder): Neither '${this.bundledMainConfigPath}' nor '${this.factoryDefaultMainConfigPath}' found. Cannot load initial plugin registrations.`);
-                 sourcePathForInitialRegistrations = null; 
+                 console.error(`CRITICAL (PluginRegistryBuilder): Bundled plugin definition file '${this.factoryDefaultMainConfigPath}' not found. Cannot load initial plugin registrations.`);
+                 sourcePathForInitialRegistrations = null;
             }
         }
-        
-        if (sourcePathForInitialRegistrations) { 
+
+        if (sourcePathForInitialRegistrations) {
             const initialRegistrations = await this._getPluginRegistrationsFromFile(sourcePathForInitialRegistrations, baseDirForInitialRegistrations, initialRegistrationsSourceType);
             registry = {...registry, ...initialRegistrations};
         }
@@ -189,15 +197,19 @@ class PluginRegistryBuilder {
             }
 
             if (this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath)) {
-                const projectRegistrations = await this._getPluginRegistrationsFromFile(this.projectManifestConfigPath, this.projectManifestBaseDir, "Project Manifest (--config)");
-                registry = {...registry, ...projectRegistrations}; 
+                if (this.projectManifestConfigPath !== sourcePathForInitialRegistrations || 
+                    (this.projectManifestConfigPath === sourcePathForInitialRegistrations && !initialRegistrationsSourceType.startsWith('Bundled Definitions'))) {
+                    const projectRegistrations = await this._getPluginRegistrationsFromFile(this.projectManifestConfigPath, this.projectManifestBaseDir, "Project Manifest (--config)");
+                    registry = {...registry, ...projectRegistrations};
+                }
             }
         }
-        this._builtRegistry = { 
-            registry, 
+        this._builtRegistry = {
+            registry,
             builtWithFactoryDefaults: this.useFactoryDefaultsOnly,
             projectManifestPathUsed: this.projectManifestConfigPath,
-            isLazyLoadMode: this.isLazyLoadMode // Cache lazy load mode
+            isLazyLoadMode: this.isLazyLoadMode,
+            primaryMainConfigLoadReason: this.primaryMainConfigLoadReason // Cache this too
         };
         return registry;
     }
@@ -233,7 +245,7 @@ class PluginRegistryBuilder {
                         registrationSourceDisplay = `Project (--config: ${definedInFilename})`;
                     } else if (registrationInfo.sourceType === "XDG Global") {
                         registrationSourceDisplay = `XDG (${definedInFilename})`;
-                    } else if (registrationInfo.sourceType.includes("Bundled Main")) {
+                    } else if (registrationInfo.sourceType.includes("Bundled Definitions")) {
                          registrationSourceDisplay = `Bundled (${definedInFilename})`;
                     } else if (registrationInfo.sourceType.includes("Factory Default")) {
                          registrationSourceDisplay = `Factory (${definedInFilename})`;

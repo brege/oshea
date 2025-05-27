@@ -2,7 +2,7 @@
 # Configuration for automated testing. Aims for predictable outputs.
 
 # --- Global Settings ---
-pdf_viewer: null 
+pdf_viewer: xdg-open # null 
 
 global_pdf_options:
   format: "Letter"

@@ -31,38 +31,75 @@ See the [version history](https://github.com/brege/md-to-pdf/commits/main/ROADMA
     * Output respects `--factory-defaults` and `--config` flags.
     * Includes `--pure` option for raw YAML output.
 
-## [Version 0.6.1][v0.6.1]: Enhanced Plugin Configuration (Completed)
+## [Version 0.6.0][v0.6.0]: Plugin Path Aliases & External Plugin Foundations (Completed)
+  * **Goal:** Simplify plugin registration and lay groundwork for easier integration of external and community plugin collections. This involved strategic decisions to favor explicit registration and prepare for more robust plugin management over automatic discovery.
+  * **Key Features:**
+    * Introduced `plugin_directory_aliases` in main configuration files (`config.yaml`, XDG, Project) to allow shorthand, manageable paths for plugin registrations.
+    * `PluginRegistryBuilder.js` updated to load and resolve these aliases, with alias targets being relative to their defining configuration file.
+    * Enforced stricter validation for resolved plugin configuration paths.
+
+## [Version 0.6.1][v0.6.1]: Enhanced Plugin Configuration - Inline Overrides & Key Rename (Completed)
   * **Goal:** Streamline plugin configuration management.
   * **Key Features:**
-    * Renamed `document_type_plugins` to `plugins` in main configuration files for plugin registration.
-    * Implemented inline plugin overrides: Plugin settings can be overridden directly within XDG or Project main configuration files using top-level keys matching the plugin name. (Incorporates and enhances concepts from former v0.5.5 proposal).
-    * Asset paths (e.g., `css_files`) in inline overrides are resolved relative to the main config file defining them.
+    * Renamed `document_type_plugins` to `plugins` in main configuration files.
+    * Implemented "Beets-inspired" inline plugin overrides in XDG/Project main configs.
+    * Implemented `plugin_directory_aliases` for simplified plugin registration paths.
 
-## [Version 0.6.2][v0.6.2]: Output & Documentation Refinements (Proposed)
-  * **Goal:** Improve default output behavior and update all documentation.
+## [Version 0.6.2][v0.6.2]: Output Default & Initial Documentation for v0.6.1 (Completed)
+  * **Goal:** Improve default output behavior and document v0.6.1 changes.
   * **Key Features:**
-    * **Default Output Directory for `convert`:** Change the default output location for `md-to-pdf convert` (when no `--outdir` is specified) to a system temporary directory. Log the full path to the console.
-    * **Comprehensive Documentation Update:** Update `README.md`, `docs/plugin-development.md`, `docs/cheat-sheet.md`, `config.example.yaml`, and this roadmap to reflect all changes from v0.6.1 and v0.6.2.
+    * Default `convert` output directory changed to system temporary folder.
+    * Comprehensive documentation update for v0.6.1 and v0.6.2 features.
 
-## Version 0.6.3: Enhanced Plugin Specification Methods (Future)
-  * **Goal:** Provide more flexible ways to specify which plugin should be used for a given Markdown file.
+## [Version 0.6.3][v0.6.3]: Enhanced Plugin Specification - Front Matter & Lazy Load (Completed)
+  * **Goal:** Introduce flexible plugin specification via Markdown front matter and "lazy load" CLI functionality.
   * **Key Features:**
-    * **Front Matter Plugin Specification:**
-        * Allow specifying the plugin directly in the Markdown file's front matter using a key (e.g., `md_to_pdf_plugin:`).
-        * Support referencing a plugin by its registered name (e.g., `cv`).
-        * Support referencing a plugin by the direct path to its plugin configuration file or directory.
-    * **Local Project Config File (`<filename>.config.yaml`):**
-        * If a Markdown file `mydoc.md` is being converted, automatically look for `mydoc.config.yaml` in the same directory.
-        * This local config file could specify the plugin to use and/or provide direct overrides for that plugin for that specific document.
-    * **Precedence:** These new methods will have a defined precedence relative to the `--plugin` CLI option and existing configuration layers. Typically, CLI would override front matter, and front matter might override a local project config file detection. This needs careful definition.
+    * Implemented "Lazy Load": `md-to-pdf <markdownFile>` acts as implicit `convert`.
+    * `src/plugin_determiner.js` introduced to manage plugin selection logic.
+    * Plugin specification via `md_to_pdf_plugin:` key in Markdown front matter (name or relative path).
+    * `ConfigResolver.js` adapted to accept absolute paths for plugin specification and derive nominal names for overrides.
+    * Conditional logging for `isLazyLoadMode` in `ConfigResolver` and `PluginRegistryBuilder`.
+    * Improved logging for plugin determination.
+    * Unit tests for front matter plugin specification and CLI override.
 
-## Version 0.6.4: External & Community Plugin Integration (Future)
-* **Goal:** Standardize and simplify the integration and management of plugins from external sources to foster a community ecosystem. (Formerly v0.7.0)
+## [Version 0.6.4][v0.6.4]: Enhanced Plugin Specification - Local Config & Core Refactor (Completed)
+  * **Goal:** Allow document-specific plugin configuration via local files and refactor core config loading.
+  * **Key Features:**
+    * Refactored `ConfigResolver.js` into modular components: `main_config_loader.js`, `plugin_config_loader.js`, `asset_resolver.js`, `config_utils.js`. [cite: 13, 14, 15, 16, 17]
+    * Implemented plugin specification and overrides via local `<filename>.config.yaml`.
+        * `plugin: <name_or_path>` key for plugin selection. [cite: 4]
+        * Highest precedence for document-specific settings overrides (`pdf_options`, `css_files`, `params`). [cite: 6, 7]
+    * Updated `params` merging hierarchy to include local config file. [cite: 8]
+    * Finalized plugin choice precedence: CLI > Front Matter > Local `<filename>.config.yaml` > Default. [cite: 5]
+    * Finalized settings override precedence: Local `<filename>.config.yaml` > Project > User-Global > Plugin Default. [cite: 7]
+    * `default_handler.js` incorporates `params` from local overrides. [cite: 8]
+    * Added tests for local `.config.yaml` functionality. [cite: 10]
+    * Adjusted warning for initial config loading. [cite: 1, 2]
+
+## [Version 0.6.5][v0.6.5]: Documentation Finalization for Enhanced Plugin System (Completed)
+  * **Goal:** Comprehensively update and polish all project documentation to accurately reflect all features introduced up to v0.6.4.
+  * **Key Activities:**
+    * Refined `README.md` for conciseness, adding new "Plugins" overview and refining "Configuration" section.
+    * Migrated detailed configuration explanations from `README.md` to `docs/plugin-development.md`, establishing it as the comprehensive resource.
+    * Updated `docs/cheat-sheet.md` with new plugin specification examples and precedence rules.
+    * Updated this `docs/roadmap.md` to accurately reflect completed work based on git history.
+
+## Version 0.7.0: External & Community Plugin Integration (Future)
+* **Goal:** Standardize and simplify the integration and management of plugins from external sources to foster a community ecosystem.
 * **Key Features:**
   * **External Plugin Management:** Enhance support for integrating and managing plugins sourced from external locations. This could involve:
-    * Documenting best practices for using Git repositories (e.g., as submodules or simple clones) to manage collections of plugins.
+    * Documenting best practices for using Git repositories (e.g., as submodules or simple clones) to manage collections of plugins, potentially using `plugin_directory_aliases`.
     * Potentially introducing a mechanism to install or reference plugins from remote Git URLs directly.
     * Managing these external plugins via a dedicated directory specified in the main `config.yaml`.
+
+## Version 0.9.0: System Hardening & Finalization (Proposed Future Milestone)
+  * **Goal:** Prepare for a conceptual "1.0" release by focusing on robustness, comprehensive testing, and API stability.
+  * **Key Features:**
+    * **Schema for Plugin Configuration:** Define and implement JSON schema validation for plugin `*.config.yaml` files to improve robustness and provide better error messaging.
+    * **Comprehensive Test Review:** Audit and expand test coverage for all features, especially edge cases.
+    * **API Stability Review:** If a programmatic API is more formally defined by this point, review for stability.
+    * **Documentation Finalization:** Complete review and polish of all user and developer documentation.
+
 
 ## Version 0.9.0: System Hardening & Finalization (Proposed Future Milestone)
   * **Goal:** Prepare for a conceptual "1.0" release by focusing on robustness, comprehensive testing, and API stability.
@@ -130,5 +167,10 @@ See the [version history](https://github.com/brege/md-to-pdf/commits/main/ROADMA
 [v0.5.2]: https://github.com/brege/md-to-pdf/releases/tag/v0.5.2
 [v0.5.3]: https://github.com/brege/md-to-pdf/releases/tag/v0.5.3
 [v0.5.4]: https://github.com/brege/md-to-pdf/releases/tag/v0.5.4
+[v0.6.0]: https://github.com/brege/md-to-pdf/releases/tag/v0.6.0
 [v0.6.1]: https://github.com/brege/md-to-pdf/releases/tag/v0.6.1
 [v0.6.2]: https://github.com/brege/md-to-pdf/releases/tag/v0.6.2
+[v0.6.3]: https://github.com/brege/md-to-pdf/releases/tag/v0.6.3
+[v0.6.4]: https://github.com/brege/md-to-pdf/releases/tag/v0.6.4
+[v0.6.5]: https://github.com/brege/md-to-pdf/releases/tag/v0.6.5
+

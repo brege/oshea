@@ -5,7 +5,7 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const CollectionsManager = require('./index.js');
 const path = require('path');
-const chalk = require('chalk'); // Added chalk
+const chalk = require('chalk');
 
 const manager = new CollectionsManager({ debug: process.env.DEBUG_CM === 'true' });
 
@@ -53,26 +53,25 @@ yargs(hideBin(process.argv))
   )
   .command(
     'list [type] [<collection_name>]',
-    'Lists plugin collections or plugins. Types: downloaded. (available/enabled are WIP)',
+    'Lists plugin collections or plugins. Types: downloaded, available. (enabled is WIP)',
     (yargsCmd) => {
         yargsCmd
             .positional('type', {
-                describe: `Type of listing: ${chalk.green('downloaded')}, ${chalk.yellow('available (WIP)')}, ${chalk.yellow('enabled (WIP)')}`,
+                describe: `Type of listing: ${chalk.green('downloaded')}, ${chalk.green('available')}, ${chalk.yellow('enabled (WIP)')}`,
                 type: 'string',
                 default: 'downloaded',
-                choices: ['downloaded'] // Keep choices limited until implemented
+                choices: ['downloaded', 'available'] // Added 'available'
             })
             .positional('collection_name', {
-                describe: 'Optional. Name of the collection (for future "available" or "enabled" types).',
+                describe: `Optional. Name of the collection to list plugins from (for "${chalk.green('available')}" or "${chalk.yellow('enabled')}" types).`,
                 type: 'string'
             });
     },
     async (argv) => {
-        if (argv.type !== 'downloaded' && argv.collection_name) {
-            console.warn(chalk.yellow(`WARN: Specifying a collection name is currently only effective for 'available' or 'enabled' listing types, which are not fully implemented.`));
+        if (argv.type === 'downloaded' && argv.collection_name) {
+             console.warn(chalk.yellow(`WARN: Specifying a collection name for 'list downloaded' has no effect. It lists all downloaded collections.`));
         }
         try {
-            // Pass chalk to manager or handle coloring in CLI based on results
             await manager.listCollections(argv.type, argv.collection_name);
         } catch (error) {
             console.error(chalk.red(`ERROR in 'list' command: ${error.message}`));

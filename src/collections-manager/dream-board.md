@@ -6,7 +6,7 @@
   Initially `src/collections_manager/` will be the location of this module.  The module will be build to not have backwards dependency on the main porject, `md-to-pdf`.
 
 * **`COLL_ROOT`:** Collections root directory \
-  Default `~/.lcal/share/md-to-pdf/collections/`, project-overridable.
+  Default `~/.local/share/md-to-pdf/collections/`, project-overridable.
 
 * **Enabled Plugins Manifest** \
   `COLL_ROOT/enabled.yaml` managed by `CollectionsManager`.
@@ -230,3 +230,134 @@ Updating all git-based collections from
 
 All collections updated.
 ```
+
+
+---
+
+### Enable All Plugins from a Collection
+#### `md-to-pdf collections enable <collection_name> --all [--prefix <prefix_string>]`
+
+**Action** 
+* Activates all valid plugins found within the specified downloaded `<collection_name>`.
+
+This adds all identified plugins from the collection to the `enabled.yaml` manifest.
+
+**Arguments** \
+`<collection_name>` \
+The name of the downloaded collection from which to enable all plugins.
+
+**Options**
+
+* `--all`
+
+   Required flag to confirm the intent to enable all plugins in the collection.
+
+* `--prefix <prefix_string>`
+
+   Optional. A string to prepend to each plugin's original ID from the collection to form its `invoke_name`. 
+     * Example: If `--prefix user1_` is used, a plugin with ID `my-plugin` in the collection would be enabled as `user1_my-plugin`.
+     * If not provided, plugins will be enabled using their original IDs as invoke names, which might lead to conflicts if IDs are not unique across all sources.
+
+**Output**
+```text
+Enabled all X plugins from 'collection_name'.
+Example:
+  - Plugin 'original-plugin-id' enabled as 'prefix_original-plugin-id'.
+  - Plugin 'another-plugin' enabled as 'prefix_another-plugin'.
+Consider using 'md-to-pdf collections list enabled collection_name' to see all enabled plugins.
+```
+
+*(Output might list each enabled plugin or provide a summary and next steps).*
+
+---
+
+### Plugin Archetyping
+#### `md-to-pdf collections archetype <collection_name>/<plugin_id> <new_archetype_name> [--target-dir <path>]`
+
+**Action**
+* Creates a customizable copy (archetype) of an existing plugin from a downloaded collection.
+
+This allows users to modify a plugin without altering the original version in `COLL_ROOT`, which might be overwritten by `md-to-pdf collections update`.
+
+
+The archetyped plugin is placed in a user-writable location.
+
+**Arguments** 
+
+`<collection_name>/<plugin_id>` \
+The identifier for the source plugin to archetype (e.g., `plugins-from-brege/advanced-card-red`).
+
+`<new_archetype_name>` \
+The desired name for the new archetyped plugin. This will also be its directory name.
+
+**Options**
+
+`--target-dir <path>`
+
+Optional. Specifies the base directory where the `<new_archetype_name>` directory will be created.
+
+If not provided, defaults to a user-specific directory (e.g., `~/.local/share/md-to-pdf/custom_plugins/` or a `custom_plugins` directory alongside `COLL_ROOT/collections`).
+
+**Internal Actions (Scoped for initial implementation):**
+
+1.  Copies the source plugin directory (`COLL_ROOT/<collection_name>/<plugin_id>`) to `<target-dir_or_default>/<new_archetype_name>`.
+
+2.  Renames the main configuration file within the new archetype directory:
+    * If `plugin_id.config.yaml` (or `.yaml`) exists, it's renamed to `new_archetype_name.config.yaml`.
+
+3.  Updates the new `<new_archetype_name>.config.yaml`:
+    * Sets `description` to something like: "Archetype of <collection_name>/<plugin_id> - Customized by User".
+    * If a CSS file like `plugin_id.css` was listed in `css_files` and the file existed, it's renamed to `new_archetype_name.css` in the archetype, and the `css_files` entry in the config is updated.
+
+4.  No other internal file content modifications (e.g., in `index.js`) are performed in this initial scope.
+
+**Output**
+```text
+Plugin archetype 'new_archetype_name' created from 'collection_name/plugin_id' at:
+    /path/to/custom_plugins/new_archetype_name
+
+To use this plugin, register it in your md-to-pdf configuration, e.g.:
+plugins:
+  my-custom-card: "/path/to/custom_plugins/new_archetype_name/new_archetype_name.config.yaml"
+```
+
+---
+
+### Make Updates more Resilient
+#### `md-to-pdf collections update`
+
+**Better Update Strategy?** 
+
+For a future version (e.g., a later 0.7.x point release or 0.8.x), consider making the update process more resilient to issues like rewritten Git history on the remote. This could involve
+
+  * Using `git fetch origin` followed by `git reset --hard origin/<default_branch>`.
+
+  * Optionally checking for local uncommitted changes before resetting and warning the user or requiring a `--force-update` flag.
+  
+  * Potentially adding logic to determine the remote's default branch name.
+  
+  * This more forceful approach aligns with the philosophy that collections in `COLL_ROOT` are intended to be pristine mirrors of their upstreams.
+
+Simplified conceptual sequence within updateCollection after fetching metadata
+and confirming it's a Git repo.
+```javascript
+
+// 1. Fetch updates from the remote
+const fetchProcess = spawn('git', ['fetch', 'origin'], { cwd: collectionPath, stdio: 'pipe' });
+// ... handle output and errors for fetch ...
+// ... await completion of fetch ...
+
+// 2. Get the default remote branch name (more complex, or assume 'main'/'master')
+// For simplicity here, let's assume 'main'
+const remoteBranch = 'origin/main'; // Or dynamically determine this
+
+// 3. Reset the local branch to the state of the remote branch
+const resetProcess = spawn('git', ['reset', '--hard', remoteBranch], { cwd: collectionPath, stdio: 'pipe' });
+// ... handle output and errors for reset ...
+// ... await completion of reset ...
+
+// Optional:
+// git clean -fdx process
+// ... handle output and errors for clean ...
+```
+

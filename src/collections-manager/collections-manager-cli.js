@@ -148,6 +148,44 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
+    'update [<collection_name>]',
+    'Updates a Git-based plugin collection, or all Git-based collections if no name is specified.',
+    (yargsCmd) => {
+      yargsCmd
+        .positional('collection_name', {
+          describe: 'Optional. The name of the specific collection to update.',
+          type: 'string'
+        });
+    },
+    async (argv) => {
+      if (argv.collection_name) {
+        console.log(chalk.blueBright(`Collections Manager CLI: Attempting to update collection '${chalk.cyan(argv.collection_name)}'...`));
+        try {
+          const result = await manager.updateCollection(argv.collection_name);
+          // updateCollection method already logs success/failure details
+        } catch (error) {
+          console.error(chalk.red(`\nERROR in 'update ${argv.collection_name}' command: ${error.message}`));
+          if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
+          process.exit(1);
+        }
+      } else {
+        console.log(chalk.blueBright('Collections Manager CLI: Attempting to update all Git-based collections...'));
+        try {
+          const results = await manager.updateAllCollections();
+          // updateAllCollections method already logs details
+           results.messages.forEach(msg => console.log(chalk.blue(`  ${msg}`)));
+           if (!results.success) {
+             console.warn(chalk.yellow("Some collections may not have updated successfully. Check logs above."));
+           }
+        } catch (error) {
+          console.error(chalk.red(`\nERROR in 'update all' command: ${error.message}`));
+          if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
+          process.exit(1);
+        }
+      }
+    }
+  )
+  .command(
     'list [type] [<collection_name>]',
     'Lists plugin collections or plugins. Types: downloaded, available, enabled.',
     (yargsCmd) => {
@@ -176,7 +214,7 @@ yargs(hideBin(process.argv))
         }
     }
   )
-  .demandCommand(1, chalk.red('You must provide a command (e.g., add, list, enable, disable, remove).'))
+  .demandCommand(1, chalk.red('You must provide a command (e.g., add, list, enable, disable, remove, update).'))
   .help()
   .alias('h', 'help')
   .strict()

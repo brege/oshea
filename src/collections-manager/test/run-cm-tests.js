@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const fss = require('fs'); // For synchronous operations
 const path = require('path');
 const os = require('os');
-// const { spawnSync } = require('child_process'); // Not needed for direct method tests
+const { execSync } = require('child_process'); // Needed for Git test setup
 const CollectionsManager = require('../index.js');
 const yaml = require('js-yaml');
 const chalk = require('chalk');
@@ -34,12 +34,46 @@ async function cleanupTestCollRoot(collRootPath) {
     }
 }
 
+async function setupLocalGitRepo(repoPath, initialFileName, initialFileContent) {
+    if (fss.existsSync(repoPath)) await fs.rm(repoPath, { recursive: true, force: true });
+    await fs.mkdir(repoPath, { recursive: true });
+    execSync('git init --bare', { cwd: repoPath });
+
+    const tempClonePath = path.join(os.tmpdir(), `temp_clone_${Date.now()}`);
+    if (fss.existsSync(tempClonePath)) await fs.rm(tempClonePath, { recursive: true, force: true });
+
+    execSync(`git clone "${repoPath}" "${tempClonePath}"`);
+    execSync('git checkout -b main', { cwd: tempClonePath }); 
+    await fs.writeFile(path.join(tempClonePath, initialFileName), initialFileContent);
+    execSync('git config user.email "test@example.com"', { cwd: tempClonePath }); 
+    execSync('git config user.name "Test User"', { cwd: tempClonePath }); 
+    execSync('git add .', { cwd: tempClonePath });
+    execSync('git commit -m "Initial commit"', { cwd: tempClonePath });
+    execSync('git push origin main', { cwd: tempClonePath }); 
+    await fs.rm(tempClonePath, { recursive: true, force: true });
+}
+
+async function addCommitToLocalGitRepo(bareRepoPath, newFileName, newFileContent, commitMessage) {
+    const tempClonePath = path.join(os.tmpdir(), `temp_clone_commit_${Date.now()}`);
+    if (fss.existsSync(tempClonePath)) await fs.rm(tempClonePath, { recursive: true, force: true });
+
+    execSync(`git clone "${bareRepoPath}" "${tempClonePath}"`);
+    await fs.writeFile(path.join(tempClonePath, newFileName), newFileContent);
+    execSync('git config user.email "test@example.com"', { cwd: tempClonePath }); 
+    execSync('git config user.name "Test User"', { cwd: tempClonePath }); 
+    execSync('git add .', { cwd: tempClonePath });
+    execSync(`git commit -m "${commitMessage}"`, { cwd: tempClonePath });
+    execSync('git push origin main', { cwd: tempClonePath }); 
+    await fs.rm(tempClonePath, { recursive: true, force: true });
+}
+
+
 async function testAddCollectionGit() {
     testsAttempted++;
     console.log("\nRunning test: Add Collection from Git URL (with metadata)...");
     const testCollRoot = await createTestCollRoot();
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: false });
-    const testRepoUrl = 'https://github.com/brege/md-to-pdf-plugins.git';
+    const testRepoUrl = 'https://github.com/brege/md-to-pdf-plugins.git'; 
     const collectionName = 'brege-plugins-git-test';
 
     try {
@@ -73,12 +107,10 @@ async function testAddCollectionLocal() {
 
     const localSourceDirName = `cm_local_source_test_${Date.now()}`;
     const localSourcePath = path.join(os.tmpdir(), localSourceDirName);
-    // Create a dummy plugin structure inside the local source path adhering to the rule
     const dummyPluginId = 'dummy-local-plugin';
     const dummyPluginDir = path.join(localSourcePath, dummyPluginId);
     await fs.mkdir(dummyPluginDir, { recursive: true });
     await fs.writeFile(path.join(dummyPluginDir, `${dummyPluginId}.config.yaml`), 'description: A local test plugin.');
-
 
     const collectionName = 'local-collection-test';
 
@@ -86,7 +118,6 @@ async function testAddCollectionLocal() {
         const resultPath = await manager.addCollection(localSourcePath, { name: collectionName });
         assert.strictEqual(resultPath, path.join(testCollRoot, collectionName), 'Correct path should be returned for local add');
         assert.ok(fss.existsSync(resultPath), 'Local collection directory should exist');
-        // Check for the copied dummy plugin's config
         assert.ok(fss.existsSync(path.join(resultPath, dummyPluginId, `${dummyPluginId}.config.yaml`)), 'Copied plugin config should exist');
 
         const metaPath = path.join(resultPath, METADATA_FILENAME);
@@ -103,7 +134,7 @@ async function testAddCollectionLocal() {
         console.error(chalk.red("  FAILED: Add Collection from Local Path (with metadata)"), error);
     } finally {
         await cleanupTestCollRoot(testCollRoot);
-        await cleanupTestCollRoot(localSourcePath); // Clean up the source dir too
+        await cleanupTestCollRoot(localSourcePath); 
     }
 }
 
@@ -114,18 +145,16 @@ async function testListCollections() {
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: false });
     const localSourceListName = `cm_local_source_list_test_${Date.now()}`;
     const localSourcePath = path.join(os.tmpdir(), localSourceListName);
-    await fs.mkdir(localSourcePath, { recursive: true }); // Create an empty dir for local add
-    // Ensure dummy plugin exists for local add to be meaningful if listAvailable is called on it
+    await fs.mkdir(localSourcePath, { recursive: true }); 
     const dummyPluginIdInList = "dummy-plugin-for-list";
     await fs.mkdir(path.join(localSourcePath, dummyPluginIdInList), { recursive: true });
     await fs.writeFile(path.join(localSourcePath, dummyPluginIdInList, `${dummyPluginIdInList}.config.yaml`), 'description: dummy');
-
 
     await manager.addCollection('https://github.com/brege/md-to-pdf-plugins.git', { name: 'plugins1-list-test' });
     await manager.addCollection(localSourcePath, { name: 'plugins2-list-test' });
 
     try {
-        const collections = await manager.listCollections('downloaded');
+        const collections = await manager.listCollections('downloaded'); // CLI should format this
         assert.ok(collections.includes('plugins1-list-test'), 'List should include plugins1-list-test');
         assert.ok(collections.includes('plugins2-list-test'), 'List should include plugins2-list-test');
         const expectedCount = fss.readdirSync(testCollRoot).filter(
@@ -178,17 +207,15 @@ async function testListAvailablePlugins() {
     await fs.writeFile(path.join(invalidPluginPath, `some.other.config.yaml`), "name mismatch");
     await fs.mkdir(emptyPluginPath, { recursive: true });
 
-
     await fs.mkdir(pluginCPath, { recursive: true });
     await fs.writeFile(path.join(pluginCPath, `${pluginCId}.config.yaml`), yaml.dump({ description: 'Plugin C description' }));
 
     await fs.mkdir(pluginDPath, {recursive: true});
     await fs.writeFile(path.join(pluginDPath, `${pluginDId}.config.yaml`), "description: Plugin D\n  bad_yaml: - item1\n - item2");
 
-
     try {
         const expectedPluginCount = 4;
-        let available = await manager.listAvailablePlugins();
+        let available = await manager.listAvailablePlugins(); // CLI should format this
         assert.strictEqual(available.length, expectedPluginCount, `Should find ${expectedPluginCount} plugins, found ${available.length}`);
 
         const pluginAInfo = available.find(p => p.plugin_id === pluginAId && p.collection === 'coll1');
@@ -309,20 +336,16 @@ async function testEnableAndListEnabledPlugins() {
             'Should reject enabling a non-existent plugin'
         );
         
-        console.log("  Listing all enabled plugins (test internal call):"); 
         const allEnabled = await manager.listCollections('enabled'); 
         assert.strictEqual(allEnabled.length, 2, 'listCollections("enabled") should return two plugins data.');
         assert.ok(allEnabled.some(p => p.invoke_name === mockPlugin1Id), `listCollections enabled data has ${mockPlugin1Id}`);
         assert.ok(allEnabled.some(p => p.invoke_name === customInvokeName), `listCollections enabled data has ${customInvokeName}`);
 
-        console.log(`  Listing enabled plugins for collection '${mockCollectionName}' (test internal call):`);
         const filteredEnabled = await manager.listCollections('enabled', mockCollectionName);
         assert.strictEqual(filteredEnabled.length, 2, `listCollections("enabled", "${mockCollectionName}") should return two plugins data.`);
         
-        console.log(`  Listing enabled plugins for collection 'nonExistentCollection' (test internal call):`);
         const nonExistentFiltered = await manager.listCollections('enabled', 'nonExistentCollection'); 
-        assert.strictEqual(nonExistentFiltered, undefined, `listCollections("enabled", "nonExistentCollection") should result in console message and return undefined or empty array if modified.`);
-
+        assert.strictEqual(nonExistentFiltered.length, 0, `listCollections("enabled", "nonExistentCollection") should result in an empty array for no matches.`); // Changed from undefined
 
         console.log(chalk.green(`  PASSED: ${testName}`));
         testsPassed++;
@@ -374,7 +397,6 @@ async function testDisablePlugin() {
         manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
         assert.strictEqual(manifest.enabled_plugins.length, 1, 'Manifest should be unchanged after trying to disable non-existent');
 
-
         console.log(chalk.green(`  PASSED: ${testName}`));
         testsPassed++;
     } catch (error) {
@@ -401,7 +423,6 @@ async function testRemoveCollection() {
     const invokeName1 = 'pluginOneInvoke';
     const invokeName2 = 'pluginTwoInvoke';
 
-    // Setup: Create a mock collection with two mock plugins
     const plugin1Path = path.join(collPathToRemove, pluginId1);
     await fs.mkdir(plugin1Path, { recursive: true });
     await fs.writeFile(path.join(plugin1Path, `${pluginId1}.config.yaml`), yaml.dump({ description: 'Plugin One' }));
@@ -410,25 +431,19 @@ async function testRemoveCollection() {
     await fs.mkdir(plugin2Path, { recursive: true });
     await fs.writeFile(path.join(plugin2Path, `${pluginId2}.config.yaml`), yaml.dump({ description: 'Plugin Two' }));
     
-    // Also create metadata for the collection
     await fs.writeFile(path.join(collPathToRemove, METADATA_FILENAME), yaml.dump({ name: collNameToRemove, source: 'test-source' }));
 
-
     try {
-        // Test 1: Attempt to remove a non-existent collection
         await assert.rejects(
             manager.removeCollection('nonExistentCollection'),
             /Collection "nonExistentCollection" not found/,
             'Should reject removing a non-existent collection'
         );
 
-        // Test 2: Enable one plugin from the collection
         await manager.enablePlugin(`${collNameToRemove}/${pluginId1}`, { as: invokeName1 });
         let manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
         assert.strictEqual(manifest.enabled_plugins.find(p=>p.invoke_name === invokeName1).collection_name, collNameToRemove, "Plugin1 correctly enabled from collection");
 
-
-        // Test 3: Attempt to remove collection without force (should fail)
         await assert.rejects(
             manager.removeCollection(collNameToRemove),
             new RegExp(`Collection "${collNameToRemove}" has enabled plugins: "${invokeName1}" \\(from ${pluginId1}\\). Please disable them first or use the --force option.`),
@@ -436,29 +451,22 @@ async function testRemoveCollection() {
         );
         assert.ok(fss.existsSync(collPathToRemove), 'Collection directory should still exist after failed removal without force');
 
-        // Test 4: Enable a second plugin from the same collection
         await manager.enablePlugin(`${collNameToRemove}/${pluginId2}`, { as: invokeName2 });
         manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
         assert.strictEqual(manifest.enabled_plugins.length, 2, 'Two plugins should be enabled now');
 
-        // Test 5: Remove collection with force (should succeed)
         const removeResultForced = await manager.removeCollection(collNameToRemove, { force: true });
         assert.ok(removeResultForced.success, 'Removing collection with force should succeed');
         assert.ok(!fss.existsSync(collPathToRemove), 'Collection directory should be deleted after forced removal');
         
-        // Check manifest: both plugins from this collection should be gone
-        if (fss.existsSync(enabledManifestPath)) { // Manifest might be empty and thus might be kept or deleted by yaml.dump logic, check existence first.
+        if (fss.existsSync(enabledManifestPath)) { 
             manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
              assert.ok(!manifest.enabled_plugins.some(p => p.invoke_name === invokeName1), 'Plugin1 should be disabled from manifest after forced collection removal');
              assert.ok(!manifest.enabled_plugins.some(p => p.invoke_name === invokeName2), 'Plugin2 should be disabled from manifest after forced collection removal');
         }
 
-
-        // Test 6: Remove a collection that has no enabled plugins (no force needed)
-        // Re-create the collection (without enabling plugins from it this time)
-        await fs.mkdir(collPathToRemove, { recursive: true }); // Just need the dir for this test part
+        await fs.mkdir(collPathToRemove, { recursive: true }); 
         await fs.writeFile(path.join(collPathToRemove, METADATA_FILENAME), yaml.dump({ name: collNameToRemove, source: 'test-source-2' }));
-
 
         const removeResultNoForce = await manager.removeCollection(collNameToRemove);
         assert.ok(removeResultNoForce.success, 'Removing collection with no enabled plugins (no force) should succeed');
@@ -471,6 +479,127 @@ async function testRemoveCollection() {
         if (error.stack) console.error(error.stack);
     } finally {
         await cleanupTestCollRoot(testCollRoot);
+    }
+}
+
+async function testUpdateCollection() {
+    testsAttempted++;
+    const testName = "Update Collection";
+    console.log(`\nRunning test: ${testName}...`);
+    const testCollRoot = await createTestCollRoot();
+    const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true });
+    const localGitRepoPath = path.join(os.tmpdir(), `cm_local_git_repo_${Date.now()}.git`);
+    const collectionName = 'git-collection-to-update';
+
+    try {
+        console.log("  Sub-test: Update non-existent collection");
+        const nonExistentResult = await manager.updateCollection('nonExistentCollectionForUpdate');
+        assert.strictEqual(nonExistentResult.success, false, 'Updating non-existent collection should fail');
+        assert.ok(nonExistentResult.message.includes('not found'), 'Correct message for non-existent collection');
+
+        console.log("  Sub-test: Update local-path collection");
+        const localSourceDirName = `cm_local_update_source_${Date.now()}`;
+        const localSourcePath = path.join(os.tmpdir(), localSourceDirName);
+        await fs.mkdir(localSourcePath, { recursive: true });
+        await manager.addCollection(localSourcePath, { name: 'local-update-coll' });
+        
+        const localUpdateResult = await manager.updateCollection('local-update-coll');
+        assert.ok(localUpdateResult.success, 'Updating local collection should report success (not an error)');
+        // Exact match for the message when it's not a Git source
+        assert.strictEqual(localUpdateResult.message, `Collection "local-update-coll" not from a recognized Git source.`, 'Correct message for non-Git local source');
+        await cleanupTestCollRoot(localSourcePath); 
+
+        console.log("  Sub-test: Update Git-based collection");
+        await setupLocalGitRepo(localGitRepoPath, 'initial.txt', 'Version 1');
+        await manager.addCollection(localGitRepoPath, { name: collectionName });
+        
+        const collectionPath = path.join(testCollRoot, collectionName);
+        assert.ok(fss.existsSync(path.join(collectionPath, 'initial.txt')), 'Initial file should exist after add');
+        assert.ok(!fss.existsSync(path.join(collectionPath, 'update.txt')), 'Update file should not exist yet');
+        
+        const initialMetaContent = await fs.readFile(path.join(collectionPath, METADATA_FILENAME), 'utf8');
+        const initialMetaData = yaml.load(initialMetaContent);
+        const initialAddedOn = initialMetaData.added_on;
+        assert.ok(initialAddedOn, "initial added_on date exists");
+        assert.strictEqual(initialMetaData.updated_on, undefined, "initial updated_on date should not exist");
+
+        await addCommitToLocalGitRepo(localGitRepoPath, 'update.txt', 'Version 2', 'Second commit');
+
+        const gitUpdateResult = await manager.updateCollection(collectionName);
+        assert.ok(gitUpdateResult.success, 'Updating Git collection should succeed');
+        assert.ok(fss.existsSync(path.join(collectionPath, 'update.txt')), 'Update file should exist after update');
+        const updatedFileContent = await fs.readFile(path.join(collectionPath, 'update.txt'), 'utf8');
+        assert.strictEqual(updatedFileContent, 'Version 2', 'Updated file content should be correct');
+
+        const updatedMetaContent = await fs.readFile(path.join(collectionPath, METADATA_FILENAME), 'utf8');
+        const updatedMetaData = yaml.load(updatedMetaContent);
+        assert.ok(updatedMetaData.updated_on, 'Metadata should have an updated_on timestamp after update');
+        assert.notStrictEqual(initialMetaData.added_on, updatedMetaData.updated_on, 'updated_on should be different from added_on');
+        if (initialMetaData.updated_on) { 
+           assert.notStrictEqual(initialMetaData.updated_on, updatedMetaData.updated_on, 'updated_on should change after update');
+        }
+
+        console.log(chalk.green(`  PASSED: ${testName}`));
+        testsPassed++;
+    } catch (error) {
+        console.error(chalk.red(`  FAILED: ${testName}`), error);
+        if (error.stack) console.error(error.stack);
+    } finally {
+        await cleanupTestCollRoot(testCollRoot);
+        await cleanupTestCollRoot(localGitRepoPath); 
+    }
+}
+
+async function testUpdateAllCollections() {
+    testsAttempted++;
+    const testName = "Update All Collections";
+    console.log(`\nRunning test: ${testName}...`);
+    const testCollRoot = await createTestCollRoot();
+    const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true });
+
+    const localGitRepoPath1 = path.join(os.tmpdir(), `cm_local_git_repo_all1_${Date.now()}.git`);
+    const gitCollectionName1 = 'git-coll-all-1';
+    await setupLocalGitRepo(localGitRepoPath1, 'file1.txt', 'Initial content for repo1');
+    await manager.addCollection(localGitRepoPath1, { name: gitCollectionName1 });
+
+    const localSourceDirName = `cm_local_source_all_${Date.now()}`;
+    const localSourcePath = path.join(os.tmpdir(), localSourceDirName);
+    await fs.mkdir(localSourcePath, { recursive: true });
+    await manager.addCollection(localSourcePath, { name: 'local-coll-all' });
+
+    await addCommitToLocalGitRepo(localGitRepoPath1, 'update1.txt', 'Updated content for repo1', 'Update for repo1');
+
+    try {
+        const results = await manager.updateAllCollections();
+        assert.ok(results.success, 'updateAllCollections should report overall success even if some are skipped');
+        
+        const gitCollPath = path.join(testCollRoot, gitCollectionName1);
+        assert.ok(fss.existsSync(path.join(gitCollPath, 'update1.txt')), `Git collection ${gitCollectionName1} should have update1.txt`);
+        const updatedMetaContent = await fs.readFile(path.join(gitCollPath, METADATA_FILENAME), 'utf8');
+        const updatedMetaData = yaml.load(updatedMetaContent);
+        assert.ok(updatedMetaData.updated_on, `Metadata for ${gitCollectionName1} should have updated_on`);
+
+        const localCollPath = path.join(testCollRoot, 'local-coll-all');
+        const localMetaContent = await fs.readFile(path.join(localCollPath, METADATA_FILENAME), 'utf8');
+        const localMetaData = yaml.load(localMetaContent);
+        assert.strictEqual(localMetaData.updated_on, undefined, 'Local collection metadata should not have updated_on');
+        
+        const expectedGitUpdateMessage = `Collection "${gitCollectionName1}" updated.`;
+        assert.ok(results.messages.some(msg => msg === expectedGitUpdateMessage), `Success message for ${gitCollectionName1} expected. Got: ${results.messages}`);
+        
+        const expectedLocalSkipMessageStart = `Skipping local-coll-all: Not a Git-based collection`;
+        assert.ok(results.messages.some(msg => msg.startsWith(expectedLocalSkipMessageStart)), `Skip message for local-coll-all expected. Got: ${results.messages}`);
+
+
+        console.log(chalk.green(`  PASSED: ${testName}`));
+        testsPassed++;
+    } catch (error) {
+        console.error(chalk.red(`  FAILED: ${testName}`), error);
+        if (error.stack) console.error(error.stack);
+    } finally {
+        await cleanupTestCollRoot(testCollRoot);
+        await cleanupTestCollRoot(localGitRepoPath1);
+        await cleanupTestCollRoot(localSourcePath);
     }
 }
 
@@ -492,7 +621,9 @@ async function runAllTests() {
     await testListAvailablePlugins();
     await testEnableAndListEnabledPlugins();
     await testDisablePlugin();
-    await testRemoveCollection(); // Add the new test function here
+    await testRemoveCollection(); 
+    await testUpdateCollection(); 
+    await testUpdateAllCollections(); 
 
     console.log(`\n--- Test Summary ---`);
     console.log(`Tests attempted: ${testsAttempted}`);

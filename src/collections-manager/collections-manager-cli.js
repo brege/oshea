@@ -75,8 +75,6 @@ yargs(hideBin(process.argv))
       }
       try {
         const result = await manager.enablePlugin(argv.collectionPluginId, { as: argv.as });
-        // The success message is already printed by enablePlugin in CollectionsManager
-        // We can add more CLI specific feedback if needed.
         if (result && result.success) {
             console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${result.invoke_name || argv.as || argv.collectionPluginId.split('/')[1]}`));
         }
@@ -88,18 +86,80 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
+    'disable <invoke_name>',
+    'Disables an active plugin by removing it from the enabled manifest.',
+    (yargsCmd) => {
+      yargsCmd
+        .positional('invoke_name', {
+          describe: 'The current "invoke_name" of the plugin to disable.',
+          type: 'string',
+          demandOption: true,
+        });
+    },
+    async (argv) => {
+      console.log(chalk.blueBright(`Collections Manager CLI: Attempting to disable plugin...`));
+      console.log(`  Plugin Invoke Name: ${chalk.cyan(argv.invoke_name)}`);
+      try {
+        const result = await manager.disablePlugin(argv.invoke_name);
+        if (result && result.success) {
+          console.log(chalk.blueBright(`Plugin "${argv.invoke_name}" is now disabled.`));
+        }
+      } catch (error) {
+        console.error(chalk.red(`\nERROR in 'disable' command: ${error.message}`));
+        if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
+        process.exit(1);
+      }
+    }
+  )
+  .command(
+    'remove <collection_name>',
+    'Removes a downloaded plugin collection. Use --force to also disable its plugins.',
+    (yargsCmd) => {
+      yargsCmd
+        .positional('collection_name', {
+          describe: 'The name of the collection to remove.',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('force', {
+          alias: 'f',
+          describe: 'Forcibly remove the collection, automatically disabling any of its enabled plugins first.',
+          type: 'boolean',
+          default: false
+        });
+    },
+    async (argv) => {
+      console.log(chalk.blueBright(`Collections Manager CLI: Attempting to remove collection...`));
+      console.log(`  Collection Name: ${chalk.cyan(argv.collection_name)}`);
+      if (argv.force) {
+        console.log(chalk.yellow('  Force option is enabled. Will attempt to disable plugins from this collection first.'));
+      }
+      try {
+        const result = await manager.removeCollection(argv.collection_name, { force: argv.force });
+        // Success/failure messages are already printed by removeCollection in CollectionsManager
+        if (result && result.success) {
+          console.log(chalk.blueBright(`Collection "${argv.collection_name}" has been removed.`));
+        }
+      } catch (error) {
+        console.error(chalk.red(`\nERROR in 'remove' command: ${error.message}`));
+        if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
+        process.exit(1);
+      }
+    }
+  )
+  .command(
     'list [type] [<collection_name>]',
-    'Lists plugin collections or plugins. Types: downloaded, available. (enabled is WIP)',
+    'Lists plugin collections or plugins. Types: downloaded, available, enabled.',
     (yargsCmd) => {
         yargsCmd
             .positional('type', {
-                describe: `Type of listing: ${chalk.green('downloaded')}, ${chalk.green('available')}, ${chalk.yellow('enabled (WIP)')}`,
+                describe: `Type of listing: ${chalk.green('downloaded')}, ${chalk.green('available')}, ${chalk.green('enabled')}`,
                 type: 'string',
                 default: 'downloaded',
-                choices: ['downloaded', 'available'] // Will add 'enabled' here later
+                choices: ['downloaded', 'available', 'enabled'] 
             })
             .positional('collection_name', {
-                describe: `Optional. Name of the collection to list plugins from (for "${chalk.green('available')}" or "${chalk.yellow('enabled')}" types).`,
+                describe: `Optional. Name of the collection to list plugins from (for "${chalk.green('available')}" or "${chalk.green('enabled')}" types).`,
                 type: 'string'
             });
     },
@@ -116,7 +176,7 @@ yargs(hideBin(process.argv))
         }
     }
   )
-  .demandCommand(1, chalk.red('You must provide a command (e.g., add, list, enable).'))
+  .demandCommand(1, chalk.red('You must provide a command (e.g., add, list, enable, disable, remove).'))
   .help()
   .alias('h', 'help')
   .strict()

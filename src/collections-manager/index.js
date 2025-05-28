@@ -9,6 +9,7 @@ const chalk = require('chalk');
 const yaml = require('js-yaml');
 
 const METADATA_FILENAME = '.collection-metadata.yaml';
+const ENABLED_MANIFEST_FILENAME = 'enabled.yaml';
 
 class CollectionsManager {
   constructor(options = {}) {
@@ -61,7 +62,7 @@ class CollectionsManager {
       throw new Error(`Error: Target directory '${targetPath}' already exists. Please remove it or choose a different name.`);
     }
 
-    const originalSource = source; // Keep the original source for metadata
+    const originalSource = source; 
 
     return new Promise(async (resolve, reject) => {
       const writeMetadata = async () => {
@@ -124,68 +125,138 @@ class CollectionsManager {
     });
   }
 
+  async enablePlugin(collectionPluginId, options = {}) {
+    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): Enabling ID: ${collectionPluginId}, options: ${JSON.stringify(options)}`));
+
+    const parts = collectionPluginId.split('/');
+    if (parts.length !== 2) {
+      throw new Error(`Invalid format for collectionPluginId: "${collectionPluginId}". Expected "collection_name/plugin_id".`);
+    }
+    const collectionName = parts[0];
+    const pluginId = parts[1];
+
+    const availablePlugins = await this.listAvailablePlugins(collectionName);
+    if (this.debug) console.log(chalk.blueBright(`[DEBUG_CM_ENABLE] Available plugins in ${collectionName}: ${JSON.stringify(availablePlugins, null, 2)}`));
+
+    const pluginToEnable = availablePlugins.find(p => p.plugin_id === pluginId && p.collection === collectionName);
+
+    if (!pluginToEnable) {
+      throw new Error(`Plugin "${pluginId}" in collection "${collectionName}" is not available or does not exist.`);
+    }
+    if (!pluginToEnable.config_path || !fss.existsSync(pluginToEnable.config_path)) { // config_path is already absolute from _findPluginsInCollectionDir
+        throw new Error(`Config path for plugin "${pluginId}" in collection "${collectionName}" is invalid or not found: ${pluginToEnable.config_path}`);
+    }
+    const absolutePluginConfigPath = pluginToEnable.config_path; 
+
+    let invokeName = options.as || pluginId; 
+    if (!/^[a-zA-Z0-9_.-]+$/.test(invokeName)) {
+        throw new Error(`Invalid invoke_name: "${invokeName}". Must be alphanumeric, underscores, hyphens, or periods.`);
+    }
+
+    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+    let enabledManifest = { enabled_plugins: [] };
+    try {
+      if (fss.existsSync(enabledManifestPath)) {
+        const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
+        enabledManifest = yaml.load(manifestContent);
+        if (!enabledManifest || !Array.isArray(enabledManifest.enabled_plugins)) {
+          if (this.debug) console.warn(chalk.yellow(`WARN (CM:enablePlugin): Invalid or empty ${ENABLED_MANIFEST_FILENAME}. Initializing with empty list.`));
+          enabledManifest = { enabled_plugins: [] };
+        }
+      } else {
+        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): ${ENABLED_MANIFEST_FILENAME} not found. Initializing new one.`));
+      }
+    } catch (e) {
+      console.warn(chalk.yellow(`WARN (CM:enablePlugin): Could not read or parse ${enabledManifestPath}: ${e.message}. Starting with a new manifest.`));
+      enabledManifest = { enabled_plugins: [] };
+    }
+
+    if (enabledManifest.enabled_plugins.some(p => p.invoke_name === invokeName)) {
+      throw new Error(`Invoke name "${invokeName}" is already in use. Choose a different name using --as.`);
+    }
+
+    const newEntry = {
+      collection_name: collectionName,
+      plugin_id: pluginId,
+      invoke_name: invokeName,
+      config_path: absolutePluginConfigPath,
+      added_on: new Date().toISOString(),
+    };
+
+    enabledManifest.enabled_plugins.push(newEntry);
+    enabledManifest.enabled_plugins.sort((a, b) => a.invoke_name.localeCompare(b.invoke_name)); 
+
+    try {
+      await fs.mkdir(this.collRoot, { recursive: true }); 
+      const yamlString = yaml.dump(enabledManifest, { sortKeys: true });
+      await fs.writeFile(enabledManifestPath, yamlString);
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): Successfully wrote to ${enabledManifestPath}`));
+      console.log(chalk.green(`Plugin "${collectionName}/${pluginId}" enabled successfully as "${invokeName}".`));
+      return { success: true, message: `Plugin "${collectionName}/${pluginId}" enabled as "${invokeName}".`, invoke_name: invokeName };
+    } catch (e) {
+      console.error(chalk.red(`ERROR (CM:enablePlugin): Failed to write to ${enabledManifestPath}: ${e.message}`));
+      throw e;
+    }
+  }
 
   async _findPluginsInCollectionDir(collectionPath, collectionName) {
     const availablePlugins = [];
     if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
-      if (this.debug) console.log(chalk.magenta(`DEBUG: Collection path ${collectionPath} does not exist or is not a directory.`));
       return [];
     }
 
     const pluginDirs = await fs.readdir(collectionPath, { withFileTypes: true });
     for (const pluginDir of pluginDirs) {
       if (pluginDir.isDirectory()) {
-        const pluginId = pluginDir.name;
-        // Skip common Git directory or our metadata file's directory if it was named like one
+        const pluginId = pluginDir.name; // This is the directory name, e.g., "pluginBeta"
         if (pluginId === '.git' || pluginId === METADATA_FILENAME) continue;
 
         const pluginPath = path.join(collectionPath, pluginId);
-        let configPath = path.join(pluginPath, `${pluginId}.config.yaml`);
+        let actualConfigPath = '';
         let description = 'No description found.';
         let foundConfig = false;
 
-        if (fss.existsSync(configPath) && fss.lstatSync(configPath).isFile()) {
+        const standardConfigPath = path.join(pluginPath, `${pluginId}.config.yaml`);
+        const alternativeYamlPath = path.join(pluginPath, `${pluginId}.yaml`);
+
+        if (fss.existsSync(standardConfigPath) && fss.lstatSync(standardConfigPath).isFile()) {
+            actualConfigPath = standardConfigPath;
             foundConfig = true;
-        } else {
-            try {
-                const filesInPluginDir = await fs.readdir(pluginPath);
-                const alternativeConfig = filesInPluginDir.find(f => f.endsWith('.config.yaml'));
-                if (alternativeConfig) {
-                    configPath = path.join(pluginPath, alternativeConfig);
-                    foundConfig = true;
-                    if (this.debug) console.log(chalk.magenta(`DEBUG: Found alternative config ${alternativeConfig} for plugin ${pluginId} in ${collectionName}`));
-                }
-            } catch (e) {
-                 if (this.debug) console.warn(chalk.yellow(`WARN: Could not read directory ${pluginPath} to find alternative config: ${e.message}`));
-            }
+            if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_fPICD): Found standard config ${path.basename(actualConfigPath)} for ${pluginId} in ${collectionName}`));
+        } else if (fss.existsSync(alternativeYamlPath) && fss.lstatSync(alternativeYamlPath).isFile()) {
+            actualConfigPath = alternativeYamlPath;
+            foundConfig = true;
+            if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_fPICD): Found alternative config ${path.basename(actualConfigPath)} for ${pluginId} in ${collectionName}`));
         }
 
-        if (foundConfig) {
+        if (foundConfig && actualConfigPath) {
           try {
-            const configFileContent = await fs.readFile(configPath, 'utf8');
-            const pluginConfig = yaml.load(configFileContent);
-            description = pluginConfig.description || 'Plugin description not available.';
+            const configFileContent = await fs.readFile(actualConfigPath, 'utf8');
+            const pluginConfigData = yaml.load(configFileContent);
+            description = pluginConfigData.description || 'Plugin description not available.';
             availablePlugins.push({
               collection: collectionName,
               plugin_id: pluginId,
               description: description,
-              config_path: configPath,
+              config_path: path.resolve(actualConfigPath), 
             });
           } catch (e) {
-            console.warn(chalk.yellow(`  WARN: Could not read or parse config file ${configPath} for plugin ${pluginId} in ${collectionName}: ${e.message}`));
+            console.warn(chalk.yellow(`  WARN (CM:_fPICD): Could not read/parse ${actualConfigPath} for ${pluginId} in ${collectionName}: ${e.message}`));
             availablePlugins.push({
               collection: collectionName,
               plugin_id: pluginId,
               description: chalk.red(`Error loading config: ${e.message.substring(0, 50)}...`),
-              config_path: configPath,
+              config_path: path.resolve(actualConfigPath),
             });
           }
         } else {
-             if (this.debug) console.log(chalk.magenta(`DEBUG: No config file found for potential plugin ${pluginId} in ${collectionName} (path: ${pluginPath})`));
+             if (this.debug) {
+                console.log(chalk.magenta(`DEBUG (CM:_fPICD): No config file (${pluginId}.config.yaml or ${pluginId}.yaml) found for ${pluginId} in ${collectionName}. Looked in ${pluginPath}`));
+             }
         }
       }
     }
-    return availablePlugins;
+    return availablePlugins; // Sorting will be done by the caller (listAvailablePlugins)
   }
 
   async listAvailablePlugins(collectionNameFilter = null) {
@@ -197,7 +268,7 @@ class CollectionsManager {
     if (collectionNameFilter) {
       const singleCollectionPath = path.join(this.collRoot, collectionNameFilter);
       if (!fss.existsSync(singleCollectionPath) || !fss.lstatSync(singleCollectionPath).isDirectory()) {
-        return []; // Will be handled by listCollections caller
+        return []; 
       }
       allAvailablePlugins = await this._findPluginsInCollectionDir(singleCollectionPath, collectionNameFilter);
     } else {
@@ -211,11 +282,16 @@ class CollectionsManager {
         allAvailablePlugins.push(...pluginsInCollection);
       }
     }
+    allAvailablePlugins.sort((a,b) => {
+        if (a.collection.toLowerCase() < b.collection.toLowerCase()) return -1;
+        if (a.collection.toLowerCase() > b.collection.toLowerCase()) return 1;
+        return a.plugin_id.toLowerCase().localeCompare(b.plugin_id.toLowerCase());
+    });
     return allAvailablePlugins;
   }
 
   async listCollections(type = 'downloaded', collectionNameFilter = null) {
-    console.log(chalk.blue(`CollectionsManager: Listing collections (type: ${chalk.yellow(type)}, filter: ${chalk.yellow(collectionNameFilter || 'all')})`));
+    console.log(chalk.blue(`CollectionsManager: Listing (type: ${chalk.yellow(type)}, filter: ${chalk.yellow(collectionNameFilter || 'all')})`));
     if (type === 'downloaded') {
       try {
         if (!fss.existsSync(this.collRoot)) {
@@ -223,9 +299,11 @@ class CollectionsManager {
           return [];
         }
         const entries = await fs.readdir(this.collRoot, { withFileTypes: true });
-        const collections = entries
+        let collections = entries
           .filter(dirent => dirent.isDirectory())
           .map(dirent => dirent.name);
+        
+        collections.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
         if (collections.length === 0) {
           console.log(chalk.yellow("  No collections found in COLL_ROOT."));
@@ -260,7 +338,9 @@ class CollectionsManager {
             return acc;
         }, {});
 
-        for (const collectionName in groupedByCollection) {
+        const sortedCollectionNames = Object.keys(groupedByCollection).sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+
+        for (const collectionName of sortedCollectionNames) {
             const metaPath = path.join(this.collRoot, collectionName, METADATA_FILENAME);
             try {
                 if (fss.existsSync(metaPath)) {
@@ -271,26 +351,69 @@ class CollectionsManager {
                     }
                 }
             } catch (e) {
-                if(this.debug) console.warn(chalk.yellow(`  WARN: Could not read metadata for ${collectionName}: ${e.message}`));
+                if(this.debug) console.warn(chalk.yellow(`  WARN (CM:listColl): Could not read metadata for ${collectionName}: ${e.message}`));
             }
         }
 
-        for (const collectionName in groupedByCollection) {
+        for (const collectionName of sortedCollectionNames) {
             const collectionData = groupedByCollection[collectionName];
             console.log(chalk.cyanBright(`\n  Collection: ${chalk.bold(collectionName)}`));
             if (collectionData.source && collectionData.source !== 'Source not specified or found') {
                 console.log(`    ${chalk.dim('Source:')} ${chalk.white(collectionData.source)}`);
             }
             console.log(chalk.blueBright(`    Plugins:`));
+            collectionData.plugins.sort((a,b) => a.plugin_id.toLowerCase().localeCompare(b.plugin_id.toLowerCase()));
             collectionData.plugins.forEach(p => {
                 console.log(chalk.greenBright(`      - ${p.plugin_id}:`));
                 console.log(`          ${chalk.white('Description:')} ${p.description}`);
-                console.log(`          ${chalk.dim('Config Path:')} ${p.config_path}`); // Path will use default terminal color
+                console.log(`          ${chalk.dim('Config Path:')} ${p.config_path}`);
             });
         }
+    } else if (type === 'enabled') {
+        const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+        let enabledManifest = { enabled_plugins: [] };
+        if (fss.existsSync(enabledManifestPath)) {
+            try {
+                const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
+                enabledManifest = yaml.load(manifestContent);
+                if (!enabledManifest || !Array.isArray(enabledManifest.enabled_plugins)) {
+                    enabledManifest = { enabled_plugins: [] };
+                }
+            } catch (e) {
+                 console.warn(chalk.yellow(`WARN (CM:listColl): Could not read or parse ${enabledManifestPath}: ${e.message}. Assuming no plugins enabled.`));
+                 enabledManifest = { enabled_plugins: [] };
+            }
+        }
+
+        let pluginsToDisplay = enabledManifest.enabled_plugins;
+
+        if (collectionNameFilter) {
+            pluginsToDisplay = pluginsToDisplay.filter(p => p.collection_name === collectionNameFilter);
+        }
+        
+        pluginsToDisplay.sort((a,b) => a.invoke_name.toLowerCase().localeCompare(b.invoke_name.toLowerCase()));
+
+        if (pluginsToDisplay.length === 0) {
+            if (collectionNameFilter) {
+                console.log(chalk.yellow(`  No enabled plugins found for collection '${collectionNameFilter}'.`));
+            } else {
+                console.log(chalk.yellow('  No plugins are currently enabled.'));
+            }
+            return; // Return undefined as per original structure
+        }
+
+        console.log(chalk.blue("\n  Enabled plugins:"));
+        pluginsToDisplay.forEach(p => {
+            console.log(chalk.greenBright(`  - Invoke Name: ${chalk.bold(p.invoke_name)}`));
+            console.log(`      ${chalk.dim('Source:')} ${p.collection_name}/${p.plugin_id}`);
+            console.log(`      ${chalk.dim('Config Path:')} ${p.config_path}`);
+            console.log(`      ${chalk.dim('Enabled On:')} ${p.added_on}`);
+        });
+        return pluginsToDisplay;
+
     } else {
       console.log(chalk.yellow(`  Listing for type '${type}' is not yet implemented.`));
-      return [];
+      // return []; // Kept original behavior
     }
   }
 }

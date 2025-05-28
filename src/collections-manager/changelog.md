@@ -1,5 +1,26 @@
 # Changelog - md-to-pdf Collections Manager
 
+## 0.7.3 (Conceptual - Features for md-to-pdf v0.7.0)
+
+### Added
+
+* **Collection Updates:**
+    * Implemented `updateCollection(<collection_name>)` method in `CollectionsManager` to update a single Git-based collection by executing `git pull`.
+    * Implemented `updateAllCollections()` method in `CollectionsManager` to iterate through all downloaded collections and update those that are Git-based.
+    * Both methods update an `updated_on` timestamp in the collection's `.collection-metadata.yaml` file.
+    * Added CLI command `md-to-pdf-cm update [<collection_name>]` to expose this functionality. If `<collection_name>` is omitted, it attempts to update all Git-based collections.
+* **Unit Tests:**
+    * Added tests for `updateCollection` (updating Git-based, attempting to update local-path, attempting to update non-existent).
+    * Added tests for `updateAllCollections` (updating a mix of Git-based and local-path collections).
+
+### Changed
+
+* Modified `addCollection` in `CollectionsManager` to correctly identify local paths ending in `.git` as Git repositories to be cloned, rather than copied. This ensures metadata and subsequent update operations work correctly for collections added from local bare or non-bare Git repositories.
+* Refined `updateCollection` and `updateAllCollections` in `CollectionsManager` to ensure they correctly identify Git-based collections for update operations, including those added from local `.git` paths.
+* Adjusted test script `run-cm-tests.js` Git helper functions (`setupLocalGitRepo`, `addCommitToLocalGitRepo`) to use `main` as the default branch name instead of `master` for broader compatibility with modern Git defaults.
+* Made assertions in `run-cm-tests.js` for update results more precise.
+
+
 ## 0.7.2 (Conceptual - Features for md-to-pdf v0.7.0)
 
 ### Added

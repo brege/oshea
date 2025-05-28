@@ -1,5 +1,22 @@
 # Changelog - md-to-pdf Collections Manager
 
+## 0.7.4 (Conceptual - Features for md-to-pdf v0.7.0)
+
+### Added
+
+* **Enable All Plugins in Collection:**
+    * Implemented `enableAllPluginsInCollection(<collectionName>, { prefix: string })` method in `CollectionsManager`.
+    * Updated the `md-to-pdf-cm enable` CLI command to support `<collection_name> --all [--prefix <prefix_string>]` for batch enabling all available plugins within a specified collection.
+    * The `--prefix` option allows prepending a string to the invoke names of all plugins enabled via `--all`.
+* **Documentation:**
+    * Added `docs/walkthrough.md` to demonstrate adding a collection and using the `enable --all` feature.
+
+### Changed
+
+* Modified the `enable` command in `collections-manager-cli.js` to handle both single plugin enablement and batch enablement via the `--all` flag.
+* Updated the help message for the `add` command in `collections-manager-cli.js` to include an example for `enable --all`.
+* Enhanced the `list` command in `collections-manager-cli.js` to provide more user-friendly output messages when no items are found for 'downloaded', 'available', or 'enabled' types.
+
 ## 0.7.3 (Conceptual - Features for md-to-pdf v0.7.0)
 
 ### Added

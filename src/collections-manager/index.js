@@ -201,6 +201,63 @@ class CollectionsManager {
     }
   }
 
+  async enableAllPluginsInCollection(collectionName, options = {}) {
+    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enableAllPluginsInCollection): Enabling all plugins in: ${collectionName}, options: ${JSON.stringify(options)}`));
+    const collectionPath = path.join(this.collRoot, collectionName);
+    if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
+        console.error(chalk.red(`ERROR: Collection "${collectionName}" not found at ${collectionPath}.`));
+        return { success: false, messages: [`Collection "${collectionName}" not found.`] };
+    }
+
+    const availablePlugins = await this.listAvailablePlugins(collectionName);
+    if (!availablePlugins || availablePlugins.length === 0) {
+        console.log(chalk.yellow(`No available plugins found in collection "${collectionName}".`));
+        return { success: true, messages: [`No available plugins found in "${collectionName}".`] };
+    }
+
+    const results = [];
+    let allSucceeded = true;
+    let countEnabled = 0;
+
+    for (const plugin of availablePlugins) {
+        const collectionPluginId = `${plugin.collection}/${plugin.plugin_id}`;
+        let invokeName = plugin.plugin_id;
+        if (options.prefix && typeof options.prefix === 'string') {
+            invokeName = `${options.prefix}${plugin.plugin_id}`;
+        }
+
+        try {
+            const enableResult = await this.enablePlugin(collectionPluginId, { as: invokeName });
+            results.push({
+                plugin: collectionPluginId,
+                invoke_name: enableResult.invoke_name,
+                status: 'enabled',
+                message: enableResult.message
+            });
+            countEnabled++;
+        } catch (error) {
+            allSucceeded = false;
+            results.push({
+                plugin: collectionPluginId,
+                invoke_name: invokeName, // Attempted invoke name
+                status: 'failed',
+                message: error.message
+            });
+            console.warn(chalk.yellow(`  Failed to enable ${collectionPluginId} as ${invokeName}: ${error.message}`));
+        }
+    }
+
+    const summaryMessage = `Batch enablement for collection "${collectionName}": ${countEnabled} of ${availablePlugins.length} plugins enabled.`;
+    console.log(chalk.blueBright(summaryMessage));
+    results.forEach(r => {
+        if (r.status === 'enabled') console.log(chalk.green(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status}`));
+        else console.log(chalk.yellow(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status} - ${r.message}`));
+    });
+    
+    return { success: allSucceeded, messages: [summaryMessage, ...results.map(r => `${r.invoke_name}: ${r.status} - ${r.message}`)] };
+  }
+
+
   async disablePlugin(invokeName) {
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:disablePlugin): Disabling invoke_name: ${invokeName}`));
 

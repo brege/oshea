@@ -1,5 +1,36 @@
 # Changelog - md-to-pdf Collections Manager
 
+## 0.7.1 (Conceptual - Features for md-to-pdf v0.7.0)
+
+### Added
+
+* **Plugin Enablement System:**
+    * Implemented `enablePlugin(<collection_name>/<plugin_id>, { as: <invoke_name> })` method in `CollectionsManager` to activate plugins.
+    * Creates and manages a `COLL_ROOT/enabled.yaml` manifest file storing details of enabled plugins (collection name, plugin ID, invoke name, absolute config path, added date).
+    * `invoke_name` uniqueness is enforced.
+    * Enabled plugins in `enabled.yaml` are sorted by `invoke_name` for consistent manifest content.
+* **CLI Command `md-to-pdf-cm enable`:**
+    * Added `enable <collection_name>/<plugin_id> [--as <invoke_name>]` command to `collections-manager-cli.js`.
+* **CLI Command `md-to-pdf-cm list enabled`:**
+    * Implemented `list enabled [<collection_name>]` functionality in `CollectionsManager` and `collections-manager-cli.js` to display currently enabled plugins from `enabled.yaml`.
+    * Output includes invoke name, original source (collection/plugin ID), config path, and enabled date.
+* **Plugin Discovery Refinement:**
+    * Plugin discovery logic in `_findPluginsInCollectionDir` now strictly looks for `<pluginId>.config.yaml` or `<pluginId>.yaml` as the plugin's configuration file.
+    * Ensured `config_path` returned by `_findPluginsInCollectionDir` is an absolute path.
+* **Sorting for Listings:**
+    * `listAvailablePlugins` output is now sorted by collection name, then by plugin ID within each collection.
+    * `listCollections('downloaded')` output is sorted by collection name.
+* **Unit Tests:**
+    * Added tests for `enablePlugin` (success, custom invoke name, conflicts, enabling non-available plugin).
+    * Added tests for `list enabled` (empty, with items, filtered).
+    * Updated test setups in `run-cm-tests.js` to use config filenames (`<pluginId>.config.yaml` or `<pluginId>.yaml`) consistent with the stricter discovery rules.
+
+### Changed
+
+* Updated `_findPluginsInCollectionDir` to strictly look for `<pluginId>.config.yaml` or `<pluginId>.yaml`.
+* Unit test `testListAvailablePlugins` updated to reflect stricter plugin config file discovery (expects fewer plugins if non-conformantly named configs were previously counted).
+
+
 ## 0.7.0 (Conceptual - Initial Development for md-to-pdf v0.7.0)
 
 ### Added

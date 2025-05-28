@@ -603,6 +603,98 @@ async function testUpdateAllCollections() {
     }
 }
 
+async function testEnableAllPluginsInCollection() {
+    testsAttempted++;
+    const testName = "Enable All Plugins in Collection";
+    console.log(`\nRunning test: ${testName}...`);
+    const testCollRoot = await createTestCollRoot();
+    const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true });
+    const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
+
+    const mockCollectionName = 'test-batch-enable';
+    const plugin1Id = 'alphaPlug';
+    const plugin2Id = 'bravoPlug';
+    const plugin3Id = 'charliePlugInvalid'; // Will have a bad config path
+
+    // Setup mock collection and plugins
+    const collPath = path.join(testCollRoot, mockCollectionName);
+    const p1Path = path.join(collPath, plugin1Id);
+    const p2Path = path.join(collPath, plugin2Id);
+    const p3Path = path.join(collPath, plugin3Id);
+
+    await fs.mkdir(p1Path, { recursive: true });
+    await fs.writeFile(path.join(p1Path, `${plugin1Id}.config.yaml`), yaml.dump({ description: 'Alpha Test Plugin' }));
+    await fs.mkdir(p2Path, { recursive: true });
+    await fs.writeFile(path.join(p2Path, `${plugin2Id}.yaml`), yaml.dump({ description: 'Bravo Test Plugin' })); // Alt .yaml ext
+    await fs.mkdir(p3Path, { recursive: true });
+    // Not creating a config for plugin3Id to simulate an unavailable plugin scenario during enable all
+
+    try {
+        // Test 1: Enable all without prefix
+        let result = await manager.enableAllPluginsInCollection(mockCollectionName);
+        assert.ok(result.success, 'Enable all (no prefix) should report overall success if some plugins enable');
+        assert.strictEqual(result.messages.length, 3, 'Should have 3 messages (summary + 2 plugins)'); // Summary + 2 actual plugins
+
+        let manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        assert.strictEqual(manifest.enabled_plugins.length, 2, 'Two plugins should be enabled (alpha, bravo)');
+        assert.ok(manifest.enabled_plugins.some(p => p.invoke_name === plugin1Id && p.plugin_id === plugin1Id), 'Alpha plug enabled correctly');
+        assert.ok(manifest.enabled_plugins.some(p => p.invoke_name === plugin2Id && p.plugin_id === plugin2Id), 'Bravo plug enabled correctly');
+
+        // Cleanup manifest for next test
+        await fs.unlink(enabledManifestPath);
+
+        // Test 2: Enable all with prefix
+        const prefix = 'test_';
+        result = await manager.enableAllPluginsInCollection(mockCollectionName, { prefix });
+        assert.ok(result.success, 'Enable all (with prefix) should report overall success');
+        manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        assert.strictEqual(manifest.enabled_plugins.length, 2, 'Two plugins should be enabled with prefix');
+        assert.ok(manifest.enabled_plugins.some(p => p.invoke_name === `${prefix}${plugin1Id}`), 'Alpha plug enabled with prefix');
+        assert.ok(manifest.enabled_plugins.some(p => p.invoke_name === `${prefix}${plugin2Id}`), 'Bravo plug enabled with prefix');
+
+        // Cleanup manifest
+        await fs.unlink(enabledManifestPath);
+
+        // Test 3: Enable all with a conflict
+        // First, enable one plugin that will conflict
+        await manager.enablePlugin(`${mockCollectionName}/${plugin1Id}`, { as: 'conflictName' });
+        // Then, try to enable all with a prefix that would cause 'bravoPlug' to also become 'conflictName'
+        // This specific scenario of prefix causing conflict with existing is tricky.
+        // Current `enablePlugin` would throw. `enableAll` catches and reports.
+        // Let's try to enable 'alphaPlug' as 'alphaPlug', then enable all which will try 'alphaPlug' again.
+        await manager.disablePlugin('conflictName'); // clean slate
+        await manager.enablePlugin(`${mockCollectionName}/${plugin1Id}`); // alphaPlug is now 'alphaPlug'
+        
+        result = await manager.enableAllPluginsInCollection(mockCollectionName); // Should try to enable alphaPlug (conflict) and bravoPlug
+        assert.strictEqual(result.success, false, 'Enable all with conflict should report overall failure (as one failed)');
+        assert.ok(result.messages.some(m => m.startsWith(`${plugin1Id}: failed -`) && m.includes(`Invoke name "${plugin1Id}" is already in use.`)), `Conflict message for ${plugin1Id} was not correctly reported.`);
+        manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        // alphaPlug was already enabled, bravoPlug should now also be enabled.
+        assert.strictEqual(manifest.enabled_plugins.length, 2, 'alphaPlug (pre-existing) and bravoPlug (newly enabled) should be in manifest');
+        assert.ok(manifest.enabled_plugins.some(p => p.invoke_name === plugin1Id), 'Original alphaPlug still present');
+        assert.ok(manifest.enabled_plugins.some(p => p.invoke_name === plugin2Id), 'bravoPlug enabled successfully despite other conflict');
+        
+        // Cleanup manifest
+        await fs.unlink(enabledManifestPath);
+
+        // Test 4: Enable all for a collection with no valid/available plugins
+        const emptyCollName = 'empty-collection';
+        await fs.mkdir(path.join(testCollRoot, emptyCollName), { recursive: true });
+        result = await manager.enableAllPluginsInCollection(emptyCollName);
+        assert.ok(result.success, 'Enable all on empty collection should be successful (no-op)');
+        assert.ok(result.messages.some(m => m.includes('No available plugins found')), 'Correct message for empty collection');
+        assert.ok(!fss.existsSync(enabledManifestPath), 'Manifest should not be created for empty collection enable all');
+        
+        console.log(chalk.green(`  PASSED: ${testName}`));
+        testsPassed++;
+    } catch (error) {
+        console.error(chalk.red(`  FAILED: ${testName}`), error);
+        if (error.stack) console.error(error.stack);
+    } finally {
+        await cleanupTestCollRoot(testCollRoot);
+    }
+}
+
 
 async function runAllTests() {
     console.log("Starting Collections Manager Tests...");
@@ -624,6 +716,7 @@ async function runAllTests() {
     await testRemoveCollection(); 
     await testUpdateCollection(); 
     await testUpdateAllCollections(); 
+    await testEnableAllPluginsInCollection();
 
     console.log(`\n--- Test Summary ---`);
     console.log(`Tests attempted: ${testsAttempted}`);
@@ -631,7 +724,7 @@ async function runAllTests() {
     console.log(`Tests failed: ${testsAttempted - testsPassed}`);
 
     if (fss.existsSync(TEST_COLL_ROOT_BASE)) { 
-        await cleanupTestCollRoot(TEST_COLL_ROOT_BASE);
+        // await cleanupTestCollRoot(TEST_COLL_ROOT_BASE); // Keep for manual inspection if needed
     }
 
     if (testsPassed === testsAttempted && testsAttempted > 0) {

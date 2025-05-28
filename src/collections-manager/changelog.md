@@ -1,5 +1,26 @@
 # Changelog - md-to-pdf Collections Manager
 
+## 0.7.2 (Conceptual - Features for md-to-pdf v0.7.0)
+
+### Added
+
+* **Plugin Disablement:**
+    * Implemented `disablePlugin(<invoke_name>)` method in `CollectionsManager` to deactivate a plugin by removing it from the `enabled.yaml` manifest.
+    * Added CLI command `md-to-pdf-cm disable <invoke_name>` to expose this functionality.
+* **Collection Removal:**
+    * Implemented `removeCollection(<collection_name>, { force: boolean })` method in `CollectionsManager`.
+    * If `force` is true, any plugins from the collection that are currently enabled will be disabled first, then the collection directory will be removed.
+    * If `force` is false and the collection has enabled plugins, an error is thrown.
+    * Added CLI command `md-to-pdf-cm remove <collection_name> [--force]` to expose this functionality.
+* **Unit Tests:**
+    * Added tests for `disablePlugin` (success, disabling non-existent, disabling with empty/no manifest).
+    * Added tests for `removeCollection` (success with/without force, attempting to remove non-existent, attempting to remove with enabled plugins without force).
+
+### Changed
+
+* Updated CLI help messages and command lists to include `disable` and `remove`.
+
+
 ## 0.7.1 (Conceptual - Features for md-to-pdf v0.7.0)
 
 ### Added

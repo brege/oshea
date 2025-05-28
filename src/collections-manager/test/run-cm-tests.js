@@ -150,51 +150,43 @@ async function testListAvailablePlugins() {
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: false });
 
     const coll1Path = path.join(testCollRoot, 'coll1');
-    const pluginAId = 'pluginA'; // Directory name
+    const pluginAId = 'pluginA'; 
     const pluginAPath = path.join(coll1Path, pluginAId);
     
-    // This plugin (pluginB) will use the alternative <pluginId>.yaml naming
-    const pluginBId = 'pluginB'; // Directory name
+    const pluginBId = 'pluginB'; 
     const pluginBPath = path.join(coll1Path, pluginBId);
 
-    const invalidPluginPath = path.join(coll1Path, 'notAPlugin'); // Will not be found
-    const emptyPluginPath = path.join(coll1Path, 'emptyPlugin'); // Will not be found
+    const invalidPluginPath = path.join(coll1Path, 'notAPlugin'); 
+    const emptyPluginPath = path.join(coll1Path, 'emptyPlugin'); 
 
     const coll2Path = path.join(testCollRoot, 'coll2');
-    const pluginCId = 'pluginC'; // Directory name
+    const pluginCId = 'pluginC'; 
     const pluginCPath = path.join(coll2Path, pluginCId);
     
-    // This plugin (pluginD) will have a correctly named config but malformed content
-    const pluginDId = 'pluginD'; // Directory name
+    const pluginDId = 'pluginD'; 
     const pluginDPath = path.join(coll2Path, pluginDId);
 
-    // Create pluginA with pluginA.config.yaml
     await fs.mkdir(pluginAPath, { recursive: true });
     await fs.writeFile(path.join(pluginAPath, `${pluginAId}.config.yaml`), yaml.dump({ description: 'Plugin A description' }));
     
-    // Create pluginB with pluginB.yaml
     await fs.mkdir(pluginBPath, { recursive: true });
     await fs.writeFile(path.join(pluginBPath, `${pluginBId}.yaml`), yaml.dump({ description: 'Plugin B description (alt .yaml)' }));
 
-    // Create directories that should not be identified as valid plugins by the strict rule
     await fs.mkdir(invalidPluginPath, { recursive: true });
     await fs.writeFile(path.join(invalidPluginPath, `text.txt`), "not a config");
-    await fs.writeFile(path.join(invalidPluginPath, `notAPlugin.config.yam`), "wrong extension"); // Note .yam
+    await fs.writeFile(path.join(invalidPluginPath, `notAPlugin.config.yam`), "wrong extension"); 
     await fs.writeFile(path.join(invalidPluginPath, `some.other.config.yaml`), "name mismatch");
     await fs.mkdir(emptyPluginPath, { recursive: true });
 
 
-    // Create pluginC with pluginC.config.yaml
     await fs.mkdir(pluginCPath, { recursive: true });
     await fs.writeFile(path.join(pluginCPath, `${pluginCId}.config.yaml`), yaml.dump({ description: 'Plugin C description' }));
 
-    // Create pluginD with pluginD.config.yaml (malformed content)
     await fs.mkdir(pluginDPath, {recursive: true});
     await fs.writeFile(path.join(pluginDPath, `${pluginDId}.config.yaml`), "description: Plugin D\n  bad_yaml: - item1\n - item2");
 
 
     try {
-        // Expected: pluginA, pluginB, pluginC, pluginD (D will have error description)
         const expectedPluginCount = 4;
         let available = await manager.listAvailablePlugins();
         assert.strictEqual(available.length, expectedPluginCount, `Should find ${expectedPluginCount} plugins, found ${available.length}`);
@@ -248,30 +240,26 @@ async function testEnableAndListEnabledPlugins() {
     const testName = "Enable and List Enabled Plugins";
     console.log(`\nRunning test: ${testName}...`);
     const testCollRoot = await createTestCollRoot();
-    // Set debug: true for more verbose output from CollectionsManager during this test
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true }); 
     const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
 
     const mockCollectionName = 'test-collection';
-    const mockPlugin1Id = 'pluginAlpha'; // Directory name
-    const mockPlugin2Id = 'pluginBeta';  // Directory name
+    const mockPlugin1Id = 'pluginAlpha'; 
+    const mockPlugin2Id = 'pluginBeta';  
 
-    // Setup pluginAlpha with <pluginId>.config.yaml
     const mockPlugin1Path = path.join(testCollRoot, mockCollectionName, mockPlugin1Id);
     const mockPlugin1ConfigFilename = `${mockPlugin1Id}.config.yaml`;
     const mockPlugin1ConfigPath = path.join(mockPlugin1Path, mockPlugin1ConfigFilename);
     await fs.mkdir(mockPlugin1Path, { recursive: true });
     await fs.writeFile(mockPlugin1ConfigPath, yaml.dump({ description: 'Mock Plugin Alpha' }));
 
-    // Setup pluginBeta with <pluginId>.yaml
     const mockPlugin2Path = path.join(testCollRoot, mockCollectionName, mockPlugin2Id);
-    const mockPlugin2ConfigFilename = `${mockPlugin2Id}.yaml`; // Adheres to new rule
+    const mockPlugin2ConfigFilename = `${mockPlugin2Id}.yaml`; 
     const mockPlugin2ConfigPath = path.join(mockPlugin2Path, mockPlugin2ConfigFilename);
     await fs.mkdir(mockPlugin2Path, { recursive: true });
     await fs.writeFile(mockPlugin2ConfigPath, yaml.dump({ description: 'Mock Plugin Beta (.yaml)' }));
 
     try {
-        // Test 1: Enable pluginAlpha
         const enableResult1 = await manager.enablePlugin(`${mockCollectionName}/${mockPlugin1Id}`);
         assert.ok(enableResult1.success, 'Enable pluginAlpha should succeed');
         assert.strictEqual(enableResult1.invoke_name, mockPlugin1Id, 'Default invoke_name for pluginAlpha is correct');
@@ -285,7 +273,6 @@ async function testEnableAndListEnabledPlugins() {
         assert.strictEqual(enabledPlugin1.config_path, path.resolve(mockPlugin1ConfigPath));
         assert.ok(enabledPlugin1.added_on, 'pluginAlpha has an added_on timestamp');
 
-        // Test 2: Enable pluginBeta with a custom invoke_name
         const customInvokeName = 'beta-custom';
         const enableResult2 = await manager.enablePlugin(`${mockCollectionName}/${mockPlugin2Id}`, { as: customInvokeName });
         assert.ok(enableResult2.success, 'Enable pluginBeta with custom name should succeed');
@@ -304,43 +291,178 @@ async function testEnableAndListEnabledPlugins() {
         assert.strictEqual(enabledPlugin2.config_path, path.resolve(mockPlugin2ConfigPath));
         assert.ok(enabledPlugin2.added_on, 'pluginBeta has an added_on timestamp');
 
-        // Test 3: Attempt to enable pluginAlpha again (conflict on default invoke_name)
         await assert.rejects(
             manager.enablePlugin(`${mockCollectionName}/${mockPlugin1Id}`),
             /Invoke name "pluginAlpha" is already in use/,
             'Should reject enabling with conflicting default invoke_name'
         );
 
-        // Test 4: Attempt to enable plugin1 with conflicting custom invoke_name
          await assert.rejects(
             manager.enablePlugin(`${mockCollectionName}/${mockPlugin1Id}`, { as: customInvokeName }),
-            new RegExp(`Invoke name "${customInvokeName}" is already in use`), // Use RegExp for robust match
+            new RegExp(`Invoke name "${customInvokeName}" is already in use`), 
             'Should reject enabling with conflicting custom invoke_name'
         );
 
-        // Test 5: Attempt to enable a non-existent plugin
         await assert.rejects(
             manager.enablePlugin(`${mockCollectionName}/nonExistentPlugin`),
             /Plugin "nonExistentPlugin" in collection "test-collection" is not available/,
             'Should reject enabling a non-existent plugin'
         );
         
-        // Test 6: List all enabled plugins
-        console.log("  Listing all enabled plugins (test internal call):"); // For console during test run
-        const allEnabled = await manager.listCollections('enabled'); // Method now logs internally
+        console.log("  Listing all enabled plugins (test internal call):"); 
+        const allEnabled = await manager.listCollections('enabled'); 
         assert.strictEqual(allEnabled.length, 2, 'listCollections("enabled") should return two plugins data.');
         assert.ok(allEnabled.some(p => p.invoke_name === mockPlugin1Id), `listCollections enabled data has ${mockPlugin1Id}`);
         assert.ok(allEnabled.some(p => p.invoke_name === customInvokeName), `listCollections enabled data has ${customInvokeName}`);
 
-        // Test 7: List enabled plugins filtered by collection
         console.log(`  Listing enabled plugins for collection '${mockCollectionName}' (test internal call):`);
         const filteredEnabled = await manager.listCollections('enabled', mockCollectionName);
         assert.strictEqual(filteredEnabled.length, 2, `listCollections("enabled", "${mockCollectionName}") should return two plugins data.`);
         
         console.log(`  Listing enabled plugins for collection 'nonExistentCollection' (test internal call):`);
-        const nonExistentFiltered = await manager.listCollections('enabled', 'nonExistentCollection'); // Returns undefined if empty, check based on console output
+        const nonExistentFiltered = await manager.listCollections('enabled', 'nonExistentCollection'); 
         assert.strictEqual(nonExistentFiltered, undefined, `listCollections("enabled", "nonExistentCollection") should result in console message and return undefined or empty array if modified.`);
 
+
+        console.log(chalk.green(`  PASSED: ${testName}`));
+        testsPassed++;
+    } catch (error) {
+        console.error(chalk.red(`  FAILED: ${testName}`), error);
+        if (error.stack) console.error(error.stack);
+    } finally {
+        await cleanupTestCollRoot(testCollRoot);
+    }
+}
+
+async function testDisablePlugin() {
+    testsAttempted++;
+    const testName = "Disable Plugin";
+    console.log(`\nRunning test: ${testName}...`);
+    const testCollRoot = await createTestCollRoot();
+    const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true });
+    const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
+
+    const mockCollectionName = 'test-collection-disable';
+    const mockPluginId = 'pluginToDisable';
+    const mockInvokeName = 'disableMe';
+
+    const mockPluginPath = path.join(testCollRoot, mockCollectionName, mockPluginId);
+    const mockPluginConfigPath = path.join(mockPluginPath, `${mockPluginId}.config.yaml`);
+    await fs.mkdir(mockPluginPath, { recursive: true });
+    await fs.writeFile(mockPluginConfigPath, yaml.dump({ description: 'Mock Plugin for Disabling' }));
+
+    try {
+        let disableResult = await manager.disablePlugin(mockInvokeName);
+        assert.strictEqual(disableResult.success, false, 'Should fail if manifest does not exist');
+        assert.ok(disableResult.message.includes('No plugins enabled'), 'Correct message for no manifest');
+
+        await manager.enablePlugin(`${mockCollectionName}/${mockPluginId}`, { as: mockInvokeName });
+        let manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        assert.strictEqual(manifest.enabled_plugins.length, 1, 'One plugin should be enabled');
+        assert.strictEqual(manifest.enabled_plugins[0].invoke_name, mockInvokeName, 'Correct plugin enabled');
+
+        disableResult = await manager.disablePlugin(mockInvokeName);
+        assert.ok(disableResult.success, 'Disabling existing plugin should succeed');
+        assert.ok(fss.existsSync(enabledManifestPath), 'Manifest should still exist');
+        manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        assert.strictEqual(manifest.enabled_plugins.length, 0, 'Plugin should be removed from manifest');
+
+        await manager.enablePlugin(`${mockCollectionName}/${mockPluginId}`, { as: 'anotherPlugin' }); 
+        disableResult = await manager.disablePlugin('nonExistentInvokeName');
+        assert.strictEqual(disableResult.success, false, 'Disabling non-existent plugin should fail');
+        assert.ok(disableResult.message.includes('not found'), 'Correct message for non-existent plugin');
+        manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        assert.strictEqual(manifest.enabled_plugins.length, 1, 'Manifest should be unchanged after trying to disable non-existent');
+
+
+        console.log(chalk.green(`  PASSED: ${testName}`));
+        testsPassed++;
+    } catch (error) {
+        console.error(chalk.red(`  FAILED: ${testName}`), error);
+        if (error.stack) console.error(error.stack);
+    } finally {
+        await cleanupTestCollRoot(testCollRoot);
+    }
+}
+
+async function testRemoveCollection() {
+    testsAttempted++;
+    const testName = "Remove Collection";
+    console.log(`\nRunning test: ${testName}...`);
+    const testCollRoot = await createTestCollRoot();
+    const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true });
+    const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
+
+    const collNameToRemove = 'collection-to-remove';
+    const collPathToRemove = path.join(testCollRoot, collNameToRemove);
+
+    const pluginId1 = 'pluginOne';
+    const pluginId2 = 'pluginTwo';
+    const invokeName1 = 'pluginOneInvoke';
+    const invokeName2 = 'pluginTwoInvoke';
+
+    // Setup: Create a mock collection with two mock plugins
+    const plugin1Path = path.join(collPathToRemove, pluginId1);
+    await fs.mkdir(plugin1Path, { recursive: true });
+    await fs.writeFile(path.join(plugin1Path, `${pluginId1}.config.yaml`), yaml.dump({ description: 'Plugin One' }));
+
+    const plugin2Path = path.join(collPathToRemove, pluginId2);
+    await fs.mkdir(plugin2Path, { recursive: true });
+    await fs.writeFile(path.join(plugin2Path, `${pluginId2}.config.yaml`), yaml.dump({ description: 'Plugin Two' }));
+    
+    // Also create metadata for the collection
+    await fs.writeFile(path.join(collPathToRemove, METADATA_FILENAME), yaml.dump({ name: collNameToRemove, source: 'test-source' }));
+
+
+    try {
+        // Test 1: Attempt to remove a non-existent collection
+        await assert.rejects(
+            manager.removeCollection('nonExistentCollection'),
+            /Collection "nonExistentCollection" not found/,
+            'Should reject removing a non-existent collection'
+        );
+
+        // Test 2: Enable one plugin from the collection
+        await manager.enablePlugin(`${collNameToRemove}/${pluginId1}`, { as: invokeName1 });
+        let manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        assert.strictEqual(manifest.enabled_plugins.find(p=>p.invoke_name === invokeName1).collection_name, collNameToRemove, "Plugin1 correctly enabled from collection");
+
+
+        // Test 3: Attempt to remove collection without force (should fail)
+        await assert.rejects(
+            manager.removeCollection(collNameToRemove),
+            new RegExp(`Collection "${collNameToRemove}" has enabled plugins: "${invokeName1}" \\(from ${pluginId1}\\). Please disable them first or use the --force option.`),
+            'Should reject removing collection with enabled plugins without force'
+        );
+        assert.ok(fss.existsSync(collPathToRemove), 'Collection directory should still exist after failed removal without force');
+
+        // Test 4: Enable a second plugin from the same collection
+        await manager.enablePlugin(`${collNameToRemove}/${pluginId2}`, { as: invokeName2 });
+        manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        assert.strictEqual(manifest.enabled_plugins.length, 2, 'Two plugins should be enabled now');
+
+        // Test 5: Remove collection with force (should succeed)
+        const removeResultForced = await manager.removeCollection(collNameToRemove, { force: true });
+        assert.ok(removeResultForced.success, 'Removing collection with force should succeed');
+        assert.ok(!fss.existsSync(collPathToRemove), 'Collection directory should be deleted after forced removal');
+        
+        // Check manifest: both plugins from this collection should be gone
+        if (fss.existsSync(enabledManifestPath)) { // Manifest might be empty and thus might be kept or deleted by yaml.dump logic, check existence first.
+            manifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+             assert.ok(!manifest.enabled_plugins.some(p => p.invoke_name === invokeName1), 'Plugin1 should be disabled from manifest after forced collection removal');
+             assert.ok(!manifest.enabled_plugins.some(p => p.invoke_name === invokeName2), 'Plugin2 should be disabled from manifest after forced collection removal');
+        }
+
+
+        // Test 6: Remove a collection that has no enabled plugins (no force needed)
+        // Re-create the collection (without enabling plugins from it this time)
+        await fs.mkdir(collPathToRemove, { recursive: true }); // Just need the dir for this test part
+        await fs.writeFile(path.join(collPathToRemove, METADATA_FILENAME), yaml.dump({ name: collNameToRemove, source: 'test-source-2' }));
+
+
+        const removeResultNoForce = await manager.removeCollection(collNameToRemove);
+        assert.ok(removeResultNoForce.success, 'Removing collection with no enabled plugins (no force) should succeed');
+        assert.ok(!fss.existsSync(collPathToRemove), 'Collection directory should be deleted');
 
         console.log(chalk.green(`  PASSED: ${testName}`));
         testsPassed++;
@@ -369,6 +491,8 @@ async function runAllTests() {
     await testListCollections();
     await testListAvailablePlugins();
     await testEnableAndListEnabledPlugins();
+    await testDisablePlugin();
+    await testRemoveCollection(); // Add the new test function here
 
     console.log(`\n--- Test Summary ---`);
     console.log(`Tests attempted: ${testsAttempted}`);

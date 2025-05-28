@@ -1,4 +1,4 @@
-// src/collections_manager/index.js
+// dev/src/collections-manager/index.js
 const fs = require('fs').promises;
 const fss = require('fs'); // For synchronous checks like existsSync
 const path = require('path');
@@ -143,7 +143,7 @@ class CollectionsManager {
     if (!pluginToEnable) {
       throw new Error(`Plugin "${pluginId}" in collection "${collectionName}" is not available or does not exist.`);
     }
-    if (!pluginToEnable.config_path || !fss.existsSync(pluginToEnable.config_path)) { // config_path is already absolute from _findPluginsInCollectionDir
+    if (!pluginToEnable.config_path || !fss.existsSync(pluginToEnable.config_path)) { 
         throw new Error(`Config path for plugin "${pluginId}" in collection "${collectionName}" is invalid or not found: ${pluginToEnable.config_path}`);
     }
     const absolutePluginConfigPath = pluginToEnable.config_path; 
@@ -199,6 +199,105 @@ class CollectionsManager {
     }
   }
 
+  async disablePlugin(invokeName) {
+    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:disablePlugin): Disabling invoke_name: ${invokeName}`));
+
+    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+    let enabledManifest = { enabled_plugins: [] };
+
+    if (!fss.existsSync(enabledManifestPath)) {
+      console.log(chalk.yellow(`No plugins are currently enabled (manifest not found). Cannot disable "${invokeName}".`));
+      return { success: false, message: `No plugins enabled. Cannot disable "${invokeName}".` };
+    }
+
+    try {
+      const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
+      enabledManifest = yaml.load(manifestContent);
+      if (!enabledManifest || !Array.isArray(enabledManifest.enabled_plugins)) {
+        console.log(chalk.yellow(`Enabled plugins manifest is invalid or empty. Cannot disable "${invokeName}".`));
+        return { success: false, message: `Enabled plugins manifest invalid. Cannot disable "${invokeName}".` };
+      }
+    } catch (e) {
+      console.error(chalk.red(`ERROR (CM:disablePlugin): Could not read or parse ${enabledManifestPath}: ${e.message}`));
+      throw e;
+    }
+
+    const initialLength = enabledManifest.enabled_plugins.length;
+    enabledManifest.enabled_plugins = enabledManifest.enabled_plugins.filter(
+      p => p.invoke_name !== invokeName
+    );
+
+    if (enabledManifest.enabled_plugins.length === initialLength) {
+      console.log(chalk.yellow(`Plugin with invoke name "${invokeName}" not found among enabled plugins.`));
+      return { success: false, message: `Plugin invoke name "${invokeName}" not found.` };
+    }
+
+    try {
+      const yamlString = yaml.dump(enabledManifest, { sortKeys: true });
+      await fs.writeFile(enabledManifestPath, yamlString);
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:disablePlugin): Successfully wrote updated manifest to ${enabledManifestPath}`));
+      console.log(chalk.green(`Plugin "${invokeName}" disabled successfully.`));
+      return { success: true, message: `Plugin "${invokeName}" disabled.` };
+    } catch (e) {
+      console.error(chalk.red(`ERROR (CM:disablePlugin): Failed to write updated manifest to ${enabledManifestPath}: ${e.message}`));
+      throw e;
+    }
+  }
+
+  async removeCollection(collectionName, options = {}) {
+    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection): Removing collection: ${collectionName}, options: ${JSON.stringify(options)}`));
+    const collectionPath = path.join(this.collRoot, collectionName);
+
+    if (!fss.existsSync(collectionPath)) {
+      throw new Error(`Collection "${collectionName}" not found at ${collectionPath}.`);
+    }
+    if (!fss.lstatSync(collectionPath).isDirectory()) {
+      throw new Error(`Target "${collectionName}" at ${collectionPath} is not a directory.`);
+    }
+
+    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+    let enabledPluginsFromThisCollection = [];
+
+    if (fss.existsSync(enabledManifestPath)) {
+      try {
+        const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
+        const enabledManifest = yaml.load(manifestContent);
+        if (enabledManifest && Array.isArray(enabledManifest.enabled_plugins)) {
+          enabledPluginsFromThisCollection = enabledManifest.enabled_plugins.filter(
+            p => p.collection_name === collectionName
+          );
+        }
+      } catch (e) {
+        console.warn(chalk.yellow(`WARN (CM:removeCollection): Could not read or parse ${enabledManifestPath} while checking for enabled plugins from ${collectionName}: ${e.message}`));
+        // Proceed with caution, or error out if strictness is preferred
+      }
+    }
+
+    if (enabledPluginsFromThisCollection.length > 0 && !options.force) {
+      const pluginNames = enabledPluginsFromThisCollection.map(p => `"${p.invoke_name}" (from ${p.plugin_id})`).join(', ');
+      throw new Error(`Collection "${collectionName}" has enabled plugins: ${pluginNames}. Please disable them first or use the --force option.`);
+    }
+
+    if (options.force && enabledPluginsFromThisCollection.length > 0) {
+      console.log(chalk.yellow(`  Force removing. Disabling plugins from "${collectionName}":`));
+      for (const plugin of enabledPluginsFromThisCollection) {
+        console.log(chalk.yellow(`    - Disabling "${plugin.invoke_name}"...`));
+        await this.disablePlugin(plugin.invoke_name); // This will re-read and write the manifest each time.
+                                                    // Could be optimized to do it once after collecting all,
+                                                    // but using disablePlugin reuses existing logic.
+      }
+    }
+
+    try {
+      await fsExtra.rm(collectionPath, { recursive: true, force: true }); // fsExtra.rm is robust
+      console.log(chalk.green(`Collection "${collectionName}" removed successfully from ${this.collRoot}.`));
+      return { success: true, message: `Collection "${collectionName}" removed.` };
+    } catch (error) {
+      console.error(chalk.red(`ERROR (CM:removeCollection): Failed to remove collection directory ${collectionPath}: ${error.message}`));
+      throw error;
+    }
+  }
+
   async _findPluginsInCollectionDir(collectionPath, collectionName) {
     const availablePlugins = [];
     if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
@@ -208,7 +307,7 @@ class CollectionsManager {
     const pluginDirs = await fs.readdir(collectionPath, { withFileTypes: true });
     for (const pluginDir of pluginDirs) {
       if (pluginDir.isDirectory()) {
-        const pluginId = pluginDir.name; // This is the directory name, e.g., "pluginBeta"
+        const pluginId = pluginDir.name; 
         if (pluginId === '.git' || pluginId === METADATA_FILENAME) continue;
 
         const pluginPath = path.join(collectionPath, pluginId);
@@ -256,7 +355,7 @@ class CollectionsManager {
         }
       }
     }
-    return availablePlugins; // Sorting will be done by the caller (listAvailablePlugins)
+    return availablePlugins; 
   }
 
   async listAvailablePlugins(collectionNameFilter = null) {
@@ -399,7 +498,7 @@ class CollectionsManager {
             } else {
                 console.log(chalk.yellow('  No plugins are currently enabled.'));
             }
-            return; // Return undefined as per original structure
+            return; 
         }
 
         console.log(chalk.blue("\n  Enabled plugins:"));
@@ -413,7 +512,6 @@ class CollectionsManager {
 
     } else {
       console.log(chalk.yellow(`  Listing for type '${type}' is not yet implemented.`));
-      // return []; // Kept original behavior
     }
   }
 }

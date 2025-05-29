@@ -3,12 +3,13 @@ const fs = require('fs').promises;
 const fss = require('fs'); // For synchronous operations
 const path = require('path');
 const os = require('os');
-const { execSync } = require('child_process'); 
-const chalk = require('chalk'); 
+const { execSync } = require('child_process');
+const chalk = require('chalk');
+const { METADATA_FILENAME, ENABLED_MANIFEST_FILENAME } = require('../constants'); // Import from constants
 
 const TEST_COLL_ROOT_BASE = path.join(os.tmpdir(), 'cm_test_coll_root');
-const METADATA_FILENAME = '.collection-metadata.yaml';
-const ENABLED_MANIFEST_FILENAME = 'enabled.yaml';
+// const METADATA_FILENAME = '.collection-metadata.yaml'; // Removed
+// const ENABLED_MANIFEST_FILENAME = 'enabled.yaml'; // Removed
 
 let testRunCounter = 0;
 
@@ -27,12 +28,12 @@ async function cleanupTestCollRoot(collRootPath) {
             while (attempts < maxAttempts) {
                 try {
                     await fs.rm(collRootPath, { recursive: true, force: true });
-                    break; 
+                    break;
                 } catch (e) {
                     attempts++;
-                    if (attempts >= maxAttempts) throw e; 
+                    if (attempts >= maxAttempts) throw e;
                     if (process.env.DEBUG_CM === 'true') console.warn(chalk.yellow(`  WARN (cleanupTestCollRoot): Attempt ${attempts} failed for ${collRootPath}. Retrying in 100ms... Error: ${e.message}`));
-                    await new Promise(resolve => setTimeout(resolve, 100)); 
+                    await new Promise(resolve => setTimeout(resolve, 100));
                 }
             }
         } catch (e) {
@@ -53,15 +54,12 @@ async function setupLocalGitRepo(repoPath, initialFileName, initialFileContent, 
 
     try {
         execSync(`git clone "${repoPath}" "${tempClonePath}"`);
-        // Explicitly set config for the temp clone used to make the initial commit
         execSync('git config user.email "test@example.com"', { cwd: tempClonePath });
         execSync('git config user.name "Test User"', { cwd: tempClonePath });
         execSync('git config commit.gpgsign false', { cwd: tempClonePath });
-        // Ensure the branch exists and is checked out in the temp clone
         try {
             execSync(`git checkout -b ${branchName}`, { cwd: tempClonePath });
         } catch (branchError) {
-            // If checkout -b fails (e.g., branch already exists from clone), just checkout
             try {
                 execSync(`git checkout ${branchName}`, { cwd: tempClonePath });
             } catch (finalCheckoutError) {
@@ -73,11 +71,11 @@ async function setupLocalGitRepo(repoPath, initialFileName, initialFileContent, 
             await fs.writeFile(path.join(tempClonePath, initialFileName), initialFileContent);
             execSync('git add .', { cwd: tempClonePath });
             execSync(`git commit -m "${commitMessage}"`, { cwd: tempClonePath });
-        } else { 
+        } else {
              execSync(`git commit --allow-empty -m "${commitMessage}"`, { cwd: tempClonePath });
         }
         execSync(`git push origin ${branchName}`, { cwd: tempClonePath });
-        
+
         execSync(`git symbolic-ref HEAD refs/heads/${branchName}`, { cwd: repoPath });
 
     } finally {
@@ -94,11 +92,10 @@ async function addCommitToLocalGitRepo(bareRepoPath, newFileName, newFileContent
 
     try {
         execSync(`git clone "${bareRepoPath}" "${tempClonePath}"`);
-        // Explicitly set config for this temp clone
         execSync('git config user.email "test@example.com"', { cwd: tempClonePath });
         execSync('git config user.name "Test User"', { cwd: tempClonePath });
         execSync('git config commit.gpgsign false', { cwd: tempClonePath });
-        
+
         try {
             execSync(`git checkout ${branchName}`, { cwd: tempClonePath });
         } catch (e) {
@@ -121,7 +118,7 @@ function getHeadCommit(repoPath) {
     try {
         if (!fss.existsSync(path.join(repoPath, '.git')) && !fss.existsSync(path.join(repoPath, 'HEAD'))) {
              if (process.env.DEBUG_CM === 'true') console.warn(chalk.yellow(`  WARN (test-helpers): Not a git repository or no HEAD: ${repoPath}`));
-             return null; 
+             return null;
         }
         const commitHash = execSync('git rev-parse HEAD', { cwd: repoPath, encoding: 'utf8' });
         return commitHash.trim();
@@ -143,15 +140,8 @@ async function addUncommittedFileToClonedRepo(clonedRepoPath, fileName, fileCont
 
 async function addLocalCommitToClonedRepo(clonedRepoPath, fileName, fileContent, commitMessage) {
      try {
-        // Local config set here might not always be picked up by execSync's commit in all shell environments
-        // So, use -c for the commit command itself as a more robust method.
-        // execSync('git config user.email "test@example.com"', { cwd: clonedRepoPath });
-        // execSync('git config user.name "Test User"', { cwd: clonedRepoPath });
-        // execSync('git config commit.gpgsign false', { cwd: clonedRepoPath });
-
         await fs.writeFile(path.join(clonedRepoPath, fileName), fileContent);
         execSync('git add .', { cwd: clonedRepoPath });
-        // Force config directly on the commit command line for this helper
         execSync(`git -c user.email="test@example.com" -c user.name="Test User" -c commit.gpgsign=false commit -m "${commitMessage}"`, { cwd: clonedRepoPath });
         if (process.env.DEBUG_CM === 'true') console.log(chalk.magenta(`  DEBUG (test-helpers): Added local commit "${commitMessage}" in ${clonedRepoPath}`));
     } catch (e) {
@@ -165,21 +155,20 @@ async function addLocalCommitToClonedRepo(clonedRepoPath, fileName, fileContent,
 async function simulateForcePushToRemote(bareRepoPath, newInitialFileName, newInitialFileContent, options = {}) {
     const { branchName = 'main', commitMessage = 'Forced new history' } = options;
     if (process.env.DEBUG_CM === 'true') console.log(chalk.magenta(`  DEBUG (test-helpers): Simulating force push to ${bareRepoPath} on branch ${branchName} with file ${newInitialFileName}`));
-    // Re-initialize the bare repo with new history
     await setupLocalGitRepo(bareRepoPath, newInitialFileName, newInitialFileContent, { branchName, commitMessage });
 }
 
 
 module.exports = {
     TEST_COLL_ROOT_BASE,
-    METADATA_FILENAME,
-    ENABLED_MANIFEST_FILENAME,
+    METADATA_FILENAME, // Keep exporting for tests that might check directly
+    ENABLED_MANIFEST_FILENAME, // Keep exporting for tests
     createTestCollRoot,
     cleanupTestCollRoot,
     setupLocalGitRepo,
     addCommitToLocalGitRepo,
-    getHeadCommit, 
-    addUncommittedFileToClonedRepo, 
-    addLocalCommitToClonedRepo, 
-    simulateForcePushToRemote, 
+    getHeadCommit,
+    addUncommittedFileToClonedRepo,
+    addLocalCommitToClonedRepo,
+    simulateForcePushToRemote,
 };

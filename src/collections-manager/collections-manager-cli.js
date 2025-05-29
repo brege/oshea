@@ -98,11 +98,11 @@ yargs(hideBin(process.argv))
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to enable all plugins in collection...`));
         console.log(`  Collection Name: ${chalk.cyan(argv.target)}`);
 
-        let originalSourceForPrefixFallback = ""; 
+        let originalSourceForPrefixFallback = "";
         try {
             const metadataPath = path.join(manager.collRoot, argv.target, '.collection-metadata.yaml');
-            if (fs.existsSync(metadataPath)) { 
-                const metaContent = await fsp.readFile(metadataPath, 'utf8'); 
+            if (fs.existsSync(metadataPath)) {
+                const metaContent = await fsp.readFile(metadataPath, 'utf8');
                 const metadata = yaml.load(metaContent);
                 if (metadata && metadata.source) {
                     originalSourceForPrefixFallback = metadata.source;
@@ -123,8 +123,8 @@ yargs(hideBin(process.argv))
         try {
           const result = await manager.enableAllPluginsInCollection(argv.target, {
             prefix: argv.prefix,
-            noPrefix: argv.noPrefix, 
-            isCliCall: true, 
+            noPrefix: argv.noPrefix,
+            isCliCall: true,
             originalSourceForPrefixFallback
           });
           if (result && result.success) {
@@ -137,13 +137,13 @@ yargs(hideBin(process.argv))
           if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
           process.exit(1);
         }
-      } else { 
+      } else {
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to enable plugin...`));
         console.log(`  Plugin Identifier: ${chalk.cyan(argv.target)}`);
         if (argv.name) {
           console.log(`  Requested invoke name: ${chalk.yellow(argv.name)}`);
         }
-        if (argv.prefix || argv.noPrefix){ 
+        if (argv.prefix || argv.noPrefix){
             console.warn(chalk.yellow("WARN: --prefix and --no-prefix options are ignored when not using --all."))
         }
         try {
@@ -223,26 +223,20 @@ yargs(hideBin(process.argv))
   )
   .command(
     'update [<collection_name>]',
-    // Revised help text for the 'update' command
     `Updates a Git-based plugin collection to match its remote source.
-     Local modifications in the collection directory (e.g., in
-     ${chalk.dim('~/.local/share/md-to-pdf/collections/<collection_name>')}) will be overwritten.
-     The update will be aborted if local uncommitted changes or unpushed
-     local commits are detected.
+Local modifications in the collection directory (e.g., in ${chalk.dim('~/.local/share/md-to-pdf/collections/<collection_name>')}) will be overwritten.
+The update will be aborted if local uncommitted changes or unpushed local commits are detected.
 
-     To preserve custom changes, clone the collection to a separate local
-     directory and register it, or use the 'archetype' command (future).
+To preserve custom changes, clone the collection to a separate local directory and register it, or use the 'archetype' command.
 
-     If no collection name is specified, attempts to update all Git-based collections.
-     Note: This command only syncs the collection; it does not automatically
-     enable any new plugins that might be added to the remote collection.`,
+If no collection name is specified, attempts to update all Git-based collections.
+Note: This command only syncs the collection; it does not automatically enable any new plugins that might be added to the remote collection.`,
     (yargsCmd) => {
       yargsCmd
         .positional('collection_name', {
           describe: 'Optional. The name of the specific collection to update.',
           type: 'string'
         });
-      // Future: .option('force-update', { describe: 'Force update even if local changes exist (overwrites them).', type: 'boolean', default: false })
     },
     async (argv) => {
       if (argv.collection_name) {
@@ -267,7 +261,7 @@ yargs(hideBin(process.argv))
              } else if (msg.includes("has local changes")) {
                 console.log(chalk.yellow(`  ${msg}`));
              } else {
-                console.log(chalk.red(`  ${msg}`)); 
+                console.log(chalk.red(`  ${msg}`));
              }
            });
            if (!results.success) {
@@ -278,6 +272,57 @@ yargs(hideBin(process.argv))
           if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
           process.exit(1);
         }
+      }
+    }
+  )
+  .command(
+    'archetype <sourcePluginIdentifier> <newArchetypeName>',
+    `Creates a customizable copy (archetype) of an existing plugin.
+The source plugin is identified by <collection_name>/<plugin_id>.
+The new archetype will be named <newArchetypeName>.`,
+    (yargsCmd) => {
+      yargsCmd
+        .positional('sourcePluginIdentifier', {
+          describe: 'The identifier for the source plugin, in the format "collection_name/plugin_id".',
+          type: 'string',
+          demandOption: true,
+        })
+        .positional('newArchetypeName', {
+          describe: 'The name for the new archetyped plugin. This will be its directory name.',
+          type: 'string',
+          demandOption: true,
+        })
+        .option('target-dir', {
+          alias: 't',
+          describe: `Optional. Specifies the base directory where the '<newArchetypeName>' directory will be created.
+                   Defaults to a user-specific directory (e.g., ~/.local/share/md-to-pdf/custom_plugins/).`,
+          type: 'string',
+        });
+    },
+    async (argv) => {
+      console.log(chalk.blueBright(`Collections Manager CLI: Attempting to create archetype...`));
+      console.log(`  Source Plugin: ${chalk.cyan(argv.sourcePluginIdentifier)}`);
+      console.log(`  New Archetype Name: ${chalk.yellow(argv.newArchetypeName)}`);
+      if (argv.targetDir) {
+        console.log(`  Target Directory: ${chalk.underline(argv.targetDir)}`);
+      }
+      try {
+        const result = await manager.archetypePlugin(argv.sourcePluginIdentifier, argv.newArchetypeName, { targetDir: argv.targetDir });
+        if (result && result.success) {
+            console.log(chalk.green(`\nPlugin archetype '${chalk.bold(argv.newArchetypeName)}' created from '${argv.sourcePluginIdentifier}' at:\n    ${chalk.underline(result.archetypePath)}\n`));
+            console.log(chalk.blueBright("To use this new plugin with md-to-pdf:"));
+            console.log(chalk.gray("  1. Ensure it's in a location md-to-pdf can access (e.g., if using project-relative paths)."));
+            console.log(chalk.gray(`  2. Register it in your md-to-pdf configuration file (e.g., ~/.config/md-to-pdf/config.yaml or a project config):`));
+            console.log(chalk.gray("     plugins:"));
+            console.log(chalk.gray(`       ${argv.newArchetypeName}: "${result.archetypePath}/${argv.newArchetypeName}.config.yaml"`));
+            console.log(chalk.gray(`  3. Then invoke: md-to-pdf convert mydoc.md --plugin ${argv.newArchetypeName}`));
+        } else {
+            console.error(chalk.red(`Failed to create archetype. ${result ? result.message : 'Unknown error.'}`));
+        }
+      } catch (error) {
+        console.error(chalk.red(`\nERROR in 'archetype' command: ${error.message}`));
+        if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
+        process.exit(1);
       }
     }
   )
@@ -373,7 +418,7 @@ yargs(hideBin(process.argv))
         }
     }
   )
-  .demandCommand(1, chalk.red('You must provide a command (e.g., add, list, enable, disable, remove, update).'))
+  .demandCommand(1, chalk.red('You must provide a command (e.g., add, list, enable, disable, remove, update, archetype).'))
   .help()
   .alias('h', 'help')
   .strict()

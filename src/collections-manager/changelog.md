@@ -1,5 +1,19 @@
 # Changelog - md-to-pdf Collections Manager
 
+
+## 0.7.8 (Conceptual - Core Logic Refactor)
+
+### Changed
+
+* **Core Logic Refactor:** The main `CollectionsManager` class in `src/collections-manager/index.js` has been significantly refactored for improved modularity and maintainability.
+    * The logic for each public command (e.g., `addCollection`, `enablePlugin`, `listCollections`, etc.) has been moved into its own dedicated file within a new `src/collections-manager/commands/` subdirectory (e.g., `commands/add.js`, `commands/enable.js`).
+    * The main `index.js` file now primarily handles class construction, management of private helper methods, and binding the command functions imported from the `commands/` directory.
+    * Shared constants like `METADATA_FILENAME` and `ENABLED_MANIFEST_FILENAME` have been moved to a new `src/collections-manager/constants.js` file.
+    * The `_findPluginsInCollectionDir` helper method was moved into `commands/listAvailable.js` as it's primarily used by that command.
+    * The initial shell for the `archetypePlugin` method (planned for v0.7.9) was also moved to `commands/archetype.js`.
+* This refactor does not introduce new user-facing features or change existing command behavior but provides a more organized and maintainable codebase for future development. All existing tests continue to pass.
+
+
 ## 0.7.7 (Conceptual - Enhanced Git Resilience for Update Command)
 
 ### Changed
@@ -12,11 +26,14 @@
 * **Test Environment Isolation:**
     * The `npm test` script for the `CollectionsManager` module now sets `GIT_CONFIG_GLOBAL` to a dummy `.gitconfig` and `GNUPGHOME` to a dummy path. This isolates test Git operations from the user's global Git settings and prevents PGP key signing prompts during tests.
     * Test helper functions (`test-helpers.js`) that create Git commits now explicitly set user identity (`user.name`, `user.email`) and disable GPG signing (`commit.gpgsign=false`) for those specific operations, ensuring consistency within the test environment.
+* **Documentation:**
+    * The `docs/walkthrough.md` for `CollectionsManager` has been significantly expanded to serve as a comprehensive guide for all its commands, with practical examples and clear explanations of behavior, including the nuances of the `update` command.
 
 ### Fixed
 
-* Resolved issues in test helpers (`test-helpers.js`) related to Git repository initialization and commit author identity that were causing test failures in certain scenarios (e.g., "Author identity unknown", "HEAD branch: (unknown)").
-* Corrected assertions in `test/update.test.js` to align with the new "safer default" behavior where updates are aborted if local history diverges (e.g., after a simulated remote force push).
+* Resolved issues in test helpers (`test-helpers.js`) related to Git repository initialization (ensuring default branch is correctly set for clones) and commit author identity that were causing test failures in certain scenarios (e.g., "Author identity unknown", "HEAD branch: (unknown)").
+* Corrected and enhanced assertions in `test/update.test.js` to accurately reflect and validate the new "safer default" update logic, especially for scenarios involving local commits and remote force pushes.
+
 
 ## 0.7.6 (Conceptual - Core Logic Refactor)
 

@@ -1,5 +1,22 @@
 # Changelog - md-to-pdf Collections Manager
 
+## 0.7.7 (Conceptual - Enhanced Git Resilience for Update Command)
+
+### Changed
+
+* **Update Command Resilience:**
+    * The `updateCollection` and `updateAllCollections` methods in `CollectionsManager` now use a more resilient Git strategy: `git fetch` followed by `git reset --hard origin/<default_branch>`.
+    * The system now correctly determines the remote's default branch name (e.g., `main`, `master`) before attempting an update.
+    * The update process will abort if local uncommitted changes or unpushed local commits are detected in the target collection. This prevents accidental data loss. The presence of an untracked `.collection-metadata.yaml` file (created by the tool itself) does not block the update.
+    * The CLI help text for `md-to-pdf-cm update` has been revised to reflect this new behavior and its implications.
+* **Test Environment Isolation:**
+    * The `npm test` script for the `CollectionsManager` module now sets `GIT_CONFIG_GLOBAL` to a dummy `.gitconfig` and `GNUPGHOME` to a dummy path. This isolates test Git operations from the user's global Git settings and prevents PGP key signing prompts during tests.
+    * Test helper functions (`test-helpers.js`) that create Git commits now explicitly set user identity (`user.name`, `user.email`) and disable GPG signing (`commit.gpgsign=false`) for those specific operations, ensuring consistency within the test environment.
+
+### Fixed
+
+* Resolved issues in test helpers (`test-helpers.js`) related to Git repository initialization and commit author identity that were causing test failures in certain scenarios (e.g., "Author identity unknown", "HEAD branch: (unknown)").
+* Corrected assertions in `test/update.test.js` to align with the new "safer default" behavior where updates are aborted if local history diverges (e.g., after a simulated remote force push).
 
 ## 0.7.6 (Conceptual - Core Logic Refactor)
 

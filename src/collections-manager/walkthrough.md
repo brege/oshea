@@ -1,167 +1,185 @@
 # Collections Manager Walkthrough
-### Adding and Enabling Plugins
 
-This walkthrough demonstrates how to use the `md-to-pdf-cm` (Collections Manager) command-line tool to add an external plugin collection, view its available plugins, and enable them for use with the main `md-to-pdf` application.
+The `md-to-pdf-cm` (Collections Manager) is a command-line tool for managing plugin collections used by `md-to-pdf`. This guide walks through its common commands.
 
-We'll use the `brege/md-to-pdf-plugins` repository (available at `https://github.com/brege/md-to-pdf-plugins.git`) as our example collection. This repository contains a couple of example plugins like `advanced-card-red` and `hierarchy-table`.
+The default storage location for downloaded collections is `~/.local/share/md-to-pdf/collections/`.
 
-**Prerequisites:**
-* `md-to-pdf` and its `md-to-pdf-cm` tool should be installed and accessible in your PATH.
-* `git` must be installed and accessible in your PATH for adding collections from Git URLs.
+## Prerequisites
 
-## Step 1: Initial Cleanup (Optional)
+* `md-to-pdf` (which includes `md-to-pdf-cm`) should be installed.
+* `git` must be installed and accessible in your PATH for adding or updating collections from Git URLs.
 
-If you've worked with this collection before, you might want to remove it and any previously enabled plugins from it for a clean start.
+## Core Workflow
 
+### 1. Adding a Plugin Collection
+
+Plugin collections can be added from a Git repository URL or a local filesystem path.
+
+**Command**
 ```bash
-# Remove the 'brege-plugins' collection if it already exists.
-# The --force flag will also disable any plugins that were enabled from it.
-md-to-pdf-cm remove brege-plugins --force
+md-to-pdf-cm add <url_or_path> [--name <local_alias>]
 ```
-You might see a message like "Collection "brege-plugins" not found" if it wasn't there, which is fine.
 
-## Step 2: Add the Plugin Collection
+* `<url_or_path>`: The source of the plugin collection.
+* `--name <local_alias>`: (Optional) A local name for the collection. If not provided, a name is derived from the source.
 
-Next, we add the external plugin collection. We'll use the `--name` option to give it a local alias `brege-plugins`.
-
+**Example**
+To add the example plugin collection from `brege/md-to-pdf-plugins` and name it `brege-plugins`:
 ```bash
 md-to-pdf-cm add https://github.com/brege/md-to-pdf-plugins.git --name brege-plugins
 ```
 
-You should see output indicating that the repository is being cloned into your Collections Manager root directory (e.g., `~/.local/share/md-to-pdf/collections/brege-plugins`).
-
+**Expected Output (summary)**
 ```
 Collections Manager CLI: Attempting to add collection...
-  Source: [https://github.com/brege/md-to-pdf-plugins.git](https://github.com/brege/md-to-pdf-plugins.git)
+  Source: https://github.com/brege/md-to-pdf-plugins.git
   Requested local name: brege-plugins
-CollectionsManager: Adding collection from source: [https://github.com/brege/md-to-pdf-plugins.git](https://github.com/brege/md-to-pdf-plugins.git)
-  Requested local name: brege-plugins
-  Target collection name: brege-plugins
-  Target path: /home/user/.local/share/md-to-pdf/collections/brege-plugins
-  Source is a Git repository. Attempting to clone with git from '[https://github.com/brege/md-to-pdf-plugins.git](https://github.com/brege/md-to-pdf-plugins.git)'...
-  GIT (stderr): Cloning into '/home/user/.local/share/md-to-pdf/collections/brege-plugins'...
-
-  Successfully cloned '[https://github.com/brege/md-to-pdf-plugins.git](https://github.com/brege/md-to-pdf-plugins.git)' to '/home/user/.local/share/md-to-pdf/collections/brege-plugins'.
-
+...
 Collection 'brege-plugins' added to:
     /home/user/.local/share/md-to-pdf/collections/brege-plugins
-
-To list its plugins, use:
-    md-to-pdf-cm list available brege-plugins
 ...
 ```
 
-## Step 3: List Available Plugins
+### 2. Listing Collections and Plugins
 
-Now, let's see which plugins are available within the newly added `brege-plugins` collection.
+Several commands help you see what's available and active.
 
+* **List Downloaded Collections**
+
+    Shows the names of all collection directories in your storage location.
+    ```bash
+    md-to-pdf-cm list collections
+    ```
+    *Example Output*
+    ```
+    Downloaded plugin collections:
+      - brege-plugins
+      - my-other-collection
+    ```
+
+* **List All Available Plugins**
+
+    Shows all usable plugins found within downloaded collections. Can be filtered by collection name.
+    ```bash
+    md-to-pdf-cm list all 
+    # or
+    md-to-pdf-cm list all brege-plugins 
+    ```
+    *Example Output (filtered)*
+    ```
+    All available plugins in collection "brege-plugins":
+      - Plugin ID: advanced-card-red
+        Collection: brege-plugins
+        Description: An advanced card plugin with a RED theme...
+        Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/advanced-card-red/advanced-card-red.config.yaml
+      - Plugin ID: hierarchy-table
+        Collection: brege-plugins
+        Description: Plugin to display a Markdown table as a presentation slide...
+        Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/hierarchy-table/hierarchy-table.config.yaml
+    ```
+
+* **List Enabled Plugins**
+
+    Shows plugins currently active and ready for use with `md-to-pdf --plugin <invoke_name>`.
+    ```bash
+    md-to-pdf-cm list enabled
+    ```
+
+* **List Disabled Plugins**
+    Shows available plugins that are not currently enabled.
+    ```bash
+    md-to-pdf-cm list disabled
+    ```
+
+### 3. Enabling Plugins
+
+To use a plugin with `md-to-pdf`, it must be enabled. When enabled, it's registered with an "invoke name".
+
+* **Enable a Single Plugin**
+    ```bash
+    md-to-pdf-cm enable <collection_name>/<plugin_id> [--name <custom_invoke_name>]
+    ```
+    * `<collection_name>/<plugin_id>`: Identifies the plugin (e.g., `brege-plugins/advanced-card-red`).
+    * `--name <custom_invoke_name>`: (Optional) If not provided, the `<plugin_id>` is used as the invoke name. Invoke names must be unique.
+
+    *Example*
+    ```bash
+    md-to-pdf-cm enable brege-plugins/advanced-card-red --name brege-card
+    # Plugin "brege-plugins/advanced-card-red" enabled successfully as "brege-card".
+    ```
+
+* **Enable All Plugins in a Collection**
+    ```bash
+    md-to-pdf-cm enable <collection_name> --all [--prefix <prefix_string>] [--no-prefix]
+    ```
+    * `--prefix <string>`: Prepends a string to each plugin's ID to form the invoke name (e.g., `brege-advanced-card-red`).
+    * `--no-prefix`: Uses plugin IDs directly as invoke names. Use with caution to avoid conflicts.
+    * Default behavior (no prefixing options): For GitHub sources, often `<username>-<plugin_id>`; for other Git sources, `<collection_name>-<plugin_id>`; for local path sources, `<plugin_id>`.
+
+    *Example*
+    ```bash
+    md-to-pdf-cm enable brege-plugins --all --prefix brege-
+    ```
+
+### 4. Updating a Git-Based Collection
+
+This command updates a collection that was added from a Git source to match its remote.
+
+**Command**
 ```bash
-md-to-pdf-cm list available brege-plugins
+md-to-pdf-cm update <collection_name>
+# or to update all Git-based collections
+md-to-pdf-cm update 
 ```
 
-The output should list the plugins found in that collection, including their descriptions and config paths:
-```
-Available plugins in collection "brege-plugins":
-  - Plugin ID: advanced-card-red
-    Collection: brege-plugins
-    Description: An advanced card plugin with a RED theme, demonstrating custom HTML and dynamic content.
-    Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/advanced-card-red/advanced-card-red.config.yaml
-  - Plugin ID: hierarchy-table
-    Collection: brege-plugins
-    Description: Plugin to display a Markdown table as a presentation slide, ideal for hierarchies or structured data.
-    Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/hierarchy-table/hierarchy-table.config.yaml
-```
+**Important Considerations for `update`**
+* **Overwrite Warning** \
+    Local modifications made directly within the managed collection directory (e.g., inside `~/.local/share/md-to-pdf/collections/<collection_name>`) **will be overwritten** by this command as it resets the collection to the remote state.
+* **Abort on Local Changes** \
+    The update will be aborted if local uncommitted changes or unpushed local commits are detected in the collection's directory. You will be advised to commit, stash, or revert these changes if you wish the update to proceed.
+* **Customization Strategy** \
+    To preserve your custom changes to a plugin from a Git collection, it's recommended to:
+    1.  Clone the original collection to a separate, personal directory (outside the managed `~/.local/share/md-to-pdf/collections/` area).
+    2.  Make your modifications there.
+    3.  Add this customized local version as a new collection using `md-to-pdf-cm add /path/to/your/customized-collection --name my-custom-<plugin_name>`.
+    (A future `archetype` command may simplify creating customizable copies).
+* **New Plugins Not Auto-Enabled** \
+    This command only syncs the collection files. If the remote update adds new plugins to the collection, they are not automatically enabled. You will need to use the `enable` command to activate them.
 
-## Step 4: Enable All Plugins (No Prefix)
-
-Let's enable all available plugins from the `brege-plugins` collection. Their invoke names will default to their plugin IDs.
-
+**Example**
 ```bash
-md-to-pdf-cm enable brege-plugins --all
+md-to-pdf-cm update brege-plugins
 ```
 
-Expected output:
-```
-Collections Manager CLI: Attempting to enable all plugins in collection...
-  Collection Name: brege-plugins
-Plugin "brege-plugins/advanced-card-red" enabled successfully as "advanced-card-red".
-Plugin "brege-plugins/hierarchy-table" enabled successfully as "hierarchy-table".
-Batch enablement for collection "brege-plugins": 2 of 2 plugins enabled.
-  - advanced-card-red (from brege-plugins/advanced-card-red) : enabled
-  - hierarchy-table (from brege-plugins/hierarchy-table) : enabled
+### 5. Disabling a Plugin
 
-Successfully processed enabling all plugins from "brege-plugins". Check details above.
-```
+Deactivates an enabled plugin, removing it from the list of plugins `md-to-pdf` can use.
 
-## Step 5: Verify Enabled Plugins
-
-Check the list of all enabled plugins to confirm.
-
+**Command**
 ```bash
-md-to-pdf-cm list enabled
+md-to-pdf-cm disable <invoke_name>
 ```
-This should show `advanced-card-red` and `hierarchy-table` as enabled.
-```
-Enabled plugins:
-  - Invoke Name: advanced-card-red
-    Original ID: brege-plugins/advanced-card-red
-    Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/advanced-card-red/advanced-card-red.config.yaml
-    Enabled On: <timestamp>
-  - Invoke Name: hierarchy-table
-    Original ID: brege-plugins/hierarchy-table
-    Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/hierarchy-table/hierarchy-table.config.yaml
-    Enabled On: <timestamp>
-```
+* `<invoke_name>`: The name the plugin was enabled with.
 
-## Step 6: Disable Plugins (Preparation for Next Test)
-
-To test enabling with a prefix, let's first disable the plugins we just enabled.
-
+**Example**
 ```bash
-md-to-pdf-cm disable advanced-card-red
-md-to-pdf-cm disable hierarchy-table
+md-to-pdf-cm disable brege-card
+# Plugin "brege-card" disabled successfully.
 ```
-You should see confirmation messages for each. You can run `md-to-pdf-cm list enabled` again to confirm no plugins are enabled.
 
-## Step 7: Enable All Plugins (With a Prefix)
+### 6. Removing a Collection
 
-Now, enable all plugins from `brege-plugins` again, but this time, let's add a prefix `brege_` to their invoke names. This is useful for avoiding naming conflicts if you have many collections.
+Deletes a downloaded collection from your storage.
 
+**Command**
 ```bash
-md-to-pdf-cm enable brege-plugins --all --prefix brege-
+md-to-pdf-cm remove <collection_name> [--force]
 ```
+* `--force`: If the collection has any plugins currently enabled, this flag is required. It will automatically disable those plugins before removing the collection directory.
 
-Expected output:
-```
-Collections Manager CLI: Attempting to enable all plugins in collection...
-  Collection Name: brege-plugins
-  Using prefix for invoke names: brege_
-Plugin "brege-plugins/advanced-card-red" enabled successfully as "brege-advanced-card-red".
-Plugin "brege-plugins/hierarchy-table" enabled successfully as "brege-hierarchy-table".
-Batch enablement for collection "brege-plugins": 2 of 2 plugins enabled.
-  - brege-advanced-card-red (from brege-plugins/advanced-card-red) : enabled
-  - brege-hierarchy-table (from brege-plugins/hierarchy-table) : enabled
-
-Successfully processed enabling all plugins from "brege-plugins". Check details above.
-```
-
-## Step 8: Verify Prefixed Enabled Plugins
-
-Check the list of enabled plugins one last time.
-
+**Example**
 ```bash
-md-to-pdf-cm list enabled
-```
-The output should now show the plugins enabled with the `brege-` prefix:
-```
-Enabled plugins:
-  - Invoke Name: brege-advanced-card-red
-    Original ID: brege-plugins/advanced-card-red
-    Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/advanced-card-red/advanced-card-red.config.yaml
-    Enabled On: <timestamp>
-  - Invoke Name: brege-hierarchy-table
-    Original ID: brege-plugins/hierarchy-table
-    Config Path: /home/user/.local/share/md-to-pdf/collections/brege-plugins/hierarchy-table/hierarchy-table.config.yaml
-    Enabled On: <timestamp>
+md-to-pdf-cm remove brege-plugins --force
+# Collection "brege-plugins" has been removed.
 ```
 

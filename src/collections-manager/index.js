@@ -97,21 +97,34 @@ class CollectionsManager {
   _spawnGitProcess(gitArgs, cwd, operationDescription) {
     return new Promise((resolve, reject) => {
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
-      const gitProcess = spawn('git', gitArgs, { cwd, stdio: 'pipe' });
+      const gitProcess = spawn('git', gitArgs, { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
+      let stdout = '';
+      let stderr = '';
 
       gitProcess.stdout.on('data', (data) => {
-        process.stdout.write(chalk.gray(`  GIT (${operationDescription}): ${data}`));
+        const dataStr = data.toString();
+        if (!(gitArgs.includes('status') && gitArgs.includes('--porcelain')) && 
+            !(gitArgs.includes('rev-list') && gitArgs.includes('--count')) || 
+            this.debug) {
+            process.stdout.write(chalk.gray(`  GIT (${operationDescription}): ${dataStr}`));
+        }
+        stdout += dataStr;
       });
       gitProcess.stderr.on('data', (data) => {
-        process.stderr.write(chalk.yellowBright(`  GIT (${operationDescription}, stderr): ${data}`));
+        const dataStr = data.toString();
+        process.stderr.write(chalk.yellowBright(`  GIT (${operationDescription}, stderr): ${dataStr}`));
+        stderr += dataStr;
       });
 
       gitProcess.on('close', (code) => {
         if (code === 0) {
-          resolve({ success: true, code });
+          resolve({ success: true, code, stdout, stderr });
         } else {
-          console.error(chalk.red(`\n  ERROR: Git operation '${gitArgs[0]}' for ${operationDescription} failed with exit code ${code}.`));
-          reject(new Error(`Git ${gitArgs[0]} failed for ${operationDescription} with exit code ${code}.`));
+          console.error(chalk.red(`\n  ERROR: Git operation '${gitArgs.join(' ')}' for ${operationDescription} failed with exit code ${code}.`));
+          const error = new Error(`Git ${gitArgs.join(' ')} failed for ${operationDescription} with exit code ${code}.`);
+          error.stdout = stdout;
+          error.stderr = stderr;
+          reject(error);
         }
       });
       gitProcess.on('error', (err) => {
@@ -134,7 +147,7 @@ class CollectionsManager {
       }
     } catch (error) {
       console.error(chalk.red(`ERROR: Failed to create COLL_ROOT directory at ${this.collRoot}: ${error.message}`));
-      throw error; // Re-throw to halt execution if COLL_ROOT cannot be created
+      throw error; 
     }
 
     const collectionName = options.name || deriveCollectionName(source);
@@ -166,8 +179,7 @@ class CollectionsManager {
         await this._writeCollectionMetadata(collectionName, createInitialMetadata());
         return targetPath;
       } catch (error) {
-        // Error already logged by _spawnGitProcess or _writeCollectionMetadata
-        throw error; // Re-throw to ensure calling context knows it failed
+        throw error; 
       }
     } else {
       const absoluteSourcePath = path.resolve(source);
@@ -240,9 +252,6 @@ class CollectionsManager {
   }
 
   async enableAllPluginsInCollection(collectionName, options = {}) {
-    // ... (content unchanged, but uses _readCollectionMetadata and _enablePlugin which now use helpers) ...
-    // For brevity, keeping this method's internal logic visually collapsed here, as it's mostly calls to other methods.
-    // The internal prefix determination logic using _readCollectionMetadata would implicitly benefit.
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enableAllPluginsInCollection): Enabling all plugins in: ${collectionName}, options: ${JSON.stringify(options)}`));
     const collectionPath = path.join(this.collRoot, collectionName);
     if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
@@ -258,7 +267,7 @@ class CollectionsManager {
 
     let defaultPrefixToUse = "";
     if (!options.noPrefix && !(options.prefix && typeof options.prefix === 'string')) {
-        const metadata = await this._readCollectionMetadata(collectionName); // Uses helper
+        const metadata = await this._readCollectionMetadata(collectionName); 
         if (metadata && metadata.source) {
             const source = metadata.source;
             const gitHubHttpsMatch = source.match(/^https?:\/\/github\.com\/([^\/]+)\/[^\/.]+(\.git)?$/);
@@ -289,7 +298,7 @@ class CollectionsManager {
         else invokeName = `${defaultPrefixToUse}${plugin.plugin_id}`;
 
         try {
-            const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName }); // Uses helper
+            const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName }); 
             results.push({ plugin: collectionPluginId, invoke_name: enableResult.invoke_name, status: 'enabled', message: enableResult.message });
             countEnabled++;
         } catch (error) {
@@ -398,22 +407,111 @@ class CollectionsManager {
 
     console.log(chalk.blue(`Updating collection "${collectionName}" from Git source: ${chalk.underline(metadata.source)}...`));
 
+    let defaultBranchName = null;
     try {
-      await this._spawnGitProcess(['pull'], collectionPath, `pulling ${collectionName}`);
-      console.log(chalk.green(`\n  Successfully updated collection "${collectionName}".`));
+        const remoteDetailsResult = await this._spawnGitProcess(
+            ['remote', 'show', 'origin'], 
+            collectionPath,
+            `getting remote details for ${collectionName}`
+        );
+
+        if (!remoteDetailsResult || !remoteDetailsResult.success || !remoteDetailsResult.stdout) {
+            console.error(chalk.red(`  ERROR: Could not retrieve remote details for ${collectionName}. Update aborted.`));
+            return { success: false, message: `Failed to retrieve remote details for ${collectionName}.` };
+        }
+
+        const remoteStdout = remoteDetailsResult.stdout;
+        const lines = remoteStdout.split('\n');
+        for (const line of lines) {
+            if (line.trim().startsWith('HEAD branch:')) {
+                defaultBranchName = line.split(':')[1].trim();
+                break;
+            }
+        }
+
+        if (!defaultBranchName) {
+            console.error(chalk.red(`  ERROR: Could not determine default branch for ${collectionName} from remote details. Update aborted.`));
+            if (this.debug) {
+                console.log(chalk.magenta(`DEBUG (CM:updateCollection): Full output from 'git remote show origin' for ${collectionName}:\n${remoteStdout}`));
+            }
+            return { success: false, message: `Could not determine default branch for ${collectionName}.` };
+        }
+        console.log(chalk.blue(`  Default branch for ${collectionName} is '${defaultBranchName}'.`));
+
+    } catch (gitError) {
+        console.error(chalk.red(`  ERROR: Failed during Git remote show for ${collectionName}. Update aborted.`));
+        return { success: false, message: `Failed during Git remote show for ${collectionName}: ${gitError.message}` };
+    }
+
+    try {
+      console.log(chalk.blue(`  Fetching remote 'origin' for ${collectionName}...`));
+      await this._spawnGitProcess(['fetch', 'origin'], collectionPath, `fetching ${collectionName}`);
+      console.log(chalk.green(`  Successfully fetched remote 'origin' for ${collectionName}.`));
+      
+      // Check for uncommitted working directory changes
+      const statusResult = await this._spawnGitProcess(['status', '--porcelain'], collectionPath, `checking status of ${collectionName}`);
+      if (!statusResult.success) {
+          console.error(chalk.red(`  ERROR: Could not get Git status for ${collectionName}. Update aborted.`));
+          return { success: false, message: `Could not get Git status for ${collectionName}.` };
+      }
+
+      const statusOutput = statusResult.stdout.trim();
+      const hasUncommittedChanges = (statusOutput !== '' && statusOutput !== `?? ${METADATA_FILENAME}`);
+      
+      let localCommitsAhead = 0;
+      if (!hasUncommittedChanges) { 
+        try {
+            const revListResult = await this._spawnGitProcess(
+                ['rev-list', '--count', `origin/${defaultBranchName}..HEAD`],
+                collectionPath,
+                `checking for local commits on ${collectionName}`
+            );
+            if (revListResult.success && revListResult.stdout) {
+                localCommitsAhead = parseInt(revListResult.stdout.trim(), 10);
+                if (isNaN(localCommitsAhead)) localCommitsAhead = 0; // Safety for parseInt
+            }
+        } catch (revListError) {
+            console.warn(chalk.yellow(`  WARN: Could not execute git rev-list to check for local commits on ${collectionName}: ${revListError.message}`));
+        }
+      }
+
+      if (hasUncommittedChanges || localCommitsAhead > 0) {
+          let abortMessage = `Collection "${collectionName}" has local changes.`;
+          if (hasUncommittedChanges && localCommitsAhead > 0) {
+              abortMessage = `Collection "${collectionName}" has uncommitted changes and local commits not on the remote.`;
+          } else if (localCommitsAhead > 0) {
+              abortMessage = `Collection "${collectionName}" has local commits not present on the remote.`;
+          }
+
+          console.warn(chalk.yellow(`  WARN: ${abortMessage} Aborting update.`));
+          console.warn(chalk.yellow("          Please commit, stash, or revert your changes before updating."));
+          if (this.debug) {
+            if (hasUncommittedChanges) console.log(chalk.magenta(`DEBUG (CM:updateCollection): 'git status --porcelain' output for ${collectionName}:\n${statusResult.stdout}`));
+            if (localCommitsAhead > 0) console.log(chalk.magenta(`DEBUG (CM:updateCollection): Found ${localCommitsAhead} local commits ahead of origin/${defaultBranchName} for ${collectionName}.`));
+          }
+          return { 
+              success: false, 
+              message: `${abortMessage} Aborting update. Commit, stash, or revert changes.`
+          };
+      }
+      
+      console.log(chalk.blue(`  Resetting to 'origin/${defaultBranchName}' for ${collectionName}...`));
+      await this._spawnGitProcess(['reset', '--hard', `origin/${defaultBranchName}`], collectionPath, `resetting ${collectionName}`);
+      console.log(chalk.green(`\n  Successfully updated collection "${collectionName}" by resetting to origin/${defaultBranchName}.`));
+      
       metadata.updated_on = new Date().toISOString();
       await this._writeCollectionMetadata(collectionName, metadata);
       return { success: true, message: `Collection "${collectionName}" updated.` };
     } catch (error) {
-      // Error already logged by _spawnGitProcess or _writeCollectionMetadata
-      return { success: false, message: error.message };
+      console.error(chalk.red(`  ERROR: Update process failed for ${collectionName}: ${error.message}`));
+      return { success: false, message: `Update failed for ${collectionName}: ${error.message}` };
     }
   }
 
   async updateAllCollections() {
     if (this.debug) console.log(chalk.magenta("DEBUG (CM:updateAllCollections): Attempting to update all Git-based collections."));
     let allOverallSuccess = true;
-    let updateMessages = [];
+    const updateMessages = [];
 
     const downloadedCollections = await this.listCollections('downloaded');
     if (!downloadedCollections || downloadedCollections.length === 0) {
@@ -435,9 +533,11 @@ class CollectionsManager {
 
         if (metadata.source && (/^(http(s)?:\/\/|git@)/.test(metadata.source) || (typeof metadata.source === 'string' && metadata.source.endsWith('.git')) )) {
             try {
-                const result = await this.updateCollection(collectionName); // Uses helper
+                const result = await this.updateCollection(collectionName); 
                 updateMessages.push(result.message);
-                if (!result.success) allOverallSuccess = false;
+                if (!result.success && !result.message.includes("has local changes")) { 
+                  allOverallSuccess = false;
+                }
             } catch (error) {
                 const errMsg = `Failed to update ${collectionName}: ${error.message}`;
                 console.error(chalk.red(`  ${errMsg}`));
@@ -567,7 +667,7 @@ class CollectionsManager {
         const availablePlugins = await this.listAvailablePlugins(collectionNameFilter);
         return availablePlugins;
     } else if (type === 'enabled') {
-        const enabledManifest = await this._readEnabledManifest(); // Uses helper
+        const enabledManifest = await this._readEnabledManifest(); 
         let pluginsToDisplay = enabledManifest.enabled_plugins;
 
         if (collectionNameFilter) {

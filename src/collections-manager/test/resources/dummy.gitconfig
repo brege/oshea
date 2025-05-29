@@ -1,0 +1,7 @@
+[user]
+    name = Test User
+    email = test@example.com
+[commit]
+    gpgsign = false
+[core]
+    editor = true

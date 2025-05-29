@@ -1,6 +1,6 @@
 {
   "name": "@md-to-pdf/collections-manager",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A manager for md-to-pdf plugin collections.",
   "private": true,
   "main": "index.js",
@@ -8,7 +8,7 @@
     "md-to-pdf-cm": "./collections-manager-cli.js"
   },
   "scripts": {
-    "test": "node ./test/run-cm-tests.js"
+    "test": "GIT_CONFIG_GLOBAL=./test/resources/dummy.gitconfig GNUPGHOME=/tmp/cm-dummy-gpg-home node ./test/run-cm-tests.js"
   },
   "keywords": [
     "md-to-pdf",

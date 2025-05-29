@@ -1,6 +1,6 @@
 {
   "name": "@md-to-pdf/collections-manager",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A manager for md-to-pdf plugin collections.",
   "private": true,
   "main": "index.js",

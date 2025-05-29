@@ -39,9 +39,9 @@ yargs(hideBin(process.argv))
         if (resultPath) {
             console.log(chalk.green(`\nCollection '${chalk.bold(path.basename(resultPath))}' added to:\n    ${chalk.underline(resultPath)}\n`));
             console.log(chalk.blueBright("To list its plugins, use:"));
-            console.log(chalk.gray(`    md-to-pdf-cm list available ${path.basename(resultPath)}`));
+            console.log(chalk.gray(`    md-to-pdf-cm list all ${path.basename(resultPath)}`));
             console.log(chalk.blueBright("\nTo activate plugins from this collection, use (example):"));
-            console.log(chalk.gray(`    md-to-pdf-cm enable ${path.basename(resultPath)}/<plugin_id_from_list_available> [--as <your_invoke_name>]`));
+            console.log(chalk.gray(`    md-to-pdf-cm enable ${path.basename(resultPath)}/<plugin_id_from_list_all> [--name <your_invoke_name>]`));
             console.log(chalk.blueBright("\nOr to activate all plugins from this collection (example):"));
             console.log(chalk.gray(`    md-to-pdf-cm enable ${path.basename(resultPath)} --all [--prefix <your_prefix_>]`));
         } else {
@@ -55,7 +55,7 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    'enable <target>', // Changed positional to <target>
+    'enable <target>',
     'Enables a plugin or all plugins from a collection.',
     (yargsCmd) => {
       yargsCmd
@@ -64,12 +64,14 @@ yargs(hideBin(process.argv))
           type: 'string',
           demandOption: true,
         })
-        .option('as', {
+        .option('name', {
           describe: 'Optional. An alternative "invoke_name" to register the plugin under (only for single plugin enablement).',
           type: 'string'
         })
-        .option('all', {
-          describe: 'Enable all available plugins from the specified collection name.',
+        .option('all', { // This 'all' is a flag for the 'enable' command, distinct from 'list all'
+          describe: `Enable all available plugins from the specified collection name.
+                   Note: This is a point-in-time action. If the collection is updated later with new plugins,
+                   this command needs to be re-run if you wish to enable those new plugins.`,
           type: 'boolean',
           default: false
         })
@@ -87,7 +89,6 @@ yargs(hideBin(process.argv))
         }
         try {
           const result = await manager.enableAllPluginsInCollection(argv.target, { prefix: argv.prefix });
-          // enableAllPluginsInCollection already logs details.
           if (result && result.success) {
             console.log(chalk.green(`\nSuccessfully processed enabling all plugins from "${argv.target}". Check details above.`));
           } else {
@@ -101,16 +102,17 @@ yargs(hideBin(process.argv))
       } else {
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to enable plugin...`));
         console.log(`  Plugin Identifier: ${chalk.cyan(argv.target)}`);
-        if (argv.as) {
-          console.log(`  Requested invoke name: ${chalk.yellow(argv.as)}`);
+        if (argv.name) {
+          console.log(`  Requested invoke name: ${chalk.yellow(argv.name)}`);
         }
         if (argv.prefix){
             console.warn(chalk.yellow("WARN: --prefix option is ignored when not using --all."))
         }
         try {
-          const result = await manager.enablePlugin(argv.target, { as: argv.as });
+          const result = await manager.enablePlugin(argv.target, { name: argv.name });
           if (result && result.success) {
-              console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${result.invoke_name || argv.as || argv.target.split('/')[1]}`));
+              const finalInvokeName = result.invoke_name || argv.target.split('/')[1];
+              console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));
           }
         } catch (error) {
           console.error(chalk.red(`\nERROR in 'enable' command: ${error.message}`));
@@ -171,7 +173,6 @@ yargs(hideBin(process.argv))
       }
       try {
         const result = await manager.removeCollection(argv.collection_name, { force: argv.force });
-        // Success/failure messages are already printed by removeCollection in CollectionsManager
         if (result && result.success) {
           console.log(chalk.blueBright(`Collection "${argv.collection_name}" has been removed.`));
         }
@@ -184,7 +185,8 @@ yargs(hideBin(process.argv))
   )
   .command(
     'update [<collection_name>]',
-    'Updates a Git-based plugin collection, or all Git-based collections if no name is specified.',
+    `Updates a Git-based plugin collection, or all Git-based collections if no name is specified.
+     Note: This command only pulls updates; it does not automatically enable any new plugins added to the collection.`,
     (yargsCmd) => {
       yargsCmd
         .positional('collection_name', {
@@ -197,7 +199,6 @@ yargs(hideBin(process.argv))
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to update collection '${chalk.cyan(argv.collection_name)}'...`));
         try {
           const result = await manager.updateCollection(argv.collection_name);
-          // updateCollection method already logs success/failure details
         } catch (error) {
           console.error(chalk.red(`\nERROR in 'update ${argv.collection_name}' command: ${error.message}`));
           if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
@@ -207,7 +208,6 @@ yargs(hideBin(process.argv))
         console.log(chalk.blueBright('Collections Manager CLI: Attempting to update all Git-based collections...'));
         try {
           const results = await manager.updateAllCollections();
-          // updateAllCollections method already logs details
            results.messages.forEach(msg => console.log(chalk.blue(`  ${msg}`)));
            if (!results.success) {
              console.warn(chalk.yellow("Some collections may not have updated successfully. Check logs above."));
@@ -222,60 +222,89 @@ yargs(hideBin(process.argv))
   )
   .command(
     'list [type] [<collection_name>]',
-    'Lists plugin collections or plugins. Types: downloaded, available, enabled.',
+    `Lists plugins or collections. Default: shows all plugins found in downloaded collections ('all').`,
     (yargsCmd) => {
         yargsCmd
             .positional('type', {
-                describe: `Type of listing: ${chalk.green('downloaded')}, ${chalk.green('available')}, ${chalk.green('enabled')}`,
+                describe: `Specify what to list:
+                          'all' (default): All usable plugins found in downloaded collections.
+                          'enabled': Only actively enabled plugins.
+                          'disabled': Available plugins that are not currently enabled.
+                          'collections': Names of all downloaded collection directories.`,
                 type: 'string',
-                default: 'downloaded',
-                choices: ['downloaded', 'available', 'enabled'] 
+                default: 'all',
+                choices: ['all', 'enabled', 'disabled', 'collections']
             })
             .positional('collection_name', {
-                describe: `Optional. Name of the collection to list plugins from (for "${chalk.green('available')}" or "${chalk.green('enabled')}" types).`,
+                describe: `Optional. Filter plugins by this collection name (not applicable for "list collections").`,
                 type: 'string'
             });
     },
     async (argv) => {
-        if (argv.type === 'downloaded' && argv.collection_name) {
-             console.warn(chalk.yellow(`WARN: Specifying a collection name for 'list downloaded' has no effect. It lists all downloaded collections.`));
-        }
         try {
-            const results = await manager.listCollections(argv.type, argv.collection_name);
-            // Formatting and printing logic for 'list' command
-            if (argv.type === 'downloaded') {
-                if (results.length === 0) {
-                    // Message already printed by manager.listCollections if COLL_ROOT doesn't exist or is empty
-                } else {
-                    console.log(chalk.blue("\nDownloaded plugin collections:"));
-                    results.forEach(name => console.log(chalk.greenBright(`  - ${name}`)));
-                }
-            } else if (argv.type === 'available') {
-                if (results.length === 0) {
-                    console.log(chalk.yellow(`No available plugins found${argv.collection_name ? ` in collection "${argv.collection_name}"` : ''}.`));
-                } else {
-                    console.log(chalk.blue(`\nAvailable plugins${argv.collection_name ? ` in collection "${chalk.cyan(argv.collection_name)}"` : ''}:`));
-                    results.forEach(p => {
-                        console.log(chalk.greenBright(`  - Plugin ID: ${chalk.yellow(p.plugin_id)}`));
-                        console.log(chalk.gray(`    Collection: ${p.collection}`));
-                        console.log(chalk.gray(`    Description: ${p.description}`));
-                        console.log(chalk.gray(`    Config Path: ${p.config_path}`));
-                    });
-                }
-            } else if (argv.type === 'enabled') {
-                if (results.length === 0) {
-                    console.log(chalk.yellow(`No plugins are currently enabled${argv.collection_name ? ` from collection "${argv.collection_name}"` : ''}.`));
-                } else {
-                    console.log(chalk.blue(`\nEnabled plugins${argv.collection_name ? ` from collection "${chalk.cyan(argv.collection_name)}"`:''}:`));
-                    results.forEach(p => {
-                        console.log(chalk.greenBright(`  - Invoke Name: ${chalk.yellow(p.invoke_name)}`));
-                        console.log(chalk.gray(`    Original ID: ${p.collection_name}/${p.plugin_id}`));
-                        console.log(chalk.gray(`    Config Path: ${p.config_path}`));
-                        console.log(chalk.gray(`    Enabled On: ${p.added_on}`));
-                    });
-                }
-            }
+            let results;
 
+            if (argv.type === 'collections') {
+                if (argv.collection_name) {
+                    console.warn(chalk.yellow("WARN: Specifying a collection name has no effect when listing 'collections'."));
+                }
+                results = await manager.listCollections('downloaded');
+                if (results.length === 0) {
+                    console.log(chalk.yellow("No collections downloaded."));
+                    return;
+                }
+                console.log(chalk.blue("\nDownloaded plugin collections:"));
+                results.forEach(name => console.log(chalk.greenBright(`  - ${name}`)));
+
+            } else if (argv.type === 'all') {
+                results = await manager.listAvailablePlugins(argv.collection_name);
+                const inCollectionMsg = argv.collection_name ? ` in collection "${chalk.cyan(argv.collection_name)}"` : ' from all collections';
+                if (results.length === 0) {
+                    console.log(chalk.yellow(`No plugins found${inCollectionMsg}.`));
+                    return;
+                }
+                console.log(chalk.blue(`\nAll available plugins${inCollectionMsg}:`));
+                results.forEach(p => {
+                    console.log(chalk.greenBright(`  - Plugin ID: ${chalk.yellow(p.plugin_id)}`));
+                    console.log(chalk.gray(`    Collection: ${p.collection}`));
+                    console.log(chalk.gray(`    Description: ${p.description}`));
+                    console.log(chalk.gray(`    Config Path: ${p.config_path}`));
+                });
+
+            } else if (argv.type === 'enabled') {
+                results = await manager.listCollections('enabled', argv.collection_name);
+                const fromCollectionMsg = argv.collection_name ? ` from collection "${chalk.cyan(argv.collection_name)}"`: '';
+                 if (results.length === 0) {
+                    console.log(chalk.yellow(`No plugins are currently enabled${fromCollectionMsg}.`));
+                    return;
+                }
+                console.log(chalk.blue(`\nEnabled plugins${fromCollectionMsg}:`));
+                results.forEach(p => {
+                    console.log(chalk.greenBright(`  - Invoke Name: ${chalk.yellow(p.invoke_name)}`));
+                    console.log(chalk.gray(`    Original ID: ${p.collection_name}/${p.plugin_id}`));
+                    console.log(chalk.gray(`    Config Path: ${p.config_path}`));
+                    console.log(chalk.gray(`    Enabled On: ${p.added_on}`));
+                });
+            } else if (argv.type === 'disabled') {
+                const availablePlugins = await manager.listAvailablePlugins(argv.collection_name);
+                const enabledPluginsList = await manager.listCollections('enabled', argv.collection_name);
+                const enabledPluginIds = new Set(enabledPluginsList.map(p => `${p.collection_name}/${p.plugin_id}`));
+
+                results = availablePlugins.filter(p => !enabledPluginIds.has(`${p.collection}/${p.plugin_id}`));
+                
+                const inCollectionMsg = argv.collection_name ? ` in collection "${chalk.cyan(argv.collection_name)}"` : ' from all collections';
+                if (results.length === 0) {
+                    console.log(chalk.yellow(`No disabled (but available) plugins found${inCollectionMsg}.`));
+                    return;
+                }
+                console.log(chalk.blue(`\nDisabled (but available) plugins${inCollectionMsg}:`));
+                results.forEach(p => {
+                    console.log(chalk.greenBright(`  - Plugin ID: ${chalk.yellow(p.plugin_id)}`));
+                    console.log(chalk.gray(`    Collection: ${p.collection}`));
+                    console.log(chalk.gray(`    Description: ${p.description}`));
+                    console.log(chalk.gray(`    Config Path: ${p.config_path}`));
+                });
+            }
         } catch (error) {
             console.error(chalk.red(`ERROR in 'list' command: ${error.message}`));
             if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));

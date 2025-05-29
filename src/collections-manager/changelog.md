@@ -1,5 +1,25 @@
 # Changelog - md-to-pdf Collections Manager
 
+
+## 0.7.5 (Conceptual - Refinement & Polish)
+
+### Changed
+
+* **Test Suite Refactoring:** The main test file `test/run-cm-tests.js` was refactored into a modular structure. Tests are now organized by command (e.g., `add.test.js`, `list.test.js`) within the `test/` directory and orchestrated by `run-cm-tests.js`. Common test utility functions were extracted into `test/test-helpers.js`.
+* **CLI Ergonomics for `enable` command:** The option to specify a custom invocation name for a plugin during enablement was changed from `--as <invoke_name>` to `--name <invoke_name>` for consistency with the `add --name` command. The internal `enablePlugin` and `enableAllPluginsInCollection` methods in `CollectionsManager` were updated accordingly.
+* **CLI `list` Command Default Behavior:** The default behavior of `md-to-pdf-cm list` (when no type is specified) now lists all **all** (i.e., available/discovered) plugins from all collections. Previously, it defaulted to listing downloaded collection names.
+* **CLI `list` Command Types:** The `list` command's types were refined:
+    * `all` (default): Lists all usable plugins found in downloaded collections.
+    * `enabled [<collection_name>]`: Lists actively enabled plugins.
+    * `disabled [<collection_name>]`: Lists available plugins that are not currently enabled.
+    * `collections`: Lists names of all downloaded collection directories (replaces the old `downloaded` type's primary function).
+* **CLI Help Text:** Updated descriptions for `enable --all` and `update` commands to clarify that they are point-in-time actions and do not automatically enable new plugins if a collection is updated later.
+
+### Fixed
+
+* Corrected the `enablePlugin` and `enableAllPluginsInCollection` methods in `CollectionsManager` to properly use the provided option (now `options.name`) for setting custom plugin invocation names. Previously, it might have defaulted to the plugin ID incorrectly.
+
+
 ## 0.7.4 (Conceptual - Features for md-to-pdf v0.7.0)
 
 ### Added

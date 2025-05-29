@@ -6,6 +6,9 @@ const { hideBin } = require('yargs/helpers');
 const CollectionsManager = require('./index.js');
 const path = require('path');
 const chalk = require('chalk');
+const fs = require('fs'); // Synchronous fs for existsSync
+const fsp = require('fs').promises; // Asynchronous fs for readFile
+const yaml = require('js-yaml'); // To read metadata for originalSourceForPrefixFallback
 
 const manager = new CollectionsManager({ debug: process.env.DEBUG_CM === 'true' });
 
@@ -43,7 +46,7 @@ yargs(hideBin(process.argv))
             console.log(chalk.blueBright("\nTo activate plugins from this collection, use (example):"));
             console.log(chalk.gray(`    md-to-pdf-cm enable ${path.basename(resultPath)}/<plugin_id_from_list_all> [--name <your_invoke_name>]`));
             console.log(chalk.blueBright("\nOr to activate all plugins from this collection (example):"));
-            console.log(chalk.gray(`    md-to-pdf-cm enable ${path.basename(resultPath)} --all [--prefix <your_prefix_>]`));
+            console.log(chalk.gray(`    md-to-pdf-cm enable ${path.basename(resultPath)} --all`));
         } else {
             console.error(chalk.red('Failed to add collection. See previous error messages.'));
         }
@@ -68,27 +71,62 @@ yargs(hideBin(process.argv))
           describe: 'Optional. An alternative "invoke_name" to register the plugin under (only for single plugin enablement).',
           type: 'string'
         })
-        .option('all', { // This 'all' is a flag for the 'enable' command, distinct from 'list all'
+        .option('all', {
           describe: `Enable all available plugins from the specified collection name.
+                   Default prefixing behavior for invoke names when using --all:
+                   - GitHub/GitLab source: Uses <username>-<plugin_id>.
+                   - Other Git source: Uses <collection_name>-<plugin_id>.
+                   - Local path source: Uses <plugin_id> (no prefix).
+                   Use --prefix or --no-prefix to override this default.
                    Note: This is a point-in-time action. If the collection is updated later with new plugins,
                    this command needs to be re-run if you wish to enable those new plugins.`,
           type: 'boolean',
           default: false
         })
         .option('prefix', {
-          describe: 'Optional. A prefix string for invoke names when using --all.',
+          describe: 'Optional. A custom prefix string for invoke names when using --all. Overrides default prefixing.',
           type: 'string'
+        })
+        .option('no-prefix', {
+          describe: 'Optional. Disables all automatic prefixing when using --all, using only plugin_id as invoke_name. Use with caution due to potential conflicts.',
+          type: 'boolean',
+          default: false
         });
     },
     async (argv) => {
       if (argv.all) {
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to enable all plugins in collection...`));
         console.log(`  Collection Name: ${chalk.cyan(argv.target)}`);
-        if (argv.prefix) {
-          console.log(`  Using prefix for invoke names: ${chalk.yellow(argv.prefix)}`);
-        }
+
+        let originalSourceForPrefixFallback = ""; // Used by manager if metadata read fails for some reason
         try {
-          const result = await manager.enableAllPluginsInCollection(argv.target, { prefix: argv.prefix });
+            const metadataPath = path.join(manager.collRoot, argv.target, '.collection-metadata.yaml');
+            if (fs.existsSync(metadataPath)) { // Use synchronous fs for this check
+                const metaContent = await fsp.readFile(metadataPath, 'utf8'); // Use async fsp for read
+                const metadata = yaml.load(metaContent);
+                if (metadata && metadata.source) {
+                    originalSourceForPrefixFallback = metadata.source;
+                }
+            }
+        } catch (e) {
+            if(process.env.DEBUG_CM === 'true') console.warn(chalk.yellow(`  WARN: Could not read metadata for prefix fallback heuristic: ${e.message}`));
+        }
+
+        if (argv.prefix) {
+          console.log(`  Using custom prefix for invoke names: ${chalk.yellow(argv.prefix)}`);
+        } else if (argv.noPrefix) {
+          console.log(chalk.yellow('  --no-prefix specified: Attempting to enable plugins with their original IDs as invoke names.'));
+        } else {
+          console.log(chalk.blue('  Using default prefixing strategy for invoke names (see help for details).'));
+        }
+
+        try {
+          const result = await manager.enableAllPluginsInCollection(argv.target, {
+            prefix: argv.prefix,
+            noPrefix: argv.noPrefix, // Pass the new flag
+            isCliCall: true, 
+            originalSourceForPrefixFallback
+          });
           if (result && result.success) {
             console.log(chalk.green(`\nSuccessfully processed enabling all plugins from "${argv.target}". Check details above.`));
           } else {
@@ -99,14 +137,14 @@ yargs(hideBin(process.argv))
           if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
           process.exit(1);
         }
-      } else {
+      } else { // Single plugin enable
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to enable plugin...`));
         console.log(`  Plugin Identifier: ${chalk.cyan(argv.target)}`);
         if (argv.name) {
           console.log(`  Requested invoke name: ${chalk.yellow(argv.name)}`);
         }
-        if (argv.prefix){
-            console.warn(chalk.yellow("WARN: --prefix option is ignored when not using --all."))
+        if (argv.prefix || argv.noPrefix){ // These flags are only for --all
+            console.warn(chalk.yellow("WARN: --prefix and --no-prefix options are ignored when not using --all."))
         }
         try {
           const result = await manager.enablePlugin(argv.target, { name: argv.name });
@@ -291,7 +329,7 @@ yargs(hideBin(process.argv))
                 const enabledPluginIds = new Set(enabledPluginsList.map(p => `${p.collection_name}/${p.plugin_id}`));
 
                 results = availablePlugins.filter(p => !enabledPluginIds.has(`${p.collection}/${p.plugin_id}`));
-                
+
                 const inCollectionMsg = argv.collection_name ? ` in collection "${chalk.cyan(argv.collection_name)}"` : ' from all collections';
                 if (results.length === 0) {
                     console.log(chalk.yellow(`No disabled (but available) plugins found${inCollectionMsg}.`));

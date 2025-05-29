@@ -3,15 +3,12 @@ const fs = require('fs').promises;
 const fss = require('fs'); // For synchronous operations
 const path = require('path');
 const os = require('os');
-const { execSync } = require('child_process'); // Needed for Git test setup
+const { execSync } = require('child_process');
 
 const TEST_COLL_ROOT_BASE = path.join(os.tmpdir(), 'cm_test_coll_root');
 const METADATA_FILENAME = '.collection-metadata.yaml';
 const ENABLED_MANIFEST_FILENAME = 'enabled.yaml';
 
-// Counter to ensure unique test roots if multiple test files run in parallel
-// or if a single test file needs multiple isolated roots.
-// For now, assuming serial execution orchestrated by the main runner.
 let testRunCounter = 0;
 
 async function createTestCollRoot() {
@@ -36,23 +33,19 @@ async function setupLocalGitRepo(repoPath, initialFileName, initialFileContent) 
     await fs.mkdir(repoPath, { recursive: true });
     execSync('git init --bare', { cwd: repoPath });
 
-    const tempClonePath = path.join(os.tmpdir(), `temp_clone_${Date.now()}`);
+    const tempClonePath = path.join(os.tmpdir(), `temp_clone_setup_${Date.now()}`);
     if (fss.existsSync(tempClonePath)) await fs.rm(tempClonePath, { recursive: true, force: true });
 
     try {
         execSync(`git clone "${repoPath}" "${tempClonePath}"`);
         execSync('git config user.email "test@example.com"', { cwd: tempClonePath });
         execSync('git config user.name "Test User"', { cwd: tempClonePath });
-        // Ensure main branch exists before trying to write file and commit
-        // Some Git versions might not create 'master' or 'main' on clone of bare repo.
-        // A common practice is to create an initial commit with a default branch.
+        execSync('git config commit.gpgsign false', { cwd: tempClonePath }); // Disable GPG signing for commits
+
         try {
             execSync('git checkout -b main', { cwd: tempClonePath });
         } catch (branchError) {
-            // If 'main' already exists or some other issue, try to ensure we are on it or default.
-            // This might need refinement based on git version specifics.
-            // For now, assume checkout -b main works or is not strictly needed if default branch is picked up.
-             console.warn(`  Git checkout -b main might have had issues or main already exists: ${branchError.message}`);
+             console.warn(chalk.yellow(`  WARN (test-helpers): Git checkout -b main might have had issues or main already exists: ${branchError.message}`));
         }
         await fs.writeFile(path.join(tempClonePath, initialFileName), initialFileContent);
         execSync('git add .', { cwd: tempClonePath });
@@ -73,6 +66,10 @@ async function addCommitToLocalGitRepo(bareRepoPath, newFileName, newFileContent
         execSync(`git clone "${bareRepoPath}" "${tempClonePath}"`);
         execSync('git config user.email "test@example.com"', { cwd: tempClonePath });
         execSync('git config user.name "Test User"', { cwd: tempClonePath });
+        execSync('git config commit.gpgsign false', { cwd: tempClonePath }); // Disable GPG signing for commits
+
+        // It's good practice to ensure you're on a branch, though clone of bare usually sets up main/master
+        // If not, the push might need explicit branch target. Assuming 'main' from setup.
         await fs.writeFile(path.join(tempClonePath, newFileName), newFileContent);
         execSync('git add .', { cwd: tempClonePath });
         execSync(`git commit -m "${commitMessage}"`, { cwd: tempClonePath });
@@ -85,7 +82,7 @@ async function addCommitToLocalGitRepo(bareRepoPath, newFileName, newFileContent
 }
 
 module.exports = {
-    TEST_COLL_ROOT_BASE, // Export if needed by the main runner for global setup/cleanup
+    TEST_COLL_ROOT_BASE,
     METADATA_FILENAME,
     ENABLED_MANIFEST_FILENAME,
     createTestCollRoot,

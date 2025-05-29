@@ -150,7 +150,7 @@ class CollectionsManager {
     }
     const absolutePluginConfigPath = pluginToEnable.config_path; 
 
-    let invokeName = options.as || pluginId; 
+    let invokeName = options.name || pluginId; 
     if (!/^[a-zA-Z0-9_.-]+$/.test(invokeName)) {
         throw new Error(`Invalid invoke_name: "${invokeName}". Must be alphanumeric, underscores, hyphens, or periods.`);
     }
@@ -227,7 +227,7 @@ class CollectionsManager {
         }
 
         try {
-            const enableResult = await this.enablePlugin(collectionPluginId, { as: invokeName });
+            const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName });
             results.push({
                 plugin: collectionPluginId,
                 invoke_name: enableResult.invoke_name,

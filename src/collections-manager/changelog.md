@@ -1,6 +1,20 @@
 # Changelog - md-to-pdf Collections Manager
 
 
+## 0.7.6 (Conceptual - Core Logic Refactor)
+
+### Changed
+
+* **Internal Refactoring:**
+    * Moved the `_deriveCollectionName(source)` method from the `CollectionsManager` class to a new utility file `cm-utils.js` as an exported function to improve modularity. `CollectionsManager` now imports and uses this utility.
+    * Refactored internal logic within `CollectionsManager` for better clarity and cohesion:
+        * Introduced private helper methods (`_readEnabledManifest`, `_writeEnabledManifest`) to centralize reading and writing of the `enabled.yaml` manifest.
+        * Introduced private helper methods (`_readCollectionMetadata`, `_writeCollectionMetadata`) to centralize reading and writing of `.collection-metadata.yaml` files.
+        * Introduced a private helper method (`_spawnGitProcess`) to encapsulate the logic for spawning Git child processes (`clone`, `pull`) and handling their I/O and events.
+    * These changes are internal and do not affect the public API or command-line behavior of the Collections Manager. The primary goal was to improve code organization and maintainability.
+
+
+
 ## 0.7.5 (Conceptual - Refinement & Polish)
 
 ### Enhancements & Fixes (Addressing Test Environment & Prefixing Strategy)

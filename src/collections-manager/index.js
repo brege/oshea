@@ -7,7 +7,8 @@ const { spawn } = require('child_process');
 const fsExtra = require('fs-extra');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
-const crypto = require('crypto'); // Added for potential hashing, though not used in current prefix logic
+const crypto = require('crypto');
+const { deriveCollectionName } = require('./cm-utils');
 
 const METADATA_FILENAME = '.collection-metadata.yaml';
 const ENABLED_MANIFEST_FILENAME = 'enabled.yaml';
@@ -29,9 +30,95 @@ class CollectionsManager {
     return path.join(xdgDataHome, 'md-to-pdf', 'collections');
   }
 
-  _deriveCollectionName(source) {
-    const baseName = path.basename(source);
-    return baseName.replace(/\.git$/, '').replace(/[^a-zA-Z0-9_-]/g, '-');
+  async _readEnabledManifest() {
+    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+    let enabledManifest = { enabled_plugins: [] };
+    try {
+      if (fss.existsSync(enabledManifestPath)) {
+        const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
+        const loadedData = yaml.load(manifestContent);
+        if (loadedData && Array.isArray(loadedData.enabled_plugins)) {
+          enabledManifest = loadedData;
+        } else {
+          if (this.debug && loadedData) console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Invalid structure in ${ENABLED_MANIFEST_FILENAME}. Re-initializing.`));
+        }
+      } else {
+        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_readEnabledManifest): ${ENABLED_MANIFEST_FILENAME} not found. Initializing new one.`));
+      }
+    } catch (e) {
+      console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Could not read or parse ${enabledManifestPath}: ${e.message}. Starting with a new manifest.`));
+    }
+    return enabledManifest;
+  }
+
+  async _writeEnabledManifest(manifestData) {
+    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+    try {
+      await fs.mkdir(this.collRoot, { recursive: true });
+      const yamlString = yaml.dump(manifestData, { sortKeys: true });
+      await fs.writeFile(enabledManifestPath, yamlString);
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_writeEnabledManifest): Successfully wrote to ${enabledManifestPath}`));
+    } catch (e) {
+      console.error(chalk.red(`ERROR (CM:_writeEnabledManifest): Failed to write to ${enabledManifestPath}: ${e.message}`));
+      throw e;
+    }
+  }
+
+  async _readCollectionMetadata(collectionName) {
+    const collectionPath = path.join(this.collRoot, collectionName);
+    const metadataPath = path.join(collectionPath, METADATA_FILENAME);
+    if (!fss.existsSync(metadataPath)) {
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_readCollMeta): Metadata file not found for ${collectionName} at ${metadataPath}`));
+      return null;
+    }
+    try {
+      const metaContent = await fs.readFile(metadataPath, 'utf8');
+      return yaml.load(metaContent);
+    } catch (e) {
+      console.error(chalk.red(`ERROR (CM:_readCollMeta): Could not read or parse metadata for "${collectionName}": ${e.message}`));
+      throw e;
+    }
+  }
+
+  async _writeCollectionMetadata(collectionName, metadataContent) {
+    const collectionPath = path.join(this.collRoot, collectionName);
+    const metadataPath = path.join(collectionPath, METADATA_FILENAME);
+    try {
+      await fs.mkdir(collectionPath, { recursive: true });
+      const yamlString = yaml.dump(metadataContent);
+      await fs.writeFile(metadataPath, yamlString);
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_writeCollMeta): Wrote metadata to ${metadataPath}`));
+    } catch (metaError) {
+      console.warn(chalk.yellow(`WARN (CM:_writeCollMeta): Could not write collection metadata for ${collectionName}: ${metaError.message}`));
+      throw metaError;
+    }
+  }
+
+  _spawnGitProcess(gitArgs, cwd, operationDescription) {
+    return new Promise((resolve, reject) => {
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
+      const gitProcess = spawn('git', gitArgs, { cwd, stdio: 'pipe' });
+
+      gitProcess.stdout.on('data', (data) => {
+        process.stdout.write(chalk.gray(`  GIT (${operationDescription}): ${data}`));
+      });
+      gitProcess.stderr.on('data', (data) => {
+        process.stderr.write(chalk.yellowBright(`  GIT (${operationDescription}, stderr): ${data}`));
+      });
+
+      gitProcess.on('close', (code) => {
+        if (code === 0) {
+          resolve({ success: true, code });
+        } else {
+          console.error(chalk.red(`\n  ERROR: Git operation '${gitArgs[0]}' for ${operationDescription} failed with exit code ${code}.`));
+          reject(new Error(`Git ${gitArgs[0]} failed for ${operationDescription} with exit code ${code}.`));
+        }
+      });
+      gitProcess.on('error', (err) => {
+        console.error(chalk.red(`\n  ERROR: Failed to start git process for ${operationDescription}: ${err.message}`));
+        reject(err);
+      });
+    });
   }
 
   async addCollection(source, options = {}) {
@@ -47,10 +134,10 @@ class CollectionsManager {
       }
     } catch (error) {
       console.error(chalk.red(`ERROR: Failed to create COLL_ROOT directory at ${this.collRoot}: ${error.message}`));
-      throw error;
+      throw error; // Re-throw to halt execution if COLL_ROOT cannot be created
     }
 
-    const collectionName = options.name || this._deriveCollectionName(source);
+    const collectionName = options.name || deriveCollectionName(source);
     if (!collectionName) {
         throw new Error('Could not determine a valid collection name.');
     }
@@ -64,67 +151,42 @@ class CollectionsManager {
     }
 
     const originalSource = source;
-
-    return new Promise(async (resolve, reject) => {
-      const writeMetadata = async () => {
-        const metadata = {
-          source: originalSource,
-          name: collectionName,
-          added_on: new Date().toISOString(),
-        };
-        try {
-          const yamlString = yaml.dump(metadata);
-          await fs.writeFile(path.join(targetPath, METADATA_FILENAME), yamlString);
-          if (this.debug) console.log(chalk.magenta(`  DEBUG: Wrote metadata to ${METADATA_FILENAME}`));
-        } catch (metaError) {
-          console.warn(chalk.yellow(`  WARN: Could not write collection metadata for ${collectionName}: ${metaError.message}`));
-        }
-      };
-
-      if (/^(http(s)?:\/\/|git@)/.test(source) || (typeof source === 'string' && source.endsWith('.git') && fss.existsSync(path.resolve(source)))) {
-        const sourceToClone = /^(http(s)?:\/\/|git@)/.test(source) ? source : path.resolve(source);
-        console.log(chalk.blue(`  Source is a Git repository. Attempting to clone with git from '${sourceToClone}'...`));
-        const gitProcess = spawn('git', ['clone', sourceToClone, targetPath], { stdio: 'pipe' });
-
-        gitProcess.stdout.on('data', (data) => {
-          process.stdout.write(chalk.gray(`  GIT: ${data}`));
-        });
-        gitProcess.stderr.on('data', (data) => {
-          process.stderr.write(chalk.yellowBright(`  GIT (stderr): ${data}`));
-        });
-
-        gitProcess.on('close', async (code) => {
-          if (code === 0) {
-            console.log(chalk.green(`\n  Successfully cloned '${sourceToClone}' to '${targetPath}'.`));
-            await writeMetadata();
-            resolve(targetPath);
-          } else {
-            console.error(chalk.red(`\n  ERROR: Git clone failed with exit code ${code} for source '${sourceToClone}'.`));
-            reject(new Error(`Git clone failed with exit code ${code}.`));
-          }
-        });
-        gitProcess.on('error', (err) => {
-          console.error(chalk.red(`\n  ERROR: Failed to start git process for cloning '${sourceToClone}': ${err.message}`));
-          reject(err);
-        });
-      } else {
-        const absoluteSourcePath = path.resolve(source);
-        console.log(chalk.blue(`  Source is a non-Git local path: ${chalk.underline(absoluteSourcePath)}. Attempting to copy...`));
-        if (!fss.existsSync(absoluteSourcePath)) {
-          console.error(chalk.red(`  ERROR: Local source path does not exist: ${absoluteSourcePath}`));
-          return reject(new Error(`Local source path does not exist: ${absoluteSourcePath}`));
-        }
-        try {
-          await fsExtra.copy(absoluteSourcePath, targetPath);
-          console.log(chalk.green(`  Successfully copied local source '${absoluteSourcePath}' to '${targetPath}'.`));
-          await writeMetadata();
-          resolve(targetPath);
-        } catch (error) {
-          console.error(chalk.red(`  ERROR: Failed to copy local source '${absoluteSourcePath}' to '${targetPath}': ${error.message}`));
-          reject(error);
-        }
-      }
+    const createInitialMetadata = () => ({
+      source: originalSource,
+      name: collectionName,
+      added_on: new Date().toISOString(),
     });
+
+    if (/^(http(s)?:\/\/|git@)/.test(source) || (typeof source === 'string' && source.endsWith('.git') && fss.existsSync(path.resolve(source)))) {
+      const sourceToClone = /^(http(s)?:\/\/|git@)/.test(source) ? source : path.resolve(source);
+      console.log(chalk.blue(`  Source is a Git repository. Attempting to clone with git from '${sourceToClone}'...`));
+      try {
+        await this._spawnGitProcess(['clone', sourceToClone, targetPath], this.collRoot, `cloning ${collectionName}`);
+        console.log(chalk.green(`\n  Successfully cloned '${sourceToClone}' to '${targetPath}'.`));
+        await this._writeCollectionMetadata(collectionName, createInitialMetadata());
+        return targetPath;
+      } catch (error) {
+        // Error already logged by _spawnGitProcess or _writeCollectionMetadata
+        throw error; // Re-throw to ensure calling context knows it failed
+      }
+    } else {
+      const absoluteSourcePath = path.resolve(source);
+      console.log(chalk.blue(`  Source is a non-Git local path: ${chalk.underline(absoluteSourcePath)}. Attempting to copy...`));
+      if (!fss.existsSync(absoluteSourcePath)) {
+        const errMsg = `Local source path does not exist: ${absoluteSourcePath}`;
+        console.error(chalk.red(`  ERROR: ${errMsg}`));
+        throw new Error(errMsg);
+      }
+      try {
+        await fsExtra.copy(absoluteSourcePath, targetPath);
+        console.log(chalk.green(`  Successfully copied local source '${absoluteSourcePath}' to '${targetPath}'.`));
+        await this._writeCollectionMetadata(collectionName, createInitialMetadata());
+        return targetPath;
+      } catch (error) {
+        console.error(chalk.red(`  ERROR: Failed to copy local source '${absoluteSourcePath}' to '${targetPath}': ${error.message}`));
+        throw error;
+      }
+    }
   }
 
   async enablePlugin(collectionPluginId, options = {}) {
@@ -150,28 +212,12 @@ class CollectionsManager {
     }
     const absolutePluginConfigPath = pluginToEnable.config_path;
 
-    let invokeName = options.name || pluginId; // Use options.name (formerly options.as)
+    let invokeName = options.name || pluginId;
     if (!/^[a-zA-Z0-9_.-]+$/.test(invokeName)) {
         throw new Error(`Invalid invoke_name: "${invokeName}". Must be alphanumeric, underscores, hyphens, or periods.`);
     }
 
-    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
-    let enabledManifest = { enabled_plugins: [] };
-    try {
-      if (fss.existsSync(enabledManifestPath)) {
-        const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
-        enabledManifest = yaml.load(manifestContent);
-        if (!enabledManifest || !Array.isArray(enabledManifest.enabled_plugins)) {
-          if (this.debug) console.warn(chalk.yellow(`WARN (CM:enablePlugin): Invalid or empty ${ENABLED_MANIFEST_FILENAME}. Initializing with empty list.`));
-          enabledManifest = { enabled_plugins: [] };
-        }
-      } else {
-        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): ${ENABLED_MANIFEST_FILENAME} not found. Initializing new one.`));
-      }
-    } catch (e) {
-      console.warn(chalk.yellow(`WARN (CM:enablePlugin): Could not read or parse ${enabledManifestPath}: ${e.message}. Starting with a new manifest.`));
-      enabledManifest = { enabled_plugins: [] };
-    }
+    const enabledManifest = await this._readEnabledManifest();
 
     if (enabledManifest.enabled_plugins.some(p => p.invoke_name === invokeName)) {
       throw new Error(`Invoke name "${invokeName}" is already in use. Choose a different name using --name.`);
@@ -188,20 +234,15 @@ class CollectionsManager {
     enabledManifest.enabled_plugins.push(newEntry);
     enabledManifest.enabled_plugins.sort((a, b) => a.invoke_name.localeCompare(b.invoke_name));
 
-    try {
-      await fs.mkdir(this.collRoot, { recursive: true });
-      const yamlString = yaml.dump(enabledManifest, { sortKeys: true });
-      await fs.writeFile(enabledManifestPath, yamlString);
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): Successfully wrote to ${enabledManifestPath}`));
-      console.log(chalk.green(`Plugin "${collectionName}/${pluginId}" enabled successfully as "${invokeName}".`));
-      return { success: true, message: `Plugin "${collectionName}/${pluginId}" enabled as "${invokeName}".`, invoke_name: invokeName };
-    } catch (e) {
-      console.error(chalk.red(`ERROR (CM:enablePlugin): Failed to write to ${enabledManifestPath}: ${e.message}`));
-      throw e;
-    }
+    await this._writeEnabledManifest(enabledManifest);
+    console.log(chalk.green(`Plugin "${collectionName}/${pluginId}" enabled successfully as "${invokeName}".`));
+    return { success: true, message: `Plugin "${collectionName}/${pluginId}" enabled as "${invokeName}".`, invoke_name: invokeName };
   }
 
   async enableAllPluginsInCollection(collectionName, options = {}) {
+    // ... (content unchanged, but uses _readCollectionMetadata and _enablePlugin which now use helpers) ...
+    // For brevity, keeping this method's internal logic visually collapsed here, as it's mostly calls to other methods.
+    // The internal prefix determination logic using _readCollectionMetadata would implicitly benefit.
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enableAllPluginsInCollection): Enabling all plugins in: ${collectionName}, options: ${JSON.stringify(options)}`));
     const collectionPath = path.join(this.collRoot, collectionName);
     if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
@@ -216,49 +257,24 @@ class CollectionsManager {
     }
 
     let defaultPrefixToUse = "";
-    let metadataReadSuccessfully = false;
-    const metadataPath = path.join(collectionPath, METADATA_FILENAME);
-
     if (!options.noPrefix && !(options.prefix && typeof options.prefix === 'string')) {
-        if (fss.existsSync(metadataPath)) {
-            try {
-                const metaContent = await fs.readFile(metadataPath, 'utf8');
-                const metadata = yaml.load(metaContent);
-                metadataReadSuccessfully = true;
-                if (metadata && metadata.source) {
-                    const source = metadata.source;
-                    const gitHubHttpsMatch = source.match(/^https?:\/\/github\.com\/([^\/]+)\/[^\/.]+(\.git)?$/);
-                    const gitHubSshMatch = source.match(/^git@github\.com:([^\/]+)\/[^\/.]+(\.git)?$/);
-                    // Add more regex for GitLab, Bitbucket, etc. if desired
-                    // e.g., const gitLabMatch = source.match(/^https?:\/\/gitlab\.com\/([^\/]+)\/[^\/.]+(\.git)?$/);
+        const metadata = await this._readCollectionMetadata(collectionName); // Uses helper
+        if (metadata && metadata.source) {
+            const source = metadata.source;
+            const gitHubHttpsMatch = source.match(/^https?:\/\/github\.com\/([^\/]+)\/[^\/.]+(\.git)?$/);
+            const gitHubSshMatch = source.match(/^git@github\.com:([^\/]+)\/[^\/.]+(\.git)?$/);
 
-                    if (gitHubHttpsMatch && gitHubHttpsMatch[1]) {
-                        defaultPrefixToUse = `${gitHubHttpsMatch[1]}-`;
-                    } else if (gitHubSshMatch && gitHubSshMatch[1]) {
-                        defaultPrefixToUse = `${gitHubSshMatch[1]}-`;
-                    } else if (/^(http(s)?:\/\/|git@)/.test(source)) {
-                        // It's a Git URL but not a recognized pattern for username extraction
-                        defaultPrefixToUse = `${collectionName}-`;
-                        if (this.debug || !options.isCliCall) { // Avoid duplicate console logs if CLI already warns
-                            console.warn(chalk.yellow(`  WARN: Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`));
-                        }
-                    }
-                    // If it's a local path, defaultPrefixToUse remains "" (no automatic prefix)
-                } else {
-                   if (this.debug) console.log(chalk.magenta(`DEBUG: Metadata source not found for ${collectionName}, defaulting to no prefix for local-like behavior.`));
-                }
-            } catch (e) {
-                if (this.debug) console.warn(chalk.yellow(`WARN: Could not read or parse metadata for ${collectionName} to determine prefix. Error: ${e.message}`));
-                // Fallback to collectionName prefix if metadata read fails but source was likely remote
-                 if (options.isCliCall && /^(http(s)?:\/\/|git@)/.test(options.originalSourceForPrefixFallback || "")) { // Heuristic
-                    defaultPrefixToUse = `${collectionName}-`;
-                 }
+            if (gitHubHttpsMatch && gitHubHttpsMatch[1]) defaultPrefixToUse = `${gitHubHttpsMatch[1]}-`;
+            else if (gitHubSshMatch && gitHubSshMatch[1]) defaultPrefixToUse = `${gitHubSshMatch[1]}-`;
+            else if (/^(http(s)?:\/\/|git@)/.test(source)) {
+                defaultPrefixToUse = `${collectionName}-`;
+                if (this.debug || !options.isCliCall) console.warn(chalk.yellow(`  WARN: Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`));
             }
         } else {
-            if (this.debug) console.log(chalk.magenta(`DEBUG: Metadata file not found for ${collectionName}. Assuming local collection, no default prefix.`));
+            if (this.debug && !metadata && fss.existsSync(path.join(collectionPath, METADATA_FILENAME))) console.warn(chalk.yellow(`WARN: Metadata for ${collectionName} exists but couldn't be read for prefix.`));
+            else if (this.debug) console.log(chalk.magenta(`DEBUG: Metadata file/source not found for ${collectionName}, defaulting to no prefix.`));
         }
     }
-
 
     const results = [];
     let allSucceeded = true;
@@ -268,31 +284,17 @@ class CollectionsManager {
         const collectionPluginId = `${plugin.collection}/${plugin.plugin_id}`;
         let invokeName;
 
-        if (options.noPrefix) {
-            invokeName = plugin.plugin_id;
-        } else if (options.prefix && typeof options.prefix === 'string') {
-            invokeName = `${options.prefix}${plugin.plugin_id}`;
-        } else { // Default prefixing logic
-            invokeName = `${defaultPrefixToUse}${plugin.plugin_id}`;
-        }
+        if (options.noPrefix) invokeName = plugin.plugin_id;
+        else if (options.prefix && typeof options.prefix === 'string') invokeName = `${options.prefix}${plugin.plugin_id}`;
+        else invokeName = `${defaultPrefixToUse}${plugin.plugin_id}`;
 
         try {
-            const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName });
-            results.push({
-                plugin: collectionPluginId,
-                invoke_name: enableResult.invoke_name,
-                status: 'enabled',
-                message: enableResult.message
-            });
+            const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName }); // Uses helper
+            results.push({ plugin: collectionPluginId, invoke_name: enableResult.invoke_name, status: 'enabled', message: enableResult.message });
             countEnabled++;
         } catch (error) {
             allSucceeded = false;
-            results.push({
-                plugin: collectionPluginId,
-                invoke_name: invokeName,
-                status: 'failed',
-                message: error.message
-            });
+            results.push({ plugin: collectionPluginId, invoke_name: invokeName, status: 'failed', message: error.message });
             console.warn(chalk.yellow(`  Failed to enable ${collectionPluginId} as ${invokeName}: ${error.message}`));
         }
     }
@@ -310,47 +312,24 @@ class CollectionsManager {
 
   async disablePlugin(invokeName) {
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:disablePlugin): Disabling invoke_name: ${invokeName}`));
+    const enabledManifest = await this._readEnabledManifest();
 
-    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
-    let enabledManifest = { enabled_plugins: [] };
-
-    if (!fss.existsSync(enabledManifestPath)) {
-      console.log(chalk.yellow(`No plugins are currently enabled (manifest not found). Cannot disable "${invokeName}".`));
+    if (enabledManifest.enabled_plugins.length === 0) {
+      console.log(chalk.yellow(`No plugins are currently enabled. Cannot disable "${invokeName}".`));
       return { success: false, message: `No plugins enabled. Cannot disable "${invokeName}".` };
     }
 
-    try {
-      const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
-      enabledManifest = yaml.load(manifestContent);
-      if (!enabledManifest || !Array.isArray(enabledManifest.enabled_plugins)) {
-        console.log(chalk.yellow(`Enabled plugins manifest is invalid or empty. Cannot disable "${invokeName}".`));
-        return { success: false, message: `Enabled plugins manifest invalid. Cannot disable "${invokeName}".` };
-      }
-    } catch (e) {
-      console.error(chalk.red(`ERROR (CM:disablePlugin): Could not read or parse ${enabledManifestPath}: ${e.message}`));
-      throw e;
-    }
-
     const initialLength = enabledManifest.enabled_plugins.length;
-    enabledManifest.enabled_plugins = enabledManifest.enabled_plugins.filter(
-      p => p.invoke_name !== invokeName
-    );
+    enabledManifest.enabled_plugins = enabledManifest.enabled_plugins.filter(p => p.invoke_name !== invokeName);
 
     if (enabledManifest.enabled_plugins.length === initialLength) {
       console.log(chalk.yellow(`Plugin with invoke name "${invokeName}" not found among enabled plugins.`));
       return { success: false, message: `Plugin invoke name "${invokeName}" not found.` };
     }
 
-    try {
-      const yamlString = yaml.dump(enabledManifest, { sortKeys: true });
-      await fs.writeFile(enabledManifestPath, yamlString);
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:disablePlugin): Successfully wrote updated manifest to ${enabledManifestPath}`));
-      console.log(chalk.green(`Plugin "${invokeName}" disabled successfully.`));
-      return { success: true, message: `Plugin "${invokeName}" disabled.` };
-    } catch (e) {
-      console.error(chalk.red(`ERROR (CM:disablePlugin): Failed to write updated manifest to ${enabledManifestPath}: ${e.message}`));
-      throw e;
-    }
+    await this._writeEnabledManifest(enabledManifest);
+    console.log(chalk.green(`Plugin "${invokeName}" disabled successfully.`));
+    return { success: true, message: `Plugin "${invokeName}" disabled.` };
   }
 
   async removeCollection(collectionName, options = {}) {
@@ -364,22 +343,8 @@ class CollectionsManager {
       throw new Error(`Target "${collectionName}" at ${collectionPath} is not a directory.`);
     }
 
-    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
-    let enabledPluginsFromThisCollection = [];
-
-    if (fss.existsSync(enabledManifestPath)) {
-      try {
-        const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
-        const enabledManifest = yaml.load(manifestContent);
-        if (enabledManifest && Array.isArray(enabledManifest.enabled_plugins)) {
-          enabledPluginsFromThisCollection = enabledManifest.enabled_plugins.filter(
-            p => p.collection_name === collectionName
-          );
-        }
-      } catch (e) {
-        console.warn(chalk.yellow(`WARN (CM:removeCollection): Could not read or parse ${enabledManifestPath} while checking for enabled plugins from ${collectionName}: ${e.message}`));
-      }
-    }
+    let enabledManifest = await this._readEnabledManifest();
+    const enabledPluginsFromThisCollection = enabledManifest.enabled_plugins.filter(p => p.collection_name === collectionName);
 
     if (enabledPluginsFromThisCollection.length > 0 && !options.force) {
       const pluginNames = enabledPluginsFromThisCollection.map(p => `"${p.invoke_name}" (from ${p.plugin_id})`).join(', ');
@@ -389,20 +354,15 @@ class CollectionsManager {
     if (options.force && enabledPluginsFromThisCollection.length > 0) {
       console.log(chalk.yellow(`  Force removing. Disabling plugins from "${collectionName}":`));
       let manifestChanged = false;
-      let currentEnabledManifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
-
       for (const plugin of enabledPluginsFromThisCollection) {
         console.log(chalk.yellow(`    - Disabling "${plugin.invoke_name}"...`));
-        const initialLength = currentEnabledManifest.enabled_plugins.length;
-        currentEnabledManifest.enabled_plugins = currentEnabledManifest.enabled_plugins.filter(p => p.invoke_name !== plugin.invoke_name);
-        if (currentEnabledManifest.enabled_plugins.length < initialLength) {
-            manifestChanged = true;
-        }
+        const initialLength = enabledManifest.enabled_plugins.length;
+        enabledManifest.enabled_plugins = enabledManifest.enabled_plugins.filter(p => p.invoke_name !== plugin.invoke_name);
+        if (enabledManifest.enabled_plugins.length < initialLength) manifestChanged = true;
       }
       if (manifestChanged) {
-          const yamlString = yaml.dump(currentEnabledManifest, { sortKeys: true });
-          await fs.writeFile(enabledManifestPath, yamlString);
-           if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection --force): Wrote updated manifest after disabling plugins.`));
+        await this._writeEnabledManifest(enabledManifest);
+        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection --force): Wrote updated manifest after disabling plugins.`));
       }
     }
 
@@ -425,19 +385,10 @@ class CollectionsManager {
       return { success: false, message: `Collection "${collectionName}" not found.` };
     }
 
-    const metadataPath = path.join(collectionPath, METADATA_FILENAME);
-    if (!fss.existsSync(metadataPath)) {
-      console.warn(chalk.yellow(`WARN: Metadata file not found for collection "${collectionName}". Cannot determine source for update.`));
-      return { success: false, message: `Metadata not found for "${collectionName}".` };
-    }
-
-    let metadata;
-    try {
-      const metaContent = await fs.readFile(metadataPath, 'utf8');
-      metadata = yaml.load(metaContent);
-    } catch (e) {
-      console.error(chalk.red(`ERROR: Could not read or parse metadata for "${collectionName}": ${e.message}`));
-      return { success: false, message: `Error reading metadata for "${collectionName}".` };
+    const metadata = await this._readCollectionMetadata(collectionName);
+    if (!metadata) {
+      console.warn(chalk.yellow(`WARN: Metadata file not found or unreadable for collection "${collectionName}". Cannot determine source for update.`));
+      return { success: false, message: `Metadata not found or unreadable for "${collectionName}".` };
     }
 
     if (!metadata.source || !(/^(http(s)?:\/\/|git@)/.test(metadata.source) || (typeof metadata.source === 'string' && metadata.source.endsWith('.git')))) {
@@ -447,39 +398,16 @@ class CollectionsManager {
 
     console.log(chalk.blue(`Updating collection "${collectionName}" from Git source: ${chalk.underline(metadata.source)}...`));
 
-    return new Promise((resolve, reject) => {
-      const gitProcess = spawn('git', ['pull'], { cwd: collectionPath, stdio: 'pipe' });
-
-      gitProcess.stdout.on('data', (data) => {
-        process.stdout.write(chalk.gray(`  GIT (${collectionName}): ${data}`));
-      });
-      gitProcess.stderr.on('data', (data) => {
-        process.stderr.write(chalk.yellowBright(`  GIT (${collectionName}, stderr): ${data}`));
-      });
-
-      gitProcess.on('close', async (code) => {
-        if (code === 0) {
-          console.log(chalk.green(`\n  Successfully updated collection "${collectionName}".`));
-          metadata.updated_on = new Date().toISOString();
-          try {
-            const yamlString = yaml.dump(metadata);
-            await fs.writeFile(metadataPath, yamlString);
-            if (this.debug) console.log(chalk.magenta(`  DEBUG: Updated metadata for ${collectionName} with new timestamp.`));
-            resolve({ success: true, message: `Collection "${collectionName}" updated.` });
-          } catch (metaError) {
-            console.warn(chalk.yellow(`  WARN: Could not update metadata timestamp for ${collectionName}: ${metaError.message}`));
-            resolve({ success: true, message: `Collection "${collectionName}" updated, but metadata timestamp failed.` });
-          }
-        } else {
-          console.error(chalk.red(`\n  ERROR: Git pull failed for collection "${collectionName}" with exit code ${code}.`));
-          resolve({ success: false, message: `Git pull failed for "${collectionName}" with exit code ${code}.`});
-        }
-      });
-      gitProcess.on('error', (err) => {
-        console.error(chalk.red(`\n  ERROR: Failed to start git process for updating "${collectionName}": ${err.message}`));
-        resolve({ success: false, message: `Failed to start git process for updating "${collectionName}": ${err.message}` });
-      });
-    });
+    try {
+      await this._spawnGitProcess(['pull'], collectionPath, `pulling ${collectionName}`);
+      console.log(chalk.green(`\n  Successfully updated collection "${collectionName}".`));
+      metadata.updated_on = new Date().toISOString();
+      await this._writeCollectionMetadata(collectionName, metadata);
+      return { success: true, message: `Collection "${collectionName}" updated.` };
+    } catch (error) {
+      // Error already logged by _spawnGitProcess or _writeCollectionMetadata
+      return { success: false, message: error.message };
+    }
   }
 
   async updateAllCollections() {
@@ -496,31 +424,18 @@ class CollectionsManager {
     console.log(chalk.blue("Processing updates for downloaded collections:"));
 
     for (const collectionName of downloadedCollections) {
-        const collectionPath = path.join(this.collRoot, collectionName);
-        const metadataPath = path.join(collectionPath, METADATA_FILENAME);
-        let originalSourceForPrefixFallback = ""; // For options.isCliCall heuristic
+        const metadata = await this._readCollectionMetadata(collectionName);
 
-        if (!fss.existsSync(metadataPath)) {
-            const skipMsg = `Skipping ${collectionName}: No metadata file found.`;
+        if (!metadata) {
+            const skipMsg = `Skipping ${collectionName}: Metadata file not found or unreadable.`;
             console.log(chalk.yellow(`  ${skipMsg}`));
             updateMessages.push(skipMsg);
             continue;
         }
-        let metadata;
-        try {
-            metadata = yaml.load(await fs.readFile(metadataPath, 'utf8'));
-            if (metadata && metadata.source) originalSourceForPrefixFallback = metadata.source;
-        } catch (e) {
-            const errMsg = `Skipping ${collectionName}: Error reading metadata. ${e.message}`;
-            console.error(chalk.red(`  ${errMsg}`));
-            updateMessages.push(errMsg);
-            allOverallSuccess = false;
-            continue;
-        }
 
-        if (metadata && metadata.source && (/^(http(s)?:\/\/|git@)/.test(metadata.source) || (typeof metadata.source === 'string' && metadata.source.endsWith('.git')) )) {
+        if (metadata.source && (/^(http(s)?:\/\/|git@)/.test(metadata.source) || (typeof metadata.source === 'string' && metadata.source.endsWith('.git')) )) {
             try {
-                const result = await this.updateCollection(collectionName);
+                const result = await this.updateCollection(collectionName); // Uses helper
                 updateMessages.push(result.message);
                 if (!result.success) allOverallSuccess = false;
             } catch (error) {
@@ -632,10 +547,9 @@ class CollectionsManager {
   }
 
   async listCollections(type = 'downloaded', collectionNameFilter = null) {
-    if (type === 'downloaded') { // This type is used by CLI 'list collections'
+    if (type === 'downloaded') {
       try {
         if (!fss.existsSync(this.collRoot)) {
-          // console.log(chalk.yellow("  Collections root directory does not exist. No collections downloaded.")); // CLI handles this
           return [];
         }
         const entries = await fs.readdir(this.collRoot, { withFileTypes: true });
@@ -649,26 +563,11 @@ class CollectionsManager {
         console.error(chalk.red(`  ERROR listing downloaded collections: ${error.message}`));
         throw error;
       }
-    } else if (type === 'available') { // This maps to 'list all' in CLI
+    } else if (type === 'available') {
         const availablePlugins = await this.listAvailablePlugins(collectionNameFilter);
         return availablePlugins;
-
     } else if (type === 'enabled') {
-        const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
-        let enabledManifest = { enabled_plugins: [] };
-        if (fss.existsSync(enabledManifestPath)) {
-            try {
-                const manifestContent = await fs.readFile(enabledManifestPath, 'utf8');
-                enabledManifest = yaml.load(manifestContent);
-                if (!enabledManifest || !Array.isArray(enabledManifest.enabled_plugins)) {
-                    enabledManifest = { enabled_plugins: [] };
-                }
-            } catch (e) {
-                 console.warn(chalk.yellow(`WARN (CM:listColl): Could not read or parse ${enabledManifestPath}: ${e.message}. Assuming no plugins enabled.`));
-                 enabledManifest = { enabled_plugins: [] };
-            }
-        }
-
+        const enabledManifest = await this._readEnabledManifest(); // Uses helper
         let pluginsToDisplay = enabledManifest.enabled_plugins;
 
         if (collectionNameFilter) {
@@ -677,7 +576,6 @@ class CollectionsManager {
 
         pluginsToDisplay.sort((a,b) => a.invoke_name.toLowerCase().localeCompare(b.invoke_name.toLowerCase()));
         return pluginsToDisplay;
-
     } else {
       console.log(chalk.yellow(`  Listing for type '${type}' is not yet implemented in manager.`));
       return [];

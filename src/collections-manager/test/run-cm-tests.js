@@ -11,6 +11,7 @@ const { runEnableTests } = require('./enable.test.js');
 const { runDisableTests } = require('./disable.test.js');
 const { runRemoveTests } = require('./remove.test.js');
 const { runUpdateTests } = require('./update.test.js');
+const { runArchetypeTests } = require('./archetype.test.js'); // Added
 
 // Import global setup/cleanup from helpers if needed, or manage here
 const { TEST_COLL_ROOT_BASE } = require('./test-helpers.js');
@@ -40,6 +41,7 @@ async function runAllTests() {
         { name: "Disable Command Tests", runner: runDisableTests },
         { name: "Remove Command Tests", runner: runRemoveTests },
         { name: "Update Command Tests", runner: runUpdateTests },
+        { name: "Archetype Command Tests", runner: runArchetypeTests }, // Added
     ];
 
     for (const suite of testSuites) {
@@ -47,20 +49,9 @@ async function runAllTests() {
             console.log(chalk.cyanBright.bold(`\n--- Running Suite: ${suite.name} ---`));
             await suite.runner(testRunStats);
         } catch (error) {
-            // Errors from tests should be caught and logged within the test functions themselves.
-            // This catch is a fallback for unexpected errors during suite execution.
             console.error(chalk.red.bold(`  FATAL ERROR during suite ${suite.name}:`), error);
-            // We might decide to stop all tests here or let it continue to the summary
         }
     }
-
-    // Global cleanup (optional, could be done by individual tests or here)
-    // For now, individual tests using createTestCollRoot and cleanupTestCollRoot handle their own specific temp dirs.
-    // The TEST_COLL_ROOT_BASE itself can be left for inspection or cleaned up.
-    // if (fss.existsSync(TEST_COLL_ROOT_BASE)) {
-    //     console.log(chalk.gray(`\n  Final cleanup of base test directory: ${TEST_COLL_ROOT_BASE}`));
-    //     await fs.rm(TEST_COLL_ROOT_BASE, { recursive: true, force: true });
-    // }
 
     console.log(chalk.bold.inverse("\n--- Test Summary ---"));
     console.log(chalk.blue(`Tests attempted: ${testRunStats.attempted}`));
@@ -76,7 +67,6 @@ async function runAllTests() {
     }
 }
 
-// Ensure this script is run directly
 if (require.main === module) {
     runAllTests().catch(err => {
         console.error(chalk.red.bold("Unhandled error in test runner:"), err);
@@ -84,4 +74,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { runAllTests }; // Export for potential programmatic use
+module.exports = { runAllTests };

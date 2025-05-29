@@ -3,7 +3,16 @@
 
 ## 0.7.5 (Conceptual - Refinement & Polish)
 
-### Changed
+### Enhancements & Fixes (Addressing Test Environment & Prefixing Strategy)
+
+* **Default Prefixing for `enable --all`:** The `enableAllPluginsInCollection` method (and thus the `md-to-pdf-cm enable <collection> --all` command) now uses an origin-dependent default prefixing strategy for `invoke_name`s:
+    * For collections sourced from recognized Git platforms (e.g., GitHub), it attempts to use `<username>-<plugin_id>`.
+    * For other Git remotes (where username parsing isn't straightforward), it defaults to `<collection_name>-<plugin_id>`.
+    * For collections sourced from local paths, it defaults to no prefix (`<plugin_id>`).
+    * This default behavior can be overridden by the user with `--prefix <custom_prefix>` or `--no-prefix`.
+* **Test Suite Git Isolation:** Test helper functions (`test-helpers.js`) that perform Git operations now configure a dummy `user.name` and `user.email`, and explicitly disable GPG commit signing (`commit.gpgsign false`) for those operations. This prevents tests from using the global Git user configuration and avoids GPG signing prompts, ensuring test reliability and portability.
+
+### Changed (Core Polish Items)
 
 * **Test Suite Refactoring:** The main test file `test/run-cm-tests.js` was refactored into a modular structure. Tests are now organized by command (e.g., `add.test.js`, `list.test.js`) within the `test/` directory and orchestrated by `run-cm-tests.js`. Common test utility functions were extracted into `test/test-helpers.js`.
 * **CLI Ergonomics for `enable` command:** The option to specify a custom invocation name for a plugin during enablement was changed from `--as <invoke_name>` to `--name <invoke_name>` for consistency with the `add --name` command. The internal `enablePlugin` and `enableAllPluginsInCollection` methods in `CollectionsManager` were updated accordingly.
@@ -13,11 +22,11 @@
     * `enabled [<collection_name>]`: Lists actively enabled plugins.
     * `disabled [<collection_name>]`: Lists available plugins that are not currently enabled.
     * `collections`: Lists names of all downloaded collection directories (replaces the old `downloaded` type's primary function).
-* **CLI Help Text:** Updated descriptions for `enable --all` and `update` commands to clarify that they are point-in-time actions and do not automatically enable new plugins if a collection is updated later.
+* **CLI Help Text:** Updated descriptions for `enable --all` and `update` commands to clarify that they are point-in-time actions and do not automatically enable new plugins if a collection is updated later. Also updated help for `enable --all` to describe the new origin-dependent default prefixing logic.
 
-### Fixed
+### Fixed (Core Polish Items)
 
-* Corrected the `enablePlugin` and `enableAllPluginsInCollection` methods in `CollectionsManager` to properly use the provided option (now `options.name`) for setting custom plugin invocation names. Previously, it might have defaulted to the plugin ID incorrectly.
+* Corrected the `enablePlugin` and `enableAllPluginsInCollection` methods in `CollectionsManager` to properly use the provided option (`options.name`) for setting custom plugin invocation names.
 
 
 ## 0.7.4 (Conceptual - Features for md-to-pdf v0.7.0)

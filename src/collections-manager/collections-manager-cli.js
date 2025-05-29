@@ -98,11 +98,11 @@ yargs(hideBin(process.argv))
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to enable all plugins in collection...`));
         console.log(`  Collection Name: ${chalk.cyan(argv.target)}`);
 
-        let originalSourceForPrefixFallback = ""; // Used by manager if metadata read fails for some reason
+        let originalSourceForPrefixFallback = ""; 
         try {
             const metadataPath = path.join(manager.collRoot, argv.target, '.collection-metadata.yaml');
-            if (fs.existsSync(metadataPath)) { // Use synchronous fs for this check
-                const metaContent = await fsp.readFile(metadataPath, 'utf8'); // Use async fsp for read
+            if (fs.existsSync(metadataPath)) { 
+                const metaContent = await fsp.readFile(metadataPath, 'utf8'); 
                 const metadata = yaml.load(metaContent);
                 if (metadata && metadata.source) {
                     originalSourceForPrefixFallback = metadata.source;
@@ -123,7 +123,7 @@ yargs(hideBin(process.argv))
         try {
           const result = await manager.enableAllPluginsInCollection(argv.target, {
             prefix: argv.prefix,
-            noPrefix: argv.noPrefix, // Pass the new flag
+            noPrefix: argv.noPrefix, 
             isCliCall: true, 
             originalSourceForPrefixFallback
           });
@@ -137,13 +137,13 @@ yargs(hideBin(process.argv))
           if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
           process.exit(1);
         }
-      } else { // Single plugin enable
+      } else { 
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to enable plugin...`));
         console.log(`  Plugin Identifier: ${chalk.cyan(argv.target)}`);
         if (argv.name) {
           console.log(`  Requested invoke name: ${chalk.yellow(argv.name)}`);
         }
-        if (argv.prefix || argv.noPrefix){ // These flags are only for --all
+        if (argv.prefix || argv.noPrefix){ 
             console.warn(chalk.yellow("WARN: --prefix and --no-prefix options are ignored when not using --all."))
         }
         try {
@@ -223,20 +223,35 @@ yargs(hideBin(process.argv))
   )
   .command(
     'update [<collection_name>]',
-    `Updates a Git-based plugin collection, or all Git-based collections if no name is specified.
-     Note: This command only pulls updates; it does not automatically enable any new plugins added to the collection.`,
+    // Revised help text for the 'update' command
+    `Updates a Git-based plugin collection to match its remote source.
+     Local modifications in the collection directory (e.g., in
+     ${chalk.dim('~/.local/share/md-to-pdf/collections/<collection_name>')}) will be overwritten.
+     The update will be aborted if local uncommitted changes or unpushed
+     local commits are detected.
+
+     To preserve custom changes, clone the collection to a separate local
+     directory and register it, or use the 'archetype' command (future).
+
+     If no collection name is specified, attempts to update all Git-based collections.
+     Note: This command only syncs the collection; it does not automatically
+     enable any new plugins that might be added to the remote collection.`,
     (yargsCmd) => {
       yargsCmd
         .positional('collection_name', {
           describe: 'Optional. The name of the specific collection to update.',
           type: 'string'
         });
+      // Future: .option('force-update', { describe: 'Force update even if local changes exist (overwrites them).', type: 'boolean', default: false })
     },
     async (argv) => {
       if (argv.collection_name) {
         console.log(chalk.blueBright(`Collections Manager CLI: Attempting to update collection '${chalk.cyan(argv.collection_name)}'...`));
         try {
           const result = await manager.updateCollection(argv.collection_name);
+          if (!result.success) {
+             console.warn(chalk.yellow(`Update for '${argv.collection_name}' reported issues: ${result.message}`));
+          }
         } catch (error) {
           console.error(chalk.red(`\nERROR in 'update ${argv.collection_name}' command: ${error.message}`));
           if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
@@ -246,9 +261,17 @@ yargs(hideBin(process.argv))
         console.log(chalk.blueBright('Collections Manager CLI: Attempting to update all Git-based collections...'));
         try {
           const results = await manager.updateAllCollections();
-           results.messages.forEach(msg => console.log(chalk.blue(`  ${msg}`)));
+           results.messages.forEach(msg => {
+             if (msg.includes("updated.") || msg.includes("not from a recognized Git source.") || msg.includes("No collections downloaded.")) {
+                console.log(chalk.blue(`  ${msg}`));
+             } else if (msg.includes("has local changes")) {
+                console.log(chalk.yellow(`  ${msg}`));
+             } else {
+                console.log(chalk.red(`  ${msg}`)); 
+             }
+           });
            if (!results.success) {
-             console.warn(chalk.yellow("Some collections may not have updated successfully. Check logs above."));
+             console.warn(chalk.yellow("Some collections may not have updated successfully or were skipped. Check logs above."));
            }
         } catch (error) {
           console.error(chalk.red(`\nERROR in 'update all' command: ${error.message}`));

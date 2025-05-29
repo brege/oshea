@@ -183,3 +183,58 @@ md-to-pdf-cm remove brege-plugins --force
 # Collection "brege-plugins" has been removed.
 ```
 
+
+## 7. Archetyping a Plugin for Customization (`archetype`)
+
+If you find a plugin in a downloaded collection that you like but want to modify extensively without affecting the original (which might be overwritten by `md-to-pdf-cm update`), you can create an "archetype" or a personal copy of it.
+
+**Command**
+```bash
+md-to-pdf-cm archetype <source_collection_name>/<source_plugin_id> <new_archetype_name> [--target-dir <path>]
+```
+
+* `<source_collection_name>/<source_plugin_id>`: The identifier of the plugin you want to copy (e.g., `plugins-from-brege/advanced-card-red`).
+* `<new_archetype_name>`: The name you want to give your new, customizable plugin copy (e.g., `my-special-card`).
+* `--target-dir <path>`: (Optional) Specifies the base directory where your new archetype plugin folder (`<new_archetype_name>/`) will be created.
+    * If not provided, it defaults to a `my-plugins/` directory located alongside your main `collections/` directory (e.g., `~/.local/share/md-to-pdf/my-plugins/`).
+
+**What it does:**
+
+1.  Copies the entire source plugin directory to the new location (`<target-dir_or_default>/<new_archetype_name>/`).
+2.  Renames key files within the new archetype:
+    * `source_plugin_id.config.yaml` becomes `new_archetype_name.config.yaml`.
+    * If a CSS file named `source_plugin_id.css` (or if it's the only simple CSS file listed) exists and is referenced, it's renamed to `new_archetype_name.css`, and the reference in the config is updated.
+    * If a handler script named `source_plugin_id.js` (and not `index.js`) exists, it's renamed to `new_archetype_name.js`, and the reference is updated.
+    * If an example file named `source_plugin_id-example.md` (or `_example.md`) exists, it's renamed to `new_archetype_name-example.md`.
+3.  Modifies the `new_archetype_name.config.yaml`:
+    * Updates the `description` to note that it's an archetype of the original.
+4.  Updates `README.md` (if present) in the archetype with a note about its origin.
+5.  Performs string replacements within common text files (`.js`, `.yaml`, `.css`, `.md`) in the new archetype, changing occurrences of the `source_plugin_id` (and its PascalCase form) to the `new_archetype_name` (and its PascalCase form), while preserving original IDs in attribution messages.
+
+**Example**
+
+To create a customizable copy of the `advanced-card-red` plugin from the `plugins-from-brege` collection and name it `my-blue-card`, placing it in the default user archetype directory:
+
+```bash
+md-to-pdf-cm archetype plugins-from-brege/advanced-card-red my-blue-card
+```
+
+**Expected Output (summary):**
+```
+Collections Manager CLI: Attempting to create archetype...
+  Source Plugin: plugins-from-brege/advanced-card-red
+  New Archetype Name: my-blue-card
+Archetype 'my-blue-card' created successfully from 'plugins-from-brege/advanced-card-red'. Operations: Renamed config file to my-blue-card.config.yaml. Updated description... (etc.)
+
+Plugin archetype 'my-blue-card' created from 'plugins-from-brege/advanced-card-red' at:
+    /home/user/.local/share/md-to-pdf/my-plugins/my-blue-card
+
+To use this new plugin with md-to-pdf:
+  1. Register it in your md-to-pdf configuration file...
+     plugins:
+       my-blue-card: "/home/user/.local/share/md-to-pdf/my-plugins/my-blue-card/my-blue-card.config.yaml"
+  2. Then invoke: md-to-pdf convert mydoc.md --plugin my-blue-card
+```
+
+After creating an archetype, you'll need to register this new plugin path in your main `md-to-pdf` configuration file (XDG or project-specific) to use it. This copied plugin is now yours to modify freely.
+

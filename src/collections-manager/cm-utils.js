@@ -15,6 +15,18 @@ function deriveCollectionName(source) {
   return baseName.replace(/\.git$/, '').replace(/[^a-zA-Z0-9_-]/g, '-');
 }
 
+/**
+ * Converts a hyphenated string to PascalCase.
+ * e.g., "my-plugin-name" -> "MyPluginName"
+ * @param {string} str - The input string.
+ * @returns {string} The PascalCase string.
+ */
+function toPascalCase(str) {
+  if (!str) return '';
+  return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+}
+
 module.exports = {
   deriveCollectionName,
+  toPascalCase, // Added
 };

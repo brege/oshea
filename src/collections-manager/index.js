@@ -26,6 +26,7 @@ const updateCollectionCmd = require('./commands/update');
 const updateAllCollectionsCmd = require('./commands/updateAll');
 const listAvailablePluginsCmd = require('./commands/listAvailable');
 const listCollectionsCmd = require('./commands/list');
+const archetypePluginCmd = require('./commands/archetype');
 
 class CollectionsManager {
   constructor(options = {}) {
@@ -45,6 +46,7 @@ class CollectionsManager {
     this.updateAllCollections = updateAllCollectionsCmd.bind(this);
     this.listAvailablePlugins = listAvailablePluginsCmd.bind(this);
     this.listCollections = listCollectionsCmd.bind(this);
+    this.archetypePlugin = archetypePluginCmd.bind(this);
   }
 
   determineCollRoot() {

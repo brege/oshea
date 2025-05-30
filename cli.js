@@ -244,11 +244,11 @@ async function main() {
                         try {
                             console.log("Discovering plugins...");
                             const builder = new PluginRegistryBuilder(
-                                path.resolve(__dirname, ".."), 
+                                __dirname, // Changed: Use __dirname as projectRoot
                                 null, 
                                 args.config, 
                                 args.factoryDefaults,
-                                args.isLazyLoad || false 
+                                args.isLazyLoadMode || false 
                             );
                             const pluginDetailsList = await builder.getAllPluginDetails();
 

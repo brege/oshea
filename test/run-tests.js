@@ -154,6 +154,7 @@ const testCases = [
             '--plugin', 'cv', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-cv.pdf',
+            '--no-open', // Added
         ],
         expectedOutputs: [
             { filePath: 'test-cv.pdf', minSize: 1000 },
@@ -166,6 +167,7 @@ const testCases = [
             path.join(EXAMPLES_DIR, 'example-cv.md'),
             '--plugin', 'cv', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--no-open', // Added
         ],
         expectedOutputs: [
             { filePath: 'example-curriculum-vitae.pdf', minSize: 1000 },
@@ -179,6 +181,7 @@ const testCases = [
             '--plugin', 'cover-letter', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-cover-letter.pdf',
+            '--no-open', // Added
         ],
         expectedOutputs: [
             { filePath: 'test-cover-letter.pdf', minSize: 1000 },
@@ -191,6 +194,7 @@ const testCases = [
             path.join(EXAMPLES_DIR, 'example-recipe.md'),
             '--plugin', 'recipe', 
             '--outdir', TEST_OUTPUT_BASE_DIR,
+            '--no-open', // Added
         ],
         expectedOutputs: [
             { filePath: 'example-recipe-title.pdf', minSize: 1000 },
@@ -204,6 +208,7 @@ const testCases = [
             '--recipes-base-dir', HUGO_EXAMPLE_SOURCE_IN_EXAMPLES, 
             '--outdir', TEST_OUTPUT_BASE_DIR,
             '--filename', 'test-recipe-book.pdf',
+            '--no-open', // Added
         ],
         expectedOutputs: [
             { filePath: 'test-recipe-book.pdf', minSize: 50000 },

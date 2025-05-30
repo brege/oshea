@@ -1,5 +1,9 @@
 # Changelog - md-to-pdf v0.8.x Series
 
+For the v0.7.x changelog, see [changelog-v0.7.md](changelog-v0.7.md).
+
+For the development track *before* v0.7.0, see [roadmap.md](roadmap.md).
+
 ## v0.8.0 (Conceptual - Main Test Suite Refactor)
 
 **Date:** 2025-05-30

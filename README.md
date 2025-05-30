@@ -350,7 +350,7 @@ plugins:
   advanced-card: examples:custom_plugin_showcase/advanced-card/advanced-card.config.yaml
 ```
 
-## Plugins Powering `md-to-pdf`
+## Plugins - The Heart of `md-to-pdf`
 
 The true power and flexibility of `md-to-pdf` lie in its extensible plugin system. Plugins allow you to define entirely new document types or customize existing ones, each with its own specific configuration, processing logic, and styling.
 
@@ -408,7 +408,6 @@ To process multiple Markdown files in a batch job (e.g., converting all recipes 
 ## Testing
 
 The project includes an integration test suite.
-
 ```bash
 npm test
 ```
@@ -416,6 +415,26 @@ npm test
 Test scripts and configurations are in [`test/`](test/), and [`test/config.test.yaml`](test/config.test.yaml), which should reflect the plugin structure.
 
 For more details, see [`test/README.md`](test#readme).
+
+To run tests more granularly, run
+```bash
+npm test -- help
+```
+
+
+## Development & Project Tracking
+
+For ongoing development, historical changes, and future plans, please refer to the following documents:
+
+**[Changelogs](docs/changelog-vX.Y  .md) - `docs/changelog-vX.Y.md`** \
+Detailed records of changes, new features, and bug fixes for each version series, starting with `changelog-v0.7.md`, are the primary source for understanding what has been implemented.
+
+**[Dream Board](docs/dream-board.md) - `docs/dream-board.md`** \
+This document captures broader, high-level ideas, potential future epochs, and long-term aspirations for `md-to-pdf` that are not yet concrete enough for a specific version proposal.
+
+**[Roadmap - Historical Overview](docs/roadmap.md) - `docs/roadmap.md`** \
+The `docs/roadmap.md` file now serves primarily as a **historical overview** of major features and milestones completed prior to v0.7.0. For current and future planning, please refer to the changelogs and dream board.
+
 
 ## License
 

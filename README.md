@@ -13,9 +13,8 @@ A [Node.js](https://nodejs.org/) command-line tool that converts [Markdown](http
   - [Usage](#usage)
   - [Commands](#commands-overview)
   - [Configuration](#configuration)
-    - [Plugin Specification & Precedence](#plugin-specification--precedence)
-    - [Overriding Plugin Settings](#overriding-plugin-settings)
-    - [Global `params`, Front Matter, and Placeholders](#global-params-front-matter-and-placeholders)
+  - [Plugins](#plugins---the-heart-of-md-to-pdf)
+  - [Developers](#development--project-tracking)
 
 #### Reference Guides
 
@@ -394,16 +393,16 @@ This plugin architecture makes `md-to-pdf` not just a converter, but a versatile
 * To learn about the bundled plugins, see the [**Bundled Plugins Overview**](plugins/README.md).
 * For a complete guide on creating and managing your own plugins, including integrating community plugins, refer to the [**Plugin Development Guide**](docs/plugin-development.md).
 
-
-## Batch Processing 'Eaches'
-
-To process multiple Markdown files in a batch job (e.g., converting all recipes in a directory to individual PDFs, or all chapters of a manual), example external scripts that call the `md-to-pdf convert` command for each file can be found in [`scripts/`](scripts/).  The **[Batch Processing Guide](docs/batch-processing-guide.md)** provides examples of how to do this with a Node.js wrapper and through a fairly simple bash script.
-
-## Creating and Using Custom Plugins
+### Creating and Using Custom Plugins
 
 `md-to-pdf` is designed to be extensible. You can create your own plugins to define custom document structures, processing logic, styling, and PDF options.
 
 **For a comprehensive guide on plugin development, including directory structure, handler scripts, registration, and advanced configuration, please see the [Plugin Development Guide](docs/plugin-development.md).**
+
+### Batch Processing 'Eaches'
+
+To process multiple Markdown files in a batch job (e.g., converting all recipes in a directory to individual PDFs, or all chapters of a manual), example external scripts that call the `md-to-pdf convert` command for each file can be found in [`scripts/`](scripts/).  The **[Batch Processing Guide](docs/batch-processing-guide.md)** provides examples of how to do this with a Node.js wrapper and through a fairly simple bash script.
+
 
 ## Testing
 
@@ -426,14 +425,27 @@ npm test -- help
 
 For ongoing development, historical changes, and future plans, please refer to the following documents:
 
-**[Changelogs](docs/changelog-vX.Y  .md) - `docs/changelog-vX.Y.md`** \
-Detailed records of changes, new features, and bug fixes for each version series, starting with `changelog-v0.7.md`, are the primary source for understanding what has been implemented.
+**[Changelogs](docs/changelog-vX.Y.md) - `docs/changelog-vX.Y.md`** \
+Detailed records of changes, new features, and bug fixes for each version series, starting with `changelog-v0.7.md`, are the primary source for understanding what has been implemented. \
+[v0.7](docs/changelog-v0.7.md) · [v0.8](docs/changelog-v0.8.md)
 
-**[Dream Board](docs/dream-board.md) - `docs/dream-board.md`** \
-This document captures broader, high-level ideas, potential future epochs, and long-term aspirations for `md-to-pdf` that are not yet concrete enough for a specific version proposal.
+**[Dream Board](docs/dream-board-v0.8.md) - `docs/dream-board-vX.Y.md`** \
+This document captures broader, high-level ideas, potential future epochs, and long-term aspirations for `md-to-pdf` that are not yet concrete enough for a specific version proposal. \
+[v0.7](docs/dream-board.md) · [v0.8](docs/dream-board-v0.8)
 
 **[Roadmap - Historical Overview](docs/roadmap.md) - `docs/roadmap.md`** \
-The `docs/roadmap.md` file now serves primarily as a **historical overview** of major features and milestones completed prior to v0.7.0. For current and future planning, please refer to the changelogs and dream board.
+The `docs/roadmap.md` file now serves primarily as a **historical overview** of major features and milestones completed prior to v0.7.0. For current and future planning, please refer to the changelogs and dream board. \
+[v0.1](https://github.com/brege/md-to-pdf/blob/b0b9fd026d4bebfb65edba4c07ab5a779f15bfff/ROADMAP.md)
+·
+[v0.2](https://github.com/brege/md-to-pdf/blob/32c448d17e2db25dbf1f47cb9d9a6fcc4361f723/ROADMAP.md)
+·
+[v0.3](https://github.com/brege/md-to-pdf/blob/4f947918755baffefe7aa29fc519a2f61970e102/ROADMAP.md)
+·
+[v0.4](https://github.com/brege/md-to-pdf/blob/9cde4a45726f8ad88041a68017309b79a16a27b9/docs/roadmap.md)
+·
+[v0.5](https://github.com/brege/md-to-pdf/blob/0c3eb2684ac71a02b73a0882a198a59b5b016e45/docs/roadmap.md)
+·
+[v0.6](https://github.com/brege/md-to-pdf/blob/fb0ef9bcd8555cdc5400599d6c99b4cdbf950702/docs/roadmap.md)
 
 
 ## License

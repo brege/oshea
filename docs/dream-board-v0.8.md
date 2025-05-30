@@ -157,7 +157,13 @@ This structure clarifies that `md-to-pdf collection add` is the explicit step to
 
 7. **Documentation Overhaul**
    
-   Update all documentation (`README.md`, `plugin-development.md`, `cheat-sheet.md`, `walkthrough.md`) to reflect the single, unified CLI.
+   Update all documentation:
+   - `README.md`
+   - `plugin-development.md`
+   - `cheat-sheet.md`
+   - `walkthrough.md`
+
+   to reflect the single, unified CLI.
 
 #### Considerations during implementation
 

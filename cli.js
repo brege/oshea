@@ -13,11 +13,13 @@ const { spawn } = require('child_process');
 const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
 const { setupWatch } = require('./src/watch_handler');
-const PluginRegistryBuilder = require('./src/PluginRegistryBuilder');
-const { scaffoldPlugin } = require('./src/plugin_scaffolder');
-const { displayPluginHelp } = require('./src/get_help');
-const { displayConfig } = require('./src/config_display');
 const { determinePluginToUse } = require('./src/plugin_determiner');
+
+// Command modules
+const configCmd = require('./src/commands/configCmd.js');
+const pluginCmd = require('./src/commands/pluginCmd.js');
+const convertCmdModule = require('./src/commands/convertCmd.js');
+const generateCmd = require('./src/commands/generateCmd.js');
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -71,7 +73,6 @@ async function executeConversion(args, configResolver) {
 
     const resolvedMarkdownPath = path.resolve(args.markdownFile);
 
-    // Pass localConfigOverrides AND resolvedMarkdownPath to getEffectiveConfig
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginSpec, localConfigOverrides, resolvedMarkdownPath);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
@@ -124,8 +125,6 @@ async function executeGeneration(args, configResolver) {
     args.pluginSpec = pluginToUse; 
     console.log(`Processing 'generate' command for plugin: ${pluginToUse}`);
 
-    // For 'generate', markdownFilePath is not directly applicable for localConfigOverrides resolution in the same way.
-    // So, pass null for markdownFilePath. localConfigOverrides would also likely be null.
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse, null, null);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
@@ -139,7 +138,11 @@ async function executeGeneration(args, configResolver) {
 
     const dataForPlugin = { cliArgs: cliArgsForPlugin };
     const outputFilename = args.filename;
-    const outputDir = path.resolve(args.outdir);
+    let outputDir = args.outdir; // Default is '.', path.resolve will handle it
+     if (args.outdir) { // Ensure outputDir is resolved if provided
+        outputDir = path.resolve(args.outdir);
+    }
+
 
     if (!fs.existsSync(outputDir)) {
         await fsp.mkdir(outputDir, { recursive: true });
@@ -170,15 +173,6 @@ async function executeGeneration(args, configResolver) {
 }
 
 async function main() {
-    const cliOptionsForConvert = (y) => {
-        y.positional("markdownFile", { describe: "Path to the input Markdown file.", type: "string" })
-            .option("plugin", { alias: "p", describe: "Plugin to use (name or path). Overrides front matter and local .config.yaml.", type: "string" })
-            .option("outdir", { alias: "o", describe: "Output directory. Defaults to a system temporary directory if not specified.", type: "string" })
-            .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
-            .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
-            .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
-    };
-
     const argvBuilder = yargs(hideBin(process.argv))
         .parserConfiguration({ 'short-option-groups': false })
         .scriptName("md-to-pdf")
@@ -194,160 +188,33 @@ async function main() {
             type: 'boolean',
             default: false,
         })
-        .command(
-            '$0 [markdownFile]',
-            "Converts a Markdown file to PDF. If markdownFile is provided, implicitly acts as 'convert'.",
-            cliOptionsForConvert, 
-            async (args) => {
+        .command({
+            ...convertCmdModule.defaultCmd,
+            handler: async (args) => { // Override handler for $0
                 if (args.markdownFile) {
-                    args.isLazyLoad = true; 
+                    args.isLazyLoad = true;
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
                 } else {
                     argvBuilder.showHelp();
                 }
             }
-        )
-        .command(
-            "convert <markdownFile>",
-            "Convert a single Markdown file to PDF using a specified plugin.",
-            cliOptionsForConvert, 
-            (args) => {
-                args.isLazyLoad = false; 
-                commonCommandHandler(args, executeConversion, 'convert (explicit)');
-            }
-        )
-        .command(
-            "generate <pluginName>",
-            "Generate a document using a specified plugin that requires complex inputs.",
-            (y) => {
-                y.positional("pluginName", { describe: "Name of the plugin.", type: "string" })
-                    .option("outdir", { alias: "o", describe: "Output directory.", type: "string", default: "." })
-                    .option("filename", { alias: "f", describe: "Output PDF filename.", type: "string" })
-                    .option("open", { describe: "Open PDF after generation.", type: "boolean", default: true })
-                    .option("watch", { alias: "w", describe: "Watch for changes.", type: "boolean", default: false });
-                y.strict(false); 
-            },
-            (args) => {
+        })
+        .command({
+            ...convertCmdModule.explicitConvert,
+            handler: async (args) => { // Override handler for explicit convert
                 args.isLazyLoad = false;
-                commonCommandHandler(args, executeGeneration, 'generate');
+                await commonCommandHandler(args, executeConversion, 'convert (explicit)');
             }
-        )
-        .command(
-            "plugin <subcommand>",
-            "Manage plugins.",
-            (pluginYargs) => {
-                pluginYargs.command(
-                    "list",
-                    "List all discoverable plugins.",
-                    () => {}, 
-                    async (args) => {
-                        try {
-                            console.log("Discovering plugins...");
-                            const builder = new PluginRegistryBuilder(
-                                __dirname, // Changed: Use __dirname as projectRoot
-                                null, 
-                                args.config, 
-                                args.factoryDefaults,
-                                args.isLazyLoadMode || false 
-                            );
-                            const pluginDetailsList = await builder.getAllPluginDetails();
-
-                            if (pluginDetailsList.length === 0) {
-                                console.log("No plugins found or registered.");
-                                return;
-                            }
-
-                            console.log(`\nFound ${pluginDetailsList.length} plugin(s):\n`);
-                            pluginDetailsList.forEach(plugin => {
-                                console.log(`  Name: ${plugin.name}`);
-                                console.log(`    Description: ${plugin.description}`);
-                                console.log(`    Source: ${plugin.registrationSourceDisplay}`);
-                                console.log(`    Config: ${plugin.configPath}`);
-                                console.log(`  ---`);
-                            });
-                        } catch (error) {
-                            console.error(`ERROR listing plugins: ${error.message}`);
-                            if (error.stack) console.error(error.stack);
-                            process.exit(1);
-                        }
-                    }
-                )
-                .command(
-                    "create <pluginName>",
-                    "Create a new plugin boilerplate.",
-                    (y) => {
-                        y.positional("pluginName", {
-                            describe: "Name for the new plugin.",
-                            type: "string"
-                        })
-                        .option("dir", {
-                            describe: "Directory to create the plugin in. Defaults to current directory.",
-                            type: "string",
-                            normalize: true
-                        })
-                        .option("force", {
-                            describe: "Overwrite existing plugin directory if it exists.",
-                            type: "boolean",
-                            default: false
-                        });
-                    },
-                    async (args) => {
-                        try {
-                            const success = await scaffoldPlugin(args.pluginName, args.dir, args.force);
-                            if (!success) {
-                                process.exit(1);
-                            }
-                        } catch (error) {
-                            console.error(`ERROR during 'plugin create ${args.pluginName}': ${error.message}`);
-                            if (error.stack) console.error(error.stack);
-                            process.exit(1);
-                        }
-                    }
-                )
-                .command(
-                    "help <pluginName>",
-                    "Display detailed help for a specific plugin.",
-                    (y) => {
-                        y.positional("pluginName", {
-                            describe: "Name of the plugin for which to display help.",
-                            type: "string"
-                        });
-                    },
-                    async (args) => {
-                        try {
-                            args.isLazyLoad = false; 
-                            await displayPluginHelp(args.pluginName, args);
-                        } catch (error) {
-                            console.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
-                            if (error.stack) console.error(error.stack);
-                            process.exit(1);
-                        }
-                    }
-                )
-                .demandCommand(1, "You need to specify a plugin subcommand (e.g., list, create, help).")
-                .strict(); 
+        })
+        .command({
+            ...generateCmd,
+            handler: async (args) => { // Override handler for generate
+                args.isLazyLoad = false;
+                await commonCommandHandler(args, executeGeneration, 'generate');
             }
-        )
-        .command(
-            "config",
-            "Display active configuration settings. Use --pure for config-only output.",
-            (y) => {
-                y.option("plugin", {
-                    alias: "p",
-                    describe: "Display effective configuration for a specific plugin.",
-                    type: "string"
-                })
-                .option("pure", {
-                    describe: "Output only the raw configuration data, suitable for piping or copying.",
-                    type: "boolean",
-                    default: false
-                });
-            },
-            async (args) => {
-                args.isLazyLoad = false; 
-                await displayConfig(args);
-            }
-        )
+        })
+        .command(pluginCmd)
+        .command(configCmd)
         .alias("help", "h")
         .alias("version", "v")
         .strict() 
@@ -370,9 +237,10 @@ async function main() {
 
     const parsedArgs = await argvBuilder.argv;
 
-    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config'].includes(parsedArgs.$0))) {
-        const knownCommands = ['convert', 'generate', 'plugin', 'config'];
-        const commandGiven = knownCommands.some(cmd => parsedArgs._.includes(cmd));
+    // This check might be redundant now due to how $0 is handled, but keeping for safety.
+    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config'].includes(parsedArgs.$0 || parsedArgs._[0]))) {
+         const knownTopLevelCommands = ['convert', 'generate', 'plugin', 'config'];
+         const commandGiven = knownTopLevelCommands.some(cmd => process.argv.includes(cmd)); // Check raw argv
         if (!commandGiven && !parsedArgs.markdownFile) {
              argvBuilder.showHelp();
         }

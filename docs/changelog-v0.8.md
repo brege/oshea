@@ -3,6 +3,24 @@
 * For the v0.7.x changelog, see [changelog-v0.7.md](changelog-v0.7.md).
 * For the development track *before* v0.7.0, see [roadmap.md](roadmap.md).
 
+---
+
+
+## v0.8.2 (Conceptual - Main CLI Refactor)
+
+**Date:** 2025-05-30
+
+### Changed
+
+* **Main CLI Refactor (`cli.js`):**
+    * The main `md-to-pdf/cli.js` file has been refactored to improve modularity and maintainability, similar to the structure of the `CollectionsManager` module.
+    * A new directory `src/commands/` has been created.
+    * The yargs command definitions and handler initializations for each top-level command (`config`, `plugin`, `convert`, `generate`, and the default `$0` command) have been moved into separate modules within `src/commands/`.
+        * `plugin` subcommands (`list`, `create`, `help`) are further modularized into `src/commands/plugin/`.
+    * `cli.js` now imports these command modules and registers them with yargs, acting as an orchestrator.
+    * Core execution logic functions (e.g., `executeConversion`, `executeGeneration`, `commonCommandHandler`, `openPdf`) remain in `cli.js` to be accessible by the command handlers.
+    * This internal structural change does not alter the CLI's external behavior or functionality. All commands and options remain the same for the user.
+
 
 ## v0.8.1 (Conceptual - Integrate CollectionsManager Manifest)
 

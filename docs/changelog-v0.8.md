@@ -6,6 +6,43 @@
 ---
 
 
+## v0.8.3 (Conceptual - CLI Integration Phase 1: Collection & Core Plugin State Commands + Test Integration)
+
+**Date:** 2025-05-31
+
+### Added
+
+* **Unified CLI - `collection` Subcommands:**
+    * Integrated `CollectionsManager` functionalities into `md-to-pdf`.
+    * New `md-to-pdf collection <subcommand>` group added:
+        * `md-to-pdf collection add <url_or_path> [--name <collection_name>]`: Adds a new plugin collection.
+        * `md-to-pdf collection list`: Lists all downloaded plugin collection names.
+        * `md-to-pdf collection remove <collection_name> [--force]`: Removes a downloaded collection, with `--force` to disable its plugins first.
+        * `md-to-pdf collection update [<collection_name>]`: Updates Git-based collections. If no name, updates all. Includes enhanced support for re-syncing locally-sourced collections from their original path.
+* **Unified CLI - `plugin enable/disable` Subcommands:**
+    * New subcommands added to the existing `md-to-pdf plugin` group:
+        * `md-to-pdf plugin enable <collection_name/plugin_id | collection_name --all> [--name <invoke_name>] [--prefix <prefix_string>] [--no-prefix]`: Enables plugin(s) from a managed collection, updating `enabled.yaml`.
+        * `md-to-pdf plugin disable <invoke_name>`: Disables an active plugin, updating `enabled.yaml`.
+* The `CollectionsManager` instance is now created by the main `md-to-pdf` CLI and made available to these new command handlers via middleware.
+* These integrated commands leverage the existing logic and console output behavior of the `CollectionsManager` module.
+
+### Changed
+
+* The main `cli.js` and its command modules in `src/commands/` were updated to support the new `collection` command group and the new `plugin` subcommands (`enable`, `disable`).
+* Refined the `success` status reporting for `CollectionsManager.updateAllCollections` to return `false` if any individual collection update fails or is aborted (e.g., due to local changes), ensuring consistency in test assertions.
+
+### Testing
+
+* **Hybrid Testing Strategy for CollectionsManager:**
+    * The original `CollectionsManager` test suites (which test methods directly) have been successfully integrated into the main project's test runner (`dev/test/run-tests.js`) under a new category: `cm-module`.
+    * These tests are located in `dev/test/cm-tests/` and use adapted helpers (`dev/test/cm-tests/cm-test-helpers.js`) to ensure proper isolation and environment setup (e.g., `MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE`, Git configuration).
+    * This approach allows for fast and precise testing of the `CollectionsManager`'s core logic.
+    * A `README.md` has been added to `dev/test/cm-tests/` explaining this hybrid strategy and the rationale.
+* **CLI-Based Integration Tests (Future Work):**
+    * The creation of a comprehensive suite of CLI-based integration tests (using `runCliCommand` for every CM scenario) for the new `md-to-pdf collection ...` and `md-to-pdf plugin enable/disable` commands has been deferred.
+    * A select few representative CLI-based tests will be added in a future version (e.g., v0.9.x) to verify end-to-end functionality, rather than exhaustively replicating all `CollectionsManager` module tests at the CLI level. This decision was made due to the complexity and potential brittleness of asserting against detailed console output from multiple software layers.
+
+
 ## v0.8.2 (Conceptual - Main CLI Refactor)
 
 **Date:** 2025-05-30

@@ -142,22 +142,27 @@ async function testUpdateAllCollections(testRunStats) {
     testRunStats.attempted++;
     const testName = "Update All Collections (Resilient)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot();
+    const testCollRoot = await createTestCollRoot(); 
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM === 'true' });
 
-    const localGitRepoPath1 = path.join(os.tmpdir(), `cm_local_git_repo_all1_${Date.now()}.git`);
+    // Use a unique base for mock remotes to avoid conflicts if tests run in parallel or are not cleaned up.
+    // This path will be relative to where the CM internal tests are run from.
+    const mockRemotesBase = path.join(os.tmpdir(), `cm_internal_mock_remotes_all_${Date.now()}`);
+    await fs.mkdir(mockRemotesBase, { recursive: true });
+
+    const localGitRepoPath1 = path.join(mockRemotesBase, `cm_local_git_repo_all1_${Date.now()}.git`);
     const gitCollectionName1 = 'git-coll-all-1';
     await setupLocalGitRepo(localGitRepoPath1, 'file1_repo1.txt', 'Initial content for repo1');
     await manager.addCollection(localGitRepoPath1, { name: gitCollectionName1 });
     const collection1ClonedPath = path.join(testCollRoot, gitCollectionName1);
 
     const localSourceDirName = `cm_local_source_all_${Date.now()}`;
-    const localSourcePath = path.join(os.tmpdir(), localSourceDirName);
+    const localSourcePath = path.join(os.tmpdir(), localSourceDirName); 
     await fs.mkdir(localSourcePath, { recursive: true });
     await fs.writeFile(path.join(localSourcePath, "local_file_in_all.txt"), "content");
     await manager.addCollection(localSourcePath, { name: 'local-coll-all' });
 
-    const localGitRepoPath2 = path.join(os.tmpdir(), `cm_local_git_repo_all2_${Date.now()}.git`);
+    const localGitRepoPath2 = path.join(mockRemotesBase, `cm_local_git_repo_all2_${Date.now()}.git`);
     const gitCollectionName2 = 'git-coll-all-2-local-changes';
     await setupLocalGitRepo(localGitRepoPath2, 'main_repo2.txt', 'Base for local changes test in repo2');
     await manager.addCollection(localGitRepoPath2, { name: gitCollectionName2 });
@@ -168,7 +173,7 @@ async function testUpdateAllCollections(testRunStats) {
 
     try {
         const results = await manager.updateAllCollections();
-        assert.ok(results.success, `(${testName}) updateAllCollections should report overall process success even if some are skipped. Messages: ${JSON.stringify(results.messages)}`);
+        assert.strictEqual(results.success, false, `(${testName}) updateAllCollections should report overall process failure due to one abort. Messages: ${JSON.stringify(results.messages)}`);
 
         assert.ok(fss.existsSync(path.join(collection1ClonedPath, 'update1_repo1.txt')), `(${testName}) Git collection ${gitCollectionName1} should have 'update1_repo1.txt'`);
         const updatedMeta1 = await manager._readCollectionMetadata(gitCollectionName1);
@@ -190,16 +195,12 @@ async function testUpdateAllCollections(testRunStats) {
         assert.ok(results.messages.some(msg => msg.startsWith(expectedGit2AbortMessageStart)), `(${testName}) Abort message for ${gitCollectionName2} starting with "${expectedGit2AbortMessageStart}" expected. Got: ${JSON.stringify(results.messages)}`);
 
         const expectedLocalSkipMessage = `Skipping local-coll-all: Not a Git-based collection (source: ${localSourcePath}).`;
-        // More robust check for the skip message
         const foundSkipMsg = results.messages.find(msg => {
-            // Normalize paths for comparison to handle potential OS differences like trailing slashes
-            // though in this specific case, both should be direct outputs.
-            // Primarily, this is to be absolutely sure about the string content.
             const normalize = (s) => s.replace(/\\/g, '/').replace(/\/$/, '');
             return normalize(msg) === normalize(expectedLocalSkipMessage);
         });
-        if (!foundSkipMsg && process.env.DEBUG_CM === 'true') { // Log only in debug mode
-            console.log(chalk.yellow("DEBUG (UpdateAllCollections): Expected skip message for local-coll-all not found via '===' comparison."));
+        if (!foundSkipMsg && process.env.DEBUG_CM === 'true') {
+            console.log(chalk.yellow("DEBUG (UpdateAllCollections Original Test): Expected skip message for local-coll-all not found via '===' comparison."));
             console.log(chalk.yellow("DEBUG: Expected normalized:"), JSON.stringify(expectedLocalSkipMessage.replace(/\\/g, '/').replace(/\/$/, '')));
             results.messages.forEach((m, i) => console.log(chalk.yellow(`DEBUG: Actual[${i}] normalized:`), JSON.stringify(m.replace(/\\/g, '/').replace(/\/$/, ''))));
         }
@@ -213,8 +214,7 @@ async function testUpdateAllCollections(testRunStats) {
         if (error.stack) console.error(error.stack);
     } finally {
         await cleanupTestCollRoot(testCollRoot);
-        await cleanupTestCollRoot(localGitRepoPath1);
-        await cleanupTestCollRoot(localGitRepoPath2);
+        await cleanupTestCollRoot(mockRemotesBase); 
         await cleanupTestCollRoot(localSourcePath);
     }
 }

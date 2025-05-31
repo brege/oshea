@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -10,9 +10,8 @@
     "start": "node cli.js",
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
-    "hugo-export-each": "node cli.js hugo-export-each",
-    "test": "node test/run-tests.js",
-    "test:keep-output": "KEEP_OUTPUT=true node test/run-tests.js"
+    "test": "GIT_CONFIG_GLOBAL=./test/resources/dummy.gitconfig GNUPGHOME=/tmp/cm-dummy-gpg-home node ./test/run-tests.js",
+    "test:keep-output": "KEEP_OUTPUT=true GIT_CONFIG_GLOBAL=./test/resources/dummy.gitconfig GNUPGHOME=/tmp/cm-dummy-gpg-home node test/run-tests.js"  
   },
   "keywords": [
     "markdown",
@@ -40,6 +39,7 @@
   "homepage": "https://github.com/brege/md-to-pdf#readme",
   "dependencies": {
     "@vscode/markdown-it-katex": "^1.1.0",
+    "chalk": "^4.1.2",
     "chokidar": "^3.5.3",
     "glob": "^11.0.2",
     "gray-matter": "^4.0.3",

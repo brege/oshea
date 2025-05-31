@@ -1,15 +1,15 @@
-// dev/src/collections-manager/index.js
+// src/collections-manager/index.js
 const fs = require('fs').promises;
 const fss = require('fs'); // For synchronous checks like existsSync
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
-const fsExtra = require('fs-extra'); // fsExtra is used by some commands
+const fsExtra = require('fs-extra');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
 
 // Utilities and Constants
-const { deriveCollectionName } = require('./cm-utils'); // Assuming cm-utils.js is present
+const { deriveCollectionName } = require('./cm-utils');
 const {
   METADATA_FILENAME,
   ENABLED_MANIFEST_FILENAME,
@@ -50,6 +50,14 @@ class CollectionsManager {
   }
 
   determineCollRoot() {
+    // Check for test override first
+    if (process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE) {
+      if (this.debug) { 
+          console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using test override for COLL_ROOT: ${process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE}`));
+      }
+      return process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE;
+    }
+
     const xdgDataHome = process.env.XDG_DATA_HOME ||
       (os.platform() === 'win32'
         ? path.join(os.homedir(), 'AppData', 'Local')
@@ -103,7 +111,7 @@ class CollectionsManager {
       return yaml.load(metaContent);
     } catch (e) {
       console.error(chalk.red(`ERROR (CM:_readCollMeta): Could not read or parse metadata for "${collectionName}": ${e.message}`));
-      throw e;
+      throw e; // Re-throwing as the original code did, to be caught by command handlers
     }
   }
 

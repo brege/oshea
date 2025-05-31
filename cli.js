@@ -7,19 +7,21 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const fsp = require('fs').promises;
-
+const chalk = require('chalk'); // Added
 const { spawn } = require('child_process');
 
 const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
 const { setupWatch } = require('./src/watch_handler');
 const { determinePluginToUse } = require('./src/plugin_determiner');
+const CollectionsManager = require('./src/collections-manager');
 
 // Command modules
 const configCmd = require('./src/commands/configCmd.js');
 const pluginCmd = require('./src/commands/pluginCmd.js');
 const convertCmdModule = require('./src/commands/convertCmd.js');
 const generateCmd = require('./src/commands/generateCmd.js');
+const collectionCmd = require('./src/commands/collectionCmd.js');
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -59,8 +61,8 @@ async function commonCommandHandler(args, executorFunction, commandType) {
         }
     } catch (error) {
         const pluginNameForError = args.pluginSpec || args.plugin || args.pluginName || 'N/A';
-        console.error(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`);
-        if (error.stack && !args.watch) console.error(error.stack);
+        console.error(chalk.red(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`));
+        if (error.stack && !args.watch) console.error(chalk.red(error.stack));
         if (!args.watch) process.exit(1);
     }
 }
@@ -128,7 +130,7 @@ async function executeGeneration(args, configResolver) {
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse, null, null);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
-    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd', 'pluginSpec', 'isLazyLoad'];
+    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd', 'pluginSpec', 'isLazyLoad', 'manager'];
     const cliArgsForPlugin = {};
     for (const key in args) {
         if (!knownGenerateOptions.includes(key) && Object.prototype.hasOwnProperty.call(args, key)) {
@@ -138,11 +140,10 @@ async function executeGeneration(args, configResolver) {
 
     const dataForPlugin = { cliArgs: cliArgsForPlugin };
     const outputFilename = args.filename;
-    let outputDir = args.outdir; // Default is '.', path.resolve will handle it
-     if (args.outdir) { // Ensure outputDir is resolved if provided
+    let outputDir = args.outdir; 
+     if (args.outdir) { 
         outputDir = path.resolve(args.outdir);
     }
-
 
     if (!fs.existsSync(outputDir)) {
         await fsp.mkdir(outputDir, { recursive: true });
@@ -173,6 +174,8 @@ async function executeGeneration(args, configResolver) {
 }
 
 async function main() {
+    const managerInstance = new CollectionsManager({ debug: process.env.DEBUG_CM === 'true' });
+
     const argvBuilder = yargs(hideBin(process.argv))
         .parserConfiguration({ 'short-option-groups': false })
         .scriptName("md-to-pdf")
@@ -188,9 +191,12 @@ async function main() {
             type: 'boolean',
             default: false,
         })
+        .middleware((argv) => {
+            argv.manager = managerInstance; 
+        })
         .command({
             ...convertCmdModule.defaultCmd,
-            handler: async (args) => { // Override handler for $0
+            handler: async (args) => { 
                 if (args.markdownFile) {
                     args.isLazyLoad = true;
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
@@ -201,46 +207,54 @@ async function main() {
         })
         .command({
             ...convertCmdModule.explicitConvert,
-            handler: async (args) => { // Override handler for explicit convert
+            handler: async (args) => { 
                 args.isLazyLoad = false;
                 await commonCommandHandler(args, executeConversion, 'convert (explicit)');
             }
         })
         .command({
             ...generateCmd,
-            handler: async (args) => { // Override handler for generate
+            handler: async (args) => { 
                 args.isLazyLoad = false;
                 await commonCommandHandler(args, executeGeneration, 'generate');
             }
         })
         .command(pluginCmd)
+        .command(collectionCmd) 
         .command(configCmd)
         .alias("help", "h")
         .alias("version", "v")
         .strict() 
         .fail((msg, err, yargsInstance) => { 
-            if (err) throw err; 
+            if (err) { // This err is from yargs own error handling (e.g., validation)
+                console.error(chalk.red(msg || err.message)); // Use chalk here
+                if (process.env.DEBUG_CM === 'true' && err.stack) console.error(chalk.red(err.stack));
+                yargsInstance.showHelp();
+                process.exit(1);
+                return; // Explicit return
+            }
+            // This block handles other failures, like command not found by yargs
             if (msg && msg.includes("Unknown argument")) { 
                  const firstArg = process.argv[2]; 
-                 if(firstArg && !['convert', 'generate', 'plugin', 'config', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
-                     console.error(`ERROR: ${msg}`);
-                     console.error(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`);
+                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
+                     console.error(chalk.red(`ERROR: ${msg}`));
+                     console.error(chalk.yellow(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`));
                      yargsInstance.showHelp();
                      process.exit(1);
+                     return; // Explicit return
                  }
             }
-            console.error(msg || "An error occurred.");
-            if (msg) console.error("For usage details, run with --help.");
+            console.error(chalk.red(msg || "An error occurred."));
+            if (msg) console.error(chalk.yellow("For usage details, run with --help."));
             process.exit(1);
         })
         .epilogue("For more information, refer to the README.md file.");
 
     const parsedArgs = await argvBuilder.argv;
 
-    // This check might be redundant now due to how $0 is handled, but keeping for safety.
-    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config'].includes(parsedArgs.$0 || parsedArgs._[0]))) {
-         const knownTopLevelCommands = ['convert', 'generate', 'plugin', 'config'];
-         const commandGiven = knownTopLevelCommands.some(cmd => process.argv.includes(cmd)); // Check raw argv
+    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config', 'collection'].includes(parsedArgs.$0 || parsedArgs._[0]))) {
+         const knownTopLevelCommands = ['convert', 'generate', 'plugin', 'config', 'collection'];
+         const commandGiven = knownTopLevelCommands.some(cmd => process.argv.includes(cmd)); 
         if (!commandGiven && !parsedArgs.markdownFile) {
              argvBuilder.showHelp();
         }
@@ -248,16 +262,16 @@ async function main() {
 }
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    console.error(chalk.red('Unhandled Rejection at:'), promise, chalk.red('reason:'), reason);
     if (reason instanceof Error && reason.stack) {
-        console.error(reason.stack);
+        console.error(chalk.red(reason.stack));
     }
     process.exit(1);
 });
 process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
+    console.error(chalk.red('Uncaught Exception:'), error);
     if (error.stack) {
-        console.error(error.stack);
+        console.error(chalk.red(error.stack));
     }
     process.exit(1);
 });

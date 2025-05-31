@@ -27,6 +27,8 @@ module.exports = async function updateAllCollections() {
           const skipMsg = `Skipping ${collectionName}: Metadata file not found or unreadable.`;
           console.log(chalk.yellow(`  ${skipMsg}`));
           updateMessages.push(skipMsg);
+          // Consider if this should set allOverallSuccess to false.
+          // For now, let's assume only active update attempts affect overall success.
           continue;
       }
 
@@ -34,7 +36,8 @@ module.exports = async function updateAllCollections() {
           try {
               const result = await this.updateCollection(collectionName); // Uses bound method
               updateMessages.push(result.message);
-              if (!result.success && !result.message.includes("has local changes")) {
+              // If any individual update result is not successful, the overall operation is not fully successful.
+              if (!result.success) {
                 allOverallSuccess = false;
               }
           } catch (error) {

@@ -427,11 +427,17 @@ For ongoing development, historical changes, and future plans, please refer to t
 
 **[Changelogs](docs/changelog-vX.Y.md) - `docs/changelog-vX.Y.md`** \
 Detailed records of changes, new features, and bug fixes for each version series, starting with `changelog-v0.7.md`, are the primary source for understanding what has been implemented. \
-[v0.7](docs/changelog-v0.7.md) · [v0.8](docs/changelog-v0.8.md)
+[v0.7](docs/changelog-v0.7.md) 
+·
+[v0.8](docs/changelog-v0.8.md)
 
 **[Dream Board](docs/dream-board-v0.8.md) - `docs/dream-board-vX.Y.md`** \
 This document captures broader, high-level ideas, potential future epochs, and long-term aspirations for `md-to-pdf` that are not yet concrete enough for a specific version proposal. \
-[v0.7](docs/dream-board.md) · [v0.8](docs/dream-board-v0.8)
+[v0.7](docs/dream-board-v0.7.md) 
+· 
+[v0.8](docs/dream-board-v0.8.md)
+· 
+[v0.9](docs/dream-board-v0.9.md)
 
 **[Roadmap - Historical Overview](docs/roadmap.md) - `docs/roadmap.md`** \
 The `docs/roadmap.md` file now serves primarily as a **historical overview** of major features and milestones completed prior to v0.7.0. For current and future planning, please refer to the changelogs and dream board. \

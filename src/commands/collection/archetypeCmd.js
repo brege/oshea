@@ -1,6 +1,6 @@
 // src/commands/collection/archetypeCmd.js
 const chalk = require('chalk');
-const path = require('path'); // Required if we make it functional for one last time
+const path = require('path'); 
 
 module.exports = {
   command: 'archetype <sourcePluginIdentifier> <newArchetypeName>',
@@ -17,7 +17,7 @@ module.exports = {
         type: 'string',
         demandOption: true,
       })
-      .option('target-dir', {
+      .option('target-dir', { // Ensure this option is defined for the command
         alias: 't',
         describe: `Optional. Specifies the base directory for the new archetype.
                    If using a CM-managed source and this is omitted, defaults to a user-specific directory (e.g., ~/.local/share/md-to-pdf/my-plugins/).
@@ -33,6 +33,7 @@ module.exports = {
   },
   handler: async (args) => {
     console.warn(chalk.yellow.bold('Warning: The "collection archetype" command is deprecated and will be removed in a future version.'));
+    // Corrected to use args.targetDir which yargs normalizes from --target-dir
     console.warn(chalk.yellow.bold(`Please use: md-to-pdf plugin create ${args.newArchetypeName} --from "${args.sourcePluginIdentifier}" ${args.targetDir ? '--dir "'+args.targetDir+'"' : ''} ${args.force ? '--force' : ''}\n`));
 
     if (!args.manager || typeof args.manager.archetypePlugin !== 'function') {
@@ -41,11 +42,9 @@ module.exports = {
       return;
     }
 
-    // For v0.8.5, we'll allow it to function with the warning.
-    // In a future version, this call would be removed.
     try {
       const result = await args.manager.archetypePlugin(args.sourcePluginIdentifier, args.newArchetypeName, {
-        targetDir: args.targetDir, // Pass it along; archetypePlugin handles its own default if this is undefined
+        targetDir: args.targetDir, 
         force: args.force
       });
 
@@ -56,12 +55,16 @@ module.exports = {
         console.log(chalk.gray(  "    plugins:"));
         console.log(chalk.gray(`      ${args.newArchetypeName}: "${path.join(result.archetypePath, `${args.newArchetypeName}.config.yaml`)}"`));
       } else {
-        console.error(chalk.red(`(Legacy) Archetype creation failed. ${result ? result.message : 'An unknown error occurred.'}`));
-        // No process.exit(1) here if archetypePlugin itself handles logging and doesn't throw for common issues
+        if (result && result.message && !result.message.toLowerCase().includes("target archetype directory")) {
+             console.error(chalk.red(`(Legacy) Archetype creation failed. ${result.message}`));
+        } else if (!result) {
+             console.error(chalk.red(`(Legacy) Archetype creation failed. An unknown error occurred with archetypePlugin.`));
+        }
       }
     } catch (error) {
-      console.error(chalk.red(`\nERROR during legacy 'collection archetype' execution: ${error.message}`));
-      // No process.exit(1) here to allow deprecation message to be primary output if error is from CM logic
+      if (!error.message.toLowerCase().includes("target archetype directory") && !error.message.toLowerCase().includes("not found")) {
+         console.error(chalk.red(`\nERROR during legacy 'collection archetype' execution: ${error.message}`));
+      }
     }
   }
 };

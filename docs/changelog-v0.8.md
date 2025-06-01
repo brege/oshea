@@ -6,6 +6,30 @@
 ---
 
 
+## v0.8.5 - Part 1 (Conceptual - Unified Plugin Creation & Archetype)
+
+**Date:** 2025-06-01
+
+### Added
+
+* **Unified `md-to-pdf plugin create <name>` Command:**
+    * This command is now the primary way to generate new plugins.
+    * If used without `--from`, it creates a new plugin from a bundled template plugin (`plugins/template-basic/`). The template includes a basic structure and a self-activating example Markdown file using front matter to point to its local configuration. The default output directory for this mode is the current working directory.
+    * The new `--from <source_identifier>` option allows `plugin create` to archetype an existing plugin. `<source_identifier>` can be a CollectionsManager-managed plugin (`collection_name/plugin_id`) or a direct filesystem path to a plugin directory. The default output directory for this mode is managed by the underlying archetype logic (typically `my-plugins/` relative to `COLL_ROOT`).
+* **Bundled `template-basic` Plugin:** Located in `plugins/template-basic/`, serves as the default source for `plugin create`. Includes `template-basic.config.yaml`, `index.js`, `template-basic.css`, `README.md`, and `template-basic-example.md`.
+* The `md-to-pdf plugin create` command now provides more detailed "Next Steps" guidance upon successful plugin creation.
+
+### Changed
+
+* **`CollectionsManager.archetypePlugin` Enhancement:** The internal `archetypePlugin` method in `CollectionsManager` has been significantly enhanced to reliably handle direct filesystem paths as source identifiers, in addition to `collection_name/plugin_id` strings. This includes improved config file detection and metadata handling for direct path sources.
+* The CLI handler for `md-to-pdf plugin create` (`src/commands/plugin/createCmd.js`) was rewritten to use `CollectionsManager.archetypePlugin` as its core engine and to manage source/target directory logic appropriately.
+
+### Deprecated
+
+* **`md-to-pdf collection archetype` Command:** This command is now deprecated in favor of `md-to-pdf plugin create <newName> --from <sourceIdentifier>`. The `collection archetype` command will issue a warning but will continue to function for this release cycle by calling the underlying `archetypePlugin` logic. It will be removed in a future version.
+* The original `src/plugin_scaffolder.js` is now effectively superseded by the `archetypePlugin` logic within `CollectionsManager`.
+
+
 ## v0.8.4 (Conceptual - Enhanced Plugin and Collection Listing)
 
 **Date:** 2025-05-31

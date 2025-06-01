@@ -3,6 +3,95 @@
 * For the v0.7.x changelog, see [changelog-v0.7.md](changelog-v0.7.md).
 * For the development track *before* v0.7.0, see [roadmap.md](roadmap.md).
 
+---
+
+
+## v0.8.4 (Conceptual - Enhanced Plugin and Collection Listing)
+
+**Date:** 2025-05-31
+
+### Added
+
+* **Enhanced `md-to-pdf plugin list` Command:**
+    * The command now integrates more deeply with `CollectionsManager` data via an enhanced `PluginRegistryBuilder` for a unified backend.
+    * New flag: `--short` provides a condensed, one-line summary for each plugin, showing status, name/invoke key, and CM origin if applicable, with aligned columns.
+    * New status flags to view plugins (primarily CM-managed unless stated otherwise):
+        * `--available`: Lists all plugins within CM-managed collections (`COLL_ROOT`) that can be used or enabled (includes already CM-enabled plugins and those only available in `COLL_ROOT`).
+        * `--enabled`: Lists all actively enabled plugins (both traditionally registered and CM-enabled).
+        * `--disabled`: Lists plugins within CM-managed collections that are available but *not* currently enabled in `enabled.yaml`.
+    * Optional `[<collection_name_filter>]` argument can be used with status flags and `--short` to filter CM-managed plugins by their collection name.
+    * Refined console output formatting for all `plugin list` views for improved readability and clarity, with distinct colors (e.g., blueBright for "Enabled (CM)", cyan for "Registered", gray for "Available (CM)") and bolding for statuses and identifiers.
+    * Added an epilogue to the `plugin list` help text to guide users to `md-to-pdf collection list` for viewing collection names and sources.
+
+* **Enhanced `md-to-pdf collection list` Command:**
+    * Output now includes the `source` (Git URL or local path) and `added_on` / `updated_on` dates for each downloaded collection, providing more comprehensive information.
+
+### Changed
+
+* `PluginRegistryBuilder.getAllPluginDetails()` now accepts a `CollectionsManager` instance. When provided, it integrates detailed information about all CM-managed plugins (including those available but not enabled) into its comprehensive list, providing a unified data source for listing.
+* The handler for `md-to-pdf plugin list` in `dev/src/commands/plugin/listCmd.js` was rewritten to use the enhanced `PluginRegistryBuilder` as its single source of plugin data and then applies filtering and specific formatting based on the provided CLI flags.
+* `CollectionsManager.listCollections('downloaded')` method in `dev/src/collections-manager/commands/list.js` now returns an array of objects (including `name`, `source`, `added_on`, `updated_on`) instead of just names, facilitating the enhanced `md-to-pdf collection list` output.
+* The handler for `md-to-pdf collection list` in `dev/src/commands/collection/listCmd.js` was updated to consume and display this richer information.
+
+### Fixed
+
+* Corrected an issue in `dev/src/collections-manager/commands/updateAll.js` where it was not correctly handling the new object-based return type from `listCollections('downloaded')`, causing `TypeError` errors during `md-to-pdf collection update` (when run for all collections).
+* Resolved a `TypeError: chalk.stripColor is not a function` in `md-to-pdf plugin list --short` by correctly using `strip-ansi` (an existing dependency) to remove ANSI codes for column width calculation.
+* Ensured tests in `dev/test/cm-tests/list.test.js` and `dev/src/collections-manager/test/list.test.js` were updated to align with the new object-based return type of `CollectionsManager.listCollections('downloaded')`.
+
+
+## v0.8.3 (Conceptual - CLI Integration Phase 1: Collection & Core Plugin State Commands + Test Integration)
+
+**Date:** 2025-05-31
+
+### Added
+
+* **Unified CLI - `collection` Subcommands:**
+    * Integrated `CollectionsManager` functionalities into `md-to-pdf`.
+    * New `md-to-pdf collection <subcommand>` group added:
+        * `md-to-pdf collection add <url_or_path> [--name <collection_name>]`: Adds a new plugin collection.
+        * `md-to-pdf collection list`: Lists all downloaded plugin collection names.
+        * `md-to-pdf collection remove <collection_name> [--force]`: Removes a downloaded collection, with `--force` to disable its plugins first.
+        * `md-to-pdf collection update [<collection_name>]`: Updates Git-based collections. If no name, updates all. Includes enhanced support for re-syncing locally-sourced collections from their original path.
+* **Unified CLI - `plugin enable/disable` Subcommands:**
+    * New subcommands added to the existing `md-to-pdf plugin` group:
+        * `md-to-pdf plugin enable <collection_name/plugin_id | collection_name --all> [--name <invoke_name>] [--prefix <prefix_string>] [--no-prefix]`: Enables plugin(s) from a managed collection, updating `enabled.yaml`.
+        * `md-to-pdf plugin disable <invoke_name>`: Disables an active plugin, updating `enabled.yaml`.
+* The `CollectionsManager` instance is now created by the main `md-to-pdf` CLI and made available to these new command handlers via middleware.
+* These integrated commands leverage the existing logic and console output behavior of the `CollectionsManager` module.
+
+### Changed
+
+* The main `cli.js` and its command modules in `src/commands/` were updated to support the new `collection` command group and the new `plugin` subcommands (`enable`, `disable`).
+* Refined the `success` status reporting for `CollectionsManager.updateAllCollections` to return `false` if any individual collection update fails or is aborted (e.g., due to local changes), ensuring consistency in test assertions.
+
+### Testing
+
+* **Hybrid Testing Strategy for CollectionsManager:**
+    * The original `CollectionsManager` test suites (which test methods directly) have been successfully integrated into the main project's test runner (`dev/test/run-tests.js`) under a new category: `cm-module`.
+    * These tests are located in `dev/test/cm-tests/` and use adapted helpers (`dev/test/cm-tests/cm-test-helpers.js`) to ensure proper isolation and environment setup (e.g., `MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE`, Git configuration).
+    * This approach allows for fast and precise testing of the `CollectionsManager`'s core logic.
+    * A `README.md` has been added to `dev/test/cm-tests/` explaining this hybrid strategy and the rationale.
+* **CLI-Based Integration Tests (Future Work):**
+    * The creation of a comprehensive suite of CLI-based integration tests (using `runCliCommand` for every CM scenario) for the new `md-to-pdf collection ...` and `md-to-pdf plugin enable/disable` commands has been deferred.
+    * A select few representative CLI-based tests will be added in a future version (e.g., v0.9.x) to verify end-to-end functionality, rather than exhaustively replicating all `CollectionsManager` module tests at the CLI level. This decision was made due to the complexity and potential brittleness of asserting against detailed console output from multiple software layers.
+
+
+## v0.8.2 (Conceptual - Main CLI Refactor)
+
+**Date:** 2025-05-30
+
+### Changed
+
+* **Main CLI Refactor (`cli.js`):**
+    * The main `md-to-pdf/cli.js` file has been refactored to improve modularity and maintainability, similar to the structure of the `CollectionsManager` module.
+    * A new directory `src/commands/` has been created.
+    * The yargs command definitions and handler initializations for each top-level command (`config`, `plugin`, `convert`, `generate`, and the default `$0` command) have been moved into separate modules within `src/commands/`.
+        * `plugin` subcommands (`list`, `create`, `help`) are further modularized into `src/commands/plugin/`.
+    * `cli.js` now imports these command modules and registers them with yargs, acting as an orchestrator.
+    * Core execution logic functions (e.g., `executeConversion`, `executeGeneration`, `commonCommandHandler`, `openPdf`) remain in `cli.js` to be accessible by the command handlers.
+    * This internal structural change does not alter the CLI's external behavior or functionality. All commands and options remain the same for the user.
+
 
 ## v0.8.1 (Conceptual - Integrate CollectionsManager Manifest)
 

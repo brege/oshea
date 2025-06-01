@@ -1,5 +1,5 @@
 // test/test-helpers.js
-const fs = require('fs').promises;
+const fs_promises = require('fs').promises;
 const fss = require('fs'); // Sync operations
 const path = require('path');
 const { exec } = require('child_process');
@@ -11,7 +11,7 @@ async function readFileContent(filePath) {
     if (!fss.existsSync(filePath)) {
         throw new Error(`File not found for content check: ${filePath}`);
     }
-    return fs.readFile(filePath, 'utf8');
+    return fs_promises.readFile(filePath, 'utf8');
 }
 
 async function checkFile(baseDir, relativeFilePath, minSize) {
@@ -19,7 +19,7 @@ async function checkFile(baseDir, relativeFilePath, minSize) {
     if (!fss.existsSync(fullPath)) {
         throw new Error(`File not found: ${fullPath}`);
     }
-    const stats = await fs.stat(fullPath);
+    const stats = await fs_promises.stat(fullPath);
     if (stats.size < minSize) {
         throw new Error(`File ${fullPath} is too small (${stats.size} bytes, expected >= ${minSize} bytes).`);
     }
@@ -30,22 +30,21 @@ async function checkFile(baseDir, relativeFilePath, minSize) {
 async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPath) {
     const cliArgs = [...argsArray];
     const hasCustomConfig = cliArgs.some(arg => arg === '--config' || arg.startsWith('--config='));
-    const isPluginCommand = cliArgs[0] === 'plugin';
-    const isConfigCommandAndNotImplicitlyTestingDefault = cliArgs[0] === 'config' && !cliArgs.includes(testConfigPath);
+    
+    let applyTestConfig = !hasCustomConfig &&
+                         !cliArgs.includes('--factory-defaults') &&
+                         !cliArgs.includes('--factory-default') &&
+                         !cliArgs.includes('-fd');
 
-    let command = `node "${cliScriptPath}" ${cliArgs.join(' ')}`;
-
-    if (!hasCustomConfig &&
-        !cliArgs.includes('--factory-defaults') &&
-        !cliArgs.includes('--factory-default') &&
-        !cliArgs.includes('-fd') &&
-        !isPluginCommand &&
-        !isConfigCommandAndNotImplicitlyTestingDefault) {
-        if (!(cliArgs[0] === 'config' && cliArgs.length === 1)) {
-            if (cliArgs[0] !== 'config' || (cliArgs[0] === 'config' && cliArgs.includes('--plugin'))) {
-                command += ` --config "${testConfigPath}"`;
-            }
+    if (cliArgs[0] === 'config' && applyTestConfig) {
+        if (!cliArgs.includes('--plugin') && cliArgs.length === 1) { 
+            applyTestConfig = false;
         }
+    }
+    
+    let command = `node "${cliScriptPath}" ${cliArgs.join(' ')}`;
+    if (applyTestConfig) {
+        command += ` --config "${testConfigPath}"`;
     }
 
     console.log(`  Executing: ${command}`);
@@ -69,12 +68,12 @@ async function setupTestDirectory(testOutputBaseDir, createdPluginsDir) {
     try {
         if (fss.existsSync(testOutputBaseDir)) {
             console.log(`Removing existing test output directory: ${testOutputBaseDir}`);
-            await fs.rm(testOutputBaseDir, { recursive: true, force: true });
+            await fs_promises.rm(testOutputBaseDir, { recursive: true, force: true });
         }
         console.log(`Creating test output directory: ${testOutputBaseDir}`);
-        await fs.mkdir(testOutputBaseDir, { recursive: true });
-        if (!fss.existsSync(createdPluginsDir)) {
-            await fs.mkdir(createdPluginsDir, { recursive: true });
+        await fs_promises.mkdir(testOutputBaseDir, { recursive: true });
+        if (createdPluginsDir && !fss.existsSync(createdPluginsDir)) {
+            await fs_promises.mkdir(createdPluginsDir, { recursive: true });
         }
     } catch (error) {
         console.error(`Error setting up test directory: ${error.message}`);
@@ -90,10 +89,28 @@ async function cleanupTestDirectory(testOutputBaseDir, keepOutput = false) {
     try {
         if (fss.existsSync(testOutputBaseDir)) {
             console.log(`Cleaning up test output directory: ${testOutputBaseDir}`);
-            await fs.rm(testOutputBaseDir, { recursive: true, force: true });
+            await fs_promises.rm(testOutputBaseDir, { recursive: true, force: true });
         }
     } catch (error) {
         console.warn(`Warning: Could not clean up test directory ${testOutputBaseDir}: ${error.message}`);
+    }
+}
+
+async function checkFileExists(filePath) {
+    if (!fss.existsSync(filePath)) {
+        throw new Error(`File not found: ${filePath}`);
+    }
+    console.log(`  OK: File exists: ${path.basename(filePath)}`);
+    return true;
+}
+
+async function cleanupDir(dirPath) {
+    if (fss.existsSync(dirPath)) {
+        try {
+            await fs_promises.rm(dirPath, { recursive: true, force: true });
+        } catch (e) {
+            console.warn(`  WARN: Could not fully cleanup directory ${dirPath}: ${e.message}`);
+        }
     }
 }
 
@@ -104,4 +121,6 @@ module.exports = {
     runCliCommand,
     setupTestDirectory,
     cleanupTestDirectory,
+    checkFileExists,
+    cleanupDir,
 };

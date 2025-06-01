@@ -1,4 +1,4 @@
-// dev/src/collections-manager/cm-utils.js
+// src/collections-manager/cm-utils.js
 const path = require('path');
 
 /**
@@ -26,7 +26,23 @@ function toPascalCase(str) {
   return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
 }
 
+/**
+ * Validates the plugin name.
+ * Allowed: letters, numbers, hyphens. Must start/end with letter/number.
+ * @param {string} pluginName - The name of the plugin.
+ * @returns {boolean} True if valid, false otherwise.
+ */
+function isValidPluginName(pluginName) {
+    if (!pluginName || typeof pluginName !== 'string') {
+        return false;
+    }
+    // Allows alphanumeric, and hyphens not at start/end. Does not allow underscore.
+    const regex = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/;
+    return regex.test(pluginName);
+}
+
 module.exports = {
   deriveCollectionName,
-  toPascalCase, // Added
+  toPascalCase,
+  isValidPluginName, // Export the new utility
 };

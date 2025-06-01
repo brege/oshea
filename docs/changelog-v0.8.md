@@ -6,28 +6,49 @@
 ---
 
 
-## v0.8.5 - Part 1 (Conceptual - Unified Plugin Creation & Archetype)
+## v0.8.5 - Unified Plugin Creation, Archetyping, and Examples
 
 **Date:** 2025-06-01
 
 ### Added
 
 * **Unified `md-to-pdf plugin create <name>` Command:**
-    * This command is now the primary way to generate new plugins.
-    * If used without `--from`, it creates a new plugin from a bundled template plugin (`plugins/template-basic/`). The template includes a basic structure and a self-activating example Markdown file using front matter to point to its local configuration. The default output directory for this mode is the current working directory.
-    * The new `--from <source_identifier>` option allows `plugin create` to archetype an existing plugin. `<source_identifier>` can be a CollectionsManager-managed plugin (`collection_name/plugin_id`) or a direct filesystem path to a plugin directory. The default output directory for this mode is managed by the underlying archetype logic (typically `my-plugins/` relative to `COLL_ROOT`).
-* **Bundled `template-basic` Plugin:** Located in `plugins/template-basic/`, serves as the default source for `plugin create`. Includes `template-basic.config.yaml`, `index.js`, `template-basic.css`, `README.md`, and `template-basic-example.md`.
-* The `md-to-pdf plugin create` command now provides more detailed "Next Steps" guidance upon successful plugin creation.
+    * Now the sole command for generating new plugins, using `CollectionsManager.archetypePlugin` as its engine.
+    * **Default Mode (No `--from`):** Creates a new plugin by archetyping from a new bundled template located at `plugins/template-basic/`. The default output directory is the current working directory (e.g., `./<new-plugin-name>`).
+    * **`--from <source_identifier>` Option:** Allows archetyping from an existing plugin. `<source_identifier>` can be a CM-managed plugin ID (`collection_name/plugin_id`) or a direct filesystem path to a plugin directory. The default output directory for this mode is handled by the underlying archetype logic (typically `my-plugins/` relative to `COLL_ROOT`).
+    * Includes `isValidPluginName` validation for the new plugin name.
+* **Bundled `template-basic` Plugin (`plugins/template-basic/`):**
+    * A minimal, functional plugin serving as the default template for `plugin create`.
+    * Includes `template-basic.config.yaml`, `index.js`, `template-basic.css`, `README.md` (with `cli_help`), and `template-basic-example.md`.
+    * The `template-basic-example.md` is pre-configured with front matter (`md_to_pdf_plugin: "./template-basic.config.yaml"`) to be self-activating when run from its directory.
+* **Self-Activating Example Markdown Files for Bundled Plugins:**
+    * Added `<plugin-name>-example.md` files to the following bundled plugins: `default`, `cv`, `cover-letter`, and `recipe`.
+    * Each example is configured with front matter (e.g., `md_to_pdf_plugin: "./cv.config.yaml"`) to allow immediate testing of the plugin by running `md-to-pdf <plugin-name>-example.md` from within the plugin's directory.
+    * Each example file includes a note explaining its self-activation and the need for general registration for use with other files.
 
 ### Changed
 
-* **`CollectionsManager.archetypePlugin` Enhancement:** The internal `archetypePlugin` method in `CollectionsManager` has been significantly enhanced to reliably handle direct filesystem paths as source identifiers, in addition to `collection_name/plugin_id` strings. This includes improved config file detection and metadata handling for direct path sources.
-* The CLI handler for `md-to-pdf plugin create` (`src/commands/plugin/createCmd.js`) was rewritten to use `CollectionsManager.archetypePlugin` as its core engine and to manage source/target directory logic appropriately.
+* **`CollectionsManager.archetypePlugin` Enhancement:**
+    * The internal `archetypePlugin` method in `CollectionsManager` (`src/collections-manager/commands/archetype.js`) has been significantly enhanced to robustly handle direct filesystem paths as source identifiers, in addition to `collection_name/plugin_id` strings. This includes improved config file discovery, `sourcePluginIdForReplacement` derivation, and metadata handling for direct path sources.
+    * Corrected string replacement logic within `archetypePlugin` to prevent "double replacement" issues for fields like `css_files` and `handler_script` in the generated config file when the `sourcePluginIdForReplacement` is a substring of the `newArchetypeName`.
+* The handler for `md-to-pdf plugin create` (`src/commands/plugin/createCmd.js`) was rewritten to use `CollectionsManager.archetypePlugin` as its core engine and to manage source/target directory logic appropriately.
 
 ### Deprecated
 
-* **`md-to-pdf collection archetype` Command:** This command is now deprecated in favor of `md-to-pdf plugin create <newName> --from <sourceIdentifier>`. The `collection archetype` command will issue a warning but will continue to function for this release cycle by calling the underlying `archetypePlugin` logic. It will be removed in a future version.
-* The original `src/plugin_scaffolder.js` is now effectively superseded by the `archetypePlugin` logic within `CollectionsManager`.
+* **`md-to-pdf collection archetype` Command:**
+    * This command is now deprecated in favor of `md-to-pdf plugin create <newName> --from <sourceIdentifier>`.
+    * A new command definition (`src/commands/collection/archetypeCmd.js`) issues a deprecation warning but allows the command to continue functioning for this release cycle by calling the underlying `archetypePlugin`.
+    * The main `collection` command group (`src/commands/collectionCmd.js`) registers this deprecated command and includes an epilogue note.
+
+### Testing
+
+* Overhauled CLI tests in `test/test-cases/plugin-create-command.test-cases.js` to comprehensively cover the unified `plugin create` functionality in both modes (template and `--from`), including various options (`--dir`, `--force`), error handling, and default directory behaviors.
+* Added a CLI test to verify the deprecation warning and continued functionality of `md-to-pdf collection archetype`.
+* Updated `test/cm-tests/archetype.test.js` assertions for description strings and error messages to align with `archetypePlugin` enhancements.
+
+### Removed
+
+* The old `src/plugin_scaffolder.js` is now fully superseded by the `archetypePlugin` logic within `CollectionsManager` and the `plugin create` command. The `isValidPluginName` utility was moved to `cm-utils.js`.
 
 
 ## v0.8.4 (Conceptual - Enhanced Plugin and Collection Listing)
@@ -53,15 +74,15 @@
 ### Changed
 
 * `PluginRegistryBuilder.getAllPluginDetails()` now accepts a `CollectionsManager` instance. When provided, it integrates detailed information about all CM-managed plugins (including those available but not enabled) into its comprehensive list, providing a unified data source for listing.
-* The handler for `md-to-pdf plugin list` in `dev/src/commands/plugin/listCmd.js` was rewritten to use the enhanced `PluginRegistryBuilder` as its single source of plugin data and then applies filtering and specific formatting based on the provided CLI flags.
-* `CollectionsManager.listCollections('downloaded')` method in `dev/src/collections-manager/commands/list.js` now returns an array of objects (including `name`, `source`, `added_on`, `updated_on`) instead of just names, facilitating the enhanced `md-to-pdf collection list` output.
-* The handler for `md-to-pdf collection list` in `dev/src/commands/collection/listCmd.js` was updated to consume and display this richer information.
+* The handler for `md-to-pdf plugin list` in `src/commands/plugin/listCmd.js` was rewritten to use the enhanced `PluginRegistryBuilder` as its single source of plugin data and then applies filtering and specific formatting based on the provided CLI flags.
+* `CollectionsManager.listCollections('downloaded')` method in `src/collections-manager/commands/list.js` now returns an array of objects (including `name`, `source`, `added_on`, `updated_on`) instead of just names, facilitating the enhanced `md-to-pdf collection list` output.
+* The handler for `md-to-pdf collection list` in `src/commands/collection/listCmd.js` was updated to consume and display this richer information.
 
 ### Fixed
 
-* Corrected an issue in `dev/src/collections-manager/commands/updateAll.js` where it was not correctly handling the new object-based return type from `listCollections('downloaded')`, causing `TypeError` errors during `md-to-pdf collection update` (when run for all collections).
+* Corrected an issue in `src/collections-manager/commands/updateAll.js` where it was not correctly handling the new object-based return type from `listCollections('downloaded')`, causing `TypeError` errors during `md-to-pdf collection update` (when run for all collections).
 * Resolved a `TypeError: chalk.stripColor is not a function` in `md-to-pdf plugin list --short` by correctly using `strip-ansi` (an existing dependency) to remove ANSI codes for column width calculation.
-* Ensured tests in `dev/test/cm-tests/list.test.js` and `dev/src/collections-manager/test/list.test.js` were updated to align with the new object-based return type of `CollectionsManager.listCollections('downloaded')`.
+* Ensured tests in `test/cm-tests/list.test.js` and `src/collections-manager/test/list.test.js` were updated to align with the new object-based return type of `CollectionsManager.listCollections('downloaded')`.
 
 
 ## v0.8.3 (Conceptual - CLI Integration Phase 1: Collection & Core Plugin State Commands + Test Integration)
@@ -92,10 +113,10 @@
 ### Testing
 
 * **Hybrid Testing Strategy for CollectionsManager:**
-    * The original `CollectionsManager` test suites (which test methods directly) have been successfully integrated into the main project's test runner (`dev/test/run-tests.js`) under a new category: `cm-module`.
-    * These tests are located in `dev/test/cm-tests/` and use adapted helpers (`dev/test/cm-tests/cm-test-helpers.js`) to ensure proper isolation and environment setup (e.g., `MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE`, Git configuration).
+    * The original `CollectionsManager` test suites (which test methods directly) have been successfully integrated into the main project's test runner (`test/run-tests.js`) under a new category: `cm-module`.
+    * These tests are located in `test/cm-tests/` and use adapted helpers (`test/cm-tests/cm-test-helpers.js`) to ensure proper isolation and environment setup (e.g., `MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE`, Git configuration).
     * This approach allows for fast and precise testing of the `CollectionsManager`'s core logic.
-    * A `README.md` has been added to `dev/test/cm-tests/` explaining this hybrid strategy and the rationale.
+    * A `README.md` has been added to `test/cm-tests/` explaining this hybrid strategy and the rationale.
 * **CLI-Based Integration Tests (Future Work):**
     * The creation of a comprehensive suite of CLI-based integration tests (using `runCliCommand` for every CM scenario) for the new `md-to-pdf collection ...` and `md-to-pdf plugin enable/disable` commands has been deferred.
     * A select few representative CLI-based tests will be added in a future version (e.g., v0.9.x) to verify end-to-end functionality, rather than exhaustively replicating all `CollectionsManager` module tests at the CLI level. This decision was made due to the complexity and potential brittleness of asserting against detailed console output from multiple software layers.
@@ -139,7 +160,7 @@
 
 * **Reason for Deferral**
 
-  Implementing isolated and reliable test cases for this specific integration presents challenges within the current main project's testing framework, particularly concerning the mocking or management of the `enabled.yaml` file and its XDG-based location from within `dev/test/run-tests.js`. The functionality has been manually verified. Future enhancements to the test environment will aim to address this for more comprehensive automated testing of this cross-module interaction.
+  Implementing isolated and reliable test cases for this specific integration presents challenges within the current main project's testing framework, particularly concerning the mocking or management of the `enabled.yaml` file and its XDG-based location from within `test/run-tests.js`. The functionality has been manually verified. Future enhancements to the test environment will aim to address this for more comprehensive automated testing of this cross-module interaction.
 
 
 ## v0.8.0 (Conceptual - Main Test Suite Refactor)

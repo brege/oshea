@@ -261,8 +261,6 @@ This structure clarifies that `md-to-pdf collection add` and `md-to-pdf plugin a
        |`recipe`       | `plugins/recipe/recipe-example.md`                           |
 
 
-
-
 #### 7.  [[v0.8.6][v0.8.6]] Enhance Local Plugin/Collection Management
 
   * **Goal:** Improve the workflow for managing and updating locally developed or sourced plugins and collections.

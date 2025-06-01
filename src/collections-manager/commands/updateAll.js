@@ -12,31 +12,29 @@ module.exports = async function updateAllCollections() {
   let allOverallSuccess = true;
   const updateMessages = [];
 
-  const downloadedCollections = await this.listCollections('downloaded'); // Uses bound method
-  if (!downloadedCollections || downloadedCollections.length === 0) {
+  // listCollections('downloaded') now returns an array of objects: { name, source, added_on, updated_on }
+  const downloadedCollectionInfos = await this.listCollections('downloaded'); // Uses bound method
+
+  if (!downloadedCollectionInfos || downloadedCollectionInfos.length === 0) {
       console.log(chalk.yellow("No collections are currently downloaded. Nothing to update."));
       return { success: true, messages: ["No collections downloaded."]};
   }
 
   console.log(chalk.blue("Processing updates for downloaded collections:"));
 
-  for (const collectionName of downloadedCollections) {
-      const metadata = await this._readCollectionMetadata(collectionName); // Private method
+  for (const collectionInfo of downloadedCollectionInfos) { // Changed loop variable name
+      const collectionName = collectionInfo.name; // Extract the name string
+      const collectionSource = collectionInfo.source; // Extract the source
 
-      if (!metadata) {
-          const skipMsg = `Skipping ${collectionName}: Metadata file not found or unreadable.`;
-          console.log(chalk.yellow(`  ${skipMsg}`));
-          updateMessages.push(skipMsg);
-          // Consider if this should set allOverallSuccess to false.
-          // For now, let's assume only active update attempts affect overall success.
-          continue;
-      }
+      // We can use collectionInfo.source directly instead of re-reading metadata just for the source,
+      // but updateCollection will read metadata again. This is fine.
+      // For clarity here, we use the source from collectionInfo for the check.
 
-      if (metadata.source && (/^(http(s)?:\/\/|git@)/.test(metadata.source) || (typeof metadata.source === 'string' && metadata.source.endsWith('.git')) )) {
+      if (collectionSource && (/^(http(s)?:\/\/|git@)/.test(collectionSource) || (typeof collectionSource === 'string' && collectionSource.endsWith('.git')) )) {
           try {
+              // Pass the string name to updateCollection
               const result = await this.updateCollection(collectionName); // Uses bound method
               updateMessages.push(result.message);
-              // If any individual update result is not successful, the overall operation is not fully successful.
               if (!result.success) {
                 allOverallSuccess = false;
               }
@@ -47,7 +45,7 @@ module.exports = async function updateAllCollections() {
               allOverallSuccess = false;
           }
       } else {
-          const skipMsg = `Skipping ${collectionName}: Not a Git-based collection (source: ${metadata.source || 'N/A'}).`;
+          const skipMsg = `Skipping ${collectionName}: Not a Git-based collection (source: ${collectionSource || 'N/A'}).`;
           console.log(chalk.yellow(`  ${skipMsg}`));
           updateMessages.push(skipMsg);
       }

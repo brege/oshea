@@ -1,0 +1,28 @@
+/* plugins/template-basic/template-basic.css */
+/* This is a basic CSS template for new md-to-pdf plugins. */
+/* When a new plugin is created from this template, this filename */
+/* ('template-basic.css') will be replaced with '<new-plugin-name>.css'. */
+
+body {
+    font-family: sans-serif;
+    line-height: 1.5;
+    margin: 1in; /* A common default margin */
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+    line-height: 1.2;
+}
+
+p {
+    margin-bottom: 0.8em;
+}
+
+/* Add more specific styles for your new 'template-basic' plugin below */
+/* For example: */
+/*
+.template-basic-custom-class {
+    color: navy;
+}
+*/

@@ -13,12 +13,23 @@ module.exports = async function listCollections(type = 'downloaded', collectionN
         return [];
       }
       const entries = await fs.readdir(this.collRoot, { withFileTypes: true });
-      let collections = entries
-        .filter(dirent => dirent.isDirectory())
-        .map(dirent => dirent.name);
+      const collectionInfos = [];
 
-      collections.sort((a,b) => a.toLowerCase().localeCompare(b.toLowerCase()));
-      return collections;
+      for (const dirent of entries) {
+        if (dirent.isDirectory()) {
+          const collectionName = dirent.name;
+          const metadata = await this._readCollectionMetadata(collectionName); // Private method on 'this'
+          collectionInfos.push({
+            name: collectionName,
+            source: metadata?.source || 'N/A (Metadata missing or unreadable)',
+            added_on: metadata?.added_on || 'N/A',
+            updated_on: metadata?.updated_on // Will be undefined if never updated
+          });
+        }
+      }
+
+      collectionInfos.sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+      return collectionInfos;
     } catch (error) {
       console.error(chalk.red(`  ERROR listing downloaded collections: ${error.message}`));
       throw error; // Re-throw to be caught by CLI or calling function

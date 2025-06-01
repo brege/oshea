@@ -4,7 +4,7 @@ const chalk = require('chalk');
 
 module.exports = {
   command: 'list',
-  describe: 'Lists all downloaded plugin collection names.',
+  describe: 'Lists all downloaded plugin collection names, their sources, and status.',
   builder: (yargsCmd) => {
     // No specific options for this list variant
   },
@@ -16,14 +16,30 @@ module.exports = {
     const manager = args.manager;
 
     try {
-      // The listCollections method (type 'downloaded') in CM handles console output
-      const collections = await manager.listCollections('downloaded');
+      const collections = await manager.listCollections('downloaded'); // This now returns richer objects
       if (collections.length === 0) {
         console.log(chalk.yellow("No collections downloaded."));
         return;
       }
       console.log(chalk.blue("\nDownloaded plugin collections:"));
-      collections.forEach(name => console.log(chalk.greenBright(`  - ${name}`)));
+      collections.forEach(coll => {
+        let sourceDisplay = coll.source || 'N/A';
+        if (sourceDisplay.startsWith(manager.collRoot)) { // Check if it's a local path within COLL_ROOT (less likely for a 'source')
+            sourceDisplay = `Local (copied to collection)`; // Or some other indicator for local non-git
+        } else if (!/^(http(s)?:\/\/|git@)/.test(sourceDisplay) && !sourceDisplay.endsWith('.git') && sourceDisplay !== 'N/A (Metadata missing or unreadable)') {
+            sourceDisplay = `Local Path: ${chalk.gray(sourceDisplay)}`;
+        } else {
+            sourceDisplay = `Git: ${chalk.gray(sourceDisplay)}`;
+        }
+
+        console.log(`  - Name: ${chalk.yellowBright(coll.name)}`);
+        console.log(`    Source: ${sourceDisplay}`);
+        console.log(`    Added: ${coll.added_on || 'N/A'}`);
+        if (coll.updated_on) {
+          console.log(`    Last Updated: ${coll.updated_on}`);
+        }
+        console.log(chalk.white("  ---"));
+      });
 
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'collection list' command execution: ${error.message}`));

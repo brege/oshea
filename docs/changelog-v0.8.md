@@ -6,6 +6,40 @@
 ---
 
 
+## v0.8.4 (Conceptual - Enhanced Plugin and Collection Listing)
+
+**Date:** 2025-05-31
+
+### Added
+
+* **Enhanced `md-to-pdf plugin list` Command:**
+    * The command now integrates more deeply with `CollectionsManager` data via an enhanced `PluginRegistryBuilder` for a unified backend.
+    * New flag: `--short` provides a condensed, one-line summary for each plugin, showing status, name/invoke key, and CM origin if applicable, with aligned columns.
+    * New status flags to view plugins (primarily CM-managed unless stated otherwise):
+        * `--available`: Lists all plugins within CM-managed collections (`COLL_ROOT`) that can be used or enabled (includes already CM-enabled plugins and those only available in `COLL_ROOT`).
+        * `--enabled`: Lists all actively enabled plugins (both traditionally registered and CM-enabled).
+        * `--disabled`: Lists plugins within CM-managed collections that are available but *not* currently enabled in `enabled.yaml`.
+    * Optional `[<collection_name_filter>]` argument can be used with status flags and `--short` to filter CM-managed plugins by their collection name.
+    * Refined console output formatting for all `plugin list` views for improved readability and clarity, with distinct colors (e.g., blueBright for "Enabled (CM)", cyan for "Registered", gray for "Available (CM)") and bolding for statuses and identifiers.
+    * Added an epilogue to the `plugin list` help text to guide users to `md-to-pdf collection list` for viewing collection names and sources.
+
+* **Enhanced `md-to-pdf collection list` Command:**
+    * Output now includes the `source` (Git URL or local path) and `added_on` / `updated_on` dates for each downloaded collection, providing more comprehensive information.
+
+### Changed
+
+* `PluginRegistryBuilder.getAllPluginDetails()` now accepts a `CollectionsManager` instance. When provided, it integrates detailed information about all CM-managed plugins (including those available but not enabled) into its comprehensive list, providing a unified data source for listing.
+* The handler for `md-to-pdf plugin list` in `dev/src/commands/plugin/listCmd.js` was rewritten to use the enhanced `PluginRegistryBuilder` as its single source of plugin data and then applies filtering and specific formatting based on the provided CLI flags.
+* `CollectionsManager.listCollections('downloaded')` method in `dev/src/collections-manager/commands/list.js` now returns an array of objects (including `name`, `source`, `added_on`, `updated_on`) instead of just names, facilitating the enhanced `md-to-pdf collection list` output.
+* The handler for `md-to-pdf collection list` in `dev/src/commands/collection/listCmd.js` was updated to consume and display this richer information.
+
+### Fixed
+
+* Corrected an issue in `dev/src/collections-manager/commands/updateAll.js` where it was not correctly handling the new object-based return type from `listCollections('downloaded')`, causing `TypeError` errors during `md-to-pdf collection update` (when run for all collections).
+* Resolved a `TypeError: chalk.stripColor is not a function` in `md-to-pdf plugin list --short` by correctly using `strip-ansi` (an existing dependency) to remove ANSI codes for column width calculation.
+* Ensured tests in `dev/test/cm-tests/list.test.js` and `dev/src/collections-manager/test/list.test.js` were updated to align with the new object-based return type of `CollectionsManager.listCollections('downloaded')`.
+
+
 ## v0.8.3 (Conceptual - CLI Integration Phase 1: Collection & Core Plugin State Commands + Test Integration)
 
 **Date:** 2025-05-31

@@ -18,7 +18,7 @@ const {
 // Renamed from testListCollections to testListCollectionsType
 async function testListCollectionsType(testRunStats) {
     testRunStats.attempted++;
-    const testName = "List Collections (type: collections)";
+    const testName = "List Collections (type: collections/downloaded)"; // Clarified type
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
     const testCollRoot = await createTestCollRoot();
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: false });
@@ -29,18 +29,33 @@ async function testListCollectionsType(testRunStats) {
     await fs.mkdir(path.join(localSourcePath, dummyPluginIdInList), { recursive: true });
     await fs.writeFile(path.join(localSourcePath, dummyPluginIdInList, `${dummyPluginIdInList}.config.yaml`), 'description: dummy');
 
-    await manager.addCollection('https://github.com/brege/md-to-pdf-plugins.git', { name: 'plugins1-list-test' });
-    await manager.addCollection(localSourcePath, { name: 'plugins2-list-test' });
+    const collection1Name = 'plugins1-list-test';
+    const collection2Name = 'plugins2-list-test';
+
+    await manager.addCollection('https://github.com/brege/md-to-pdf-plugins.git', { name: collection1Name });
+    await manager.addCollection(localSourcePath, { name: collection2Name });
 
     try {
-        // This now specifically tests the 'collections' type which maps to 'downloaded' in manager
-        const collections = await manager.listCollections('downloaded'); // Internal type
-        assert.ok(collections.includes('plugins1-list-test'), `(${testName}) List should include plugins1-list-test`);
-        assert.ok(collections.includes('plugins2-list-test'), `(${testName}) List should include plugins2-list-test`);
+        // This now specifically tests the 'downloaded' type which returns objects
+        const collectionsInfo = await manager.listCollections('downloaded'); // Returns array of objects
+        
+        assert.ok(
+            collectionsInfo.some(c => c.name === collection1Name),
+            `(${testName}) List should include object with name '${collection1Name}'`
+        );
+        assert.ok(
+            collectionsInfo.some(c => c.name === collection2Name),
+            `(${testName}) List should include object with name '${collection2Name}'`
+        );
+        // Verify source for one of them
+        const coll1Info = collectionsInfo.find(c => c.name === collection1Name);
+        assert.ok(coll1Info && coll1Info.source === 'https://github.com/brege/md-to-pdf-plugins.git', `(${testName}) Source for ${collection1Name} should be correct.`);
+
         const expectedCount = fss.readdirSync(testCollRoot).filter(
             item => fss.lstatSync(path.join(testCollRoot, item)).isDirectory()
         ).length;
-        assert.strictEqual(collections.length, expectedCount, `(${testName}) Should list correct number of downloaded collections`);
+        assert.strictEqual(collectionsInfo.length, expectedCount, `(${testName}) Should list correct number of downloaded collections`);
+        
         console.log(chalk.green(`  PASSED: ${testName}`));
         testRunStats.passed++;
     } catch (error) {
@@ -55,20 +70,23 @@ async function testListCollectionsType(testRunStats) {
 // Renamed from testListAvailablePlugins to testListAllPluginsType
 async function testListAllPluginsType(testRunStats) {
     testRunStats.attempted++;
-    const testName = "List All Available Plugins (type: all)";
+    const testName = "List All Available Plugins (type: all/available)"; // Clarified type
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
     const testCollRoot = await createTestCollRoot();
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: false });
 
-    const coll1Path = path.join(testCollRoot, 'coll1');
-    const pluginAId = 'pluginA';
+    const coll1Name = 'coll1-list-avail'; // Shortened for clarity
+    const coll1Path = path.join(testCollRoot, coll1Name);
+    const pluginAId = 'pluginAlist';
     const pluginAPath = path.join(coll1Path, pluginAId);
-    const pluginBId = 'pluginB';
+    const pluginBId = 'pluginBlist';
     const pluginBPath = path.join(coll1Path, pluginBId);
-    const coll2Path = path.join(testCollRoot, 'coll2');
-    const pluginCId = 'pluginC';
+    
+    const coll2Name = 'coll2-list-avail'; // Shortened
+    const coll2Path = path.join(testCollRoot, coll2Name);
+    const pluginCId = 'pluginClist';
     const pluginCPath = path.join(coll2Path, pluginCId);
-    const pluginDId = 'pluginD'; // Malformed
+    const pluginDId = 'pluginDlistMalformed'; // Malformed
     const pluginDPath = path.join(coll2Path, pluginDId);
 
 
@@ -83,18 +101,23 @@ async function testListAllPluginsType(testRunStats) {
 
 
     try {
-        const expectedPluginCount = 4; // A, B, C, D (D is listed with error)
-        let allPlugins = await manager.listAvailablePlugins(); // This is what 'list all' uses
+        const expectedPluginCount = 4; 
+        let allPlugins = await manager.listAvailablePlugins(); 
         assert.strictEqual(allPlugins.length, expectedPluginCount, `(${testName}) Should find ${expectedPluginCount} plugins globally`);
 
-        const pluginAInfo = allPlugins.find(p => p.plugin_id === pluginAId && p.collection === 'coll1');
-        assert.ok(pluginAInfo, `(${testName}) Plugin A should be listed`);
+        const pluginAInfo = allPlugins.find(p => p.plugin_id === pluginAId && p.collection === coll1Name);
+        assert.ok(pluginAInfo, `(${testName}) Plugin A (${pluginAId}) in ${coll1Name} should be listed`);
+        assert.strictEqual(pluginAInfo.description, 'Plugin A description', `(${testName}) Plugin A description correct`);
 
-        // Test filtering by collection
-        allPlugins = await manager.listAvailablePlugins('coll1');
-        assert.strictEqual(allPlugins.length, 2, `(${testName}) Should find 2 plugins in 'coll1' when filtered`);
-        assert.ok(allPlugins.some(p => p.plugin_id === pluginAId), `(${testName}) Plugin A in coll1 filter`);
-        assert.ok(allPlugins.some(p => p.plugin_id === pluginBId), `(${testName}) Plugin B in coll1 filter`);
+
+        allPlugins = await manager.listAvailablePlugins(coll1Name);
+        assert.strictEqual(allPlugins.length, 2, `(${testName}) Should find 2 plugins in '${coll1Name}' when filtered`);
+        assert.ok(allPlugins.some(p => p.plugin_id === pluginAId), `(${testName}) Plugin A in ${coll1Name} filter`);
+        assert.ok(allPlugins.some(p => p.plugin_id === pluginBId), `(${testName}) Plugin B in ${coll1Name} filter`);
+
+        const pluginDInfo = (await manager.listAvailablePlugins(coll2Name)).find(p => p.plugin_id === pluginDId);
+        assert.ok(pluginDInfo, `(${testName}) Malformed Plugin D should still be listed`);
+        assert.ok(pluginDInfo.description.includes('Error loading config'), `(${testName}) Malformed Plugin D description should indicate error`);
 
         allPlugins = await manager.listAvailablePlugins('nonExistentCollection');
         assert.strictEqual(allPlugins.length, 0, `(${testName}) Should find 0 plugins in non-existent collection`);
@@ -110,13 +133,12 @@ async function testListAllPluginsType(testRunStats) {
     }
 }
 
-// testListEnabledPlugins remains largely the same as it tests manager.listCollections('enabled', ...)
 async function testListEnabledPluginsType(testRunStats) {
     testRunStats.attempted++;
     const testName = "List Enabled Plugins (type: enabled)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
     const testCollRoot = await createTestCollRoot();
-    const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true });
+    const manager = new CollectionsManager({ collRoot: testCollRoot, debug: true }); // debug true can be helpful
 
     const mockCollectionName = 'test-collection-list-enabled';
     const mockPlugin1Id = 'pluginAlphaList';
@@ -167,17 +189,14 @@ async function testListDisabledPluginsType(testRunStats) {
     const pluginEnabledId = 'plugEna';
     const pluginDisabledId = 'plugDis';
 
-    // Setup plugins
     await fs.mkdir(path.join(testCollRoot, collName, pluginEnabledId), { recursive: true });
     await fs.writeFile(path.join(testCollRoot, collName, pluginEnabledId, `${pluginEnabledId}.config.yaml`), yaml.dump({ description: 'Enabled Plugin' }));
     await fs.mkdir(path.join(testCollRoot, collName, pluginDisabledId), { recursive: true });
     await fs.writeFile(path.join(testCollRoot, collName, pluginDisabledId, `${pluginDisabledId}.config.yaml`), yaml.dump({ description: 'Disabled Plugin' }));
 
-    // Enable one plugin
     await manager.enablePlugin(`${collName}/${pluginEnabledId}`, { name: 'enabledInvokeName' });
 
     try {
-        // Logic to get disabled plugins: (all available) - (all enabled)
         const availableInColl = await manager.listAvailablePlugins(collName);
         const enabledInColl = await manager.listCollections('enabled', collName);
         const enabledPluginFullIds = new Set(enabledInColl.map(p => `${p.collection_name}/${p.plugin_id}`));
@@ -186,14 +205,11 @@ async function testListDisabledPluginsType(testRunStats) {
         assert.strictEqual(disabledInColl.length, 1, `(${testName}) Should find 1 disabled plugin in ${collName}`);
         assert.strictEqual(disabledInColl[0].plugin_id, pluginDisabledId, `(${testName}) Correct disabled plugin found in ${collName}`);
 
-        // Test without collection filter
         const availableAll = await manager.listAvailablePlugins();
         const enabledAll = await manager.listCollections('enabled');
         const enabledAllFullIds = new Set(enabledAll.map(p => `${p.collection_name}/${p.plugin_id}`));
         const disabledAll = availableAll.filter(p => !enabledAllFullIds.has(`${p.collection}/${p.plugin_id}`));
         
-        // This count depends on how many plugins are created by other tests if roots are not perfectly isolated or cleaned.
-        // For simplicity, we just check if our specific disabled plugin is there.
         const foundPlugDisInAll = disabledAll.find(p => p.collection === collName && p.plugin_id === pluginDisabledId);
         assert.ok(foundPlugDisInAll, `(${testName}) Plugin ${pluginDisabledId} should be in the global list of disabled plugins.`);
 
@@ -211,10 +227,10 @@ async function testListDisabledPluginsType(testRunStats) {
 
 
 async function runListTests(testRunStats) {
-    await testListCollectionsType(testRunStats);      // Tests listing collection names
-    await testListAllPluginsType(testRunStats);       // Tests listing all available plugins
-    await testListEnabledPluginsType(testRunStats);   // Tests listing enabled plugins
-    await testListDisabledPluginsType(testRunStats);  // New test for disabled plugins
+    await testListCollectionsType(testRunStats);
+    await testListAllPluginsType(testRunStats); 
+    await testListEnabledPluginsType(testRunStats);
+    await testListDisabledPluginsType(testRunStats);
 }
 
 module.exports = {

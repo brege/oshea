@@ -11,7 +11,15 @@ const CM_ENABLED_MANIFEST_FILENAME = 'enabled.yaml';
 const CM_COLLECTIONS_SUBDIR_NAME = 'collections';
 
 class PluginRegistryBuilder {
-    constructor(projectRoot, xdgBaseDir, projectManifestConfigPath, useFactoryDefaultsOnly = false, isLazyLoadMode = false, primaryMainConfigLoadReason = null) {
+    constructor(
+        projectRoot,
+        xdgBaseDir,
+        projectManifestConfigPath,
+        useFactoryDefaultsOnly = false,
+        isLazyLoadMode = false,
+        primaryMainConfigLoadReason = null,
+        collectionsManagerInstance = null // New optional parameter
+    ) {
         this.projectRoot = projectRoot;
         if (!this.projectRoot || typeof this.projectRoot !== 'string') {
             throw new Error("PluginRegistryBuilder: projectRoot must be a valid path string.");
@@ -34,6 +42,7 @@ class PluginRegistryBuilder {
         this.projectManifestBaseDir = this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath) ? path.dirname(this.projectManifestConfigPath) : null;
 
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
+        this.collectionsManager = collectionsManagerInstance; // Store the instance
         this._builtRegistry = null;
 
         this.cmCollRoot = this._determineCmCollRoot();
@@ -125,7 +134,7 @@ class PluginRegistryBuilder {
             return {};
         }
         try {
-            const config = await loadYamlConfig(mainConfigFilePath); 
+            const config = await loadYamlConfig(mainConfigFilePath);
             const registrations = {};
             let currentAliases = {};
 
@@ -160,8 +169,8 @@ class PluginRegistryBuilder {
     async _getPluginRegistrationsFromCmManifest(cmEnabledManifestPath, sourceType) {
         const registrations = {};
         if (!fs.existsSync(cmEnabledManifestPath)) {
-            if (process.env.DEBUG_CM_INTEGRATION === 'true') { 
-                 console.log(`INFO (PluginRegistryBuilder): CollectionsManager manifest '${cmEnabledManifestPath}' not found. No CM plugins loaded.`);
+            if (process.env.DEBUG_CM_INTEGRATION === 'true') {
+                 console.log(`INFO (PluginRegistryBuilder): CollectionsManager manifest '${cmEnabledManifestPath}' not found. No CM plugins loaded this way.`);
             }
             return registrations;
         }
@@ -174,9 +183,13 @@ class PluginRegistryBuilder {
                     if (pluginEntry && pluginEntry.invoke_name && pluginEntry.config_path) {
                         if (fs.existsSync(pluginEntry.config_path)) {
                             registrations[pluginEntry.invoke_name] = {
-                                configPath: pluginEntry.config_path, 
+                                configPath: pluginEntry.config_path,
                                 definedIn: cmEnabledManifestPath,
-                                sourceType: `${sourceType} (CM: ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`
+                                sourceType: `${sourceType} (CM: ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`,
+                                cmOriginalCollection: pluginEntry.collection_name,
+                                cmOriginalPluginId: pluginEntry.plugin_id,
+                                cmAddedOn: pluginEntry.added_on,
+                                cmStatus: 'Enabled (CM)' // Mark as CM Enabled
                             };
                         } else {
                             console.warn(`WARN (PluginRegistryBuilder): Config path '${pluginEntry.config_path}' for CM-enabled plugin '${pluginEntry.invoke_name}' does not exist. Skipping.`);
@@ -193,11 +206,18 @@ class PluginRegistryBuilder {
     }
 
     async buildRegistry() {
+        // This method primarily builds the registry from traditional config files
+        // and includes CM-enabled plugins if this.collectionsManager is NOT set (maintaining old path).
+        // If this.collectionsManager IS set, getAllPluginDetails will handle full CM integration.
         if (this._builtRegistry &&
             this._builtRegistry.builtWithFactoryDefaults === this.useFactoryDefaultsOnly &&
             this._builtRegistry.projectManifestPathUsed === this.projectManifestConfigPath &&
             this._builtRegistry.isLazyLoadMode === this.isLazyLoadMode &&
-            this._builtRegistry.primaryMainConfigLoadReason === this.primaryMainConfigLoadReason) {
+            this._builtRegistry.primaryMainConfigLoadReason === this.primaryMainConfigLoadReason &&
+            // Only add CM instance check if we decide buildRegistry itself also changes behavior with it
+            // For now, buildRegistry focuses on config files, getAllPluginDetails enhances with live CM state.
+            this._builtRegistry.collectionsManagerInstance === this.collectionsManager
+        ) {
             return this._builtRegistry.registry;
         }
 
@@ -206,7 +226,6 @@ class PluginRegistryBuilder {
         let initialRegistrationsSourceType;
         let baseDirForInitialRegistrations = this.projectRoot;
 
-        // Tier 4: Bundled config.example.yaml (Factory Defaults)
         if (this.useFactoryDefaultsOnly) {
             sourcePathForInitialRegistrations = this.factoryDefaultMainConfigPath;
             initialRegistrationsSourceType = `Factory Default (${path.basename(this.factoryDefaultMainConfigPath)})`;
@@ -220,10 +239,10 @@ class PluginRegistryBuilder {
                 initialRegistrationsSourceType = `Bundled Definitions (${path.basename(this.factoryDefaultMainConfigPath)})`;
 
                 const shouldWarn = !this.isLazyLoadMode &&
-                                   !fs.existsSync(this.bundledMainConfigPath) && 
-                                   (this.primaryMainConfigLoadReason === "bundled main" || 
-                                    this.primaryMainConfigLoadReason === "factory default fallback" || 
-                                    this.primaryMainConfigLoadReason === "none found"); 
+                                   !fs.existsSync(this.bundledMainConfigPath) &&
+                                   (this.primaryMainConfigLoadReason === "bundled main" ||
+                                    this.primaryMainConfigLoadReason === "factory default fallback" ||
+                                    this.primaryMainConfigLoadReason === "none found");
 
                 if (shouldWarn) {
                     console.warn(`WARN (PluginRegistryBuilder): Project root config '${this.bundledMainConfigPath}' not found, and no user-level main config (XDG or --config) was primary for global settings. Using '${this.factoryDefaultMainConfigPath}' for bundled plugin definitions.`);
@@ -238,22 +257,21 @@ class PluginRegistryBuilder {
             const initialRegistrations = await this._getPluginRegistrationsFromFile(sourcePathForInitialRegistrations, baseDirForInitialRegistrations, initialRegistrationsSourceType);
             registry = {...registry, ...initialRegistrations};
         }
-        
-        // Tier 3: CollectionsManager enabled.yaml (if not factory defaults)
-        if (!this.useFactoryDefaultsOnly) {
-            const cmRegistrations = await this._getPluginRegistrationsFromCmManifest(this.cmEnabledManifestPath, "CollectionsManager");
-            registry = {...registry, ...cmRegistrations}; 
+
+        // Only load from CM manifest here if CM instance isn't provided for getAllPluginDetails to do a full scan
+        if (!this.useFactoryDefaultsOnly && !this.collectionsManager) {
+            const cmEnabledRegistrations = await this._getPluginRegistrationsFromCmManifest(this.cmEnabledManifestPath, "CollectionsManager");
+            registry = {...registry, ...cmEnabledRegistrations};
         }
 
-        // Tier 2: XDG global config.yaml (if not factory defaults)
+
         if (!this.useFactoryDefaultsOnly) {
             if (fs.existsSync(this.xdgGlobalConfigPath)) {
                 const xdgRegistrations = await this._getPluginRegistrationsFromFile(this.xdgGlobalConfigPath, this.xdgBaseDir, "XDG Global");
                 registry = {...registry, ...xdgRegistrations};
             }
         }
-        
-        // Tier 1: Project manifest config.yaml (if --config is used and not factory defaults)
+
         if (!this.useFactoryDefaultsOnly) {
             if (this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath)) {
                 if (this.projectManifestConfigPath !== sourcePathForInitialRegistrations ||
@@ -264,67 +282,124 @@ class PluginRegistryBuilder {
             }
         }
 
-        this._builtRegistry = {
+        this._builtRegistry = { // Cache the result of this traditional build
             registry,
             builtWithFactoryDefaults: this.useFactoryDefaultsOnly,
             projectManifestPathUsed: this.projectManifestConfigPath,
             isLazyLoadMode: this.isLazyLoadMode,
-            primaryMainConfigLoadReason: this.primaryMainConfigLoadReason
+            primaryMainConfigLoadReason: this.primaryMainConfigLoadReason,
+            collectionsManagerInstance: this.collectionsManager
         };
         return registry;
     }
 
     async getAllPluginDetails() {
-        const registry = await this.buildRegistry();
-        const pluginDetailsList = [];
+        // This will hold the final list of plugin details
+        const pluginDetailsMap = new Map();
 
-        for (const pluginName in registry) {
-            if (Object.prototype.hasOwnProperty.call(registry, pluginName)) {
-                const registrationInfo = registry[pluginName];
+        // 1. Get plugins from traditional configuration files (Bundled, XDG, Project)
+        //    AND from enabled.yaml if this.collectionsManager is NOT set (legacy path)
+        const traditionalRegistry = await this.buildRegistry();
+
+        for (const pluginName in traditionalRegistry) {
+            if (Object.prototype.hasOwnProperty.call(traditionalRegistry, pluginName)) {
+                const regInfo = traditionalRegistry[pluginName];
                 let description = "N/A";
                 try {
-                    if (registrationInfo.configPath && fs.existsSync(registrationInfo.configPath)) {
-                        if (fs.statSync(registrationInfo.configPath).isFile()) {
-                            const pluginConfig = await loadYamlConfig(registrationInfo.configPath);
-                            description = pluginConfig.description || "N/A";
-                        } else {
-                            description = "Error: Registered path is a directory, not a file.";
-                        }
+                    if (regInfo.configPath && fs.existsSync(regInfo.configPath) && fs.statSync(regInfo.configPath).isFile()) {
+                        const pluginConfig = await loadYamlConfig(regInfo.configPath);
+                        description = pluginConfig.description || "N/A";
                     } else {
-                         description = "Error: Config path does not exist.";
+                        description = `Error: Config path '${regInfo.configPath || 'undefined'}' not found or not a file.`;
                     }
                 } catch (e) {
-                    console.warn(`WARN (PluginRegistryBuilder): Could not load or parse plugin config for description: ${registrationInfo.configPath} - ${e.message}`);
-                     description = `Error loading config: ${e.message.substring(0, 50)}...`;
+                    description = `Error loading config: ${e.message.substring(0, 50)}...`;
                 }
 
-                let registrationSourceDisplay = registrationInfo.sourceType;
-                if (registrationInfo.definedIn) {
-                    const definedInFilename = path.basename(registrationInfo.definedIn);
-                     if (registrationInfo.sourceType.startsWith("Project Manifest")) {
-                        registrationSourceDisplay = `Project (--config: ${definedInFilename})`;
-                    } else if (registrationInfo.sourceType === "XDG Global") {
-                        registrationSourceDisplay = `XDG (${definedInFilename})`;
-                    } else if (registrationInfo.sourceType.includes("Bundled Definitions")) {
-                         registrationSourceDisplay = `Bundled (${definedInFilename})`;
-                    } else if (registrationInfo.sourceType.includes("Factory Default")) {
-                         registrationSourceDisplay = `Factory (${definedInFilename})`;
-                    } else if (registrationInfo.sourceType.startsWith("CollectionsManager")) {
-                         registrationSourceDisplay = registrationInfo.sourceType; 
-                    } else {
-                        registrationSourceDisplay = `${registrationInfo.sourceType} (${definedInFilename})`;
-                    }
+                let regSourceDisplay = regInfo.sourceType;
+                 if (regInfo.definedIn) {
+                    const definedInFilename = path.basename(regInfo.definedIn);
+                     if (regInfo.sourceType.startsWith("Project Manifest")) regSourceDisplay = `Project (--config: ${definedInFilename})`;
+                    else if (regInfo.sourceType === "XDG Global") regSourceDisplay = `XDG (${definedInFilename})`;
+                    else if (regInfo.sourceType.includes("Bundled Definitions")) regSourceDisplay = `Bundled (${definedInFilename})`;
+                    else if (regInfo.sourceType.includes("Factory Default")) regSourceDisplay = `Factory (${definedInFilename})`;
+                    // CM SourceType is already formatted by _getPluginRegistrationsFromCmManifest
                 }
-                pluginDetailsList.push({
-                    name: pluginName,
-                    description: description,
-                    configPath: registrationInfo.configPath,
-                    registrationSourceDisplay: registrationSourceDisplay,
+
+                pluginDetailsMap.set(pluginName, {
+                    name: pluginName, // Invoke name or registration key
+                    description,
+                    configPath: regInfo.configPath,
+                    registrationSourceDisplay: regSourceDisplay,
+                    status: regInfo.cmStatus || `Registered (${regInfo.sourceType.split('(')[0].trim()})`,
+                    cmCollection: regInfo.cmOriginalCollection,
+                    cmPluginId: regInfo.cmOriginalPluginId,
+                    cmInvokeName: regInfo.cmStatus === 'Enabled (CM)' ? pluginName : undefined,
+                    cmAddedOn: regInfo.cmAddedOn
                 });
             }
         }
-        pluginDetailsList.sort((a, b) => a.name.localeCompare(b.name));
-        return pluginDetailsList;
+
+        // 2. If CollectionsManager is available, enhance the list with all CM plugins and their statuses
+        if (this.collectionsManager) {
+            const cmAvailable = await this.collectionsManager.listAvailablePlugins(null) || [];
+            const cmEnabled = await this.collectionsManager.listCollections('enabled', null) || [];
+
+            const cmEnabledDetailsMap = new Map(); // Maps full_cm_id (coll/plugid) to its enabled details (can have multiple invoke names)
+            cmEnabled.forEach(enabledPlugin => {
+                const fullCmId = `${enabledPlugin.collection_name}/${enabledPlugin.plugin_id}`;
+                if (!cmEnabledDetailsMap.has(fullCmId)) {
+                    cmEnabledDetailsMap.set(fullCmId, []);
+                }
+                cmEnabledDetailsMap.get(fullCmId).push({
+                    invokeName: enabledPlugin.invoke_name,
+                    configPath: enabledPlugin.config_path, // Should be same for all invokes of same plugin
+                    addedOn: enabledPlugin.added_on
+                });
+            });
+
+            for (const availableCmPlugin of cmAvailable) {
+                const fullCmId = `${availableCmPlugin.collection}/${availableCmPlugin.plugin_id}`;
+                const enabledInstances = cmEnabledDetailsMap.get(fullCmId);
+
+                if (enabledInstances && enabledInstances.length > 0) {
+                    // This plugin is enabled, possibly multiple times.
+                    // We list each enabled instance by its invoke_name.
+                    enabledInstances.forEach(instance => {
+                        pluginDetailsMap.set(instance.invokeName, {
+                            name: instance.invokeName,
+                            description: availableCmPlugin.description,
+                            configPath: instance.configPath, // from enabled.yaml, should match availableCmPlugin.config_path
+                            registrationSourceDisplay: `CollectionsManager (CM: ${fullCmId})`,
+                            status: 'Enabled (CM)',
+                            cmCollection: availableCmPlugin.collection,
+                            cmPluginId: availableCmPlugin.plugin_id,
+                            cmInvokeName: instance.invokeName,
+                            cmAddedOn: instance.addedOn
+                        });
+                    });
+                } else {
+                    // This plugin is available in CM but not enabled.
+                    // Add it if not already covered by a traditional registration of the same name.
+                    // The "name" for these will be their full CM ID to avoid clashes.
+                    if (!pluginDetailsMap.has(fullCmId)) { // Avoid overwriting if a traditional plugin has this name
+                        pluginDetailsMap.set(fullCmId, {
+                            name: fullCmId, // Use full ID as primary name/key
+                            description: availableCmPlugin.description,
+                            configPath: availableCmPlugin.config_path,
+                            registrationSourceDisplay: `CollectionsManager (CM: ${fullCmId})`,
+                            status: 'Available (CM)',
+                            cmCollection: availableCmPlugin.collection,
+                            cmPluginId: availableCmPlugin.plugin_id,
+                            cmInvokeName: undefined, // Not enabled under a specific invoke name
+                            cmAddedOn: undefined
+                        });
+                    }
+                }
+            }
+        }
+
+        return Array.from(pluginDetailsMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
     }
 }
 

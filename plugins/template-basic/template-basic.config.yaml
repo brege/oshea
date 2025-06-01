@@ -1,0 +1,35 @@
+# plugins/template-basic/template-basic.config.yaml
+# This is a basic template for creating new md-to-pdf plugins.
+# When a new plugin is created from this template, instances of
+# 'template-basic' (and its PascalCase 'TemplateBasic') in filenames
+# and content will be replaced with the new plugin's name.
+
+description: "A new template-basic plugin for [describe your plugin's purpose here]."
+handler_script: "index.js" # Points to the handler within this plugin's directory
+css_files:
+  - "template-basic.css"  # Points to CSS within this plugin's directory
+pdf_options:
+  # Standard PDF options, users should customize these as needed.
+  format: "Letter"
+  printBackground: true
+  margin: { top: "1in", right: "1in", bottom: "1in", left: "1in" }
+# toc_options: # Uncomment and configure if your plugin needs a Table of Contents
+#   enabled: false
+#   placeholder: "%%TOC%%"
+#   level: [1, 2, 3]
+#   listType: "ul"
+math:
+  enabled: false # Math is disabled by default for new plugins
+#  engine: "katex"
+#  katex_options:
+#    throwOnError: false
+#    trust: false
+#    macros:
+#      "\\RR": "\\mathbb{R}"
+inject_fm_title_as_h1: true
+aggressiveHeadingCleanup: false
+# watch_sources: # Example to show users how to add more watchable sources
+#   - type: "file"
+#     path: "data/my-data.json" # Relative to this config file
+# params: # Default parameters for this plugin, can be overridden
+#   default_greeting: "Hello from template-basic plugin!"

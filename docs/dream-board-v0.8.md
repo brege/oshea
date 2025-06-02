@@ -197,8 +197,6 @@ This structure clarifies that `md-to-pdf collection add` and `md-to-pdf plugin a
       - Optional `[<collection_name_filter>]` for CM-managed plugins.
       
     - Refined console output with improved formatting and consistent coloring.
- 
-
 
 
 #### 6. [[v0.8.5][v0.8.5]] Unify `md-to-pdf plugin create` with Archetype Functionality
@@ -220,8 +218,50 @@ This structure clarifies that `md-to-pdf collection add` and `md-to-pdf plugin a
         * `<source_identifier>` can be `collection_name/plugin_id` or a direct path
         * Reconcile `--target-dir` default behaviors based on whether `--from` is used.
   
-  * The original `src/plugin_scaffolder.js` logic will be superseded.
-  * **Deprecate:** The command `md-to-pdf collection archetype` will be deprecated, or aliased.
+    * The original `src/plugin_scaffolder.js` logic will be superseded.
+    * **Deprecate:** The command `md-to-pdf collection archetype` will be deprecated, or aliased.
+
+
+  * **Results (v0.8.5)**
+
+    - `md-to-pdf plugin create <name>`
+      - now uses `CollectionsManager.archetypePlugin` as its engine.
+
+    - **If no `--from`** \
+      then it creates a plugin from a new bundled template `plugins/template-basic/`. This template includes a self-activating example Markdown file. Default output is to current working directory `./<new-plugin-name>`.
+
+    - **If `--from <source_identifier>`** \
+      then it archetypes from the specified source (CM-managed plugin ID or direct filesystem path). Default output is to the CM archetype directory (e.g., `my-plugins/`).
+    
+    - `CollectionsManager.archetypePlugin` \
+      * handle direct path sources
+      * better file/content renaming and metadata handling.
+    
+    - The `isValidPluginName` utility has been:
+      * moved to `cm-utils.js` , and
+      * integrated into `plugin create`.
+    
+  
+  * **Deprecation/Removal**
+    
+    - The original `src/plugin_scaffolder.js` logic is now superseded.
+    
+    - The `md-to-pdf collection archetype` command is now deprecated. 
+      * A command stub issues a warning and delegates to the new `plugin create --from` functionality for this version.
+    
+  * **New Features**
+
+    - Self-activating example Markdown files `<plugin-name>-example.md` were added to the bundled plugins:
+      
+       | **Templates** | **Example Markdown Files**                                   |
+       |---------------|--------------------------------------------------------------|
+       |`default`      | `plugins/default/default-example.md`                         | 
+       |`cv`           | `plugins/cv/cv-example.md`                                   |
+       |`cover-letter` | `plugins/cover-letter/cover-letter-example.md`               |
+       |`recipe`       | `plugins/recipe/recipe-example.md`                           |
+
+
+
 
 #### 7.  [[v0.8.6][v0.8.6]] Enhance Local Plugin/Collection Management
 

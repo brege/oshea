@@ -6,6 +6,33 @@
 ---
 
 
+## v0.8.6 (Conceptual - Enhanced Local Plugin/Collection Management - Part 1)
+
+**Date:** 2025-06-01
+
+### Added
+
+* **`md-to-pdf collection list --short`:**
+    * Added a `--short` flag to the `md-to-pdf collection list` command. [cite: 1]
+    * This provides a condensed, one-line-per-collection summary, displaying the collection name, source type (Git/Local Path), and source origin. [cite: 1]
+
+### Changed
+
+* **`md-to-pdf collection update` for Local Sources:**
+    * Enhanced the `md-to-pdf collection update [<collection_name>]` command and the underlying `CollectionsManager.updateCollection` method to support re-synchronizing collections that were originally added from a local filesystem path. [cite: 2, 3]
+    * When updating a locally sourced collection, the system now attempts to re-copy content from the original source path recorded in its metadata. [cite: 2]
+    * The `updated_on` timestamp in the collection's metadata is updated upon successful re-sync. [cite: 2]
+    * The `CollectionsManager.updateAllCollections` method now correctly processes both Git-based and locally sourced collections for updates. [cite: 3]
+    * Added `fs-extra` as a dependency to `CollectionsManager` to facilitate robust file operations for local collection updates.
+
+### Fixed
+
+* **CM Test Suite Stability (`dev/test/cm-tests/`):**
+    * Resolved a persistent issue where `baseTestRunDir` was not being correctly passed to `createTestCollRoot` in individual CM test functions, causing test initialization failures. This involved updating all 7 CM test suite files (`add.test.js`, `archetype.test.js`, `disable.test.js`, `enable.test.js`, `list.test.js`, `remove.test.js`, `update.test.js`) to correctly accept and propagate the `baseTestRunDir` parameter.
+    * Corrected an assertion error in the `CM: Archetype Plugin - Target Directory Exists` test by removing `chalk.underline()` from the error message string in `dev/src/collections-manager/commands/archetype.js`, making the test assertion robust against TTY-dependent styling. [cite: 13, 14]
+    * Fixed a test counter issue in `dev/test/cm-tests/run-cm-tests.js` that incorrectly incremented the "attempted" test count when a CM suite had a fatal error. [cite: 15]
+
+
 ## v0.8.5 - Unified Plugin Creation, Archetyping, and Examples
 
 **Date:** 2025-06-01

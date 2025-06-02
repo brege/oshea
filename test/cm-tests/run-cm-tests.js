@@ -14,13 +14,13 @@ const { runRemoveTests } = require('./remove.test.js');
 const { runUpdateTests } = require('./update.test.js'); 
 const { runArchetypeTests } = require('./archetype.test.js');
 
-async function runCmModuleTests(parentTestRunStats) {
+async function runCmModuleTests(parentTestRunStats, baseTestRunDirForCmModule) {
     console.log(chalk.bold.cyanBright("\n===== Starting CollectionsManager Module Tests ====="));
 
-    const baseTestRunDirForCmModule = path.join(os.tmpdir(), `cm_module_test_base_${Date.now()}`);
-    await fs.mkdir(baseTestRunDirForCmModule, { recursive: true });
+    // Base directory for this specific CM module test run is already created by the main runner
+    // and passed as baseTestRunDirForCmModule. No need to create another one here.
     if (process.env.DEBUG_CM_TESTS === 'true') {
-        console.log(chalk.gray(`  [CM Runner] Created base directory for CM module tests: ${baseTestRunDirForCmModule}`));
+        console.log(chalk.gray(`  [CM Runner] Using base directory for CM module tests: ${baseTestRunDirForCmModule}`));
     }
 
     const testSuites = [
@@ -31,7 +31,6 @@ async function runCmModuleTests(parentTestRunStats) {
         { name: "CM Remove Command Logic Tests", runner: runRemoveTests },
         { name: "CM Update Command Logic Tests", runner: runUpdateTests },
         { name: "CM Archetype Command Logic Tests", runner: runArchetypeTests },
-        // Add other suites here as they are integrated
     ];
 
     let cmModuleOverallSuccess = true;
@@ -39,26 +38,17 @@ async function runCmModuleTests(parentTestRunStats) {
     for (const suite of testSuites) {
         try {
             console.log(chalk.cyanBright.bold(`\n--- Running CM Suite: ${suite.name} ---`));
+            // Pass baseTestRunDirForCmModule to each suite runner
             await suite.runner(parentTestRunStats, baseTestRunDirForCmModule);
         } catch (error) {
             console.error(chalk.red.bold(`  FATAL ERROR during CM suite ${suite.name}:`), error);
             cmModuleOverallSuccess = false;
-            parentTestRunStats.attempted++; 
+            // FIX 2: Removed parentTestRunStats.attempted++;
+            // The individual test function inside the suite runner already increments this.
         }
     }
 
-    if (fss.existsSync(baseTestRunDirForCmModule)) {
-        if (process.env.DEBUG_CM_TESTS === 'true') {
-            console.log(chalk.gray(`  [CM Runner] Cleaning up base CM module test directory: ${baseTestRunDirForCmModule}`));
-        }
-        try {
-            await fs.rm(baseTestRunDirForCmModule, { recursive: true, force: true });
-        } catch (cleanupError) {
-            if (process.env.DEBUG_CM_TESTS === 'true') {
-                 console.warn(chalk.yellow(`  [CM Runner] WARN: Could not cleanup base CM module test directory ${baseTestRunDirForCmModule}: ${cleanupError.message}`));
-            }
-        }
-    }
+    // Cleanup of baseTestRunDirForCmModule is handled by the main test runner (dev/test/run-tests.js)
     console.log(chalk.bold.cyanBright("===== Finished CollectionsManager Module Tests ====="));
     return cmModuleOverallSuccess;
 }

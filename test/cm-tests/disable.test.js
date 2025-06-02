@@ -17,7 +17,7 @@ async function testDisablePlugin(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Disable Plugin";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
     const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
 

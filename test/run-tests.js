@@ -1,6 +1,9 @@
 // dev/test/run-tests.js
 const path = require('path');
-const yaml = require('js-yaml');
+const os = require('os'); // Added
+const fs = require('fs').promises; // Added to use await fs.mkdir
+const fss = require('fs'); // For synchronous existsSync if needed elsewhere or by helpers
+const yaml = require('js-yaml'); // Keep if used by this file or its direct logic
 const chalk = require('chalk');
 
 const {
@@ -24,7 +27,6 @@ const {
     LOCAL_CONFIG_DOC_MD_PATH,
 } = require('./test-constants');
 
-// Import the CM test runner
 const { runCmModuleTests } = require('./cm-tests/run-cm-tests.js');
 
 const allTestGroups = {
@@ -33,7 +35,7 @@ const allTestGroups = {
   'generate': require('./test-cases/generate-command.test-cases.js').testCases,
   'plugin-create': require('./test-cases/plugin-create-command.test-cases.js').testCases,
   'advanced-features': require('./test-cases/advanced-features.test-cases.js').testCases,
-  'cm-module': 'cm-module', // Special key for the CM module tests
+  'cm-module': 'cm-module', 
 };
 
 function printTestHelp() {
@@ -55,7 +57,7 @@ async function runTests() {
         attempted: 0,
         passed: 0,
     };
-    let allTestsPassedOverall = true; // Tracks if any test category failed
+    let allTestsPassedOverall = true; 
 
     const keepOutput = process.argv.includes('--keep-output');
     const cliArgsForCategories = process.argv.slice(2).filter(
@@ -115,6 +117,13 @@ async function runTests() {
 
     try {
         await setupTestDirectory(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_DIR);
+        
+        const baseTestRunDirForCmModule = path.join(os.tmpdir(), `cm_module_test_base_${Date.now()}`);
+        await fs.mkdir(baseTestRunDirForCmModule, { recursive: true });
+        
+        if (process.env.DEBUG_CM_TESTS === 'true') {
+            console.log(chalk.gray(`  [CM Runner Main] Created base directory for CM module tests: ${baseTestRunDirForCmModule}`));
+        }
 
         for (const testCase of testCasesToExecute) {
             testRunStats.attempted++;
@@ -189,7 +198,12 @@ async function runTests() {
         }
 
         if (runCmTestsFlag) {
-            const cmModuleSuccessOverall = await runCmModuleTests(testRunStats);
+            console.log(`[DEBUG run-tests.js] About to call runCmModuleTests. baseTestRunDirForCmModule is: ${baseTestRunDirForCmModule}`);
+            if (typeof baseTestRunDirForCmModule === 'undefined') {
+                console.error(chalk.redBright.bold("[CRITICAL DEBUG run-tests.js] baseTestRunDirForCmModule IS UNDEFINED before calling runCmModuleTests!"));
+            }
+            // ** THE FIX IS HERE **
+            const cmModuleSuccessOverall = await runCmModuleTests(testRunStats, baseTestRunDirForCmModule); 
             if (!cmModuleSuccessOverall) {
                 allTestsPassedOverall = false;
             }
@@ -228,4 +242,4 @@ if (require.main === module) {
     runTests();
 }
 
-module.exports = { runTests };
+module.exports = { runTests }; // Ensure it's exported if other scripts might require it.

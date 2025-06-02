@@ -12,14 +12,14 @@ const {
     METADATA_FILENAME,
     createTestCollRoot,
     cleanupTestCollRoot,
-    setupLocalGitRepo
+    // setupLocalGitRepo // Not used in add.test.js directly
 } = require('./cm-test-helpers.js');
 
 async function testAddCollectionGit(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Add Collection from Git URL (with metadata)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
     const testRepoUrl = 'https://github.com/brege/md-to-pdf-plugins.git';
     const collectionName = 'brege-plugins-git-test-cm';
@@ -44,7 +44,7 @@ async function testAddCollectionGit(testRunStats, baseTestRunDir) {
         console.error(chalk.red(`  FAILED: ${testName}`), error);
         throw error;
     } finally {
-        await cleanupTestCollRoot(testCollRoot);
+        await cleanupTestCollRoot(testCollRoot); // This specific root, base is cleaned by main runner
     }
 }
 
@@ -52,12 +52,11 @@ async function testAddCollectionLocal(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Add Collection from Local Path (with metadata)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const localSourceDirName = `cm_local_source_test_cm_${Date.now()}`;
-    // Create localSourcePath inside baseTestRunDir to ensure it's cleaned up if tests are interrupted.
-    const localSourcePath = path.join(baseTestRunDir, localSourceDirName);
+    const localSourcePath = path.join(baseTestRunDir, localSourceDirName); // Create in baseTestRunDir
     const dummyPluginId = 'dummy-local-plugin-cm';
     const dummyPluginDir = path.join(localSourcePath, dummyPluginId);
     await fs.mkdir(dummyPluginDir, { recursive: true });
@@ -86,7 +85,7 @@ async function testAddCollectionLocal(testRunStats, baseTestRunDir) {
         throw error;
     } finally {
         await cleanupTestCollRoot(testCollRoot);
-        // localSourcePath is inside baseTestRunDir, which will be cleaned by the CM runner
+        // localSourcePath is inside baseTestRunDir and will be cleaned by the main CM runner
     }
 }
 

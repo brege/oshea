@@ -92,14 +92,15 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
   if (fss.existsSync(archetypePath) && !options.force) {
-    throw new Error(`Target archetype directory "${chalk.underline(archetypePath)}" already exists. Use --force to overwrite or choose a different name.`);
+    // FIX 1: Removed chalk.underline from the error message string
+    throw new Error(`Target archetype directory "${archetypePath}" already exists. Use --force to overwrite or choose a different name.`);
   }
   if (fss.existsSync(archetypePath) && options.force) {
     console.log(chalk.yellow(`WARN: Target archetype directory "${chalk.underline(archetypePath)}" already exists. Overwriting due to --force.`));
     await fsExtra.rm(archetypePath, { recursive: true, force: true });
   }
 
-  let configDataFromSpecificLogic; // Store config after specific renames/updates
+  let configDataFromSpecificLogic; 
 
   try {
     await fs.mkdir(targetBaseDir, { recursive: true });
@@ -136,7 +137,6 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
         filesToProcessForStringReplacement.push(newConfigPathInArchetype);
       }
 
-      // Load config for specific field modifications
       let tempConfigData = yaml.load(await fs.readFile(newConfigPathInArchetype, 'utf8'));
       tempConfigData.description = `Archetype of "${sourcePluginIdentifier}": ${originalPluginDescriptionFromSource}`.trim();
       messages.push(`Updated description in ${newConfigFilename} to reference original source '${sourcePluginIdentifier}'.`);
@@ -155,7 +155,7 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
               await fs.rename(oldCssPathInArchetype, newCssPathInArchetype);
               messages.push(`Renamed CSS file ${tempConfigData.css_files[cssIndex]} to ${newCssName}.`);
             }
-            tempConfigData.css_files[cssIndex] = newCssName; // Correctly set to new name
+            tempConfigData.css_files[cssIndex] = newCssName; 
             messages.push(`Updated CSS file reference in ${newConfigFilename} to ${newCssName}.`);
             if (processExtensions.includes(path.extname(newCssName).toLowerCase()) && !filesToProcessForStringReplacement.includes(newCssPathInArchetype)) {
               filesToProcessForStringReplacement.push(newCssPathInArchetype);
@@ -175,14 +175,14 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
             await fs.rename(oldHandlerPathInArchetype, newHandlerPathInArchetype);
             messages.push(`Renamed handler script ${tempConfigData.handler_script} to ${newHandlerName}.`);
           }
-          tempConfigData.handler_script = newHandlerName; // Correctly set to new name
+          tempConfigData.handler_script = newHandlerName; 
           messages.push(`Updated handler_script in ${newConfigFilename} to ${newHandlerName}.`);
           if (processExtensions.includes(path.extname(newHandlerName).toLowerCase()) && !filesToProcessForStringReplacement.includes(newHandlerPathInArchetype)) {
             filesToProcessForStringReplacement.push(newHandlerPathInArchetype);
           }
         }
       }
-      configDataFromSpecificLogic = { ...tempConfigData }; // Store this version
+      configDataFromSpecificLogic = { ...tempConfigData }; 
       await fs.writeFile(newConfigPathInArchetype, yaml.dump(configDataFromSpecificLogic));
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Saved specifically updated config fields in ${newConfigFilename}.`));
     } else {
@@ -218,16 +218,12 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
           if (fileContent !== originalFileContentForCompare) {
             if (filePath.toLowerCase() === newConfigPathInArchetype.toLowerCase() && configDataFromSpecificLogic) { 
               let tempConfigData = yaml.load(fileContent);
-              // Restore specifically set fields from before general replacement
               tempConfigData.description = configDataFromSpecificLogic.description;
               tempConfigData.css_files = configDataFromSpecificLogic.css_files;
               tempConfigData.handler_script = configDataFromSpecificLogic.handler_script;
               if (configDataFromSpecificLogic.params) {
                 tempConfigData.params = configDataFromSpecificLogic.params;
               }
-              // Any other fields that were specifically set and might contain substrings of sourcePluginIdForReplacement
-              // that should NOT be replaced generally would need similar restoration.
-              // For now, description, css_files, handler_script, and params are common.
               fileContent = yaml.dump(tempConfigData);
             }
             await fs.writeFile(filePath, fileContent);

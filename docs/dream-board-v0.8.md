@@ -294,7 +294,7 @@ This structure clarifies that `md-to-pdf collection add` and `md-to-pdf plugin a
 
 ### Phase 3: Deprecation and Documentation Overhaul 
 
-#### 8. [[v0.8.7][v0.8.7]] Deprecate `md-to-pdf-cm` (Standalone Tool
+#### 8. [[v0.8.7][v0.8.7]] Deprecate `md-to-pdf-cm` (Standalone Tool)
 
   Once all essential functionalities are robustly integrated into `md-to-pdf`, the standalone `md-to-pdf-cm` entry point will be officially deprecated
   

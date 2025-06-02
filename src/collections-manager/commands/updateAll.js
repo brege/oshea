@@ -23,14 +23,47 @@ module.exports = async function updateAllCollections() {
       const collectionName = collectionInfo.name;
 
       if (collectionName === USER_ADDED_PLUGINS_DIR_NAME) {
-        const skipMessage = `INFO: Skipping update for "${USER_ADDED_PLUGINS_DIR_NAME}" container. To update individual user-added plugins, use "md-to-pdf collection update ${USER_ADDED_PLUGINS_DIR_NAME}/<plugin_id>"`;
-        console.log(chalk.blue(`  ${skipMessage}`));
-        updateMessages.push(skipMessage);
-        continue; // Skip to the next collection
+        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Processing singletons in "${USER_ADDED_PLUGINS_DIR_NAME}".`));
+        const singletonsBasePath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
+        try {
+          if (fss.existsSync(singletonsBasePath) && fss.lstatSync(singletonsBasePath).isDirectory()) {
+            const singletonPluginDirs = await fs.readdir(singletonsBasePath, { withFileTypes: true });
+            for (const dirent of singletonPluginDirs) {
+              if (dirent.isDirectory()) {
+                const singletonPluginId = dirent.name;
+                const singletonCollectionNameForUpdate = path.join(USER_ADDED_PLUGINS_DIR_NAME, singletonPluginId);
+                // Construct the "collection name" as expected by updateCollection
+                // This will be something like "_user_added_plugins/my-plugin"
+                if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Attempting to update singleton: ${singletonCollectionNameForUpdate}`));
+                try {
+                  const result = await this.updateCollection(singletonCollectionNameForUpdate);
+                  updateMessages.push(result.message);
+                  if (!result.success) {
+                    allOverallSuccess = false;
+                  }
+                } catch (singletonError) {
+                  const errMsg = `Failed to process update for singleton ${singletonCollectionNameForUpdate}: ${singletonError.message}`;
+                  console.error(chalk.red(`  ${errMsg}`));
+                  updateMessages.push(errMsg);
+                  allOverallSuccess = false;
+                }
+              }
+            }
+          } else {
+            if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Directory "${USER_ADDED_PLUGINS_DIR_NAME}" not found at ${singletonsBasePath}. Skipping singleton processing.`));
+          }
+        } catch (error) {
+          const errMsg = `Error processing directory ${USER_ADDED_PLUGINS_DIR_NAME}: ${error.message}`;
+          console.error(chalk.red(`  ${errMsg}`));
+          updateMessages.push(errMsg);
+          allOverallSuccess = false;
+        }
+        continue; // Continue to the next item in downloadedCollectionInfos
       }
 
-      // updateCollection will determine if it's Git, local-syncable, or neither.
+      // Process regular collections
       try {
+          if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Attempting to update regular collection: ${collectionName}`));
           const result = await this.updateCollection(collectionName);
           updateMessages.push(result.message);
           if (!result.success) {

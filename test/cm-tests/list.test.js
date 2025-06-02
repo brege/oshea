@@ -9,21 +9,19 @@ const chalk = require('chalk');
 
 const CollectionsManager = require('../../src/collections-manager/index.js');
 const {
-    // METADATA_FILENAME, // Not directly used by list.test.js logic itself, but by helpers if creating files
-    // ENABLED_MANIFEST_FILENAME, // Not directly used by list.test.js logic itself, but by helpers if creating files
     createTestCollRoot,
     cleanupTestCollRoot
 } = require('./cm-test-helpers.js');
 
-async function testListCollectionsType(testRunStats, baseTestRunDir) { // Renamed and baseTestRunDir added
+async function testListCollectionsType(testRunStats, baseTestRunDir) { 
     testRunStats.attempted++;
     const testName = "CM: List Collections (type: collections/downloaded)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const localSourceListName = `cm_local_source_list_test_cm_${Date.now()}`;
-    const localSourcePath = path.join(baseTestRunDir, localSourceListName); // Create in baseTestRunDir for cleanup
+    const localSourcePath = path.join(baseTestRunDir, localSourceListName); 
     await fs.mkdir(localSourcePath, { recursive: true });
     const dummyPluginIdInList = "dummy-plugin-for-list-cm";
     const dummyPluginDir = path.join(localSourcePath, dummyPluginIdInList);
@@ -37,7 +35,7 @@ async function testListCollectionsType(testRunStats, baseTestRunDir) { // Rename
     await manager.addCollection(localSourcePath, { name: collection2Name });
 
     try {
-        const collectionsInfo = await manager.listCollections('downloaded'); // Returns array of objects
+        const collectionsInfo = await manager.listCollections('downloaded'); 
         
         assert.ok(
             collectionsInfo.some(c => c.name === collection1Name),
@@ -53,8 +51,6 @@ async function testListCollectionsType(testRunStats, baseTestRunDir) { // Rename
         assert.strictEqual(coll1Info.source, 'https://github.com/brege/md-to-pdf-plugins.git', `(${testName}) Source for ${collection1Name} correct`);
         assert.ok(coll1Info.added_on, `(${testName}) ${collection1Name} should have added_on date`);
 
-
-        // Read the directory content to count actual collection directories
         const entries = await fs.readdir(testCollRoot, { withFileTypes: true });
         const actualCollectionDirs = entries.filter(dirent => dirent.isDirectory()).map(d => d.name);
         
@@ -66,15 +62,14 @@ async function testListCollectionsType(testRunStats, baseTestRunDir) { // Rename
         throw error;
     } finally {
         await cleanupTestCollRoot(testCollRoot);
-        // localSourcePath is in baseTestRunDir and will be cleaned by the cm-runner
     }
 }
 
-async function testListAllPluginsType(testRunStats, baseTestRunDir) { // baseTestRunDir added
+async function testListAllPluginsType(testRunStats, baseTestRunDir) { 
     testRunStats.attempted++;
     const testName = "CM: List All Available Plugins (type: all/available)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const coll1Name = 'coll1-list-avail-cm';
@@ -88,7 +83,7 @@ async function testListAllPluginsType(testRunStats, baseTestRunDir) { // baseTes
     const coll2Path = path.join(testCollRoot, coll2Name);
     const pluginCId = 'pluginClist';
     const pluginCPath = path.join(coll2Path, pluginCId);
-    const pluginDId = 'pluginDlistMalformed'; // Malformed
+    const pluginDId = 'pluginDlistMalformed'; 
     const pluginDPath = path.join(coll2Path, pluginDId);
 
     await fs.mkdir(pluginAPath, { recursive: true });
@@ -98,7 +93,7 @@ async function testListAllPluginsType(testRunStats, baseTestRunDir) { // baseTes
     await fs.mkdir(pluginCPath, { recursive: true });
     await fs.writeFile(path.join(pluginCPath, `${pluginCId}.config.yaml`), yaml.dump({ description: 'Plugin C description CM' }));
     await fs.mkdir(pluginDPath, { recursive: true });
-    await fs.writeFile(path.join(pluginDPath, `${pluginDId}.config.yaml`), "description: Plugin D CM\n  bad_yaml: - item1\n - item2"); // Malformed YAML
+    await fs.writeFile(path.join(pluginDPath, `${pluginDId}.config.yaml`), "description: Plugin D CM\n  bad_yaml: - item1\n - item2"); 
 
     try {
         const expectedPluginCount = 4;
@@ -118,7 +113,6 @@ async function testListAllPluginsType(testRunStats, baseTestRunDir) { // baseTes
         assert.ok(pluginDInfo, `(${testName}) Malformed Plugin D should still be listed`);
         assert.ok(pluginDInfo.description.includes('Error loading config'), `(${testName}) Malformed Plugin D description should indicate error`);
 
-
         allPlugins = await manager.listAvailablePlugins('nonExistentCollection-cm');
         assert.strictEqual(allPlugins.length, 0, `(${testName}) Should find 0 plugins in non-existent collection`);
 
@@ -133,11 +127,11 @@ async function testListAllPluginsType(testRunStats, baseTestRunDir) { // baseTes
     }
 }
 
-async function testListEnabledPluginsType(testRunStats, baseTestRunDir) { // baseTestRunDir added
+async function testListEnabledPluginsType(testRunStats, baseTestRunDir) { 
     testRunStats.attempted++;
     const testName = "CM: List Enabled Plugins (type: enabled)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const mockCollectionName = 'test-collection-list-enabled-cm';
@@ -153,7 +147,7 @@ async function testListEnabledPluginsType(testRunStats, baseTestRunDir) { // bas
     await fs.writeFile(path.join(mockPlugin2Path, `${mockPlugin2Id}.yaml`), yaml.dump({ description: 'Mock Plugin Beta for List CM (.yaml)' }));
 
     const customInvokeName = 'beta-custom-list-cm';
-    await manager.enablePlugin(`${mockCollectionName}/${mockPlugin1Id}`, { name: mockPlugin1Id }); // Use pluginId as invoke name
+    await manager.enablePlugin(`${mockCollectionName}/${mockPlugin1Id}`, { name: mockPlugin1Id }); 
     await manager.enablePlugin(`${mockCollectionName}/${mockPlugin2Id}`, { name: customInvokeName });
 
     try {
@@ -179,11 +173,11 @@ async function testListEnabledPluginsType(testRunStats, baseTestRunDir) { // bas
     }
 }
 
-async function testListDisabledPluginsType(testRunStats, baseTestRunDir) { // baseTestRunDir added
+async function testListDisabledPluginsType(testRunStats, baseTestRunDir) { 
     testRunStats.attempted++;
     const testName = "CM: List Disabled Plugins (type: disabled)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const collName = 'coll-for-disabled-cm';
@@ -225,7 +219,7 @@ async function testListDisabledPluginsType(testRunStats, baseTestRunDir) { // ba
     }
 }
 
-async function runListTests(testRunStats, baseTestRunDir) { // baseTestRunDir added as second param
+async function runListTests(testRunStats, baseTestRunDir) { 
     await testListCollectionsType(testRunStats, baseTestRunDir);
     await testListAllPluginsType(testRunStats, baseTestRunDir);
     await testListEnabledPluginsType(testRunStats, baseTestRunDir);

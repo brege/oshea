@@ -1,12 +1,17 @@
 // src/commands/collection/listCmd.js
 const chalk = require('chalk');
-// CollectionsManager instance will be passed via args.manager
+const stripAnsi = require('strip-ansi'); // For width calculation
 
 module.exports = {
   command: 'list',
-  describe: 'Lists all downloaded plugin collection names, their sources, and status.',
+  describe: 'Lists all downloaded plugin collection names, their sources, and status. Use --short for a condensed view.',
   builder: (yargsCmd) => {
-    // No specific options for this list variant
+    yargsCmd
+      .option('short', {
+        describe: 'Display a condensed, one-line summary for each collection.',
+        type: 'boolean',
+        default: false,
+      });
   },
   handler: async (args) => {
     if (!args.manager) {
@@ -16,30 +21,62 @@ module.exports = {
     const manager = args.manager;
 
     try {
-      const collections = await manager.listCollections('downloaded'); // This now returns richer objects
+      const collections = await manager.listCollections('downloaded');
       if (collections.length === 0) {
         console.log(chalk.yellow("No collections downloaded."));
         return;
       }
       console.log(chalk.blue("\nDownloaded plugin collections:"));
-      collections.forEach(coll => {
-        let sourceDisplay = coll.source || 'N/A';
-        if (sourceDisplay.startsWith(manager.collRoot)) { // Check if it's a local path within COLL_ROOT (less likely for a 'source')
-            sourceDisplay = `Local (copied to collection)`; // Or some other indicator for local non-git
-        } else if (!/^(http(s)?:\/\/|git@)/.test(sourceDisplay) && !sourceDisplay.endsWith('.git') && sourceDisplay !== 'N/A (Metadata missing or unreadable)') {
-            sourceDisplay = `Local Path: ${chalk.gray(sourceDisplay)}`;
-        } else {
-            sourceDisplay = `Git: ${chalk.gray(sourceDisplay)}`;
-        }
 
-        console.log(`  - Name: ${chalk.yellowBright(coll.name)}`);
-        console.log(`    Source: ${sourceDisplay}`);
-        console.log(`    Added: ${coll.added_on || 'N/A'}`);
-        if (coll.updated_on) {
-          console.log(`    Last Updated: ${coll.updated_on}`);
-        }
-        console.log(chalk.white("  ---"));
-      });
+      if (args.short) {
+        let maxNameWidth = "NAME".length;
+        let maxSourceTypeWidth = "SOURCE TYPE".length;
+        collections.forEach(coll => {
+          if (coll.name.length > maxNameWidth) maxNameWidth = coll.name.length;
+          const sourceType = (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) ? "Git" : "Local Path";
+          if (sourceType.length > maxSourceTypeWidth) maxSourceTypeWidth = sourceType.length;
+        });
+
+        console.log(chalk.bold(`  ${'NAME'.padEnd(maxNameWidth)} | ${'SOURCE TYPE'.padEnd(maxSourceTypeWidth)} | SOURCE ORIGIN`));
+        console.log(chalk.bold(`  ${'-'.repeat(maxNameWidth)} | ${'-'.repeat(maxSourceTypeWidth)} | ${'-'.repeat('SOURCE ORIGIN'.length)}`));
+
+        collections.forEach(coll => {
+          const nameText = chalk.yellowBright(coll.name);
+          const sourceType = (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) ? "Git" : "Local Path";
+          const sourceTypeText = chalk.gray(sourceType);
+          const sourceOriginText = chalk.dim(coll.source || 'N/A');
+          
+          const plainName = stripAnsi(nameText);
+          const plainSourceType = stripAnsi(sourceTypeText);
+
+          console.log(`  ${nameText.padEnd(maxNameWidth + (nameText.length - plainName.length))} | ${sourceTypeText.padEnd(maxSourceTypeWidth + (sourceTypeText.length - plainSourceType.length))} | ${sourceOriginText}`);
+        });
+
+      } else {
+        collections.forEach(coll => {
+          let sourceDisplay = coll.source || 'N/A';
+          let sourceType = 'N/A';
+          if (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) {
+            sourceType = chalk.magenta("Git");
+            sourceDisplay = chalk.gray(coll.source);
+          } else if (coll.source && coll.source !== 'N/A (Metadata missing or unreadable)') {
+            sourceType = chalk.cyan("Local Path");
+            sourceDisplay = chalk.gray(coll.source);
+          } else {
+             sourceType = chalk.dim("Unknown");
+             sourceDisplay = chalk.dim(sourceDisplay);
+          }
+
+          console.log(`  - Name: ${chalk.yellowBright(coll.name)}`);
+          console.log(`    Source Type: ${sourceType}`);
+          console.log(`    Source Origin: ${sourceDisplay}`);
+          console.log(`    Added: ${chalk.gray(coll.added_on || 'N/A')}`);
+          if (coll.updated_on) {
+            console.log(`    Last Updated: ${chalk.gray(coll.updated_on)}`);
+          }
+          console.log(chalk.white("  ---"));
+        });
+      }
 
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'collection list' command execution: ${error.message}`));

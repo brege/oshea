@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');
 const chalk = require('chalk');
+const { USER_ADDED_PLUGINS_DIR_NAME } = require('../constants'); // Import constant
 
 module.exports = async function updateAllCollections() {
   if (this.debug) console.log(chalk.magenta("DEBUG (CM:updateAllCollections): Attempting to update all downloaded collections."));
@@ -20,19 +21,22 @@ module.exports = async function updateAllCollections() {
 
   for (const collectionInfo of downloadedCollectionInfos) {
       const collectionName = collectionInfo.name;
+
+      if (collectionName === USER_ADDED_PLUGINS_DIR_NAME) {
+        const skipMessage = `INFO: Skipping update for "${USER_ADDED_PLUGINS_DIR_NAME}" container. To update individual user-added plugins, use "md-to-pdf collection update ${USER_ADDED_PLUGINS_DIR_NAME}/<plugin_id>"`;
+        console.log(chalk.blue(`  ${skipMessage}`));
+        updateMessages.push(skipMessage);
+        continue; // Skip to the next collection
+      }
+
       // updateCollection will determine if it's Git, local-syncable, or neither.
       try {
-          const result = await this.updateCollection(collectionName); // Call the enhanced updateCollection
+          const result = await this.updateCollection(collectionName);
           updateMessages.push(result.message);
           if (!result.success) {
-            // A "success:false" from updateCollection can mean "aborted due to local changes"
-            // or "source not found", which are not hard failures for the batch operation itself.
-            // However, if updateCollection itself throws an error, it's a hard failure.
-            // We'll consider any `success:false` from `updateCollection` as something that
-            // makes `allOverallSuccess` false for the batch.
             allOverallSuccess = false;
           }
-      } catch (error) { // Catch if updateCollection itself throws an unexpected error
+      } catch (error) {
           const errMsg = `Failed to process update for ${collectionName}: ${error.message}`;
           console.error(chalk.red(`  ${errMsg}`));
           updateMessages.push(errMsg);

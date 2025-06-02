@@ -74,7 +74,7 @@ provides a natural development workflow.
   * `--disabled` \ 
     Lists available plugins in `COLL_ROOT` that are not currently enabled.
 
-*Default* (no status flag): 
+***Default* (no status flag)**\
 Provides a comprehensive view of all plugins usable by `md-to-pdf` (from traditional `config.yaml` registrations AND CM-enabled plugins from `enabled.yaml`), indicating their source/status.
 
 #### 5.  Showing help for a plugin
@@ -87,7 +87,7 @@ Provides a comprehensive view of all plugins usable by `md-to-pdf` (from traditi
 
 *Focuses on managing the plugin "collections" (directories containing multiple plugins) that are stored and managed within `COLL_ROOT`.*
 
-#### 1. Adding a new collection of plugins (to `COLL_ROOT`):
+#### 1. Adding a new collection of plugins (to `COLL_ROOT`)
     
   ```
   md-to-pdf collection add <url_or_local_path_to_source> [--name <collection_name_in_coll_root>]
@@ -201,10 +201,12 @@ This structure clarifies that `md-to-pdf collection add` and `md-to-pdf plugin a
 
 #### 6. [[v0.8.5][v0.8.5]] Unify `md-to-pdf plugin create` with Archetype Functionality
 
+##### [Status: Completed (v0.8.5)][v0.8.5]
+
   * **Goal:** \
   Make `md-to-pdf plugin create` the single command for generating new plugins, whether from a template or an existing plugin.
 
-  * **Enhancements:**
+  * **Enhancements**
     - Archetype from a predefined bundled "template" plugin, likely 'default', without `--from`:
       ```
       plugin create <new-plugin-name>`
@@ -265,16 +267,18 @@ This structure clarifies that `md-to-pdf collection add` and `md-to-pdf plugin a
 
 #### 7.  [[v0.8.6][v0.8.6]] Enhance Local Plugin/Collection Management
 
+##### [Status: Completed (v0.8.6)][v0.8.6]
+
   * **Goal:** Improve the workflow for managing and updating locally developed or sourced plugins and collections.
 
-  * **Warmup:** 
+  * **Warmup** 
 
     Add a condensed view for listing downloaded collections:
     ```
     md-to-pdf collection list --short
     ```
     
-  * **Enhancements:**
+  * **Enhancements**
     - Implement re-sync capability for locally-sourced collections: 
       ```
       md-to-pdf collection update [<collection_name>]`
@@ -292,38 +296,88 @@ This structure clarifies that `md-to-pdf collection add` and `md-to-pdf plugin a
       * as specified by `--name`.
     - This plugin would then be updatable via the enhanced `collection update` command.
 
-### Phase 3: Deprecation and Documentation Overhaul 
+  * **Results (v0.8.6)**
 
-#### 8. [[v0.8.7][v0.8.7]] Deprecate `md-to-pdf-cm` (Standalone Tool)
+    - `md-to-pdf collection list --short` \
+      * now includes local collection metadata.
+    
+    - `md-to-pdf collection update [<collection_name>]` \
+      * now re-syncs from the original local source path recorded in the collection's metadata.
+    
+    - `md-to-pdf plugin add <path_to_plugin_dir> [--name <invoke_name>]` \
+      * now adds a local plugin directory to `COLL_ROOT` management.
 
-  Once all essential functionalities are robustly integrated into `md-to-pdf`, the standalone `md-to-pdf-cm` entry point will be officially deprecated
+  * **Deferred**
+
+    - `md-to-pdf collection remove <singleton_name>` \
+      * implement in polishing stage
+
+    - Sunsetting the `md-to-pdf collection archetype` command and the dedicated `md-to-pdf-cm` standalone module.
+    
+
+### Phase 3: Finalization, Testing & Documentation (Target: v0.8.7+)
+
+#### 8. [[v0.8.7][v0.8.7]] Implement Backlog of Automated Tests & Refine Test Execution
   
-  1. CLI script will issue a warning and redirect users. 
+  * **Goal:** Ensure comprehensive test coverage for features introduced from v0.8.3 through v0.8.6 and improve the test execution framework.
+
+  * **Refine Test Runners**
+    
+    - Modify the main CLI test runner `test/run-tests.js` to support more granular execution of specific CLI command test categories. e.g.
+
+      - `plugin-add-cli`
+      - `collection-update-cli`
+      - and composite groups
+    
+    - Modify the CM module test runner `test/cm-tests/run-cm-tests.js` to allow targeted execution of individual CM sub-suites. e.g.
+      
+      - `cm-list`
+      - `cm-add`
+      - `cm-update`
+  
+  * **Implement Backlogged CLI Integration Tests**
+    
+    - Add CLI test suites for core `md-to-pdf collection` 
+      
+      * `collection add`
+      * `collection list --short`
+      * `collection remove`
+      * `collection update`
+      
+      for local/singleton sources
+    
+    - Add CLI test suites for core `md-to-pdf plugin` commands:
+      
+      * `plugin add`
+      * `plugin list`
+      * `plugin enable`
+      * `plugin disable`
+    
+    - These tests will verify CLI argument parsing, command wiring to `CollectionsManager` methods, and high-level outcomes, serving as the "rigorous check" for user-facing workflows.
+  
+  * **Implement/Update Backlogged CM Module Tests**
+    - Add **direct module tests** for `CollectionsManager.addSingletonPlugin`.
+    - Update `CollectionsManager` module tests for singleton scenarios:
+       * `updateCollection`
+       * `updateAllCollections`
+    - Update `CollectionsManager` module tests for `listCollections` to handle:
+      * `_user_added_plugins`
+      * singleton types.
+
+Similar to the documentation overhaul, it is best to wait until the `stdout` has stabilized before implementing these tests. While there is a substantial set of **direct module tests**, these **CLI-based integration tests** (the kind performed in the 'main' test suite, provide a more thorough, penetrative check of full-stack integrity.  The analogy in mathematics is, respectively, the difference between formal and rigorous proofs.
+
+#### 9. [[v0.8.8][v0.8.8]] Deprecate `md-to-pdf-cm` (Standalone Tool)
+  Once all essential functionalities are integrated into `md-to-pdf` and thoroughly tested, the standalone `md-to-pdf-cm` entry point will be officially deprecated (deferred in v0.8.6)
+  1. CLI script will issue a warning and redirect users.
   2. Eventual removal in v0.9+.
 
-#### 9.  **Comprehensive Documentation Overhaul**
-
-Update all user-facing documentation:
-
+#### 10. [[v0.8.9][v0.8.9]] Comprehensive Documentation Overhaul
+  Update all user-facing documentation:
   - `README.md`
   - `docs/plugin-development.md`
   - `docs/cheat-sheet.md`
-  - `src/collections-manager/walkthrough.md` 
-
-to reflect the unified `md-to-pdf` CLI. 
-
-#### 10.  **Add Select CLI-Based Integration Tests**
-
-Implement the deferred "rigorous check" tests for the core CLI workflows of the integrated collection and plugin management commands.
-
-* **v0.8.5 - Unified Plugin Generation** \
-  Consolidate plugin creation by enhancing `md-to-pdf plugin create` to handle both scaffolding from a template and archetyping from an existing source (using `--from`), deprecating the separate `collection archetype` command.
-
-* **v0.8.6 -  Local Source Management - Part 1** \
-  Implement re-sync capability in `md-to-pdf collection update` for collections originally added from local, non-Git paths, allowing them to be refreshed from their source.
-
-* **v0.8.6 - Local Source Management - Part 2** \
-  Introduce `md-to-pdf plugin add <path_to_plugin_dir>` to copy, manage (with metadata for updates), and auto-enable single local plugins within `COLL_ROOT`. (The `md-to-pdf collection list --short` flag can also be addressed in this phase).
+  - `src/collections-manager/walkthrough.md` (or integrate its relevant parts into main docs and deprecate this specific file if `md-to-pdf-cm` is gone)
+  to reflect the unified `md-to-pdf` CLI and the deprecation of `md-to-pdf-cm`.
 
 Like the documentation overhaul, it is best to wait until the `stdout` has stabilized before implementing these tests. While there is a substantial set of **direct module tests**, these **CLI-based integration tests** (the kind performed in the 'main' test suite, provide a more thorough, penetrative check of full-stack integrity.  The analogy in mathematics is, respectively, the difference between formal and rigorous proofs.
 
@@ -346,3 +400,5 @@ Like the documentation overhaul, it is best to wait until the `stdout` has stabi
 [v0.8.5]: https://github.com/brege/md-to-pdf/releases/tag/v0.8.5
 [v0.8.6]: https://github.com/brege/md-to-pdf/releases/tag/v0.8.6
 [v0.8.7]: https://github.com/brege/md-to-pdf/releases/tag/v0.8.7
+[v0.8.8]: https://github.com/brege/md-to-pdf/releases/tag/v0.8.8
+[v0.8.9]: https://github.com/brege/md-to-pdf/releases/tag/v0.8.9    

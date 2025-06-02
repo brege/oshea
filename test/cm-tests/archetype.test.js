@@ -3,7 +3,7 @@ const assert = require('assert');
 const fs = require('fs').promises;
 const fss = require('fs'); // For synchronous operations
 const path = require('path');
-// const os = require('os'); // Not strictly needed
+// const os = require('os'); // Not strictly needed as baseTestRunDir provides base
 const yaml = require('js-yaml');
 const chalk = require('chalk'); 
 
@@ -60,7 +60,7 @@ async function testSuccessfulArchetypeDefaultTarget(testRunStats, baseTestRunDir
     testRunStats.attempted++;
     const testName = "CM: Archetype Plugin - Successful (Default Target)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const sourceCollectionName = 'source-coll-arch-cm';
@@ -80,7 +80,6 @@ async function testSuccessfulArchetypeDefaultTarget(testRunStats, baseTestRunDir
         const newConfigPath = path.join(expectedArchetypePath, `${newArchetypeName}.config.yaml`);
         const newConfigData = yaml.load(await fs.readFile(newConfigPath, 'utf8'));
         
-        // Corrected Assertion for description
         const expectedDesc = `Archetype of "${fullSourceIdentifier}": Original description for ${sourcePluginId}`;
         assert.strictEqual(newConfigData.description, expectedDesc, `(${testName}) Description should be updated. Expected: '${expectedDesc}', Got: '${newConfigData.description}'`);
         
@@ -109,7 +108,7 @@ async function testSuccessfulArchetypeCustomTarget(testRunStats, baseTestRunDir)
     testRunStats.attempted++;
     const testName = "CM: Archetype Plugin - Successful (Custom Target Directory)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const sourceCollectionName = 'source-coll-custom-arch-cm';
@@ -134,7 +133,6 @@ async function testSuccessfulArchetypeCustomTarget(testRunStats, baseTestRunDir)
         const newConfigPath = path.join(expectedArchetypePath, `${newArchetypeName}.config.yaml`);
         const newConfigData = yaml.load(await fs.readFile(newConfigPath, 'utf8'));
 
-        // Corrected Assertion for description
         const expectedDesc = `Archetype of "${fullSourceIdentifier}": Original description for ${sourcePluginId}`;
         assert.strictEqual(newConfigData.description, expectedDesc, `(${testName}) Description updated in custom target. Expected: '${expectedDesc}', Got: '${newConfigData.description}'`);
         
@@ -154,13 +152,12 @@ async function testArchetypeSourceNotFound(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Archetype Plugin - Source Not Found";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
     const newArchetypeName = 'my-new-archetype-cm';
 
     try {
         const nonExistentCmId = 'non-existent-coll-cm/some-plugin';
-        // Corrected Expected Regex
         await assert.rejects(
             manager.archetypePlugin(nonExistentCmId, newArchetypeName),
             /Source plugin "some-plugin" in collection "non-existent-coll-cm" not found via CollectionsManager.*?/,
@@ -172,7 +169,6 @@ async function testArchetypeSourceNotFound(testRunStats, baseTestRunDir) {
         await fs.writeFile(path.join(testCollRoot, sourceCollectionName, METADATA_FILENAME), yaml.dump({ name: sourceCollectionName, source: 'local-cm' }));
         
         const nonExistentPluginInExistingColl = `${sourceCollectionName}/non-existent-plugin-cm`;
-        // Corrected Expected Regex
         await assert.rejects(
             manager.archetypePlugin(nonExistentPluginInExistingColl, newArchetypeName),
             new RegExp(`Source plugin "non-existent-plugin-cm" in collection "${sourceCollectionName}" not found via CollectionsManager`),
@@ -201,7 +197,7 @@ async function testArchetypeTargetExists(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Archetype Plugin - Target Directory Exists";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const sourceCollectionName = 'source-coll-target-test-cm';
@@ -218,7 +214,6 @@ async function testArchetypeTargetExists(testRunStats, baseTestRunDir) {
 
     try {
         const escapedPath = conflictingArchetypePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Corrected Expected Regex to include the full error message
         await assert.rejects(
             manager.archetypePlugin(fullSourceIdentifier, newArchetypeName),
             new RegExp(`Target archetype directory "${escapedPath}" already exists\\. Use --force to overwrite or choose a different name\\.`),

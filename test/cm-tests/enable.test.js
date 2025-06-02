@@ -13,14 +13,14 @@ const {
     ENABLED_MANIFEST_FILENAME,
     createTestCollRoot,
     cleanupTestCollRoot,
-    setupLocalGitRepo // Assuming this might be used for advanced prefixing tests later
+    // setupLocalGitRepo // Assuming this might be used for advanced prefixing tests later
 } = require('./cm-test-helpers.js');
 
 async function testEnablePlugin(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Enable Plugin and Verify Manifest";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
     const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
 
@@ -106,20 +106,20 @@ async function testEnableAllPluginsInCollection(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Enable All Plugins in Collection (Default & Override Prefixing)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
     const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
 
     const githubUser = 'testusercm';
-    const githubRepoUrl = `https://github.com/${githubUser}/testrepo-cm.git`; // Mock URL
+    const githubRepoUrl = `https://github.com/${githubUser}/testrepo-cm.git`; 
     const githubCollName = 'gh-coll-enable-all-cm';
 
     const genericGitDomain = 'my-git-server-cm.com';
-    const genericGitRepoUrl = `git@${genericGitDomain}:anotheruser/anotherrepo-cm.git`; // Mock URL
+    const genericGitRepoUrl = `git@${genericGitDomain}:anotheruser/anotherrepo-cm.git`; 
     const genericGitCollName = 'generic-git-coll-enable-all-cm';
 
     const localPathSourceDir = path.join(baseTestRunDir, `cm_local_src_enable_all_${Date.now()}`);
-    await fs.mkdir(localPathSourceDir, { recursive: true }); // Ensure local source dir is created within baseTestRunDir
+    await fs.mkdir(localPathSourceDir, { recursive: true }); 
     const localCollName = 'local-path-coll-enable-all-cm';
 
     const createDummyCollection = async (collName, sourceUrlOrPath, pluginIds = ['plugin1', 'plugin2']) => {
@@ -184,8 +184,8 @@ async function testEnableAllPluginsInCollection(testRunStats, baseTestRunDir) {
         await fs.unlink(enabledManifestPath);
         
         console.log(chalk.magenta("  Sub-test: Conflict during enableAll (simulated by pre-enabling one)"));
-        await manager.enablePlugin(`${githubCollName}/plugin1`, { name: `${githubUser}-plugin1` }); // Pre-enable
-        result = await manager.enableAllPluginsInCollection(githubCollName, { isCliCall: true }); // Default prefixing
+        await manager.enablePlugin(`${githubCollName}/plugin1`, { name: `${githubUser}-plugin1` }); 
+        result = await manager.enableAllPluginsInCollection(githubCollName, { isCliCall: true }); 
         assert.strictEqual(result.success, false, `(${testName}) Enable all with one conflict should report overall failure`);
         assert.ok(result.messages.some(m => m.includes(`${githubUser}-plugin1: failed -`) && m.includes('already in use')), `(${testName}) Conflict for ${githubUser}-plugin1 reported`);
         assert.ok(result.messages.some(m => m.includes(`${githubUser}-plugin2: enabled`)), `(${testName}) ${githubUser}-plugin2 enabled despite other conflict`);

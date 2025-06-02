@@ -18,7 +18,7 @@ async function testRemoveCollection(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: Remove Collection";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir);
+    const testCollRoot = await createTestCollRoot(baseTestRunDir); // Pass baseTestRunDir
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
     const enabledManifestPath = path.join(testCollRoot, ENABLED_MANIFEST_FILENAME);
 
@@ -30,7 +30,6 @@ async function testRemoveCollection(testRunStats, baseTestRunDir) {
     const invokeName1 = 'pluginOneInvokeCm';
     const invokeName2 = 'pluginTwoInvokeCm';
 
-    // Setup initial collection and plugins
     const plugin1Path = path.join(collPathToRemove, pluginId1);
     await fs.mkdir(plugin1Path, { recursive: true });
     await fs.writeFile(path.join(plugin1Path, `${pluginId1}.config.yaml`), yaml.dump({ description: 'Plugin One CM' }));
@@ -73,14 +72,11 @@ async function testRemoveCollection(testRunStats, baseTestRunDir) {
             assert.ok(!manifest.enabled_plugins.some(p => p.invoke_name === invokeName2), `(${testName}) Plugin2 should be disabled from manifest after forced collection removal`);
         }
 
-        // Recreate for no-force removal test
         await fs.mkdir(collPathToRemove, { recursive: true });
         await fs.writeFile(path.join(collPathToRemove, METADATA_FILENAME), yaml.dump({ name: collNameToRemove, source: 'test-source-2-cm' }));
-        // Ensure manifest is empty or doesn't list plugins from this collection
-        if(fss.existsSync(enabledManifestPath)) { // if manifest exists, make sure its empty for this test
+        if(fss.existsSync(enabledManifestPath)) { 
             await manager._writeEnabledManifest({ enabled_plugins: [] });
         }
-
 
         const removeResultNoForce = await manager.removeCollection(collNameToRemove);
         assert.ok(removeResultNoForce.success, `(${testName}) Removing collection with no enabled plugins (no force) should succeed`);

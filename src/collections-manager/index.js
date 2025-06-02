@@ -14,6 +14,7 @@ const {
   METADATA_FILENAME,
   ENABLED_MANIFEST_FILENAME,
   DEFAULT_ARCHETYPE_BASE_DIR_NAME,
+  USER_ADDED_PLUGINS_DIR_NAME, // Import new constant
 } = require('./constants');
 
 // Command Modules
@@ -27,6 +28,7 @@ const updateAllCollectionsCmd = require('./commands/updateAll');
 const listAvailablePluginsCmd = require('./commands/listAvailable');
 const listCollectionsCmd = require('./commands/list');
 const archetypePluginCmd = require('./commands/archetype');
+const addSingletonPluginCmd = require('./commands/addSingleton'); // Import new command
 
 class CollectionsManager {
   constructor(options = {}) {
@@ -47,12 +49,13 @@ class CollectionsManager {
     this.listAvailablePlugins = listAvailablePluginsCmd.bind(this);
     this.listCollections = listCollectionsCmd.bind(this);
     this.archetypePlugin = archetypePluginCmd.bind(this);
+    this.addSingletonPlugin = addSingletonPluginCmd.bind(this); // Bind new command
   }
 
   determineCollRoot() {
     // Check for test override first
     if (process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE) {
-      if (this.debug) { 
+      if (this.debug) {
           console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using test override for COLL_ROOT: ${process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE}`));
       }
       return process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE;

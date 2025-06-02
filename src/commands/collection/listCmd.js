@@ -1,6 +1,6 @@
 // src/commands/collection/listCmd.js
 const chalk = require('chalk');
-const stripAnsi = require('strip-ansi'); // For width calculation
+const stripAnsi = require('strip-ansi');
 
 module.exports = {
   command: 'list',
@@ -33,30 +33,48 @@ module.exports = {
         let maxSourceTypeWidth = "SOURCE TYPE".length;
         collections.forEach(coll => {
           if (coll.name.length > maxNameWidth) maxNameWidth = coll.name.length;
-          const sourceType = (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) ? "Git" : "Local Path";
+          let sourceType = "Unknown";
+          if (coll.special_type === 'singleton_container') {
+            sourceType = "Managed Dir";
+          } else if (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) {
+            sourceType = "Git";
+          } else if (coll.source && coll.source !== 'N/A (Metadata missing or unreadable)') {
+            sourceType = "Local Path";
+          }
           if (sourceType.length > maxSourceTypeWidth) maxSourceTypeWidth = sourceType.length;
         });
 
-        console.log(chalk.bold(`  ${'NAME'.padEnd(maxNameWidth)} | ${'SOURCE TYPE'.padEnd(maxSourceTypeWidth)} | SOURCE ORIGIN`));
-        console.log(chalk.bold(`  ${'-'.repeat(maxNameWidth)} | ${'-'.repeat(maxSourceTypeWidth)} | ${'-'.repeat('SOURCE ORIGIN'.length)}`));
+        console.log(chalk.bold(`  ${'NAME'.padEnd(maxNameWidth)} | ${'SOURCE TYPE'.padEnd(maxSourceTypeWidth)} | SOURCE/PATH`));
+        console.log(chalk.bold(`  ${'-'.repeat(maxNameWidth)} | ${'-'.repeat(maxSourceTypeWidth)} | ${'-'.repeat('SOURCE/PATH'.length)}`));
 
         collections.forEach(coll => {
           const nameText = chalk.yellowBright(coll.name);
-          const sourceType = (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) ? "Git" : "Local Path";
-          const sourceTypeText = chalk.gray(sourceType);
-          const sourceOriginText = chalk.dim(coll.source || 'N/A');
+          let sourceType = "Unknown";
+          let sourceOriginText = chalk.dim(coll.source || 'N/A');
+
+          if (coll.special_type === 'singleton_container') {
+            sourceType = chalk.blue("Managed Dir");
+          } else if (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) {
+            sourceType = chalk.magenta("Git");
+          } else if (coll.source && coll.source !== 'N/A (Metadata missing or unreadable)') {
+            sourceType = chalk.cyan("Local Path");
+          }
           
           const plainName = stripAnsi(nameText);
-          const plainSourceType = stripAnsi(sourceTypeText);
+          const plainSourceType = stripAnsi(sourceType);
 
-          console.log(`  ${nameText.padEnd(maxNameWidth + (nameText.length - plainName.length))} | ${sourceTypeText.padEnd(maxSourceTypeWidth + (sourceTypeText.length - plainSourceType.length))} | ${sourceOriginText}`);
+          console.log(`  ${nameText.padEnd(maxNameWidth + (nameText.length - plainName.length))} | ${sourceType.padEnd(maxSourceTypeWidth + (sourceType.length - plainSourceType.length))} | ${sourceOriginText}`);
         });
 
-      } else {
+      } else { // Not short
         collections.forEach(coll => {
           let sourceDisplay = coll.source || 'N/A';
           let sourceType = 'N/A';
-          if (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) {
+
+          if (coll.special_type === 'singleton_container') {
+            sourceType = chalk.blue("Managed Directory"); // More descriptive
+            sourceDisplay = chalk.gray(coll.source);     // Display the actual path
+          } else if (/^(http(s)?:\/\/|git@)/.test(coll.source || '') || (coll.source || '').endsWith('.git')) {
             sourceType = chalk.magenta("Git");
             sourceDisplay = chalk.gray(coll.source);
           } else if (coll.source && coll.source !== 'N/A (Metadata missing or unreadable)') {
@@ -69,7 +87,7 @@ module.exports = {
 
           console.log(`  - Name: ${chalk.yellowBright(coll.name)}`);
           console.log(`    Source Type: ${sourceType}`);
-          console.log(`    Source Origin: ${sourceDisplay}`);
+          console.log(`    Source Origin: ${sourceDisplay}`); // Will show actual path for container
           console.log(`    Added: ${chalk.gray(coll.added_on || 'N/A')}`);
           if (coll.updated_on) {
             console.log(`    Last Updated: ${chalk.gray(coll.updated_on)}`);

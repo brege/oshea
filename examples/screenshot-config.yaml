@@ -12,4 +12,9 @@ document_type_plugins:
   # --- ../docs/plugin-management.md ---
   business-card: "../test/custom_plugins/business-card/business-card.config.yaml"
   advanced-card: "./custom_plugin_showcase/advanced-card/advanced-card.config.yaml"
-
+  
+  # --- ../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.md ---
+  d3-histogram-slide: "../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.config.yaml"
+  
+  # --- .../../md-to-pdf-plugins/restaurant-menu/restaurant-menu-example.md ---
+  restaurant-menu: "../../md-to-pdf-plugins/restaurant-menu/restaurant-menu.config.yaml" 

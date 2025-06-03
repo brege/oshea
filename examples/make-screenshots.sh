@@ -49,18 +49,37 @@ md-to-pdf convert ./custom_plugin_showcase/advanced-card/advanced-card-example.m
             --outdir ../docs/images/screenshots \
             --no-open
 
-# --- Presentation Slide Example ---
-echo "d3-histogram-slide"
-
+# only do these next two if they are present at the specified relative location
+# if present, the plugin discovery is self-activating, using the contents of the
+# shared root of their corresponding *.md file
 
 # --- D3 Histogram Slide Example ---
-md-to-pdf convert ../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.md \
-          --plugin ../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.config.yaml \
-          --config ./screenshot-config.yaml \
-          --filename d3-histogram-slide.pdf \
-          --outdir ../docs/images/screenshots \
-          --no-open
+if [ -d "../../md-to-pdf-plugins/d3-histogram-slide" ]; then
+  md-to-pdf convert ../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.md \
+            --config ./screenshot-config.yaml \
+            --filename d3-histogram-slide.pdf \
+            --outdir ../docs/images/screenshots \
+            --no-open
+fi
 
+# --- Restaurant Menu Example (Single View) ---
+if [ -d "../../md-to-pdf-plugins/restaurant-menu" ]; then
+  md-to-pdf ../../md-to-pdf-plugins/restaurant-menu/restaurant-menu-example.md \
+            --config ./screenshot-config.yaml \
+            --filename restaurant-menu.pdf \
+            --outdir ../docs/images/screenshots \
+            --no-open
+fi
+
+# alternatively, you could use the --plugin flag if you performed the steps to add
+# the collection via
+# md-to-pdf-cm add https://github.com/brege/md-to-pdf-plugins.git --name brege-plugins
+# md-to-pdf plugin list --short
+# md-to-pdf plugin enable brege-plugins/d3-histogram-slide --name d3-histogram-slide
+# md-to-pdf plugin enable brege-plugins/restaurant-menu --name restaurant-menu
+# e.g.:
+# md-to-pdf convert path/to/d3-histogram-slide.md --plugin d3-histogram-slide # [ ... ]
+# md-to-pdf convert ../../relative/path/to/restaurant-menu.md --plugin restaurant-menu # [ ... ]
 
 # --- Convert PDFs to PNGs ---
 for f in ../docs/images/screenshots/*.pdf; do 
@@ -78,4 +97,11 @@ rm ../docs/images/screenshots/example-cv.pdf
 rm ../docs/images/screenshots/example-cover-letter.pdf
 rm ../docs/images/screenshots/example-business-card.pdf
 rm ../docs/images/screenshots/advanced-business-card.pdf
-rm ../docs/images/screenshots/d3-histogram-slide.pdf
+
+# only try to remove these if their corresponding md files are present
+if [ -f "../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.md" ]; then
+  rm ../docs/images/screenshots/d3-histogram-slide.pdf
+fi
+if [ -f "../../md-to-pdf-plugins/restaurant-menu/restaurant-menu-example.md" ]; then
+  rm ../docs/images/screenshots/restaurant-menu.pdf
+fi

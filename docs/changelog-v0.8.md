@@ -5,6 +5,26 @@
 
 ---
 
+## v0.8.7 - Comprehensive Documentation Overhaul
+
+**Date:** 2025-06-03
+
+This version marks a significant overhaul of the public-facing documentation to reflect the new unified CLI and plugin management capabilities.
+
+### Changed
+
+* **`README.md` Overhaul:** The main `README.md` was significantly restructured and rewritten to prominently feature new CLI-based plugin and collection management, streamline quick-start examples, and highlight the tool's versatility. The example gallery was moved to the top for immediate visual impact.
+* **`docs/cheat-sheet.md` Update:** Refined to include all new CLI commands for plugin and collection management (`add`, `list`, `enable`, `disable`, `remove`, `update`), providing concise syntax and common use cases.
+* **`docs/plugin-development.md` Update:** Expanded into a comprehensive reference for plugin developers and advanced users. It now includes detailed explanations of CLI-based plugin/collection management, in-depth configuration precedence, archetyping, and updated examples for plugin creation. Information on XDG root for collections (`~/.local/share/md-to-pdf/collections/`) was added. Backtick links to `dream-board` and `changelog` were included.
+* **`dev/plugins/README.md` (Bundled Plugins Overview) Refinement:** Updated to serve as a template for documenting external plugin collections, detailing how to manage and use bundled plugins via CLI commands.
+* **`dev/community_plugins/plugins-from-brege/README.md` Update:** Revised to align with the new documentation standard for external plugin repositories, showing how to add the collection and manage its plugins using CLI commands.
+* **`docs/batch-processing-guide.md` Update:** Refined to remove obsolete `hugo-export-each` command references and reinforce the recommendation for external scripting.
+* **Documentation Tone:** A consistent, direct, and honest language was adopted across all user-facing documentation, avoiding "salesman-like" or overly informal vernacular.
+* **Obsolete Command "Ghosting":** All explicit references to the standalone `md-to-pdf-cm` binary and the deprecated `md-to-pdf collection archetype` command were removed from public documentation.
+* **TODO Notes:** Specific `TODO` notes for future features like singleton purging were added to relevant documents.
+
+---
+
 ## v0.8.6 - Enhanced Local Plugin/Collection Management
 
 **Date:** 2025-06-02

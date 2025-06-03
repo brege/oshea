@@ -15,7 +15,7 @@ See `md-to-pdf` in action\! These examples showcase the visual capabilities of s
 | :-----------------------: | :------------------------: | :-----------------------: |
 | <img src="docs/images/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="docs/images/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="docs/images/screenshots/example-recipe.png" alt="Recipe Screenshot" width="300"/> |
 | [**Business Card**](plugins/advanced-card) | [**Restaurant Menu**](https://github.com/brege/md-to-pdf-plugins/tree/main/restaurant-menu) | [**D3.js Slide**](https://github.com/brege/md-to-pdf-plugins/tree/main/d3-histogram-slide) |
-| <img src="docs/images/screenshots/advanced-business-card.png" alt="Business Card" width="300"/> | <img src="docs/images/screenshots/restaurant-menu.png" alt="." width="300"/>  | <img src="docs/images/screenshots/d3-histogram-slide.png" alt="D3.js Slide" width="300"/> | 
+| <img src="docs/images/screenshots/advanced-business-card.png" alt="Business Card" width="300"/> | <img src="docs/images/screenshots/restaurant-menu.png" alt="Restaurant Menu" width="300"/>  | <img src="docs/images/screenshots/d3-histogram-slide.png" alt="D3.js Slide" width="300"/> | 
 ---
 
 ## Features

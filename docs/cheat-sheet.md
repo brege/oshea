@@ -113,32 +113,87 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
         --base-plugin recipe
     ```
 
-## Plugin Management Commands
+## Plugin & Collection Management Commands
 
-**1. List Discoverable Plugins**
+These commands simplify managing plugins and collections directly from the CLI.
+
+**1. Add a Plugin Collection**
+
+  * Adds a plugin collection from a Git repository URL or local directory.
+    ```bash
+    md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins
+    md-to-pdf collection add ./local-plugin-collection # Add from a local path
+    ```
+
+**2. List Plugin Collections**
+
+  * Lists all currently managed plugin collections.
+    ```bash
+    md-to-pdf collection list
+    ```
+
+**3. Update Plugin Collections**
+
+  * Updates a specific collection (if Git-sourced) or all collections.
+    ```bash
+    md-to-pdf collection update my-plugins-repo # Update a specific collection
+    md-to-pdf collection update              # Update all managed collections
+    ```
+
+**4. Remove a Plugin Collection**
+
+  * Removes a registered plugin collection.
+    ```bash
+    md-to-pdf collection remove my-plugins-repo
+    ```
+
+**5. List Discoverable Plugins**
 
   * Lists all plugins found via Bundled, User-Global, and Project configurations.
   * Shows name, description, registration source, and config file path for each.
   * Respects global `--config` and `--factory-defaults` flags.
     ```bash
     md-to-pdf plugin list
+    md-to-pdf plugin list --available # List all plugins, including disabled ones
+    md-to-pdf plugin list --enabled   # List only enabled plugins
+    md-to-pdf plugin list --disabled  # List only disabled plugins
     md-to-pdf plugin list --factory-defaults
     ```
 
-**2. Create Plugin Boilerplate**
+**6. Create New Plugin Boilerplate**
 
-  * Generates a starting structure for a new plugin.
+  * Generates a starting structure for a new plugin, optionally based on an existing one.
     ```bash
     md-to-pdf plugin create <your-plugin-name> [--dir <output-directory>] [--force]
-    ```
-    Example:
-    ```bash
+    # Create a new plugin from scratch
     md-to-pdf plugin create my-invoice --dir ./custom-plugins
+    # Archetype (create from) an existing plugin, e.g., 'cv'
+    md-to-pdf plugin create my-custom-cv --from cv
     ```
-    This creates `./custom-plugins/my-invoice/` with `my-invoice.config.yaml`, `index.js`, `my-invoice.css`, and `README.md` (with a `cli_help` section).
-    Remember to register the new plugin in a `config.yaml` file afterwards.
+    This creates `<output-directory>/<your-plugin-name>/` with `<your-plugin-name>.config.yaml`, `index.js`, `<your-plugin-name>.css`, and `README.md` (with a `cli_help` section).
 
-**3. Get Help for a Specific Plugin**
+**7. Enable a Plugin**
+
+  * Activates a specific plugin.
+    ```bash
+    md-to-pdf plugin enable my-invoice
+    ```
+
+**8. Disable a Plugin**
+
+  * Deactivates a specific plugin.
+    ```bash
+    md-to-pdf plugin disable my-invoice
+    ```
+
+**9. Remove a Plugin**
+
+  * Removes a registered plugin (Currently for singletons only. Collection-based plugin removal is handled by `collection remove`).
+    ```bash
+    md-to-pdf plugin remove my-standalone-plugin # TODO: Singleton removal and purging
+    ```
+
+**10. Get Help for a Specific Plugin**
 
   * Displays detailed help information for a named plugin, sourced from its `README.md` front matter.
     ```bash
@@ -279,7 +334,7 @@ For placeholder substitution (e.g., `{{ .site.name }}`).
 params:
   site:
     name: "My Awesome Site"
-    url: "[https://example.com](https://example.com)"
+    url: "https://example.com"
   authorContact:
     name: "Default Author"
     email: "author@example.com"
@@ -297,6 +352,8 @@ params:
 Document front matter `params` (or top-level keys) have the highest precedence overall. See [Plugin Development Guide](./plugin-development.md#placeholder-context-and-params-merging-precedence) for full merge order.
 
 ### Registering a Custom Plugin
+
+While CLI commands (`md-to-pdf collection add`) are the primary way to manage plugins, you can still manually register plugins via `config.yaml` for advanced setups or specific scenarios.
 
 Assuming your plugin `my-notes`'s config is at `~/my_md_plugins/my-notes-plugin/my-notes.config.yaml`.
 
@@ -359,27 +416,32 @@ Today's long date: {{ .CurrentDateFormatted }}
 
   * Inline: `The equation is $E = mc^2$.`
   * Display: `$$ f(x) = \\int_{-\\infty}^\\infty \\hat{f}(\\xi)\\,e^{2 \\pi i \\xi x} \\,d\\xi $$`
-  * `\\(` and `\\[` are **not** supported by default. [cite: 125]
+  * `\(` and `\[` are **not** supported by default.
 
 ## Plugin Creation Basics - `plugin create`
 
 1.  **Generate Boilerplate**
+
     ```bash
     md-to-pdf plugin create my-custom-plugin --dir ./path/to/where/plugins_live
+    # To archetype from an existing plugin:
+    md-to-pdf plugin create my-custom-cv --from cv
     ```
-    This creates `my-custom-plugin/` containing:
-    * `my-custom-plugin.config.yaml`
-    * `index.js` (handler expecting `coreUtils` in constructor)
-    * `my-custom-plugin.css`
-    * `README.md` (with `cli_help` section)
+
+    This creates `my-custom-plugin/` (or `my-custom-cv/`) containing:
+
+      * `my-custom-plugin.config.yaml`
+      * `index.js` (handler expecting `coreUtils` in constructor)
+      * `my-custom-plugin.css`
+      * `README.md` (with `cli_help` section)
 
 2.  **Customize**
 
     Edit the generated files. The `index.js` handler will already be set up to use `DefaultHandler` via dependency injection.
 
-3.  **Register**
+3.  **Register (if not using CLI collection management)**
 
-    Add your plugin to a `config.yaml` (see [Registering a Custom Plugin](#registering-a-custom-plugin) above).
+    If you're not using `md-to-pdf collection add` to manage this plugin, you might need to manually add your plugin to a `config.yaml` (see [Registering a Custom Plugin](#registering-a-custom-plugin) above).
 
 4.  **Invoke**
 
@@ -406,7 +468,7 @@ Today's long date: {{ .CurrentDateFormatted }}
 
 1.  **Local `<filename>.config.yaml`** (document-specific settings & `params`)
 2.  **Front Matter** (`params` and top-level data from the Markdown file)
-3.  __**Project Main Config Overrides**__ (Inline blocks like `cv: { pdf_options: ... }` in the `--config` file)
+3.  **Project Main Config Overrides** (Inline blocks like `cv: { pdf_options: ... }` in the `--config` file)
 4.  **User-Global Main Config Overrides** (Inline blocks in `~/.config/md-to-pdf/config.yaml`)
 5.  **Plugin's Own Default `<pluginName>.config.yaml`** (Base settings & `params` from the plugin itself)
 6.  **Global `params`** (From the active main `config.yaml` chosen from Project, User-Global, or Bundled)
@@ -415,12 +477,13 @@ Today's long date: {{ .CurrentDateFormatted }}
 
   * **CSS Not Working?** Check paths in `css_files` (relative to the `*.config.yaml` they are in, or the main config for inline overrides). Is `inherit_css: false` in an override, replacing all prior CSS?
 
-  * **Math Issues?** Ensure `math.enabled: true` in the effective plugin config. Check delimiters and LaTeX syntax. Only `$$...$$`, `$...$` work with this implementation of KaTeX. [cite: 125]
+  * **Math Issues?** Ensure `math.enabled: true` in the effective plugin config. Check delimiters and LaTeX syntax. Only `$$...$$`, `$...$` work with this implementation of KaTeX.
 
-  * **Plugin Unknown?** Verify registration in `plugins` section of a loaded `config.yaml` and path correctness. Use `md-to-pdf plugin list`.
+  * **Plugin Unknown?** Verify registration using `md-to-pdf plugin list`. If it's a new custom plugin, ensure it's either added via `md-to-pdf collection add` or manually registered in a loaded `config.yaml` file with a correct path.
 
   * **What config am I using?** See "Configuration Overview & Precedence". Use `md-to-pdf config` and `md-to-pdf config --plugin <name>` for details.
 
------
+---
 
 Refer to the full [`README.md`](../README.md) and [Plugin Development Guide](./plugin-development.md) for detailed explanations.
+

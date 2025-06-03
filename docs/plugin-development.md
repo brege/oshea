@@ -6,10 +6,12 @@ This document serves as a comprehensive reference for creating, configuring, and
 
 Plugins are the core of `md-to-pdf`'s extensibility. They allow you to define custom processing, styling, and PDF generation options for different types of Markdown documents. Whether you're creating a CV, a recipe, a technical report, or any other document, a plugin provides the tailored environment for that specific output.
 
-Each plugin is typically a self-contained directory that bundles
+Each plugin is typically a self-contained directory that bundles:
 * A configuration manifest (`<plugin-name>.config.yaml`)
 * A Node.js handler script (usually `index.js`)
 * Custom CSS files
+
+With the introduction of CLI-based plugin and collection management, interacting with and leveraging plugins has become more direct and streamlined, reducing the need for manual `config.yaml` edits for common tasks.
 
 ## Plugin Anatomy
 
@@ -17,13 +19,15 @@ A plugin for `md-to-pdf` is a self-contained directory that bundles configuratio
 
 ### Core Directory Structure
 
-Typically, a plugin resides in its own directory. For example, a plugin named `my-invoice` would be structured as
+Typically, a plugin resides in its own directory. For example, a plugin named `my-invoice` would be structured as:
 
     my-custom-plugins/
     └── my-invoice/
         ├── my-invoice.config.yaml  # Primary configuration (manifest)
         ├── index.js                # Node.js handler script
-        └── my-invoice.css          # Custom CSS styles
+        ├── my-invoice.css          # Custom CSS styles
+        ├── my-invoice-example.md   # Example Markdown file for demonstration
+        └── README.md               # Plugin documentation (with CLI help)
 
 ### 1. Plugin Configuration
 
@@ -127,33 +131,33 @@ The script must export a class. This class should have
 
 **`coreUtils` Object**
 
-The `constructor` receives an object with the following utilities, injected by `PluginManager.js`
+The `constructor` receives an object with the following utilities, injected by `PluginManager.js`:
 
-| Utility         | Description                                                                                                                                |
-|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `DefaultHandler`  | The standard handler class. Useful for plugins that need common Markdown-to-HTML processing but with custom configurations or minor tweaks. |
-| `markdownUtils` | An object with helper functions like `extractFrontMatter()`, `renderMarkdownToHtml()`, `substituteAllPlaceholders()`, and `generateSlug()`.      |
-| `pdfGenerator`  | An object with the `generatePdf()` function for direct PDF creation from an HTML string, CSS, and PDF options.                             |
+| Utility | Description |
+|-----------|------------------------------------------------------------------------------------|
+| `DefaultHandler` | The standard handler class. Useful for plugins that need common Markdown-to-HTML processing but with custom configurations or minor tweaks. |
+| `markdownUtils` | An object with helper functions like `extractFrontMatter()`, `renderMarkdownToHtml()`, `substituteAllPlaceholders()`, and `generateSlug()`. |
+| `pdfGenerator` | An object with the `generatePdf()` function for direct PDF creation from an HTML string, CSS, and PDF options. |
 
 **`generate` Method Signature and Parameters**
 
-The `generate` method is the core of your plugin's logic. It must have the following signature
+The `generate` method is the core of your plugin's logic. It must have the following signature:
 
 ```javascript
 async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath)
 ```
 
-Here's a breakdown of its parameters
+Here's a breakdown of its parameters:
 
-| Parameter           | Type             | Description                                                                                                                                                              |
-|---------------------|------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `data`              | `object`         | Input data for the plugin. For `convert` commands, this usually contains `{ markdownFilePath: 'path/to/file.md' }`. For `generate` commands, it often contains `{ cliArgs: {...} }` with arguments passed after the plugin name. |
-| `pluginSpecificConfig` | `object`         | The fully resolved configuration object specifically for this plugin instance. This includes settings from the plugin's own `<plugin-name>.config.yaml` merged with any applicable user-global or project-level overrides. |
-| `globalConfig`      | `object`         | The main global configuration object loaded by `md-to-pdf` (e.g., from `config.yaml` in the project root, user's config directory, or specified via `--config`). This object includes global `params` and `global_pdf_options`. |
-| `outputDir`         | `string`         | The absolute path to the directory where the output PDF file should be saved.                                                                                              |
-| `outputFilenameOpt` | `string` (opt)   | The desired filename for the PDF (e.g., "my-document.pdf"), if specified by the user via the `--filename` option. If not provided, the plugin should generate a suitable name. |
-| `pluginBasePath`    | `string`         | The absolute path to the root directory of the plugin (i.e., the directory containing its `<plugin-name>.config.yaml`). This is crucial for resolving relative paths to assets like CSS files or templates within the plugin. |
-| **Returns** | `Promise<string>` | The method must return a Promise that resolves to a string containing the absolute path to the generated PDF file.                                                       |
+| Parameter | Type | Description |
+|-------------|------------|------------------------------------------------------------------------------------------------------|
+| `data` | `object` | Input data for the plugin. For `convert` commands, this usually contains `{ markdownFilePath: 'path/to/file.md' }`. For `generate` commands, it often contains `{ cliArgs: {...} }` with arguments passed after the plugin name. |
+| `pluginSpecificConfig` | `object` | The fully resolved configuration object specifically for this plugin instance. This includes settings from the plugin's own `<plugin-name>.config.yaml` merged with any applicable user-global or project-level overrides. |
+| `globalConfig` | `object` | The main global configuration object loaded by `md-to-pdf` (e.g., from `config.yaml` in the project root, user's config directory, or specified via `--config`). This object includes global `params` and `global_pdf_options`. |
+| `outputDir` | `string` | The absolute path to the directory where the output PDF file should be saved. |
+| `outputFilenameOpt` | `string` (opt) | The desired filename for the PDF (e.g., "my-document.pdf"), if specified by the user via the `--filename` option. If not provided, the plugin should generate a suitable name. |
+| `pluginBasePath` | `string` | The absolute path to the root directory of the plugin (i.e., the directory containing its `<plugin-name>.config.yaml`). This is crucial for resolving relative paths to assets like CSS files or templates within the plugin. |
+| **Returns** | `Promise<string>` | The method must return a Promise that resolves to a string containing the absolute path to the generated PDF file. |
 
 **Example Simple Handler using `DefaultHandler`**
 
@@ -193,6 +197,8 @@ Standard CSS files used to style your document. Paths are specified in your plug
 
   * `data/` For storing static data files (e.g., JSON, YAML) that your plugin might use.
   * `templates/` If your plugin uses a templating engine (like Handlebars, EJS) for HTML generation, you can store template files here.
+  * `assets/` For images, fonts, or other static assets used by the plugin.
+  * `test/` For unit tests specific to the plugin's logic.
 
 ## Understanding the Configuration System
 
@@ -200,15 +206,16 @@ Standard CSS files used to style your document. Paths are specified in your plug
 
 ### Main `config.yaml` Locations & Precedence
 
-`md-to-pdf` looks for a main `config.yaml` file to load global settings (like `pdf_viewer`, global `params` for placeholders) and register plugins. The first file found in the following order of precedence is used as the primary source for global settings
+`md-to-pdf` looks for a main `config.yaml` file to load global settings (like `pdf_viewer`, global `params` for placeholders) and register plugins. The first file found in the following order of precedence is used as the primary source for global settings:
 
-1.  **Project-Specific Configuration** (Highest Precedence) \
+1.  **Project-Specific Configuration** (Highest Precedence)  
     Specified via the `--config <your-project-config.yaml>` CLI option. This file is considered the "project manifest" and is the most specific.
 
-2.  **User-Global Configuration** (Medium Precedence) \
+2.  **User-Global Configuration** (Medium Precedence)  
     Located at `~/.config/md-to-pdf/config.yaml` (following XDG Base Directory Specification). This file stores your personal default settings that apply across all projects unless overridden by a project-specific configuration.
+    Additionally, `md-to-pdf` manages its installed plugin collections and archetypes under `~/.local/share/md-to-pdf/` (also adhering to XDG Base Directory Specification), primarily within the `collections/` subdirectory.
 
-3.  **Bundled Configuration** (Lowest Precedence) \
+3.  **Bundled Configuration** (Lowest Precedence)  
     The `config.example.yaml` file located in the `md-to-pdf` installation directory serves as the ultimate fallback for global settings and bundled plugin registrations if no user or project configuration is found. If a `config.yaml` exists in the project root (alongside `cli.js`), it might be used for bundled plugin definitions, but `config.example.yaml` is the primary source for factory defaults.
 
 #### Factory Defaults Flag
@@ -217,17 +224,18 @@ The `--factory-defaults` CLI flag instructs `md-to-pdf` to use *only* the settin
 
 ### Plugin Specification & Precedence
 
-When you run `md-to-pdf convert <markdownFile>` or `md-to-pdf <markdownFile>` (lazy load), the tool determines which plugin to use based on the following order of precedence (highest first)
+When you run `md-to-pdf convert <markdownFile>` or `md-to-pdf <markdownFile>` (lazy load), the tool determines which plugin to use based on the following order of precedence (highest first):
 
 1.  **CLI Option `--plugin <nameOrPath>`** (Highest)
-    
+
     This directly tells `md-to-pdf` which plugin to use.
 
-    * `<nameOrPath>` can be the registered name of a plugin (e.g., `cv`, `my-custom-plugin`).
-    
-    * Or, it can be a direct path to a plugin's configuration file (e.g., `./path/to/my-plugin.config.yaml`) or to the plugin's root directory (e.g., `./path/to/my-plugin/`). Paths are resolved relative to the current working directory if not absolute.
+      * `<nameOrPath>` can be the registered name of a plugin (e.g., `cv`, `my-custom-plugin`).
+
+      * Or, it can be a direct path to a plugin's configuration file (e.g., `./path/to/my-plugin.config.yaml`) or to the plugin's root directory (e.g., `./path/to/my-plugin/`). Paths are resolved relative to the current working directory if not absolute.
 
     **`--plugin <nameOrPath>`**
+
     ```bash
     md-to-pdf convert mydoc.md --plugin cv
     md-to-pdf convert mydoc.md --plugin ./project_plugins/special_report_style/
@@ -236,9 +244,10 @@ When you run `md-to-pdf convert <markdownFile>` or `md-to-pdf <markdownFile>` (l
 2.  **Markdown Front Matter `md_to_pdf_plugin` Key**
     You can specify the plugin directly within your Markdown file's YAML front matter.
 
-    * The value can be a registered plugin name or a path (relative to the Markdown file).
+      * The value can be a registered plugin name or a path (relative to the Markdown file).
 
     **`mydoc.md`**
+
     ```yaml
     ---
     title: "My Special Document"
@@ -253,10 +262,11 @@ When you run `md-to-pdf convert <markdownFile>` or `md-to-pdf <markdownFile>` (l
 
     For a Markdown file named `mydoc.md`, `md-to-pdf` will automatically look for a `mydoc.config.yaml` file in the same directory.
 
-    * This local config file can specify the plugin using the `plugin` key.
-    * The value can be a registered plugin name or a path (relative to this local `.config.yaml` file).
+      * This local config file can specify the plugin using the `plugin` key.
+      * The value can be a registered plugin name or a path (relative to this local `.config.yaml` file).
 
     **`mydoc.config.yaml`**
+
     ```yaml
     # mydoc.config.yaml
     plugin: "cv" # Use the registered 'cv' plugin
@@ -272,11 +282,37 @@ When you run `md-to-pdf convert <markdownFile>` or `md-to-pdf <markdownFile>` (l
 
     If no plugin is specified through any of the above methods, `md-to-pdf` will use the `default` plugin.
 
-### Plugin Registration - `plugins` Key
+### Plugin Registration & Management - `plugins` Key and CLI Commands
 
 For a plugin to be usable by its name (e.g., `cv`, `my-invoice`), it must be "registered" in a main `config.yaml` file (Bundled, User-Global, or Project-Specific). This is done under the `plugins` key.
 
+However, the primary and recommended way to manage plugins and collections in `md-to-pdf` v0.8.x and later is through the dedicated **CLI commands**:
+
+  * **`md-to-pdf collection add <source>`** 
+
+    Use this to register entire plugin collections (from Git repositories or local directories) or individual plugins. This command automatically handles adding the necessary entries to your user-global `config.yaml` and places downloaded collections under `~/.local/share/md-to-pdf/collections/`.
+    ```bash
+    md-to-pdf collection add https://github.com/your-org/my-plugins-repo
+    md-to-pdf collection add ~/my-custom-plugins/my-invoice/ # Adds a single plugin as a collection
+    ```
+  * **`md-to-pdf collection list`** -- See all your registered plugin collections.
+  
+  * **`md-to-pdf collection update [name]`** -- Update a specific collection (if Git-sourced) or all collections.
+  
+  * **`md-to-pdf collection remove <name>`** -- Unregister and remove a plugin collection.
+  
+  * **`md-to-pdf plugin list`** -- List all discoverable plugins, whether enabled or disabled.
+  
+  * **`md-to-pdf plugin enable <name>`** -- Activate a specific plugin.
+  
+  * **`md-to-pdf plugin disable <name>`** -- Deactivate a specific plugin.
+  
+  * **`md-to-pdf plugin remove <name>`** -- Remove a registered standalone plugin. (TODO: Support for full removal/purging of singletons from the internal database is planned for the next context window.)
+
+For advanced scenarios, or if you prefer manual management, you can still directly define plugins under the `plugins` key in your `config.yaml` files:
+
 **`~/.config/md-to-pdf/config.yaml`**
+
 ```yaml
 plugins:
   default: "./plugins/default/default.config.yaml" # Path relative to md-to-pdf install dir if this is bundled
@@ -285,15 +321,16 @@ plugins:
   project-specific-plugin: "./internal_plugins/report_style/report.config.yaml" # Path relative to this config file
 ```
 
-  * **Paths** 
+  * **Paths**
 
     Paths to plugin configuration files can be absolute, tilde-expanded (`~`), or relative to the main `config.yaml` file they are defined in.
 
-  * **Plugin Directory Aliases** 
+  * **Plugin Directory Aliases**
 
     You can define `plugin_directory_aliases` within a main `config.yaml` to create shorthand paths for your `plugins` registrations.
 
     **`~/.config/md-to-pdf/config.yaml`**
+
     ```yaml
     plugin_directory_aliases:
       my_plugins: "~/Projects/md-to-pdf-custom-plugins"
@@ -315,29 +352,31 @@ Once a plugin is chosen (e.g., `cv`), its default settings (defined in its own `
     If `mydoc.md` has an accompanying `mydoc.config.yaml`, any settings defined in `mydoc.config.yaml` (other than the `plugin` key itself) take the highest precedence for that specific document conversion.
 
     **`mydoc.config.yaml`**
+
     ```yaml
     plugin: "cv"                # specifies which plugin's defaults to start with
                                 # overrides 'cv' plugin, only for 'mydoc.md'
     pdf_options:
       format: "A5"
       margin: { top: "0.5in", bottom: "0.5in" }
-    css_files: ["./special_style_for_mydoc.css"] 
+    css_files: ["./special_style_for_mydoc.css"]
                                 # ^ Path relative to this mydoc.config.yaml
     params:
       document_status: "Final Version"
-    # cv:                       # incorrect 
+    # cv:                       # incorrect
     #   some_cv_specific_key: "value_for_this_doc_only"
     ```
-    
+
     `params` defined here also take high precedence for placeholder substitution in `mydoc.md`.
-    
+
     Asset paths (like `css_files`) are resolved relative to this local `<filename>.config.yaml`.
 
 2.  **Project-Specific Main Config Inline Overrides**
-    
+
     In your main project configuration file (specified via `--config your_project.yaml`), you can provide "inline" overrides for any registered plugin by using a top-level key that matches the plugin's name.
 
     **`your_project.yaml`**
+
     ```yaml
     plugins:
       cv: "../path_to_actual_cv_plugin/cv.config.yaml" # Registering the base cv plugin
@@ -352,7 +391,7 @@ Once a plugin is chosen (e.g., `cv`), its default settings (defined in its own `
       params:
         project_name: "Project Alpha"
     ```
-    
+
     Asset paths (like `css_files`) in these inline overrides are resolved relative to the directory of this project-specific main configuration file.
 
 3.  **User-Global Main Config Inline Overrides `~/.config/md-to-pdf/config.yaml`**
@@ -360,9 +399,10 @@ Once a plugin is chosen (e.g., `cv`), its default settings (defined in its own `
     Similar to project-specific inline overrides, you can define overrides in your user-global `config.yaml`. These apply if not superseded by a project-level override or a local `<filename>.config.yaml` override.
 
     **`~/.config/md-to-pdf/config.yaml`**
+
     ```yaml
     plugins:
-      cv: "/path_to_md_to_pdf_install/plugins/cv/cv.config.yaml" # Bundled CV
+      cv: "/path_to_md_to-pdf_install/plugins/cv/cv.config.yaml" # Bundled CV
       # ... other plugin registrations ...
 
     # Inline override for the 'cv' plugin for this user
@@ -372,6 +412,7 @@ Once a plugin is chosen (e.g., `cv`), its default settings (defined in its own `
       params:
         user_default_email: "user@example.com"
     ```
+
     Asset paths here are resolved relative to the directory of the user-global `config.yaml`.
 
 4.  **Plugin's Own Default Configuration** (Lowest Precedence for settings)
@@ -402,6 +443,7 @@ When `css_files` are specified in an override layer (Local `<filename>.config.ya
     Define reusable key-value pairs in your active main `config.yaml` (Bundled, User-Global, or Project-specific) under a top-level `params:` key.
 
     **`~/.config/md-to-pdf/config.yaml`**
+
     ```yaml
     params:
       site:
@@ -418,6 +460,7 @@ When `css_files` are specified in an override layer (Local `<filename>.config.ya
     Define `params` within a local `<filename>.config.yaml` that will only apply to its corresponding Markdown document. These override global `params`.
 
     **`mydoc.config.yaml`**
+
     ```yaml
     plugin: "default"
     params:
@@ -432,6 +475,7 @@ When `css_files` are specified in an override layer (Local `<filename>.config.ya
     Markdown files can include YAML front matter for document-specific metadata and data. Front matter data takes the highest precedence.
 
     **`mydoc.md`**
+
     ```yaml
     ---
     title: "My Document Title"
@@ -460,42 +504,48 @@ When `css_files` are specified in an override layer (Local `<filename>.config.ya
 
 #### Placeholder Context and `params` Merging Precedence
 
-When placeholders are processed, the data context is built by merging `params` from various sources, along with top-level front matter keys. The order of precedence (highest wins) is
+When placeholders are processed, the data context is built by merging `params` from various sources, along with top-level front matter keys. The order of precedence (highest wins) is:
 
-  1.  **Document Front Matter**  \
-      Top-level keys and keys under a `params:` block within front matter are merged into the context. Direct top-level keys from front matter generally override any identically named keys from `params` objects from other sources if they collide at the root of the context.
+1.  **Document Front Matter**  
+    Top-level keys and keys under a `params:` block within front matter are merged into the context. Direct top-level keys from front matter generally override any identically named keys from `params` objects from other sources if they collide at the root of the context.
 
-  2.  **Local `<filename>.config.yaml` `params`**
+2.  **Local `<filename>.config.yaml` `params`**
 
-  3.  **Plugin-Specific Override `params`** \
-       Defined within an inline override block for the plugin, e.g., in a project `config.yaml`: `cv: { params: { cv_specific: "value" } }`
+3.  **Plugin-Specific Override `params`**  
+    Defined within an inline override block for the plugin, e.g., in a project `config.yaml`: `cv: { params: { cv_specific: "value" } }`
 
-  4.  **Plugin Default `params`** \
-      Defined in the plugin's own `<plugin-name>.config.yaml` under its `params:` key
+4.  **Plugin Default `params`**  
+    Defined in the plugin's own `<plugin-name>.config.yaml` under its `params:` key
 
-  5.  **Global `params`** \
-      From the active main `config.yaml`
+5.  **Global `params`**  
+    From the active main `config.yaml`
 
 #### Merging Precedence
 
-During merging, objects are deeply merged. For example, if global `params` define 
+During merging, objects are deeply merged. For example, if global `params` define:
 
-    contact_info: { email: "global@example.com", phone: "555-GLOBAL" }
+```
+contact_info: { email: "global@example.com", phone: "555-GLOBAL" }
+```
 
-and front matter defines
+and front matter defines:
 
-    contact_info: { email: "fm@example.com", fax: "555-FAX" } 
+```
+contact_info: { email: "fm@example.com", fax: "555-FAX" }
+```
 
 the resulting `contact_info` in the context will be:
 
-    { email: "fm@example.com", phone: "555-GLOBAL", fax: "555-FAX" }`
+```
+{ email: "fm@example.com", phone: "555-GLOBAL", fax: "555-FAX" }`
+```
 
 #### Automatic Date Placeholders
 
-The following date placeholders are always available
+The following date placeholders are always available:
 
-  * `{{ .CurrentDateFormatted }}` e. "May 26, 2025" (locale-dependent long format).
-  * `{{ .CurrentDateISO }}` e. "2025-05-26".
+  * `{{ .CurrentDateFormatted }}` e.g., "May 26, 2025" (locale-dependent long format).
+  * `{{ .CurrentDateISO }}` e.g., "2025-05-26".
 
 #### Placeholder Syntax
 
@@ -513,21 +563,21 @@ md-to-pdf config --plugin cv --pure # For raw YAML output
 
 This is invaluable for debugging how settings and `params` are being applied. Refer to the [Cheat Sheet](docs/cheat-sheet.md#configuration-inspection) for more examples.
 
-
-
 ### Plugin Help via CLI
 
 Usage:
+
 ```bash
 md-to-pdf plugin help <your-plugin-name>
 ```
 
 Example:
+
 ```bash
 md-to-pdf plugin help cv
 ```
 
-So concludes **Plugin Anatomy**.  This is a natural segue to **Creating Plugins**. 
+So concludes **Plugin Anatomy**. This is a natural segue to **Creating Plugins**.
 
 ---
 
@@ -537,17 +587,19 @@ This section transitions from a reference manual language toward a step-by-step 
 
 There are four main components to a plugin:
 
-1. **Configuration** - `<plugin-name>.config.yaml`
+1.  **Configuration** - `<plugin-name>.config.yaml`
 
-2. **Styling** - `<plugin-name>.css`
+2.  **Styling** - `<plugin-name>.css`
 
-3. **Handler** - `index.js`
+3.  **Handler** - `index.js`
 
-4. **Documentation** - `README.md`
-    - YAML front matter holds [**Help**](#plugin-help) text for the plugin
-    - Parsed directly by our own Markdown utilities
+4.  **Documentation** - `README.md`
+
+      - YAML front matter holds [**Help**](#plugin-help) text for the plugin
+      - Parsed directly by our own Markdown utilities
 
 Some plugins may also contain:
+
   - a sample (front mattered) Markdown document, for reference.
   - an asset directory, e.g., `assets/`, containing images, fonts, etc.
   - a data directory, e.g., `data/`, containing external data files: `.json`, `.csv`, etc.
@@ -560,16 +612,19 @@ The easiest way to start a new plugin is with the `plugin create` command. This 
 ### Command Syntax
 
 ```bash
-md-to-pdf plugin create <new-plugin-name> [--dir <target-directory>] [--force]
+md-to-pdf plugin create <new-plugin-name> [--dir <target-directory>] [--from <existing-plugin-name-or-path>] [--force]
 ```
 
-  * `<new-plugin-name>` \
+  * `<new-plugin-name>`  
     The name for your plugin (e.g., `business-card`, `my-report`).
 
-  * `--dir <target-directory>` (Optional) \
+  * `--dir <target-directory>` (Optional)  
     The directory *within which* your new plugin folder will be created. Defaults to the current working directory.
 
-  * `--force` (Optional) \
+  * `--from <existing-plugin-name-or-path>` (Optional)  
+    Specifies an existing plugin to use as an archetype or template. `md-to-pdf` will copy the configuration, handler, CSS, and other files from the source plugin, allowing you to quickly create a variant. You can specify a registered plugin name (e.g., `cv`) or a direct path to a plugin's configuration file or directory.
+
+  * `--force` (Optional)  
     If the target plugin directory already exists, this flag allows overwriting its contents.
 
 ### Plugin Help Mechanism
@@ -610,6 +665,7 @@ cli_help: |
 
 This plugin helps you create professional invoices from simple Markdown files...
 ```
+
 Keep this help text current with your plugin's features.
 
 If a plugin's `README.md` is missing, or if the `cli_help` key is absent from its front matter, `md-to-pdf plugin help <pluginName>` will display the plugin's `description` from its `*.config.yaml` file as a fallback.
@@ -624,7 +680,7 @@ If a plugin's `README.md` is missing, or if the `cli_help` key is absent from it
 md-to-pdf plugin create business-card --dir ./my_custom_plugins
 ```
 
-This command will create the following structure
+This command will create the following structure:
 
 ```
 ./my_custom_plugins/
@@ -632,12 +688,13 @@ This command will create the following structure
     ├── business-card.config.yaml
     ├── business-card.css
     ├── index.js
+    ├── business-card-example.md # Example Markdown file for demonstration
     └── README.md
 ```
 
 **Generated Files**
 
-  * **`business-card.config.yaml`** \
+  * **`business-card.config.yaml`**  
     A basic configuration manifest. You'll customize fields like `description`, `pdf_options` (e.g., to set specific dimensions for a business card), etc. The `README.md` will also be pre-filled with a `cli_help` section.
 
     ```yaml
@@ -653,7 +710,7 @@ This command will create the following structure
       enabled: false
     ```
 
-  * **`index.js`** \
+  * **`index.js`**  
     A handler script that uses `DefaultHandler` by default. You can modify this for custom logic.
 
     ```javascript
@@ -670,19 +727,37 @@ This command will create the following structure
     module.exports = BusinessCardHandler;
     ```
 
-  * **`business-card.css`** \
+  * **`business-card.css`**  
     A placeholder CSS file for your custom styles.
-  
-  * **`README.md`** \
+
+  * **`business-card-example.md`**  
+    A sample Markdown file demonstrating how to use the plugin.
+
+    ```markdown
+    ---
+    md_to_pdf_plugin: business-card # Self-activating
+    title: "My Business Card"
+    ---
+
+    # John Doe
+    ## Software Engineer
+    ### Example Corp.
+
+    **Email:** john.doe@example.com
+    **Phone:** +1-555-123-4567
+    **Web:** [example.com](https://example.com)
+    ```
+
+  * **`README.md`**  
     A basic README with a pre-filled `cli_help` section for your plugin.
 
 ### Next Steps After Scaffolding
 
-1.  **Customize Files** \
-    Edit the generated `.config.yaml`, `index.js` (if needed), `.css`, and `README.md` files to match your plugin's requirements.
-2.  **Register** \
-    Add your plugin to a main `config.yaml` as described in the "Plugin Discovery and Registration" section.
-3.  **Test** \
+1.  **Customize Files**  
+    Edit the generated `.config.yaml`, `index.js` (if needed), `.css`, `example.md`, and `README.md` files to match your plugin's requirements.
+2.  **Register or Add Collection**  
+    For simple individual plugins, you can manually add them to a main `config.yaml` as described in the "Plugin Registration" section. For easier management or grouping, use `md-to-pdf collection add` to register the plugin or its containing directory as a collection.
+3.  **Test**  
     Use your plugin with the `md-to-pdf convert` or `generate` command.
 
 For a complete, working example of a custom "business-card" plugin, you can also inspect the one used in our test kit located at [`test/custom_plugins/business-card/`](../test/custom_plugins/business-card/).
@@ -695,9 +770,9 @@ md-to-pdf convert test/assets/example-business-card.md \
     --config test/config.test.yaml
 ```
 
-Refer to the [**cheat-sheet.md**](cheat-sheet.md#plugin-management-commands) for more command syntax details.
+Refer to the [**cheat-sheet.md**](cheat-sheet.md#plugin--collection-management-commands) for more command syntax details.
 
-## Advanced Example 
+## Advanced Example
 
 ### 'advanced-card' Plugin for Custom HTML and Dynamic Content
 
@@ -705,7 +780,7 @@ The standard Markdown-to-HTML conversion offered by `DefaultHandler` might not a
 
 <img src="images/screenshots/advanced-business-card.png" alt="Advanced Business Card Screenshot" width="500"/>
 
-The **advanced-card** plugin serves as an example of this. It generates a business card where
+The **advanced-card** plugin serves as an example of this. It generates a business card where:
 
   * The main content (name, title, company, contact details) is written directly in the Markdown file's body using standard Markdown syntax (e.g., H1 for name, H2 for title).
   * Front matter is used for auxiliary data like a website URL (for a QR code) or branding colors.
@@ -718,14 +793,14 @@ The **advanced-card** plugin serves as an example of this. It generates a busine
 
 ### Why a Custom Handler for "advanced-card"?
 
-  * **Precise Layout Control** \
+  * **Precise Layout Control**  
     Business cards have specific layout requirements that are easier to achieve with custom HTML and CSS than by trying to style generic Markdown output.
-  * **Dynamic Content Integration** \
+  * **Dynamic Content Integration**  
     We want to include a QR code whose data can come from front matter or global parameters.
-  * **Processing Markdown Body** \
+  * **Processing Markdown Body**  
     Instead of just relying on front matter for all data, this example shows how to take the Markdown content written by the user (e.g., their name as an H1, title as H2) and incorporate that rendered HTML into a custom card structure.
 
-### 1. Example Markdown
+### 1\. Example Markdown
 
 #### `advanced-card-example.md`
 
@@ -737,6 +812,7 @@ The user provides card details using standard Markdown formatting.
 website: https://www.innovatech.example.com/evance   # Used for QR if qr_data is not set
 qr_data: "mailto:e.vance@innovatech.example.com"     # Specific data for the QR code
 brandingColor: "#2a9d8f"                             # Custom branding color for top border
+md_to_pdf_plugin: advanced-card                      # Self-activating
 ---
 
 # Dr. Eleanor Vance
@@ -752,7 +828,7 @@ brandingColor: "#2a9d8f"                             # Custom branding color for
 
 You could, of course, configure your name, phone number, email, etc in the front matter—or, better yet, in the `params` portion of your global `config.yaml` file—but for readability we only add dynamic parameters in this example. E.g., `**Web:** [{{ .website }}]({{ .website }})`.
 
-### 2. Plugin Configuration
+### 2\. Plugin Configuration
 
 #### `advanced-card.config.yaml`
 
@@ -788,7 +864,7 @@ math:
   * `printBackground: true` ensures CSS backgrounds are rendered in the PDF.
   * `inject_fm_title_as_h1: false` is crucial because the main heading (the person's name) will come from the H1 tag in the Markdown body.
 
-### 3. Handler Script Snippet
+### 3\. Handler Script Snippet
 
 #### `advanced-card/index.js`
 
@@ -872,7 +948,7 @@ module.exports = AdvancedCardHandler;
   * It constructs `htmlBodyContent` by injecting `renderedMarkdownHtml` into a custom `div` structure. This structure also includes a placeholder for the QR code and an optional company logo (from global params).
   * It uses `this.pdfGenerator.generatePdf` to directly render the PDF from this custom HTML string, its own CSS, and specific PDF options.
 
-### 4. CSS Styling Snippet
+### 4\. CSS Styling Snippet
 
 #### `advanced-card/advanced-card.css`
 
@@ -913,11 +989,11 @@ body { /* Styles applied to the Puppeteer page context */
 
 This **advanced-card** example illustrates how to take full control when the standard `DefaultHandler` doesn't meet your needs, allowing for complex layouts, dynamic data, and custom processing of Markdown content.
 
-### 5. Execution
+### 5\. Execution
 
 To compile and view the [`advanced-card-example.md`](../examples/custom_plugin_showcase/advanced-card/advanced-card-example.md) using this **advanced-card** plugin, which should be registered in a main `config.yaml` pointing to
 [`examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml`](../examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml),
-run the following command
+run the following command:
 
 ```bash
 md_file=examples/custom_plugin_showcase/advanced-card/advanced-card-example.md
@@ -928,7 +1004,7 @@ This also highlights the use of the `--watch` flag, which is quite handy when it
 
 You can find the full source code for this **advanced-card** plugin, including the example Markdown file, in the
 [`examples/custom_plugin_showcase/advanced-card/`](../examples/custom_plugin_showcase/advanced-card/)
-directory, which contains
+directory, which contains:
 
 ```bash
 examples/custom_plugin_showcase/advanced-card/
@@ -942,13 +1018,13 @@ examples/custom_plugin_showcase/advanced-card/
 
 ### Using `watch_sources`
 
-If your plugin relies on external data files or templates that should trigger a rebuild in `--watch` mode, define them in the `watch_sources` array in your plugin's `<plugin-name>.config.yaml`. 
+If your plugin relies on external data files or templates that should trigger a rebuild in `--watch` mode, define them in the `watch_sources` array in your plugin's `<plugin-name>.config.yaml`.
 
 Refer to the example under the "Plugin Configuration (`<plugin-name>.config.yaml`)" section, specifically the "Key Fields" discussion.
 
 ### Accessing CLI Arguments in "Generate" Plugins
 
-For plugins invoked with the `generate` command (e.g., `md-to-pdf generate my-data-processor --custom-arg value`), any additional command-line arguments (like `--custom-arg value`) are passed to your plugin's `generate` method within the `data.cliArgs` object
+For plugins invoked with the `generate` command (e.g., `md-to-pdf generate my-data-processor --custom-arg value`), any additional command-line arguments (like `--custom-arg value`) are passed to your plugin's `generate` method within the `data.cliArgs` object:
 
 ```javascript
 // In your plugin's index.js
@@ -960,4 +1036,14 @@ async generate(data, pluginSpecificConfig, /* ...other args */) {
     // ... rest of your logic
 }
 ```
+
+---
+
+## Related Documents
+
+For broader context and future plans, refer to:
+
+  * [Dream Board (`docs/dream-board-v0.8.md`)](docs/dream-board-v0.8.md)
+  * [Changelog (`docs/changelog-v0.8.md`)](docs/changelog-v0.8.md)
+
 

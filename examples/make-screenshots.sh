@@ -37,7 +37,7 @@ md-to-pdf convert example-cover-letter.md \
 # --- Business Card Examples ---
 md-to-pdf convert ../test/assets/example-business-card.md \
             --plugin business-card \
-            --config ./screenshot-config.yaml \
+            --config ../test/config.test.yaml \
             --filename example-business-card.pdf \
             --outdir ../docs/images/screenshots \
             --no-open
@@ -48,6 +48,19 @@ md-to-pdf convert ./custom_plugin_showcase/advanced-card/advanced-card-example.m
             --filename advanced-business-card.pdf \
             --outdir ../docs/images/screenshots \
             --no-open
+
+# --- Presentation Slide Example ---
+echo "d3-histogram-slide"
+
+
+# --- D3 Histogram Slide Example ---
+md-to-pdf convert ../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.md \
+          --plugin ../../md-to-pdf-plugins/d3-histogram-slide/d3-histogram-slide.config.yaml \
+          --config ./screenshot-config.yaml \
+          --filename d3-histogram-slide.pdf \
+          --outdir ../docs/images/screenshots \
+          --no-open
+
 
 # --- Convert PDFs to PNGs ---
 for f in ../docs/images/screenshots/*.pdf; do 
@@ -65,3 +78,4 @@ rm ../docs/images/screenshots/example-cv.pdf
 rm ../docs/images/screenshots/example-cover-letter.pdf
 rm ../docs/images/screenshots/example-business-card.pdf
 rm ../docs/images/screenshots/advanced-business-card.pdf
+rm ../docs/images/screenshots/d3-histogram-slide.pdf

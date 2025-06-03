@@ -1,88 +1,73 @@
-# Understanding and Using `md-to-pdf` Plugins
+# Understanding and Using `md-to-pdf` Bundled Plugins
 
-This directory contains the core, bundled plugins that come with `md-to-pdf`.
-These plugins provide out-of-the-box functionality for various document types.
+This directory serves as the home for the core, bundled plugins that come pre-packaged with `md-to-pdf`. It also functions as a **reference example** for how other external plugin collections can be structured and documented.
+
+These plugins provide out-of-the-box functionality for various document types, demonstrating the power and flexibility of the `md-to-pdf` plugin system.
 
 ## Bundled Plugins Overview:
 
-* [**`cv/`**](cv/): For Curriculum Vitae documents. 
-* [**`cover-letter/`**](cover-letter/): For cover letters. 
-* [**`default/`**](default/): A generic plugin for standard Markdown documents.
-* [**`recipe/`**'](recipe/): For individual recipe documents.
-* [**`recipe-book/`**](recipe-book/): For compiling multiple recipes into a single book. This plugin is typically invoked using the `generate` command.
+Here's a list of the plugins included in this bundled collection:
 
-## How Plugins are Used with `md-to-pdf` Commands
+* [**`cv/`**](cv/): Specifically designed for generating professional Curriculum Vitae (CV) documents.
+* [**`cover-letter/`**](cover-letter/): Tailored for creating formatted cover letters.
+* [**`default/`**](default/): A versatile, generic plugin for converting standard Markdown documents to PDF.
+* [**`recipe/`**](recipe/): Optimized for formatting individual recipe documents.
+* [**`recipe-book/`**](recipe-book/): A specialized plugin for compiling multiple recipes into a single, cohesive recipe book, typically invoked using the `generate` command.
+* [**`template-basic/`**](template-basic/): A minimal template plugin, useful as a starting point for creating new plugins via archetyping.
 
-`md-to-pdf` uses a command-driven approach to leverage these plugins. Here's a brief overview of the main commands and how they relate to plugins. For a comprehensive list of all options and quick syntax, please refer to the [Cheat Sheet](../docs/cheat-sheet.md).
+## How to Manage and Use These Plugins
 
-### Single File Conversion: `convert`
+These plugins are automatically available when you install `md-to-pdf`. For external plugin collections, you would typically use the `md-to-pdf collection add` command.
 
-The `convert` command is used for transforming a single Markdown file into a PDF using a specified plugin.
+### Discovering and Getting Help for Plugins
 
-*Basic Syntax:*
-```bash
-md-to-pdf convert <markdownFile> --plugin <pluginName> [options]
-```
+You can easily explore these bundled plugins and any other registered plugins directly from your command line:
 
-  * `<markdownFile>`: Path to your Markdown source.
-  * `--plugin <pluginName>`: Specifies which plugin's configuration and styling to use (e.g., `cv`, `recipe`, `default`).
-  * Common options include `--outdir`, `--filename`, `--watch`.
+* **List All Available Plugins:**
+    ```bash
+    md-to-pdf plugin list
+    ```
+    This command will show all plugins that `md-to-pdf` can find, including those from this bundled collection, any user-added collections, and individual plugins.
 
-*Example:*
+* **Get Detailed Plugin Help:**
+    ```bash
+    md-to-pdf plugin help <pluginName>
+    ```
+    Replace `<pluginName>` with the name of any plugin (e.g., `cv`, `recipe-book`). This command will display detailed information about the plugin's features, expected front matter, and configuration notes.
 
-```bash
-md-to-pdf convert my_cv.md --plugin cv --outdir ./output
-```
+### Converting Documents with Plugins
 
-### Complex Document Generation: `generate`
+Once you know the plugin name, you can use it with the `convert` or `generate` commands:
 
-The `generate` command is used for plugins that might have more complex input requirements or produce documents from multiple sources, like the `recipe-book` plugin.
+* **Single File Conversion (`convert`):**
+    ```bash
+    md-to-pdf convert <markdownFile> --plugin <pluginName> [options]
+    ```
+    *Example: Convert a CV*
+    ```bash
+    md-to-pdf convert my_cv.md --plugin cv --outdir ./output
+    ```
 
-*Basic Syntax:*
+* **Complex Document Generation (`generate`):**
+    Some plugins, like `recipe-book`, are designed to generate documents from multiple sources or require specific arguments.
+    ```bash
+    md-to-pdf generate <pluginName> [plugin-specific-options...] [options]
+    ```
+    *Example: Generate a Recipe Book*
+    ```bash
+    md-to-pdf generate recipe-book --recipes-base-dir ./all_my_recipes --filename "MyCookbook.pdf"
+    ```
 
-```bash
-md-to-pdf generate <pluginName> [plugin-specific-options...] [options]
-```
-
-  * `<pluginName>`: The name of the generator plugin (e.g., `recipe-book`).
-  * `[plugin-specific-options...]`: Arguments required by the plugin itself (e.g., `--recipes-base-dir` for `recipe-book`).
-
-*Example (Recipe Book):*
-
-```bash
-md-to-pdf generate recipe-book --recipes-base-dir ./all_my_recipes --filename "MyCookbook.pdf"
-```
-
-### Batch Processing: `hugo-export-each`
-
-This command is specialized for processing multiple Markdown files from a Hugo content structure, applying a base plugin for consistent styling.
-
-*Basic Syntax:*
-
-```bash
-md-to-pdf hugo-export-each <sourceDir> --base-plugin <pluginName> [options]
-```
-
-*Example:*
-
-```bash
-md-to-pdf hugo-export-each ./hugo_site/content/posts --base-plugin recipe
-```
-
-### Managing Plugins: `plugin` subcommands
-
-  * `md-to-pdf plugin list`: Shows all available plugins that `md-to-pdf` can find.
-  * `md-to-pdf plugin create <name>`: Helps you start a new plugin by creating a basic file structure.
+For a comprehensive list of all `md-to-pdf` commands, their options, and quick syntax, please refer to the main [Cheat Sheet](../docs/cheat-sheet.md).
 
 ## Customizing Bundled Plugins
 
-You can change the styles (CSS) and PDF settings (page size, margins, etc.) of these bundled plugins without altering these original files. This is done using the 3-tier configuration system (XDG user configs or project-specific configs).
+You can change the styles (CSS) and PDF settings (page size, margins, etc.) of these bundled plugins without altering their original files. This is done using `md-to-pdf`'s flexible configuration system.
 
-**For full details on how to customize plugin settings, please see the "Configuration" section in the main [README](../README.md).**
+**For full details on how to customize plugin settings, please see the [Plugin Development Guide](../docs/plugin-development.md).**
 
-## Creating Your Own Plugins
+## Creating Your Own Plugins and Collections
 
-Want to create a plugin for a document type not covered here? `md-to-pdf` is extensible\!
+Want to create a plugin for a document type not covered here, or build your own collection of plugins? `md-to-pdf` is designed for extensibility!
 
 **For a comprehensive guide on building your own plugins from scratch (including directory structure, handler scripts, and registration), please refer to the [Plugin Development Guide](../docs/plugin-development.md).**
-

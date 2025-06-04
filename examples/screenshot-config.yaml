@@ -2,6 +2,14 @@
 # Configuration for generating screenshots.
 # Paths are relative to this config file's location (the 'examples/' directory).
 
+math:
+  enabled: true
+  engine: katex
+  katex_options:
+    throwOnError: false
+    trust: false
+
+
 document_type_plugins:
 
   # --- ../README.md ---

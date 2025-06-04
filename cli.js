@@ -175,32 +175,14 @@ async function executeGeneration(args, configResolver) {
 }
 
 async function main() {
-    // Initial parsing of argv to get config and factoryDefaults before full yargs build
-    const initialArgv = yargs(hideBin(process.argv)).argv;
+    let managerInstance; // Declare here so it's accessible within the middleware
 
-    // Instantiate ConfigResolver early to get resolvedCollRoot
-    const initialConfigResolver = new ConfigResolver(
-        initialArgv.config, // Pass CLI config path
-        initialArgv.factoryDefaults, // Pass factoryDefaults
-        false 
-    );
-    // Initialize it to ensure collections_root is resolved
-    await initialConfigResolver._initializeResolverIfNeeded(); 
-    const collRootFromMainConfig = await initialConfigResolver.getResolvedCollRoot();
-
-    // Get the CLI override for collections root
-    const collRootCliOverride = initialArgv['coll-root'] || null;
-
-    const managerInstance = new CollectionsManager({
-        debug: process.env.DEBUG_CM === 'true',
-        collRootFromMainConfig: collRootFromMainConfig, // Pass the resolved collections root from config file
-        collRootCliOverride: collRootCliOverride // Pass the CLI override for collections root
-    });
-
+    // Build the main yargs instance
     const argvBuilder = yargs(hideBin(process.argv))
         .parserConfiguration({ 'short-option-groups': false })
         .scriptName("md-to-pdf")
         .usage("Usage: $0 <command_or_markdown_file> [options]")
+        // Define ALL global options
         .option('config', {
             describe: 'Path to a custom YAML configuration file. This acts as the project-specific main config.',
             type: 'string',
@@ -212,15 +194,34 @@ async function main() {
             type: 'boolean',
             default: false,
         })
-        .option('coll-root', { // NEW: CLI option for collections root
+        .option('coll-root', { 
             alias: 'cr',
             describe: 'Specify the root directory for collections and plugins. Overrides config file and environment variables.',
             type: 'string',
-            normalize: true, // Normalize the path (e.g., resolve ~, ./)
+            normalize: true, 
         })
-        .middleware((argv) => {
-            argv.manager = managerInstance; 
+        .middleware(async (argv) => { // This middleware runs *after* global options are parsed
+            // At this point, argv.config, argv.factoryDefaults, argv['coll-root'] are available.
+            // Instantiate ConfigResolver and CollectionsManager here.
+            const initialConfigResolver = new ConfigResolver(
+                argv.config,
+                argv.factoryDefaults,
+                false 
+            );
+            await initialConfigResolver._initializeResolverIfNeeded(); 
+            const collRootFromMainConfig = await initialConfigResolver.getResolvedCollRoot();
+            const collRootCliOverride = argv['coll-root'] || null;
+
+            managerInstance = new CollectionsManager({ // Assign to the outer managerInstance
+                debug: process.env.DEBUG_CM === 'true',
+                collRootFromMainConfig: collRootFromMainConfig,
+                collRootCliOverride: collRootCliOverride
+            });
+
+            // Make the managerInstance available on the argv object for command handlers
+            argv.manager = managerInstance;
         })
+        // Define all commands and their subcommands
         .command({
             ...convertCmdModule.defaultCmd,
             handler: async (args) => { 
@@ -228,7 +229,7 @@ async function main() {
                     args.isLazyLoad = true;
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
                 } else {
-                    argvBuilder.showHelp();
+                    argvBuilder.showHelp(); // Use argvBuilder.showHelp() directly as we are in the main builder
                 }
             }
         })
@@ -246,30 +247,29 @@ async function main() {
                 await commonCommandHandler(args, executeGeneration, 'generate');
             }
         })
-        .command(pluginCmd)
-        .command(collectionCmd)
-        .command(updateCmd) // ADDED: Register the new update command
+        .command(pluginCmd) // This includes subcommands for 'plugin'
+        .command(collectionCmd) // This includes subcommands for 'collection'
+        .command(updateCmd) 
         .command(configCmd)
         .alias("help", "h")
         .alias("version", "v")
         .strict() 
         .fail((msg, err, yargsInstance) => { 
-            if (err) { // This err is from yargs own error handling (e.g., validation)
-                console.error(chalk.red(msg || err.message)); // Use chalk here
+            if (err) { 
+                console.error(chalk.red(msg || err.message)); 
                 if (process.env.DEBUG_CM === 'true' && err.stack) console.error(chalk.red(err.stack));
                 yargsInstance.showHelp();
                 process.exit(1);
-                return; // Explicit return
+                return; 
             }
-            // This block handles other failures, like command not found by yargs
             if (msg && msg.includes("Unknown argument")) { 
                  const firstArg = process.argv[2]; 
-                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd', '--coll-root', '-cr'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){ // MODIFIED: Added 'update', 'up', 'coll-root', 'cr' to known arguments
+                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd', '--coll-root', '-cr'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){ 
                      console.error(chalk.red(`ERROR: ${msg}`));
                      console.error(chalk.yellow(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`));
                      yargsInstance.showHelp();
                      process.exit(1);
-                     return; // Explicit return
+                     return; 
                  }
             }
             console.error(chalk.red(msg || "An error occurred."));
@@ -278,15 +278,8 @@ async function main() {
         })
         .epilogue("For more information, refer to the README.md file.");
 
-    const parsedArgs = await argvBuilder.argv;
-
-    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config', 'collection', 'update'].includes(parsedArgs.$0 || parsedArgs._[0]))) { // MODIFIED: Added 'update'
-         const knownTopLevelCommands = ['convert', 'generate', 'plugin', 'config', 'collection', 'update']; // MODIFIED: Added 'update'
-         const commandGiven = knownTopLevelCommands.some(cmd => process.argv.includes(cmd)); 
-        if (!commandGiven && !parsedArgs.markdownFile) {
-             argvBuilder.showHelp();
-        }
-    }
+    // The single, final .argv call. This is where parsing and command dispatch happen.
+    await argvBuilder.argv;
 }
 
 process.on('unhandledRejection', (reason, promise) => {

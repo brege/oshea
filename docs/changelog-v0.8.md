@@ -5,6 +5,88 @@
 
 ---
 
+### **v0.8.8 - Plugin & Collection Management -- Better Removals (Phase 3)**
+
+**Date:** 2025-06-04
+
+**Features & Enhancements:**
+
+  * **Improved Singleton Removal:** The `collection remove` command now fully supports removing individual singleton plugins by their managed name (e.g., `md-to-pdf collection remove _user_added_plugins/my-plugin`). This capability was identified as already present and robust within the existing codebase.
+  * **Enhanced Missing Source Indication:** The output of `md-to-pdf collection list` now explicitly indicates when the original source directory for a locally added plugin is missing. The `Original Source` path will display `(MISSING)` in red, providing clearer feedback on plugin health and potential issues.
+
+**Notes:**
+
+  * **"Purge" Functionality Deferred:** The implementation of a comprehensive "purge" option for orphan cleanup has been deferred to a future major release (post v1.0). I do not have the confidence to implement something like this without introducing vectors of data loss. Defer to experts.
+
+## v0.8.8 - CLI Consolidation & Enhancements (Phase 2)
+
+**Date:** 2025-06-04
+
+This phase focused on refining plugin and collection management, particularly for locally added (singleton) plugins, and ensuring robust cleanup of the enabled plugins manifest.
+
+### Added
+
+* **Enhanced Singleton Plugin Information in `collection list`**:
+    * When listing plugins within the `_user_added_plugins` directory (e.g., via `md-to-pdf collection list _user_added_plugins`), the output for each singleton plugin now includes its "Original Source" path, "Added On" date, and "Updated On" date, providing more comprehensive details. [Related to `listAvailable.js`, `collection/listCmd.js`]
+
+### Changed
+
+* **Improved `plugin add` User Feedback**:
+    * The `md-to-pdf plugin add <path_to_plugin_dir>` command now provides clearer and more detailed feedback to the user upon successful addition of a local plugin. This includes explicitly stating that a copy is made, where it's managed, how to edit the original, and how to sync updates using `md-to-pdf collection update _user_added_plugins`. [Related to `plugin/addCmd.js`]
+
+### Fixed
+
+* **Corrected Orphaning of Entries in `enabled.yaml` on Collection Removal**:
+    * Resolved a critical issue where `md-to-pdf collection remove <collection_name> --force` (and `md-to-pdf collection remove _user_added_plugins/<singleton_id> --force`) would delete the collection/plugin directory but fail to remove all associated entries from the `enabled.yaml` manifest.
+    * The `CollectionsManager.removeCollection` method (in `commands/remove.js`) now correctly calls the central `CollectionsManager.disableAllPluginsFromCollection` method.
+    * The `CollectionsManager.disableAllPluginsFromCollection` method (in `index.js`) has been fixed to accurately identify and remove manifest entries for both regular collections and specific singleton plugins. This ensures `enabled.yaml` is kept clean and consistent.
+
+
+## v0.8.8 - CLI Consolidation & Enhancements (Phase 1)
+
+**Date:** 2025-06-04
+
+This phase focuses on streamlining command-line operations, fully integrating the functionality of the standalone `md-to-pdf-cm` tool into the main `md-to-pdf` executable, and improving overall CLI consistency.
+
+### Added
+
+* **New Top-Level Command: `md-to-pdf update [<collection_name>]` (alias `up`)**:
+    * Provides a direct and convenient way to update plugin collections, acting as a shortcut for `md-to-pdf collection update`.
+* **Enhanced Plugin Enablement: `md-to-pdf plugin enable --all <collection_name> ...`**:
+    * The `md-to-pdf plugin enable` command now supports an `--all` flag when a collection name is provided as the target.
+    * This allows enabling all plugins from the specified collection, mirroring the functionality of the former `md-to-pdf-cm enable --all`.
+    * Supports `--prefix <string>` and `--no-prefix` options for controlling the invoke names of the enabled plugins.
+* **Enhanced Plugin Listing: `md-to-pdf plugin list --disabled [<collection_name>]`**:
+    * The `md-to-pdf plugin list` command now includes a `--disabled` flag to list plugins within CollectionsManager-managed collections that are available but not currently enabled.
+    * Can be combined with an optional `[<collection_name>]` argument to filter by a specific collection.
+
+### Changed
+
+* **CLI Flag Standardization: `md-to-pdf plugin create --target-dir`**:
+    * The flag for specifying the output directory in the `md-to-pdf plugin create` command has been changed from `--dir` to `--target-dir` (alias `-t`).
+    * This improves consistency with other commands and clearly distinguishes it from general file output directories (`--outdir`).
+* **Internal Test Updates**:
+    * Tests for `md-to-pdf plugin create` (in `test/test-cases/plugin-create-command.test-cases.js`) were updated to use the new `--target-dir` flag, ensuring the test suite remains robust.
+
+### Removed
+
+* **Standalone `md-to-pdf-cm` CLI Tool**:
+    * The separate `md-to-pdf-cm` command-line tool (formerly `src/collections-manager/collections-manager-cli.js`) has been removed.
+    * All its functionalities (collection add, list, remove, update; plugin enable, disable, archetype, list) are now fully integrated into the main `md-to-pdf` CLI via the `collection` and `plugin` sub-commands.
+    * Associated files including its local `package.json`, `package-lock.json` within `src/collections-manager/`, and its dedicated test suite in `src/collections-manager/test/` have also been removed. The core `CollectionsManager` library and its primary tests in `test/cm-tests/` are preserved.
+
+### Verified
+
+* **Functional Parity for Key Collection/Plugin Management Commands**:
+    * Confirmed that `md-to-pdf collection remove <collection_name> --force` correctly disables relevant plugins before removing the collection.
+    * Ensured that `md-to-pdf plugin create --from <source>` fully covers the `archetype` functionality.
+    * Verified that the new `enable --all` and `list --disabled` features for plugins provide the same capabilities as the former standalone tool.
+
+
+
+
+
+
 ## v0.8.7 - Comprehensive Documentation Overhaul
 
 **Date:** 2025-06-03

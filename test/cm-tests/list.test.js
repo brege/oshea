@@ -13,15 +13,15 @@ const {
     cleanupTestCollRoot
 } = require('./cm-test-helpers.js');
 
-async function testListCollectionsType(testRunStats, baseTestRunDir) { 
+async function testListCollectionsType(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: List Collections (type: collections/downloaded)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
+    const testCollRoot = await createTestCollRoot(baseTestRunDir);
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const localSourceListName = `cm_local_source_list_test_cm_${Date.now()}`;
-    const localSourcePath = path.join(baseTestRunDir, localSourceListName); 
+    const localSourcePath = path.join(baseTestRunDir, localSourceListName);
     await fs.mkdir(localSourcePath, { recursive: true });
     const dummyPluginIdInList = "dummy-plugin-for-list-cm";
     const dummyPluginDir = path.join(localSourcePath, dummyPluginIdInList);
@@ -35,8 +35,8 @@ async function testListCollectionsType(testRunStats, baseTestRunDir) {
     await manager.addCollection(localSourcePath, { name: collection2Name });
 
     try {
-        const collectionsInfo = await manager.listCollections('downloaded'); 
-        
+        const collectionsInfo = await manager.listCollections('downloaded');
+
         assert.ok(
             collectionsInfo.some(c => c.name === collection1Name),
             `(${testName}) List should include object with name '${collection1Name}'`
@@ -53,7 +53,7 @@ async function testListCollectionsType(testRunStats, baseTestRunDir) {
 
         const entries = await fs.readdir(testCollRoot, { withFileTypes: true });
         const actualCollectionDirs = entries.filter(dirent => dirent.isDirectory()).map(d => d.name);
-        
+
         assert.strictEqual(collectionsInfo.length, actualCollectionDirs.length, `(${testName}) Should list correct number of downloaded collections. Expected ${actualCollectionDirs.length}, Got ${collectionsInfo.length}. Dirs: ${actualCollectionDirs.join(', ')} Collections: ${collectionsInfo.map(c=>c.name).join(', ')}`);
         console.log(chalk.green(`  PASSED: ${testName}`));
         testRunStats.passed++;
@@ -65,44 +65,52 @@ async function testListCollectionsType(testRunStats, baseTestRunDir) {
     }
 }
 
-async function testListAllPluginsType(testRunStats, baseTestRunDir) { 
+async function testListAllPluginsType(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: List All Available Plugins (type: all/available)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
+    const testCollRoot = await createTestCollRoot(baseTestRunDir);
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const coll1Name = 'coll1-list-avail-cm';
-    const coll1Path = path.join(testCollRoot, coll1Name);
+    // const coll1Path = path.join(testCollRoot, coll1Name); // Not strictly needed if manager handles creation
     const pluginAId = 'pluginAlist';
-    const pluginAPath = path.join(coll1Path, pluginAId);
+    const pluginAPath = path.join(testCollRoot, coll1Name, pluginAId); // Adjusted path
     const pluginBId = 'pluginBlist';
-    const pluginBPath = path.join(coll1Path, pluginBId);
+    const pluginBPath = path.join(testCollRoot, coll1Name, pluginBId); // Adjusted path
 
     const coll2Name = 'coll2-list-avail-cm';
-    const coll2Path = path.join(testCollRoot, coll2Name);
+    // const coll2Path = path.join(testCollRoot, coll2Name); // Not strictly needed
     const pluginCId = 'pluginClist';
-    const pluginCPath = path.join(coll2Path, pluginCId);
-    const pluginDId = 'pluginDlistMalformed'; 
-    const pluginDPath = path.join(coll2Path, pluginDId);
+    const pluginCPath = path.join(testCollRoot, coll2Name, pluginCId); // Adjusted path
+    const pluginDId = 'pluginDlistMalformed';
+    const pluginDPath = path.join(testCollRoot, coll2Name, pluginDId); // Adjusted path
+
+    // Ensure collection directories are created before plugin directories
+    await fs.mkdir(path.join(testCollRoot, coll1Name), { recursive: true });
+    await fs.mkdir(path.join(testCollRoot, coll2Name), { recursive: true });
 
     await fs.mkdir(pluginAPath, { recursive: true });
     await fs.writeFile(path.join(pluginAPath, `${pluginAId}.config.yaml`), yaml.dump({ description: 'Plugin A description CM' }));
     await fs.mkdir(pluginBPath, { recursive: true });
-    await fs.writeFile(path.join(pluginBPath, `${pluginBId}.yaml`), yaml.dump({ description: 'Plugin B description CM (alt .yaml)' }));
+    await fs.writeFile(path.join(pluginBPath, `${pluginBId}.yaml`), yaml.dump({ description: 'Plugin B description CM (alt .yaml)' })); // Note: .yaml, not .config.yaml
     await fs.mkdir(pluginCPath, { recursive: true });
     await fs.writeFile(path.join(pluginCPath, `${pluginCId}.config.yaml`), yaml.dump({ description: 'Plugin C description CM' }));
     await fs.mkdir(pluginDPath, { recursive: true });
-    await fs.writeFile(path.join(pluginDPath, `${pluginDId}.config.yaml`), "description: Plugin D CM\n  bad_yaml: - item1\n - item2"); 
+    await fs.writeFile(path.join(pluginDPath, `${pluginDId}.config.yaml`), "description: Plugin D CM\n  bad_yaml: - item1\n - item2");
 
     try {
-        const expectedPluginCount = 4;
+        const expectedPluginCount = 4; // A, B, C, D
         let allPlugins = await manager.listAvailablePlugins();
-        assert.strictEqual(allPlugins.length, expectedPluginCount, `(${testName}) Should find ${expectedPluginCount} plugins globally`);
+        
+        // Helper to strip ANSI codes for cleaner logging if an error occurs
+        const stripAnsi = (str) => str.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+
+        assert.strictEqual(allPlugins.length, expectedPluginCount, `(${testName}) Should find ${expectedPluginCount} plugins globally. Found: ${allPlugins.map(p=>p.collection+'/'+p.plugin_id).join(', ')}`);
 
         const pluginAInfo = allPlugins.find(p => p.plugin_id === pluginAId && p.collection === coll1Name);
         assert.ok(pluginAInfo, `(${testName}) Plugin A (${pluginAId}) in ${coll1Name} should be listed`);
-        assert.strictEqual(pluginAInfo.description, 'Plugin A description CM', `(${testName}) Plugin A description correct`);
+        assert.strictEqual(stripAnsi(pluginAInfo.description), 'Plugin A description CM', `(${testName}) Plugin A description correct`);
 
         allPlugins = await manager.listAvailablePlugins(coll1Name);
         assert.strictEqual(allPlugins.length, 2, `(${testName}) Should find 2 plugins in '${coll1Name}' when filtered`);
@@ -111,7 +119,14 @@ async function testListAllPluginsType(testRunStats, baseTestRunDir) {
 
         const pluginDInfo = (await manager.listAvailablePlugins(coll2Name)).find(p => p.plugin_id === pluginDId);
         assert.ok(pluginDInfo, `(${testName}) Malformed Plugin D should still be listed`);
-        assert.ok(pluginDInfo.description.includes('Error loading config'), `(${testName}) Malformed Plugin D description should indicate error`);
+
+        // MODIFIED ASSERTION FOR MALFORMED PLUGIN DESCRIPTION (Revision 2)
+        // Based on actual output: "Error loading plugin config: bad indentation of a mapping entry (2:11)..."
+        const plainDescriptionD = stripAnsi(pluginDInfo.description);
+        assert.ok(
+            plainDescriptionD.startsWith('Error loading plugin config:') && plainDescriptionD.includes('bad indentation'),
+            `(${testName}) Malformed Plugin D description ('${plainDescriptionD}') should start with "Error loading plugin config:" and include YAML error details for plugin '${pluginDId}'`
+        );
 
         allPlugins = await manager.listAvailablePlugins('nonExistentCollection-cm');
         assert.strictEqual(allPlugins.length, 0, `(${testName}) Should find 0 plugins in non-existent collection`);
@@ -127,16 +142,18 @@ async function testListAllPluginsType(testRunStats, baseTestRunDir) {
     }
 }
 
-async function testListEnabledPluginsType(testRunStats, baseTestRunDir) { 
+async function testListEnabledPluginsType(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: List Enabled Plugins (type: enabled)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
+    const testCollRoot = await createTestCollRoot(baseTestRunDir);
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const mockCollectionName = 'test-collection-list-enabled-cm';
     const mockPlugin1Id = 'pluginAlphaListCm';
     const mockPlugin2Id = 'pluginBetaListCm';
+    
+    await fs.mkdir(path.join(testCollRoot, mockCollectionName), { recursive: true }); // Ensure collection dir exists
 
     const mockPlugin1Path = path.join(testCollRoot, mockCollectionName, mockPlugin1Id);
     await fs.mkdir(mockPlugin1Path, { recursive: true });
@@ -147,7 +164,7 @@ async function testListEnabledPluginsType(testRunStats, baseTestRunDir) {
     await fs.writeFile(path.join(mockPlugin2Path, `${mockPlugin2Id}.yaml`), yaml.dump({ description: 'Mock Plugin Beta for List CM (.yaml)' }));
 
     const customInvokeName = 'beta-custom-list-cm';
-    await manager.enablePlugin(`${mockCollectionName}/${mockPlugin1Id}`, { name: mockPlugin1Id }); 
+    await manager.enablePlugin(`${mockCollectionName}/${mockPlugin1Id}`, { name: mockPlugin1Id });
     await manager.enablePlugin(`${mockCollectionName}/${mockPlugin2Id}`, { name: customInvokeName });
 
     try {
@@ -173,16 +190,18 @@ async function testListEnabledPluginsType(testRunStats, baseTestRunDir) {
     }
 }
 
-async function testListDisabledPluginsType(testRunStats, baseTestRunDir) { 
+async function testListDisabledPluginsType(testRunStats, baseTestRunDir) {
     testRunStats.attempted++;
     const testName = "CM: List Disabled Plugins (type: disabled)";
     console.log(chalk.blue(`\nRunning test: ${testName}...`));
-    const testCollRoot = await createTestCollRoot(baseTestRunDir); 
+    const testCollRoot = await createTestCollRoot(baseTestRunDir);
     const manager = new CollectionsManager({ collRoot: testCollRoot, debug: process.env.DEBUG_CM_TESTS === 'true' });
 
     const collName = 'coll-for-disabled-cm';
     const pluginEnabledId = 'plugEnaCm';
     const pluginDisabledId = 'plugDisCm';
+
+    await fs.mkdir(path.join(testCollRoot, collName), { recursive: true }); // Ensure collection dir exists
 
     await fs.mkdir(path.join(testCollRoot, collName, pluginEnabledId), { recursive: true });
     await fs.writeFile(path.join(testCollRoot, collName, pluginEnabledId, `${pluginEnabledId}.config.yaml`), yaml.dump({ description: 'Enabled Plugin CM' }));
@@ -204,7 +223,7 @@ async function testListDisabledPluginsType(testRunStats, baseTestRunDir) {
         const enabledAll = await manager.listCollections('enabled');
         const enabledAllFullIds = new Set(enabledAll.map(p => `${p.collection_name}/${p.plugin_id}`));
         const disabledAll = availableAll.filter(p => !enabledAllFullIds.has(`${p.collection}/${p.plugin_id}`));
-        
+
         const foundPlugDisInAll = disabledAll.find(p => p.collection === collName && p.plugin_id === pluginDisabledId);
         assert.ok(foundPlugDisInAll, `(${testName}) Plugin ${pluginDisabledId} should be in the global list of disabled plugins.`);
 
@@ -219,7 +238,7 @@ async function testListDisabledPluginsType(testRunStats, baseTestRunDir) {
     }
 }
 
-async function runListTests(testRunStats, baseTestRunDir) { 
+async function runListTests(testRunStats, baseTestRunDir) {
     await testListCollectionsType(testRunStats, baseTestRunDir);
     await testListAllPluginsType(testRunStats, baseTestRunDir);
     await testListEnabledPluginsType(testRunStats, baseTestRunDir);

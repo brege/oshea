@@ -22,10 +22,11 @@ module.exports = {
         type: 'string',
         alias: 'f'
       })
-      .option('dir', {
+      .option('target-dir', { // MODIFIED: Renamed from 'dir'
+        alias: 't', // ADDED: Alias
         describe: `Optional. The base directory in which to create the new plugin's folder ('<pluginName>').
                    - If --from is NOT used (creating from template): Defaults to the current working directory (e.g., './<pluginName>').
-                   - If --from IS used (archetyping an existing plugin): Defaults to a user-specific plugins directory (e.g., ~/.local/share/md-to-pdf/my-plugins/'). This default is handled by the underlying archetype command if --dir is omitted.`,
+                   - If --from IS used (archetyping an existing plugin): Defaults to a user-specific plugins directory (e.g., ~/.local/share/md-to-pdf/my-plugins/'). This default is handled by the underlying archetype command if --target-dir is omitted.`, // MODIFIED: Description updated
         type: 'string',
         normalize: true
       })
@@ -57,12 +58,12 @@ module.exports = {
     try {
       if (args.from) {
         sourceIdentifier = args.from;
-        targetDirOptionForArchetype = args.dir ? path.resolve(args.dir) : undefined;
+        targetDirOptionForArchetype = args.targetDir ? path.resolve(args.targetDir) : undefined; // MODIFIED: args.dir to args.targetDir
         console.log(chalk.blue(`Attempting to create plugin '${chalk.yellow(newPluginName)}' by archetyping from source '${chalk.cyan(sourceIdentifier)}'...`));
       } else {
         const templateName = 'template-basic';
         sourceIdentifier = path.resolve(__dirname, '..', '..', '..', 'plugins', templateName);
-        targetDirOptionForArchetype = args.dir ? path.resolve(args.dir) : path.resolve(process.cwd());
+        targetDirOptionForArchetype = args.targetDir ? path.resolve(args.targetDir) : path.resolve(process.cwd()); // MODIFIED: args.dir to args.targetDir
         console.log(chalk.blue(`Attempting to create plugin '${chalk.yellow(newPluginName)}' from bundled template '${chalk.cyan(templateName)}'...`));
         if (process.env.DEBUG_CM === 'true' || !args.from) {
              console.log(chalk.gray(` (Template source resolved to: ${sourceIdentifier})`));
@@ -73,7 +74,7 @@ module.exports = {
         console.log(chalk.blue(`  Target base directory specified: ${chalk.underline(targetDirOptionForArchetype)}`));
       } else if (targetDirOptionForArchetype && !args.from) {
         console.log(chalk.blue(`  Target base directory (for template): ${chalk.underline(targetDirOptionForArchetype)}`));
-      } else if (args.from && !args.dir) {
+      } else if (args.from && !args.targetDir) { // MODIFIED: args.dir to args.targetDir
         console.log(chalk.blue(`  No target base directory specified, will use default for archetypes (e.g., ~/.local/share/md-to-pdf/my-plugins/).`));
       }
 

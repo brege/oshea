@@ -14,7 +14,7 @@ const {
   METADATA_FILENAME,
   ENABLED_MANIFEST_FILENAME,
   DEFAULT_ARCHETYPE_BASE_DIR_NAME,
-  USER_ADDED_PLUGINS_DIR_NAME, // Import new constant
+  USER_ADDED_PLUGINS_DIR_NAME,
 } = require('./constants');
 
 // Command Modules
@@ -28,7 +28,7 @@ const updateAllCollectionsCmd = require('./commands/updateAll');
 const listAvailablePluginsCmd = require('./commands/listAvailable');
 const listCollectionsCmd = require('./commands/list');
 const archetypePluginCmd = require('./commands/archetype');
-const addSingletonPluginCmd = require('./commands/addSingleton'); // Import new command
+const addSingletonPluginCmd = require('./commands/addSingleton');
 
 class CollectionsManager {
   constructor(options = {}) {
@@ -38,7 +38,6 @@ class CollectionsManager {
       console.log(chalk.magenta(`DEBUG (CollectionsManager): Initialized. COLL_ROOT: ${this.collRoot}`));
     }
 
-    // Bind command methods from external files
     this.addCollection = addCollectionCmd.bind(this);
     this.enablePlugin = enablePluginCmd.bind(this);
     this.enableAllPluginsInCollection = enableAllPluginsInCollectionCmd.bind(this);
@@ -49,11 +48,10 @@ class CollectionsManager {
     this.listAvailablePlugins = listAvailablePluginsCmd.bind(this);
     this.listCollections = listCollectionsCmd.bind(this);
     this.archetypePlugin = archetypePluginCmd.bind(this);
-    this.addSingletonPlugin = addSingletonPluginCmd.bind(this); // Bind new command
+    this.addSingletonPlugin = addSingletonPluginCmd.bind(this);
   }
 
   determineCollRoot() {
-    // Check for test override first
     if (process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE) {
       if (this.debug) {
           console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using test override for COLL_ROOT: ${process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE}`));
@@ -114,7 +112,7 @@ class CollectionsManager {
       return yaml.load(metaContent);
     } catch (e) {
       console.error(chalk.red(`ERROR (CM:_readCollMeta): Could not read or parse metadata for "${collectionName}": ${e.message}`));
-      throw e; // Re-throwing as the original code did, to be caught by command handlers
+      throw e;
     }
   }
 
@@ -132,6 +130,61 @@ class CollectionsManager {
     }
   }
 
+  async disableAllPluginsFromCollection(collectionIdentifier) {
+    const manifest = await this._readEnabledManifest();
+    const initialCount = manifest.enabled_plugins.length;
+    let userFriendlyName = collectionIdentifier;
+
+    let actualCollectionNameForFilter = collectionIdentifier;
+    let specificPluginIdForFilter = null;
+
+    if (collectionIdentifier.startsWith(USER_ADDED_PLUGINS_DIR_NAME + path.sep)) {
+      const parts = collectionIdentifier.split(path.sep);
+      if (parts.length >= 2 && parts[0] === USER_ADDED_PLUGINS_DIR_NAME) {
+        actualCollectionNameForFilter = USER_ADDED_PLUGINS_DIR_NAME;
+        specificPluginIdForFilter = parts[1];
+        userFriendlyName = `${specificPluginIdForFilter} (from ${USER_ADDED_PLUGINS_DIR_NAME})`;
+      }
+    }
+
+    const pluginsToKeep = [];
+    const disabledInvokeNames = new Set();
+
+    manifest.enabled_plugins.forEach(pluginEntry => {
+      let matchesCriteriaForRemoval = false;
+      if (specificPluginIdForFilter) {
+        if (pluginEntry.collection_name === actualCollectionNameForFilter && pluginEntry.plugin_id === specificPluginIdForFilter) {
+          matchesCriteriaForRemoval = true;
+        }
+      } else {
+        if (pluginEntry.collection_name === actualCollectionNameForFilter) {
+          matchesCriteriaForRemoval = true;
+        }
+      }
+
+      if (matchesCriteriaForRemoval) {
+        if (!disabledInvokeNames.has(pluginEntry.invoke_name)) {
+             console.log(chalk.gray(`    - Disabling plugin "${pluginEntry.invoke_name}" (from ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`));
+             disabledInvokeNames.add(pluginEntry.invoke_name);
+        }
+      } else {
+        pluginsToKeep.push(pluginEntry);
+      }
+    });
+
+    if (pluginsToKeep.length < initialCount) {
+      manifest.enabled_plugins = pluginsToKeep;
+      await this._writeEnabledManifest(manifest);
+      console.log(chalk.green(`  Successfully disabled ${initialCount - pluginsToKeep.length} plugin instance(s) originating from "${userFriendlyName}".`));
+      return { success: true, disabledCount: initialCount - pluginsToKeep.length };
+    } else {
+      if (this.debug) {
+          console.log(chalk.yellow(`  No active plugins found originating from "${userFriendlyName}" to disable.`));
+      }
+      return { success: true, disabledCount: 0 };
+    }
+  }
+
   _spawnGitProcess(gitArgs, cwd, operationDescription) {
     return new Promise((resolve, reject) => {
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
@@ -144,13 +197,13 @@ class CollectionsManager {
         if (!(gitArgs.includes('status') && gitArgs.includes('--porcelain')) &&
             !(gitArgs.includes('rev-list') && gitArgs.includes('--count')) ||
             this.debug) {
-            process.stdout.write(chalk.gray(`  GIT (${operationDescription}): ${dataStr}`));
+            if (this.debug) process.stdout.write(chalk.gray(`  GIT_STDOUT (${operationDescription}): ${dataStr}`));
         }
         stdout += dataStr;
       });
       gitProcess.stderr.on('data', (data) => {
         const dataStr = data.toString();
-        process.stderr.write(chalk.yellowBright(`  GIT (${operationDescription}, stderr): ${dataStr}`));
+        process.stderr.write(chalk.yellowBright(`  GIT_STDERR (${operationDescription}): ${dataStr}`));
         stderr += dataStr;
       });
 

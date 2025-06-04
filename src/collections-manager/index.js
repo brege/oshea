@@ -37,8 +37,8 @@ class CollectionsManager {
 
     // Determine collRoot using the new precedence, passing the config file value via options
     // The instantiator of CollectionsManager will be responsible for reading the main config
-    // and passing the value as options.collRootFromMainConfig
-    this.collRoot = this.determineCollRoot(options.collRootFromMainConfig);
+    // and passing the value as options.collRootFromMainConfig and collRootCliOverride
+    this.collRoot = this.determineCollRoot(options.collRootCliOverride, options.collRootFromMainConfig);
 
     if (this.debug) {
       console.log(chalk.magenta(`DEBUG (CollectionsManager): Initialized. Final COLL_ROOT: ${this.collRoot}`));
@@ -57,8 +57,16 @@ class CollectionsManager {
     this.addSingletonPlugin = addSingletonPluginCmd.bind(this);
   }
 
-  determineCollRoot(collRootFromConfig = null) {
-    // 1. Test Override Environment Variable (highest precedence)
+  determineCollRoot(collRootCliOverride = null, collRootFromConfig = null) {
+    // 1. CLI Override (highest precedence)
+    if (collRootCliOverride) {
+      if (this.debug) {
+        console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using CLI override --coll-root for COLL_ROOT: ${collRootCliOverride}`));
+      }
+      return collRootCliOverride;
+    }
+
+    // 2. Test Override Environment Variable
     if (process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE) {
       if (this.debug) {
           console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using test override MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE for COLL_ROOT: ${process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE}`));
@@ -66,7 +74,7 @@ class CollectionsManager {
       return process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE;
     }
 
-    // 2. User-defined Environment Variable
+    // 3. User-defined Environment Variable
     if (process.env.MD_TO_PDF_COLLECTIONS_ROOT) {
       if (this.debug) {
           console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using env var MD_TO_PDF_COLLECTIONS_ROOT for COLL_ROOT: ${process.env.MD_TO_PDF_COLLECTIONS_ROOT}`));
@@ -74,7 +82,7 @@ class CollectionsManager {
       return process.env.MD_TO_PDF_COLLECTIONS_ROOT;
     }
 
-    // 3. Value from Configuration File (passed as argument)
+    // 4. Value from Configuration File (passed as argument)
     if (collRootFromConfig) {
       if (this.debug) {
           console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using collRootFromMainConfig for COLL_ROOT: ${collRootFromConfig}`));
@@ -82,7 +90,7 @@ class CollectionsManager {
       return collRootFromConfig;
     }
 
-    // 4. XDG Base Directory / OS Default (fallback)
+    // 5. XDG Base Directory / OS Default (fallback)
     const xdgDataHome = process.env.XDG_DATA_HOME ||
       (os.platform() === 'win32'
         ? path.join(os.homedir(), 'AppData', 'Local')

@@ -175,20 +175,26 @@ async function executeGeneration(args, configResolver) {
 }
 
 async function main() {
+    // Initial parsing of argv to get config and factoryDefaults before full yargs build
+    const initialArgv = yargs(hideBin(process.argv)).argv;
+
     // Instantiate ConfigResolver early to get resolvedCollRoot
     const initialConfigResolver = new ConfigResolver(
-        yargs(hideBin(process.argv)).argv.config, // Pass CLI config path
-        yargs(hideBin(process.argv)).argv.factoryDefaults, // Pass factoryDefaults
-        // isLazyLoad is not relevant for initial config loading, can be false
+        initialArgv.config, // Pass CLI config path
+        initialArgv.factoryDefaults, // Pass factoryDefaults
         false 
     );
     // Initialize it to ensure collections_root is resolved
     await initialConfigResolver._initializeResolverIfNeeded(); 
     const collRootFromMainConfig = await initialConfigResolver.getResolvedCollRoot();
 
+    // Get the CLI override for collections root
+    const collRootCliOverride = initialArgv['coll-root'] || null;
+
     const managerInstance = new CollectionsManager({
         debug: process.env.DEBUG_CM === 'true',
-        collRootFromMainConfig: collRootFromMainConfig // Pass the resolved collections root
+        collRootFromMainConfig: collRootFromMainConfig, // Pass the resolved collections root from config file
+        collRootCliOverride: collRootCliOverride // Pass the CLI override for collections root
     });
 
     const argvBuilder = yargs(hideBin(process.argv))
@@ -205,6 +211,12 @@ async function main() {
             describe: 'Use only bundled default configurations, ignoring user (XDG) and project (--config) overrides.',
             type: 'boolean',
             default: false,
+        })
+        .option('coll-root', { // NEW: CLI option for collections root
+            alias: 'cr',
+            describe: 'Specify the root directory for collections and plugins. Overrides config file and environment variables.',
+            type: 'string',
+            normalize: true, // Normalize the path (e.g., resolve ~, ./)
         })
         .middleware((argv) => {
             argv.manager = managerInstance; 
@@ -252,7 +264,7 @@ async function main() {
             // This block handles other failures, like command not found by yargs
             if (msg && msg.includes("Unknown argument")) { 
                  const firstArg = process.argv[2]; 
-                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){ // MODIFIED: Added 'update', 'up' to known arguments
+                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd', '--coll-root', '-cr'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){ // MODIFIED: Added 'update', 'up', 'coll-root', 'cr' to known arguments
                      console.error(chalk.red(`ERROR: ${msg}`));
                      console.error(chalk.yellow(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`));
                      yargsInstance.showHelp();

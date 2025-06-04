@@ -30,6 +30,7 @@ class ConfigResolver {
         this.primaryMainConfig = null;
         this.primaryMainConfigPathActual = null;
         this.primaryMainConfigLoadReason = null;
+        this.resolvedCollRoot = null; // NEW: To store the resolved collections root
     }
 
     async _initializeResolverIfNeeded() {
@@ -42,6 +43,10 @@ class ConfigResolver {
 
         const xdg = await this.mainConfigLoader.getXdgMainConfig();
         const project = await this.mainConfigLoader.getProjectManifestConfig();
+
+        // The primaryMainConfig already has the merged config from MainConfigLoader
+        // This is where collections_root would reside if specified in a main config.
+        this.resolvedCollRoot = this.primaryMainConfig.collections_root || null; // NEW: Extract collections_root
 
         this.pluginConfigLoader = new PluginConfigLoader(
             xdg.baseDir, xdg.config, xdg.path,
@@ -76,6 +81,10 @@ class ConfigResolver {
             this._lastProjectManifestPathForRegistry = currentProjectManifestPath;
         }
         this._initialized = true;
+
+        if (process.env.DEBUG) { // NEW debug log
+            console.log("DEBUG (ConfigResolver): Resolved Collections Root:", this.resolvedCollRoot);
+        }
     }
 
     getConfigFileSources() {
@@ -289,6 +298,12 @@ class ConfigResolver {
         this.loadedPluginConfigsCache[cacheKey] = effectiveDetails;
         this._lastEffectiveConfigSources = loadedConfigSourcePaths;
         return effectiveDetails;
+    }
+
+    // NEW: Getter for the resolved collections root
+    async getResolvedCollRoot() {
+        await this._initializeResolverIfNeeded();
+        return this.resolvedCollRoot;
     }
 }
 

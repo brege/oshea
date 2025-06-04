@@ -109,7 +109,7 @@ const pluginCreateCommandTestCases = [
             if (!fs.existsSync(testCase.targetPluginDir)) throw new Error(`Plugin directory not created at ${testCase.targetPluginDir}`);
             await checkArchetypeContents(testCase.targetPluginDir, 'new-template-plug', BUNDLED_TEMPLATE_PATH_ABS, true, 'template-basic');
             if (!result.stdout.includes("Target base directory (for template): " + process.cwd())) {
-                 throw new Error("Stdout did not correctly indicate CWD as target base for template creation without --dir.");
+                 throw new Error("Stdout did not correctly indicate CWD as target base for template creation without --target-dir.");
             }
         },
         postTestCleanup: async (testCase) => {
@@ -117,8 +117,8 @@ const pluginCreateCommandTestCases = [
         }
     },
     {
-        description: "CLI: plugin create new-template-custom-dir --dir <CREATED_PLUGINS_DIR> (default template, custom dir)",
-        commandArgs: ['plugin', 'create', 'new-template-custom-dir', '--dir', CREATED_PLUGINS_DIR, '--force'],
+        description: "CLI: plugin create new-template-custom-dir --target-dir <CREATED_PLUGINS_DIR> (default template, custom dir)",
+        commandArgs: ['plugin', 'create', 'new-template-custom-dir', '--target-dir', CREATED_PLUGINS_DIR, '--force'],
         preTestSetup: async (testCase) => {
             testCase.targetPluginDir = path.join(CREATED_PLUGINS_DIR, 'new-template-custom-dir');
             await cleanupDir(testCase.targetPluginDir);
@@ -136,8 +136,8 @@ const pluginCreateCommandTestCases = [
         }
     },
     {
-        description: "CLI: plugin create arch-from-cv --from ./plugins/cv --dir <CREATED_PLUGINS_DIR> (archetype from direct path)",
-        commandArgs: ['plugin', 'create', 'arch-from-cv', '--from', BUNDLED_CV_PLUGIN_PATH_REL, '--dir', CREATED_PLUGINS_DIR, '--force'],
+        description: "CLI: plugin create arch-from-cv --from ./plugins/cv --target-dir <CREATED_PLUGINS_DIR> (archetype from direct path)",
+        commandArgs: ['plugin', 'create', 'arch-from-cv', '--from', BUNDLED_CV_PLUGIN_PATH_REL, '--target-dir', CREATED_PLUGINS_DIR, '--force'],
         preTestSetup: async (testCase) => {
             testCase.targetPluginDir = path.join(CREATED_PLUGINS_DIR, 'arch-from-cv');
             await cleanupDir(testCase.targetPluginDir);
@@ -155,8 +155,8 @@ const pluginCreateCommandTestCases = [
         }
     },
     {
-        description: "CLI: plugin create existing-dir-no-force --dir <CREATED_PLUGINS_DIR> (error on existing, no --force)",
-        commandArgs: ['plugin', 'create', 'existing-dir-no-force', '--dir', CREATED_PLUGINS_DIR],
+        description: "CLI: plugin create existing-dir-no-force --target-dir <CREATED_PLUGINS_DIR> (error on existing, no --force)",
+        commandArgs: ['plugin', 'create', 'existing-dir-no-force', '--target-dir', CREATED_PLUGINS_DIR],
         preTestSetup: async (testCase) => {
             testCase.targetPluginDir = path.join(CREATED_PLUGINS_DIR, 'existing-dir-no-force');
             await cleanupDir(testCase.targetPluginDir); 
@@ -174,8 +174,8 @@ const pluginCreateCommandTestCases = [
         }
     },
     {
-        description: "CLI: plugin create existing-dir-with-force --dir <CREATED_PLUGINS_DIR> --force (overwrite existing)",
-        commandArgs: ['plugin', 'create', 'existing-dir-with-force', '--dir', CREATED_PLUGINS_DIR, '--force'],
+        description: "CLI: plugin create existing-dir-with-force --target-dir <CREATED_PLUGINS_DIR> --force (overwrite existing)",
+        commandArgs: ['plugin', 'create', 'existing-dir-with-force', '--target-dir', CREATED_PLUGINS_DIR, '--force'],
         preTestSetup: async (testCase) => {
             testCase.targetPluginDir = path.join(CREATED_PLUGINS_DIR, 'existing-dir-with-force');
             await cleanupDir(testCase.targetPluginDir);
@@ -193,7 +193,7 @@ const pluginCreateCommandTestCases = [
     },
     {
         description: "CLI: plugin create bad!name (invalid name check)",
-        commandArgs: ['plugin', 'create', 'bad!name', '--dir', CREATED_PLUGINS_DIR],
+        commandArgs: ['plugin', 'create', 'bad!name', '--target-dir', CREATED_PLUGINS_DIR],
         postTestChecks: async (testCaseOutputDir, result, testCase) => {
             if (result.success) throw new Error("Command should have failed (invalid name).");
             if (!result.stderr || !result.stderr.includes('ERROR: Invalid plugin name: "bad!name"')) {
@@ -203,7 +203,7 @@ const pluginCreateCommandTestCases = [
     },
     {
         description: "CLI: plugin create --from non-existent-source (error check)",
-        commandArgs: ['plugin', 'create', 'someplug', '--from', './non-existent-dir-source', '--dir', CREATED_PLUGINS_DIR],
+        commandArgs: ['plugin', 'create', 'someplug', '--from', './non-existent-dir-source', '--target-dir', CREATED_PLUGINS_DIR],
         postTestChecks: async (testCaseOutputDir, result, testCase) => {
             if (result.success) throw new Error("Command should have failed (source for --from does not exist).");
             const expectedErrorPart = `Source plugin path "${path.resolve('./non-existent-dir-source')}" (from identifier "./non-existent-dir-source") not found or is not a directory.`;
@@ -237,7 +237,7 @@ const pluginCreateCommandTestCases = [
     },
     {
         description: "CLI: plugin create arch-from-cm-coll/plug (CM source - placeholder for manual or future test)",
-        commandArgs: ['plugin', 'create', 'arch-from-cm', '--from', 'my-test-collection/my-test-plugin', '--dir', CREATED_PLUGINS_DIR, '--force'],
+        commandArgs: ['plugin', 'create', 'arch-from-cm', '--from', 'my-test-collection/my-test-plugin', '--target-dir', CREATED_PLUGINS_DIR, '--force'],
         preTestSetup: async (testCase) => {
             console.warn("WARN: Test 'CLI: plugin create arch-from-cm-coll/plug' is a placeholder. True testing of CM source via CLI requires mock COLL_ROOT or manual setup.");
             testCase.shouldSkip = true; 

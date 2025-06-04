@@ -1,9 +1,9 @@
 // src/collections-manager/commands/list.js
 const fs = require('fs').promises;
-const fss = require('fs');
+const fss = require('fs'); // Synchronous fs for existsSync
 const path = require('path');
 const chalk = require('chalk');
-const { USER_ADDED_PLUGINS_DIR_NAME, METADATA_FILENAME } = require('../constants'); // Added METADATA_FILENAME
+const { USER_ADDED_PLUGINS_DIR_NAME, METADATA_FILENAME } = require('../constants');
 
 module.exports = async function listCollections(type = 'downloaded', collectionNameFilter = null) {
   if (type === 'downloaded') {
@@ -24,15 +24,14 @@ module.exports = async function listCollections(type = 'downloaded', collectionN
                 if (singletons.some(sDirent => sDirent.isDirectory())) {
                     collectionInfos.push({
                         name: USER_ADDED_PLUGINS_DIR_NAME,
-                        source: singletonPluginsContainerPath, // Actual path
-                        special_type: 'singleton_container', // Marker for CLI
+                        source: singletonPluginsContainerPath,
+                        special_type: 'singleton_container',
                         added_on: 'N/A (Container)',
                         updated_on: undefined
                     });
                 }
             }
           } else {
-            // For regular collections, read their metadata
             const metadata = await this._readCollectionMetadata(collectionName);
             collectionInfos.push({
               name: collectionName,
@@ -50,16 +49,29 @@ module.exports = async function listCollections(type = 'downloaded', collectionN
       throw error;
     }
   } else if (type === 'available') {
-      const availablePlugins = await this.listAvailablePlugins(collectionNameFilter);
-      return availablePlugins;
+      // This now correctly calls the modified listAvailablePlugins which sets the flag.
+      return await this.listAvailablePlugins(collectionNameFilter);
   } else if (type === 'enabled') {
       const enabledManifest = await this._readEnabledManifest();
-      let pluginsToDisplay = enabledManifest.enabled_plugins;
+      let pluginsFromManifest = enabledManifest.enabled_plugins;
+      
       if (collectionNameFilter) {
-          pluginsToDisplay = pluginsToDisplay.filter(p => p.collection_name === collectionNameFilter);
+          pluginsFromManifest = pluginsFromManifest.filter(p => p.collection_name === collectionNameFilter);
       }
-      pluginsToDisplay.sort((a,b) => a.invoke_name.toLowerCase().localeCompare(b.invoke_name.toLowerCase()));
-      return pluginsToDisplay;
+      
+      const processedEnabledPlugins = [];
+      for (const p of pluginsFromManifest) {
+        const pluginEntry = { ...p }; // Clone
+        // Check for enabled user-added singletons that have an original_source recorded in enabled.yaml
+        if (pluginEntry.original_source && pluginEntry.collection_name === USER_ADDED_PLUGINS_DIR_NAME) {
+          if (!fss.existsSync(pluginEntry.original_source)) {
+            pluginEntry.is_original_source_missing = true;
+          }
+        }
+        processedEnabledPlugins.push(pluginEntry);
+      }
+      processedEnabledPlugins.sort((a,b) => (a.invoke_name || '').toLowerCase().localeCompare((b.invoke_name || '').toLowerCase()));
+      return processedEnabledPlugins;
   } else {
     console.log(chalk.yellow(`  Listing for type '${type}' is not implemented in manager's listCollections method.`));
     return [];

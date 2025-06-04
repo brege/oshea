@@ -20,7 +20,6 @@ async function _findPluginsInCollectionDir(collectionPath, collectionName, debug
 
       const pluginItselfPath = path.join(collectionPath, pluginId);
       let actualConfigPath = '';
-      let description = 'No description found.';
       let foundConfig = false;
 
       const standardConfigPath = path.join(pluginItselfPath, `${pluginId}.config.yaml`);
@@ -54,14 +53,13 @@ async function _findPluginsInCollectionDir(collectionPath, collectionName, debug
         if (collectionName === USER_ADDED_PLUGINS_DIR_NAME && _readCollectionMetadataFunc) {
             pluginInfoBase.is_singleton = true;
             try {
-                const singletonMetaPath = path.join(collectionName, pluginId);
-                const metadata = await _readCollectionMetadataFunc(singletonMetaPath);
+                const metadata = await _readCollectionMetadataFunc(path.join(USER_ADDED_PLUGINS_DIR_NAME, pluginId));
                 if (metadata) {
                     pluginInfoBase.original_source = metadata.source;
                     pluginInfoBase.added_on = metadata.added_on;
                     pluginInfoBase.updated_on = metadata.updated_on;
                 } else {
-                    if (debug) console.log(chalk.magenta(`DEBUG (CM:_fPICD via listAvailable): No specific metadata found for singleton ${pluginId} at ${singletonMetaPath}`));
+                    if (debug) console.log(chalk.magenta(`DEBUG (CM:_fPICD via listAvailable): No specific metadata found for singleton ${pluginId} at ${path.join(USER_ADDED_PLUGINS_DIR_NAME, pluginId)}`));
                 }
             } catch (metaError) {
                 if (debug) {
@@ -70,6 +68,18 @@ async function _findPluginsInCollectionDir(collectionPath, collectionName, debug
                 pluginInfoBase.metadata_error = `Metadata unreadable: ${metaError.message.substring(0,30)}...`;
             }
         }
+
+        // Check for missing original source AFTER original_source is populated
+        if (pluginInfoBase.is_singleton && pluginInfoBase.original_source) {
+            if (!fss.existsSync(pluginInfoBase.original_source)) {
+                pluginInfoBase.is_original_source_missing = true;
+                // Optional: debug log for specific plugin, shown if this.debug is true for the CM instance
+                if (debug) { 
+                    console.log(chalk.bgYellow.black(`DEBUG (listAvailable): Set 'is_original_source_missing' for plugin_id: ${pluginId}`));
+                }
+            }
+        }
+        
         availablePlugins.push(pluginInfoBase);
 
       } else {

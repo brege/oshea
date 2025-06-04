@@ -4,11 +4,9 @@ const fss = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
-const { METADATA_FILENAME } = require('../constants');
+const { METADATA_FILENAME, USER_ADDED_PLUGINS_DIR_NAME } = require('../constants');
 
-async function _findPluginsInCollectionDir(collectionPath, collectionName, debug) {
-  // This helper is now local to listAvailable.js
-  // It takes 'debug' as an argument since it no longer has 'this.debug'
+async function _findPluginsInCollectionDir(collectionPath, collectionName, debug, _readCollectionMetadataFunc) {
   const availablePlugins = [];
   if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
     return [];
@@ -31,35 +29,49 @@ async function _findPluginsInCollectionDir(collectionPath, collectionName, debug
       if (fss.existsSync(standardConfigPath) && fss.lstatSync(standardConfigPath).isFile()) {
           actualConfigPath = standardConfigPath;
           foundConfig = true;
-          if (debug) console.log(chalk.magenta(`DEBUG (CM:_fPICD via listAvailable): Found standard config ${path.basename(actualConfigPath)} for ${pluginId} in ${collectionName}`));
       } else if (fss.existsSync(alternativeYamlPath) && fss.lstatSync(alternativeYamlPath).isFile()) {
           actualConfigPath = alternativeYamlPath;
           foundConfig = true;
-          if (debug) console.log(chalk.magenta(`DEBUG (CM:_fPICD via listAvailable): Found alternative config ${path.basename(actualConfigPath)} for ${pluginId} in ${collectionName}`));
       }
 
       if (foundConfig && actualConfigPath) {
+        const pluginInfoBase = {
+            collection: collectionName,
+            plugin_id: pluginId,
+            config_path: path.resolve(actualConfigPath),
+            base_path: path.resolve(pluginItselfPath)
+        };
+
         try {
           const configFileContent = await fs.readFile(actualConfigPath, 'utf8');
           const pluginConfigData = yaml.load(configFileContent);
-          description = pluginConfigData.description || 'Plugin description not available.';
-          availablePlugins.push({
-            collection: collectionName,
-            plugin_id: pluginId,
-            description: description,
-            config_path: path.resolve(actualConfigPath),
-            base_path: path.resolve(pluginItselfPath)
-          });
+          pluginInfoBase.description = pluginConfigData.description || 'Plugin description not available.';
         } catch (e) {
-          console.warn(chalk.yellow(`  WARN (CM:_fPICD via listAvailable): Could not read/parse ${actualConfigPath} for ${pluginId} in ${collectionName}: ${e.message}`));
-          availablePlugins.push({
-            collection: collectionName,
-            plugin_id: pluginId,
-            description: chalk.red(`Error loading config: ${e.message.substring(0, 50)}...`),
-            config_path: path.resolve(actualConfigPath),
-            base_path: path.resolve(pluginItselfPath)
-          });
+          if(debug) console.warn(chalk.yellow(`  WARN (CM:_fPICD via listAvailable): Could not read/parse plugin config ${actualConfigPath} for ${pluginId} in ${collectionName}: ${e.message.split('\n')[0]}`));
+          pluginInfoBase.description = chalk.red(`Error loading plugin config: ${e.message.substring(0, 50)}...`);
         }
+
+        if (collectionName === USER_ADDED_PLUGINS_DIR_NAME && _readCollectionMetadataFunc) {
+            pluginInfoBase.is_singleton = true;
+            try {
+                const singletonMetaPath = path.join(collectionName, pluginId);
+                const metadata = await _readCollectionMetadataFunc(singletonMetaPath);
+                if (metadata) {
+                    pluginInfoBase.original_source = metadata.source;
+                    pluginInfoBase.added_on = metadata.added_on;
+                    pluginInfoBase.updated_on = metadata.updated_on;
+                } else {
+                    if (debug) console.log(chalk.magenta(`DEBUG (CM:_fPICD via listAvailable): No specific metadata found for singleton ${pluginId} at ${singletonMetaPath}`));
+                }
+            } catch (metaError) {
+                if (debug) {
+                    console.warn(chalk.yellow(`  WARN (CM:_fPICD via listAvailable): Could not read .collection-metadata.yaml for singleton ${pluginId} in ${collectionName}: ${metaError.message.split('\n')[0]}`));
+                }
+                pluginInfoBase.metadata_error = `Metadata unreadable: ${metaError.message.substring(0,30)}...`;
+            }
+        }
+        availablePlugins.push(pluginInfoBase);
+
       } else {
            if (debug) {
               console.log(chalk.magenta(`DEBUG (CM:_fPICD via listAvailable): No config file (${pluginId}.config.yaml or ${pluginId}.yaml) found for ${pluginId} in ${collectionName}. Looked in ${pluginItselfPath}`));
@@ -71,32 +83,38 @@ async function _findPluginsInCollectionDir(collectionPath, collectionName, debug
 }
 
 module.exports = async function listAvailablePlugins(collectionNameFilter = null) {
-  // 'this' will be the CollectionsManager instance
   let allAvailablePlugins = [];
   if (!fss.existsSync(this.collRoot)) {
+    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:listAvailablePlugins): Collection root ${this.collRoot} does not exist. Returning empty.`));
     return [];
   }
+
+  const readMetadataFunc = this._readCollectionMetadata.bind(this);
 
   if (collectionNameFilter) {
     const singleCollectionPath = path.join(this.collRoot, collectionNameFilter);
     if (!fss.existsSync(singleCollectionPath) || !fss.lstatSync(singleCollectionPath).isDirectory()) {
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:listAvailablePlugins): Filtered collection path ${singleCollectionPath} does not exist or not a directory. Returning empty.`));
       return [];
     }
-    allAvailablePlugins = await _findPluginsInCollectionDir(singleCollectionPath, collectionNameFilter, this.debug);
+    allAvailablePlugins = await _findPluginsInCollectionDir(singleCollectionPath, collectionNameFilter, this.debug, readMetadataFunc);
   } else {
-    const collectionNames = (await fs.readdir(this.collRoot, { withFileTypes: true }))
+    const collectionDirs = (await fs.readdir(this.collRoot, { withFileTypes: true }))
       .filter(dirent => dirent.isDirectory())
       .map(dirent => dirent.name);
 
-    for (const collectionName of collectionNames) {
+    for (const collectionName of collectionDirs) {
       const collectionPath = path.join(this.collRoot, collectionName);
-      const pluginsInCollection = await _findPluginsInCollectionDir(collectionPath, collectionName, this.debug);
+      const pluginsInCollection = await _findPluginsInCollectionDir(collectionPath, collectionName, this.debug, readMetadataFunc);
       allAvailablePlugins.push(...pluginsInCollection);
     }
   }
+
   allAvailablePlugins.sort((a,b) => {
-      if (a.collection.toLowerCase() < b.collection.toLowerCase()) return -1;
-      if (a.collection.toLowerCase() > b.collection.toLowerCase()) return 1;
+      const collA = a.collection.toLowerCase();
+      const collB = b.collection.toLowerCase();
+      if (collA < collB) return -1;
+      if (collA > collB) return 1;
       return a.plugin_id.toLowerCase().localeCompare(b.plugin_id.toLowerCase());
   });
   return allAvailablePlugins;

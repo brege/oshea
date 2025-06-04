@@ -22,6 +22,7 @@ const pluginCmd = require('./src/commands/pluginCmd.js');
 const convertCmdModule = require('./src/commands/convertCmd.js');
 const generateCmd = require('./src/commands/generateCmd.js');
 const collectionCmd = require('./src/commands/collectionCmd.js');
+const updateCmd = require('./src/commands/updateCmd.js'); // ADDED: Require the new update command
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -220,7 +221,8 @@ async function main() {
             }
         })
         .command(pluginCmd)
-        .command(collectionCmd) 
+        .command(collectionCmd)
+        .command(updateCmd) // ADDED: Register the new update command
         .command(configCmd)
         .alias("help", "h")
         .alias("version", "v")
@@ -236,7 +238,7 @@ async function main() {
             // This block handles other failures, like command not found by yargs
             if (msg && msg.includes("Unknown argument")) { 
                  const firstArg = process.argv[2]; 
-                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
+                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){ // MODIFIED: Added 'update', 'up' to known arguments
                      console.error(chalk.red(`ERROR: ${msg}`));
                      console.error(chalk.yellow(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`));
                      yargsInstance.showHelp();
@@ -252,8 +254,8 @@ async function main() {
 
     const parsedArgs = await argvBuilder.argv;
 
-    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config', 'collection'].includes(parsedArgs.$0 || parsedArgs._[0]))) {
-         const knownTopLevelCommands = ['convert', 'generate', 'plugin', 'config', 'collection'];
+    if (parsedArgs._.length === 0 && !parsedArgs.markdownFile && !(['plugin', 'config', 'collection', 'update'].includes(parsedArgs.$0 || parsedArgs._[0]))) { // MODIFIED: Added 'update'
+         const knownTopLevelCommands = ['convert', 'generate', 'plugin', 'config', 'collection', 'update']; // MODIFIED: Added 'update'
          const commandGiven = knownTopLevelCommands.some(cmd => process.argv.includes(cmd)); 
         if (!commandGiven && !parsedArgs.markdownFile) {
              argvBuilder.showHelp();

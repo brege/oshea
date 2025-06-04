@@ -175,7 +175,21 @@ async function executeGeneration(args, configResolver) {
 }
 
 async function main() {
-    const managerInstance = new CollectionsManager({ debug: process.env.DEBUG_CM === 'true' });
+    // Instantiate ConfigResolver early to get resolvedCollRoot
+    const initialConfigResolver = new ConfigResolver(
+        yargs(hideBin(process.argv)).argv.config, // Pass CLI config path
+        yargs(hideBin(process.argv)).argv.factoryDefaults, // Pass factoryDefaults
+        // isLazyLoad is not relevant for initial config loading, can be false
+        false 
+    );
+    // Initialize it to ensure collections_root is resolved
+    await initialConfigResolver._initializeResolverIfNeeded(); 
+    const collRootFromMainConfig = await initialConfigResolver.getResolvedCollRoot();
+
+    const managerInstance = new CollectionsManager({
+        debug: process.env.DEBUG_CM === 'true',
+        collRootFromMainConfig: collRootFromMainConfig // Pass the resolved collections root
+    });
 
     const argvBuilder = yargs(hideBin(process.argv))
         .parserConfiguration({ 'short-option-groups': false })

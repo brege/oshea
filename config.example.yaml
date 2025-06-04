@@ -51,6 +51,12 @@ math:
 #     name: "Default Author"
 #     email: "contact@example.com"
 
+# --- Collections Root Directory ---
+# Specify the base directory where `md-to-pdf` will store and look for plugin collections.
+# This path can be absolute, tilde-expanded (~), or relative to the main config.yaml file's location.
+# This setting takes precedence over XDG/OS default paths, but is overridden by
+# environment variables MD_TO_PDF_COLLECTIONS_ROOT or MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE.
+# collections_root: "~/my-md-to-pdf-collections" # Example: points to a custom directory
 
 # --- Plugin Directory Aliases ---
 # Define shorthand aliases for common plugin directories.

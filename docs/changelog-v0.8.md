@@ -5,6 +5,26 @@
 
 ---
 
+
+## v0.8.8 - Configuration & Manual Testing (Phase 4)                                       
+                                                                                              
+**Date:** 2025-06-04                                                                           
+                                                                                              
+This phase focused on enhancing the configurability of the collections root directory through both configuration files and a new CLI flag, while also resolving a critical regression in CLI help text display.
+
+### Added                                                                                 
+                                                                                              
+* **Collections Root Configurability**:
+    * Introduced the `collections_root` option in `config.yaml` to allow users to specify a custom base directory for managed plugin collections and singletons. This provides a flexible, file-based method for configuring collection storage.
+    * Added a new CLI flag, `--coll-root` (alias `-cr`), which allows users to directly override the collections root directory from the command line. This flag holds the highest precedence for determining the `collRoot`.
+    * The `collRoot` resolution now follows a clear precedence order: CLI Flag (`--coll-root`) > Environment Variables (`MD_TO_PDF_COLLECTIONS_ROOT`, `MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE`) > Configuration File (`collections_root` in `config.yaml`) > XDG Base Directory / OS Default.
+
+### Fixed                                                                                   
+
+* **CLI Help Text Regression**:
+    * Addressed a regression where `md-to-pdf --help` and `md-to-pdf <command> --help` commands were not displaying the full, correct help text, only showing global options. The `yargs` initialization logic was refactored to ensure proper command and option discovery for help output.
+
+
 ### **v0.8.8 - Plugin & Collection Management -- Better Removals (Phase 3)**
 
 **Date:** 2025-06-04

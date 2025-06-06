@@ -1,12 +1,10 @@
-// dev/src/collections-manager/commands/listAvailable.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const yaml = require('js-yaml');
-const { METADATA_FILENAME, USER_ADDED_PLUGINS_DIR_NAME } = require('../constants');
+// src/collections-manager/commands/listAvailable.js
+// No longer requires fs, path, chalk, yaml, or constants
 
-async function _findPluginsInCollectionDir(collectionPath, collectionName, debug, _readCollectionMetadataFunc) {
+async function _findPluginsInCollectionDir(dependencies, collectionPath, collectionName, debug, _readCollectionMetadataFunc) {
+  const { fss, fs, path, chalk, yaml, constants } = dependencies;
+  const { METADATA_FILENAME, USER_ADDED_PLUGINS_DIR_NAME } = constants;
+
   const availablePlugins = [];
   if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
     return [];
@@ -69,11 +67,9 @@ async function _findPluginsInCollectionDir(collectionPath, collectionName, debug
             }
         }
 
-        // Check for missing original source AFTER original_source is populated
         if (pluginInfoBase.is_singleton && pluginInfoBase.original_source) {
             if (!fss.existsSync(pluginInfoBase.original_source)) {
                 pluginInfoBase.is_original_source_missing = true;
-                // Optional: debug log for specific plugin, shown if this.debug is true for the CM instance
                 if (debug) { 
                     console.log(chalk.bgYellow.black(`DEBUG (listAvailable): Set 'is_original_source_missing' for plugin_id: ${pluginId}`));
                 }
@@ -92,7 +88,9 @@ async function _findPluginsInCollectionDir(collectionPath, collectionName, debug
   return availablePlugins;
 }
 
-module.exports = async function listAvailablePlugins(collectionNameFilter = null) {
+module.exports = async function listAvailablePlugins(dependencies, collectionNameFilter = null) {
+  const { fss, fs, path, chalk } = dependencies;
+
   let allAvailablePlugins = [];
   if (!fss.existsSync(this.collRoot)) {
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:listAvailablePlugins): Collection root ${this.collRoot} does not exist. Returning empty.`));
@@ -107,7 +105,7 @@ module.exports = async function listAvailablePlugins(collectionNameFilter = null
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:listAvailablePlugins): Filtered collection path ${singleCollectionPath} does not exist or not a directory. Returning empty.`));
       return [];
     }
-    allAvailablePlugins = await _findPluginsInCollectionDir(singleCollectionPath, collectionNameFilter, this.debug, readMetadataFunc);
+    allAvailablePlugins = await _findPluginsInCollectionDir(dependencies, singleCollectionPath, collectionNameFilter, this.debug, readMetadataFunc);
   } else {
     const collectionDirs = (await fs.readdir(this.collRoot, { withFileTypes: true }))
       .filter(dirent => dirent.isDirectory())
@@ -115,7 +113,7 @@ module.exports = async function listAvailablePlugins(collectionNameFilter = null
 
     for (const collectionName of collectionDirs) {
       const collectionPath = path.join(this.collRoot, collectionName);
-      const pluginsInCollection = await _findPluginsInCollectionDir(collectionPath, collectionName, this.debug, readMetadataFunc);
+      const pluginsInCollection = await _findPluginsInCollectionDir(dependencies, collectionPath, collectionName, this.debug, readMetadataFunc);
       allAvailablePlugins.push(...pluginsInCollection);
     }
   }

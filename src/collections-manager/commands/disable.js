@@ -1,12 +1,10 @@
-// dev/src/collections-manager/commands/disable.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const yaml = require('js-yaml');
-const chalk = require('chalk');
-const { ENABLED_MANIFEST_FILENAME } = require('../constants');
+// src/collections-manager/commands/disable.js
+// No longer requires fs, path, yaml, chalk, or constants
 
-module.exports = async function disablePlugin(invokeName) {
+module.exports = async function disablePlugin(dependencies, invokeName) {
+  // Destructure dependencies
+  const { chalk } = dependencies;
+
   // 'this' will be the CollectionsManager instance
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:disablePlugin): Disabling invoke_name: ${invokeName}`));
   const enabledManifest = await this._readEnabledManifest(); // Uses private method

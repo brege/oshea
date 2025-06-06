@@ -1,11 +1,11 @@
 // src/collections-manager/commands/updateAll.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const { USER_ADDED_PLUGINS_DIR_NAME } = require('../constants'); // Import constant
+// No longer requires fs, path, or chalk
 
-module.exports = async function updateAllCollections() {
+module.exports = async function updateAllCollections(dependencies) {
+  // Destructure dependencies
+  const { fss, fs, path, chalk, constants } = dependencies;
+  const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
+
   if (this.debug) console.log(chalk.magenta("DEBUG (CM:updateAllCollections): Attempting to update all downloaded collections."));
   let allOverallSuccess = true;
   const updateMessages = [];
@@ -32,8 +32,7 @@ module.exports = async function updateAllCollections() {
               if (dirent.isDirectory()) {
                 const singletonPluginId = dirent.name;
                 const singletonCollectionNameForUpdate = path.join(USER_ADDED_PLUGINS_DIR_NAME, singletonPluginId);
-                // Construct the "collection name" as expected by updateCollection
-                // This will be something like "_user_added_plugins/my-plugin"
+                
                 if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Attempting to update singleton: ${singletonCollectionNameForUpdate}`));
                 try {
                   const result = await this.updateCollection(singletonCollectionNameForUpdate);
@@ -58,7 +57,7 @@ module.exports = async function updateAllCollections() {
           updateMessages.push(errMsg);
           allOverallSuccess = false;
         }
-        continue; // Continue to the next item in downloadedCollectionInfos
+        continue;
       }
 
       // Process regular collections

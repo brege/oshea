@@ -1,12 +1,11 @@
 // src/collections-manager/commands/update.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const fsExtra = require('fs-extra'); // Added for robust copy
-const { METADATA_FILENAME } = require('../constants');
+// No longer requires fs, path, chalk, or fs-extra
 
-module.exports = async function updateCollection(collectionName) {
+module.exports = async function updateCollection(dependencies, collectionName) {
+  // Destructure dependencies
+  const { fss, fs, path, chalk, fsExtra, constants } = dependencies;
+  const { METADATA_FILENAME } = constants;
+
   // 'this' will be the CollectionsManager instance
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateCollection): Updating collection: ${collectionName}`));
   const collectionPath = path.join(this.collRoot, collectionName);
@@ -31,7 +30,6 @@ module.exports = async function updateCollection(collectionName) {
 
   // Check if it's a Git source
   if (/^(http(s)?:\/\/|git@)/.test(originalSourcePath) || (typeof originalSourcePath === 'string' && originalSourcePath.endsWith('.git'))) {
-    // Existing Git update logic
     console.log(chalk.blue(`Updating collection "${collectionName}" from Git source: ${chalk.underline(originalSourcePath)}...`));
 
     let defaultBranchName = null;
@@ -144,7 +142,6 @@ module.exports = async function updateCollection(collectionName) {
     }
 
     try {
-      // Re-copy logic: remove all existing files/dirs in collectionPath except metadata, then copy from source.
       const entries = await fs.readdir(collectionPath);
       for (const entry of entries) {
         if (entry !== METADATA_FILENAME) {
@@ -153,9 +150,6 @@ module.exports = async function updateCollection(collectionName) {
       }
       if (this.debug) console.log(chalk.magenta(`  DEBUG: Cleaned existing content (except metadata) in ${collectionPath}.`));
 
-      // Copy new/updated content from originalSourcePath
-      // We use a filter to explicitly exclude .git directory if the source itself is a git repo
-      // but being treated as a "local path" source type.
       await fsExtra.copy(originalSourcePath, collectionPath, {
         overwrite: true,
         errorOnExist: false,

@@ -1,11 +1,10 @@
-// dev/src/collections-manager/commands/enableAll.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const chalk = require('chalk');
-const { METADATA_FILENAME } = require('../constants');
+// src/collections-manager/commands/enableAll.js
+// No longer requires fs, path, chalk, or constants
 
-module.exports = async function enableAllPluginsInCollection(collectionName, options = {}) {
+module.exports = async function enableAllPluginsInCollection(dependencies, collectionName, options = {}) {
+  // Destructure dependencies
+  const { fss, path, chalk, constants } = dependencies;
+
   // 'this' will be the CollectionsManager instance
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enableAllPluginsInCollection): Enabling all plugins in: ${collectionName}, options: ${JSON.stringify(options)}`));
   const collectionPath = path.join(this.collRoot, collectionName);
@@ -35,7 +34,7 @@ module.exports = async function enableAllPluginsInCollection(collectionName, opt
               if (this.debug || !options.isCliCall) console.warn(chalk.yellow(`  WARN: Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`));
           }
       } else {
-          if (this.debug && !metadata && fss.existsSync(path.join(collectionPath, METADATA_FILENAME))) console.warn(chalk.yellow(`WARN: Metadata for ${collectionName} exists but couldn't be read for prefix.`));
+          if (this.debug && !metadata && fss.existsSync(path.join(collectionPath, constants.METADATA_FILENAME))) console.warn(chalk.yellow(`WARN: Metadata for ${collectionName} exists but couldn't be read for prefix.`));
           else if (this.debug) console.log(chalk.magenta(`DEBUG: Metadata file/source not found for ${collectionName}, defaulting to no prefix.`));
       }
   }

@@ -1,15 +1,9 @@
 // src/collections-manager/commands/archetype.js
-const fs = require('fs').promises;
-const fss = require('fs'); // For synchronous operations
-const path = require('path');
-const fsExtra = require('fs-extra');
-const chalk = require('chalk');
-const yaml =require('js-yaml');
-const matter = require('gray-matter');
-const { DEFAULT_ARCHETYPE_BASE_DIR_NAME, METADATA_FILENAME } = require('../constants');
-const { toPascalCase } = require('../cm-utils');
+// No longer requires fs, path, fs-extra, chalk, yaml, matter, constants, or cm-utils
 
-module.exports = async function archetypePlugin(sourcePluginIdentifier, newArchetypeName, options = {}) {
+module.exports = async function archetypePlugin(dependencies, sourcePluginIdentifier, newArchetypeName, options = {}) {
+  const { fs, fss, path, fsExtra, chalk, yaml, matter, constants, cmUtils } = dependencies;
+
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Archetyping from '${sourcePluginIdentifier}' to '${newArchetypeName}'. Options: ${JSON.stringify(options)}`));
 
   let sourcePluginInfo = {};
@@ -87,12 +81,11 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
   if (options.targetDir) {
     targetBaseDir = path.resolve(options.targetDir);
   } else {
-    targetBaseDir = path.join(path.dirname(this.collRoot), DEFAULT_ARCHETYPE_BASE_DIR_NAME);
+    targetBaseDir = path.join(path.dirname(this.collRoot), constants.DEFAULT_ARCHETYPE_BASE_DIR_NAME);
   }
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
   if (fss.existsSync(archetypePath) && !options.force) {
-    // FIX 1: Removed chalk.underline from the error message string
     throw new Error(`Target archetype directory "${archetypePath}" already exists. Use --force to overwrite or choose a different name.`);
   }
   if (fss.existsSync(archetypePath) && options.force) {
@@ -106,8 +99,8 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
     await fs.mkdir(targetBaseDir, { recursive: true });
     await fsExtra.copy(sourcePluginBasePath, archetypePath, {
       filter: (src) => {
-        if (!sourceIsDirectPath && path.basename(src) === METADATA_FILENAME) {
-          if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Skipping copy of ${METADATA_FILENAME} from CM-managed source.`));
+        if (!sourceIsDirectPath && path.basename(src) === constants.METADATA_FILENAME) {
+          if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Skipping copy of ${constants.METADATA_FILENAME} from CM-managed source.`));
           return false;
         }
         return true;
@@ -120,8 +113,8 @@ module.exports = async function archetypePlugin(sourcePluginIdentifier, newArche
     const newConfigPathInArchetype = path.join(archetypePath, newConfigFilename);
     let messages = [];
 
-    const sourcePluginIdPascal = toPascalCase(sourcePluginIdForReplacement);
-    const newArchetypeNamePascal = toPascalCase(newArchetypeName);
+    const sourcePluginIdPascal = cmUtils.toPascalCase(sourcePluginIdForReplacement);
+    const newArchetypeNamePascal = cmUtils.toPascalCase(newArchetypeName);
     const filesToProcessForStringReplacement = [];
     const processExtensions = ['.js', '.yaml', '.yml', '.css', '.md'];
 

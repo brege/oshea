@@ -1,12 +1,10 @@
-// dev/src/collections-manager/commands/enable.js
-const fs = require('fs').promises;
-const fss = require('fs'); // For synchronous checks like existsSync
-const path = require('path');
-const yaml = require('js-yaml');
-const chalk = require('chalk');
-const { ENABLED_MANIFEST_FILENAME } = require('../constants');
+// src/collections-manager/commands/enable.js
+// No longer requires fs, path, yaml, chalk, or constants
 
-module.exports = async function enablePlugin(collectionPluginId, options = {}) {
+module.exports = async function enablePlugin(dependencies, collectionPluginId, options = {}) {
+  // Destructure dependencies
+  const { fss, chalk } = dependencies;
+
   // 'this' will be the CollectionsManager instance
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): Enabling ID: ${collectionPluginId}, options: ${JSON.stringify(options)}`));
 

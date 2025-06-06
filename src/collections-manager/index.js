@@ -7,15 +7,11 @@ const { spawn } = require('child_process');
 const fsExtra = require('fs-extra');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
+const matter = require('gray-matter');
 
-// Utilities and Constants
-const { deriveCollectionName } = require('./cm-utils');
-const {
-  METADATA_FILENAME,
-  ENABLED_MANIFEST_FILENAME,
-  DEFAULT_ARCHETYPE_BASE_DIR_NAME,
-  USER_ADDED_PLUGINS_DIR_NAME,
-} = require('./constants');
+// Internal Utilities
+const cmUtils = require('./cm-utils');
+const constants = require('./constants');
 
 // Command Modules
 const addCollectionCmd = require('./commands/add');
@@ -31,80 +27,67 @@ const archetypePluginCmd = require('./commands/archetype');
 const addSingletonPluginCmd = require('./commands/addSingleton');
 
 class CollectionsManager {
-  constructor(options = {}) {
-    // Set debug status first so determineCollRoot can use it for logging
-    this.debug = options.debug || false; 
+  constructor(options = {}, dependencies = {}) {
+    // Define all default dependencies needed by any command module
+    const defaultDependencies = {
+      fs, fss, path, os, spawn, fsExtra, chalk, yaml, matter,
+      cmUtils, constants, process,
+    };
 
-    // Determine collRoot using the new precedence, passing the config file value via options
-    // The instantiator of CollectionsManager will be responsible for reading the main config
-    // and passing the value as options.collRootFromMainConfig and collRootCliOverride
+    // Merge defaults with any injected dependencies for testing
+    this.dependencies = { ...defaultDependencies, ...dependencies };
+
+    this.debug = options.debug || false;
     this.collRoot = this.determineCollRoot(options.collRootCliOverride, options.collRootFromMainConfig);
 
     if (this.debug) {
-      console.log(chalk.magenta(`DEBUG (CollectionsManager): Initialized. Final COLL_ROOT: ${this.collRoot}`));
+      console.log(this.dependencies.chalk.magenta(`DEBUG (CollectionsManager): Initialized. Final COLL_ROOT: ${this.collRoot}`));
     }
 
-    this.addCollection = addCollectionCmd.bind(this);
-    this.enablePlugin = enablePluginCmd.bind(this);
-    this.enableAllPluginsInCollection = enableAllPluginsInCollectionCmd.bind(this);
-    this.disablePlugin = disablePluginCmd.bind(this);
-    this.removeCollection = removeCollectionCmd.bind(this);
-    this.updateCollection = updateCollectionCmd.bind(this);
-    this.updateAllCollections = updateAllCollectionsCmd.bind(this);
-    this.listAvailablePlugins = listAvailablePluginsCmd.bind(this);
-    this.listCollections = listCollectionsCmd.bind(this);
-    this.archetypePlugin = archetypePluginCmd.bind(this);
-    this.addSingletonPlugin = addSingletonPluginCmd.bind(this);
+    // Bind all commands, passing the 'dependencies' object as the first argument
+    this.addCollection = addCollectionCmd.bind(this, this.dependencies);
+    this.enablePlugin = enablePluginCmd.bind(this, this.dependencies);
+    this.enableAllPluginsInCollection = enableAllPluginsInCollectionCmd.bind(this, this.dependencies);
+    this.disablePlugin = disablePluginCmd.bind(this, this.dependencies);
+    this.removeCollection = removeCollectionCmd.bind(this, this.dependencies);
+    this.updateCollection = updateCollectionCmd.bind(this, this.dependencies);
+    this.updateAllCollections = updateAllCollectionsCmd.bind(this, this.dependencies);
+    this.listAvailablePlugins = listAvailablePluginsCmd.bind(this, this.dependencies);
+    this.listCollections = listCollectionsCmd.bind(this, this.dependencies);
+    this.archetypePlugin = archetypePluginCmd.bind(this, this.dependencies);
+    this.addSingletonPlugin = addSingletonPluginCmd.bind(this, this.dependencies);
   }
 
   determineCollRoot(collRootCliOverride = null, collRootFromConfig = null) {
-    // 1. CLI Override (highest precedence)
+    const { chalk, process, os, path } = this.dependencies;
     if (collRootCliOverride) {
-      if (this.debug) {
-        console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using CLI override --coll-root for COLL_ROOT: ${collRootCliOverride}`));
-      }
+      if (this.debug) console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using CLI override --coll-root for COLL_ROOT: ${collRootCliOverride}`));
       return collRootCliOverride;
     }
-
-    // 2. Test Override Environment Variable
     if (process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE) {
-      if (this.debug) {
-          console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using test override MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE for COLL_ROOT: ${process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE}`));
-      }
+      if (this.debug) console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using test override MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE for COLL_ROOT: ${process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE}`));
       return process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE;
     }
-
-    // 3. User-defined Environment Variable
     if (process.env.MD_TO_PDF_COLLECTIONS_ROOT) {
-      if (this.debug) {
-          console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using env var MD_TO_PDF_COLLECTIONS_ROOT for COLL_ROOT: ${process.env.MD_TO_PDF_COLLECTIONS_ROOT}`));
-      }
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using env var MD_TO_PDF_COLLECTIONS_ROOT for COLL_ROOT: ${process.env.MD_TO_PDF_COLLECTIONS_ROOT}`));
       return process.env.MD_TO_PDF_COLLECTIONS_ROOT;
     }
-
-    // 4. Value from Configuration File (passed as argument)
     if (collRootFromConfig) {
-      if (this.debug) {
-          console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using collRootFromMainConfig for COLL_ROOT: ${collRootFromConfig}`));
-      }
+      if (this.debug) console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using collRootFromMainConfig for COLL_ROOT: ${collRootFromConfig}`));
       return collRootFromConfig;
     }
-
-    // 5. XDG Base Directory / OS Default (fallback)
     const xdgDataHome = process.env.XDG_DATA_HOME ||
       (os.platform() === 'win32'
         ? path.join(os.homedir(), 'AppData', 'Local')
         : path.join(os.homedir(), '.local', 'share'));
-    
     const defaultPath = path.join(xdgDataHome, 'md-to-pdf', 'collections');
-    if (this.debug) {
-        console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using XDG/OS default for COLL_ROOT. Base: ${xdgDataHome}, Full Path: ${defaultPath}`));
-    }
+    if (this.debug) console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using XDG/OS default for COLL_ROOT. Base: ${xdgDataHome}, Full Path: ${defaultPath}`));
     return defaultPath;
   }
 
   async _readEnabledManifest() {
-    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+    const { path, fss, fs, yaml, chalk, constants } = this.dependencies;
+    const enabledManifestPath = path.join(this.collRoot, constants.ENABLED_MANIFEST_FILENAME);
     let enabledManifest = { enabled_plugins: [] };
     try {
       if (fss.existsSync(enabledManifestPath)) {
@@ -113,10 +96,10 @@ class CollectionsManager {
         if (loadedData && Array.isArray(loadedData.enabled_plugins)) {
           enabledManifest = loadedData;
         } else {
-          if (this.debug && loadedData) console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Invalid structure in ${ENABLED_MANIFEST_FILENAME}. Re-initializing.`));
+          if (this.debug && loadedData) console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Invalid structure in ${constants.ENABLED_MANIFEST_FILENAME}. Re-initializing.`));
         }
       } else {
-        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_readEnabledManifest): ${ENABLED_MANIFEST_FILENAME} not found. Initializing new one.`));
+        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_readEnabledManifest): ${constants.ENABLED_MANIFEST_FILENAME} not found. Initializing new one.`));
       }
     } catch (e) {
       console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Could not read or parse ${enabledManifestPath}: ${e.message}. Starting with a new manifest.`));
@@ -125,7 +108,8 @@ class CollectionsManager {
   }
 
   async _writeEnabledManifest(manifestData) {
-    const enabledManifestPath = path.join(this.collRoot, ENABLED_MANIFEST_FILENAME);
+    const { path, fs, yaml, chalk, constants } = this.dependencies;
+    const enabledManifestPath = path.join(this.collRoot, constants.ENABLED_MANIFEST_FILENAME);
     try {
       await fs.mkdir(this.collRoot, { recursive: true });
       const yamlString = yaml.dump(manifestData, { sortKeys: true });
@@ -138,8 +122,9 @@ class CollectionsManager {
   }
 
   async _readCollectionMetadata(collectionName) {
+    const { path, fss, fs, yaml, chalk, constants } = this.dependencies;
     const collectionPath = path.join(this.collRoot, collectionName);
-    const metadataPath = path.join(collectionPath, METADATA_FILENAME);
+    const metadataPath = path.join(collectionPath, constants.METADATA_FILENAME);
     if (!fss.existsSync(metadataPath)) {
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_readCollMeta): Metadata file not found for ${collectionName} at ${metadataPath}`));
       return null;
@@ -154,8 +139,9 @@ class CollectionsManager {
   }
 
   async _writeCollectionMetadata(collectionName, metadataContent) {
+    const { path, fs, yaml, chalk, constants } = this.dependencies;
     const collectionPath = path.join(this.collRoot, collectionName);
-    const metadataPath = path.join(collectionPath, METADATA_FILENAME);
+    const metadataPath = path.join(collectionPath, constants.METADATA_FILENAME);
     try {
       await fs.mkdir(collectionPath, { recursive: true });
       const yamlString = yaml.dump(metadataContent);
@@ -168,25 +154,22 @@ class CollectionsManager {
   }
 
   async disableAllPluginsFromCollection(collectionIdentifier) {
+    const { path, chalk, constants } = this.dependencies;
     const manifest = await this._readEnabledManifest();
     const initialCount = manifest.enabled_plugins.length;
     let userFriendlyName = collectionIdentifier;
-
     let actualCollectionNameForFilter = collectionIdentifier;
     let specificPluginIdForFilter = null;
-
-    if (collectionIdentifier.startsWith(USER_ADDED_PLUGINS_DIR_NAME + path.sep)) {
+    if (collectionIdentifier.startsWith(constants.USER_ADDED_PLUGINS_DIR_NAME + path.sep)) {
       const parts = collectionIdentifier.split(path.sep);
-      if (parts.length >= 2 && parts[0] === USER_ADDED_PLUGINS_DIR_NAME) {
-        actualCollectionNameForFilter = USER_ADDED_PLUGINS_DIR_NAME;
+      if (parts.length >= 2 && parts[0] === constants.USER_ADDED_PLUGINS_DIR_NAME) {
+        actualCollectionNameForFilter = constants.USER_ADDED_PLUGINS_DIR_NAME;
         specificPluginIdForFilter = parts[1];
-        userFriendlyName = `${specificPluginIdForFilter} (from ${USER_ADDED_PLUGINS_DIR_NAME})`;
+        userFriendlyName = `${specificPluginIdForFilter} (from ${constants.USER_ADDED_PLUGINS_DIR_NAME})`;
       }
     }
-
     const pluginsToKeep = [];
     const disabledInvokeNames = new Set();
-
     manifest.enabled_plugins.forEach(pluginEntry => {
       let matchesCriteriaForRemoval = false;
       if (specificPluginIdForFilter) {
@@ -198,7 +181,6 @@ class CollectionsManager {
           matchesCriteriaForRemoval = true;
         }
       }
-
       if (matchesCriteriaForRemoval) {
         if (!disabledInvokeNames.has(pluginEntry.invoke_name)) {
              console.log(chalk.gray(`    - Disabling plugin "${pluginEntry.invoke_name}" (from ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`));
@@ -208,7 +190,6 @@ class CollectionsManager {
         pluginsToKeep.push(pluginEntry);
       }
     });
-
     if (pluginsToKeep.length < initialCount) {
       manifest.enabled_plugins = pluginsToKeep;
       await this._writeEnabledManifest(manifest);
@@ -223,12 +204,12 @@ class CollectionsManager {
   }
 
   _spawnGitProcess(gitArgs, cwd, operationDescription) {
+    const { spawn, chalk, process } = this.dependencies;
     return new Promise((resolve, reject) => {
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
       const gitProcess = spawn('git', gitArgs, { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
       let stdout = '';
       let stderr = '';
-
       gitProcess.stdout.on('data', (data) => {
         const dataStr = data.toString();
         if (!(gitArgs.includes('status') && gitArgs.includes('--porcelain')) &&
@@ -243,7 +224,6 @@ class CollectionsManager {
         process.stderr.write(chalk.yellowBright(`  GIT_STDERR (${operationDescription}): ${dataStr}`));
         stderr += dataStr;
       });
-
       gitProcess.on('close', (code) => {
         if (code === 0) {
           resolve({ success: true, code, stdout, stderr });

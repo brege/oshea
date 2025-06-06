@@ -1,13 +1,11 @@
-// dev/src/collections-manager/commands/remove.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const fsExtra = require('fs-extra');
-const chalk = require('chalk');
-const { USER_ADDED_PLUGINS_DIR_NAME } = require('../constants');
+// src/collections-manager/commands/remove.js
+// No longer requires fs, path, fs-extra, chalk, or constants
 
-module.exports = async function removeCollection(collectionName, options = {}) {
-  // 'this' will be the CollectionsManager instance
+module.exports = async function removeCollection(dependencies, collectionName, options = {}) {
+  // Destructure dependencies for cleaner code
+  const { fss, path, fsExtra, chalk, constants } = dependencies;
+
+  // 'this' is the CollectionsManager instance
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection): Removing collection: ${collectionName}, options: ${JSON.stringify(options)}`));
   const collectionPath = path.join(this.collRoot, collectionName);
 
@@ -23,10 +21,10 @@ module.exports = async function removeCollection(collectionName, options = {}) {
   let actualCollectionNameForFilterCheck = collectionName;
   let specificPluginIdForFilterCheck = null;
 
-  if (collectionName.startsWith(USER_ADDED_PLUGINS_DIR_NAME + path.sep)) {
+  if (collectionName.startsWith(constants.USER_ADDED_PLUGINS_DIR_NAME + path.sep)) {
     const parts = collectionName.split(path.sep);
-    if (parts.length === 2 && parts[0] === USER_ADDED_PLUGINS_DIR_NAME) {
-      actualCollectionNameForFilterCheck = USER_ADDED_PLUGINS_DIR_NAME;
+    if (parts.length === 2 && parts[0] === constants.USER_ADDED_PLUGINS_DIR_NAME) {
+      actualCollectionNameForFilterCheck = constants.USER_ADDED_PLUGINS_DIR_NAME;
       specificPluginIdForFilterCheck = parts[1];
     }
   }

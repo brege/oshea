@@ -1,12 +1,12 @@
 // src/collections-manager/commands/list.js
-const fs = require('fs').promises;
-const fss = require('fs'); // Synchronous fs for existsSync
-const path = require('path');
-const chalk = require('chalk');
-const { USER_ADDED_PLUGINS_DIR_NAME, METADATA_FILENAME } = require('../constants');
+// No longer requires fs, path, or chalk
 
-module.exports = async function listCollections(type = 'downloaded', collectionNameFilter = null) {
-  if (type === 'downloaded' || type === 'collections') { // MODIFIED: Added || type === 'collections' to handle the new input from the CLI.
+module.exports = async function listCollections(dependencies, type = 'downloaded', collectionNameFilter = null) {
+  // Destructure dependencies
+  const { fss, fs, path, chalk, constants } = dependencies;
+  const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
+
+  if (type === 'downloaded' || type === 'collections') {
     try {
       if (!fss.existsSync(this.collRoot)) {
         return [];
@@ -49,7 +49,6 @@ module.exports = async function listCollections(type = 'downloaded', collectionN
       throw error;
     }
   } else if (type === 'available') {
-      // This now correctly calls the modified listAvailablePlugins which sets the flag.
       return await this.listAvailablePlugins(collectionNameFilter);
   } else if (type === 'enabled') {
       const enabledManifest = await this._readEnabledManifest();
@@ -62,7 +61,6 @@ module.exports = async function listCollections(type = 'downloaded', collectionN
       const processedEnabledPlugins = [];
       for (const p of pluginsFromManifest) {
         const pluginEntry = { ...p }; // Clone
-        // Check for enabled user-added singletons that have an original_source recorded in enabled.yaml
         if (pluginEntry.original_source && pluginEntry.collection_name === USER_ADDED_PLUGINS_DIR_NAME) {
           if (!fss.existsSync(pluginEntry.original_source)) {
             pluginEntry.is_original_source_missing = true;

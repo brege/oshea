@@ -1,15 +1,11 @@
 // dev/src/collections-manager/commands/add.js
-const fs = require('fs').promises;
-const fss = require('fs'); // For synchronous checks like existsSync
-const path = require('path');
-const fsExtra = require('fs-extra');
-const chalk = require('chalk');
-const { deriveCollectionName } = require('../cm-utils');
-const { METADATA_FILENAME } = require('../constants');
+// No longer needs its own require() statements for fs, path, etc.
 
-module.exports = async function addCollection(source, options = {}) {
-  // 'this' will be the CollectionsManager instance, providing access to
-  // this.collRoot, this.debug, this._spawnGitProcess, this._writeCollectionMetadata
+module.exports = async function addCollection(dependencies, source, options = {}) {
+  // Destructure the dependencies object for cleaner code
+  const { fs, fss, path, fsExtra, chalk, cmUtils } = dependencies;
+  
+  // 'this' is still the CollectionsManager instance
   console.log(chalk.blue(`CollectionsManager: Adding collection from source: ${chalk.underline(source)}`));
   if (options.name) {
     console.log(chalk.blue(`  Requested local name: ${chalk.yellow(options.name)}`));
@@ -25,7 +21,7 @@ module.exports = async function addCollection(source, options = {}) {
     throw error;
   }
 
-  const collectionName = options.name || deriveCollectionName(source);
+  const collectionName = options.name || cmUtils.deriveCollectionName(source);
   if (!collectionName) {
       throw new Error('Could not determine a valid collection name.');
   }

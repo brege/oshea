@@ -6,7 +6,7 @@ const chalk = require('chalk');
 const { USER_ADDED_PLUGINS_DIR_NAME, METADATA_FILENAME } = require('../constants');
 
 module.exports = async function listCollections(type = 'downloaded', collectionNameFilter = null) {
-  if (type === 'downloaded') {
+  if (type === 'downloaded' || type === 'collections') { // MODIFIED: Added || type === 'collections' to handle the new input from the CLI.
     try {
       if (!fss.existsSync(this.collRoot)) {
         return [];

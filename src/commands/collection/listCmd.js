@@ -1,5 +1,6 @@
 // src/commands/collection/listCmd.js
 const chalk = require('chalk');
+const stripAnsi = require('strip-ansi');
 
 module.exports = {
   command: 'list [type_or_collection_name]',
@@ -10,6 +11,12 @@ module.exports = {
         describe: `Specify 'collections' for downloaded collections, 'available' for plugins across all collections, 'enabled' for enabled plugins, or provide a specific collection name to list plugins within it. Default is 'collections'.`,
         type: 'string',
         default: 'collections',
+      })
+      .option('short', {
+        alias: 's',
+        describe: 'Display a condensed, short list of downloaded collections.',
+        type: 'boolean',
+        default: false,
       })
       .option('raw', {
         describe: 'Display raw JSON output.',
@@ -23,20 +30,26 @@ module.exports = {
       process.exit(1);
     }
     const manager = args.manager;
-    const typeOrCollectionName = args.type_or_collection_name;
+    let typeOrCollectionName = args.type_or_collection_name;
+
+    // If --short is used without a type, assume they want to list 'collections'
+    if (args.short && typeOrCollectionName.toLowerCase() !== 'collections') {
+      typeOrCollectionName = 'collections';
+    }
 
     let listType = 'downloaded'; // Default
     let collectionFilter = null;
 
-    // Determine if the input is a type or a collection name
     const recognizedTypes = ['collections', 'all', 'available', 'enabled'];
     if (recognizedTypes.includes(typeOrCollectionName.toLowerCase())) {
       listType = typeOrCollectionName.toLowerCase();
+      if (listType === 'collections') listType = 'downloaded'; // Translate to internal type
     } else {
-      // If not a recognized type, treat it as a collection name filter for 'available' plugins
       listType = 'available';
       collectionFilter = typeOrCollectionName;
-      console.log(chalk.blueBright(`md-to-pdf collection: Listing plugins in collection: ${chalk.cyan(collectionFilter)}`));
+      if (!args.short) {
+        console.log(chalk.blueBright(`md-to-pdf collection: Listing plugins in collection: ${chalk.cyan(collectionFilter)}`));
+      }
     }
 
     try {
@@ -47,24 +60,51 @@ module.exports = {
         return;
       }
 
-      if (listType === 'collections' || listType === 'downloaded') {
+      if (listType === 'downloaded') {
         if (results.length === 0) {
           console.log(chalk.yellow("No downloaded collections found."));
           return;
         }
-        console.log(chalk.blueBright("\nDownloaded plugin collections:"));
-        results.forEach(collection => {
-          console.log(chalk.greenBright(`\n  Collection Name: ${chalk.yellow(collection.name)}`));
-          if (collection.special_type === 'singleton_container') {
-            console.log(chalk.gray(`    Type: Managed Directory (for user-added singleton plugins)`));
-            console.log(chalk.gray(`    Managed Path: ${collection.source}`));
-            console.log(chalk.gray(`    (To see individual singletons, run: ${chalk.cyan('md-to-pdf collection list _user_added_plugins')})`));
-          } else {
-            console.log(chalk.gray(`    Source: ${collection.source}`));
-            if (collection.added_on) console.log(chalk.gray(`    Added On: ${new Date(collection.added_on).toLocaleString()}`));
-            if (collection.updated_on) console.log(chalk.gray(`    Updated On: ${new Date(collection.updated_on).toLocaleString()}`));
-          }
-        });
+        
+        if (args.short) {
+            console.log(chalk.blueBright("\nDownloaded plugin collections:"));
+            let maxNameWidth = "NAME".length;
+            let maxTypeWidth = "TYPE".length;
+            results.forEach(coll => {
+                if (coll.name.length > maxNameWidth) maxNameWidth = coll.name.length;
+                let typeStr = 'Local Path';
+                if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
+                else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
+                if (typeStr.length > maxTypeWidth) maxTypeWidth = typeStr.length;
+            });
+            console.log(chalk.bold(`  ${'NAME'.padEnd(maxNameWidth)} | ${'TYPE'.padEnd(maxTypeWidth)} | SOURCE`));
+            console.log(chalk.bold(`  ${'-'.repeat(maxNameWidth)} | ${'-'.repeat(maxTypeWidth)} | ${'-'.repeat('SOURCE'.length)}`));
+            results.forEach(coll => {
+                let typeStr = 'Local Path';
+                if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
+                else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
+
+                const S_NAME = chalk.yellow(coll.name);
+                const S_TYPE = chalk.cyan(typeStr);
+                const S_SOURCE = chalk.gray(coll.source || 'N/A');
+                console.log(`  ${S_NAME.padEnd(maxNameWidth + (S_NAME.length - stripAnsi(S_NAME).length))} | ${S_TYPE.padEnd(maxTypeWidth + (S_TYPE.length - stripAnsi(S_TYPE).length))} | ${S_SOURCE}`);
+            });
+        } else {
+            console.log(chalk.blueBright("\nDownloaded plugin collections:"));
+            results.forEach(collection => {
+              console.log(chalk.greenBright(`\n  Collection Name: ${chalk.yellow(collection.name)}`));
+              if (collection.special_type === 'singleton_container') {
+                console.log(chalk.gray(`    Type: Managed Directory (for user-added singleton plugins)`));
+                console.log(chalk.gray(`    Managed Path: ${collection.source}`));
+                console.log(chalk.gray(`    (To see individual singletons, run: ${chalk.cyan('md-to-pdf plugin list --available ' + collection.name)})`));
+              } else {
+                console.log(chalk.gray(`    Source: ${collection.source}`));
+                if (collection.added_on && collection.added_on !== 'N/A (Container)') console.log(chalk.gray(`    Added On: ${new Date(collection.added_on).toLocaleString()}`));
+                if (collection.updated_on) console.log(chalk.gray(`    Updated On: ${new Date(collection.updated_on).toLocaleString()}`));
+              }
+            });
+        }
+
       } else if (listType === 'available') {
         if (results.length === 0) {
           console.log(chalk.yellow(`No available plugins found for collection "${collectionFilter || 'all'}"`));

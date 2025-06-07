@@ -1,14 +1,21 @@
 // dev/src/plugin_determiner.js
-const fs = require('fs').promises;
-const fss = require('fs'); // For synchronous existsSync
-const path = require('path');
-const yaml = require('js-yaml');
-const markdownUtils = require('./markdown_utils');
-
-// Add this constant at the top
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
-async function determinePluginToUse(args, defaultPluginName = 'default') {
+/**
+ * Determines the plugin to use based on CLI arguments, front matter, local config, or default.
+ *
+ * @param {object} args - Command line arguments, potentially containing `plugin` and `markdownFile`.
+ * @param {object} dependencies - Injected dependencies.
+ * @param {object} dependencies.fsPromises - Node's `fs.promises` module.
+ * @param {object} dependencies.fsSync - Node's synchronous `fs` module (e.g., `fs.existsSync`, `fs.statSync`).
+ * @param {object} dependencies.path - Node's `path` module.
+ * @param {object} dependencies.yaml - The `js-yaml` library.
+ * @param {object} dependencies.markdownUtils - The local `markdown_utils` module.
+ * @param {function} dependencies.processCwd - A function that returns the current working directory (e.g., `process.cwd`).
+ * @param {string} defaultPluginName - The name of the default plugin to use if no other is determined.
+ * @returns {Promise<object>} An object containing `pluginSpec`, `source`, and `localConfigOverrides`.
+ */
+async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, markdownUtils, processCwd }, defaultPluginName = 'default') {
     let pluginSpec = defaultPluginName;
     let determinationSource = 'default';
     let localConfigOverrides = null;
@@ -21,9 +28,9 @@ async function determinePluginToUse(args, defaultPluginName = 'default') {
 
     if (args.markdownFile) {
         markdownFilePathAbsolute = path.resolve(args.markdownFile);
-        if (fss.existsSync(markdownFilePathAbsolute)) {
+        if (fsSync.existsSync(markdownFilePathAbsolute)) {
             try {
-                const rawMarkdownContent = await fs.readFile(markdownFilePathAbsolute, 'utf8');
+                const rawMarkdownContent = await fsPromises.readFile(markdownFilePathAbsolute, 'utf8');
                 const { data: frontMatter } = markdownUtils.extractFrontMatter(rawMarkdownContent);
                 if (frontMatter && frontMatter.md_to_pdf_plugin) {
                     fmPlugin = frontMatter.md_to_pdf_plugin;
@@ -32,11 +39,11 @@ async function determinePluginToUse(args, defaultPluginName = 'default') {
                 console.warn(`WARN (plugin_determiner): Could not read or parse front matter from ${args.markdownFile}: ${error.message}`);
             }
 
-            const localConfigPath = path.resolve(path.dirname(markdownFilePathAbsolute), `${path.basename(markdownFilePathAbsolute, path.extname(markdownFilePathAbsolute))}.config.yaml`);
+            const localConfigPath = path.resolve(path.dirname(markdownFilePathAbsolute), `${path.basename(markdownFilePathAbsolute, path.extname(markdownFilePathAbsolute))}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
             localConfigFileNameForLogging = path.basename(localConfigPath);
-            if (fss.existsSync(localConfigPath)) {
+            if (fsSync.existsSync(localConfigPath)) {
                 try {
-                    const localConfigContent = await fs.readFile(localConfigPath, 'utf8');
+                    const localConfigContent = await fsPromises.readFile(localConfigPath, 'utf8');
                     const parsedLocalConfig = yaml.load(localConfigContent);
                     if (parsedLocalConfig && parsedLocalConfig.plugin) {
                         localCfgPlugin = parsedLocalConfig.plugin;
@@ -90,11 +97,11 @@ async function determinePluginToUse(args, defaultPluginName = 'default') {
         // Second, check for a plugin config directly in the markdown file's directory (e.g., /my-plugin.config.yaml)
         const potentialPluginConfigPathDirect = path.join(markdownDir, `${pluginSpec}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
 
-        if (fss.existsSync(potentialPluginConfigPath) && fss.statSync(potentialPluginConfigPath).isFile()) {
+        if (fsSync.existsSync(potentialPluginConfigPath) && fsSync.statSync(potentialPluginConfigPath).isFile()) {
             pluginSpec = potentialPluginConfigPath;
             determinationSource += ' (self-activated via dir path)';
             if (process.env.DEBUG) console.log(`DEBUG (plugin_determiner): Self-activating from plugin directory: ${potentialPluginConfigPath}`);
-        } else if (fss.existsSync(potentialPluginConfigPathDirect) && fss.statSync(potentialPluginConfigPathDirect).isFile()) {
+        } else if (fsSync.existsSync(potentialPluginConfigPathDirect) && fsSync.statSync(potentialPluginConfigPathDirect).isFile()) {
             pluginSpec = potentialPluginConfigPathDirect;
             determinationSource += ' (self-activated via direct path)';
             if (process.env.DEBUG) console.log(`DEBUG (plugin_determiner): Self-activating from direct path: ${potentialPluginConfigPathDirect}`);
@@ -108,12 +115,12 @@ async function determinePluginToUse(args, defaultPluginName = 'default') {
         } else {
             // If markdownFile is not present, this path might be relative to CWD.
             // For consistency with CLI, assume CWD if no markdown file.
-            pluginSpec = path.resolve(process.cwd(), pluginSpec);
+            pluginSpec = path.resolve(processCwd(), pluginSpec);
         }
     }
     // --- END NEW LOGIC ---
 
-    const baseMdFilename = args.markdownFile ? path.basename(args.markdownFile) : 'N/A';
+    // const baseMdFilename = args.markdownFile ? path.basename(args.markdownFile) : 'N/A'; // This line is not used.
     let logMessage = `INFO: Using plugin '${pluginSpec}' (determined via ${determinationSource})`;
 
     // Only log the final determination if it's not a redundant message following an override log.
@@ -128,6 +135,7 @@ async function determinePluginToUse(args, defaultPluginName = 'default') {
 }
 
 // Temp hack to avoid duplicate logs, ideally manage state better or make logs more distinct
+// This remains outside the function as it's a global console state
 console.lastLog = "";
 
 module.exports = { determinePluginToUse };

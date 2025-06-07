@@ -1,17 +1,23 @@
 // src/PluginManager.js
 const path = require('path');
+const DefaultHandler = require('./default_handler');
+const markdownUtils = require('./markdown_utils');
+const pdfGenerator = require('./pdf_generator'); // CORRECTED: Changed path from './src/pdf_generator' to './pdf_generator'
+
+// Object containing core utilities to be injected into plugins
+const coreUtils = {
+    DefaultHandler,
+    markdownUtils,
+    pdfGenerator
+};
 
 class PluginManager {
     /**
-     * Constructor now accepts coreUtils as a dependency.
-     * This makes PluginManager itself testable via Dependency Injection.
-     * @param {Object} coreUtils - Object containing core utility modules (DefaultHandler, markdownUtils, pdfGenerator).
+     * Constructor is now very simple.
+     * It doesn't manage config loading anymore.
      */
-    constructor(coreUtils) {
-        if (!coreUtils || !coreUtils.DefaultHandler || !coreUtils.markdownUtils || !coreUtils.pdfGenerator) {
-            throw new Error('PluginManager requires DefaultHandler, markdownUtils, and pdfGenerator via coreUtils injection.');
-        }
-        this.coreUtils = coreUtils;
+    constructor() {
+        // No setup needed here as ConfigResolver handles config.
     }
 
     /**
@@ -25,32 +31,28 @@ class PluginManager {
      * - handlerScriptPath: string (Absolute path to the handler script)
      * @param {Object} data - Input data for the plugin (e.g., { markdownFilePath: 'path/to/file.md' }).
      * @param {string} outputDir - The directory to output generated files.
-     * @param {string} [outputFilenameOpt] - Optional. The desired output filename.
+     * @param {string} [outputFilenameOpt] - Optional. Desired filename for the PDF.
      * @returns {Promise<string|null>} Path to the generated PDF, or null if an error occurs.
      */
     async invokeHandler(pluginName, effectiveConfig, data, outputDir, outputFilenameOpt) {
         const {
             pluginSpecificConfig,
             mainConfig,
-            pluginBasePath, 
+            pluginBasePath,
             handlerScriptPath
         } = effectiveConfig;
 
-        if (!handlerScriptPath) { 
+        if (!handlerScriptPath) {
             throw new Error(`Handler script path not available in effectiveConfig for plugin '${pluginName}'.`);
         }
 
         try {
-            const HandlerModule = require(handlerScriptPath); 
+            const HandlerModule = require(handlerScriptPath);
             let handlerInstance;
-
-            // Use the injected coreUtils here
-            const { DefaultHandler, markdownUtils, pdfGenerator } = this.coreUtils;
-            const coreUtilsForPlugin = { DefaultHandler, markdownUtils, pdfGenerator };
 
             if (typeof HandlerModule === 'function' && HandlerModule.prototype && HandlerModule.prototype.constructor.name === HandlerModule.name) {
                 // Pass coreUtils to the constructor
-                handlerInstance = new HandlerModule(coreUtilsForPlugin);
+                handlerInstance = new HandlerModule(coreUtils);
             } else if (HandlerModule && typeof HandlerModule.generate === 'function') {
                 // For plain objects exporting a generate function, constructor injection isn't direct.
                 // This pattern is now discouraged if coreUtils are needed.
@@ -62,20 +64,20 @@ class PluginManager {
             } else {
                 throw new Error(`Handler module '${handlerScriptPath}' for plugin '${pluginName}' does not export a class or a 'generate' function.`);
             }
-            
+
             if (typeof handlerInstance.generate !== 'function') {
                 throw new Error(`Handler instance for plugin '${pluginName}' does not have a 'generate' method.`);
             }
 
             // If generate signature were to be changed for non-class plugins:
-            // return await handlerInstance.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath, coreUtilsForPlugin);
+            // return await handlerInstance.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath, coreUtils);
             return await handlerInstance.generate(
                 data,
                 pluginSpecificConfig,
                 mainConfig,
                 outputDir,
                 outputFilenameOpt,
-                pluginBasePath 
+                pluginBasePath
             );
         } catch (error) {
             console.error(`ERROR invoking handler for plugin '${pluginName}' from '${handlerScriptPath}': ${error.message}`);

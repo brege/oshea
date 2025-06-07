@@ -1,14 +1,18 @@
 // src/plugin_config_loader.js
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { loadYamlConfig, deepMerge, isObject } = require('./config_utils');
-const AssetResolver = require('./asset_resolver');
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class PluginConfigLoader {
-    constructor(xdgBaseDir, xdgMainConfig, xdgMainConfigPath, projectBaseDir, projectMainConfig, projectMainConfigPath, useFactoryDefaultsOnly) {
+    constructor(
+        xdgBaseDir,
+        xdgMainConfig,
+        xdgMainConfigPath,
+        projectBaseDir,
+        projectMainConfig,
+        projectMainConfigPath,
+        useFactoryDefaultsOnly,
+        dependencies = {} // Dependency Injection container
+    ) {
         this.xdgBaseDir = xdgBaseDir;
         this.xdgMainConfig = xdgMainConfig || {};
         this.xdgMainConfigPath = xdgMainConfigPath; // Actual path of XDG config file
@@ -17,6 +21,13 @@ class PluginConfigLoader {
         this.projectMainConfigPath = projectMainConfigPath; // Actual path of Project config file
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
         this._rawPluginYamlCache = {};
+
+        // Injected dependencies
+        this.fs = dependencies.fs || require('fs');
+        this.path = dependencies.path || require('path');
+        this.os = dependencies.os || require('os');
+        this.configUtils = dependencies.configUtils || require('./config_utils');
+        this.AssetResolver = dependencies.AssetResolver || require('./asset_resolver');
     }
 
     async _loadSingleConfigLayer(configFilePath, assetsBasePath, pluginName) {
@@ -25,13 +36,13 @@ class PluginConfigLoader {
             return this._rawPluginYamlCache[cacheKey];
         }
 
-        if (!configFilePath || !fs.existsSync(configFilePath)) {
+        if (!configFilePath || !this.fs.existsSync(configFilePath)) {
             console.warn(`WARN (PluginConfigLoader): Config file path not provided or does not exist: ${configFilePath} for plugin ${pluginName}.`);
             return null;
         }
         try {
-            const rawConfig = await loadYamlConfig(configFilePath);
-            const initialCssPaths = AssetResolver.resolveAndMergeCss(
+            const rawConfig = await this.configUtils.loadYamlConfig(configFilePath);
+            const initialCssPaths = this.AssetResolver.resolveAndMergeCss(
                 rawConfig.css_files,
                 assetsBasePath,
                 [],
@@ -59,15 +70,15 @@ class PluginConfigLoader {
         }
 
         // Layer 1: XDG Overrides
-        const xdgPluginOverrideDir = path.join(this.xdgBaseDir, pluginName);
-        const xdgPluginOverrideFilePath = path.join(xdgPluginOverrideDir, `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
+        const xdgPluginOverrideDir = this.path.join(this.xdgBaseDir, pluginName);
+        const xdgPluginOverrideFilePath = this.path.join(xdgPluginOverrideDir, `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
 
-        if (fs.existsSync(xdgPluginOverrideFilePath)) {
+        if (this.fs.existsSync(xdgPluginOverrideFilePath)) {
             const layer1Data = await this._loadSingleConfigLayer(xdgPluginOverrideFilePath, xdgPluginOverrideDir, pluginName);
             if (layer1Data && layer1Data.rawConfig) {
-                currentMergedConfig = deepMerge(currentMergedConfig, layer1Data.rawConfig);
+                currentMergedConfig = this.configUtils.deepMerge(currentMergedConfig, layer1Data.rawConfig);
                 contributingPaths.push(xdgPluginOverrideFilePath);
-                currentCssPaths = AssetResolver.resolveAndMergeCss(
+                currentCssPaths = this.AssetResolver.resolveAndMergeCss(
                     layer1Data.rawConfig.css_files,
                     xdgPluginOverrideDir,
                     currentCssPaths,
@@ -78,13 +89,13 @@ class PluginConfigLoader {
             }
         }
 
-        if (this.xdgMainConfig[pluginName] && isObject(this.xdgMainConfig[pluginName])) {
+        if (this.xdgMainConfig[pluginName] && this.configUtils.isObject(this.xdgMainConfig[pluginName])) {
             const inlineXdgOverrideBlock = this.xdgMainConfig[pluginName];
-            currentMergedConfig = deepMerge(currentMergedConfig, inlineXdgOverrideBlock);
+            currentMergedConfig = this.configUtils.deepMerge(currentMergedConfig, inlineXdgOverrideBlock);
             // Use the stored xdgMainConfigPath for accurate reporting
-            const xdgConfigReportPath = this.xdgMainConfigPath ? this.xdgMainConfigPath : path.join(this.xdgBaseDir || '~/.config/md-to-pdf', 'config.yaml (path not found)');
+            const xdgConfigReportPath = this.xdgMainConfigPath ? this.xdgMainConfigPath : this.path.join(this.xdgBaseDir || '~/.config/md-to-pdf', 'config.yaml (path not found)');
             contributingPaths.push(`Inline override from XDG main config: ${xdgConfigReportPath}`);
-            currentCssPaths = AssetResolver.resolveAndMergeCss(
+            currentCssPaths = this.AssetResolver.resolveAndMergeCss(
                 inlineXdgOverrideBlock.css_files,
                 this.xdgBaseDir,
                 currentCssPaths,
@@ -103,19 +114,19 @@ class PluginConfigLoader {
                 const projectOverrideRelPath = this.projectMainConfig.plugins[pluginName];
                 let projectOverrideAbsPath = projectOverrideRelPath;
                  if (projectOverrideRelPath.startsWith('~/') || projectOverrideRelPath.startsWith('~\\')) {
-                     projectOverrideAbsPath = path.join(os.homedir(), projectOverrideRelPath.substring(2));
-                } else if (!path.isAbsolute(projectOverrideRelPath)) {
+                     projectOverrideAbsPath = this.path.join(this.os.homedir(), projectOverrideRelPath.substring(2));
+                } else if (!this.path.isAbsolute(projectOverrideRelPath)) {
                     // Resolve relative to the directory of the --config file (this.projectBaseDir)
-                    projectOverrideAbsPath = path.resolve(this.projectBaseDir, projectOverrideRelPath);
+                    projectOverrideAbsPath = this.path.resolve(this.projectBaseDir, projectOverrideRelPath);
                 }
 
-                if (fs.existsSync(projectOverrideAbsPath) && projectOverrideAbsPath !== layer0ConfigData.actualPath) {
-                    const projectOverrideAssetBase = path.dirname(projectOverrideAbsPath);
+                if (this.fs.existsSync(projectOverrideAbsPath) && projectOverrideAbsPath !== layer0ConfigData.actualPath) {
+                    const projectOverrideAssetBase = this.path.dirname(projectOverrideAbsPath);
                     const layer2Data = await this._loadSingleConfigLayer(projectOverrideAbsPath, projectOverrideAssetBase, pluginName);
                     if (layer2Data && layer2Data.rawConfig && Object.keys(layer2Data.rawConfig).length > 0) {
-                        currentMergedConfig = deepMerge(currentMergedConfig, layer2Data.rawConfig);
+                        currentMergedConfig = this.configUtils.deepMerge(currentMergedConfig, layer2Data.rawConfig);
                         contributingPaths.push(projectOverrideAbsPath);
-                        currentCssPaths = AssetResolver.resolveAndMergeCss(
+                        currentCssPaths = this.AssetResolver.resolveAndMergeCss(
                             layer2Data.rawConfig.css_files,
                             projectOverrideAssetBase,
                             currentCssPaths,
@@ -132,13 +143,13 @@ class PluginConfigLoader {
             }
 
             // Project Inline Override (top-level key in the --config file)
-            if (this.projectMainConfig[pluginName] && isObject(this.projectMainConfig[pluginName])) {
+            if (this.projectMainConfig[pluginName] && this.configUtils.isObject(this.projectMainConfig[pluginName])) {
                 const inlineProjectOverrideBlock = this.projectMainConfig[pluginName];
-                currentMergedConfig = deepMerge(currentMergedConfig, inlineProjectOverrideBlock);
+                currentMergedConfig = this.configUtils.deepMerge(currentMergedConfig, inlineProjectOverrideBlock);
                 // Use the stored projectMainConfigPath for accurate reporting
-                const projectConfigReportPath = this.projectMainConfigPath ? this.projectMainConfigPath : path.join(this.projectBaseDir || '.', 'config.yaml (path not found)');
+                const projectConfigReportPath = this.projectMainConfigPath ? this.projectMainConfigPath : this.path.join(this.projectBaseDir || '.', 'config.yaml (path not found)');
                 contributingPaths.push(`Inline override from project main config: ${projectConfigReportPath}`);
-                currentCssPaths = AssetResolver.resolveAndMergeCss(
+                currentCssPaths = this.AssetResolver.resolveAndMergeCss(
                     inlineProjectOverrideBlock.css_files,
                     this.projectBaseDir, // Base for paths in inline project override is dir of --config file
                     currentCssPaths,

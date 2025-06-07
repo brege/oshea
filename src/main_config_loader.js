@@ -1,25 +1,24 @@
 // src/main_config_loader.js
-const fs = require('fs');
-const path = require('path');
 const os = require('os');
-const { loadYamlConfig } = require('./config_utils');
-
-const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
 
 class MainConfigLoader {
-    constructor(projectRoot, mainConfigPathFromCli, useFactoryDefaultsOnly = false, xdgBaseDir = null) {
-        this.projectRoot = projectRoot; // This is the md-to-pdf tool's root directory
-        this.defaultMainConfigPath = path.join(this.projectRoot, 'config.yaml');
-        this.factoryDefaultMainConfigPath = path.join(this.projectRoot, 'config.example.yaml');
+    constructor(projectRoot, mainConfigPathFromCli, useFactoryDefaultsOnly = false, xdgBaseDir = null, dependencies = {}) {
+        this.fs = dependencies.fs || require('fs');
+        this.path = dependencies.path || require('path');
+        this.loadYamlConfig = dependencies.loadYamlConfig || require('./config_utils').loadYamlConfig;
 
-        this.xdgBaseDir = xdgBaseDir || path.join(process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'), XDG_CONFIG_DIR_NAME);
-        this.xdgGlobalConfigPath = path.join(this.xdgBaseDir, 'config.yaml');
+        this.projectRoot = projectRoot;
+        this.defaultMainConfigPath = this.path.join(this.projectRoot, 'config.yaml');
+        this.factoryDefaultMainConfigPath = this.path.join(this.projectRoot, 'config.example.yaml');
+
+        this.xdgBaseDir = xdgBaseDir || this.path.join(process.env.XDG_CONFIG_HOME || this.path.join(os.homedir(), '.config'), 'md-to-pdf');
+        this.xdgGlobalConfigPath = this.path.join(this.xdgBaseDir, 'config.yaml');
 
         this.projectManifestConfigPath = mainConfigPathFromCli;
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
 
         this.primaryConfig = null;
-        this.primaryConfigPath = null;
+        this.primaryConfigPath = null; // Initialize as null
         this.primaryConfigLoadReason = null;
         this.xdgConfigContents = null;
         this.projectConfigContents = null;
@@ -35,14 +34,14 @@ class MainConfigLoader {
         if (this.useFactoryDefaultsOnly) {
             configPathToLoad = this.factoryDefaultMainConfigPath;
             loadedFromReason = "factory default";
-        } else if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
+        } else if (this.projectManifestConfigPath && this.fs.existsSync(this.projectManifestConfigPath)) {
             configPathToLoad = this.projectManifestConfigPath;
             loadedFromReason = "project (from --config)";
-        } else if (fs.existsSync(this.xdgGlobalConfigPath)) {
+        } else if (this.fs.existsSync(this.xdgGlobalConfigPath)) {
             configPathToLoad = this.xdgGlobalConfigPath;
             loadedFromReason = "XDG global";
         } else {
-            if (fs.existsSync(this.defaultMainConfigPath)) {
+            if (this.fs.existsSync(this.defaultMainConfigPath)) {
                 configPathToLoad = this.defaultMainConfigPath;
                 loadedFromReason = "bundled main";
             } else {
@@ -52,31 +51,38 @@ class MainConfigLoader {
         }
         this.primaryConfigLoadReason = loadedFromReason;
 
-        if (configPathToLoad && fs.existsSync(configPathToLoad)) {
+        // Set primaryConfigPath based on the determined path before attempting to load.
+        // This ensures it correctly reflects the *attempted* path even if loading fails.
+        this.primaryConfigPath = configPathToLoad; // <--- MOVED THIS LINE
+
+        if (configPathToLoad && this.fs.existsSync(configPathToLoad)) {
             try {
                 if (process.env.DEBUG) {
                      console.log(`INFO (MainConfigLoader): Loading primary main configuration from: ${configPathToLoad} (Reason: ${this.primaryConfigLoadReason})`);
                 }
-                this.primaryConfig = await loadYamlConfig(configPathToLoad);
-                this.primaryConfigPath = configPathToLoad;
+                this.primaryConfig = await this.loadYamlConfig(configPathToLoad);
+                // No need to set this.primaryConfigPath here, it's already set above
             } catch (error) {
                 console.error(`ERROR (MainConfigLoader): loading primary main configuration from '${configPathToLoad}': ${error.message}`);
                 this.primaryConfig = {};
+                // If load fails, primaryConfigPath should remain the attempted path, which is already set.
             }
         } else {
             this.primaryConfig = {};
             this.primaryConfigLoadReason = "none found";
+            // If no config file could be identified or loaded, ensure primaryConfigPath is null.
+            this.primaryConfigPath = null; // <--- ADDED THIS LINE for the 'none found' case
             console.warn(`WARN (MainConfigLoader): Primary main configuration file could not be identified or loaded. Using empty global settings.`);
         }
         this.primaryConfig = this.primaryConfig || {};
 
         if (!this.useFactoryDefaultsOnly) {
-            if (fs.existsSync(this.xdgGlobalConfigPath)) {
+            if (this.fs.existsSync(this.xdgGlobalConfigPath)) {
                 try {
                     if (this.xdgGlobalConfigPath === this.primaryConfigPath) {
                         this.xdgConfigContents = this.primaryConfig;
                     } else {
-                        this.xdgConfigContents = await loadYamlConfig(this.xdgGlobalConfigPath);
+                        this.xdgConfigContents = await this.loadYamlConfig(this.xdgGlobalConfigPath);
                     }
                 } catch (e) {
                     console.warn(`WARN (MainConfigLoader): Could not load XDG main config from ${this.xdgGlobalConfigPath}: ${e.message}`);
@@ -86,12 +92,12 @@ class MainConfigLoader {
                 this.xdgConfigContents = {};
             }
 
-            if (this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath)) {
+            if (this.projectManifestConfigPath && this.fs.existsSync(this.projectManifestConfigPath)) {
                  try {
                     if (this.projectManifestConfigPath === this.primaryConfigPath) {
                         this.projectConfigContents = this.primaryConfig;
                     } else {
-                        this.projectConfigContents = await loadYamlConfig(this.projectManifestConfigPath);
+                        this.projectConfigContents = await this.loadYamlConfig(this.projectManifestConfigPath);
                     }
                 } catch (e) {
                     console.warn(`WARN (MainConfigLoader): Could not load project manifest from ${this.projectManifestConfigPath}: ${e.message}`);
@@ -113,49 +119,38 @@ class MainConfigLoader {
     async getPrimaryMainConfig() {
         await this._initialize();
         return {
-            // **** MODIFICATION START ****
-            config: { 
+            config: {
                 ...this.primaryConfig,
-                projectRoot: this.projectRoot // Add the tool's root path here
+                projectRoot: this.projectRoot
             },
-            // **** MODIFICATION END ****
             path: this.primaryConfigPath,
-            baseDir: this.primaryConfigPath ? path.dirname(this.primaryConfigPath) : null,
+            baseDir: this.primaryConfigPath ? this.path.dirname(this.primaryConfigPath) : null,
             reason: this.primaryConfigLoadReason
         };
     }
 
     async getXdgMainConfig() {
         await this._initialize();
-        const xdgBase = this.xdgGlobalConfigPath ? path.dirname(this.xdgGlobalConfigPath) : this.xdgBaseDir;
-        // **** MODIFICATION START ****
-        // Also ensure projectRoot is available if XDG config becomes primary in some scenarios
-        // although getPrimaryMainConfig is the one that populates what plugins typically see as globalConfig.
-        // For consistency, if this method were to be used to form the base globalConfig directly,
-        // it should also include projectRoot.
-        return { 
+        const xdgBase = this.xdgGlobalConfigPath ? this.path.dirname(this.xdgGlobalConfigPath) : this.xdgBaseDir;
+        return {
             config: {
                 ...this.xdgConfigContents,
-                projectRoot: this.projectRoot 
-            }, 
-            path: this.xdgGlobalConfigPath, 
-            baseDir: xdgBase 
+                projectRoot: this.projectRoot
+            },
+            path: this.xdgGlobalConfigPath,
+            baseDir: xdgBase
         };
-        // **** MODIFICATION END ****
     }
 
     async getProjectManifestConfig() {
         await this._initialize();
-        // **** MODIFICATION START ****
-        // Similar consistency for projectRoot if this directly forms globalConfig
         return {
             config: {
-                ...(this.projectConfigContents || {}), // Ensure projectConfigContents is an object
+                ...(this.projectConfigContents || {}),
                 projectRoot: this.projectRoot
             },
-            // **** MODIFICATION END ****
             path: this.projectManifestConfigPath,
-            baseDir: this.projectManifestConfigPath && fs.existsSync(this.projectManifestConfigPath) ? path.dirname(this.projectManifestConfigPath) : null
+            baseDir: this.projectManifestConfigPath && this.fs.existsSync(this.projectManifestConfigPath) ? this.path.dirname(this.projectManifestConfigPath) : null
         };
     }
 }

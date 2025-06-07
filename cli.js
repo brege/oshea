@@ -7,7 +7,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const fsp = require('fs').promises;
-const chalk = require('chalk'); // Added
+const chalk = require('chalk');
 const { spawn } = require('child_process');
 
 const ConfigResolver = require('./src/ConfigResolver');
@@ -15,6 +15,9 @@ const PluginManager = require('./src/PluginManager');
 const { setupWatch } = require('./src/watch_handler');
 const { determinePluginToUse } = require('./src/plugin_determiner');
 const CollectionsManager = require('./src/collections-manager');
+const markdownUtils = require('./src/markdown_utils'); // CORRECTED: Added markdownUtils import
+const yaml = require('js-yaml'); // CORRECTED: Added yaml import
+
 
 // Command modules
 const configCmd = require('./src/commands/configCmd.js');
@@ -22,7 +25,7 @@ const pluginCmd = require('./src/commands/pluginCmd.js');
 const convertCmdModule = require('./src/commands/convertCmd.js');
 const generateCmd = require('./src/commands/generateCmd.js');
 const collectionCmd = require('./src/commands/collectionCmd.js');
-const updateCmd = require('./src/commands/updateCmd.js'); // ADDED: Require the new update command
+const updateCmd = require('./src/commands/updateCmd.js');
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -69,8 +72,18 @@ async function commonCommandHandler(args, executorFunction, commandType) {
 }
 
 async function executeConversion(args, configResolver) {
-    const { pluginSpec, source: pluginSource, localConfigOverrides } = await determinePluginToUse(args, 'default');
-    args.pluginSpec = pluginSpec; 
+    // CORRECTED: Create dependencies object for determinePluginToUse
+    const dependenciesForPluginDeterminer = {
+        fsPromises: fsp,
+        fsSync: fs,
+        path: path,
+        yaml: yaml,
+        markdownUtils: markdownUtils,
+        processCwd: process.cwd
+    };
+
+    const { pluginSpec, source: pluginSource, localConfigOverrides } = await determinePluginToUse(args, dependenciesForPluginDeterminer, 'default'); // CORRECTED: Passed dependencies object
+    args.pluginSpec = pluginSpec;
 
     console.log(`Processing 'convert' for: ${args.markdownFile}`);
 
@@ -84,14 +97,14 @@ async function executeConversion(args, configResolver) {
         outputDir = path.resolve(args.outdir);
     } else {
         outputDir = path.join(os.tmpdir(), 'md-to-pdf-output');
-        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { 
+        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
             console.log(`INFO: No output directory specified. Defaulting to temporary directory: ${outputDir}`);
         }
     }
 
     if (!fs.existsSync(outputDir)) {
         await fsp.mkdir(outputDir, { recursive: true });
-        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) { 
+        if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
              console.log(`INFO: Created output directory: ${outputDir}`);
         }
     }
@@ -100,7 +113,7 @@ async function executeConversion(args, configResolver) {
 
     const pluginManager = new PluginManager();
     const generatedPdfPath = await pluginManager.invokeHandler(
-        pluginSpec, 
+        pluginSpec,
         effectiveConfig,
         dataForPlugin,
         outputDir,
@@ -125,7 +138,7 @@ async function executeConversion(args, configResolver) {
 
 async function executeGeneration(args, configResolver) {
     const pluginToUse = args.pluginName;
-    args.pluginSpec = pluginToUse; 
+    args.pluginSpec = pluginToUse;
     console.log(`Processing 'generate' command for plugin: ${pluginToUse}`);
 
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse, null, null);
@@ -141,8 +154,8 @@ async function executeGeneration(args, configResolver) {
 
     const dataForPlugin = { cliArgs: cliArgsForPlugin };
     const outputFilename = args.filename;
-    let outputDir = args.outdir; 
-     if (args.outdir) { 
+    let outputDir = args.outdir;
+     if (args.outdir) {
         outputDir = path.resolve(args.outdir);
     }
 
@@ -175,14 +188,12 @@ async function executeGeneration(args, configResolver) {
 }
 
 async function main() {
-    let managerInstance; // Declare here so it's accessible within the middleware
+    let managerInstance;
 
-    // Build the main yargs instance
     const argvBuilder = yargs(hideBin(process.argv))
         .parserConfiguration({ 'short-option-groups': false })
         .scriptName("md-to-pdf")
         .usage("Usage: $0 <command_or_markdown_file> [options]")
-        // Define ALL global options
         .option('config', {
             describe: 'Path to a custom YAML configuration file. This acts as the project-specific main config.',
             type: 'string',
@@ -194,82 +205,78 @@ async function main() {
             type: 'boolean',
             default: false,
         })
-        .option('coll-root', { 
+        .option('coll-root', {
             alias: 'cr',
             describe: 'Specify the root directory for collections and plugins. Overrides config file and environment variables.',
             type: 'string',
-            normalize: true, 
+            normalize: true,
         })
-        .middleware(async (argv) => { // This middleware runs *after* global options are parsed
-            // At this point, argv.config, argv.factoryDefaults, argv['coll-root'] are available.
-            // Instantiate ConfigResolver and CollectionsManager here.
+        .middleware(async (argv) => {
             const initialConfigResolver = new ConfigResolver(
                 argv.config,
                 argv.factoryDefaults,
-                false 
+                false
             );
-            await initialConfigResolver._initializeResolverIfNeeded(); 
+            await initialConfigResolver._initializeResolverIfNeeded();
             const collRootFromMainConfig = await initialConfigResolver.getResolvedCollRoot();
             const collRootCliOverride = argv['coll-root'] || null;
 
-            managerInstance = new CollectionsManager({ // Assign to the outer managerInstance
+            managerInstance = new CollectionsManager({
                 debug: process.env.DEBUG_CM === 'true',
                 collRootFromMainConfig: collRootFromMainConfig,
                 collRootCliOverride: collRootCliOverride
             });
 
-            // Make the managerInstance available on the argv object for command handlers
             argv.manager = managerInstance;
         })
-        // Define all commands and their subcommands
         .command({
             ...convertCmdModule.defaultCmd,
-            handler: async (args) => { 
+            handler: async (args) => {
                 if (args.markdownFile) {
                     args.isLazyLoad = true;
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
                 } else {
-                    argvBuilder.showHelp(); // Use argvBuilder.showHelp() directly as we are in the main builder
+                    argvBuilder.showHelp();
                 }
             }
         })
         .command({
             ...convertCmdModule.explicitConvert,
-            handler: async (args) => { 
+            handler: async (args) => {
                 args.isLazyLoad = false;
                 await commonCommandHandler(args, executeConversion, 'convert (explicit)');
             }
         })
         .command({
             ...generateCmd,
-            handler: async (args) => { 
+            handler: async (args) => {
                 args.isLazyLoad = false;
                 await commonCommandHandler(args, executeGeneration, 'generate');
             }
         })
-        .command(pluginCmd) // This includes subcommands for 'plugin'
-        .command(collectionCmd) // This includes subcommands for 'collection'
-        .command(updateCmd) 
+        .command(pluginCmd)
+        .command(collectionCmd)
+        .command(updateCmd)
         .command(configCmd)
         .alias("help", "h")
         .alias("version", "v")
-        .strict() 
-        .fail((msg, err, yargsInstance) => { 
-            if (err) { 
-                console.error(chalk.red(msg || err.message)); 
+        .strict()
+        .fail((msg, err, yargsInstance) => {
+            if (err) {
+                console.error(chalk.red(msg || err.message));
                 if (process.env.DEBUG_CM === 'true' && err.stack) console.error(chalk.red(err.stack));
                 yargsInstance.showHelp();
                 process.exit(1);
-                return; 
+                return;
             }
-            if (msg && msg.includes("Unknown argument")) { 
-                 const firstArg = process.argv[2]; 
-                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd', '--coll-root', '-cr'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){ 
+            if (msg && msg.includes("Unknown argument")) {
+                 const firstArg = process.argv[2];
+                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd', '--coll-root', '-cr'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
                      console.error(chalk.red(`ERROR: ${msg}`));
                      console.error(chalk.yellow(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`));
                      yargsInstance.showHelp();
                      process.exit(1);
-                     return; 
+                     return;
                  }
             }
             console.error(chalk.red(msg || "An error occurred."));
@@ -278,7 +285,6 @@ async function main() {
         })
         .epilogue("For more information, refer to the README.md file.");
 
-    // The single, final .argv call. This is where parsing and command dispatch happen.
     await argvBuilder.argv;
 }
 

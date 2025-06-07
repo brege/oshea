@@ -1,4 +1,7 @@
-// dev/src/plugin_determiner.js
+// src/plugin_determiner.js
+// Dependencies for this module are now injected via the function arguments.
+// No direct 'require' statements for fs, path, yaml, markdownUtils here.
+
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 /**
@@ -20,7 +23,8 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
     let determinationSource = 'default';
     let localConfigOverrides = null;
 
-    const cliPluginArg = args.plugin;
+    const cliPluginArg = args.plugin; // CORRECTED: This line is now definitively present.
+
     let fmPlugin = null;
     let localCfgPlugin = null;
     let markdownFilePathAbsolute = null;
@@ -120,7 +124,7 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
     }
     // --- END NEW LOGIC ---
 
-    // const baseMdFilename = args.markdownFile ? path.basename(args.markdownFile) : 'N/A'; // This line is not used.
+    // This line is not used.
     let logMessage = `INFO: Using plugin '${pluginSpec}' (determined via ${determinationSource})`;
 
     // Only log the final determination if it's not a redundant message following an override log.

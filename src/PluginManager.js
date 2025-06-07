@@ -1,23 +1,17 @@
 // src/PluginManager.js
 const path = require('path');
-const DefaultHandler = require('./default_handler');
-const markdownUtils = require('./markdown_utils');
-const pdfGenerator = require('./pdf_generator');
-
-// Object containing core utilities to be injected into plugins
-const coreUtils = {
-    DefaultHandler,
-    markdownUtils,
-    pdfGenerator
-};
 
 class PluginManager {
     /**
-     * Constructor is now very simple.
-     * It doesn't manage config loading anymore.
+     * Constructor now accepts coreUtils as a dependency.
+     * This makes PluginManager itself testable via Dependency Injection.
+     * @param {Object} coreUtils - Object containing core utility modules (DefaultHandler, markdownUtils, pdfGenerator).
      */
-    constructor() {
-        // No setup needed here as ConfigResolver handles config.
+    constructor(coreUtils) {
+        if (!coreUtils || !coreUtils.DefaultHandler || !coreUtils.markdownUtils || !coreUtils.pdfGenerator) {
+            throw new Error('PluginManager requires DefaultHandler, markdownUtils, and pdfGenerator via coreUtils injection.');
+        }
+        this.coreUtils = coreUtils;
     }
 
     /**
@@ -50,9 +44,13 @@ class PluginManager {
             const HandlerModule = require(handlerScriptPath); 
             let handlerInstance;
 
+            // Use the injected coreUtils here
+            const { DefaultHandler, markdownUtils, pdfGenerator } = this.coreUtils;
+            const coreUtilsForPlugin = { DefaultHandler, markdownUtils, pdfGenerator };
+
             if (typeof HandlerModule === 'function' && HandlerModule.prototype && HandlerModule.prototype.constructor.name === HandlerModule.name) {
                 // Pass coreUtils to the constructor
-                handlerInstance = new HandlerModule(coreUtils);
+                handlerInstance = new HandlerModule(coreUtilsForPlugin);
             } else if (HandlerModule && typeof HandlerModule.generate === 'function') {
                 // For plain objects exporting a generate function, constructor injection isn't direct.
                 // This pattern is now discouraged if coreUtils are needed.
@@ -70,7 +68,7 @@ class PluginManager {
             }
 
             // If generate signature were to be changed for non-class plugins:
-            // return await handlerInstance.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath, coreUtils);
+            // return await handlerInstance.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath, coreUtilsForPlugin);
             return await handlerInstance.generate(
                 data,
                 pluginSpecificConfig,

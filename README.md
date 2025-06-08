@@ -167,7 +167,7 @@ md-to-pdf plugin create my-custom-cv --from cv
   - [Installation](#installation)
   - [Usage](#usage)
   - [Commands](#commands-overview)
-  - [Configuration (Advanced)](#configuration)
+  - [Configuration (Advanced)](#configuration----advanced-details)
   - [Plugins](#plugins---the-heart-of-md-to-pdf)
   - [Developers](#development--project-tracking)
 

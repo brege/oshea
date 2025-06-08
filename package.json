@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.8.7",
+  "version": "0.9.00",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -10,8 +10,8 @@
     "start": "node cli.js",
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
-    "test": "GIT_CONFIG_GLOBAL=./test/resources/dummy.gitconfig GNUPGHOME=/tmp/cm-dummy-gpg-home node ./test/run-tests.js",
-    "test:keep-output": "KEEP_OUTPUT=true GIT_CONFIG_GLOBAL=./test/resources/dummy.gitconfig GNUPGHOME=/tmp/cm-dummy-gpg-home node test/run-tests.js"  
+    "test": "node test/runner.js",
+    "test:watch": "mocha --watch"
   },
   "keywords": [
     "markdown",
@@ -41,6 +41,7 @@
     "@vscode/markdown-it-katex": "^1.1.0",
     "chalk": "^4.1.2",
     "chokidar": "^3.5.3",
+    "fs-extra": "^11.2.0",
     "glob": "^11.0.2",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
@@ -50,12 +51,16 @@
     "markdown-it-toc-done-right": "^4.2.0",
     "puppeteer": "^22.0.0",
     "strip-ansi": "^6.0.1",
-    "yargs": "^17.7.2",
-    "chalk": "^4.1.2", 
-    "fs-extra": "^11.2.0" 
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "jsdom": "^22.1.0",
+    "lodash": "^4.17.21",
+    "mocha": "^10.0.0",
+    "sinon": "^17.0.1"
   },
   "engines": {
-
     "node": ">=18.0.0"
   }
 }

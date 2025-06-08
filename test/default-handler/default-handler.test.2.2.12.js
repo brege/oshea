@@ -22,30 +22,25 @@ describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.12)', () => {
         // Mock fss.existsSync to return false, simulating a non-existent file
         this.existsSyncStub.withArgs('/input/nonexistent.md').returns(false);
 
-        let caughtError;
-        try {
-            await this.defaultHandler.generate(
-                data,
-                pluginSpecificConfig,
-                globalConfig,
-                outputDir,
-                outputFilenameOpt,
-                pluginBasePath
-            );
-            // If it reaches here, the test should fail as an error should have been thrown
-            expect.fail('Expected an error to be thrown for non-existent file.');
-        } catch (error) {
-            caughtError = error;
-        }
+        // --- MODIFIED START ---
+        // Since the method now returns null instead of throwing, we await the result directly.
+        const result = await this.defaultHandler.generate(
+            data,
+            pluginSpecificConfig,
+            globalConfig,
+            outputDir,
+            outputFilenameOpt,
+            pluginBasePath
+        );
 
-        // Assert that the expected error was thrown
-        expect(caughtError).to.be.an('error');
-        expect(caughtError.message).to.include('Input Markdown file not found');
+        // Assert that the result is null as expected on failure
+        expect(result).to.be.null;
         
         // Assert that no further processing (like PDF generation) was attempted
         expect(this.readFileStub.notCalled).to.be.true;
         expect(this.mkdirStub.notCalled).to.be.true;
         expect(this.extractFrontMatterStub.notCalled).to.be.true;
         expect(this.generatePdfStub.notCalled).to.be.true;
+        // --- MODIFIED END ---
     });
 });

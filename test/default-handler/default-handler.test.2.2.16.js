@@ -32,31 +32,21 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
     });
 
     // Test Case 1: fs.readFile fails
-    it.skip('should return null and log an error if fs.readFile fails (EXPECTED TO FAIL)', async function() {
+    it('should return null and log an error if fs.readFile fails', async function() {
         // Specifically make readFile throw an error
         this.readFileStub.withArgs(markdownFilePath, 'utf8').rejects(new Error('Mock file read error during test'));
         this.existsSyncStub.withArgs(markdownFilePath).returns(true); // Ensure it's found but fails to read
 
-        let result = null;
-        let thrownError = null;
-        try {
-            // Call the method under test
-            result = await defaultHandler.generate(
-                { markdownFilePath: markdownFilePath },
-                { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
-                {}, outputDir, null, pluginBasePath
-            );
-        } catch (e) {
-            thrownError = e; // Catch the re-thrown error
-        }
+        // --- MODIFIED START ---
+        // Call the method under test and expect a null result
+        const result = await defaultHandler.generate(
+            { markdownFilePath: markdownFilePath },
+            { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
+            {}, outputDir, null, pluginBasePath
+        );
 
         // Assertions:
-        // This expectation will fail because the code throws an error, it does not return null.
         expect(result).to.be.null;
-        
-        // Assert that an error was thrown
-        expect(thrownError).to.be.an('error');
-        expect(thrownError.message).to.include('Error during document generation: Mock file read error during test');
 
         // Assert that the error was logged to console.error
         expect(this.consoleErrorStub.calledOnce).to.be.true;
@@ -64,57 +54,46 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         
         // Ensure that generatePdf was NOT called since an earlier step failed
         expect(this.generatePdfStub.notCalled).to.be.true;
+        // --- MODIFIED END ---
     });
 
-    // You can add more 'it' blocks here for other failure points, e.g.:
-
     // Test Case 2: renderMarkdownToHtml fails
-    it.skip('should return null and log an error if renderMarkdownToHtml fails (EXPECTED TO FAIL)', async function() {
+    it('should return null and log an error if renderMarkdownToHtml fails', async function() {
         // Assume file read succeeds but rendering fails
         this.readFileStub.withArgs(markdownFilePath, 'utf8').resolves('Valid Markdown');
         this.renderMarkdownToHtmlStub.throws(new Error('Mock HTML rendering error during test'));
 
-        let result = null;
-        let thrownError = null;
-        try {
-            result = await defaultHandler.generate(
-                { markdownFilePath: markdownFilePath },
-                { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
-                {}, outputDir, null, pluginBasePath
-            );
-        } catch (e) {
-            thrownError = e;
-        }
+        // --- MODIFIED START ---
+        const result = await defaultHandler.generate(
+            { markdownFilePath: markdownFilePath },
+            { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
+            {}, outputDir, null, pluginBasePath
+        );
 
-        expect(result).to.be.null; // This will fail
-        expect(thrownError).to.be.an('error');
-        expect(thrownError.message).to.include('Error during document generation: Mock HTML rendering error during test');
+        expect(result).to.be.null;
         expect(this.consoleErrorStub.calledOnce).to.be.true;
+        expect(this.consoleErrorStub.getCall(0).args[0]).to.include('Error during document generation: Mock HTML rendering error during test');
         expect(this.generatePdfStub.notCalled).to.be.true;
+        // --- MODIFIED END ---
     });
 
     // Test Case 3: generatePdf fails
-    it.skip('should return null and log an error if generatePdf fails (EXPECTED TO FAIL)', async function() {
+    it('should return null and log an error if generatePdf fails', async function() {
         // Assume all prior steps succeed but PDF generation fails
         this.readFileStub.withArgs(markdownFilePath, 'utf8').resolves('Valid Markdown');
         this.generatePdfStub.rejects(new Error('Mock PDF generation error during test'));
 
-        let result = null;
-        let thrownError = null;
-        try {
-            result = await defaultHandler.generate(
-                { markdownFilePath: markdownFilePath },
-                { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
-                {}, outputDir, null, pluginBasePath
-            );
-        } catch (e) {
-            thrownError = e;
-        }
+        // --- MODIFIED START ---
+        const result = await defaultHandler.generate(
+            { markdownFilePath: markdownFilePath },
+            { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
+            {}, outputDir, null, pluginBasePath
+        );
 
-        expect(result).to.be.null; // This will fail
-        expect(thrownError).to.be.an('error');
-        expect(thrownError.message).to.include('Error during document generation: Mock PDF generation error during test');
+        expect(result).to.be.null;
         expect(this.consoleErrorStub.calledOnce).to.be.true;
+        expect(this.consoleErrorStub.getCall(0).args[0]).to.include('Error during document generation: Mock PDF generation error during test');
         expect(this.generatePdfStub.calledOnce).to.be.true; // generatePdf should have been called before failing
+        // --- MODIFIED END ---
     });
 });

@@ -5,8 +5,8 @@
  * configuration loading, front matter extraction, shortcode removal,
  * Markdown-to-HTML rendering, slug generation, heading preprocessing,
  * and placeholder substitution.
- * @version 1.2.2 // Updated version
- * @date 2025-05-22 // Updated date
+ * @version 1.2.3
+ * @date 2025-06-08
  */
 
 const fs = require('fs').promises;
@@ -15,7 +15,7 @@ const yaml = require('js-yaml');
 const matter = require('gray-matter');
 const MarkdownIt = require('markdown-it');
 const anchorPlugin = require('markdown-it-anchor');
-const tocPlugin = require('markdown-it-toc-done-right');
+const tocPlugin = 'markdown-it-toc-done-right';
 const mathIntegration = require('./math_integration');
 
 /**
@@ -130,7 +130,10 @@ function extractFrontMatter(markdownContent) {
 function removeShortcodes(content, patterns) {
     let processedContent = content;
     if (patterns && Array.isArray(patterns)) {
-        patterns.forEach(patternStr => {
+        // Sort patterns by length, descending, to match more specific patterns (like blocks) first.
+        const sortedPatterns = [...patterns].sort((a, b) => b.length - a.length);
+
+        sortedPatterns.forEach(patternStr => {
             if (typeof patternStr !== 'string' || patternStr.trim() === '') return;
             try {
                 const regex = new RegExp(patternStr, 'gs');
@@ -144,24 +147,32 @@ function removeShortcodes(content, patterns) {
 }
 
 /**
- * Renders a Markdown string to an HTML string using markdown-it with anchor, TOC, and potentially math plugins.
+ * Renders a Markdown string to an HTML string using markdown-it with plugins.
  *
  * @param {string} markdownContent - The Markdown content to render.
  * @param {Object} [tocOptions={enabled: false}] - Configuration for the Table of Contents plugin.
  * @param {Object} [anchorOptions={}] - Configuration for the anchor plugin (markdown-it-anchor).
  * @param {Object} [mathConfig=null] - Configuration for math rendering.
- * @param {MarkdownIt} [mdInstance] - Optional. A pre-configured instance of MarkdownIt. If not provided, a new one is created.
+ * @param {MarkdownIt} [mdInstance] - Optional. A pre-configured instance of MarkdownIt.
+ * @param {Object} [markdownItOptions={}] - Optional. Additional options for the MarkdownIt instance.
  * @returns {string} The rendered HTML string (body content).
  */
-function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, anchorOptions = {}, mathConfig = null, mdInstance) {
-    const md = mdInstance || new MarkdownIt({
+function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, anchorOptions = {}, mathConfig = null, mdInstance, markdownItOptions = {}) {
+    const baseOptions = {
         html: true,
         xhtmlOut: false,
         breaks: false,
         langPrefix: 'language-',
         linkify: true,
         typographer: true,
-    });
+    };
+
+    const finalOptions = {
+        ...baseOptions,
+        ...markdownItOptions
+    };
+
+    const md = mdInstance || new MarkdownIt(finalOptions);
 
     md.use(anchorPlugin, {
         level: anchorOptions?.level || [1, 2, 3, 4, 5, 6],
@@ -169,7 +180,7 @@ function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, 
     });
 
     if (tocOptions && tocOptions.enabled) {
-        md.use(tocPlugin, {
+        md.use(require(tocPlugin), {
             placeholder: tocOptions.placeholder || '%toc%',
             level: tocOptions.level || [1, 2, 3],
             listType: tocOptions.listType || 'ol',

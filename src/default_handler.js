@@ -114,7 +114,9 @@ class DefaultHandler {
                 markdownToRender,
                 pluginSpecificConfig.toc_options,
                 mergedPdfOptions.anchor_options,
-                pluginSpecificConfig.math
+                pluginSpecificConfig.math,
+                null, // mdInstance - not used in this flow
+                pluginSpecificConfig.markdown_it_options // Pass the options object
             );
 
             const cssFileContentsArray = [];

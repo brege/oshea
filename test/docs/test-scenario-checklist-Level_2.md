@@ -134,13 +134,13 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 2.2.1 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify the `handle` function successfully processes a basic Markdown file, extracts front matter, renders HTML, applies default CSS, and generates a PDF.
-* [ ] 2.2.2 **TEST_TARGET**: `default_handler`
+* [s] 2.2.2 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` correctly removes shortcodes from Markdown content before rendering.
 * [x] 2.2.3 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `handle` correctly substitutes placeholders in Markdown content before rendering.
-* [ ] 2.2.4 **TEST_TARGET**: `default_handler`
+* [x] 2.2.4 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` correctly applies `pluginSpecificConfig.markdown_it_options` to the MarkdownIt instance.
 * [x] 2.2.5 **TEST_TARGET**: `default_handler`
@@ -176,7 +176,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [ ] 2.2.15 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `handle` correctly handles `omit_title_heading` to prevent the title heading from being rendered when true.
-* [ ] 2.2.16 **TEST_TARGET**: `default_handler`
+* [x] 2.2.16 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` returns `null` and logs an error if any critical step in the pipeline (e.g., HTML rendering, PDF generation) fails.
 

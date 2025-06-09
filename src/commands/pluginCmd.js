@@ -1,10 +1,11 @@
-// src/commands/pluginCmd.js
+// src/commands/pluginCmd.js 
 const listCmd = require('./plugin/listCmd');
 const createCmd = require('./plugin/createCmd');
 const helpCmd = require('./plugin/helpCmd');
 const enableCmd = require('./plugin/enableCmd');
 const disableCmd = require('./plugin/disableCmd');
-const addCmd = require('./plugin/addCmd'); // Import the new add command
+const addCmd = require('./plugin/addCmd');
+const validateCmd = require('./plugin/validateCmd'); 
 
 module.exports = {
   command: 'plugin <subcommand>',
@@ -16,8 +17,9 @@ module.exports = {
       .command(helpCmd)
       .command(enableCmd)
       .command(disableCmd)
-      .command(addCmd) // Add the new command
-      .demandCommand(1, 'You need to specify a plugin subcommand (e.g., list, create, help, enable, disable, add).')
+      .command(addCmd)
+      .command(validateCmd) 
+      .demandCommand(1, 'You need to specify a plugin subcommand (e.g., list, create, help, enable, disable, add, validate).')
       .strict();
   },
   handler: (argv) => {

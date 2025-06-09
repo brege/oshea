@@ -204,7 +204,6 @@ Let's explore the order of execution for these standardization tasks, and consid
 
 
 ### Legend -- Tasks Summary
-
 | Task #                                                        | Description                     |
 |:-------------------------------------------------------------:|:--------------------------------|
 | [**T0**](#11-implement-a-centralized-mocha-configuration-t0)  | Mocha Configuration             |
@@ -233,7 +232,7 @@ The following table covers all 24 possible sequences of the remaining developmen
 | 6  |  T1  |  T4  |  T3  |  T2  | **High**       | same as #5  |
 | <span style="white-space:nowrap">**Contract - `plugins/`**</span>| [**T2**](#21-the-plugin-contract--in-situ-testing-t2) |
 | 7  |**T2**|**T1**|**T3**|**T4**| **Low-Med**    | logical but T4 work will be blocked until T1 is done  |
-| 8**|**T2**|**T3**|**T1**|**T4**| **Low-Med**    | most logical **contract first** path--fix core **on top** of plugin contract  |
+| 8  |**T2**|**T3**|**T1**|**T4**| **Low-Med**    | most logical **contract first** path--fix core **on top** of plugin contract  |
 | 9  |  T2  |  T3  |  T4  |  T1  | **Very High**  | writing E2E tests on shaky foundation + T1 last = refactor noise  |
 | 10 |  T2  |  T4  |  ..  |  ..  | **Very High**  | ..  |
 | 11 |  T2  |  T1  |  T4  |  T3  | **High**       | similar to #7 will require test rework  |
@@ -255,7 +254,7 @@ The following table covers all 24 possible sequences of the remaining developmen
 
 ### Final Plan
 
-Clearly, any implementation that does not but T4 last is much more difficult to implement.
+Clearly, any implementation that does not put T4 last is much more difficult to implement.
 
 The easiest pathway is **T1 → [T2 ↔ T3] → T4**, but any form of **[T1 ↔ T2 ↔ T3] → T4** is relatively feasible.
 
@@ -266,19 +265,41 @@ Basically, I could "sliderule" the **T?**'s over these:
 [ **Develop Code** | **Draft Code** | **Write Plan** | **Online Plan** ] to dissipate the all-too predictable accretion of content fatigue on my continued self-interest.
 
 
-### Actual Outcome:
+### Actual Outcome
 
-| Task #  | Status                                                              |
-|:-------:|:------------------------------------------------------------------- |
-| **T0**  | `.mocharc.js` and `test/runner.js` implemented                      |
-| **T1**  | `test/default-handler/*.test.*.js` now at parity                    |
-| **T2**\*| pilot via `cv` plugin: `{base-plugin, plugins/cv/cv}.schema.json`   |
-| **T3**\*| `docs/plugin-contract.md`   |
-| **T2**  | \_ |
-| **T3**  | \_ |
-| **T4**  | \_ |
-| **T5**  | \_ |
+| Task #  | Phase    | Outcome                                                                      |
+|:-------:|:---------|:-------------------------------------------------------------------------    |
+| **T0**  | ✔ coded  | `.mocharc.js` and `test/runner.js` implemented                               |
+| **T1**  | ✔ coded  | `test/default-handler/*.test.*.js` now at parity                             |
+| **T2**\*| ✔ coded  | pilot via `cv` plugin: `{base-plugin, plugins/cv/cv}.schema.json`            |
+| **T3**\*| ✔ coded  | `config.yaml` and `docs/plugin-contract.md` all values defined in contract   |
+| **T3**  | ● plan   | \_ |
+| **T2**  | ✔ coded  | in situ tests `plugins/*/test/**-e2e.test.js`                                |
+| **T4**  | ➜ study  | \_ |
+| **T5**  | ○ ...    | \_ |
 
+\
+We took a hybrid approach for the **[T2 ↔ T3]** phases:
+1. implement a schema for a pilot plugin `cv`
+2. write in-situ tests for a pilot plugin `cv`
+3. write a general contract for a plugin
+4. write in-situ tests for all bundled plugin
+5. ➜ create a validator that checks:
+   - a plugin against the contract
+   - it passes its in-situ E2E test
+   - for a valid schema
+6. write tests for the validator itself
+7. checks README front matter for {plugin-name} and {version}
+8. writes a template for an e2e test to bepopulated by archetyping/`plugin create` 
+
+#### Check Symbol Key
+| Type      | Meaning           |
+|:---------:|:------------------|
+| **✔**     | Completed         |
+| **✖**     | Incomplete        |
+| **➜**     | In Progress       |
+| **● / ○** | Active / Inactive |
+| **...**   | No thoughts yet   |
 
 
 

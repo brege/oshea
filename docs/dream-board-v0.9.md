@@ -253,7 +253,7 @@ The following table covers all 24 possible sequences of the remaining developmen
 | 23 |  T4  |  T2  |  T3  |  T1  | **Unfeasible** | .. *and* impossible to debug  |
 | 24 |  T4  |  T3  |  ..  |  ..  | **Unfeasible** | .. *and* impossible to debug  |
 
-### Conclusions
+### Final Plan
 
 Clearly, any implementation that does not but T4 last is much more difficult to implement.
 
@@ -264,3 +264,22 @@ Try starting with T1 to fix the core tests.  If you get stuck, formulate the plu
 
 Basically, I could "sliderule" the **T?**'s over these:
 [ **Develop Code** | **Draft Code** | **Write Plan** | **Online Plan** ] to dissipate the all-too predictable accretion of content fatigue on my continued self-interest.
+
+
+### Actual Outcome:
+
+| Task #  | Status                                                              |
+|:-------:|:------------------------------------------------------------------- |
+| **T0**  | `.mocharc.js` and `test/runner.js` implemented                      |
+| **T1**  | `test/default-handler/*.test.*.js` now at parity                    |
+| **T2**\*| pilot via `cv` plugin: `{base-plugin, plugins/cv/cv}.schema.json`   |
+| **T3**\*| `docs/plugin-contract.md`   |
+| **T2**  | \_ |
+| **T3**  | \_ |
+| **T4**  | \_ |
+| **T5**  | \_ |
+
+
+
+
+

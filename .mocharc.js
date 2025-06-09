@@ -30,17 +30,17 @@ module.exports = {
         ],
         'plugin-determiner': 'test/plugin_determiner/**/*.test.*.js',
         'plugins': [
-            'plugins/*/test/**/*.test.js', // Discover tests in any plugin's 'test' directory
+            'plugins/*/test/**/*.test.js', 
         ],
         'e2e': [
-            // Currently, the cv-e2e test is in the 'plugins' suite for discovery by 'all',
-            // but future E2E tests can be explicitly added here if they don't belong to a plugin.
         ],
         'all': [
-            'test/**/*.test.*.js', // Catches all main tests in the 'test/' directory
-            'plugins/*/test/**/*.test.js', // Catches all plugin-specific tests in 'plugins/*/test/'
-            'test-deprecated/test-cases/**/*.test-cases.js', // Keeping deprecated tests for now
-            'test-deprecated/cm-tests/**/*.test.js', // Keeping deprecated CM tests
+            'test/**/*.test.*.js', 
+            'plugins/*/test/**/*.test.js', 
+        ],
+        'deprecated': [
+            'test-deprecated/run-tests.js', 
+            'test-deprecated/cm-tests/run-cm-tests.js', 
         ]
     }
 };

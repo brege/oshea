@@ -149,16 +149,16 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 2.2.6 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` correctly applies `markdown-it-anchor` and `markdown-it-table-of-contents` when configured in `pluginSpecificConfig`.
-* [ ] 2.2.7 **TEST_TARGET**: `default_handler`
+* [x] 2.2.7 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `handle` correctly integrates custom MarkdownIt plugins specified in `pluginSpecificConfig.markdown_it_plugins`.
 * [x] 2.2.8 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` resolves and merges CSS files from `pluginSpecificConfig.css_files` and `raw_css_files`, injecting them into the HTML output.
-* [ ] 2.2.9 **TEST_TARGET**: `default_handler`
+* [x] 2.2.9 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `handle` correctly loads and uses a custom HTML template specified by `pluginSpecificConfig.html_template_path`.
-* [ ] 2.2.10 **TEST_TARGET**: `default_handler`
+* [x] 2.2.10 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` correctly injects `head_html`, `body_html_start`, and `body_html_end` from `pluginSpecificConfig` into the HTML template.
 * [x] 2.2.11 **TEST_TARGET**: `default_handler`

@@ -2,7 +2,7 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
 
-async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileContentsArray, htmlTemplateStr = null) {
+async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileContentsArray, htmlTemplateStr = null, injectionPoints = {}) {
     let browser = null;
     try {
         browser = await puppeteer.launch({
@@ -12,29 +12,36 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
         const page = await browser.newPage();
         
         const styles = `<style>${cssFileContentsArray.join('\n')}</style>`;
-        
-        let finalHtml;
-        if (htmlTemplateStr && typeof htmlTemplateStr === 'string') {
-            finalHtml = htmlTemplateStr
-                .replace('{{{title}}}', pdfOptions.title || 'Document')
-                .replace('{{{styles}}}', styles)
-                .replace('{{{body}}}', htmlBodyContent);
-        } else {
-            // Fallback to the default template if none is provided
-            finalHtml = `
+        const { head_html = '', body_html_start = '', body_html_end = '' } = injectionPoints;
+
+        let template = htmlTemplateStr;
+        if (!template || typeof template !== 'string') {
+            // Default template now includes all placeholders
+            template = `
 <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>${pdfOptions.title || 'Document'}</title>
-        ${styles}
+        <title>{{{title}}}</title>
+        {{{styles}}}
+        {{{head_html}}}
     </head>
     <body>
-        ${htmlBodyContent}
+        {{{body_html_start}}}
+        {{{body}}}
+        {{{body_html_end}}}
     </body>
 </html>`;
         }
         
+        const finalHtml = template
+            .replace('{{{title}}}', pdfOptions.title || 'Document')
+            .replace('{{{styles}}}', styles)
+            .replace('{{{body}}}', htmlBodyContent)
+            .replace('{{{head_html}}}', head_html)
+            .replace('{{{body_html_start}}}', body_html_start)
+            .replace('{{{body_html_end}}}', body_html_end);
+
         await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
 
         const finalPdfOptions = {

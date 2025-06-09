@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CV Plugin Schema",
+  "description": "Defines the structure for the cv.config.yaml file, extending the base plugin schema with CV-specific rules.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "base-plugin.schema.json"
+    }
+  ],
+  "properties": {
+    "pdf_options": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "description": "The paper size. For CVs, 'A4' or 'Letter' are most common.",
+          "enum": ["A4", "Letter"]
+        }
+      }
+    }
+  }
+}

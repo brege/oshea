@@ -13,11 +13,8 @@ describe('ConfigResolver getEffectiveConfig (1.1.14)', () => {
         const FAKE_BASE_PATH = '/fake/plugin-dir';
         const FAKE_RESOLVED_HANDLER_PATH = '/fake/plugin-dir/my-handler.js';
 
-        // --- FIX: Create a precise existsSync stub without a generic catch-all ---
         const existsSyncStub = sinon.stub();
-        // The main plugin config must exist to get to the handler check.
         existsSyncStub.withArgs(FAKE_PLUGIN_CONFIG_PATH).returns(true);
-        // The handler script path must NOT exist to trigger the error.
         existsSyncStub.withArgs(FAKE_RESOLVED_HANDLER_PATH).returns(false);
 
         const mockDependencies = {
@@ -26,10 +23,14 @@ describe('ConfigResolver getEffectiveConfig (1.1.14)', () => {
                 dirname: sinon.stub().returns(FAKE_BASE_PATH),
                 sep: '/',
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
-                existsSync: existsSyncStub
+                existsSync: existsSyncStub,
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({ ...a, ...b })
         };

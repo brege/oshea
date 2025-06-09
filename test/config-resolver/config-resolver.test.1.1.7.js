@@ -14,20 +14,22 @@ describe('ConfigResolver getEffectiveConfig (1.1.7)', () => {
                 resolve: sinon.stub().returnsArg(0),
                 sep: '/',
                 isAbsolute: sinon.stub().returns(true),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
                 existsSync: sinon.stub().returns(true),
-                // --- Key for this test: statSync reports it as neither a file nor a directory ---
                 statSync: sinon.stub().returns({ 
                     isDirectory: () => false, 
                     isFile: () => false 
-                })
+                }),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             }
         };
 
         const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // Stub the initializer to prevent its complex logic from running
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
 
         // Act & Assert

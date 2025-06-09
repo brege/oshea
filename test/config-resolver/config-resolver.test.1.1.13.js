@@ -10,11 +10,10 @@ describe('ConfigResolver getEffectiveConfig (1.1.13)', () => {
         // Arrange
         const existsSyncStub = sinon.stub();
         
-        // --- FIX: Add the plugin's own config path to the list of existing files ---
         existsSyncStub.withArgs('/path/to/style.css').returns(true);
         existsSyncStub.withArgs('/path/to/duplicate.css').returns(true);
         existsSyncStub.withArgs('/resolved/path/to/handler.js').returns(true);
-        existsSyncStub.withArgs('/fake/path').returns(true); // This was the missing piece
+        existsSyncStub.withArgs('/fake/path').returns(true); 
         existsSyncStub.withArgs('/path/to/non-existent.css').returns(false);
 
         const mockDependencies = {
@@ -23,10 +22,14 @@ describe('ConfigResolver getEffectiveConfig (1.1.13)', () => {
                 dirname: sinon.stub().returns(''),
                 sep: '/',
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
-                existsSync: existsSyncStub
+                existsSync: existsSyncStub,
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({ ...a, ...b })
         };

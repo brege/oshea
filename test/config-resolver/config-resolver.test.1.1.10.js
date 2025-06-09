@@ -10,9 +10,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.10)', () => {
         // Arrange
         const mockAssetResolver = { resolveAndMergeCss: sinon.stub().returns(['/path/to/markdown/styles/override.css']) };
         
-        // --- FIX: Use .callsFake for a more realistic merge simulation ---
         const deepMergeStub = sinon.stub().callsFake((base, override) => {
-            // Return a new object that represents the merge
             return { ...base, ...override, pdf_options: { ...base.pdf_options, ...override.pdf_options }};
         });
 
@@ -22,9 +20,15 @@ describe('ConfigResolver getEffectiveConfig (1.1.10)', () => {
                 dirname: sinon.stub().returns('/path/to/markdown'),
                 sep: '/',
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
-            fs: { existsSync: sinon.stub().returns(true) },
+            fs: {
+                existsSync: sinon.stub().returns(true),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
+            },
             deepMerge: deepMergeStub,
             AssetResolver: mockAssetResolver
         };
@@ -37,7 +41,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.10)', () => {
 
         const baseConfig = { handler_script: 'index.js', pdf_options: { scale: 1.0 } };
         resolver.pluginConfigLoader = {
-            // --- FIX: Return a fresh copy of the baseConfig to prevent mutation issues ---
             applyOverrideLayers: sinon.stub().resolves({
                 mergedConfig: { ...baseConfig },
                 mergedCssPaths: ['/base/style.css']

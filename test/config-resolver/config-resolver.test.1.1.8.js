@@ -11,22 +11,23 @@ describe('ConfigResolver getEffectiveConfig (1.1.8)', () => {
         const FAKE_PLUGIN_NAME = 'my-registered-plugin';
         const FAKE_CONFIG_PATH = '/path/to/a/missing/config.yaml';
 
-        // --- FIX: Provide a complete mock for the 'path' dependency ---
         const mockDependencies = {
             path: {
-                resolve: sinon.stub().returnsArg(0), // Needed by constructor
-                dirname: sinon.stub().returns(''),     // Needed by getEffectiveConfig
-                sep: '/'                               // Needed by getEffectiveConfig
+                resolve: sinon.stub().returnsArg(0),
+                dirname: sinon.stub().returns(''),
+                sep: '/',
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
-                // Key for this test: The config file does NOT exist on the filesystem
-                existsSync: sinon.stub().returns(false)
+                existsSync: sinon.stub().returns(false),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             }
         };
 
         const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // Stub the initializer and manually set the registry
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
         resolver.mergedPluginRegistry = {
             [FAKE_PLUGIN_NAME]: {

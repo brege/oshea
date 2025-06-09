@@ -14,10 +14,14 @@ describe('ConfigResolver getEffectiveConfig (1.1.9)', () => {
                 dirname: sinon.stub().returns('/fake/plugin/base/path'),
                 sep: '/',
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
-                existsSync: sinon.stub().returns(true)
+                existsSync: sinon.stub().returns(true),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({ ...a, ...b })
         };
@@ -26,7 +30,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.9)', () => {
 
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
 
-        // --- FIX: Manually set all properties that _initializeResolverIfNeeded would have created ---
         resolver.primaryMainConfig = { global_pdf_options: {}, math: {} };
 
         const finalLayeredConfig = {
@@ -39,7 +42,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.9)', () => {
                 mergedCssPaths: ['/fake/path.css']
             })
         };
-        // This was the missing piece of the setup
         resolver.mergedPluginRegistry = {
             'my-plugin': {
                 configPath: '/fake/path/to/plugin.config.yaml'

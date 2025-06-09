@@ -17,10 +17,14 @@ describe('ConfigResolver getEffectiveConfig (1.1.12)', () => {
                 dirname: sinon.stub().returns(''),
                 sep: '/',
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
-                existsSync: sinon.stub().returns(true)
+                existsSync: sinon.stub().returns(true),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: deepMergeSpy
         };
@@ -29,13 +33,12 @@ describe('ConfigResolver getEffectiveConfig (1.1.12)', () => {
 
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
 
-        // --- Key for this test: Setup global and plugin-specific math options ---
         resolver.primaryMainConfig = {
             math: {
-                engine: 'katex', // Global only
+                engine: 'katex',
                 katex_options: {
-                    displayMode: false, // Global, will be overridden
-                    fleqn: true // Global only
+                    displayMode: false,
+                    fleqn: true
                 }
             }
         };
@@ -44,8 +47,8 @@ describe('ConfigResolver getEffectiveConfig (1.1.12)', () => {
             handler_script: 'index.js',
             math: {
                 katex_options: {
-                    displayMode: true, // Plugin override
-                    throwOnError: false // Plugin only
+                    displayMode: true,
+                    throwOnError: false
                 }
             }
         };
@@ -68,18 +71,15 @@ describe('ConfigResolver getEffectiveConfig (1.1.12)', () => {
         const result = await resolver.getEffectiveConfig('my-plugin');
 
         // Assert
-        // 1. Verify that deepMerge was called for the main math object and again for katex_options
         expect(deepMergeSpy.callCount).to.be.greaterThanOrEqual(2);
 
-        // 2. Check the final merged math object
         const finalMathConfig = result.pluginSpecificConfig.math;
-        expect(finalMathConfig.engine).to.equal('katex'); // From global
+        expect(finalMathConfig.engine).to.equal('katex');
 
-        // 3. Check the final merged katex_options object
         const finalKatexOptions = finalMathConfig.katex_options;
-        expect(finalKatexOptions.displayMode).to.be.true; // Overridden by plugin
-        expect(finalKatexOptions.fleqn).to.be.true; // From global
-        expect(finalKatexOptions.throwOnError).to.be.false; // From plugin
+        expect(finalKatexOptions.displayMode).to.be.true;
+        expect(finalKatexOptions.fleqn).to.be.true;
+        expect(finalKatexOptions.throwOnError).to.be.false;
     });
 
     afterEach(() => {

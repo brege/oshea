@@ -10,9 +10,8 @@ describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {
     let resolver;
 
     beforeEach(async () => {
-        // --- FIX: Create a more realistic mock instance for PluginConfigLoader ---
         const mockPluginConfigLoaderInstance = {
-            _rawPluginYamlCache: {} // Ensure the cache property exists
+            _rawPluginYamlCache: {}
         };
         const MockPluginConfigLoader = sinon.stub().returns(mockPluginConfigLoaderInstance);
         
@@ -26,8 +25,25 @@ describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {
         const MockMainConfigLoader = sinon.stub().returns(mockMainConfigLoaderInstance);
 
         mockDependencies = {
-            fs: { existsSync: sinon.stub().returns(true) },
-            loadYamlConfig: sinon.stub(), // Injecting the function directly now
+            fs: {
+                existsSync: sinon.stub().returns(true),
+                readFileSync: sinon.stub().returns('{}')
+            },
+            path: {
+                join: (...args) => args.join('/'),
+                resolve: sinon.stub().returnsArg(0),
+                dirname: sinon.stub().returns('/fake/plugin'),
+                // FIX: Added the missing basename function to the mock
+                basename: (p, ext) => {
+                    const base = p.split('/').pop();
+                    if (ext && base.endsWith(ext)) {
+                        return base.slice(0, -ext.length);
+                    }
+                    return base;
+                }
+            },
+            deepMerge: (a, b) => ({...a, ...b}),
+            loadYamlConfig: sinon.stub(),
             AssetResolver: {
                 resolveAndMergeCss: sinon.stub()
             },
@@ -37,6 +53,11 @@ describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {
         };
 
         resolver = new ConfigResolver(null, false, false, mockDependencies);
+        // We manually inject ajv with a mock schema for validation
+        resolver.ajv = {
+            getSchema: sinon.stub().returns({ schema: {} }),
+            compile: sinon.stub().returns(() => true)
+        };
         await resolver._initializeResolverIfNeeded();
     });
 
@@ -54,16 +75,21 @@ describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {
         const resolvedCssPaths = ['/fake/plugin/style.css'];
 
         mockDependencies.loadYamlConfig.withArgs(fakeConfigPath).resolves(rawConfigData);
-        mockDependencies.AssetResolver.resolveAndMergeCss.returns(resolvedCssPaths);
+        
+        mockDependencies.AssetResolver.resolveAndMergeCss
+            .withArgs(rawConfigData.css_files, fakeAssetsPath, [], false, fakePluginName, fakeConfigPath)
+            .returns(resolvedCssPaths);
         
         // Act
         const result = await resolver._loadPluginBaseConfig(fakeConfigPath, fakeAssetsPath, fakePluginName);
 
         // Assert
-        expect(mockDependencies.loadYamlConfig.calledWith(fakeConfigPath)).to.be.true;
-        expect(mockDependencies.AssetResolver.resolveAndMergeCss.calledWith(
+        expect(mockDependencies.loadYamlConfig.calledOnceWith(fakeConfigPath)).to.be.true;
+        
+        expect(mockDependencies.AssetResolver.resolveAndMergeCss.calledOnce).to.be.true;
+        sinon.assert.calledWith(mockDependencies.AssetResolver.resolveAndMergeCss,
             rawConfigData.css_files, fakeAssetsPath, [], false, fakePluginName, fakeConfigPath
-        )).to.be.true;
+        );
 
         expect(result).to.be.an('object');
         expect(result.rawConfig).to.deep.equal(rawConfigData);

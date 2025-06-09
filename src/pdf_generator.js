@@ -12,14 +12,14 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
         const page = await browser.newPage();
         
         const styles = `<style>${cssFileContentsArray.join('\n')}</style>`;
-        const { head_html = '', body_html_start = '', body_html_end = '' } = injectionPoints;
+        const { head_html = '', body_html_start = '', body_html_end = '', lang = 'en' } = injectionPoints;
 
         let template = htmlTemplateStr;
         if (!template || typeof template !== 'string') {
             // Default template now includes all placeholders
             template = `
 <!DOCTYPE html>
-<html>
+<html lang="{{{lang}}}">
     <head>
         <meta charset="UTF-8">
         <title>{{{title}}}</title>
@@ -35,6 +35,7 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
         }
         
         const finalHtml = template
+            .replace('{{{lang}}}', lang)
             .replace('{{{title}}}', pdfOptions.title || 'Document')
             .replace('{{{styles}}}', styles)
             .replace('{{{body}}}', htmlBodyContent)

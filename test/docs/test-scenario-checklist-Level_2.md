@@ -134,7 +134,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 2.2.1 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify the `handle` function successfully processes a basic Markdown file, extracts front matter, renders HTML, applies default CSS, and generates a PDF.
-* [s] 2.2.2 **TEST_TARGET**: `default_handler`
+* [S] 2.2.2 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` correctly removes shortcodes from Markdown content before rendering.
 * [x] 2.2.3 **TEST_TARGET**: `default_handler`
@@ -173,7 +173,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 2.2.14 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` correctly applies the `lang` attribute from front matter to the HTML `<html>` tag.
-* [ ] 2.2.15 **TEST_TARGET**: `default_handler`
+* [x] 2.2.15 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `handle` correctly handles `omit_title_heading` to prevent the title heading from being rendered when true.
 * [x] 2.2.16 **TEST_TARGET**: `default_handler`
@@ -210,7 +210,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 2.3.8 **TEST_TARGET**: `pdf_generator`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `generatePdf` returns `null` and logs an error if PDF generation itself fails (e.g., invalid `pdfOptions`).
-* [s] 2.3.9 **TEST_TARGET**: `pdf_generator`
+* [S] 2.3.9 **TEST_TARGET**: `pdf_generator`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `generatePdf` ensures the browser and page are properly closed after PDF generation, even if errors occur.
 * [x] 2.3.10 **TEST_TARGET**: `pdf_generator`

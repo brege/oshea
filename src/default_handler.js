@@ -91,7 +91,8 @@ class DefaultHandler {
 
             let markdownToRender = cleanedContent;
             const fmTitleForH1 = processedFmData.title;
-            if (pluginSpecificConfig.inject_fm_title_as_h1 && fmTitleForH1) {
+            
+            if (pluginSpecificConfig.inject_fm_title_as_h1 && !pluginSpecificConfig.omit_title_heading && fmTitleForH1) {
                 markdownToRender = ensureAndPreprocessHeading(
                     cleanedContent,
                     String(fmTitleForH1),

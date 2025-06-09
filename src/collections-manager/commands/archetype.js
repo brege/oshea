@@ -116,7 +116,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
     const sourcePluginIdPascal = cmUtils.toPascalCase(sourcePluginIdForReplacement);
     const newArchetypeNamePascal = cmUtils.toPascalCase(newArchetypeName);
     const filesToProcessForStringReplacement = [];
-    const processExtensions = ['.js', '.yaml', '.yml', '.css', '.md'];
+    const processExtensions = ['.js', '.yaml', '.yml', '.css', '.md', '.json'];
 
     if (fss.existsSync(originalConfigPathInArchetype)) {
       if (originalConfigPathInArchetype.toLowerCase() !== newConfigPathInArchetype.toLowerCase()) {
@@ -182,6 +182,26 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
       messages.push(`Original config file ${originalSourceConfigFilename} not found in copied archetype at ${archetypePath}. Cannot rename or modify.`);
       console.warn(chalk.yellow(`WARN (CM:archetypePlugin): ${messages[messages.length - 1]}`));
     }
+    
+    // --- NEW: Schema File Handling ---
+    const filesInArchetype = await fs.readdir(archetypePath);
+    const originalSchemaFile = filesInArchetype.find(f => f.toLowerCase() === `${sourcePluginIdForReplacement}.schema.json`);
+
+    if (originalSchemaFile) {
+        const oldSchemaPath = path.join(archetypePath, originalSchemaFile);
+        const newSchemaFilename = `${newArchetypeName}.schema.json`;
+        const newSchemaPath = path.join(archetypePath, newSchemaFilename);
+        
+        if (oldSchemaPath.toLowerCase() !== newSchemaPath.toLowerCase()) {
+            await fs.rename(oldSchemaPath, newSchemaPath);
+            messages.push(`Renamed schema file to ${newSchemaFilename}.`);
+        }
+        
+        if (!filesToProcessForStringReplacement.includes(newSchemaPath)) {
+            filesToProcessForStringReplacement.push(newSchemaPath);
+        }
+    }
+    // --- END NEW ---
 
     const currentArchetypeFiles = await fs.readdir(archetypePath, { withFileTypes: true });
     for (const dirent of currentArchetypeFiles) {

@@ -18,21 +18,23 @@ describe('ConfigResolver getEffectiveConfig (1.1.6)', () => {
                 resolve: sinon.stub().returnsArg(0),
                 sep: '/',
                 isAbsolute: sinon.stub().returns(true),
-                dirname: sinon.stub().returns(PLUGIN_BASE_PATH), // Key mock for this test
+                dirname: sinon.stub().returns(PLUGIN_BASE_PATH),
                 basename: sinon.stub().returns('my-plugin'),
-                extname: sinon.stub().returns('.yaml')
+                extname: sinon.stub().returns('.yaml'),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
                 existsSync: sinon.stub().returns(true),
-                // Key mock: When stat is called on the path, report it as a file
-                statSync: sinon.stub().returns({ isDirectory: () => false, isFile: () => true })
+                statSync: sinon.stub().returns({ isDirectory: () => false, isFile: () => true }),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({...a, ...b})
         };
 
         resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // Stub and manually set properties to isolate the test
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
         resolver.pluginConfigLoader = {
             applyOverrideLayers: sinon.stub().resolves({
@@ -63,7 +65,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.6)', () => {
         const resolvedConfigPath = callArgs[0];
         const resolvedBasePath = callArgs[1];
 
-        // Assert that the paths were correctly determined
         expect(resolvedConfigPath).to.equal(PLUGIN_CONFIG_FILE_PATH);
         expect(resolvedBasePath).to.equal(PLUGIN_BASE_PATH);
     });

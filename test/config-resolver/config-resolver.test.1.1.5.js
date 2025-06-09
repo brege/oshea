@@ -27,7 +27,9 @@ describe('ConfigResolver getEffectiveConfig (1.1.5)', () => {
             },
             fs: {
                 existsSync: sinon.stub().returns(true),
-                statSync: sinon.stub().returns({ isDirectory: () => true, isFile: () => false })
+                statSync: sinon.stub().returns({ isDirectory: () => true, isFile: () => false }),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}') 
             },
             deepMerge: (a, b) => ({...a, ...b})
         };
@@ -36,7 +38,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.5)', () => {
 
         resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // --- FIX: Manually set the properties that _initializeResolverIfNeeded would have created ---
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
         resolver.pluginConfigLoader = {
             applyOverrideLayers: sinon.stub().resolves({

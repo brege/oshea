@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const Ajv = require('ajv');
 const { loadYamlConfig, deepMerge } = require('./config_utils');
 const PluginRegistryBuilder = require('./PluginRegistryBuilder');
 const MainConfigLoader = require('./main_config_loader');
@@ -40,7 +41,69 @@ class ConfigResolver {
         this.primaryMainConfigPathActual = null;
         this.primaryMainConfigLoadReason = null;
         this.resolvedCollRoot = null;
+
+        this.ajv = new Ajv({ allErrors: true });
+        const baseSchemaPath = this.dependencies.path.join(this.projectRoot, 'src', 'base-plugin.schema.json');
+        if (this.dependencies.fs.existsSync(baseSchemaPath)) {
+            const baseSchema = JSON.parse(this.dependencies.fs.readFileSync(baseSchemaPath, 'utf8'));
+            this.ajv.addSchema(baseSchema, 'base-plugin.schema.json');
+        } else {
+            console.error("CRITICAL: Base plugin schema not found. Validation will not work.");
+        }
     }
+
+    _validatePluginConfig(pluginName, configData, pluginConfigPath) {
+        const baseSchema = this.ajv.getSchema('base-plugin.schema.json').schema;
+        let specificSchema = {};
+        const pluginSchemaPath = this.dependencies.path.join(this.dependencies.path.dirname(pluginConfigPath), `${this.dependencies.path.basename(pluginConfigPath, '.config.yaml')}.schema.json`);
+    
+        if (this.dependencies.fs.existsSync(pluginSchemaPath)) {
+            try {
+                specificSchema = JSON.parse(this.dependencies.fs.readFileSync(pluginSchemaPath, 'utf8'));
+            } catch (e) {
+                console.warn(`WARN: Could not read or parse schema file at ${pluginSchemaPath}. Error: ${e.message}`);
+            }
+        }
+    
+        // Create a strict version of the schema for typo-checking
+        const strictSchema = this.dependencies.deepMerge(baseSchema, specificSchema);
+        
+        // Safely set additionalProperties to false for all defined objects
+        const objectsToRestrict = ['pdf_options', 'params', 'math', 'toc_options'];
+        if (strictSchema.properties) {
+            objectsToRestrict.forEach(key => {
+                if (strictSchema.properties[key] && strictSchema.properties[key].type === 'object') {
+                    strictSchema.properties[key].additionalProperties = false;
+                }
+            });
+        }
+    
+        const validate = this.ajv.compile(strictSchema);
+        const isValid = validate(configData);
+    
+        if (!isValid) {
+            const typoErrors = validate.errors.filter(e => e.keyword === 'additionalProperties');
+            const otherErrors = validate.errors.filter(e => e.keyword !== 'additionalProperties');
+
+            if (typoErrors.length > 0) {
+                console.warn(`WARN: Configuration for plugin '${pluginName}' has possible typos or unknown properties:`);
+                typoErrors.forEach(err => {
+                    const property = err.params.additionalProperty;
+                    const path = err.instancePath ? `${err.instancePath.substring(1)}.${property}`.replace(/\//g, '.') : property;
+                    console.warn(`  - Unknown property '${path}' found in '${pluginConfigPath}'.`);
+                });
+                console.warn(`  INFO: To see the final effective configuration, run 'md-to-pdf config --plugin ${pluginName}'`);
+            }
+            
+            if (otherErrors.length > 0) {
+                console.warn(`WARN: Configuration for plugin '${pluginName}' has validation errors:`);
+                otherErrors.forEach(err => {
+                    console.warn(`  - Path '${err.instancePath || '/'}': ${err.message}`);
+                });
+            }
+        }
+    }
+
 
     async _initializeResolverIfNeeded() {
         if (this._initialized) return;
@@ -113,6 +176,10 @@ class ConfigResolver {
         }
         try {
             const rawConfig = await this.dependencies.loadYamlConfig(configFilePath);
+            
+            // --- NEW: Perform validation after loading the raw config ---
+            this._validatePluginConfig(pluginName, rawConfig, configFilePath);
+            
             const initialCssPaths = this.dependencies.AssetResolver.resolveAndMergeCss(
                 rawConfig.css_files, assetsBasePath, [], false,
                 pluginName, configFilePath

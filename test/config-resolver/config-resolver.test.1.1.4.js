@@ -19,12 +19,16 @@ describe('ConfigResolver getEffectiveConfig (1.1.4)', () => {
                 dirname: sinon.stub().returns(FAKE_BASE_PATH),
                 resolve: sinon.stub().returnsArg(0),
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/') 
             },
             fs: {
-                existsSync: sinon.stub().returns(true)
+                existsSync: sinon.stub().returns(true),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}') 
             },
-            deepMerge: (a, b) => ({...a, ...b}) // Simple merge for this test
+            deepMerge: (a, b) => ({...a, ...b})
         };
 
         resolver = new ConfigResolver(null, false, false, mockDependencies);
@@ -37,7 +41,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.4)', () => {
             }
         };
 
-        // --- FIX: Manually set the properties that _initializeResolverIfNeeded would have created ---
         resolver.pluginConfigLoader = {
             applyOverrideLayers: sinon.stub().resolves({
                 mergedConfig: { handler_script: 'index.js' },

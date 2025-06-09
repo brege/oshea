@@ -1,7 +1,7 @@
 // test/config-resolver/config-resolver.test.1.1.11.js
 const { expect } = require('chai');
 const sinon = require('sinon');
-const _ = require('lodash'); // Use the real lodash for a realistic merge simulation
+const _ = require('lodash'); 
 const ConfigResolver = require('../../src/ConfigResolver');
 
 // Test suite for Scenario 1.1.11
@@ -9,7 +9,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
 
     it('should correctly merge global and plugin-specific pdf_options', async () => {
         // Arrange
-        // Spy on a real deepMerge implementation to verify calls and get real merge behavior
         const deepMergeSpy = sinon.spy(_, 'merge');
 
         const mockDependencies = {
@@ -18,10 +17,14 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
                 dirname: sinon.stub().returns(''),
                 sep: '/',
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
-                existsSync: sinon.stub().returns(true)
+                existsSync: sinon.stub().returns(true),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: deepMergeSpy
         };
@@ -30,11 +33,10 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
 
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
 
-        // --- Key for this test: Setup global and plugin-specific PDF options ---
         resolver.primaryMainConfig = {
             global_pdf_options: {
-                format: 'A4', // Global only
-                margin: { top: '1in', bottom: '1in' } // Global margin
+                format: 'A4',
+                margin: { top: '1in', bottom: '1in' } 
             },
             math: {}
         };
@@ -42,8 +44,8 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
         const pluginSpecificConfig = {
             handler_script: 'index.js',
             pdf_options: {
-                printBackground: true, // Plugin only
-                margin: { top: '0.5in', left: '0.5in' } // Plugin margin (should override top)
+                printBackground: true,
+                margin: { top: '0.5in', left: '0.5in' }
             }
         };
 
@@ -65,19 +67,16 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
         const result = await resolver.getEffectiveConfig('my-plugin');
 
         // Assert
-        // 1. Verify that deepMerge was called for pdf_options and again for the nested margin
         expect(deepMergeSpy.callCount).to.be.greaterThanOrEqual(2);
 
-        // 2. Check the final merged pdf_options object
         const finalPdfOptions = result.pluginSpecificConfig.pdf_options;
-        expect(finalPdfOptions.format).to.equal('A4'); // From global
-        expect(finalPdfOptions.printBackground).to.be.true; // From plugin
+        expect(finalPdfOptions.format).to.equal('A4');
+        expect(finalPdfOptions.printBackground).to.be.true;
         
-        // 3. Check the final merged margin object
         const finalMargin = finalPdfOptions.margin;
-        expect(finalMargin.top).to.equal('0.5in'); // Overridden by plugin
-        expect(finalMargin.bottom).to.equal('1in'); // From global
-        expect(finalMargin.left).to.equal('0.5in'); // From plugin
+        expect(finalMargin.top).to.equal('0.5in');
+        expect(finalMargin.bottom).to.equal('1in');
+        expect(finalMargin.left).to.equal('0.5in');
     });
 
     afterEach(() => {

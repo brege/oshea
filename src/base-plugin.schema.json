@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Base Schema for md-to-pdf Plugins",
+  "description": "Defines the common set of properties and rules that all md-to-pdf plugins should adhere to.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "A brief, user-facing description of the plugin's purpose.",
+      "type": "string"
+    },
+    "handler_script": {
+      "description": "The path to the Node.js handler script, relative to the plugin's configuration file.",
+      "type": "string"
+    },
+    "css_files": {
+      "description": "An array of CSS file paths to be applied. Paths are relative to the configuration file.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pdf_options": {
+      "description": "Default Puppeteer PDF generation options for this plugin. These can be overridden by user or project configs.",
+      "type": "object",
+      "properties": {
+        "format": { "type": "string" },
+        "width": { "type": "string" },
+        "height": { "type": "string" },
+        "printBackground": { "type": "boolean" },
+        "landscape": { "type": "boolean" },
+        "margin": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "params": {
+        "description": "Defines default parameters specific to this plugin, which can be used as placeholders.",
+        "type": "object",
+        "additionalProperties": true
+    },
+    "math": {
+      "description": "Configuration for KaTeX math rendering.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "toc_options": {
+      "description": "Configuration for the Table of Contents.",
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "watch_sources": {
+      "description": "Defines additional files or directories for md-to-pdf to monitor in --watch mode.",
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "inject_fm_title_as_h1": {
+      "description": "If true, injects the 'title' from front matter as the main H1 heading.",
+      "type": "boolean"
+    },
+    "aggressiveHeadingCleanup": {
+      "description": "If true, removes existing H1/H2 headings from the Markdown content.",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "description",
+    "handler_script"
+  ]
+}

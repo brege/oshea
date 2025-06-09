@@ -14,10 +14,14 @@ describe('ConfigResolver getEffectiveConfig (1.1.15)', () => {
                 dirname: sinon.stub().returns(''),
                 sep: '/',
                 basename: sinon.stub().returns(''),
-                extname: sinon.stub().returns('')
+                extname: sinon.stub().returns(''),
+                // FIX: Added path.join
+                join: (...args) => args.join('/')
             },
             fs: {
-                existsSync: sinon.stub().returns(true)
+                existsSync: sinon.stub().returns(true),
+                // FIX: Added fs.readFileSync
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({ ...a, ...b })
         };
@@ -28,7 +32,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.15)', () => {
         resolver.primaryMainConfig = { global_pdf_options: {}, math: {} };
         resolver.mergedPluginRegistry = { 'my-plugin': { configPath: '/fake/path' } };
         
-        // --- Key for this test: A spy on a method called AFTER the cache check ---
         const applyOverridesSpy = sinon.stub().resolves({
             mergedConfig: { handler_script: 'index.js' },
             mergedCssPaths: []
@@ -43,15 +46,11 @@ describe('ConfigResolver getEffectiveConfig (1.1.15)', () => {
         });
         
         // Act
-        // Call the method twice with the exact same arguments
         const result1 = await resolver.getEffectiveConfig('my-plugin', { some: 'override' });
         const result2 = await resolver.getEffectiveConfig('my-plugin', { some: 'override' });
 
         // Assert
-        // 1. Verify that the deep logic was only executed once
         expect(applyOverridesSpy.callCount).to.equal(1);
-
-        // 2. Verify that both calls returned the same result object
         expect(result1).to.deep.equal(result2);
     });
 

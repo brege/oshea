@@ -170,7 +170,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 2.2.13 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `handle` calls `pdfGenerator.generatePdf` with the correctly prepared HTML content and PDF options.
-* [ ] 2.2.14 **TEST_TARGET**: `default_handler`
+* [x] 2.2.14 **TEST_TARGET**: `default_handler`
     **TEST_TYPE:** `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `handle` correctly applies the `lang` attribute from front matter to the HTML `<html>` tag.
 * [ ] 2.2.15 **TEST_TARGET**: `default_handler`

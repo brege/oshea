@@ -171,7 +171,8 @@ class DefaultHandler {
             const injectionPoints = {
                 head_html: pluginSpecificConfig.head_html || '',
                 body_html_start: pluginSpecificConfig.body_html_start || '',
-                body_html_end: pluginSpecificConfig.body_html_end || ''
+                body_html_end: pluginSpecificConfig.body_html_end || '',
+                lang: processedFmData.lang || 'en'
             };
 
             await generatePdf(

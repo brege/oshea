@@ -293,6 +293,26 @@ The `collections-manager` module is now considered fully tested at the L2 subsys
 
 ---
 
+## L2Y2: `default_handler` - Parity and Feature Implementation (Phase 2)
+
+This phase addressed several failing and pending tests for the `default_handler` module, bringing it closer to full test parity and implementing planned features.
+
+* **Robust Error Handling (2.2.12, 2.2.16):** The core error handling contract of the `generate` method was changed to return `null` on failure instead of throwing an error. Corresponding integration tests were updated to assert for this `null` return value, making the handler's behavior more predictable for programmatic use.
+
+* **Feature Implementation (2.2.4, 2.2.7, 2.2.9, 2.2.10, 2.2.14, 2.2.15):** Several new features were successfully implemented and brought under test coverage:
+    * Passing custom `markdown-it` options via `markdown_it_options`.
+    * Integrating custom `markdown-it` plugins via `markdown_it_plugins`.
+    * Using custom HTML templates via `html_template_path`.
+    * Injecting HTML snippets into the `<head>` and `<body>`.
+    * Setting the HTML `lang` attribute from front matter.
+    * Allowing suppression of automatic title injection via `omit_title_heading`.
+
+* **Deferred Item (2.2.2):** The test for shortcode removal was deferred. While the underlying implementation in `markdown_utils` was improved, the integration test proved brittle. The recommended future solution is to replace the regex-based approach with a more robust AST parser.
+
+With these changes, the `default_handler` module is now more robust, extensible, and fully aligned with its Level 2 integration test specifications, barring the deferred item.
+
+---
+
 2.3.9: Browser and Page Closure (Covered by other tests)
 
 * **Limitation:** This scenario, "Verify `generatePdf` ensures the browser and page are properly closed after PDF generation, even if errors occur," is found to be comprehensively covered by existing Level 2 integration tests for `pdf_generator.js`. Assertions in **Scenario 2.3.1** (success path), **Scenario 2.3.6** (Puppeteer launch failure), **Scenario 2.3.7** (page content setting failure), and **Scenario 2.3.8** (PDF generation failure) already verify that the browser is correctly closed (or not opened if launch failed) across various execution paths within `src/pdf_generator.js`.

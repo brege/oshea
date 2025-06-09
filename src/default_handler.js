@@ -158,11 +158,22 @@ class DefaultHandler {
                 console.warn(warningMsg);
             }
 
+            let htmlTemplateContent = null;
+            if (pluginSpecificConfig.html_template_path) {
+                const templatePath = path.resolve(pluginBasePath, pluginSpecificConfig.html_template_path);
+                if (require('fs').existsSync(templatePath)) {
+                    htmlTemplateContent = await fs.readFile(templatePath, 'utf8');
+                } else {
+                    console.warn(`WARN: HTML template not found at specified path: ${templatePath}`);
+                }
+            }
+
             await generatePdf(
                 htmlBodyContent,
                 outputPdfPath,
                 mergedPdfOptions, 
-                cssFileContentsArray
+                cssFileContentsArray,
+                htmlTemplateContent
             );
 
             return outputPdfPath;

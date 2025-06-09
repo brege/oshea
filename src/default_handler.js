@@ -168,12 +168,19 @@ class DefaultHandler {
                 }
             }
 
+            const injectionPoints = {
+                head_html: pluginSpecificConfig.head_html || '',
+                body_html_start: pluginSpecificConfig.body_html_start || '',
+                body_html_end: pluginSpecificConfig.body_html_end || ''
+            };
+
             await generatePdf(
                 htmlBodyContent,
                 outputPdfPath,
                 mergedPdfOptions, 
                 cssFileContentsArray,
-                htmlTemplateContent
+                htmlTemplateContent,
+                injectionPoints
             );
 
             return outputPdfPath;

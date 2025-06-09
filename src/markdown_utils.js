@@ -5,7 +5,7 @@
  * configuration loading, front matter extraction, shortcode removal,
  * Markdown-to-HTML rendering, slug generation, heading preprocessing,
  * and placeholder substitution.
- * @version 1.2.3
+ * @version 1.2.4
  * @date 2025-06-08
  */
 
@@ -155,9 +155,10 @@ function removeShortcodes(content, patterns) {
  * @param {Object} [mathConfig=null] - Configuration for math rendering.
  * @param {MarkdownIt} [mdInstance] - Optional. A pre-configured instance of MarkdownIt.
  * @param {Object} [markdownItOptions={}] - Optional. Additional options for the MarkdownIt instance.
+ * @param {Array} [customPlugins=[]] - Optional. An array of custom markdown-it plugins to use.
  * @returns {string} The rendered HTML string (body content).
  */
-function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, anchorOptions = {}, mathConfig = null, mdInstance, markdownItOptions = {}) {
+function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, anchorOptions = {}, mathConfig = null, mdInstance, markdownItOptions = {}, customPlugins = []) {
     const baseOptions = {
         html: true,
         xhtmlOut: false,
@@ -173,6 +174,23 @@ function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, 
     };
 
     const md = mdInstance || new MarkdownIt(finalOptions);
+
+    if (Array.isArray(customPlugins)) {
+        customPlugins.forEach(pluginConfig => {
+            try {
+                if (Array.isArray(pluginConfig)) {
+                    const [pluginName, pluginOptions] = pluginConfig;
+                    md.use(require(pluginName), pluginOptions || {});
+                } else if (typeof pluginConfig === 'string') {
+                    md.use(require(pluginConfig));
+                } else {
+                    console.warn(`Invalid markdown-it plugin configuration found:`, pluginConfig);
+                }
+            } catch (e) {
+                console.error(`Error applying custom markdown-it plugin '${pluginConfig}': ${e.message}`);
+            }
+        });
+    }
 
     md.use(anchorPlugin, {
         level: anchorOptions?.level || [1, 2, 3, 4, 5, 6],

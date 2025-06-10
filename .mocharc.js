@@ -1,4 +1,5 @@
-// dev/.mocharc.js
+// .mocharc.js
+
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 
@@ -26,7 +27,9 @@ const paths = {
     plugin_validator: 'test/plugin-validator/**/*.js',
     // E2E Plugin Tests
     plugin_e2e: 'plugins/**/test/*.test.js',
-    deprecated: 'test-deprecated/**/*.js'
+    deprecated: 'test-deprecated/**/*.js',
+    // T4 E2E Tests
+    e2e: 'test/e2e/**/*.js'
 };
 
 const groups = {
@@ -63,17 +66,24 @@ const groups = {
     // Individual Module Groups
     validator: [paths.plugin_validator],
     e2e: [paths.plugin_e2e], 
+    t4: [paths.e2e],
     deprecated: [paths.deprecated],
-    // All Tests
-    all: ['test/**/*.js']
+    all: ['test/**/*.js', 'plugins/**/test/*.test.js']
 };
 
 const spec = groups[group] || groups.all;
 
-module.exports = {
-    require: 'test/setup.js',
+// Start with the base config.
+const mochaConfig = {
     spec: spec,
     timeout: 5000,
     exit: true,
     color: true,
 };
+
+// Conditionally add the 'require' property only if the group is not 't4'.
+if (group !== 't4') {
+    mochaConfig.require = 'test/setup.js';
+}
+
+module.exports = mochaConfig;

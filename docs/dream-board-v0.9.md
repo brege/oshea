@@ -328,8 +328,24 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
 
 
 ---
+# Initial Trilogy of Tasks
 
-# Trilogy of Tasks
+ 1. [**T0**] Implement a Centralized Mocha Configuration [T0]  **easy**
+ 2. [**T1**] Implement the Default Handler Module [T1]  **easy**
+ 3. [**T3**] Implement the schema for a Pilot Plugin [T3]
+
+The third task is a little more involved.  We should also use this to determine 
+how we can provide the protocol version to follow.
+
+| Protocol | File Structure Check | E2E Test Check | Self-Activation Check | How it's Implemented in the "Plugin Contract" Service |
+| :--- | :---: | :---: | :---: | :--- |
+| **v1** | **Required** | Ignored | Ignored | Logic is defined in `v1.js`. |
+| **v2** | **Required** | **Required** | Ignored | `v2.js` **imports** the structure check from `v1.js` and adds the new test check. |
+| **v3** | Ignored | **Required** | **Required** | `v3.js` **imports** the test check from `v2.js`, adds the new self-activation check, and **omits** the structure check. |
+
+---
+
+# Final Trilogy of Tasks
 
  1. [**T0->T3**] Checkpoint: Current Test Suite Status
  2. [**T4**] Draft the E2E manifest testing procdure 
@@ -441,33 +457,19 @@ const os = require('os');
 const cliPath = path.resolve(__dirname, '../cli.js');
 
 class TestHarness {
-    constructor() {
-        this.sandboxDir = '';
-    }
+    constructor() { this.sandboxDir = ''; }
 
     // Creates a clean, temporary directory for a test run
-    async createSandbox() {
-        this.sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), 'md-to-pdf-e2e-'));
-        // We can pre-populate it with mock configs, plugins, etc.
-        return this.sandboxDir;
-    }
+    async createSandbox() { ... }
+    // returns the path to the sandbox directory
 
     // Executes the CLI with given arguments
-    runCli(args = []) {
-        return new Promise((resolve) => {
-            const process = spawn('node', [cliPath, ...args], { cwd: this.sandboxDir });
-            let stdout = '';
-            let stderr = '';
-            process.stdout.on('data', (data) => (stdout += data.toString()));
-            process.stderr.on('data', (data) => (stderr += data.toString()));
-            process.on('close', (exitCode) => resolve({ exitCode, stdout, stderr }));
-        });
-    }
+    runCli(args = []) { ... }
+    // returns a Promise that resolves to { exitCode, stdout, stderr }
 
     // Cleans up the temporary directory
-    cleanup() {
-        return fs.remove(this.sandboxDir);
-    }
+    cleanup() { return fs.remove(this.sandboxDir); }
+    
 }
 
 module.exports = { TestHarness };
@@ -504,32 +506,18 @@ For complex, multi-step user stories, we'll write dedicated test files. These pr
 
 **`test-e2e/collections.test.js` Skeleton**
 ```javascript
-const { expect } = require('chai');
-const { TestHarness } = require('./harness.js');
-
+// ...
 describe('E2E - Plugin and Collection Management', function() {
-    let harness;
 
-    beforeEach(async () => {
-        harness = new TestHarness();
-        await harness.createSandbox();
-    });
+    beforeEach( ... )
+    // creates a clean sandbox
 
-    afterEach(async () => {
-        await harness.cleanup();
-    });
+    afterEach( ... )
+    // cleans up the sandbox
 
-    it('should allow adding, enabling, using, and removing a plugin', async () => {
-        // Step 1: Add a collection
-        const addResult = await harness.runCli(['collection', 'add', 'https://github.com/user/mock-collection.git']);
-        expect(addResult.exitCode).to.equal(0);
-
-        // Step 2: Enable a plugin from it
-        const enableResult = await harness.runCli(['plugin', 'enable', 'mock-plugin', '--as', 'my-plugin']);
-        expect(enableResult.exitCode).to.equal(0);
+    it('should allow adding, enabling, using, and removing a plugin', async () => { ... });
+    // performs a series of steps
         
-        // ...and so on.
-    });
 });
 ```
 

@@ -145,22 +145,26 @@ This combines a practical and reproducible document generation workflow that is 
       interactive toy diagram, and a section for a few sample
       problems.
   Assisted with an interaction spec, could an AI then be initialized to use the project's archetyping to generate all necessary files?
-  - that is, `index.js`, `*.config.yaml`, CSS, example markdown, etc.
+  - i.e., `README.md`, `index.js`, `*.config.yaml`, `*.css`, `*-example.md`, `test/*.e2e.test.js`, etc.
 - **Actions**
-  1. **"Interaction Specification"**  
+  1. **Interaction Specification**\
      Document the precise inputs, outputs, and APIs of the plugin system.
      This goes beyond the user-facing `plugin-development.md` and details the internal mechanics in a way an LLM can parse.
-  2. **Refine Plugin Archetype Command**  
+  2. **Refine Plugin Archetype Command**\
      Adapt the `plugin create` command to be more machine toolable by providing a well-commented skeleton that can be reasonably populated.
-  3. **Create an Example Prompting Guide**  
+  3. **Create an Example Prompting Guide**\
      Develop a document, say `docs/prompt-example-guide.md`, that shows users how to effectively initialize context windows to build a plugin for this system, providing a few real-world examples.
-     Wedding invitations and Thank You cards could, perhaps, be sexy examples, as these are creatively hard to produce in existing document systems.
-     The disposability of interaction windows offer iterative content creation opportunities. 
+
+     Wedding invitations and Thank You cards could, perhaps, be sexy examples, as these are creatively hard to produce in existing document systems.  The disposability of interaction windows offer iterative content creation opportunities. 
 
 
 ## v0.9 Order of Implementation
 
-Let's explore the order of execution for these standardization tasks, and consider their flexibility and feasibility
+Let's explore the order of execution for these standardization tasks, and consider their flexibility and feasibility.
+
+At the beginning, these tasks seem daunting, as we are still haunted and scarred from the old, deprecated, brittle E2E tests.
+A methodical approach is worth the time to map out. 
+I don't want to be constantly fighting failing tests.
 
 #### Bookend Tasks (Immovable)
 
@@ -174,7 +178,7 @@ Let's explore the order of execution for these standardization tasks, and consid
   |     |     |
   | --- | --- |
   | **Description** | Develop the interaction specifications and guides to enable AI-assisted plugin scaffolding.
-  | **Placement** | Must be done last, as it depends on all other standardization tasks being complete.
+  | **Placement** | Must be done last, as its structure is directly transferable from the standardization tasks being completed.
 
 #### Core Development Tasks (Permutable)
 
@@ -203,15 +207,15 @@ Let's explore the order of execution for these standardization tasks, and consid
   | **Alias** | `E2E Tests`
 
 
-### Legend -- Tasks Summary
+### Legend -- Condensed Tasks Summary
 | Task #                                                        | Description                     |
 |:-------------------------------------------------------------:|:--------------------------------|
-| [**T0**](#11-implement-a-centralized-mocha-configuration-t0)  | Mocha Configuration             |
+| [**T0**](#11-implement-a-centralized-mocha-configuration-t0)  | Mocha Adoption & Configuration  |
 | [**T1**](#31-default_handler-parity-t1)                       | Core Stability                  |
 | [**T2**](#21-the-plugin-contract--in-situ-testing-t2)         | Plugin Contract                 |
 | [**T3**](#22-configuration-and-plugin-schema-validation-t3)   | Schema Formalization            |
 | [**T4**](#12-define-and-implement-level-3-e2e-tests-t4)       | E2E Testing                     |
-| [**T5**](#41-ai-assisted-plugin-scaffolding-t5)               | AI Integration/Interaction Spec |
+| [**T5**](#41-ai-assisted-plugin-scaffolding-t5)               | AI Integration                  |
 
 
 ### v0.9 Standardization Task Permutation Table
@@ -219,7 +223,7 @@ Let's explore the order of execution for these standardization tasks, and consid
 
 The following table covers all 24 possible sequences of the remaining development tasks. 
 
-***goal:** identify the most logical, lowest-risk, and flexible path for v0.9 standardization*
+***Goal:** identify the most logical, lowest-risk, and flexible--**pivotable**--pathway for v0.9 standardization*
 
 |  # |<span style="white-space:nowrap">**Step 1**</span> |<span style="white-space:nowrap">**Step 2**</span> |<span style="white-space:nowrap">**Step 3**</span> |<span style="white-space:nowrap">**Step 4**</span> | Difficulty     | Remarks             |
 |---:|:-----|:-----|:-----|:-----|:---------------|:--------------------|
@@ -258,41 +262,59 @@ Clearly, any implementation that does not put T4 last is much more difficult to 
 
 The easiest pathway is **T1 → [T2 ↔ T3] → T4**, but any form of **[T1 ↔ T2 ↔ T3] → T4** is relatively feasible.
 
-**Recommendation for myself**  
-Try starting with T1 to fix the core tests.  If you get stuck, formulate the plugin contract for T2.  You can also draft plans for schema (T3) colinearly.  Would not hurt to at least plot out the E2E test set.
+**Recommendation for myself**\
+Try starting with **T1** to fix the core tests.
+If you get stuck, formulate the plugin contract for **T2**.
+You can also draft plans for schema (**T3**) colinearly.
+Would not hurt to at least plot out the E2E test set.
 
 Basically, I could "sliderule" the **T?**'s over these:
-[ **Develop Code** | **Draft Code** | **Write Plan** | **Online Plan** ] to dissipate the all-too predictable accretion of content fatigue on my continued self-interest.
+[ **Develop Code** | **Draft Code** | **Write Plan** | **Online Plan** ]
+to dissipate the all-too predictable accretion of content fatigue on my continued self-interest.
 
 
 ### Actual Outcome
 
-| Task #  | Phase    | Outcome                                                                      |
-|:-------:|:---------|:-------------------------------------------------------------------------    |
-| **T0**  | ✔ coded  | `.mocharc.js` and `test/runner.js` implemented                               |
-| **T1**  | ✔ coded  | `test/default-handler/*.test.*.js` now at parity                             |
-| **T2**\*| ✔ coded  | pilot via `cv` plugin: `{base-plugin, plugins/cv/cv}.schema.json`            |
-| **T3**\*| ✔ coded  | `config.yaml` and `docs/plugin-contract.md` all values defined in contract   |
-| **T3**  | ● plan   | \_ |
-| **T2**  | ✔ coded  | in situ tests `plugins/*/test/**-e2e.test.js`                                |
-| **T4**  | ➜ study  | \_ |
-| **T5**  | ○ ...    | \_ |
+| Task #  | Phase    | Outcome                                                                        |
+|:-------:|:---------|:-------------------------------------------------------------------------      |
+| **T0**  | ✔ coded  | `.mocharc.js` and `test/runner.js` implemented                                 |
+| **T1**  | ✔ coded  | `test/default-handler/*.test.*.js` now at parity                               |
+| **T3**  | ✔ coded  | 1. pilot `cv`, `{base-plugin, plugins/cv/cv}.schema.json`                      |
+| **T2.1**| ✔ coded  | 2. in-situ tests `plugins/*/test/**-e2e.test.js`                               |
+| **T2.2**| ✔ coded  | 3. `config.yaml` and `docs/plugin-contract.md` set values                      |
+| **T2.3**| ✔ coded  | 4. `src/plugin-validator.js` implemented                                       |
+| **T2.4**| ✔ coded  | 5. refactor: `src/plugin-validator.js` dispatches `src/plugin-validator/v?.js` |
+| **T2.5**| ● active | 6. validation by self-activation tests `src/plugin-validator.test.js`          |
+| **T2.6**| ➜ draft  | 7. `test/plugin-validator/*.test.js` test the validator module                 |
+| **T4.1**| ○ think  | ...[permute thru commands via manifest]... |
+| **T4.2**| ○ think  | ...[determine if tab-completion is a happy artifact]... |
+| **T5**  | ...      | ...[sleeping]... |
 
 \
 We took a hybrid approach for the **[T2 ↔ T3]** phases:
-1. implement a schema for a pilot plugin `cv`
-2. write in-situ tests for a pilot plugin `cv`
-3. write a general contract for a plugin
-4. write in-situ tests for all bundled plugin
-5. ➜ create a validator that checks:
-   - a plugin against the contract
-   - it passes its in-situ E2E test
-   - for a valid schema
-6. write tests for the validator itself
-7. checks README front matter for {plugin-name} and {version}
-8. writes a template for an e2e test to bepopulated by archetyping/`plugin create` 
+1. ✔ implement a schema for a pilot plugin `cv`
+2. ✔ write in-situ tests for a pilot plugin `cv` 
+3. ✔ write a general contract for a plugin
+4. ✔ write in-situ tests for all bundled plugin
+5. ✔ create a validator that checks:
+   - ✔ it validates a plugin against the contract
+   - ✔ it passes its in-situ E2E test
+   - ✔ for a valid schema
+6. ➜ write (module/subsystem) tests for the validator itself [**B)**]
+7. ✔ checks README front matter for {plugin-name} and {version}
+8. ➜ write self-activation tests for the validator to run *against* a plugin [**A)**]
+9. ➜ update archetyper to produce schema, e2e test, and pin 
+   `protocol`/`plugin-name`/`version` to front matter [**C)**]
+10. `plugin add` could use the validator to validate new plugins 
+11. `collection update` could use the validator to validate plugins after update
 
-#### Check Symbol Key
+**note** -- be careful with the degeneracy of terminology:
+ - **A)** need to add a validation check for a plugin using a new test prototype (self-activation test)
+ - **B)** need **module/subsystem** tests for the validator itself
+ - **C)** need to add a test template in `plugins/template-basic` for the archetyper to populate on
+ - **{A, B, C} are three distinct items**
+
+#### Checklist Key
 | Type      | Meaning           |
 |:---------:|:------------------|
 | **✔**     | Completed         |

@@ -1,67 +1,167 @@
-// src/plugin-validator.js - FINALIZED OUTPUT & VALID/USABLE DISTINCTION
+// dev/src/plugin-validator.js - DISPATCHER
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
 
+// Load versioned validators
+const v1Validator = require('./plugin-validators/v1');
+
 /**
- * Helper function to check README.md front matter.
- * @param {string} readmePath - Path to the README.md file.
- * @param {string} pluginName - The name of the plugin.
+ * Universal metadata lookup function.
+ * Prioritized lookup order for 'plugin_name', 'version', and 'protocol'.
+ * 1. plugins/{plugin-name}/{plugin-name}.schema.json
+ * 2. plugins/{plugin-name}/{plugin-name}.config.yaml
+ * 3. plugins/{plugin-name}/README.md (front matter)
+ *
+ * @param {string} pluginDirectoryPath - The absolute path to the plugin's root directory.
+ * @param {string} pluginName - The name of the plugin (directory name).
  * @param {Array<string>} warnings - Array to push warnings into.
- * @returns {void}
+ * @returns {object} - An object containing the resolved metadata.
  */
-function _checkReadmeFrontMatter(readmePath, pluginName, warnings) {
-    console.log(chalk.yellow(`Checking README.md front matter:`));
-    if (!fs.existsSync(readmePath)) {
-        console.log(chalk.red(`  [✖] README.md file not found. (Error reported in file tree check)`));
-        return;
-    }
+function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
+    const metadata = {
+        plugin_name: { value: undefined, source: undefined },
+        version: { value: undefined, source: undefined },
+        protocol: { value: undefined, source: undefined },
+    };
 
-    const readmeContent = fs.readFileSync(readmePath, 'utf8');
-    const frontMatterDelimiter = '---';
-    const parts = readmeContent.split(frontMatterDelimiter);
+    // Removed leading newline to consolidate output with previous "Validating Plugin" line
+    console.log(chalk.cyan(`Resolving plugin metadata for '${pluginName}'...`));
 
-    if (parts.length >= 3 && parts[0].trim() === '') {
-        try {
-            const frontMatter = yaml.load(parts[1]);
-            if (!frontMatter || typeof frontMatter !== 'object') {
-                console.log(chalk.red(`  [✖] Could not parse YAML or front matter is not an object.`));
-                warnings.push(`README.md for '${pluginName}' has invalid front matter. Ensure it's valid YAML and an object.`);
-            } else {
-                // Checking for plugin_name
-                if (frontMatter.plugin_name !== pluginName) {
-                    console.log(chalk.red(`  [✖] 'plugin_name' in README.md does not match plugin directory name or is missing.`));
-                    warnings.push(`README.md for '${pluginName}' should have a top-level 'plugin_name: ${pluginName}' declaration in its front matter.`);
-                } else {
-                    console.log(chalk.green(`  [✔] 'plugin_name' matches '${pluginName}'`));
-                }
+    // Helper to read JSON
+    const readJsonFile = (filePath) => {
+        if (fs.existsSync(filePath)) {
+            try {
+                const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+                console.log(chalk.gray(`    (Read JSON from: ${path.basename(filePath)})`));
+                return content;
+            } catch (e) {
+                warnings.push(`Could not parse JSON from '${path.basename(filePath)}': ${e.message}`);
+            }
+        }
+        return null;
+    };
 
-                // Checking for version
-                if (typeof frontMatter.version === 'undefined') {
-                    console.log(chalk.red(`  [✖] 'version' declaration is missing in README.md front matter.`));
-                    warnings.push(`README.md for '${pluginName}' is missing a 'version' declaration in its front matter. This 'version' field implicitly declares the contract version adherence.`);
-                } else {
-                    console.log(chalk.green(`  [✔] 'version' found: '${frontMatter.version}'`));
+    // Helper to read YAML
+    const readYamlFile = (filePath) => {
+        if (fs.existsSync(filePath)) {
+            try {
+                const content = yaml.load(fs.readFileSync(filePath, 'utf8'));
+                console.log(chalk.gray(`    (Read YAML from: ${path.basename(filePath)})`));
+                return content;
+            } catch (e) {
+                warnings.push(`Could not parse YAML from '${path.basename(filePath)}': ${e.message}`);
+            }
+        }
+        return null;
+    };
+
+    // Helper to read README front matter
+    const readReadmeFrontMatter = (readmePath) => {
+        if (fs.existsSync(readmePath)) {
+            const readmeContent = fs.readFileSync(readmePath, 'utf8');
+            const frontMatterDelimiter = '---';
+            const parts = readmeContent.split(frontMatterDelimiter);
+            if (parts.length >= 3 && parts[0].trim() === '') {
+                try {
+                    const content = yaml.load(parts[1]);
+                    console.log(chalk.gray(`    (Read front matter from: ${path.basename(readmePath)})`));
+                    return content;
+                } catch (e) {
+                    warnings.push(`Could not parse YAML front matter from '${path.basename(readmePath)}': ${e.message}`);
                 }
             }
-        } catch (e) {
-            console.log(chalk.red(`  [✖] Could not parse YAML front matter: ${e.message}`));
-            warnings.push(`Could not parse README.md front matter for '${pluginName}': ${e.message}. Ensure it's valid YAML.`);
         }
-    } else {
-        console.log(chalk.red(`  [✖] README.md does not have a valid YAML front matter block (e.g., missing leading '---' or content before it).`));
-        warnings.push(`README.md for '${pluginName}' does not have a valid YAML front matter block.`);
+        return null;
+    };
+
+    // --- 1. Check .schema.json ---
+    const schemaPath = path.join(pluginDirectoryPath, `${pluginName}.schema.json`);
+    const schemaContent = readJsonFile(schemaPath);
+    if (schemaContent) {
+        if (schemaContent.plugin_name && metadata.plugin_name.value === undefined) {
+            metadata.plugin_name.value = schemaContent.plugin_name;
+            metadata.plugin_name.source = 'schema';
+        }
+        if (schemaContent.version && metadata.version.value === undefined) {
+            metadata.version.value = schemaContent.version;
+            metadata.version.source = 'schema';
+        }
+        if (schemaContent.protocol && metadata.protocol.value === undefined) {
+            metadata.protocol.value = schemaContent.protocol;
+            metadata.protocol.source = 'schema';
+        }
     }
+
+    // --- 2. Check .config.yaml ---
+    const configPath = path.join(pluginDirectoryPath, `${pluginName}.config.yaml`);
+    const configContent = readYamlFile(configPath);
+    if (configContent) {
+        if (configContent.plugin_name && metadata.plugin_name.value === undefined) {
+            metadata.plugin_name.value = configContent.plugin_name;
+            metadata.plugin_name.source = 'config';
+        }
+        if (configContent.version && metadata.version.value === undefined) {
+            metadata.version.value = configContent.version;
+            metadata.version.source = 'config';
+        }
+        if (configContent.protocol && metadata.protocol.value === undefined) {
+            metadata.protocol.value = configContent.protocol;
+            metadata.protocol.source = 'config';
+        }
+    }
+
+    // --- 3. Check README.md front matter ---
+    const readmePath = path.join(pluginDirectoryPath, 'README.md');
+    const readmeFrontMatter = readReadmeFrontMatter(readmePath);
+    if (readmeFrontMatter) {
+        if (readmeFrontMatter.plugin_name && metadata.plugin_name.value === undefined) {
+            metadata.plugin_name.value = readmeFrontMatter.plugin_name;
+            metadata.plugin_name.source = 'README';
+        }
+        if (readmeFrontMatter.version && metadata.version.value === undefined) {
+            metadata.version.value = readmeFrontMatter.version;
+            metadata.version.source = 'README';
+        }
+        if (readmeFrontMatter.protocol && metadata.protocol.value === undefined) {
+            metadata.protocol.value = readmeFrontMatter.protocol;
+            metadata.protocol.source = 'README';
+        }
+    }
+
+    // Final checks and defaults
+    if (metadata.plugin_name.value === undefined) {
+        metadata.plugin_name.value = pluginName; // Default to directory name if not found anywhere
+        metadata.plugin_name.source = 'default (directory name)';
+        warnings.push(`Plugin name not found in schema, config, or README. Defaulting to directory name: '${pluginName}'.`);
+    }
+    if (metadata.version.value === undefined) {
+        metadata.version.source = 'default';
+        warnings.push(`Plugin version not found in schema, config, or README.`);
+    }
+    if (metadata.protocol.value === undefined) {
+        metadata.protocol.value = 'v1'; // Default to v1 as per requirements
+        metadata.protocol.source = 'default (v1)';
+        warnings.push(`Plugin protocol not found in schema, config, or README. Defaulting to 'v1'.`);
+    }
+
+    // Ensure protocol is a string
+    metadata.protocol.value = String(metadata.protocol.value);
+
+    // Changed to gray for softer output, removed "Resolved metadata:" line
+    console.log(chalk.gray(`    Plugin Name: ${metadata.plugin_name.value} (from ${metadata.plugin_name.source})`));
+    console.log(chalk.gray(`    Version: ${metadata.version.value || 'N/A (Warning)'} (from ${metadata.version.source})`));
+    console.log(chalk.gray(`    Protocol: ${metadata.protocol.value} (from ${metadata.protocol.source})`));
+
+    return metadata;
 }
 
 
 /**
- * Validates a plugin against the defined contract, providing chronological feedback.
- * The contract requires specific file presence, naming conventions, and a passing E2E test (if present).
- * The plugin's adherence to the contract version is determined by the 'version' field in its README.md front matter.
+ * Main dispatcher for plugin validation. Determines the contract version
+ * and routes to the appropriate validator module.
  *
  * @param {string} pluginDirectoryPath - The absolute path to the plugin's root directory.
  * @returns {{isValid: boolean, errors: string[], warnings: string[]}} - Validation result.
@@ -71,112 +171,78 @@ function validate(pluginDirectoryPath) {
     const warnings = [];
     const pluginName = path.basename(pluginDirectoryPath);
 
-    console.log(chalk.bold(`\n--- Validating Plugin: ${pluginName} ---`));
+    // console.log(chalk.bold(`\nValidating Plugin: ${pluginName}`)); // Removed this line and leading newline
 
-    const readmePath = path.join(pluginDirectoryPath, 'README.md');
+    // Step 1: Resolve universal metadata
+    // The getPluginMetadata function will print its own leading newline.
+    const pluginMetadata = getPluginMetadata(pluginDirectoryPath, pluginName, warnings);
 
-    // --- Check 1: Required File Presence ---
-    console.log(chalk.yellow(`Checking file tree of plugin contents:`));
-    const requiredFiles = [
-        'index.js',
-        `${pluginName}.config.yaml`,
-        `${pluginName}-example.md`,
-        'README.md',
-    ];
-
-    for (const file of requiredFiles) {
-        const filePath = path.join(pluginDirectoryPath, file);
-        if (!fs.existsSync(filePath)) {
-            console.log(chalk.red(`  [✖] Missing required file: '${file}'`));
-            errors.push(`Missing required file: '${file}' at expected path: '${filePath}'.`);
-        } else {
-            console.log(chalk.green(`  [✔] Found required file: '${file}'`));
-        }
+    // Ensure plugin_name derived from metadata matches the directory name for core consistency
+    if (pluginMetadata.plugin_name.value !== pluginName) {
+         const nameMismatchError = `Resolved 'plugin_name' ('${pluginMetadata.plugin_name.value}') does not match plugin directory name ('${pluginName}'). This is a critical mismatch.`;
+         console.error(chalk.red(`\n[✖] Plugin is INVALID: ${nameMismatchError}`));
+         errors.push(nameMismatchError);
+         return {
+            isValid: false,
+            errors: errors,
+            warnings: warnings
+        };
     }
 
-
-    // --- Check 2: Test Directory and E2E Test File Existence (Warning for v1 if missing) ---
-    console.log(chalk.yellow(`Checking plugin's test structure and E2E test file:`));
-    const e2eTestDirectory = path.join(pluginDirectoryPath, 'test');
-    const e2eTestFileName = `${pluginName}-e2e.test.js`;
-    const e2eTestPath = path.join(e2eTestDirectory, e2eTestFileName);
-
-    if (!fs.existsSync(e2eTestDirectory)) {
-        console.log(chalk.yellow(`  [!] Missing required 'test/' directory`));
-        warnings.push(`Missing required 'test/' directory for plugin: '${pluginName}' at '${e2eTestDirectory}'. (For v1 contract, this is a warning, for future versions, it may be an error.)`);
-    } else {
-        console.log(chalk.green(`  [✔] Found required 'test/' directory`));
-
-        if (!fs.existsSync(e2eTestPath)) {
-            console.log(chalk.yellow(`  [!] Missing required E2E test file: '${e2eTestFileName}'`));
-            warnings.push(`Missing E2E test file: '${e2eTestFileName}' at expected path: '${e2eTestPath}'. (For v1 contract, this is a warning, for future versions, it may be an error.)`);
-        } else {
-            console.log(chalk.green(`  [✔] Found E2E test file: '${e2eTestFileName}'`));
-
-            // --- Check 2.1: Programmatically Run Co-located E2E Test (Error if exists and fails) ---
-            console.log(chalk.cyan(`  Running in-situ test...`));
-            try {
-                const projectRoot = path.resolve(pluginDirectoryPath, '../../');
-                const relativeTestPath = path.relative(projectRoot, e2eTestPath);
-                execSync(`npx mocha "${relativeTestPath}"`, { cwd: projectRoot, stdio: 'pipe' });
-                console.log(chalk.green(`  [✔] In-situ test passes.`));
-            } catch (mochaError) {
-                console.log(chalk.red(`  [✖] In-situ test failed.`));
-                errors.push(`E2E test for '${pluginName}' failed: ${mochaError.message}`);
-            }
-        }
+    let validationResult;
+    switch (pluginMetadata.protocol.value.toLowerCase()) {
+        case 'v1':
+            validationResult = v1Validator.validateV1(pluginDirectoryPath, pluginMetadata);
+            break;
+        // Future cases will go here:
+        // case 'v2':
+        //     const v2Validator = require('./plugin-validators/v2');
+        //     validationResult = v2Validator.validateV2(pluginDirectoryPath, pluginMetadata);
+        //     break;
+        default:
+            const errorMsg = `Unsupported plugin protocol '${pluginMetadata.protocol.value}' for plugin '${pluginName}'.`;
+            console.error(chalk.red(`\n[✖] Plugin is INVALID: ${errorMsg}`));
+            errors.push(errorMsg);
+            validationResult = { isValid: false, errors: errors, warnings: [] };
+            break;
     }
 
+    // Consolidate warnings from metadata lookup and specific validator
+    validationResult.warnings = [...warnings, ...validationResult.warnings];
+    validationResult.isValid = validationResult.isValid && (errors.length === 0);
 
-    // --- Check 3: Plugin Schema File Existence (Warning if missing) ---
-    console.log(chalk.yellow(`Checking for plugin schema file:`));
-    const schemaFileName = `${pluginName}.schema.json`;
-    const schemaPath = path.join(pluginDirectoryPath, schemaFileName);
-    if (fs.existsSync(schemaPath)) {
-        console.log(chalk.green(`  [✔] Plugin has a schema file ('${schemaFileName}')`));
-    } else {
-        console.log(chalk.yellow(`  [!] Plugin does not have a specific schema file ('${schemaFileName}')`));
-        warnings.push(`Plugin '${pluginName}' does not have a specific schema file ('${schemaFileName}'). Will rely on base schema or default validation.`);
-    }
-
-
-    // --- Check 4: README Front Matter (using helper function) ---
-    _checkReadmeFrontMatter(readmePath, pluginName, warnings);
-
-
-    // --- Final Summary ---
-    console.log(chalk.bold(`\n--- Validation Summary for ${pluginName} ---`));
-    if (errors.length === 0) {
-        if (warnings.length === 0) {
-            console.log(chalk.green(`Plugin '${pluginName}' is VALID and adheres to the contract.`));
+    // Final Summary by dispatcher
+    console.log(chalk.bold(`\n--- Summary for ${pluginName} ---`));
+    if (validationResult.isValid) {
+        if (validationResult.warnings.length === 0) {
+            console.log(chalk.green(`[✔] Plugin '${pluginName}' is VALID.`));
         } else {
-            // Use an orange-like color for "USABLE"
-            console.log(chalk.rgb(255, 165, 0)(`Plugin '${pluginName}' is USABLE but has warnings.`));
+            console.log(chalk.rgb(255, 165, 0)(`[!] Plugin '${pluginName}' is USABLE (with warnings).`));
         }
     } else {
-        console.error(chalk.red(`Plugin '${pluginName}' is INVALID. Found contract violations:`));
-        errors.forEach((error) => {
+        console.error(chalk.red(`[✖] Plugin '${pluginName}' is INVALID.`));
+    }
+
+    if (validationResult.errors.length > 0) {
+        console.error(chalk.red(`\nErrors:`));
+        validationResult.errors.forEach((error) => {
             console.error(chalk.red(`  - ${error}`));
         });
     }
 
-    if (warnings.length > 0) {
-        console.log(chalk.yellow(`\nWarnings for plugin '${pluginName}':`));
-        warnings.forEach((warning) => {
+    if (validationResult.warnings.length > 0) {
+        console.log(chalk.yellow(`\nWarnings:`));
+        validationResult.warnings.forEach((warning) => {
             console.log(chalk.yellow(`  - ${warning}`));
         });
-    } else if (errors.length === 0) {
-        console.log(chalk.green(`No warnings found for plugin '${pluginName}'.`));
+    } else if (validationResult.isValid) {
+        console.log(chalk.green(`No warnings found.`));
     }
 
-    console.log(chalk.bold(`--- End Validation Summary ---`));
+    // Removed the final separator line
+    // console.log(chalk.bold(`-----------------------------------`));
 
-    // The return value will still determine the process exit code in validateCmd.js
-    return {
-        isValid: errors.length === 0,
-        errors: errors,
-        warnings: warnings
-    };
+    return validationResult;
 }
 
 module.exports = { validate };

@@ -1,5 +1,3 @@
-Here is the Y.1 section for `src/collections-manager/index.js`, adding Level 2 test scenarios to the checklist.
-
 # Level 2 - Test Scenario Checklist
 
 This checklist guides the automatic generation of test cases. Status Legend: 

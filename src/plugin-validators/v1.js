@@ -5,6 +5,7 @@ const path = require('path');
 const { execSync } = require('child_process');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
+const os = require('os'); // Required for temporary directory operations
 
 /**
  * Helper function to check README.md front matter for v1 protocol.
@@ -79,7 +80,6 @@ function checkReadmeFrontMatterV1(readmePath, pluginName, warnings) {
 function validateV1(pluginDirectoryPath, pluginMetadata) {
     const errors = [];
     const warnings = [];
-    // FIX: Access .value property of pluginMetadata.plugin_name
     const pluginName = pluginMetadata.plugin_name.value;
 
     const readmePath = path.join(pluginDirectoryPath, 'README.md');
@@ -124,7 +124,7 @@ function validateV1(pluginDirectoryPath, pluginMetadata) {
             // --- Check 2.1: Programmatically Run Co-located E2E Test (Error if exists and fails) ---
             console.log(chalk.cyan(`    Running in-situ E2E test...`));
             try {
-                const projectRoot = path.resolve(pluginDirectoryPath, '../../');
+                const projectRoot = process.cwd();
                 const relativeTestPath = path.relative(projectRoot, e2eTestPath);
                 execSync(`node node_modules/mocha/bin/mocha "${relativeTestPath}"`, { cwd: projectRoot, stdio: 'pipe' });
                 console.log(chalk.green(`    [✔] In-situ test passes.`));
@@ -149,6 +149,52 @@ function validateV1(pluginDirectoryPath, pluginMetadata) {
     // --- Check 4: README Front Matter (re-check here for v1 specific values) ---
     console.log(chalk.cyan(`  Checking README.md front matter...`));
     checkReadmeFrontMatterV1(readmePath, pluginName, warnings); // Warnings are pushed directly to the 'warnings' array
+
+    // --- Check 5: Self-Activation Sanity Check ---
+    console.log(chalk.cyan(`  Performing self-activation sanity check...`));
+    const exampleMdPath = path.join(pluginDirectoryPath, `${pluginName}-example.md`);
+    const configYamlPath = path.join(pluginDirectoryPath, `${pluginName}.config.yaml`);
+
+    if (!fs.existsSync(exampleMdPath) || !fs.existsSync(configYamlPath)) {
+        console.log(chalk.yellow(`    [!] Skipping self-activation: Missing example Markdown or config file.`));
+        warnings.push(`Self-activation check skipped for '${pluginName}': Missing '${pluginName}-example.md' or '${pluginName}.config.yaml'.`);
+    } else {
+        const projectRoot = process.cwd();
+        const relativeCliPath = path.relative(projectRoot, path.join(projectRoot, 'cli.js'));
+        const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), `md-to-pdf-test-${pluginName}-`));
+        // Force a predictable filename using --filename option
+        const outputFilename = `${pluginName}-sanity-check-output`;
+        const tempOutputFilePath = path.join(tempOutputDir, `${outputFilename}.pdf`);
+
+        try {
+            // Use --outdir instead of --output-dir and add --filename
+            const command = `node "${relativeCliPath}" convert "${exampleMdPath}" --config "${configYamlPath}" --outdir "${tempOutputDir}" --filename "${outputFilename}" --no-open`;
+            execSync(command, { cwd: projectRoot, stdio: 'pipe' });
+
+            // Check if PDF was created and has non-zero size
+            const stats = fs.statSync(tempOutputFilePath);
+            if (stats.isFile() && stats.size > 0) {
+                console.log(chalk.green(`    [✔] Self-activation successful. Generated PDF: ${tempOutputFilePath}`));
+            } else {
+                console.log(chalk.red(`    [✖] Self-activation failed: Generated PDF is missing or empty.`));
+                errors.push(`Self-activation check failed for '${pluginName}': Generated PDF is missing or empty.`);
+            }
+        } catch (cmdError) {
+            console.log(chalk.red(`    [✖] Self-activation failed: Command execution error.`));
+            // Only capture the first line of the error message for conciseness
+            errors.push(`Self-activation check failed for '${pluginName}': ${cmdError.message.split('\\n')[0].trim()}`);
+        } finally {
+            // Clean up temporary files and directory
+            try {
+                if (fs.existsSync(tempOutputDir)) {
+                    fs.rmSync(tempOutputDir, { recursive: true, force: true });
+                }
+            } catch (cleanupError) {
+                console.error(chalk.red(`    [!] Error cleaning up temporary directory '${tempOutputDir}': ${cleanupError.message}`));
+                warnings.push(`Cleanup error for temporary directory '${tempOutputDir}': ${cleanupError.message}`);
+            }
+        }
+    }
 
     return {
         isValid: errors.length === 0,

@@ -10,7 +10,7 @@
     "start": "node cli.js",
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
-    "test": "node test/runner.js",
+    "test": "mocha",
     "test:watch": "mocha --watch"
   },
   "keywords": [

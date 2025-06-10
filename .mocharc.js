@@ -1,46 +1,79 @@
-// .mocharc.js
-// Centralized configuration for Mocha test execution.
+// dev/.mocharc.js
+const yargs = require('yargs/yargs');
+const { hideBin } = require('yargs/helpers');
+
+const argv = yargs(hideBin(process.argv)).argv;
+const group = argv.group || 'all'; 
+
+console.log(`[Mocha] Running test group: '${group}'`);
+
+const paths = {
+    // Rank 0
+    default_handler: 'test/default-handler/**/*.js',
+    pdf_generator: 'test/pdf-generator/**/*.js',
+    // Rank 1
+    ConfigResolver: 'test/config-resolver/**/*.js',
+    plugin_determiner: 'test/plugin_determiner/**/*.js',
+    collections_manager: 'test/collections-manager/**/*.js',
+    // Rank 2
+    PluginRegistryBuilder: 'test/plugin-registry-builder/**/*.js',
+    main_config_loader: 'test/main-config-loader/**/*.js',
+    plugin_config_loader: 'test/plugin-config-loader/**/*.js',
+    PluginManager: 'test/plugin-manager/**/*.js',
+    math_integration: 'test/math_integration/**/*.js',
+    cm_utils: 'test/collections-manager/**/*.js',
+    // Level 2
+    plugin_validator: 'test/plugin-validator/**/*.js',
+    // E2E Plugin Tests
+    plugin_e2e: 'plugins/**/test/*.test.js',
+    deprecated: 'test-deprecated/**/*.js'
+};
+
+const groups = {
+    // By Rank
+    rank0: [paths.default_handler, paths.pdf_generator],
+    rank1: [paths.ConfigResolver, paths.plugin_determiner, paths.collections_manager],
+    rank2: [
+        paths.PluginRegistryBuilder,
+        paths.main_config_loader,
+        paths.plugin_config_loader,
+        paths.PluginManager,
+        paths.math_integration,
+    ],
+    // By Level
+    level1: [
+        paths.ConfigResolver,
+        paths.plugin_determiner,
+        paths.PluginRegistryBuilder,
+        paths.main_config_loader,
+        paths.plugin_config_loader,
+        paths.PluginManager,
+        paths.math_integration,
+        paths.cm_utils
+    ],
+    level2: [paths.default_handler, paths.pdf_generator, paths.collections_manager, paths.plugin_validator],
+    // By Toolchain
+    config: [
+        paths.ConfigResolver,
+        paths.main_config_loader,
+        paths.plugin_config_loader,
+        paths.plugin_determiner,
+        paths.PluginRegistryBuilder
+    ],
+    // Individual Module Groups
+    validator: [paths.plugin_validator],
+    e2e: [paths.plugin_e2e], 
+    deprecated: [paths.deprecated],
+    // All Tests
+    all: ['test/**/*.js']
+};
+
+const spec = groups[group] || groups.all;
 
 module.exports = {
-    // --- Standard Mocha Options ---
-    require: './test/setup.js',
-    reporter: 'spec',
-    timeout: 10000, // Increased timeout to accommodate E2E tests
+    require: 'test/setup.js',
+    spec: spec,
+    timeout: 5000,
     exit: true,
-
-    // --- Custom Test Suite Aliases with CORRECTED glob patterns ---
-    testSuites: {
-        'unit': [
-            'test/collections-manager/**/*.test.js',
-            'test/config-resolver/**/*.test.js',
-            'test/default-handler/**/*.test.js',
-            'test/main-config-loader/**/*.test.js',
-            'test/pdf-generator/**/*.test.js',
-            'test/plugin-config-loader/**/*.test.js',
-            'test/plugin-manager/**/*.test.js',
-            'test/plugin-registry-builder/**/*.test.js',
-            'test/plugin_determiner/**/*.test.js',
-        ],
-        'core': 'test/default-handler/**/*.test.*.js',
-        'collections': 'test/collections-manager/**/*.test.*.js',
-        'config': [
-            'test/config-resolver/**/*.test.*.js',
-            'test/main-config-loader/**/*.test.*.js',
-            'test/plugin-config-loader/**/*.test.*.js'
-        ],
-        'plugin-determiner': 'test/plugin_determiner/**/*.test.*.js',
-        'plugins': [
-            'plugins/*/test/**/*.test.js', 
-        ],
-        'e2e': [
-        ],
-        'all': [
-            'test/**/*.test.*.js', 
-            'plugins/*/test/**/*.test.js', 
-        ],
-        'deprecated': [
-            'test-deprecated/run-tests.js', 
-            'test-deprecated/cm-tests/run-cm-tests.js', 
-        ]
-    }
+    color: true,
 };

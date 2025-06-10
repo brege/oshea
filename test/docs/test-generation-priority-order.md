@@ -83,3 +83,13 @@ These modules provide essential services, manage critical data structures (like 
 | L1Y7  |  8 Tests   |  Rank 2    | `math_integration`        | xx/8      |     |
 | L1Y8  |  9 Tests   |  Rank 2    | `cm-utils`                | xx/9      |     |
 
+
+---
+
+### Post-Prioritization Additions (New Modules)
+
+*These modules were developed after the initial priority ranking was established and are being brought under test as part of ongoing development.*
+
+- **L2Y4: `plugin-validator`** (`src/plugin-validator.js`) - 10 Tests
+  * *Rationale:* A new, critical subsystem for ensuring the quality and stability of all plugins.
+

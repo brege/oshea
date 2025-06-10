@@ -59,7 +59,7 @@ The new granular tests provide excellent coverage of individual modules. The E2E
   Create a manageable, high-value suite of E2E tests that verify complete user workflows without being overly brittle.
 - **Actions**
   1. **Repurpose Old Tests**  
-     Port the most valuable tests from the `test-old/` directory, focusing on the "happy path" for each core command (`convert`, `generate`, `config`, `plugin`, `collection`).
+   Port the most valuable tests from the `test-old/` directory, focusing on the "happy path" for each core command (`convert`, `generate`, `config`, `plugin`, `collection`).
   2. **Command Manifest**  
      Instead of dozens of individual E2E test files, we could create a manifest, say `test/e2e/commands.json`, or simple script, that lists the command permutations to be tested.  
      A single test runner script will then iterate through this manifest, executing each command and performing basic assertions.
@@ -292,21 +292,24 @@ to dissipate the all-too predictable accretion of content fatigue on my continue
 
 \
 We took a hybrid approach for the **[T2 ↔ T3]** phases:
-1. ✔ implement a schema for a pilot plugin `cv`
-2. ✔ write in-situ tests for a pilot plugin `cv` 
-3. ✔ write a general contract for a plugin
-4. ✔ write in-situ tests for all bundled plugin
-5. ✔ create a validator that checks:
-   - ✔ it validates a plugin against the contract
-   - ✔ it passes its in-situ E2E test
-   - ✔ for a valid schema
-6. ➜ write (module/subsystem) tests for the validator itself [**B)**]
-7. ✔ checks README front matter for {plugin-name} and {version}
-8. ➜ write self-activation tests for the validator to run *against* a plugin [**A)**]
-9. ➜ update archetyper to produce schema, e2e test, and pin 
-   `protocol`/`plugin-name`/`version` to front matter [**C)**]
-10. `plugin add` could use the validator to validate new plugins 
-11. `collection update` could use the validator to validate plugins after update
+ 1. ✔ implement a schema for a pilot plugin `cv`
+ 2. ✔ write in-situ tests for a pilot plugin `cv` 
+ 3. ✔ write a general contract for a plugin
+ 4. ✔ write in-situ tests for all bundled plugin
+ 5. ✔ create a validator that checks:
+    - ✔ it validates a plugin against the contract
+    - ✔ it passes its in-situ E2E test
+    - ✔ for a valid schema
+ 6. ➜ write (module/subsystem) tests for the validator itself **(B)**
+    - ✔ prepare checklist for these tests
+    - ➜ implement the tests
+    - ○ all tests pass
+ 7. ✔ checks README front matter for {plugin-name} and {version}
+ 8. ✔ write self-activation tests for the validator to run *against* a plugin **(A)**
+ 9. ○ update archetyper to produce schema, e2e test, and pin 
+    `protocol` / `plugin-name` / `version` to front matter **(C\)**
+10. ○ `plugin add/enable` could use the validator to validate new plugins 
+11. ○ `collection update` could use the validator to verify updated plugins
 
 **note** -- be careful with the degeneracy of terminology:
  - **A)** need to add a validation check for a plugin using a new test prototype (self-activation test)
@@ -324,5 +327,312 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
 | **...**   | No thoughts yet   |
 
 
+---
+
+# Trilogy of Tasks
+
+ 1. [**T0->T3**] Checkpoint: Current Test Suite Status
+ 2. [**T4**] Draft the E2E manifest testing procdure 
+ 3. [**T5**] Outline prequisites as a checklist
+
+### T0 ➜ T3 | Checkpoint: Current Test Suite Status
+
+This is a snapshot of all test scenarios that are not currently passing, grouped by their implementation status.
+
+[`./scripts/find-missing-tests.js`](../scripts/find-missing-tests.js)
+
+This tool:
+
+ 1. Determines from the checklists 
+      
+    - [`test/docs/test-scenario-checklist-Level_1.md`](../test/docs/test-scenario-checklist-Level_1.md)
+    
+    - [`test/docs/test-scenario-checklist-Level_2.md`](../test/docs/test-scenario-checklist-Level_2.md)
+    
+    which tests do not yet have corresponding test files:
+    - `[ ]`, `[S]`, `[?]`
+ 
+ 2. Determines via `it.skip()` and `descibe.skip()` which tests have files, but are disabled. 
+    Then, each is linked to an existing audit log entry.
+
+
+#### 1. Pending Scenarios (Missing Implementation Files)
+
+These scenarios are defined in the checklists but do not yet have corresponding test files.
+
+
+| Code   | Test Scenario          | Description                                                     |
+|:------:|:-----------------------|:----------------------------------------------------------------|
+| `L1Y7` | **`math_integration`** | **nice-to-have** entire test suite is pending--low-priority     |
+| `L2Y4` | **`plugin_validator`** | **new** entire test suite for the new subsystem pending         |
+| `L2Y3` | **`pdf_generator`**    | **only `2.3.9`** `[S]` functionality is covered by other tests  |
+
+#### 2. Implemented but Skipped Tests (Requires Refactoring)
+
+These scenarios have test files, but the tests are disabled with `.skip()` due to known limitations in the source code. Each is linked to an existing audit log entry.
+
+
+| Code     | Test Scenario  | Issue  | Reason  |
+|:---------|:---------------|:---------|---------|
+|**1.1.2** | `ConfigResolver` | caching | The caching/rebuild logic is not implemented due to a non-re-entrant design in `_initializeResolverIfNeeded` |
+|**1.2.4** | `PluginRegistryBuilder` | tilde path resolution | Skipped due to brittle and unreliable mocking of `os.homedir` in the test environment.|
+|**1.2.8** | `PluginRegistryBuilder` | ... | ... |
+|**1.2.24**| `PluginRegistryBuilder` | caching | The `buildRegistry` caching mechanism is not functioning as intended and fails to return cached results. |
+|**1.3.2** | `plugin_determiner` | front matter override | Skipped due to a subtle and unresolvable mock failure where `localConfigOverrides` consistently returns `null`.|
+|**1.4.14**| `main_config_loader` | config loading logic | Skipped due to a conflict with the module's prioritization logic and inconsistent `console.warn` behavior.|
+|**1.4.15**| `main_config_loader` | ... | ... |
+|**2.2.2** | `default_handler` | shortcode removal | Skipped because the regex-based shortcode removal is not effective enough for reliable testing.|
+
+#### 3. Ongoing Tasks
+
+See the [**T2 -> T3 Actual Outcome**](#actual-outcome) checklist and numbered notes.
+
+
+### T4 | Systemizing End-to-End (E2E) Testing
+
+The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application. 
+This involves running the `cli.js` command with a variety of arguments and asserting that the application's behavior—including file outputs, console messages, and exit codes—is correct.
+
+#### 1. The E2E Test Harness
+
+To do this efficiently, we'll first build a small, reusable testing "harness." This will live in a new `test-e2e/` directory to keep it separate from the existing module integration tests.
+
+The harness will consist of a helper module (`test-e2e/harness.js`) that provides foundational tools for every E2E test.
+
+**`test-e2e/harness.js` Skeleton**
+```javascript
+const { spawn } = require('child_process');
+const fs = require('fs-extra');
+const path = require('path');
+const os = require('os');
+
+const cliPath = path.resolve(__dirname, '../cli.js');
+
+class TestHarness {
+    constructor() {
+        this.sandboxDir = '';
+    }
+
+    // Creates a clean, temporary directory for a test run
+    async createSandbox() {
+        this.sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), 'md-to-pdf-e2e-'));
+        // We can pre-populate it with mock configs, plugins, etc.
+        return this.sandboxDir;
+    }
+
+    // Executes the CLI with given arguments
+    runCli(args = []) {
+        return new Promise((resolve) => {
+            const process = spawn('node', [cliPath, ...args], { cwd: this.sandboxDir });
+            let stdout = '';
+            let stderr = '';
+            process.stdout.on('data', (data) => (stdout += data.toString()));
+            process.stderr.on('data', (data) => (stderr += data.toString()));
+            process.on('close', (exitCode) => resolve({ exitCode, stdout, stderr }));
+        });
+    }
+
+    // Cleans up the temporary directory
+    cleanup() {
+        return fs.remove(this.sandboxDir);
+    }
+}
+
+module.exports = { TestHarness };
+```
+
+#### 2. E2E Test Structure: A Hybrid Approach
+
+We will use two complementary strategies for our E2E tests, both powered by the harness.
+
+**A. Data-Driven Smoke Tests**
+
+For simple commands, we can use a manifest file to test a wide range of inputs and expected outputs without writing repetitive test code.
+
+**`test-e2e/command-manifest.json` Skeleton**
+```json
+[
+  {
+    "description": "Should show the main help text",
+    "args": ["--help"],
+    "expectInStdout": "Usage: cli.js [command] [options]"
+  },
+  {
+    "description": "Should fail gracefully for a non-existent command",
+    "args": ["non-existent-command"],
+    "exitCode": 1,
+    "expectInStderr": "Unknown command: non-existent-command"
+  }
+]
+```
+
+**B. Scenario-Driven Workflow Tests**
+
+For complex, multi-step user stories, we'll write dedicated test files. These provide the clarity needed to test a full workflow from start to finish.
+
+**`test-e2e/collections.test.js` Skeleton**
+```javascript
+const { expect } = require('chai');
+const { TestHarness } = require('./harness.js');
+
+describe('E2E - Plugin and Collection Management', function() {
+    let harness;
+
+    beforeEach(async () => {
+        harness = new TestHarness();
+        await harness.createSandbox();
+    });
+
+    afterEach(async () => {
+        await harness.cleanup();
+    });
+
+    it('should allow adding, enabling, using, and removing a plugin', async () => {
+        // Step 1: Add a collection
+        const addResult = await harness.runCli(['collection', 'add', 'https://github.com/user/mock-collection.git']);
+        expect(addResult.exitCode).to.equal(0);
+
+        // Step 2: Enable a plugin from it
+        const enableResult = await harness.runCli(['plugin', 'enable', 'mock-plugin', '--as', 'my-plugin']);
+        expect(enableResult.exitCode).to.equal(0);
+        
+        // ...and so on.
+    });
+});
+```
+
+#### 3. Housekeeping: Reorganizing the `test/` Directory
+
+As we introduce the `test-e2e/` directory, it presents a perfect opportunity to improve the project's overall structure for long-term clarity and maintainability.
+
+**Current Structure:**
+```
+test/
+├── collections-manager/
+├── config-resolver/
+├── default-handler/
+└── ... (all T0-T3 tests)
+```
+
+**Proposed Structure:**
+```
+test/
+├── e2e/
+│   ├── collections.test.js
+│   ├── harness.js
+│   └── ...
+└── integration/
+    ├── collections-manager/
+    ├── config-resolver/
+    ├── default-handler/
+    └── ...
+```
+
+**Why this is a good idea**
+
+1. **Clarity and Convention**\
+   This structure is self-documenting and conventional. New contributors can more quickly grok the distinction between different tests. Putting in all of the work to generate these tests, then failing to make it easy to know which tests do what isn't exactly anethema to achieving the greater goal: accuracy.
+
+2. **Simplified Maintenance (The "Pain" of Waiting)**\
+  Test configuration files, like `.mocharc.js`, are a form of documentation that codifies your project's structure. If we reorganize later, we would have to hunt down every reference to the old paths and update them. 
+  Further, we would likely be producing a new document to describe the test structure.  
+  Doing it *now* avoids refactoring debt.
+
+3. **Focused Test Execution**\
+   This structure makes it trivial to run *all* tests of a certain type. For example, in your `.mocharc.js`, the configuration becomes beautifully simple:
+   ```javascript
+   const groups = {
+       // ... other groups
+       integration: ['test/integration/**/*.js'],
+       e2e: ['test/e2e/**/*.js']
+   }
+   ```
+   This is cleaner and less error-prone than maintaining a long list of individual module paths for a single group.
+
+
+### T5 | Outline Prequisites as a Checklist
+
+#### Shortlist of T5 Prerequisites
+
+1. **✔** **Plugin Scaffolding** -- *Creating new plugins and collections*
+
+2. **●** **Schema & Validation Improvements** -- *Hardening the `plugin-validator`*
+   
+   **T4** E2E Test Suite\
+   **➜** Full E2E test suite is needed for the `plugin validate` command.
+
+3. **●** **Plugin E2E Testing Integration** -- *Automating E2E tests as part of the plugin contract*
+   
+   **T4** E2E Test Harness\
+   **➜** A sandboxing framework is needed for programmatically running the CLI.
+
+4. **Performance Profiling** -- *Analyzing and optimizing conversion speed*
+   
+   **T4** E2E Test Suite for `convert`\
+   **✖** A stable E2E test suite is needed to facilitate performance measurements.
+
+5. **✔** **Auto-documentation** -- *Generating CLI help and plugin manifests*
+
+### Expanded T5 Prerequisites Checklist
+
+<details>
+<summary><strong>Expanded Prerequisites Checklist</strong></summary>
+
+#### **Plugin Scaffolding**
+*`plugin create`, `collection archetype`*
+
+* **Primary Prerequisites**
+  * **✔** `plugin_scaffolder.js`: The core module responsible for orchestrating file and directory creation exists.
+  * **✔** `collections-manager`: The tested subsystem for managing plugin collections where new plugins will be placed is complete.
+  * **✔** CLI Command Boilerplate: The command files (`createCmd.js`, `archetypeCmd.js`) that will invoke the scaffolder are already in place.
+
+* **Secondary Prerequisites**
+  * **✔** Base Plugin Template: A foundational plugin (`template-basic`) exists to be used as a source for scaffolding new plugins.
+
+#### **Schema & Validation Improvements**
+*Hardening the `plugin-validator`*
+
+* **Primary Prerequisites**
+  * **✔** `plugin-validator.js`: The core validation dispatcher exists and is ready for its test suite to be implemented.
+  * **✔** `ajv` Dependency: The underlying JSON Schema validation library is included in the project's dependencies.
+  * **✔** `base-plugin.schema.json`: A base schema for plugins to extend or conform to is available.
+
+* **Secondary Prerequisites**
+  * **✖** T4 E2E Test Suite: A comprehensive E2E test suite for the `plugin validate` command is needed to harden its behavior and ensure clear error messaging.
+  * **✔** Plugin Contract Documentation: A formal document outlining the requirements for a plugin exists to guide schema design.
+
+#### **Plugin E2E Testing Integration**
+*Automating E2E tests as part of the plugin contract*
+
+* **Primary Prerequisites**
+  * **✖** T4 E2E Test Harness: The core framework for sandboxing and programmatically running the CLI is a required foundation.
+  * **✔** Proof-of-Concept Self-Test: The `v1.js` validator already contains a working example of how to programmatically execute a plugin's co-located E2E test.
+
+* **Secondary Prerequisites**
+  * **✔** Base E2E Test Template: A template file for a plugin's E2E test already exists as part of the basic plugin template, which can be used in scaffolding.
+
+#### **Performance Profiling**
+*Analyzing and optimizing conversion speed*
+
+* **Primary Prerequisites**
+  * **✔** Core `convert` Command: The main conversion command, the primary target for profiling, is implemented.
+  * **✖** T4 E2E Test Suite for `convert`: A stable E2E test suite is needed to provide a repeatable and consistent baseline for performance measurements.
+
+* **Secondary Prerequisites**
+  * **✔** Node.js Profiling Tools: The underlying tools for performance analysis (e.g., `node --prof`) are part of the Node.js runtime.
+  * **✔** Complex Test Documents: A variety of large or complex Markdown documents exist within the project to use as profiling workloads.
+
+#### **Auto-documentation**
+*Generating CLI help and plugin manifests*
+
+* **Primary Prerequisites**
+  * **✔** `PluginRegistryBuilder`: The module capable of discovering all plugins and their metadata is complete and tested.
+  * **✔** `yargs` Dependency: The CLI framework, which can expose the registered command structure, is a core dependency.
+  * **✔** `get_help.js`: A dedicated module for help text generation exists.
+
+* **Secondary Prerequisites**
+  * **●** Consistent Plugin `description`: The quality of auto-generated documentation will depend on the convention of having a clear and concise `description` field in each plugin's `config.yaml` file.
+
+</details>
 
 

@@ -133,8 +133,8 @@ const runSelfActivation = (pluginDirectoryPath, pluginName, errors, warnings) =>
     const configYamlPath = path.join(pluginDirectoryPath, `${pluginName}.config.yaml`);
 
     if (!fs.existsSync(exampleMdPath) || !fs.existsSync(configYamlPath)) {
-        warnings.push(`Self-activation check skipped: Missing example or config file.`);
-        console.log(chalk.yellow(`    [!] Skipping self-activation: Missing example or config file.`));
+        errors.push('Self-activation check failed: The plugin could not be activated.');
+        console.log(chalk.red(`    [✖] Self-activation check failed.`));
         return;
     }
 

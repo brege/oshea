@@ -1,4 +1,4 @@
-// dev/src/plugin-validator.js - DISPATCHER
+// dev/src/plugin-validator.js
 
 const fs = require('fs');
 const path = require('path');
@@ -139,7 +139,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     }
     if (metadata.version.value === undefined) {
         metadata.version.source = 'default';
-        warnings.push(`Plugin version not found in schema, config, or README.`);
+        warnings.push(`Plugin version not found.`);
     }
     if (metadata.protocol.value === undefined) {
         metadata.protocol.value = 'v1'; // Default to v1 as per requirements
@@ -220,7 +220,7 @@ function validate(pluginDirectoryPath) {
             console.log(chalk.rgb(255, 165, 0)(`[!] Plugin '${pluginName}' is USABLE (with warnings).`));
         }
     } else {
-        console.error(chalk.red(`[✖] Plugin '${pluginName}' is INVALID.`));
+        console.log(chalk.red(`[✖] Plugin '${pluginName}' is INVALID.`));
     }
 
     if (validationResult.errors.length > 0) {

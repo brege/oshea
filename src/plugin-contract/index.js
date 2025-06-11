@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const chalk = require('chalk');
 const getPluginMetadata = require('./metadata');
-const v1_checks = require('./v1');
+const v1_checks = require('../plugin-validators/v1');
 
 const handleValidationCommand = async (pluginIdentifier, options = {}) => {
     try {

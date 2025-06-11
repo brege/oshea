@@ -313,7 +313,8 @@ With these changes, the `default_handler` module is now more robust, extensible,
 
 ---
 
-2.3.9: Browser and Page Closure (Covered by other tests)
+
+## 2.3.9: Browser and Page Closure (Covered by other tests)
 
 * **Limitation:** This scenario, "Verify `generatePdf` ensures the browser and page are properly closed after PDF generation, even if errors occur," is found to be comprehensively covered by existing Level 2 integration tests for `pdf_generator.js`. Assertions in **Scenario 2.3.1** (success path), **Scenario 2.3.6** (Puppeteer launch failure), **Scenario 2.3.7** (page content setting failure), and **Scenario 2.3.8** (PDF generation failure) already verify that the browser is correctly closed (or not opened if launch failed) across various execution paths within `src/pdf_generator.js`.
 
@@ -323,3 +324,14 @@ With these changes, the `default_handler` module is now more robust, extensible,
 
 ---
 
+## 2.4.1: `plugin-validator` - Fully Compliant Plugin Validation
+
+* **Test ID:** 2.4.1
+* **TEST_TARGET:** `plugin-validator`
+* **SCENARIO_DESCRIPTION:** Verify a fully compliant v1 plugin (all files, passing tests, successful self-activation) is reported as `VALID`.
+
+* **Limitation:** This test is blocked by the current capabilities of the `plugin create` command. The archetyper (`src/plugin_scaffolder.js`) does not yet generate a "fully compliant" plugin out-of-the-box. Specifically, it omits the `test/` directory, an in-situ E2E test file, and a `schema.json` file.
+
+* **User Impact:** A user following the `plugin create` workflow cannot immediately validate their new plugin without manual intervention, which is counter-intuitive. The validator correctly identifies the freshly-created plugin as `INVALID`, but the test for the "happy path" cannot pass until the archetyper is enhanced.
+
+* **Suggested Action:** The `plugin_scaffolder.js` module should be updated to copy the complete set of required files from the `template-basic` plugin, including the `test/` directory and a templated schema. The test for `2.4.1` has been written in a future-proof way and can be re-enabled (by removing `skip: true`) once this improvement is made.

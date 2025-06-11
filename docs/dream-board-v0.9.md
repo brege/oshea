@@ -331,17 +331,10 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
 # Initial Trilogy of Tasks
 
  1. [**T0**] Implement a Centralized Mocha Configuration [T0]  **easy**
- 2. [**T1**] Implement the Default Handler Module [T1]  **easy**
- 3. [**T3**] Implement the schema for a Pilot Plugin [T3]
+ 2. [**T1**] All **core** tests pass (most work is for the Default Handler Module) [T1]  **easy**
+ 3. [**T3**] Implement the schema for a Pilot Plugin [T3]  **medium**
 
-The third task is a little more involved.  We should also use this to determine 
-how we can provide the protocol version to follow.
-
-| Protocol | File Structure Check | E2E Test Check | Self-Activation Check | How it's Implemented in the "Plugin Contract" Service |
-| :--- | :---: | :---: | :---: | :--- |
-| **v1** | **Required** | Ignored | Ignored | Logic is defined in `v1.js`. |
-| **v2** | **Required** | **Required** | Ignored | `v2.js` **imports** the structure check from `v1.js` and adds the new test check. |
-| **v3** | Ignored | **Required** | **Required** | `v3.js` **imports** the test check from `v2.js`, adds the new self-activation check, and **omits** the structure check. |
+The third task is a little more involved.  
 
 ---
 
@@ -401,7 +394,7 @@ These scenarios have test files, but the tests are disabled with `.skip()` due t
 
 #### 3. Ongoing Tasks
 
-See the [**T2 -> T3 Actual Outcome**](#actual-outcome) checklist and numbered notes.
+See the [**T2 ➜ T3 Actual Outcome**](#actual-outcome) checklist and numbered notes.
 
 
 ### T3 ➜ T4 | Decision on broader order of remaining tasks (including T4)
@@ -435,6 +428,30 @@ Using the harness to test these system-level interactions is more direct and les
 **This hybrid strategy ensures we use the right testing style for the right job—a harness for external system validation and stubs for internal logic verification.**
 
 Conclusion: **[T4 ↔ T3.y] ➜ T3.x** is the logical progression.
+
+
+### Sidebar: how can we execute `plugin validate` tests?
+
+
+Let's **illustrate** how enforcing the rules of the **protocol** affects
+the enforcement of the **contract**.  For illustration, let's say a:
+- **v1**-valid plugin is required to have a sane file structure
+- **v2**-valid plugin is required to have a sane file structure and E2E tests
+- **v3**-valid plugin is required to have E2E tests and self-activation tests, but no longer requires a sane file structure, because the self-activation test implicitly checks for a sane file structure 
+
+
+| Protocol | File Structure Check | E2E Test Check | Self-Activation Check | How it's Implemented in the "Plugin Contract" Service |
+| :--- | :---: | :---: | :---: | :--- |
+| **v1** | **Required** | Ignored | Ignored | Logic is defined in `v1.js`. |
+| **v2** | **Required** | **Required** | Ignored | `v2.js` **imports** the structure check from `v1.js` and adds the new test check. |
+| **v3** | Ignored | **Required** | **Required** | `v3.js` **imports** the test check from `v2.js`, adds the new self-activation check, and **omits** the structure check. |
+
+
+This presciently informs us that in order for the L2Y4 testing to work (which will use the T4 architecture, as it's a very special case warranting that tooling), we need to break the validator down into stages for specifically the above purpose.
+
+You cannot run self-activation tests on mocked dummy files. You need to check if certain *stages* are valid for this targeted tests to work, and to make the subcommand-matrix separable. 
+We do not want to be stuck relying on one command to execute the others.
+The **L2Y4** test should be **composable** and **extendable**. 
 
 ### T4 | Systemizing End-to-End (E2E) Testing
 

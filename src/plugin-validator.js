@@ -1,4 +1,4 @@
-// dev/src/plugin-validator.js
+// dev/src/plugin-validator.js - DISPATCHER (Final State)
 
 const fs = require('fs');
 const path = require('path');
@@ -7,6 +7,29 @@ const yaml = require('js-yaml');
 
 // Load versioned validators
 const v1Validator = require('./plugin-validators/v1');
+
+/**
+ * Resolves the absolute path and name of a plugin.
+ * (Moved from src/plugin-contract/index.js and path resolution corrected)
+ * @param {string} pluginIdentifier - The identifier of the plugin (path or name).
+ * @returns {{pluginDirectoryPath: string, pluginName: string}} - Resolved paths.
+ * @throws {Error} If the plugin directory is not found.
+ */
+function resolvePluginPath(pluginIdentifier) {
+    const resolvedIdentifier = path.resolve(pluginIdentifier);
+    if (fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory()) {
+        return { pluginDirectoryPath: resolvedIdentifier, pluginName: path.basename(resolvedIdentifier) };
+    }
+    // CORRECTED: Adjust projectRoot resolution from dev/src/ to dev/
+    // This finds the project root (dev/) which contains the 'plugins' directory.
+    const projectRoot = path.resolve(__dirname, '../'); // Changed from '../../' to '../'
+    const pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
+    if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
+        throw new Error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'.`);
+    }
+    return { pluginDirectoryPath, pluginName: pluginIdentifier };
+}
+
 
 /**
  * Universal metadata lookup function.
@@ -27,10 +50,8 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
         protocol: { value: undefined, source: undefined },
     };
 
-    // Removed leading newline to consolidate output with previous "Validating Plugin" line
     console.log(chalk.cyan(`Resolving plugin metadata for '${pluginName}'...`));
 
-    // Helper to read JSON
     const readJsonFile = (filePath) => {
         if (fs.existsSync(filePath)) {
             try {
@@ -44,7 +65,6 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
         return null;
     };
 
-    // Helper to read YAML
     const readYamlFile = (filePath) => {
         if (fs.existsSync(filePath)) {
             try {
@@ -58,7 +78,6 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
         return null;
     };
 
-    // Helper to read README front matter
     const readReadmeFrontMatter = (readmePath) => {
         if (fs.existsSync(readmePath)) {
             const readmeContent = fs.readFileSync(readmePath, 'utf8');
@@ -70,7 +89,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
                     console.log(chalk.gray(`    (Read front matter from: ${path.basename(readmePath)})`));
                     return content;
                 } catch (e) {
-                    warnings.push(`Could not parse YAML front matter from '${path.basename(readmePath)}': ${e.message}`);
+                        warnings.push(`Could not parse YAML front matter from '${path.basename(readmePath)}': ${e.message}`);
                 }
             }
         }
@@ -139,7 +158,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     }
     if (metadata.version.value === undefined) {
         metadata.version.source = 'default';
-        warnings.push(`Plugin version not found.`);
+        warnings.push(`Plugin version not found in schema, config, or README.`);
     }
     if (metadata.protocol.value === undefined) {
         metadata.protocol.value = 'v1'; // Default to v1 as per requirements
@@ -150,7 +169,6 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     // Ensure protocol is a string
     metadata.protocol.value = String(metadata.protocol.value);
 
-    // Changed to gray for softer output, removed "Resolved metadata:" line
     console.log(chalk.gray(`    Plugin Name: ${metadata.plugin_name.value} (from ${metadata.plugin_name.source})`));
     console.log(chalk.gray(`    Version: ${metadata.version.value || 'N/A (Warning)'} (from ${metadata.version.source})`));
     console.log(chalk.gray(`    Protocol: ${metadata.protocol.value} (from ${metadata.protocol.source})`));
@@ -163,18 +181,22 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
  * Main dispatcher for plugin validation. Determines the contract version
  * and routes to the appropriate validator module.
  *
- * @param {string} pluginDirectoryPath - The absolute path to the plugin's root directory.
+ * @param {string} pluginIdentifier - The identifier of the plugin (path or name).
  * @returns {{isValid: boolean, errors: string[], warnings: string[]}} - Validation result.
  */
-function validate(pluginDirectoryPath) {
+function validate(pluginIdentifier) {
     const errors = [];
     const warnings = [];
-    const pluginName = path.basename(pluginDirectoryPath);
 
-    // console.log(chalk.bold(`\nValidating Plugin: ${pluginName}`)); // Removed this line and leading newline
+    let pluginDirectoryPath, pluginName;
+    try {
+        ({ pluginDirectoryPath, pluginName } = resolvePluginPath(pluginIdentifier));
+    } catch (error) {
+        console.error(chalk.red(error.message));
+        return { isValid: false, errors: [error.message], warnings: [] };
+    }
 
-    // Step 1: Resolve universal metadata
-    // The getPluginMetadata function will print its own leading newline.
+
     const pluginMetadata = getPluginMetadata(pluginDirectoryPath, pluginName, warnings);
 
     // Ensure plugin_name derived from metadata matches the directory name for core consistency
@@ -194,11 +216,6 @@ function validate(pluginDirectoryPath) {
         case 'v1':
             validationResult = v1Validator.validateV1(pluginDirectoryPath, pluginMetadata);
             break;
-        // Future cases will go here:
-        // case 'v2':
-        //     const v2Validator = require('./plugin-validators/v2');
-        //     validationResult = v2Validator.validateV2(pluginDirectoryPath, pluginMetadata);
-        //     break;
         default:
             const errorMsg = `Unsupported plugin protocol '${pluginMetadata.protocol.value}' for plugin '${pluginName}'.`;
             console.error(chalk.red(`\n[✖] Plugin is INVALID: ${errorMsg}`));
@@ -207,11 +224,9 @@ function validate(pluginDirectoryPath) {
             break;
     }
 
-    // Consolidate warnings from metadata lookup and specific validator
     validationResult.warnings = [...warnings, ...validationResult.warnings];
     validationResult.isValid = validationResult.isValid && (errors.length === 0);
 
-    // Final Summary by dispatcher
     console.log(chalk.bold(`\n--- Summary for ${pluginName} ---`));
     if (validationResult.isValid) {
         if (validationResult.warnings.length === 0) {
@@ -220,6 +235,7 @@ function validate(pluginDirectoryPath) {
             console.log(chalk.rgb(255, 165, 0)(`[!] Plugin '${pluginName}' is USABLE (with warnings).`));
         }
     } else {
+        // Corrected: Output 'INVALID' summary to stdout as per previous requirement
         console.log(chalk.red(`[✖] Plugin '${pluginName}' is INVALID.`));
     }
 
@@ -238,9 +254,6 @@ function validate(pluginDirectoryPath) {
     } else if (validationResult.isValid) {
         console.log(chalk.green(`No warnings found.`));
     }
-
-    // Removed the final separator line
-    // console.log(chalk.bold(`-----------------------------------`));
 
     return validationResult;
 }

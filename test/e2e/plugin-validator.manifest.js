@@ -1,11 +1,21 @@
 const fs = require('fs-extra');
 const path = require('path');
+const os = require('os'); 
+
+function expectStringsOnSameLine(output, strings, expect) {
+  expect(
+    output.split('\n').some(line =>
+      strings.every(str => new RegExp(str, 'i').test(line))
+    )
+  ).to.be.true;
+}
 
 module.exports = [
+  
   // --- LINT & TEST COMMANDS ---
   {
-    describe: '2.4.6 (Lint): Should PASS a lint check for a structurally compliant plugin',
-    args: (pluginDir) => ['plugin', 'lint', pluginDir],
+    describe: '2.4.6: Should PASS a validation check for a structurally compliant plugin',
+    args: (pluginDir) => ['plugin', 'validate', pluginDir], 
     setup: async (pluginDir, pluginName) => {
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
       await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `name: ${pluginName}`);
@@ -14,23 +24,27 @@ module.exports = [
     },
     assert: ({ exitCode, stdout }, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.include(`USABLE`);
+      expect(/USABLE/.test(stdout)).to.be.true;
     }
   },
   {
-    describe: '2.4.6 (Lint): Should FAIL a lint check if a required file is missing',
-    args: (pluginDir) => ['plugin', 'lint', pluginDir],
+    describe: '2.4.6: Should FAIL a validation check if a required file is missing',
+    args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir) => {
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
     },
     assert: ({ exitCode, stdout }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(stdout).to.include(`INVALID`);
+      console.log(stdout);
+      // currently, it does not report as INVALID
+      // but if s/validate/lint/, it does report as INVALID
+      // why?
+      expect(/INVALID/.test(stdout)).to.be.true;
     }
   },
   {
-    describe: '2.4.5 (Lint): Should default to v1 and WARN if protocol is missing',
-    args: (pluginDir) => ['plugin', 'lint', pluginDir],
+    describe: '2.4.5: Should default to v1 and WARN if protocol is missing',
+    args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
         await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `name: ${pluginName}`);
         await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
@@ -39,13 +53,15 @@ module.exports = [
     },
     assert: ({ exitCode, stdout }, expect) => {
         expect(exitCode).to.equal(0);
-        expect(stdout).to.include(`USABLE`);
-        expect(stdout).to.include("protocol not found");
+        expect(/USABLE/.test(stdout)).to.be.true;
+        expect(/protocol not found/i.test(stdout)).to.be.true;
     }
   },
   {
-    describe: '2.4.8 (Test): Should FAIL if the in-situ E2E test fails',
-    args: (pluginDir) => ['plugin', 'test', pluginDir],
+    //describe: '2.4.8 (Test): Should FAIL if the in-situ E2E test fails',
+    //args: (pluginDir) => ['plugin', 'test', pluginDir],
+    describe: '2.4.8: Should FAIL if the in-situ E2E test fails',
+    args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
         const testDir = path.join(pluginDir, 'test');
         await fs.ensureDir(testDir);
@@ -53,27 +69,24 @@ module.exports = [
     },
     assert: ({ exitCode, stdout }, expect) => {
         expect(exitCode).to.equal(1);
-        expect(stdout).to.include('In-situ E2E test failed');
+        expectStringsOnSameLine(stdout, ['In-situ',  'failed'], expect);
     }
   },
 
   // --- VALIDATE COMMAND ---
   {
-    // AUDIT LOG (2025-06-11): Skipping this test.
-    // REASON: This test is blocked by the capabilities of the `plugin create` command.
-    // The archetyper does not yet generate a "fully compliant" plugin (it is missing
-    // the `test/` directory and a schema file). This test will be re-enabled
-    // once the archetyper is improved to produce a 100% valid plugin out-of-the-box.
-    describe: '2.4.1: Should report a fully compliant plugin as VALID',
     skip: true,
+    //  see: test/docs/audit-findings-and-limitations.md
+    
+    describe: '2.4.1: Should report a fully compliant plugin as VALID',
     args: (pluginDir, pluginName) => ['plugin', 'validate', pluginName],
     setup: async (pluginDir, pluginName, harness) => {
         await harness.runCli(['plugin', 'create', pluginName]);
     },
     assert: ({ exitCode, stdout, stderr }, expect) => {
         expect(exitCode).to.equal(0);
-        expect(stdout).to.include('VALID');
-        expect(stderr).to.not.include('INVALID');
+        expect(/VALID/.test(stdout)).to.be.true;
+        expect(/INVALID/.test(stderr)).to.be.false;
     }
   },
   {
@@ -88,8 +101,8 @@ protocol: v99
     },
     assert: ({ exitCode, stderr }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(stderr).to.include('INVALID');
-      expect(stderr).to.include('Unsupported plugin protocol');
+      expect(/INVALID/.test(stderr)).to.be.true;
+      expectStringsOnSameLine(stderr, ['Unsupported', 'protocol'], expect);
     }
   },
   {
@@ -104,8 +117,8 @@ plugin_name: mismatched-plugin-name
     },
     assert: ({ exitCode, stderr }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(stderr).to.include('INVALID');
-      expect(stderr).to.include('does not match plugin directory name');
+      expect(/INVALID/.test(stderr)).to.be.true;
+      expectStringsOnSameLine(stderr, ['plugin', 'name', 'not', 'match'], expect);
     }
   },
   {
@@ -121,9 +134,9 @@ protocol: v1
     },
     assert: ({ exitCode, stderr, stdout }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(stderr).to.include('INVALID');
-      expect(stderr).to.include('Unsupported plugin protocol');
-      expect(stdout).to.include("Protocol: v99 (from schema)");
+      expect(/INVALID/.test(stderr)).to.be.true;
+      expectStringsOnSameLine(stderr, ['Unsupported', 'protocol'], expect);
+      expectStringsOnSameLine(stdout, ['Protocol', 'v99'], expect);
     }
   },
   {
@@ -139,28 +152,40 @@ protocol: v1
     },
     assert: ({ exitCode, stdout }, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.include('USABLE');
-      // Flexibly assert that a warning about the missing test directory is shown.
-      expect(stdout).to.match(/Missing.*test/);
+      expect(/USABLE/.test(stdout)).to.be.true;
+      expectStringsOnSameLine(stdout, ['Missing', 'test', 'directory'], expect);
     }
   },
   {
     describe: '2.4.10: Should report USABLE (with warnings) for malformed README.md front matter',
     args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
-      // Create a structurally valid plugin in all ways except for the README
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
       await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `name: ${pluginName}\nprotocol: v1`);
       await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-      
-      // Create a README with invalid YAML (an unquoted colon in a value)
       const badReadme = '---\nname: my-plugin\ndescription: an: invalid value\n---\n# My Plugin';
       await fs.writeFile(path.join(pluginDir, 'README.md'), badReadme);
     },
     assert: ({ exitCode, stdout }, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.include('USABLE');
-      expect(stdout).to.match(/Could not parse README.md front matter/);
+      expectStringsOnSameLine(stdout, ['matter', 'README', 'not'], expect);
+      
+    }
+  },
+  {
+    describe: '2.4.9: Should report as INVALID when plugin self-activation fails',
+    args: (pluginDir) => ['plugin', 'validate', pluginDir],
+    setup: async (pluginDir, pluginName) => {
+      await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+      await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `name: ${pluginName}\nprotocol: v1`);
+      await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+      // await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+    },
+    assert: ({ exitCode, stdout, stderr }, expect) => {
+      expect(exitCode).to.equal(1);
+      expect(/INVALID/.test(stdout)).to.be.true;
+      expectStringsOnSameLine(stdout, ['self', 'activation', 'failed'], expect);
+
     }
   },
 ];

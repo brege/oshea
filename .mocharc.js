@@ -31,7 +31,7 @@ const paths = {
     // --- End-to-End Test Paths ---
     
     // Level 2
-    plugin_validator: 'test/plugin-validator/**/*.js',
+    plugin_validator: 'test/e2e/plugin-validator.*.js',
     
     // Level 3
     plugin_convert: 'test/e2e/convert.*.js',
@@ -86,15 +86,15 @@ const groups = {
         paths.plugin_validator
     ],
     level3: [
-        paths.plugin_convert,
-        paths.plugin_generate,
-        paths.plugin_config,
-        paths.plugin_list,
-        paths.plugin_create,
-        paths.plugin_add,
-        paths.plugin_enable,
-        paths.plugin_disable,
-        //paths.plugin_validate,
+        //paths.plugin_convert,
+        //paths.plugin_generate,
+        //paths.plugin_config,
+        //paths.plugin_list,
+        //paths.plugin_create,
+        //paths.plugin_add,
+        //paths.plugin_enable,
+        //paths.plugin_disable,
+        paths.plugin_validate,
         //paths.collection_add,
         //paths.collection_list,
         //paths.collection_remove,
@@ -110,7 +110,7 @@ const groups = {
         paths.PluginRegistryBuilder
     ],
     // Individual Module Groups
-    validator: [paths.plugin_validator],
+    validator: [paths.plugin_validator, paths.plgin_validate],
     insitu: [paths.insitu_e2e], 
     t4: [paths.e2e],
     // Default

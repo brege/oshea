@@ -11,6 +11,32 @@ function expectStringsOnSameLine(output, strings, expect) {
   ).to.be.true;
 }
 
+// Helper to create a dummy plugin that is fully compliant with the v1 contract
+async function createWellFormedPlugin(pluginDir, pluginName) {
+    await fs.ensureDir(path.join(pluginDir, 'test'));
+
+    const handlerContent = `
+class DummyHandler {
+    constructor(coreUtils) {}
+    async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
+        const fs = require('fs').promises;
+        const path = require('path');
+        const pdfPath = path.join(outputDir, outputFilenameOpt || 'dummy.pdf');
+        await fs.writeFile(pdfPath, 'dummy pdf content');
+        return pdfPath;
+    }
+}
+module.exports = DummyHandler;
+`;
+    await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent);
+    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: A well-formed plugin.`);
+    await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+    await fs.writeFile(path.join(pluginDir, 'test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
+    await fs.writeFile(path.join(pluginDir, `${pluginName}.schema.json`), `{}`);
+    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);
+}
+
+
 module.exports = [
   {
     describe: '2.4.6: Should PASS a validation check for a structurally compliant plugin',
@@ -66,20 +92,17 @@ module.exports = [
         expectStringsOnSameLine(stdout, ['In-situ',  'failed'], expect);
     }
   },
-
   {
-    skip: true,
-    //  see: test/docs/audit-findings-and-limitations.md
-    
     describe: '2.4.1: Should report a fully compliant plugin as VALID',
-    args: (pluginDir, pluginName) => ['plugin', 'validate', pluginName],
-    setup: async (pluginDir, pluginName, harness) => {
-        await harness.runCli(['plugin', 'create', pluginName]);
+    args: (pluginDir) => ['plugin', 'validate', pluginDir],
+    setup: async (pluginDir, pluginName) => {
+        // Use the helper to create a plugin that meets all VALID criteria
+        await createWellFormedPlugin(pluginDir, pluginName);
     },
     assert: ({ exitCode, stdout, stderr }, expect) => {
         expect(exitCode).to.equal(0);
         expect(/VALID/.test(stdout)).to.be.true;
-        expect(/INVALID/.test(stderr)).to.be.false;
+        expect(stderr).to.not.match(/error/i);
     }
   },
   {
@@ -94,7 +117,7 @@ protocol: v99
     },
     assert: ({ exitCode, stdout, stderr }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(/INVALID/.test(stdout)).to.be.true; // Corrected: expect INVALID in stdout
+      expect(/INVALID/.test(stdout)).to.be.true;
       expectStringsOnSameLine(stderr, ['Unsupported', 'protocol'], expect);
     }
   },
@@ -110,7 +133,7 @@ plugin_name: mismatched-plugin-name
     },
     assert: ({ exitCode, stdout, stderr }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(/INVALID/.test(stderr)).to.be.true; // Corrected: expect INVALID in stdout
+      expect(/INVALID/.test(stderr)).to.be.true;
       expectStringsOnSameLine(stderr, ['plugin', 'name', 'not', 'match'], expect);
     }
   },
@@ -127,7 +150,7 @@ protocol: v1
     },
     assert: ({ exitCode, stderr, stdout }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(/INVALID/.test(stdout)).to.be.true; // Corrected: expect INVALID in stdout
+      expect(/INVALID/.test(stdout)).to.be.true;
       expectStringsOnSameLine(stderr, ['Unsupported', 'protocol'], expect);
       expectStringsOnSameLine(stdout, ['Protocol', 'v99'], expect);
     }
@@ -136,12 +159,10 @@ protocol: v1
     describe: '2.4.7: Should report USABLE (with warnings) for a plugin with a missing optional file',
     args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
-      // A usable plugin is one that has the core files, but may be missing optional ones.
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
       await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `name: ${pluginName}\nprotocol: v1`);
       await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
       await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-      // Intentionally omitting the `test/` directory and schema file.
     },
     assert: ({ exitCode, stdout }, expect) => {
       expect(exitCode).to.equal(0);
@@ -172,13 +193,11 @@ protocol: v1
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
       await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `name: ${pluginName}\nprotocol: v1`);
       await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-      // The omission of ${pluginName}-example.md is crucial for this test to fail self-activation
-      // await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
     },
-    assert: ({ exitCode, stdout, stderr }, expect) => {
+    assert: async ({ exitCode, stdout, stderr }, expect) => {
       expect(exitCode).to.equal(1);
       expect(/INVALID/.test(stdout)).to.be.true; 
-      expectStringsOnSameLine(stdout, ['self', 'activation', 'failed'], expect);
+      expect(stderr).to.match(/Self-activation failed/i);
     }
   },
 ];

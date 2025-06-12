@@ -28,94 +28,94 @@ This checklist guides the implementation of End-to-End (E2E) CLI integration tes
 
 ## Y.01. `convert` Command
 
-* [ ] 3.1.1 **TEST_TARGET**: `convert`
+* [x] 3.1.1 **TEST_TARGET**: `convert`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully converts a basic markdown file to PDF using the default plugin.
 
-* [ ] 3.1.2 **TEST_TARGET**: `convert`
+* [x] 3.1.2 **TEST_TARGET**: `convert`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Key Option) Successfully converts using a specified plugin via `--plugin`.
 
-* [ ] 3.1.3 **TEST_TARGET**: `convert`
+* [x] 3.1.3 **TEST_TARGET**: `convert`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Key Option) Successfully creates a PDF in a specified directory with `--outdir` and a custom name with `--filename`.
 
-* [ ] 3.1.4 **TEST_TARGET**: `convert`
+* [x] 3.1.4 **TEST_TARGET**: `convert`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Config Precedence) A `md_to_pdf_plugin` key in front matter is correctly used for conversion.
 
-* [ ] 3.1.5 **TEST_TARGET**: `convert`
+* [x] 3.1.5 **TEST_TARGET**: `convert`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Config Precedence) A `--plugin` CLI flag correctly overrides a plugin specified in front matter.
 
-* [ ] 3.1.6 **TEST_TARGET**: `convert`
+* [x] 3.1.6 **TEST_TARGET**: `convert`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Sad Path) Fails with a non-zero exit code when the input `<file>` does not exist.
 
-* [ ] 3.1.7 **TEST_TARGET**: `convert`
+* [x] 3.1.7 **TEST_TARGET**: `convert`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Sad Path) Fails with a non-zero exit code when a non-existent plugin is specified with `--plugin`.
 
 
 ## Y.02. `generate` Command
 
-* [ ] 3.2.1 **TEST_TARGET**: `generate`
+* [x] 3.2.1 **TEST_TARGET**: `generate`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully generates an artifact using a known generator plugin (e.g., `recipe-book`).
 
-* [ ] 3.2.2 **TEST_TARGET**: `generate`
+* [x] 3.2.2 **TEST_TARGET**: `generate`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Sad Path) Fails with a non-zero exit code if required plugin-specific options are missing.
 
 
 ## Y.03. `config` Command
 
-* [ ] 3.3.1 **TEST_TARGET**: `config`
+* [x] 3.3.1 **TEST_TARGET**: `config`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Correctly displays the global configuration.
 
-* [ ] 3.3.2 **TEST_TARGET**: `config`
+* [x] 3.3.2 **TEST_TARGET**: `config`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Key Option) Correctly displays the merged configuration for a specific plugin using `--plugin`.
 
-* [ ] 3.3.3 **TEST_TARGET**: `config`
+* [x] 3.3.3 **TEST_TARGET**: `config`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Key Option) Correctly outputs clean YAML when using the `--pure` flag.
 
 
 ## Y.04. `plugin list` Command
 
-* [ ] 3.4.1 **TEST_TARGET**: `plugin list`
+* [x] 3.4.1 **TEST_TARGET**: `plugin list`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: Correctly lists plugins with the default (`--all`) filter.
 
-* [ ] 3.4.2 **TEST_TARGET**: `plugin list`
+* [x] 3.4.2 **TEST_TARGET**: `plugin list`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: Correctly filters for enabled plugins with `--enabled`.
 
-* [ ] 3.4.3 **TEST_TARGET**: `plugin list`
+* [x] 3.4.3 **TEST_TARGET**: `plugin list`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: Correctly filters for disabled plugins with `--disabled`.
 
-* [ ] 3.4.4 **TEST_TARGET**: `plugin list`
+* [x] 3.4.4 **TEST_TARGET**: `plugin list`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: Correctly filters for all available plugins with `--available`.
 
 
 ## Y.05. `plugin create` Command
 
-* [ ] 3.5.1 **TEST_TARGET**: `plugin create`
+* [x] 3.5.1 **TEST_TARGET**: `plugin create`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully creates a new plugin directory with boilerplate files.
 
-* [ ] 3.5.2 **TEST_TARGET**: `plugin create`
+* [x] 3.5.2 **TEST_TARGET**: `plugin create`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Key Option) Successfully archetypes a new plugin from a source with `--from`.
 
 
 ## Y.06. `plugin add` Command
 
-* [ ] 3.6.1 **TEST_TARGET**: `plugin add`
+* [x] 3.6.1 **TEST_TARGET**: `plugin add`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully adds and enables a singleton plugin from a local path.
 
@@ -129,7 +129,7 @@ This checklist guides the implementation of End-to-End (E2E) CLI integration tes
 
 ## Y.08. `plugin disable` Command
 
-* [ ] 3.8.1 **TEST_TARGET**: `plugin disable`
+* [x] 3.8.1 **TEST_TARGET**: `plugin disable`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully disables an enabled plugin.
 

@@ -207,7 +207,15 @@ class CollectionsManager {
     const { spawn, chalk, process } = this.dependencies;
     return new Promise((resolve, reject) => {
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
-      const gitProcess = spawn('git', gitArgs, { cwd, stdio: ['pipe', 'pipe', 'pipe'] });
+      
+      // Make git non-interactive to prevent prompts for credentials.
+      const spawnOptions = {
+        cwd,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        env: { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+      };
+      const gitProcess = spawn('git', gitArgs, spawnOptions);
+
       let stdout = '';
       let stderr = '';
       gitProcess.stdout.on('data', (data) => {

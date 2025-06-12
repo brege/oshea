@@ -225,38 +225,38 @@ This checklist guides the automatic generation of test cases. Status Legend:
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Verify a fully compliant v1 plugin (all files, passing tests, successful self-activation) is reported as `VALID` with no errors or warnings.
 
-* [ ] 2.4.2 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.2 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Test that a plugin with an unsupported protocol (e.g., `v2`) is reported as `INVALID` with a clear error message.
 
-* [ ] 2.4.3 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.3 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Verify that a plugin whose directory name does not match the `plugin_name` in its metadata is reported as `INVALID` with a critical mismatch error.
 
-* [ ] 2.4.4 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.4 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Test the metadata resolution precedence: `protocol` from `.schema.json` should be used even if different values exist in `.config.yaml` and `README.md`.
 
-* [ ] 2.4.5 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.5 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Test that a plugin missing a `protocol` in all its metadata files defaults to `v1` and is reported as `USABLE (with warnings)`.
 
-* [ ] 2.4.6 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.6 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Verify that a plugin with a missing required file (e.g., `index.js`) is reported as `INVALID`.
 
-* [ ] 2.4.7 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.7 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Test that a plugin with a missing optional file (e.g., `test/cv-e2e.test.js` or `cv.schema.json`) is reported as `USABLE (with warnings)`.
 
-* [ ] 2.4.8 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.8 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Verify that a plugin whose co-located E2E test fails when executed is reported as `INVALID`.
 
-* [ ] 2.4.9 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.9 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Test that a plugin whose self-activation sanity check fails (e.g., the CLI command returns an error) is reported as `INVALID`.
 
-* [ ] 2.4.10 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.10 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Test a plugin with malformed YAML in its `README.md` front matter, which should result in a `USABLE (with warnings)` status, assuming other checks pass.

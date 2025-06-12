@@ -122,7 +122,7 @@ This checklist guides the implementation of End-to-End (E2E) CLI integration tes
 
 ## Y.07. `plugin enable` Command
 
-* [ ] 3.7.1 **TEST_TARGET**: `plugin enable`
+* [x] 3.7.1 **TEST_TARGET**: `plugin enable`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully enables a plugin from a collection.
 
@@ -136,11 +136,11 @@ This checklist guides the implementation of End-to-End (E2E) CLI integration tes
 
 ## Y.09. `plugin validate` Command
 
-* [ ] 3.9.1 **TEST_TARGET**: `plugin validate`
+* [x] 3.9.1 **TEST_TARGET**: `plugin validate`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully validates a well-formed plugin directory.
 
-* [ ] 3.9.2 **TEST_TARGET**: `plugin validate`
+* [x] 3.9.2 **TEST_TARGET**: `plugin validate`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Sad Path) Fails validation for a poorly-formed plugin directory.
 

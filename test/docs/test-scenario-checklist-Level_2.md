@@ -221,7 +221,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 
 ### Function -- `validate( ... )`
 
-* [ ] 2.4.1 **TEST_TARGET**: `plugin-validator`
+* [x] 2.4.1 **TEST_TARGET**: `plugin-validator`
     **TEST_TYPE**: `SUBSYSTEM_INTEGRATION`
     **SCENARIO_DESCRIPTION**: Verify a fully compliant v1 plugin (all files, passing tests, successful self-activation) is reported as `VALID` with no errors or warnings.
 

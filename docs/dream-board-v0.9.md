@@ -53,31 +53,47 @@ A new test file that follows the naming convention will be picked up automatical
 
 ### 1.2. Define and Implement Level 3 E2E Tests [T4]
 
-The new granular tests provide excellent coverage of individual modules. The E2E tests will validate the user experience and catch regressions from a high level.
+The Level 1 and 2 tests provide excellent coverage of our modules and subsystems. The Level 3 End-to-End (E2E) tests validate the complete user experience from the command line, ensuring all parts of the application work together correctly and provide a bat-signal ahead of high-level regressions.
 
-- **Objective**  
-  Create a manageable, high-value suite of E2E tests that verify complete user workflows without being overly brittle.
-- **Actions**
-  1. **Repurpose Old Tests**  
-   Port the most valuable tests from the `test-old/` directory, focusing on the "happy path" for each core command (`convert`, `generate`, `config`, `plugin`, `collection`).
-  2. **Command Manifest**  
-     Instead of dozens of individual E2E test files, we could create a manifest, say `test/e2e/commands.json`, or simple script, that lists the command permutations to be tested.  
-     A single test runner script will then iterate through this manifest, executing each command and performing basic assertions.
-     - **Example Manifest Entry** 
-       ```json
-       { 
-         "describe": "Convert command with CV plugin", 
-         "command": "node cli.js convert examples/example-cv.md -o test-output/cv.pdf", 
-         "assertions": ["fileExists:test-output/cv.pdf"] 
-       }
-       ```
-       **Check:** Is a PDF file created? Are the margins and the name of the document correct?
+**Objective**\
+To create a manageable and high-value suite of E2E tests that verify workflows. Our strategy is not to test every possible permutation, but to define a **basis set** of tests that provides maximum confidence with minimal redundancy.
 
-       **TODO:** Can CLI tab-completion be a happy artifact of doing this?
-  3. **Cover New Features**  
-     Ensure E2E tests cover key features added since v0.8.2, particularly those related to the collections manager and advanced plugin interactions.
-  4. **Focus on Experience, Not Implementation**  
-     Assertions will be high-level: Did the command succeed? We will no longer perform fragile snapshot testing on exact string matching asserts from `stdout`.
+**Core Testing Philosophy**\
+We will systematically select tests for each command by covering five key dimensions:
+ 1. **The "Happy Path"** -- The single, most common, successful use-case for a command with default settings.
+ 2. **Options & Flags** -- Critical, orthogonal flags are tested in isolation to verify their specific functionality without causing a combinatorial explosion of test cases.
+ 3. **Input Variations** -- We test representatives from distinct categories of input (e.g., markdown with and without front matter) to trigger different internal logic.
+ 4. **Configuration Precedence** -- Targeted tests to confirm that the configuration hierarchy (CLI > front matter > local > global) is respected.
+ 5. **Expected Failures / "Sad Paths"** -- Verifies that the application fails gracefully and predictably with invalid inputs or options.
+
+**Test Architecture and Structure**
+
+To support this strategy, our testing architecture is organized as follows:
+
+**Standardized Directory Structure**\
+The `test/` directory is organized to clearly separate test types and provide a home for reusable test data.
+```
+test/
+├── e2e/          # Level 3 E2E Tests (CLI runners & manifests)
+├── integration/  # Level 1 & 2 Tests (module & subsystem)
+└── fixtures/     # Reusable test data (mock files, configs, plugins)
+```
+**Dedicated Fixture Files**\
+All test data (markdown content, configurations, mock plugins) will be maintained in the `test/fixtures/` directory. This mirrors real-world usage, promotes reusability, and keeps test logic separate from test data. Tests can mix and match these fixtures to create complex scenarios, such as ad-hoc plugins for specific test cases.
+
+**Reusable Test Harness `test/e2e/harness.js`**\
+A central harness provides sandboxing (creating/cleaning temporary directories) and a programmatic way to execute the CLI and capture its output: `exitCode`, `stdout`, `stderr`.
+
+**Assertion Best Practices**\
+To ensure our tests are robust and not brittle, we will adhere to a strict assertion policy:
+ 
+ * **Assert on Verifiable Outcomes**\
+   The primary assertions will always be on `exitCode` and file system state (e.g., a file was created, a directory was removed).
+ 
+ * **Use Patterns, Not Exact Strings**\
+   When checking `stdout` or `stderr` is necessary, we will use regular expressions to search for key patterns. This prevents tests from failing due to trivial whitespace or wording changes.
+   * **Good:** `/Successfully created/.test(stdout)`
+   * **Forbidden:** `expect(stdout).to.include('Successfully created')`
 
 ---
 
@@ -87,31 +103,35 @@ If there is any hope in fostering a healthy plugin ecosystem, we should ideally 
 
 ### 2.1. The Plugin Contract & In-Situ Testing [T2]
 
-- **Objective**  
-  Define a formal "Plugin Contract" and require basic tests to ship with every plugin.
-- **Actions**
-  1. **Co-locate Tests**  
-     Move the E2E tests for bundled plugins into their respective folders, such as:  
-     - `test-old/test-cases/convert-command.test-cases.js:cv` → `plugins/cv/cv.e2e.test.js`.
-  2. **Enforce the Contract**  
-     A plugin will be considered valid only if it adheres to the following structure and includes a passing test.
-     - `plugins/{plugin-name}/index.js` (main logic)
-     - `plugins/{plugin-name}/{plugin-name}.config.yaml` (default configuration)
-     - `plugins/{plugin-name}/{plugin-name}-example.md` (example usage file)
-     - `plugins/{plugin-name}/{plugin-name}.e2e.test.js` (a simple, passing E2E test)
-     - `plugins/{plugin-name}/README.md` (updated to explain the plugin and the testing standard)
+**Objective**\
+Define a formal "Plugin Contract" and require basic tests to ship with every plugin.
+
+**Actions**
+ 1. **Co-locate Tests**\
+    Move the E2E tests for bundled plugins into their respective folders, such as:\
+    `test-old/test-cases/convert-command.test-cases.js:cv` → `plugins/cv/cv.e2e.test.js`.
+ 
+ 2. **Enforce the Contract**\
+    A plugin will be considered valid only if it adheres to the following structure and includes a passing test.
+    - `plugins/{plugin-name}/index.js` (main logic)
+    - `plugins/{plugin-name}/{plugin-name}.config.yaml` (default configuration)
+    - `plugins/{plugin-name}/{plugin-name}-example.md` (example usage file)
+    - `plugins/{plugin-name}/{plugin-name}.e2e.test.js` (a simple, passing E2E test)
+    - `plugins/{plugin-name}/README.md` (updated to explain the plugin and the testing standard)
 
 ### 2.2. Configuration and Plugin Schema Validation [T3]
 
-- **Objective**  
-  Introduce schema validation for all configuration files to provide better error feedback to users.
-- **Actions**
-  - **Project `config.yaml` Schema**  
-    Define a JSON Schema for the root `config.yaml` file.
-  - **Plugin `config.yaml` Schema**  
-    Each plugin's `config.yaml` will also have its own schema.
-  - **Validation Step**  
-    The application will validate all loaded configuration files against their respective schemas at runtime, providing clear, human-readable errors for malformed configurations.
+**Objective**\
+Introduce schema validation for all configuration files to provide better error feedback to users.
+
+**Actions**
+1. **Project `config.yaml` Schema**  
+   Define a JSON Schema for the root `config.yaml` file.
+2. **Plugin `config.yaml` Schema**  
+   Each plugin's `config.yaml` will also have its own schema.
+
+**Validation Step**\
+The application will validate all loaded configuration files against their respective schemas at runtime, providing clear, human-readable errors for malformed configurations.
 
 ---
 
@@ -119,12 +139,14 @@ If there is any hope in fostering a healthy plugin ecosystem, we should ideally 
 
 ### 3.1. `default_handler` Parity [T1]
 
-- **Objective**  
-  Ensure the `default_handler` provides a reliable and predictable baseline experience.
-- **Problem**  
-  Currently, about half of the `default_handler` tests are failing due to a departure from the base assumptions of the underlying Markdown and PDF generation libraries.
-- **Action**  
-  Prioritize fixing all tests for the `default_handler`. This may involve creating a thin abstraction layer over Puppeteer or `markdown-it` to ensure our application's expectations are met consistently. This handler is the fallback for all conversions and *must* be 100% reliable.
+**Objective**\
+Ensure the `default_handler` provides a reliable and predictable baseline experience.
+
+**Problem**\
+Currently, about half of the `default_handler` tests are failing due to a departure from the base assumptions of the underlying Markdown and PDF generation libraries.
+
+**Action**\
+Prioritize fixing all tests for the `default_handler`. This may involve creating a thin abstraction layer over Puppeteer or `markdown-it` to ensure our application's expectations are met consistently. This handler is the fallback for all conversions and *must* be 100% reliable.
 
 ---
 
@@ -135,27 +157,29 @@ This combines a practical and reproducible document generation workflow that is 
 
 ### 4.1. LLM-Assisted Plugin Scaffolding [T5]
 
-- **Objective**  
-  Define a clear interaction specification that allows AI models to reliably generate new, working plugins.
-- **Thoughts**  
-  A user, such as a teacher, could provide a simple prompt like this:
+**Objective**\
+Define a clear interaction specification that allows AI models to reliably generate new, working plugins.
 
-      Create a plugin for a simple pendulum physics demonstration. 
-      It should have sections for theory with LaTeX equations, an 
-      interactive toy diagram, and a section for a few sample
-      problems.
-  Assisted with an interaction spec, could an AI then be initialized to use the project's archetyping to generate all necessary files?
-  - i.e., `README.md`, `index.js`, `*.config.yaml`, `*.css`, `*-example.md`, `test/*.e2e.test.js`, etc.
-- **Actions**
-  1. **Interaction Specification**\
-     Document the precise inputs, outputs, and APIs of the plugin system.
-     This goes beyond the user-facing `plugin-development.md` and details the internal mechanics in a way an LLM can parse.
-  2. **Refine Plugin Archetype Command**\
-     Adapt the `plugin create` command to be more machine toolable by providing a well-commented skeleton that can be reasonably populated.
-  3. **Create an Example Prompting Guide**\
-     Develop a document, say `docs/prompt-example-guide.md`, that shows users how to effectively initialize context windows to build a plugin for this system, providing a few real-world examples.
+**Thoughts**\
+A user, such as a teacher, could provide a simple prompt like this:
 
-     Wedding invitations and Thank You cards could, perhaps, be sexy examples, as these are creatively hard to produce in existing document systems.  The disposability of interaction windows offer iterative content creation opportunities. 
+    Create a plugin for a simple pendulum physics demonstration. 
+    It should have sections for theory with LaTeX equations, an 
+    interactive toy diagram, and a section for a few sample
+    problems.
+Assisted with an interaction spec, could an AI then be initialized to use the project's archetyping to generate all necessary files?\
+`README.md`, `index.js`, `*.config.yaml`, `*.css`, `*-example.md`, `test/*.e2e.test.js`, etc.
+
+**Actions**
+ 1. **Interaction Specification**\
+    Document the precise inputs, outputs, and APIs of the plugin system.
+    This goes beyond the user-facing `plugin-development.md` and details the internal mechanics in a way an LLM can parse.
+ 2. **Refine Plugin Archetype Command**\
+    Adapt the `plugin create` command to be more machine toolable by providing a well-commented skeleton that can be reasonably populated.
+ 3. **Create an Example Prompting Guide**\
+    Develop a document, say `docs/prompt-example-guide.md`, that shows users how to effectively initialize context windows to build a plugin for this system, providing a few real-world examples.
+
+     *Wedding invitations* and *Thank You Cards* could, perhaps, be sexy examples, as these are creatively hard to produce in existing document systems.  The disposability of interaction windows offer iterative content creation opportunities. 
 
 
 ## v0.9 Order of Implementation
@@ -273,7 +297,7 @@ Basically, I could "sliderule" the **T?**'s over these:
 to dissipate the all-too predictable accretion of content fatigue on my continued self-interest.
 
 
-### Actual Outcome
+### Actual Outcome -- Live Checklist: T0 → T4 
 
 | Task #  | Phase    | Outcome                                                                        |
 |:-------:|:---------|:-------------------------------------------------------------------------      |
@@ -284,10 +308,10 @@ to dissipate the all-too predictable accretion of content fatigue on my continue
 | **T2.2**| ✔ coded  | 3. `config.yaml` and `docs/plugin-contract.md` set values                      |
 | **T2.3**| ✔ coded  | 4. `src/plugin-validator.js` implemented                                       |
 | **T2.4**| ✔ coded  | 5. refactor: `src/plugin-validator.js` dispatches `src/plugin-validator/v?.js` |
-| **T2.5**| ● active | 6. validation by self-activation tests `src/plugin-validator.test.js`          |
-| **T2.6**| ➜ draft  | 7. `test/plugin-validator/*.test.js` test the validator module                 |
-| **T4.1**| ○ think  | ...[permute thru commands via manifest]... |
-| **T4.2**| ○ think  | ...[determine if tab-completion is a happy artifact]... |
+| **T2.5**| ✔ coded  | 6. validation by self-activation tests `src/plugin-validator.test.js`          |
+| **T2.6**| ✔ coded  | 7. `test/plugin-validator/*.test.js` test the validator module                 |
+| **T4.1**| ● active | ...[permute thru commands via manifest]... |
+| **T4.2**| ○ pause  | ...[determine if tab-completion is a happy artifact]... |
 | **T5**  | ...      | ...[sleeping]... |
 
 \
@@ -300,10 +324,10 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
     - ✔ it validates a plugin against the contract
     - ✔ it passes its in-situ E2E test
     - ✔ for a valid schema
- 6. ➜ write (module/subsystem) tests for the validator itself **(B)**
+ 6. ✔ write (subsystem) tests for the validator itself **(B)**
     - ✔ prepare checklist for these tests
-    - ➜ implement the tests
-    - ○ all tests pass
+    - ✔ implement the tests
+    - ✔ all tests pass
  7. ✔ checks README front matter for {plugin-name} and {version}
  8. ✔ write self-activation tests for the validator to run *against* a plugin **(A)**
  9. ○ update archetyper to produce schema, e2e test, and pin 
@@ -311,24 +335,25 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
 10. ○ `plugin add/enable` could use the validator to validate new plugins 
 11. ○ `collection update` could use the validator to verify updated plugins
 
-**note** -- be careful with the degeneracy of terminology:
- - **A)** need to add a validation check for a plugin using a new test prototype (self-activation test)
- - **B)** need **module/subsystem** tests for the validator itself
- - **C)** need to add a test template in `plugins/template-basic` for the archetyper to populate on
+**\*note** -- be careful with the degeneracy of terminology:
+ - ✔ **A)** need to add a validation check for a plugin using a new test prototype (self-activation test)
+ - ✔ **B)** need **module/subsystem** tests for the validator itself
+ - ○ **C)** need to add a test template in `plugins/template-basic` for the archetyper to populate on
  - **{A, B, C} are three distinct items**
 
 #### Checklist Key
-| Type      | Meaning           |
-|:---------:|:------------------|
-| **✔**     | Completed         |
-| **✖**     | Incomplete        |
-| **➜**     | In Progress       |
-| **● / ○** | Active / Inactive |
-| **...**   | No thoughts yet   |
+| Type   | Meaning           |
+|:------:|:------------------|
+| **✔**  | Completed         |
+| **✖**  | Incomplete        |
+| **➜**  | In Progress       |
+| ● / ○  | Active / Inactive |
+| **..** | No thoughts yet   |
 
 
 ---
-# Initial Trilogy of Tasks
+
+### Initial Tasks
 
  1. [**T0**] Implement a Centralized Mocha Configuration [T0]  **easy**
  2. [**T1**] All **core** tests pass (most work is for the Default Handler Module) [T1]  **easy**
@@ -338,7 +363,7 @@ The third task is a little more involved.
 
 ---
 
-# Final Trilogy of Tasks
+### Final Trilogy of Tasks
 
  1. [**T0->T3**] Checkpoint: Current Test Suite Status
  2. [**T4**] Draft the E2E manifest testing procdure 
@@ -370,11 +395,11 @@ This tool:
 These scenarios are defined in the checklists but do not yet have corresponding test files.
 
 
-| Code   | Test Scenario          | Description                                                     |
-|:------:|:-----------------------|:----------------------------------------------------------------|
-| `L1Y7` | **`math_integration`** | **nice-to-have** entire test suite is pending--low-priority     |
-| `L2Y4` | **`plugin_validator`** | **new** entire test suite for the new subsystem pending         |
-| `L2Y3` | **`pdf_generator`**    | **only `2.3.9`** `[S]` functionality is covered by other tests  |
+| Code   | Test Scenario          | Description                                                       |
+|:------:|:-----------------------|:------------------------------------------------------------------|
+| `L1Y7` | **`math_integration`** | **nice-to-have** entire test suite is pending--low-priority       |
+| `L2Y4` | **`plugin_validator`** | **only `2.4.1`** requires archetyping `test/` and `*.schema.json` |
+| `L2Y3` | **`pdf_generator`**    | **only `2.3.9`** `[S]` functionality is covered by other tests    |
 
 #### 2. Implemented but Skipped Tests (Requires Refactoring)
 
@@ -417,7 +442,7 @@ This doesn't require a permutation matrix, but you could construct one like:
 |**T4**    |**T3.x**  |**T3.y**| **No Benefit**     | schizo |
 |**T4**    |**T3.y**  |**T3.x**| **Low**            | adds new L3 test framework first |
 
-The pathway **T4 ➜ T3.y ➜ T3.x** and **T3.y ➜ T4 ➜ T3.x** are the most logical.
+The pathway **T4 ➜ T3.x ➜ T3.y** and **T3.x ➜ T4 ➜ T3.y** are the most logical.
 
 **Here is why:**
 
@@ -425,13 +450,18 @@ The `plugin-validator` test (L2Y4) is an ideal candidate for the T4 harness beca
 
 Using the harness to test these system-level interactions is more direct and less brittle than attempting to mock them. Conversely, existing L2 tests for modules like `default_handler` should not be backported, as their purpose is different: they surgically test the internal "white-box" orchestration *between* modules, which requires the precision of stubs. 
 
-**This hybrid strategy ensures we use the right testing style for the right job—a harness for external system validation and stubs for internal logic verification.**
+**This hybrid strategy ensures we use the right testing style for the right job--a harness for external system validation and stubs for internal logic verification.**
 
-Conclusion: **[T4 ↔ T3.y] ➜ T3.x** is the logical progression.
+Conclusion: **[T4 ↔ T3.x] ➜ T3.y** is the logical progression.
 
+This approach makes final the total map of tests for all logic belonging to the planned v1.0 release.
+This will provide a measure of coverage during the *release candidate* (**rc**) phase of finalization.
+
+Having some non-breaking bugs that touch multiple layers could act as a means of intentional incompleteness,
+as it would bring me more abreast of the clicking of the gears while polishing the body of the watch.
+The more I think about the permutation matrix, the gladder I am about the choice of path.
 
 ### Sidebar: how can we execute `plugin validate` tests?
-
 
 Let's **illustrate** how enforcing the rules of the **protocol** affects
 the enforcement of the **contract**.  For illustration, let's say a:
@@ -453,7 +483,7 @@ You cannot run self-activation tests on mocked dummy files. You need to check if
 We do not want to be stuck relying on one command to execute the others.
 The **L2Y4** test should be **composable** and **extendable**. 
 
-### T4 | Systemizing End-to-End (E2E) Testing
+### T3 ➜ T4 Bridge | Systemizing End-to-End (E2E) Testing
 
 The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application. 
 This involves running the `cli.js` command with a variety of arguments and asserting that the application's behavior—including file outputs, console messages, and exit codes—is correct.
@@ -466,13 +496,7 @@ The harness will consist of a helper module (`test-e2e/harness.js`) that provide
 
 **`test-e2e/harness.js` Skeleton**
 ```javascript
-const { spawn } = require('child_process');
-const fs = require('fs-extra');
-const path = require('path');
-const os = require('os');
-
-const cliPath = path.resolve(__dirname, '../cli.js');
-
+// const ... (libs) ...
 class TestHarness {
     constructor() { this.sandboxDir = ''; }
 
@@ -585,6 +609,51 @@ test/
    }
    ```
    This is cleaner and less error-prone than maintaining a long list of individual module paths for a single group.
+
+### T4 | E2E Testing Integration
+
+#### Global Options
+
+| Option | Description |
+| :-- | :-- |
+| `--config <path>` | Specifies a path to a global configuration file |
+| `--version` | Shows the version number |
+| `--help` | Shows the help screen |
+
+
+---
+
+#### Command Matrix
+
+| Command | Subcommand | Positional(s) | Options/Flags | Notes/Details |
+| :-- | :-- | :-- | :-- | :-- |
+| `convert` | — | `<file>` (Required) | `--plugin, -p`<br>`--outdir, -o`<br>`--filename, -f` | Default command (`$0`) |
+| `generate` | — | `<plugin>` (Required) | *(Dynamic options from plugin.config.yaml)* | Plugin-specific options loaded at runtime |
+| `config` | — | — | `--plugin, -p`<br>`--pure` | Shows merged config for a plugin |
+| `plugin` | `list` | — | `--enabled`<br>`--disabled`<br>`--available`<br>`--all` | `--all` is default |
+| `plugin` | `create` | `<plugin_name>` (Required) | `--from <source_plugin>`<br>`--target-dir <path>`<br>`--force` | Archetype from existing plugin, set target dir, force overwrite |
+| `plugin` | `add` | `<path>` (Required) | — | Add and enable a singleton plugin directory |
+| `plugin` | `enable` | `<plugin_ref>` (Required) | — | Reference: `collection_name/plugin_id` |
+| `plugin` | `disable` | `<invoke_name>` (Required) | — |  |
+| `plugin` | `validate` | `[path]` (Optional) | `--schema <version>` | Defaults to current directory if no path provided |
+| `collection` | `add` | `<source>` (Required) | — | Source can be git URL or local path |
+| `collection` | `list` | — | — |  |
+| `collection` | `remove` | `<name>` (Required) | — |  |
+| `collection` | `update` | `[name]` (Optional) | — | If omitted, updates all collections |
+| `update` | — | `[name]` (Optional) | — | Alias for `collection update` |
+
+
+---
+
+#### **Legend**
+
+- **Command** -- Top-level command (or alias).
+- **Subcommand** -- If present, the subcommand under the command.
+- **Positional(s)** -- Required or optional positional arguments.
+- **Options/Flags** -- All available flags for the command/subcommand.
+- **Notes/Details** -- Usage notes, defaults, or dynamic behavior.
+
+---
 
 
 

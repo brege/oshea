@@ -28,7 +28,9 @@ function createE2eTestRunner(commandName, manifestPath, options = {}) {
                     }
 
                     const args = testCase.args(sandboxDir);
-                    const result = await harness.runCli(args);
+                    // Pass options to runCli, allowing test case to override defaults
+                    const cliOptions = { useFactoryDefaults: testCase.useFactoryDefaults !== false };
+                    const result = await harness.runCli(args, cliOptions);
 
                     await testCase.assert(result, sandboxDir, expect);
                 } finally {

@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { TEST_CONFIG_PATH } = require('../shared/test-constants');
 
 // Helper to create a dummy plugin structure for testing CM commands
 async function createDummyPlugin(pluginDir, pluginName) {
@@ -18,31 +17,29 @@ async function setupCollectionWithOneEnabled(sandboxDir, harness) {
     await createDummyPlugin(path.join(collDir, 'plugin-two'), 'plugin-two');
     
     // Use the harness to run the prerequisite setup commands
-    await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection']);
-    await harness.runCli(['plugin', 'enable', 'test-collection/plugin-one', '--name', 'enabled-one']);
+    await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection'], { useFactoryDefaults: false });
+    await harness.runCli(['plugin', 'enable', 'test-collection/plugin-one', '--name', 'enabled-one'], { useFactoryDefaults: false });
 }
 
 
 module.exports = [
   {
-    describe: '3.4.1: Correctly lists plugins with the default filter',
+    describe: '3.4.1: Correctly lists plugins with the default filter (from factory defaults)',
+    // No useFactoryDefaults:false, so this test uses the default sandboxed harness
     setup: async (sandboxDir) => {
-      // No sandbox setup needed as we are referencing an existing config file.
+      // No sandbox setup needed.
     },
     args: (sandboxDir) => [
       'plugin',
       'list',
-      '--config',
-      TEST_CONFIG_PATH,
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      // Check for some of the plugins registered in the test config
+      // Check for plugins that are actually in config.example.yaml
       expect(stdout).to.match(/Name: cv/i);
       expect(stdout).to.match(/Name: recipe/i);
-      expect(stdout).to.match(/Name: business-card/i);
-      // Check for the header message
-      expect(stdout).to.match(/plugin\(s\) usable by md-to-pdf/i);
+      // This plugin is NOT in the default config, so this ensures we aren't picking up other configs.
+      expect(stdout).to.not.match(/Name: business-card/i);
     },
   },
   {

@@ -147,61 +147,61 @@ This checklist guides the implementation of End-to-End (E2E) CLI integration tes
 
 ## Y.10. `collection add` Command
 
-* [ ] 3.10.1 **TEST_TARGET**: `collection add`
+* [x] 3.10.1 **TEST_TARGET**: `collection add`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully adds a collection from a git URL.
 
-* [ ] 3.10.2 **TEST_TARGET**: `collection add`
+* [x] 3.10.2 **TEST_TARGET**: `collection add`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Input Variation) Successfully adds a collection from a local directory path.
 
-* [ ] 3.10.3 **TEST_TARGET**: `collection add`
+* [x] 3.10.3 **TEST_TARGET**: `collection add`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Sad Path) Fails with a non-zero exit code when the source is invalid.
 
 
 ## Y.11. `collection list` Command
 
-* [ ] 3.11.1 **TEST_TARGET**: `collection list`
+* [x] 3.11.1 **TEST_TARGET**: `collection list`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Correctly lists all added collections.
 
 
 ## Y.12. `collection remove` Command
 
-* [ ] 3.12.1 **TEST_TARGET**: `collection remove`
+* [x] 3.12.1 **TEST_TARGET**: `collection remove`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully removes an added collection.
 
 
 ## Y.13. `collection update` Command
 
-* [ ] 3.13.1 **TEST_TARGET**: `collection update`
+* [x] 3.13.1 **TEST_TARGET**: `collection update`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Happy Path) Successfully runs the update process on all collections.
 
-* [ ] 3.13.2 **TEST_TARGET**: `collection update`
+* [x] 3.13.2 **TEST_TARGET**: `collection update`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Key Option) Successfully runs the update process on a single named collection.
 
 
 ## Y.14. `update` (alias) Command
 
-* [ ] 3.14.1 **TEST_TARGET**: `update`
+* [x] 3.14.1 **TEST_TARGET**: `update`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Alias) The `update` alias successfully runs the collection update process.
 
 
 ## Y.15. Global Flags
 
-* [ ] 3.15.1 **TEST_TARGET**: `Global Flags`
+* [x] 3.15.1 **TEST_TARGET**: `Global Flags`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: The `--version` flag correctly displays the tool's version.
 
-* [ ] 3.15.2 **TEST_TARGET**: `Global Flags`
+* [x] 3.15.2 **TEST_TARGET**: `Global Flags`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: The `--help` flag correctly displays the help text.
 
-* [ ] 3.15.3 **TEST_TARGET**: `Global Flags`
+* [x] 3.15.3 **TEST_TARGET**: `Global Flags`
 **TEST_TYPE**: `E2E_CLI`
 **SCENARIO_DESCRIPTION**: (Sad Path) An unknown command fails with a non-zero exit code and an appropriate error message.

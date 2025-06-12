@@ -119,7 +119,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 1.2.7 **TEST_TARGET**: `PluginRegistryBuilder`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `_resolvePluginConfigPath` correctly resolves an alias-prefixed raw path (e.g., `myAlias:path/to/plugin`) using provided `currentAliases`.
-* [?] 1.2.8 **TEST_TARGET**: `PluginRegistryBuilder`
+* [ ] 1.2.8 **TEST_TARGET**: `PluginRegistryBuilder`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `_resolvePluginConfigPath` resolves a tilde-prefixed raw path to an absolute path in the user's home directory.
 * [x] 1.2.9 **TEST_TARGET**: `PluginRegistryBuilder`
@@ -128,7 +128,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 1.2.10 **TEST_TARGET**: `PluginRegistryBuilder`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `_resolvePluginConfigPath` correctly identifies the conventional config file (`dirname.config.yaml`) when a directory path is provided.
-* [ ] 1.2.11 **TEST_TARGET**: `PluginRegistryBuilder`
+* [x] 1.2.11 **TEST_TARGET**: `PluginRegistryBuilder`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `_resolvePluginConfigPath` finds an alternative `*.config.yaml` file in a directory if the conventional name is not present.
 * [x] 1.2.12 **TEST_TARGET**: `PluginRegistryBuilder`
@@ -216,7 +216,7 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 1.3.1 **TEST_TARGET**: `plugin_determiner`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `determinePluginToUse` correctly prioritizes a plugin specified via the CLI argument (`args.plugin`) over all other sources.
-* [?] 1.3.2 **TEST_TARGET**: `plugin_determiner`
+* [ ] 1.3.2 **TEST_TARGET**: `plugin_determiner`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `determinePluginToUse` correctly prioritizes a plugin specified in the Markdown file's front matter (`frontMatter.md_to_pdf_plugin`) when no CLI argument is present.
 * [x] 1.3.3 **TEST_TARGET**: `plugin_determiner`
@@ -304,10 +304,10 @@ This checklist guides the automatic generation of test cases. Status Legend:
 * [x] 1.4.13 **TEST_TARGET**: `main_config_loader`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `_initialize` sets `xdgConfigContents` to an empty object if `xdgGlobalConfigPath` does not exist or loading fails.
-* [s] 1.4.14 **TEST_TARGET**: `main_config_loader`
+* [ ] 1.4.14 **TEST_TARGET**: `main_config_loader`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Test `_initialize` loads `projectConfigContents` from `projectManifestConfigPath` if it exists and is not the primary config.
-* [x] 1.4.15 **TEST_TARGET**: `main_config_loader`
+* [ ] 1.4.15 **TEST_TARGET**: `main_config_loader`
     **TEST_TYPE:** `MODULE_INTEGRATION`
     **SCENARIO_DESCRIPTION:** Verify `_initialize` sets `projectConfigContents` to an empty object if `projectManifestConfigPath` does not exist or loading fails.
 * [x] 1.4.16 **TEST_TARGET**: `main_config_loader`

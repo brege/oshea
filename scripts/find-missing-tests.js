@@ -8,7 +8,8 @@ const projectRoot = path.resolve(__dirname, '../');
 const testDir = path.join(projectRoot, 'test');
 const checklistPaths = [
     path.join(testDir, 'docs/test-scenario-checklist-Level_1.md'),
-    path.join(testDir, 'docs/test-scenario-checklist-Level_2.md')
+    path.join(testDir, 'docs/test-scenario-checklist-Level_2.md'),
+    path.join(testDir, 'docs/test-scenario-checklist-Level_3.md')
 ];
 const auditLogPath = path.join(testDir, 'docs/audit-findings-and-limitations.md');
 

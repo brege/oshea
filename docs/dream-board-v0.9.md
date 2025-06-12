@@ -1,6 +1,6 @@
 # Dream Board: v0.9 - Standardization Phase
 
-## Core Theme: Standardization & Stability
+## Standardization & Stability
 
 The ongoing overhaul of the test suite, initially slated for v0.8.9, has revealed a larger opportunity. 
 The work done is foundational and represents maturation of the project. 
@@ -12,15 +12,15 @@ We focus this release on creating a stable, reliable, and extensible codebase by
 ### Table of Contents
 - [Core Theme: Standardization & Stability](#core-theme-standardization--stability)
 - [1. Test Suite Standardization & E2E Implementation](#1-test-suite-standardization--e2e-implementation)
-  - [1.1. Implement a Centralized Mocha Configuration [T0]](#11-implement-a-centralized-mocha-configuration-t0)
-  - [1.2. Define and Implement Level 3 E2E Tests [T4]](#12-define-and-implement-level-3-e2e-tests-t4)
+  - [1.1. Implement a Centralized Mocha Configuration | T0](#11-implement-a-centralized-mocha-configuration-t0)
+  - [1.2. Define and Implement Level 3 E2E Tests | T4](#12-define-and-implement-level-3-e2e-tests-t4)
 - [2. Plugin Architecture Standardization](#2-plugin-architecture-standardization)
-  - [2.1. The Plugin Contract & In-Situ Testing [T2]](#21-the-plugin-contract--in-situ-testing-t2)
-  - [2.2. Configuration and Plugin Schema Validation [T3]](#22-configuration-and-plugin-schema-validation-t3)
+  - [2.1. The Plugin Contract & In-Situ Testing | T2](#21-the-plugin-contract--in-situ-testing-t2)
+  - [2.2. Configuration and Plugin Schema Validation | T3](#22-configuration-and-plugin-schema-validation-t3)
 - [3. Core Module Stability](#3-core-module-stability)
-  - [3.1. `default_handler` Parity [T1]](#31-default_handler-parity-t1)
+  - [3.1. `default_handler` Parity | T1](#31-default_handler-parity-t1)
 - [4. Future-Proofing & AI Integration](#4-future-proofing--ai-integration)
-  - [4.1. AI-Assisted Plugin Scaffolding [T5]](#41-ai-assisted-plugin-scaffolding-t5)
+  - [4.1. AI-Assisted Plugin Scaffolding | T5](#41-ai-assisted-plugin-scaffolding-t5)
 - [v0.9 Order of Implementation](#v09-order-of-implementation)
   - [Bookend Tasks (Immovable)](#bookend-tasks-immovable)
   - [Core Development Tasks (Permutable)](#core-development-tasks-permutable)
@@ -31,13 +31,13 @@ We focus this release on creating a stable, reliable, and extensible codebase by
 
 ---
 
-## 1. Test Suite Standardization & E2E Implementation
+## 1. Test Suite Standardization & End-to-End Implementation
 
 The previous testing strategy was brittle and difficult to maintain.
-The new strategy, with its tiered levels (Level 0-3), provides comprehensive coverage.
+The new strategy, with its tiered levels, Level 0, 1, 2, and 3, provides comprehensive coverage.
 The focus for v0.9 is to complete this transition and establish a clear, sustainable testing framework for the future.
 
-### 1.1. Implement a Centralized Mocha Configuration [T0]
+### 1.1. Implement a Centralized Mocha Configuration | T0
 
 To eliminate hardcoded paths in `package.json` and streamline test execution, we will implement a central Mocha configuration file (e.g., `.mocharc.js`).
 
@@ -51,7 +51,7 @@ To eliminate hardcoded paths in `package.json` and streamline test execution, we
 This will massively simplify the process of adding new tests and modules. 
 A new test file that follows the naming convention will be picked up automatically, requiring no changes to `package.json`.
 
-### 1.2. Define and Implement Level 3 E2E Tests [T4]
+### 1.2. Define and Implement Level 3 E2E Tests | T4
 
 The Level 1 and 2 tests provide excellent coverage of our modules and subsystems. The Level 3 End-to-End (E2E) tests validate the complete user experience from the command line, ensuring all parts of the application work together correctly and provide a bat-signal ahead of high-level regressions.
 
@@ -101,7 +101,7 @@ To ensure our tests are robust and not brittle, we will adhere to a strict asser
 
 If there is any hope in fostering a healthy plugin ecosystem, we should ideally define a clear contract for what constitutes a valid plugin.
 
-### 2.1. The Plugin Contract & In-Situ Testing [T2]
+### 2.1. The Plugin Contract & In-Situ Testing | T2
 
 **Objective**\
 Define a formal "Plugin Contract" and require basic tests to ship with every plugin.
@@ -119,7 +119,7 @@ Define a formal "Plugin Contract" and require basic tests to ship with every plu
     - `plugins/{plugin-name}/{plugin-name}.e2e.test.js` (a simple, passing E2E test)
     - `plugins/{plugin-name}/README.md` (updated to explain the plugin and the testing standard)
 
-### 2.2. Configuration and Plugin Schema Validation [T3]
+### 2.2. Configuration and Plugin Schema Validation | T3
 
 **Objective**\
 Introduce schema validation for all configuration files to provide better error feedback to users.
@@ -137,7 +137,7 @@ The application will validate all loaded configuration files against their respe
 
 ## 3. Core Module Stability
 
-### 3.1. `default_handler` Parity [T1]
+### 3.1. `default_handler` Parity | T1
 
 **Objective**\
 Ensure the `default_handler` provides a reliable and predictable baseline experience.
@@ -155,7 +155,7 @@ Prioritize fixing all tests for the `default_handler`. This may involve creating
 The ultimate goal of standardization is to create a platform so robust and predictable that it can be programmatically extended.
 This combines a practical and reproducible document generation workflow that is systematically compatible with ever-evolving agentic capabilities.
 
-### 4.1. LLM-Assisted Plugin Scaffolding [T5]
+### 4.1. LLM-Assisted Plugin Scaffolding | T5
 
 **Objective**\
 Define a clear interaction specification that allows AI models to reliably generate new, working plugins.
@@ -182,7 +182,7 @@ Assisted with an interaction spec, could an AI then be initialized to use the pr
      *Wedding invitations* and *Thank You Cards* could, perhaps, be sexy examples, as these are creatively hard to produce in existing document systems.  The disposability of interaction windows offer iterative content creation opportunities. 
 
 
-## v0.9 Order of Implementation
+## v0.9 Order of Implementation -- Multi-Task Approach
 
 Let's explore the order of execution for these standardization tasks, and consider their flexibility and feasibility.
 
@@ -190,41 +190,41 @@ At the beginning, these tasks seem daunting, as we are still haunted and scarred
 A methodical approach is worth the time to map out. 
 I don't want to be constantly fighting failing tests.
 
-#### Bookend Tasks (Immovable)
+#### Bookend Tasks -- Immovable
 
-* **[T0](#11-implement-a-centralized-mocha-configuration-t0): Mocha Configuration -- `1.1`**
+**[T0](#11-implement-a-centralized-mocha-configuration-t0) | `1.1` | Mocha Configuration**
   |     |     |
   | --- | --- |
   | **Description** | Implement a central Mocha configuration file `.mocharc.js` to streamline test execution and eliminate hardcoded paths.
   | **Placement** | Must be done first to enable the rest of the testing workflow.
 
-* **[T5](#41-ai-assisted-plugin-scaffolding-t5): AI Integration -- `4.1`**
+**[T5](#41-ai-assisted-plugin-scaffolding-t5) | `4.1` | AI Integration**
   |     |     |
   | --- | --- |
   | **Description** | Develop the interaction specifications and guides to enable AI-assisted plugin scaffolding.
   | **Placement** | Must be done last, as its structure is directly transferable from the standardization tasks being completed.
 
-#### Core Development Tasks (Permutable)
+#### Core Development Tasks -- Permutable
 
-* **[T1](#31-default_handler-parity-t1): Core Stability -- `3.1`**
+**[T1](#31-default_handler-parity-t1) | `3.1` | Core Stability**
   |     |     |
   | --- | --- |
   | **Description**  | Achieve 100% test pass rate for the `default_handler` module (L0-L2 tests) to ensure a stable foundation. 
   | **Alias**  |`default_handler Parity` 
 
-* **[T2](#21-the-plugin-contract--in-situ-testing-t2): Plugin Contract -- `2.1a`**
+**[T2](#21-the-plugin-contract--in-situ-testing-t2) | `2.1a` | Plugin Contract**
   |     |     |
   | --- | --- |
   | **Description** |Define the human-readable rules, directory structure, and documentation standards for what constitutes a valid plugin. 
   | **Alias** | `Define Contract` 
 
-* **[T3](#21-the-plugin-contract--in-situ-testing-t2): Schema Formalization -- `2.2`**
+**[T3](#21-the-plugin-contract--in-situ-testing-t2) | `2.2` | Schema Formalization**
   |     |     |
   | --- | --- |
   | **Description** | Create the machine-readable JSON Schemas for `config.yaml` and plugin configurations to enforce the contract's rules programmatically.
   | **Alias** | `Config/Plugin Schema`
 
-* **[T4](#12-define-and-implement-level-3-e2e-tests-t4): E2E Implementation -- `1.2` & `2.1b`**
+**[T4](#12-define-and-implement-level-3-e2e-tests-t4) | `1.2` \& `2.1b` |  E2E Implementation**
   |     |     |
   | --- | --- |
   | **Description** | Write the high-level End-to-End tests, including porting valuable old tests and creating new in-situ tests for plugins.
@@ -282,7 +282,7 @@ The following table covers all 24 possible sequences of the remaining developmen
 
 ### Final Plan
 
-Clearly, any implementation that does not put T4 last is much more difficult to implement.
+Clearly, any implementation that does not **put T4 last** is much more difficult to implement.
 
 The easiest pathway is **T1 → [T2 ↔ T3] → T4**, but any form of **[T1 ↔ T2 ↔ T3] → T4** is relatively feasible.
 
@@ -297,7 +297,7 @@ Basically, I could "sliderule" the **T?**'s over these:
 to dissipate the all-too predictable accretion of content fatigue on my continued self-interest.
 
 
-### Actual Outcome -- Live Checklist: T0 → T4 
+### Actual Outcome -- Live Checklist: T0 ➜ T4 
 
 | Task #  | Phase    | Outcome                                                                        |
 |:-------:|:---------|:-------------------------------------------------------------------------      |
@@ -310,12 +310,13 @@ to dissipate the all-too predictable accretion of content fatigue on my continue
 | **T2.4**| ✔ coded  | 5. refactor: `src/plugin-validator.js` dispatches `src/plugin-validator/v?.js` |
 | **T2.5**| ✔ coded  | 6. validation by self-activation tests `src/plugin-validator.test.js`          |
 | **T2.6**| ✔ coded  | 7. `test/plugin-validator/*.test.js` test the validator module                 |
-| **T4.1**| ● active | ...[permute thru commands via manifest]... |
-| **T4.2**| ○ pause  | ...[determine if tab-completion is a happy artifact]... |
-| **T5**  | ...      | ...[sleeping]... |
+| **T4.1**| ✔ coded  | 8. `test/e2e/*.{manifest,test}.js`,`harness.js`, `factory function`            |
+| **T4.2**| ○ think  | ...*tab-completion can will people learn a new CLI*...                         |
+| **T5**  | ● active | [**in progress**](#t5--outline-prequisites-as-a-checklist)                     |
 
 \
 We took a hybrid approach for the **[T2 ↔ T3]** phases:
+ 
  1. ✔ implement a schema for a pilot plugin `cv`
  2. ✔ write in-situ tests for a pilot plugin `cv` 
  3. ✔ write a general contract for a plugin
@@ -330,12 +331,15 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
     - ✔ all tests pass
  7. ✔ checks README front matter for {plugin-name} and {version}
  8. ✔ write self-activation tests for the validator to run *against* a plugin **(A)**
+ 
+ We paused work at this point to hop to **T4**. These implementations were tended to after **T4**'s completion:
+
  9. ○ update archetyper to produce schema, e2e test, and pin 
     `protocol` / `plugin-name` / `version` to front matter **(C\)**
 10. ○ `plugin add/enable` could use the validator to validate new plugins 
 11. ○ `collection update` could use the validator to verify updated plugins
 
-**\*note** -- be careful with the degeneracy of terminology:
+**note** -- be careful with the degeneracy of terminology:
  - ✔ **A)** need to add a validation check for a plugin using a new test prototype (self-activation test)
  - ✔ **B)** need **module/subsystem** tests for the validator itself
  - ○ **C)** need to add a test template in `plugins/template-basic` for the archetyper to populate on
@@ -345,7 +349,7 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
 | Type   | Meaning           |
 |:------:|:------------------|
 | **✔**  | Completed         |
-| **✖**  | Incomplete        |
+| **×**  | Incomplete        |
 | **➜**  | In Progress       |
 | ● / ○  | Active / Inactive |
 | **..** | No thoughts yet   |
@@ -355,9 +359,9 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
 
 ### Initial Tasks
 
- 1. [**T0**] Implement a Centralized Mocha Configuration [T0]  **easy**
- 2. [**T1**] All **core** tests pass (most work is for the Default Handler Module) [T1]  **easy**
- 3. [**T3**] Implement the schema for a Pilot Plugin [T3]  **medium**
+ - ✔ **T0** | Implement a Centralized Mocha Configuration [T0]  **easy**
+ - ✔ **T1** | All **core** tests pass (most work is for the Default Handler Module) [T1]  **easy**
+ - ✔ **T3** | Implement the schema for a Pilot Plugin [T3]  **medium**
 
 The third task is a little more involved.  
 
@@ -365,9 +369,9 @@ The third task is a little more involved.
 
 ### Final Trilogy of Tasks
 
- 1. [**T0->T3**] Checkpoint: Current Test Suite Status
- 2. [**T4**] Draft the E2E manifest testing procdure 
- 3. [**T5**] Outline prequisites as a checklist
+ - ✔ **T0 ➜ T3**  | Checkpoint: Current Test Suite Status
+ - ✔ **T4**       | Implement the E2E manifest testing procdure 
+ - ➜ **T5**       | Outline prequisites as a checklist
 
 ### T0 ➜ T3 | Checkpoint: Current Test Suite Status
 
@@ -383,8 +387,7 @@ This tool:
     
     - [`test/docs/test-scenario-checklist-Level_2.md`](../test/docs/test-scenario-checklist-Level_2.md)
     
-    which tests do not yet have corresponding test files:
-    - `[ ]`, `[S]`, `[?]`
+    which tests do not yet have corresponding test files: `[ ]`, `[S]`, `[?]`
  
  2. Determines via `it.skip()` and `descibe.skip()` which tests have files, but are disabled. 
     Then, each is linked to an existing audit log entry.
@@ -422,7 +425,7 @@ These scenarios have test files, but the tests are disabled with `.skip()` due t
 See the [**T2 ➜ T3 Actual Outcome**](#actual-outcome) checklist and numbered notes.
 
 
-### T3 ➜ T4 | Decision on broader order of remaining tasks (including T4)
+### T3 ➜ T4 | 1. ) A decision on the broader order of remaining tasks
 
 The **T4** implementation can be done now, but there are still many tasks left to do.
 Very generally speacking, these epochs are
@@ -461,13 +464,13 @@ Having some non-breaking bugs that touch multiple layers could act as a means of
 as it would bring me more abreast of the clicking of the gears while polishing the body of the watch.
 The more I think about the permutation matrix, the gladder I am about the choice of path.
 
-### Sidebar: how can we execute `plugin validate` tests?
+#### Sidebar: how can we execute `plugin validate` tests?
 
 Let's **illustrate** how enforcing the rules of the **protocol** affects
-the enforcement of the **contract**.  For illustration, let's say a:
-- **v1**-valid plugin is required to have a sane file structure
-- **v2**-valid plugin is required to have a sane file structure and E2E tests
-- **v3**-valid plugin is required to have E2E tests and self-activation tests, but no longer requires a sane file structure, because the self-activation test implicitly checks for a sane file structure 
+the enforcement of the **contract**.  For illustration, let's say
+- a **v1**-valid plugin is required to have a sane file structure
+- a **v2**-valid plugin is required to have a sane file structure and E2E tests
+- a **v3**-valid plugin is required to have *in-situ* tests and *self-activation* tests, but no longer requires a sane file structure, because the self-activation test implicitly checks for a sane file structure 
 
 
 | Protocol | File Structure Check | E2E Test Check | Self-Activation Check | How it's Implemented in the "Plugin Contract" Service |
@@ -483,10 +486,13 @@ You cannot run self-activation tests on mocked dummy files. You need to check if
 We do not want to be stuck relying on one command to execute the others.
 The **L2Y4** test should be **composable** and **extendable**. 
 
-### T3 ➜ T4 Bridge | Systemizing End-to-End (E2E) Testing
+###  T3 ➜ T4 | 2. ) The Bridge to Systemizing End-to-End Testing
 
 The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application. 
-This involves running the `cli.js` command with a variety of arguments and asserting that the application's behavior—including file outputs, console messages, and exit codes—is correct.
+This involves running the `cli.js` command with a variety of arguments and asserting that the application's behavior--including file outputs, console messages, and exit codes--is correct.
+
+<details>
+<summary><strong>Systemizing End-to-End Testing</strong></summary>
 
 #### 1. The E2E Test Harness
 
@@ -518,7 +524,7 @@ module.exports = { TestHarness };
 
 #### 2. E2E Test Structure: A Hybrid Approach
 
-We will use two complementary strategies for our E2E tests, both powered by the harness.
+We will use two complementary strategies for our E2E tests, both driven through the harness.
 
 **A. Data-Driven Smoke Tests**
 
@@ -566,7 +572,7 @@ describe('E2E - Plugin and Collection Management', function() {
 
 As we introduce the `test-e2e/` directory, it presents a perfect opportunity to improve the project's overall structure for long-term clarity and maintainability.
 
-**Current Structure:**
+#### Current Structure
 ```
 test/
 ├── collections-manager/
@@ -575,7 +581,7 @@ test/
 └── ... (all T0-T3 tests)
 ```
 
-**Proposed Structure:**
+#### Proposed Structure
 ```
 test/
 ├── e2e/
@@ -589,7 +595,7 @@ test/
     └── ...
 ```
 
-**Why this is a good idea**
+#### Why this is a good idea
 
 1. **Clarity and Convention**\
    This structure is self-documenting and conventional. New contributors can more quickly grok the distinction between different tests. Putting in all of the work to generate these tests, then failing to make it easy to know which tests do what isn't exactly anethema to achieving the greater goal: accuracy.
@@ -610,7 +616,13 @@ test/
    ```
    This is cleaner and less error-prone than maintaining a long list of individual module paths for a single group.
 
+</details>
+
 ### T4 | E2E Testing Integration
+
+The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application's user-land behavior. Our strategy is not to test every possible permutation, but to define a **basis set** of tests that provides maximum confidence with minimal redundancy. 
+
+To achieve this efficiently, the testing architecture combines a reusable `TestHarness` for sandboxing, a `test-runner-factory` to eliminate boilerplate, and manifest files to clearly define test cases for each command. This approach proves invaluable, as implementing the suite becomes a powerful final validation of the entire application, uncovering subtle bugs that only appear during full end-to-end execution.
 
 #### Global Options
 
@@ -627,23 +639,25 @@ test/
 
 | Command | Subcommand | Positional(s) | Options/Flags | Notes/Details |
 | :-- | :-- | :-- | :-- | :-- |
-| `convert` | — | `<file>` (Required) | `--plugin, -p`<br>`--outdir, -o`<br>`--filename, -f` | Default command (`$0`) |
-| `generate` | — | `<plugin>` (Required) | *(Dynamic options from plugin.config.yaml)* | Plugin-specific options loaded at runtime |
-| `config` | — | — | `--plugin, -p`<br>`--pure` | Shows merged config for a plugin |
-| `plugin` | `list` | — | `--enabled`<br>`--disabled`<br>`--available`<br>`--all` | `--all` is default |
+| `convert` | -- | `<file>` (Required) | `--plugin, -p`<br>`--outdir, -o`<br>`--filename, -f` | Default command (`$0`) |
+| `generate` | -- | `<plugin>` (Required) | *(Dynamic options from plugin.config.yaml)* | Plugin-specific options loaded at runtime |
+| `config` | -- | -- | `--plugin, -p`<br>`--pure` | Shows merged config for a plugin |
+| `plugin` | `list` | -- | `--enabled`<br>`--disabled`<br>`--available`<br>`--all` | `--all` is default |
 | `plugin` | `create` | `<plugin_name>` (Required) | `--from <source_plugin>`<br>`--target-dir <path>`<br>`--force` | Archetype from existing plugin, set target dir, force overwrite |
-| `plugin` | `add` | `<path>` (Required) | — | Add and enable a singleton plugin directory |
-| `plugin` | `enable` | `<plugin_ref>` (Required) | — | Reference: `collection_name/plugin_id` |
-| `plugin` | `disable` | `<invoke_name>` (Required) | — |  |
+| `plugin` | `add` | `<path>` (Required) | -- | Add and enable a singleton plugin directory |
+| `plugin` | `enable` | `<plugin_ref>` (Required) | -- | Reference: `collection_name/plugin_id` |
+| `plugin` | `disable` | `<invoke_name>` (Required) | -- |  |
 | `plugin` | `validate` | `[path]` (Optional) | `--schema <version>` | Defaults to current directory if no path provided |
-| `collection` | `add` | `<source>` (Required) | — | Source can be git URL or local path |
-| `collection` | `list` | — | — |  |
-| `collection` | `remove` | `<name>` (Required) | — |  |
-| `collection` | `update` | `[name]` (Optional) | — | If omitted, updates all collections |
-| `update` | — | `[name]` (Optional) | — | Alias for `collection update` |
+| `collection` | `add` | `<source>` (Required) | -- | Source can be git URL or local path |
+| `collection` | `list` | -- | -- |  |
+| `collection` | `remove` | `<name>` (Required) | -- |  |
+| `collection` | `update` | `[name]` (Optional) | -- | If omitted, updates all collections |
+| `update` | -- | `[name]` (Optional) | -- | Alias for `collection update` |
 
 
 ---
+
+The successful implementation of this test plan provides a strong guarantee of the tool's stability. While more complex workflows--such as `--watch` mode and complex CLI lifecycles--have been documented in a so-called *Level 4 checklist* for release candidacy, the core functionality is now, I believe, well validated.
 
 #### **Legend**
 
@@ -656,31 +670,7 @@ test/
 ---
 
 
-
 ### T5 | Outline Prequisites as a Checklist
-
-#### Shortlist of T5 Prerequisites
-
-1. **✔** **Plugin Scaffolding** -- *Creating new plugins and collections*
-
-2. **●** **Schema & Validation Improvements** -- *Hardening the `plugin-validator`*
-   
-   **T4** E2E Test Suite\
-   **➜** Full E2E test suite is needed for the `plugin validate` command.
-
-3. **●** **Plugin E2E Testing Integration** -- *Automating E2E tests as part of the plugin contract*
-   
-   **T4** E2E Test Harness\
-   **➜** A sandboxing framework is needed for programmatically running the CLI.
-
-4. **Performance Profiling** -- *Analyzing and optimizing conversion speed*
-   
-   **T4** E2E Test Suite for `convert`\
-   **✖** A stable E2E test suite is needed to facilitate performance measurements.
-
-5. **✔** **Auto-documentation** -- *Generating CLI help and plugin manifests*
-
-### Expanded T5 Prerequisites Checklist
 
 <details>
 <summary><strong>Expanded Prerequisites Checklist</strong></summary>
@@ -705,14 +695,14 @@ test/
   * **✔** `base-plugin.schema.json`: A base schema for plugins to extend or conform to is available.
 
 * **Secondary Prerequisites**
-  * **✖** T4 E2E Test Suite: A comprehensive E2E test suite for the `plugin validate` command is needed to harden its behavior and ensure clear error messaging.
+  * **✔** T4 E2E Test Suite: A comprehensive E2E test suite for the `plugin validate` command is needed to harden its behavior and ensure clear error messaging.
   * **✔** Plugin Contract Documentation: A formal document outlining the requirements for a plugin exists to guide schema design.
 
 #### **Plugin E2E Testing Integration**
 *Automating E2E tests as part of the plugin contract*
 
 * **Primary Prerequisites**
-  * **✖** T4 E2E Test Harness: The core framework for sandboxing and programmatically running the CLI is a required foundation.
+  * **✔** T4 E2E Test Harness: The core framework for sandboxing and programmatically running the CLI is a required foundation.
   * **✔** Proof-of-Concept Self-Test: The `v1.js` validator already contains a working example of how to programmatically execute a plugin's co-located E2E test.
 
 * **Secondary Prerequisites**
@@ -723,7 +713,7 @@ test/
 
 * **Primary Prerequisites**
   * **✔** Core `convert` Command: The main conversion command, the primary target for profiling, is implemented.
-  * **✖** T4 E2E Test Suite for `convert`: A stable E2E test suite is needed to provide a repeatable and consistent baseline for performance measurements.
+  * **✔** T4 E2E Test Suite for `convert`: A stable E2E test suite is needed to provide a repeatable and consistent baseline for performance measurements.
 
 * **Secondary Prerequisites**
   * **✔** Node.js Profiling Tools: The underlying tools for performance analysis (e.g., `node --prof`) are part of the Node.js runtime.
@@ -742,4 +732,27 @@ test/
 
 </details>
 
+## v0.9 Finalization & Release Candidate Checklist | Live
 
+With the core E2E tests implemented, this checklist outlines the remaining **hardening** tasks required to reach a stable `v1.0.0-rc.1` release.
+
+| ✔ |        |<span style="white-space:nowrap">Plugin System Hardening</span>| Command | Value|`#`|   
+|---|--------|:-----------------------------|:-----------------|:-----------------------------|---|
+| ○ | **A1** | `v1` Plugin Contract Final   |`plugin validate` | Specification & Automation   |`2`|
+| ○ | **A2** | Fully Valid Archetyping      |`plugin create`   | Feature Completeness         |`3`|
+| ○ | **A3** | Integrate Validator          |`plugin enable`   | Code Hardening               |`4`|
+|   |        | <span style="white-space:nowrap">**CLI Polish & Usability**</span>       |     |   |
+| ○ | **B1** | Tab Completion               |`cli.js` `<TAB>`  | User Experience Polish       |`6`|
+|   |        | <span style="white-space:nowrap">**Test Suite Completion**</span>        |     |   |
+| ○ | **C1** | Shrink Gaps in Test Coverage |`×L2 ×L1 ○L4 ✔L3` | Technical Debt               |`5`|
+| ➜ | **C2** | Housekeeping Tests & CI      |`test/integration`| Code Quality                 |`1`|
+
+**Proposed Sequence | C2 ➜ A1 ➜ A2 ➜ A3 ➜ C1 ➜ B1**
+
+<!--
+✔
+×
+➜
+●
+○
+-->

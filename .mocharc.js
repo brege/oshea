@@ -53,12 +53,15 @@ const paths = {
     collection_update: 'test/e2e/collection-update.*.js',
     global_flags: 'test/e2e/global-flags.*.js',
 
+    // Level 4
+    // paths to test/<multi-command-interactions>
+
     // --- In-Situ E2E Tests for Bundled Plugins ---
     insitu_e2e: 'plugins/**/test/*.test.js',
 };
 
 const groups = {
-    // By Rank
+    // --- By Rank ---
     rank0: [paths.default_handler, paths.pdf_generator],
     rank1: [paths.ConfigResolver, paths.plugin_determiner, paths.collections_manager],
     rank2: [
@@ -68,7 +71,7 @@ const groups = {
         paths.PluginManager,
         paths.math_integration,
     ],
-    // By Level
+    // --- By Level ---
     level1: [
         paths.ConfigResolver,
         paths.plugin_determiner,
@@ -86,22 +89,28 @@ const groups = {
         paths.plugin_validator
     ],
     level3: [
-        //paths.plugin_convert,
-        //paths.plugin_generate,
-        //paths.plugin_config,
-        //paths.plugin_list,
-        //paths.plugin_create,
-        //paths.plugin_add,
-        //paths.plugin_enable,
-        //paths.plugin_disable,
-        //paths.plugin_validate,
+        paths.plugin_convert,
+        paths.plugin_generate,
+        paths.plugin_config,
+        paths.plugin_list,
+        paths.plugin_create,
+        paths.plugin_add,
+        paths.plugin_enable,
+        paths.plugin_disable,
+        paths.plugin_validate,
         paths.collection_add,
-        //paths.collection_list,
-        //paths.collection_remove,
-        //paths.collection_update,
-        //paths.global_flags,
+        paths.collection_list,
+        paths.collection_remove,
+        paths.collection_update,
+        paths.global_flags,
     ],
-    // By Toolchain
+    level4: [
+      // happy lifecycle
+      // --watch
+      // sad lifecycle
+    ],
+    // --- By Toolchain ---
+    // Config
     config: [
         paths.ConfigResolver,
         paths.main_config_loader,
@@ -109,10 +118,9 @@ const groups = {
         paths.plugin_determiner,
         paths.PluginRegistryBuilder
     ],
-    // Individual Module Groups
-    validator: [paths.plugin_validator, paths.plgin_validate],
+    //  Individual Module Groups
+    validator: [paths.plugin_validator, paths.plugin_validate],
     insitu: [paths.insitu_e2e], 
-    t4: [paths.e2e],
     // Default
     all: ['test/**/*.js', 'plugins/**/test/*.test.js']
 };

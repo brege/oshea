@@ -1,0 +1,30 @@
+const fs = require('fs-extra');
+const path = require('path');
+
+async function createDummyPlugin(pluginDir, pluginName) {
+    await fs.ensureDir(pluginDir);
+    await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
+    await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+}
+
+module.exports = [
+  {
+    describe: '3.8.1: (Happy Path) Successfully disables an enabled plugin',
+    setup: async (sandboxDir, harness) => {
+      const collDir = path.join(sandboxDir, 'test-collection-for-disable');
+      await createDummyPlugin(path.join(collDir, 'plugin-to-disable'), 'plugin-to-disable');
+      await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection-for-disable']);
+      await harness.runCli(['plugin', 'enable', 'test-collection-for-disable/plugin-to-disable', '--name', 'my-enabled-plugin']);
+    },
+    args: (sandboxDir) => [
+      'plugin',
+      'disable',
+      'my-enabled-plugin',
+    ],
+    assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
+      expect(exitCode).to.equal(0);
+      expect(stdout).to.match(/Plugin "my-enabled-plugin" disabled successfully/i);
+    },
+  },
+];

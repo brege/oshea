@@ -9,13 +9,17 @@ const group = argv.group || 'all';
 console.log(`[Mocha] Running test group: '${group}'`);
 
 const paths = {
+    // --- Subsystem & Module Integration Test Paths ---
+    
     // Rank 0
     default_handler: 'test/default-handler/**/*.js',
     pdf_generator: 'test/pdf-generator/**/*.js',
+    
     // Rank 1
     ConfigResolver: 'test/config-resolver/**/*.js',
     plugin_determiner: 'test/plugin_determiner/**/*.js',
     collections_manager: 'test/collections-manager/**/*.js',
+    
     // Rank 2
     PluginRegistryBuilder: 'test/plugin-registry-builder/**/*.js',
     main_config_loader: 'test/main-config-loader/**/*.js',
@@ -23,13 +27,34 @@ const paths = {
     PluginManager: 'test/plugin-manager/**/*.js',
     math_integration: 'test/math_integration/**/*.js',
     cm_utils: 'test/collections-manager/**/*.js',
+
+    // --- End-to-End Test Paths ---
+    
     // Level 2
     plugin_validator: 'test/plugin-validator/**/*.js',
-    // E2E Plugin Tests
-    plugin_e2e: 'plugins/**/test/*.test.js',
-    deprecated: 'test-deprecated/**/*.js',
-    // T4 E2E Tests
-    e2e: 'test/e2e/**/*.js'
+    
+    // Level 3
+    plugin_convert: 'test/e2e/convert.*.js',
+    plugin_generate: 'test/e2e/generate.*.js',
+
+    // Level 3 E2E Paths
+    plugin_convert: 'test/e2e/convert.*.js',
+    plugin_generate: 'test/e2e/generate.*.js',
+    plugin_config: 'test/e2e/config.*.js',
+    plugin_list: 'test/e2e/plugin-list.*.js',
+    plugin_create: 'test/e2e/plugin-create.*.js',
+    plugin_add: 'test/e2e/plugin-add.*.js',
+    plugin_enable: 'test/e2e/plugin-enable.*.js',
+    plugin_disable: 'test/e2e/plugin-disable.*.js',
+    plugin_validate: 'test/e2e/plugin-validate.*.js',
+    collection_add: 'test/e2e/collection-add.*.js',
+    collection_list: 'test/e2e/collection-list.*.js',
+    collection_remove: 'test/e2e/collection-remove.*.js',
+    collection_update: 'test/e2e/collection-update.*.js',
+    global_flags: 'test/e2e/global-flags.*.js',
+
+    // --- In-Situ E2E Tests for Bundled Plugins ---
+    insitu_e2e: 'plugins/**/test/*.test.js',
 };
 
 const groups = {
@@ -54,7 +79,28 @@ const groups = {
         paths.math_integration,
         paths.cm_utils
     ],
-    level2: [paths.default_handler, paths.pdf_generator, paths.collections_manager, paths.plugin_validator],
+    level2: [
+        paths.default_handler, 
+        paths.pdf_generator, 
+        paths.collections_manager,
+        paths.plugin_validator
+    ],
+    level3: [
+        //paths.plugin_convert,
+        //paths.plugin_generate,
+        //paths.plugin_config,
+        //paths.plugin_list,
+        //paths.plugin_create,
+        //paths.plugin_add,
+        paths.plugin_enable,
+        //paths.plugin_disable,
+        //paths.plugin_validate,
+        //paths.collection_add,
+        //paths.collection_list,
+        //paths.collection_remove,
+        //paths.collection_update,
+        //paths.global_flags,
+    ],
     // By Toolchain
     config: [
         paths.ConfigResolver,
@@ -65,9 +111,9 @@ const groups = {
     ],
     // Individual Module Groups
     validator: [paths.plugin_validator],
-    e2e: [paths.plugin_e2e], 
+    insitu: [paths.insitu_e2e], 
     t4: [paths.e2e],
-    deprecated: [paths.deprecated],
+    // Default
     all: ['test/**/*.js', 'plugins/**/test/*.test.js']
 };
 

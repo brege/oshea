@@ -15,8 +15,8 @@ const PluginManager = require('./src/PluginManager');
 const { setupWatch } = require('./src/watch_handler');
 const { determinePluginToUse } = require('./src/plugin_determiner');
 const CollectionsManager = require('./src/collections-manager');
-const markdownUtils = require('./src/markdown_utils'); // CORRECTED: Added markdownUtils import
-const yaml = require('js-yaml'); // CORRECTED: Added yaml import
+const markdownUtils = require('./src/markdown_utils');
+const yaml = require('js-yaml');
 
 
 // Command modules
@@ -72,7 +72,6 @@ async function commonCommandHandler(args, executorFunction, commandType) {
 }
 
 async function executeConversion(args, configResolver) {
-    // CORRECTED: Create dependencies object for determinePluginToUse
     const dependenciesForPluginDeterminer = {
         fsPromises: fsp,
         fsSync: fs,
@@ -82,7 +81,7 @@ async function executeConversion(args, configResolver) {
         processCwd: process.cwd
     };
 
-    const { pluginSpec, source: pluginSource, localConfigOverrides } = await determinePluginToUse(args, dependenciesForPluginDeterminer, 'default'); // CORRECTED: Passed dependencies object
+    const { pluginSpec, source: pluginSource, localConfigOverrides } = await determinePluginToUse(args, dependenciesForPluginDeterminer, 'default');
     args.pluginSpec = pluginSpec;
 
     console.log(`Processing 'convert' for: ${args.markdownFile}`);
@@ -233,6 +232,13 @@ async function main() {
             ...convertCmdModule.defaultCmd,
             handler: async (args) => {
                 if (args.markdownFile) {
+                    // If the arg is not a real file and doesn't look like one, treat as an error.
+                    const potentialFile = args.markdownFile;
+                    if (!fs.existsSync(potentialFile) && !potentialFile.endsWith('.md') && !potentialFile.endsWith('.mdx')) {
+                         console.error(chalk.red(`Error: Unknown command: '${potentialFile}'`));
+                         console.error(chalk.yellow("\nTo convert a file, provide a valid path. For other commands, see --help."));
+                         process.exit(1);
+                    }
                     args.isLazyLoad = true;
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
                 } else {
@@ -269,7 +275,7 @@ async function main() {
                 process.exit(1);
                 return;
             }
-            if (msg && msg.includes("Unknown argument")) {
+             if (msg && msg.includes("Unknown argument")) {
                  const firstArg = process.argv[2];
                  if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd', '--coll-root', '-cr'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
                      console.error(chalk.red(`ERROR: ${msg}`));

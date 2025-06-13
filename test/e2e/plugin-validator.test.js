@@ -1,3 +1,4 @@
+// test/e2e/plugin-validator.test.js
 const { expect } = require('chai');
 const path = require('path');
 const fs = require('fs-extra');

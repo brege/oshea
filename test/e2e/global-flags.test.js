@@ -1,3 +1,4 @@
+// test/e2e/global-flags.test.js
 const { createE2eTestRunner } = require('./test-runner-factory.js');
 
 // Create the test suite for global flags

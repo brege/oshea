@@ -1,3 +1,4 @@
+// test/e2e/generate.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
 const { HUGO_EXAMPLE_SOURCE_IN_EXAMPLES } = require('../shared/test-constants');

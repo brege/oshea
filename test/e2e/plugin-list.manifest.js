@@ -1,3 +1,4 @@
+// test/e2e/plugin-list.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
 

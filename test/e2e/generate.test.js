@@ -1,4 +1,4 @@
-// use test-runner-factory.js
+// test/e2e/generate.test.js
 const { createE2eTestRunner } = require('./test-runner-factory.js');
 
 // Create the test suite for the 'generate' command, with a custom timeout

@@ -1,3 +1,4 @@
+// test/e2e/collection-update.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
 const { execSync } = require('child_process');
@@ -13,7 +14,10 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     // 2. Clone it, add a file, and push to create the initial state
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
-    execSync('git config user.name "Test" && git config user.email "test@example.com"', { cwd: initialClonePath });
+    // --- START MODIFICATION ---
+    // Set local git config for the test repo to prevent GPG signing prompts
+    execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
+    // --- END MODIFICATION ---
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
     execSync('git push origin main', { cwd: initialClonePath });
 

@@ -1,4 +1,4 @@
-// dev/test/e2e/plugin-validator.manifest.js
+// test/e2e/plugin-validator.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
 const os = require('os'); 

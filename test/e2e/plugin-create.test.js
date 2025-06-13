@@ -1,3 +1,4 @@
+// test/e2e/plugin-create.test.js
 const { createE2eTestRunner } = require('./test-runner-factory.js');
 
 // Create the test suite for the 'plugin create' command

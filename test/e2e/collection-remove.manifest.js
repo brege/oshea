@@ -1,3 +1,4 @@
+// test/e2e/collection-remove.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
 

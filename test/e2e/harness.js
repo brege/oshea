@@ -1,3 +1,4 @@
+// test/e2e/harness.js
 const { spawn } = require('child_process');
 const fs = require('fs-extra');
 const path = require('path');

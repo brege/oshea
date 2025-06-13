@@ -1,3 +1,4 @@
+// test/e2e/global-flags.manifest.js
 const path = require('path');
 const { version } = require('../../package.json'); // Import version for the test
 

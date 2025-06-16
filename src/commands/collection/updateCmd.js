@@ -21,13 +21,10 @@ module.exports = {
 
     try {
       if (args.collection_name) {
-        // --- START MODIFICATION ---
-        // The command handler is now fully responsible for logging its final status.
         console.log(chalk.blueBright(`md-to-pdf collection: Attempting to update collection '${chalk.cyan(args.collection_name)}'...`));
         const cmResult = await manager.updateCollection(args.collection_name);
         
         if (cmResult.success) {
-            // This is the message the E2E test will now correctly assert against.
             console.log(chalk.green(`Successfully updated collection "${args.collection_name}".`));
         } else {
             console.warn(chalk.yellow(`Update for '${args.collection_name}' reported issues. Message: ${cmResult.message}`));
@@ -35,7 +32,6 @@ module.exports = {
                 commandShouldFailHard = true;
             }
         }
-        // --- END MODIFICATION ---
       } else {
         console.log(chalk.blueBright('md-to-pdf collection: Attempting to update all Git-based collections...'));
         const cmResults = await manager.updateAllCollections();
@@ -53,5 +49,13 @@ module.exports = {
     if (commandShouldFailHard) {
         process.exit(1);
     }
+
+    // --- START MODIFICATION ---
+    // This explicitly waits for the stdout buffer to flush before the handler promise resolves.
+    // This should fix the race condition where the process exits before output is captured.
+    return new Promise(resolve => {
+        process.stdout.write('', resolve);
+    });
+    // --- END MODIFICATION ---
   }
 };

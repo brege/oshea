@@ -24,10 +24,8 @@ This command only syncs the collection files; it does not automatically enable a
     const manager = args.manager;
 
     if (args.collection_name) {
-      // --- START MODIFICATION ---
-      // This logic now mirrors the main command handler for consistency.
-      console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
       try {
+        console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
         const result = await manager.updateCollection(args.collection_name);
         
         if (result && result.success) {
@@ -35,7 +33,6 @@ This command only syncs the collection files; it does not automatically enable a
         } else if (result && !result.success) {
            console.warn(chalk.yellow(`Update for '${args.collection_name}' may have had issues: ${result.message || 'Please check output above.'}`));
         }
-      // --- END MODIFICATION ---
       } catch (error) {
         console.error(chalk.red(`\nERROR updating collection '${args.collection_name}': ${error.message}`));
         if (process.env.DEBUG_CM === 'true' && error.stack) {
@@ -58,5 +55,12 @@ This command only syncs the collection files; it does not automatically enable a
         process.exit(1);
       }
     }
+
+    // --- START MODIFICATION ---
+    // Apply the same fix to the alias command for consistency.
+    return new Promise(resolve => {
+        process.stdout.write('', resolve);
+    });
+    // --- END MODIFICATION ---
   }
 };

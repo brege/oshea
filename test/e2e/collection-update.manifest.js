@@ -8,17 +8,12 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     const remoteRepoPath = path.join(sandboxDir, `${collectionName}-remote.git`);
     const initialClonePath = path.join(sandboxDir, `${collectionName}-clone`);
 
-    // 1. Create a bare git repo to act as the remote
+    // 1. Create a bare git repo to act as the remote.
+    // The --initial-branch=main flag and user identity are now handled by the harness via GIT_CONFIG_GLOBAL.
     execSync(`git init --bare "${remoteRepoPath}"`);
-    // --- START MODIFICATION ---
-    // Explicitly set the default branch in the bare remote repo. This makes the
-    // environment more robust and prevents issues in clean CI environments.
-    execSync(`git -C "${remoteRepoPath}" symbolic-ref HEAD refs/heads/main`);
-    // --- END MODIFICATION ---
 
     // 2. Clone it, add a file, and push to create the initial state
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
-    // The cloned repo will now correctly start on the 'main' branch.
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
     execSync('git push origin main', { cwd: initialClonePath });

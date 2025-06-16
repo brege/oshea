@@ -3,50 +3,32 @@ const fs = require('fs-extra');
 const path = require('path');
 const { execSync } = require('child_process');
 
-// Helper to set up a local git "remote" and a collection cloned from it
 async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     const remoteRepoPath = path.join(sandboxDir, `${collectionName}-remote.git`);
     const initialClonePath = path.join(sandboxDir, `${collectionName}-clone`);
 
-    // 1. Create a bare git repo to act as the remote
-    console.log(`[CI DEBUG] Initializing bare remote repo at: ${remoteRepoPath}`);
     execSync(`git init --bare "${remoteRepoPath}"`);
-
-    // 2. Clone it, add a file, and push to create the initial state
-    console.log(`[CI DEBUG] Cloning remote repo to: ${initialClonePath}`);
-    execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
-    await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
-
-    console.log(`[CI DEBUG] Setting local git config for: ${initialClonePath}`);
-    execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
-    
-    console.log(`[CI DEBUG] Committing v1 to local clone...`);
-    execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
-
     // --- START MODIFICATION ---
-    console.log(`[CI DEBUG] Renaming default branch to 'main' to ensure consistency...`);
-    execSync('git branch -m main', { cwd: initialClonePath });
+    // This is the critical fix. It explicitly sets the default branch in the bare
+    // "remote" repository. This ensures that subsequent git commands inside the
+    // application know that 'main' is the branch to track.
+    execSync(`git symbolic-ref HEAD refs/heads/main`, { cwd: remoteRepoPath });
     // --- END MODIFICATION ---
 
-    console.log(`[CI DEBUG] Pushing v1 to remote...`);
+    execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
+    await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
+    execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
+    execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
+    // We no longer need to rename the branch locally because the clone will now correctly start on 'main'.
     execSync('git push -u origin main', { cwd: initialClonePath });
 
-    // 3. Add this initial clone as a collection to the CM
-    console.log(`[CI DEBUG] Adding collection '${collectionName}' to CollectionsManager via CLI...`);
     await harness.runCli(['collection', 'add', remoteRepoPath, '--name', collectionName]);
 
-    // 4. Update the "remote" with a new version
-    console.log(`[CI DEBUG] Pulling from remote to ensure clone is up to date...`);
-    execSync('git pull origin main', { cwd: initialClonePath }); // Ensure it's up to date
+    execSync('git pull origin main', { cwd: initialClonePath });
     await fs.writeFile(path.join(initialClonePath, 'v2.txt'), 'version 2');
-
-    console.log(`[CI DEBUG] Committing v2 to local clone...`);
     execSync('git add . && git commit -m "v2"', { cwd: initialClonePath });
-
-    console.log(`[CI DEBUG] Pushing v2 to remote...`);
     execSync('git push origin main', { cwd: initialClonePath });
 }
-
 
 module.exports = [
   {

@@ -8,11 +8,11 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     const remoteRepoPath = path.join(sandboxDir, `${collectionName}-remote.git`);
     const initialClonePath = path.join(sandboxDir, `${collectionName}-clone`);
 
-    // 1. Create a bare git repo to act as the remote.
-    // The user identity and default branch name are now handled by the test harness environment.
+    // 1. Create a bare git repo. The harness now ensures git is properly configured.
     execSync(`git init --bare "${remoteRepoPath}"`);
 
-    // 2. Clone it, add a file, and push to create the initial state
+    // 2. Clone it, add a file, and push to create the initial state.
+    // The default branch will be 'main' because of our test .gitconfig.
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
@@ -40,6 +40,11 @@ module.exports = [
       'update',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
+      console.log("--- DEBUG START: 3.13.1 ---");
+      console.log("Exit Code:", exitCode);
+      console.log("STDOUT:", stdout);
+      console.log("STDERR:", stderr);
+      console.log("--- DEBUG END: 3.13.1 ---");
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-all"/i);
       
@@ -60,6 +65,11 @@ module.exports = [
       'collection-to-update-one',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
+      console.log("--- DEBUG START: 3.13.2 ---");
+      console.log("Exit Code:", exitCode);
+      console.log("STDOUT:", stdout);
+      console.log("STDERR:", stderr);
+      console.log("--- DEBUG END: 3.13.2 ---");
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-one"/i);
 
@@ -79,6 +89,11 @@ module.exports = [
       'collection-to-update-alias',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
+      console.log("--- DEBUG START: 3.14.1 ---");
+      console.log("Exit Code:", exitCode);
+      console.log("STDOUT:", stdout);
+      console.log("STDERR:", stderr);
+      console.log("--- DEBUG END: 3.14.1 ---");
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-alias"/i);
 

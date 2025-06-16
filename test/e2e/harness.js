@@ -5,7 +5,6 @@ const path = require('path');
 const os = require('os');
 
 const cliPath = path.resolve(__dirname, '../../cli.js');
-const fixtureGitConfigPath = path.resolve(__dirname, '../fixtures/config/.gitconfig');
 
 class TestHarness {
     constructor() {
@@ -41,22 +40,9 @@ class TestHarness {
         }
 
         const fullArgs = [...defaultFlags, ...args];
-        
-        // Prepare environment variables for the spawned process.
-        // This forces any git commands run by the CLI to use our test-specific config.
-        const testProcessEnv = {
-            ...process.env,
-            GIT_CONFIG_GLOBAL: fixtureGitConfigPath
-        };
 
         return new Promise((resolve) => {
-            // --- START MODIFICATION ---
-            // Pass the custom environment to the spawned process.
-            const proc = spawn('node', [cliPath, ...fullArgs], {
-                cwd: this.sandboxDir,
-                env: testProcessEnv
-            });
-            // --- END MODIFICATION ---
+            const proc = spawn('node', [cliPath, ...fullArgs], { cwd: this.sandboxDir });
             let stdout = '';
             let stderr = '';
             proc.stdout.on('data', (data) => (stdout += data.toString()));

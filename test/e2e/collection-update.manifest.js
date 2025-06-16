@@ -14,23 +14,16 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     // 2. Clone it, add a file, and push to create the initial state
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
-
-    // --- START MODIFICATION ---
-    // Set a local git identity before committing. This is required in clean CI environments.
     execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
-    // Now, create the first commit. This establishes the initial branch (e.g., 'master').
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
-    // Rename the branch to 'main' for consistency.
     execSync('git branch -m main', { cwd: initialClonePath });
-    // Finally, push the 'main' branch to the remote.
     execSync('git push origin main', { cwd: initialClonePath });
-    // --- END MODIFICATION ---
 
     // 3. Add this initial clone as a collection to the CM
     await harness.runCli(['collection', 'add', remoteRepoPath, '--name', collectionName]);
 
     // 4. Update the "remote" with a new version
-    execSync('git pull origin main', { cwd: initialClonePath }); // Ensure it's up to date
+    execSync('git pull origin main', { cwd: initialClonePath });
     await fs.writeFile(path.join(initialClonePath, 'v2.txt'), 'version 2');
     execSync('git add . && git commit -m "v2"', { cwd: initialClonePath });
     execSync('git push origin main', { cwd: initialClonePath });
@@ -48,6 +41,15 @@ module.exports = [
       'update',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
+      // --- START MODIFICATION ---
+      // Add debug logging to see the output in the CI environment
+      console.log("--- DEBUG START: 3.13.1 ---");
+      console.log("Exit Code:", exitCode);
+      console.log("STDOUT:", stdout);
+      console.log("STDERR:", stderr);
+      console.log("--- DEBUG END: 3.13.1 ---");
+      // --- END MODIFICATION ---
+
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-all"/i);
       
@@ -68,6 +70,15 @@ module.exports = [
       'collection-to-update-one',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
+      // --- START MODIFICATION ---
+      // Add debug logging to see the output in the CI environment
+      console.log("--- DEBUG START: 3.13.2 ---");
+      console.log("Exit Code:", exitCode);
+      console.log("STDOUT:", stdout);
+      console.log("STDERR:", stderr);
+      console.log("--- DEBUG END: 3.13.2 ---");
+      // --- END MODIFICATION ---
+
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-one"/i);
 
@@ -87,6 +98,15 @@ module.exports = [
       'collection-to-update-alias',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
+      // --- START MODIFICATION ---
+      // Add debug logging to see the output in the CI environment
+      console.log("--- DEBUG START: 3.14.1 ---");
+      console.log("Exit Code:", exitCode);
+      console.log("STDOUT:", stdout);
+      console.log("STDERR:", stderr);
+      console.log("--- DEBUG END: 3.14.1 ---");
+      // --- END MODIFICATION ---
+
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-alias"/i);
 

@@ -56,11 +56,9 @@ This command only syncs the collection files; it does not automatically enable a
       }
     }
 
-    // --- START MODIFICATION ---
     // Apply the same fix to the alias command for consistency.
     return new Promise(resolve => {
         process.stdout.write('', resolve);
     });
-    // --- END MODIFICATION ---
   }
 };

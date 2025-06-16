@@ -9,14 +9,9 @@ const cliPath = path.resolve(__dirname, '../../cli.js');
 class TestHarness {
     constructor() {
         this.sandboxDir = '';
-        this.collRootDir = ''; // To store the path to the sandboxed collections root
+        this.collRootDir = '';
     }
 
-    /**
-     * Creates a clean, temporary directory for a test run,
-     * including a dedicated subdirectory for the CollectionsManager root.
-     * @returns {Promise<string>} The path to the created sandbox directory.
-     */
     async createSandbox() {
         this.sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), 'md-to-pdf-e2e-'));
         this.collRootDir = path.join(this.sandboxDir, '.cm-test-root');
@@ -24,13 +19,6 @@ class TestHarness {
         return this.sandboxDir;
     }
 
-    /**
-     * Executes the CLI with given arguments within the sandbox directory,
-     * forcing it to use the sandboxed collections root.
-     * @param {string[]} [args=[]] - The arguments to pass to the CLI.
-     * @param {object} [options={}] - Options for the CLI run.
-     * @returns {Promise<{exitCode: number, stdout: string, stderr: string}>}
-     */
     runCli(args = [], options = {}) {
         const { useFactoryDefaults = true } = options;
 
@@ -41,21 +29,43 @@ class TestHarness {
 
         const fullArgs = [...defaultFlags, ...args];
 
+        // --- START MODIFICATION ---
+        // Refactor how stdout/stderr are captured for more robust stream handling.
         return new Promise((resolve) => {
+            console.log(`[HARNESS] Spawning: node ${cliPath} ${fullArgs.join(' ')}`);
             const proc = spawn('node', [cliPath, ...fullArgs], { cwd: this.sandboxDir });
-            let stdout = '';
-            let stderr = '';
-            proc.stdout.on('data', (data) => (stdout += data.toString()));
-            proc.stderr.on('data', (data) => (stderr += data.toString()));
-            proc.on('close', (exitCode) => resolve({ exitCode, stdout, stderr }));
+            
+            const stdoutChunks = [];
+            const stderrChunks = [];
+
+            proc.stdout.on('data', (data) => {
+                console.log(`[HARNESS] stdout chunk received: ${data.toString().substring(0, 50)}...`);
+                stdoutChunks.push(data);
+            });
+
+            proc.stderr.on('data', (data) => {
+                console.log(`[HARNESS] stderr chunk received: ${data.toString().substring(0, 50)}...`);
+                stderrChunks.push(data);
+            });
+
+            proc.on('close', (exitCode) => {
+                const stdout = Buffer.concat(stdoutChunks).toString('utf8');
+                const stderr = Buffer.concat(stderrChunks).toString('utf8');
+                console.log(`[HARNESS] Process closed with code: ${exitCode}`);
+                console.log(`[HARNESS] Final stdout length: ${stdout.length}`);
+                console.log(`[HARNESS] Final stderr length: ${stderr.length}`);
+                resolve({ exitCode, stdout, stderr });
+            });
+
+            proc.on('error', (err) => {
+                console.error('[HARNESS] Spawn error:', err);
+                resolve({ exitCode: 1, stdout: '', stderr: err.message });
+            });
         });
+        // --- END MODIFICATION ---
     }
 
-    /**
-     * Cleans up the temporary sandbox directory.
-     * @returns {Promise<void>}
-     */
-    cleanup() {
+    async cleanup() {
         if (this.sandboxDir) {
             return fs.remove(this.sandboxDir);
         }

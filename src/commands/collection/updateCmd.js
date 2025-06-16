@@ -50,12 +50,10 @@ module.exports = {
         process.exit(1);
     }
 
-    // --- START MODIFICATION ---
     // This explicitly waits for the stdout buffer to flush before the handler promise resolves.
-    // This should fix the race condition where the process exits before output is captured.
+    // This fixes the race condition where the process exits before output is captured.
     return new Promise(resolve => {
         process.stdout.write('', resolve);
     });
-    // --- END MODIFICATION ---
   }
 };

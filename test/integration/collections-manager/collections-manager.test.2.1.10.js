@@ -8,7 +8,6 @@ describe('CollectionsManager updateCollection (2.1.10)', () => {
 
     const FAKE_COLL_ROOT = '/fake/collRoot';
     const COLLECTION_TO_UPDATE = 'my-git-collection';
-    const FAKE_COLLECTION_PATH = `${FAKE_COLL_ROOT}/${COLLECTION_TO_UPDATE}`;
 
     let mockDependencies;
     let manager;
@@ -27,7 +26,6 @@ describe('CollectionsManager updateCollection (2.1.10)', () => {
 
         manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT }, mockDependencies);
 
-        // Stub internal manager methods
         sinon.stub(manager, '_readCollectionMetadata').resolves({
             source: 'https://github.com/fake/repo.git'
         });
@@ -52,10 +50,9 @@ describe('CollectionsManager updateCollection (2.1.10)', () => {
 
         // Assert
         expect(result.success).to.be.true;
-        // --- START MODIFICATION ---
-        // Match the new, more descriptive success message from the refactored command.
+        // This test was failing because the expected message was outdated.
+        // It now asserts for the correct, more descriptive message.
         expect(result.message).to.equal(`Successfully updated collection "${COLLECTION_TO_UPDATE}" by resetting to origin/main.`);
-        // --- END MODIFICATION ---
 
         // Verify the final 'git reset' command was called
         expect(spawnGitStub.calledWith(['reset', '--hard', 'origin/main'])).to.be.true;
@@ -65,3 +62,4 @@ describe('CollectionsManager updateCollection (2.1.10)', () => {
         expect(writeMetaStub.firstCall.args[1]).to.have.property('updated_on');
     });
 });
+

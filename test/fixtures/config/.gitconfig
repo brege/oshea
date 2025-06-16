@@ -1,0 +1,5 @@
+[user]
+    name = E2E Test User
+    email = test@example.com
+[commit]
+    gpgsign = false

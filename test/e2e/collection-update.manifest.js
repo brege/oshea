@@ -9,25 +9,36 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     const initialClonePath = path.join(sandboxDir, `${collectionName}-clone`);
 
     // 1. Create a bare git repo to act as the remote
+    console.log(`[CI DEBUG] Initializing bare remote repo at: ${remoteRepoPath}`);
     execSync(`git init --bare "${remoteRepoPath}"`);
 
     // 2. Clone it, add a file, and push to create the initial state
+    console.log(`[CI DEBUG] Cloning remote repo to: ${initialClonePath}`);
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
-    // --- START MODIFICATION ---
-    // Set local git config for the test repo to prevent GPG signing prompts
+
+    console.log(`[CI DEBUG] Setting local git config for: ${initialClonePath}`);
     execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
-    // --- END MODIFICATION ---
+    
+    console.log(`[CI DEBUG] Committing v1 to local clone...`);
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
+
+    console.log(`[CI DEBUG] Pushing v1 to remote...`);
     execSync('git push origin main', { cwd: initialClonePath });
 
     // 3. Add this initial clone as a collection to the CM
+    console.log(`[CI DEBUG] Adding collection '${collectionName}' to CollectionsManager via CLI...`);
     await harness.runCli(['collection', 'add', remoteRepoPath, '--name', collectionName]);
 
     // 4. Update the "remote" with a new version
+    console.log(`[CI DEBUG] Pulling from remote to ensure clone is up to date...`);
     execSync('git pull origin main', { cwd: initialClonePath }); // Ensure it's up to date
     await fs.writeFile(path.join(initialClonePath, 'v2.txt'), 'version 2');
+
+    console.log(`[CI DEBUG] Committing v2 to local clone...`);
     execSync('git add . && git commit -m "v2"', { cwd: initialClonePath });
+
+    console.log(`[CI DEBUG] Pushing v2 to remote...`);
     execSync('git push origin main', { cwd: initialClonePath });
 }
 

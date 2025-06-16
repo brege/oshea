@@ -12,14 +12,16 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     execSync(`git init --bare "${remoteRepoPath}"`);
 
     // 2. Clone it, add a file, and push to create the initial state
-    execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
+    execSync(`git clone "<span class="math-inline">\{remoteRepoPath\}" "</span>{initialClonePath}"`);
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
+
+    // Set a local git identity before committing. This is required in clean CI environments.
     execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
-    // Commit first to create the initial branch (likely 'master' in CI)
+    // Now, create the first commit. This establishes the initial branch (e.g., 'master').
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
-    // Now that the branch exists, rename it to 'main' to ensure consistency.
+    // Rename the branch to 'main' for consistency.
     execSync('git branch -m main', { cwd: initialClonePath });
-    // Now, push the 'main' branch.
+    // Finally, push the 'main' branch to the remote.
     execSync('git push origin main', { cwd: initialClonePath });
 
     // 3. Add this initial clone as a collection to the CM
@@ -64,32 +66,4 @@ module.exports = [
       'collection-to-update-one',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
-      expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Successfully updated collection "collection-to-update-one"/i);
-
-      const collRootDir = path.join(sandboxDir, '.cm-test-root');
-      const updatedFile = path.join(collRootDir, 'collection-to-update-one', 'v2.txt');
-      const fileExists = await fs.pathExists(updatedFile);
-      expect(fileExists, 'Expected updated file v2.txt to exist').to.be.true;
-    },
-  },
-  {
-    describe: "3.14.1: (Alias) The 'update' alias successfully runs the collection update process",
-    setup: async (sandboxDir, harness) => {
-        await setupLocalGitCollection(sandboxDir, harness, 'collection-to-update-alias');
-    },
-    args: (sandboxDir) => [
-      'update', // Use the alias
-      'collection-to-update-alias',
-    ],
-    assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
-      expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Successfully updated collection "collection-to-update-alias"/i);
-
-      const collRootDir = path.join(sandboxDir, '.cm-test-root');
-      const updatedFile = path.join(collRootDir, 'collection-to-update-alias', 'v2.txt');
-      const fileExists = await fs.pathExists(updatedFile);
-      expect(fileExists, 'Expected updated file v2.txt to exist').to.be.true;
-    },
-  },
-];
+      expect(exitCode).to.equal(0

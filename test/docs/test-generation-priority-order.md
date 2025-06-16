@@ -1,6 +1,20 @@
-- test-scenario-checklist-Level\_1.md
-- test-scenario-checklist-Level\_2.md
+## Test Generation Priority Order
 
+This document outlines the priority and status for the implementation of the project's automated tests. It serves as a high-level map of the testing strategy.
+
+The testing framework is divided into **Levels** and **Ranks**.
+
+**Level** refers to the type and scope of a test suite.\
+It can be thought of as categorizing the tests in terms of their fidelity, how faithfully the test reproduces the conditions of the production environment and a real user's interaction.
+  * **L0** -- Level 0. Core utility unit tests.[^1]
+  * **L1** -- Level 1. Module Integration tests, verifying the interactions between closely related functions within a single module.
+  * **L2** -- Level 2. Subsystem Integration tests, verifying the interactions between different modules that form a cohesive subsystem.
+  * **L3** -- Level 3. E2E (End-to-End) tests, verifying CLI commands and their primary options.
+  * **L4** -- Level 4. Advanced E2E tests, verifying complex workflows and edge cases.
+
+**Rank** refers to the implementation priority, based on how foundational the module is to the application's core value proposition. Rank 0 is the highest priority.
+
+### Module Test Counts by Level
 
 | Level | Tests      | Rank       | Module                    |
 | :---- | :--------- | :--------- | :------------------------ |
@@ -11,85 +25,105 @@
 | L1Y5  |   9 Tests  |  Rank 2    | `PluginManager`           |
 | L1Y6  |  15 Tests  |  Rank 2    | `plugin_config_loader`    |
 | L1Y7  |   8 Tests  |  Rank 2    | `math_integration`        |
-| L1Y8  |   9 Tests  |  Rank 2    | `cm-utils`                |
+| L1Y8  |   3 Tests  |  Rank 2    | `cm-utils`                |
 | L2Y1  |  28 Tests  |  Rank 1    | `collections-manager`     |
 | L2Y2  |  16 Tests  |  Rank 0    | `default_handler`         |
 | L2Y3  |  10 Tests  |  Rank 0    | `pdf_generator`           |
+| L2Y4  |  10 Tests  |  Rank 1    | `plugin-validator`        |
+| L3    |  34 Tests  |  N/A       | E2E CLI Commands          |
+| L4    |   5 Tests  |  N/A       | Advanced E2E Workflows    |
 
-Rank 0: 10 + 16      = 26
-Rank 1: 15 + 14 + 28 = 57
-Rank 2:              = 93
+*L0 tests (nitpick logic) are not performed.*  
 
-### Prioritized Order for Test Generation (by Collective Rank)
+**Higher level** numbers mean the tests are measuring more of the system as a whole,
+while **lower level** numbers mean the tests target more internal logical structures.*
 
-This order is designed to allow you to focus on a set of related modules before shifting your context, while still tackling the most critical areas first.
+### Prioritized Order for Test Generation--by Rank
 
-**Rank 0: Mission Critical Core Operations (Total: 26 Tests)**
+This order was designed to focus on a set of related modules before shifting context, while still tackling the most foundational areas first.
+
+**Rank 0 -- Mission Critical Core Operations (Total: 26 Tests)** \
 These modules represent the absolute core processing pipeline and the final output generation. Their functionality is directly observable by the user.
 
-1.  **L2Y2: `default_handler`** (`src/default_handler.js`) - 16 Tests
-  * *Rationale:* This module embodies the entire Markdown processing pipeline, transforming raw content into the final HTML that `pdf_generator` consumes. Its robust functionality is paramount to the application's core purpose.
-2.  **L2Y3: `pdf_generator`** (`src/pdf_generator.js`) - 10 Tests
-  * *Rationale:* Directly responsible for the final PDF output. Any failure here means the application fails to deliver its primary value proposition.
+1. **L2Y2: `default_handler`**
+   -- [`src/default_handler.js`](../../src/default_handler.js)
+   -- 16 Tests
+2. **L2Y3: `pdf_generator`**
+   -- [`src/pdf_generator.js`](../../src/pdf_generator.js)
+   -- 10 Tests
 
 ---
 
-**Rank 1: Essential Subsystem / Core Configuration (Total: 57 Tests)**
+**Rank 1 -- Essential Subsystem / Core Configuration (Total: 67 Tests)** \
 These modules handle fundamental configuration loading, plugin selection, and the management of the collections ecosystem. They are foundational, and issues here can have widespread, hard-to-trace impacts.
 
-1.  **L1Y1: `ConfigResolver`** (`src/ConfigResolver.js`) - 15 Tests
-  * *Rationale:* Central to how all configurations (main and plugin-specific) are loaded, merged, and resolved. It's the "brain" for configuration.
-2.  **L1Y3: `plugin_determiner`** (`src/plugin_determiner.js`) - 14 Tests
-  * *Rationale:* Crucial for selecting the *correct* plugin based on various precedence rules (CLI, Front Matter, Local Config). If this fails, the wrong plugin, or no plugin, is used.
-3.  **L2Y1: `collections-manager`** (`src/collections-manager/index.js`) - 28 Tests
-  * *Rationale:* The core of the collections system, handling adding, removing, updating, enabling, and disabling plugins/collections. It involves complex file system and manifest interactions.
+1. **L1Y1: `ConfigResolver`** 
+   -- [`src/ConfigResolver.js`](../../src/ConfigResolver.js) 
+   -- 15 Tests
+2. **L1Y3: `plugin_determiner`** 
+   -- [`src/plugin_determiner.js`](../../src/plugin_determiner.js)
+   -- 14 Tests
+3. **L2Y1: `collections-manager`**
+   -- [`src/collections-manager/index.js`](../../src/collections-manager/index.js)
+   -- 28 Tests
+4. **L2Y4: `plugin-validator`**
+   -- [`src/plugin-validator.js`](../../src/plugin-validator.js)
+   -- 10 Tests
 
 ---
 
-**Rank 2: Supportive Core Functionality / Key Integrations (Total: 92 Tests)**
-These modules provide essential services, manage critical data structures (like the plugin registry), and integrate specific features. While not "mission critical" in the same immediate sense as Rank 0, their robust operation is vital for the application's overall stability and feature set.
+**Rank 2 -- Supportive Core Functionality / Key Integrations (Total: 82 Tests)** \
+These modules provide essential services, manage key data structures, and integrate specific features.
 
-1.  **L1Y2: `PluginRegistryBuilder`** (`src/PluginRegistryBuilder.js`) - 32 Tests
-  * *Rationale:* Directly impacts the discoverability and availability of plugins within the system. Failures here mean plugins can't be found or used correctly.
-2.  **L1Y4: `main_config_loader`** (`src/main_config_loader.js`) - 19 Tests
-  * *Rationale:* Responsible for loading the application's global configuration files (bundled, XDG, project). Fundamental to the application starting with the correct settings.
-3.  **L1Y6: `plugin_config_loader`** (`src/plugin_config_loader.js`) - 15 Tests
-  * *Rationale:* Manages the complex process of applying layered overrides (XDG, project) to individual plugin configurations. Essential for customized plugin behavior.
-4.  **L1Y5: `PluginManager`** (`src/PluginManager.js`) - 9 Tests
-  * *Rationale:* The direct interface for dynamically loading and invoking plugin handler scripts. Without this, even discovered and configured plugins cannot execute.
-5.  **L1Y7: `math_integration`** (`src/math_integration.js`) - 8 Tests
-  * *Rationale:* Integrates a specific but important feature (math rendering) with the Markdown processing pipeline.
-6.  **L1Y8: `cm-utils`** (`src/collections-manager/cm-utils.js`) - 9 Tests
-  * *Rationale:* Contains utility functions that support the collections manager. While essential, these are typically self-contained string transformations with lower integration complexity compared to the other modules in Rank 2. Their failure modes are usually contained and easily debugged.
+1. **L1Y2: `PluginRegistryBuilder`**
+   -- [`src/PluginRegistryBuilder.js`](../../src/PluginRegistryBuilder.js)
+   -- 32 Tests
+2. **L1Y4: `main_config_loader`**
+   -- [`src/main_config_loader.js`](../../src/main_config_loader.js)
+   -- 19 Tests
+3. **L1Y6: `plugin_config_loader`**
+   -- [`src/plugin_config_loader.js`](../../src/plugin_config_loader.js)
+   -- 15 Tests
+4. **L1Y5: `PluginManager`**
+   -- [`src/PluginManager.js`](../../src/PluginManager.js)
+   -- 9 Tests
+5. **L1Y7: `math_integration`**
+   -- [`src/math_integration.js`](../../src/math_integration.js)
+   -- 8 Tests
+6. **L1Y8: `cm-utils`**
+   -- [`src/collections-manager/cm-utils.js`](../../src/collections-manager/cm-utils.js)
+   -- 3 Tests
 
 ---
 
+### Summary Table - Ordered by Priority
 
-### Summary Table - Order by Priority: Higher Rank = Lower Priority
+**Rank 0 > Rank 1 > Rank 2**
 
 | Level | Tests      | Rank       | Module                    | Coverage  | Remaining |
 | :---- | :--------- | :--------- | :------------------------ | :-------- | :-------- |
-| L2Y2  |  16 Tests  |  Rank 0    | `default_handler`         | 08/16     | **8/16**  |
-| L2Y3  |  10 Tests  |  Rank 0    | `pdf_generator`           | 09/10\*   | **DONE**  |
+| L2Y2  |  16 Tests  |  Rank 0    | `default_handler`         | 15/16     | **1/16** |
+| L2Y3  |  10 Tests  |  Rank 0    | `pdf_generator`           | 9/10      | **1/10** |
 |       |            |            |                           |           |
-| L1Y1  |  15 Tests  |  Rank 1    | `ConfigResolver`          | 14/15     | **1/15**  |
-| L1Y3  |  14 Tests  |  Rank 1    | `plugin_determiner`       | 13/14     | **1/14**  |
-| L2Y1  |  28 Tests  |  Rank 1    | `collections-manager`     | 28/28     | **DONE**  |
+| L1Y1  |  15 Tests  |  Rank 1    | `ConfigResolver`          | 14/15     | **1/15** |
+| L1Y3  |  14 Tests  |  Rank 1    | `plugin_determiner`       | 13/14     | **1/14** |
+| L2Y1  |  28 Tests  |  Rank 1    | `collections-manager`     | 28/28     | **DONE** |
+| L2Y4  |  10 Tests  |  Rank 1    | `plugin-validator`        | 10/10     | **DONE** |
 |       |            |            |                           |           |
-| L1Y2  |  32 Tests  |  Rank 2    | `PluginRegistryBuilder`   | 29/32     | **3/32**  |
-| L1Y4  |  19 Tests  |  Rank 2    | `main_config_loader`      | xx/19     |     |
-| L1Y5  |  9 Tests   |  Rank 2    | `PluginManager`           | xx/9      |     |
-| L1Y6  |  15 Tests  |  Rank 2    | `plugin_config_loader`    | xx/15     |     |
-| L1Y7  |  8 Tests   |  Rank 2    | `math_integration`        | xx/8      |     |
-| L1Y8  |  9 Tests   |  Rank 2    | `cm-utils`                | xx/9      |     |
-
+| L1Y2  |  32 Tests  |  Rank 2    | `PluginRegistryBuilder`   | 23/32     | **9/32** |
+| L1Y4  |  19 Tests  |  Rank 2    | `main_config_loader`      | 17/19     | **2/19** |
+| L1Y5  |   9 Tests  |  Rank 2    | `PluginManager`           | 9/9       | **DONE** |
+| L1Y6  |  15 Tests  |  Rank 2    | `plugin_config_loader`    | 14/15     | **1/15** |
+| L1Y7  |   8 Tests  |  Rank 2    | `math_integration`        | 0/8       | **8/8** |
+| L1Y8  |   3 Tests  |  Rank 2    | `cm-utils`                | 3/3       | **DONE** |
 
 ---
 
-### Post-Prioritization Additions (New Modules)
+### Ongoing Test Status Tracking
 
-*These modules were developed after the initial priority ranking was established and are being brought under test as part of ongoing development.*
+As of commit [`ff43eb5`](https://github.com/brege/md-to-pdf/commit/ff43eb5), this document provides a static, high-level overview of the test suite's structure and initial implementation priorities.
 
-- **L2Y4: `plugin-validator`** (`src/plugin-validator.js`) - 10 Tests
-  * *Rationale:* A new, critical subsystem for ensuring the quality and stability of all plugins.
+For a live, dynamic view of all currently pending, skipped, or failing tests, the authoritative source is the QA Dashboard. It can be generated by running `node test/scripts/qa-dashboard.js` and viewing the output in [`test/docs/qa-dashboard.md`](docs/qa-dashboard.md) or the [`test/README.md`](../test/README.md).
 
+---
+[^1]: Level 0 tests, which would target individual, isolated functions (traditional unit tests), were not pursued for this project. The testing strategy prioritized integration and end-to-end scenarios to verify the interoperability of the system's components.

@@ -3,11 +3,11 @@ const path = require('path');
 
 // --- Helper functions for all three sources ---
 
-// 1. Build testId -> testTarget, checklistStatus, checklistFile
+// 1. Build testId -> testTarget, checklistStatus
 function getChecklistOpenTests() {
-  const DOCS_DIR = __dirname;
+  const DOCS_DIR = path.join(__dirname, '../docs');
   const checklistFiles = fs.readdirSync(DOCS_DIR)
-    .filter(f => /^checklist-with-headers-Level_\d+\.md$/.test(f))
+    .filter(f => /^checklist-level-\d+\.md$/.test(f))
     .map(f => path.join(DOCS_DIR, f));
 
   const openTests = {};
@@ -80,7 +80,7 @@ function getTestIdToFileAndSkipMap() {
 
 // 3. Build testId -> auditLogLine
 function getAuditLogMap() {
-  const AUDIT_LOG = path.join(__dirname, 'audit-log.md');
+  const AUDIT_LOG = path.join(__dirname, '../docs/audit-log.md');
   const lines = fs.readFileSync(AUDIT_LOG, 'utf8').split('\n');
   const auditMap = {};
   for (let i = 0; i < lines.length; i++) {
@@ -109,42 +109,90 @@ function getAuditLogMap() {
   return auditMap;
 }
 
-// --- Build unified set of "in trouble" test codes ---
-const openTests = getChecklistOpenTests();
-const testIdToFile = getTestIdToFileAndSkipMap();
-const auditMap = getAuditLogMap();
+// --- Main execution logic ---
 
-const allTestIds = new Set([
-  ...Object.keys(openTests),
-  ...Object.keys(testIdToFile),
-  ...Object.keys(auditMap)
-]);
+function generateDashboardContent() {
+    const openTests = getChecklistOpenTests();
+    const testIdToFile = getTestIdToFileAndSkipMap();
+    const auditMap = getAuditLogMap();
 
-// --- Output Markdown table ---
-console.log('| Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |');
-console.log('|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|');
+    const allTestIds = new Set([
+      ...Object.keys(openTests),
+      ...Object.keys(testIdToFile),
+      ...Object.keys(auditMap)
+    ]);
 
-for (const testId of Array.from(allTestIds).sort((a, b) => {
-  // Sort numerically if possible
-  const aParts = a.split('.').map(Number), bParts = b.split('.').map(Number);
-  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-    const diff = (aParts[i] || 0) - (bParts[i] || 0);
-    if (diff !== 0) return diff;
-  }
-  return 0;
-})) {
-  const t = openTests[testId] || {};
-  const f = testIdToFile[testId] || {};
-  const a = auditMap[testId] || '';
-  const checklistStatus = t.checklistStatus || '';
-  const testTarget = t.testTarget || '';
-  const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
-  const testFilePath = f.testFilePath || '';
-  // Only show if at least one of these is non-empty
-  if (checklistStatus || skips || a) {
-    console.log(
-      `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
-    );
-  }
+    const sortedIds = Array.from(allTestIds).sort((a, b) => {
+      const aParts = a.split('.').map(Number);
+      const bParts = b.split('.').map(Number);
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const diff = (aParts[i] || 0) - (bParts[i] || 0);
+        if (diff !== 0) return diff;
+      }
+      return 0;
+    });
+
+    const outputLines = [];
+    outputLines.push('| Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |');
+    outputLines.push('|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|');
+
+    for (const testId of sortedIds) {
+      const t = openTests[testId] || {};
+      const f = testIdToFile[testId] || {};
+      const a = auditMap[testId] || '';
+      const checklistStatus = t.checklistStatus || '';
+      const testTarget = t.testTarget || '';
+      const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
+      const testFilePath = f.testFilePath || '';
+      if (checklistStatus || skips || a) {
+        outputLines.push(
+          `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
+        );
+      }
+    }
+    return outputLines;
 }
 
+function updateReadme(dashboardLines) {
+    const readmePath = path.join(__dirname, '..', 'README.md');
+    const startMarker = '<!--qa-dashboard-start-->';
+    const endMarker = '<!--qa-dashboard-end-->';
+
+    let readmeContent;
+    try {
+        readmeContent = fs.readFileSync(readmePath, 'utf8');
+    } catch (error) {
+        console.error(`ERROR: Could not read README.md at ${readmePath}.`, error);
+        return;
+    }
+    
+    const newContent = [startMarker, ...dashboardLines, endMarker].join('\n');
+    
+    function escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    }
+
+    const regex = new RegExp(`${escapeRegex(startMarker)}[\\s\\S]*${escapeRegex(endMarker)}`, 'g');
+    
+    if (!regex.test(readmeContent)) {
+        console.error(`ERROR: Could not find dashboard markers in ${readmePath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`);
+        return;
+    }
+    
+    // Perform the replacement
+    readmeContent = readmeContent.replace(regex, newContent);
+    
+    fs.writeFileSync(readmePath, readmeContent, 'utf8');
+    console.log(`Successfully updated dashboard in ${readmePath}`);
+}
+
+
+// --- Check command line arguments to determine action ---
+if (process.argv.includes('--update-readme')) {
+    const dashboardLines = generateDashboardContent();
+    updateReadme(dashboardLines);
+} else {
+    // Default behavior: print to stdout
+    const dashboardLines = generateDashboardContent();
+    console.log(dashboardLines.join('\n'));
+}

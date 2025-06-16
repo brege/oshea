@@ -52,7 +52,10 @@ describe('CollectionsManager updateCollection (2.1.10)', () => {
 
         // Assert
         expect(result.success).to.be.true;
-        expect(result.message).to.equal(`Collection "${COLLECTION_TO_UPDATE}" updated.`);
+        // --- START MODIFICATION ---
+        // Match the new, more descriptive success message from the refactored command.
+        expect(result.message).to.equal(`Successfully updated collection "${COLLECTION_TO_UPDATE}" by resetting to origin/main.`);
+        // --- END MODIFICATION ---
 
         // Verify the final 'git reset' command was called
         expect(spawnGitStub.calledWith(['reset', '--hard', 'origin/main'])).to.be.true;

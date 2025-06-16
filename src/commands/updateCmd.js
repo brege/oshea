@@ -24,40 +24,36 @@ This command only syncs the collection files; it does not automatically enable a
     const manager = args.manager;
 
     if (args.collection_name) {
-      console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
+      console.log(`[HANDLER-DEBUG] update alias: STARTING for ${args.collection_name}`);
       try {
         const result = await manager.updateCollection(args.collection_name);
-        // --- START MODIFICATION ---
+        console.log(`[HANDLER-DEBUG] update alias: Manager returned: ${JSON.stringify(result)}`);
+
         if (result && result.success) {
             console.log(chalk.green(result.message));
         } else if (result && !result.success) {
            console.warn(chalk.yellow(`Update for '${args.collection_name}' may have had issues: ${result.message || 'Please check output above.'}`));
         }
-        // --- END MODIFICATION ---
       } catch (error) {
         console.error(chalk.red(`\nERROR updating collection '${args.collection_name}': ${error.message}`));
         if (process.env.DEBUG_CM === 'true' && error.stack) {
           console.error(chalk.red(error.stack));
         }
-        process.exit(1); // Exit on error to ensure scriptability
+        process.exit(1);
       }
     } else {
       console.log(chalk.blue(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`));
       try {
         const results = await manager.updateAllCollections();
-        // --- START MODIFICATION ---
         if (results && !results.success) {
             console.warn(chalk.yellow("\nSome collections may not have updated successfully or were skipped. Please check output above."));
-        } else if (results && results.success) {
-            // The manager's final log is sufficient here.
         }
-        // --- END MODIFICATION ---
       } catch (error) {
         console.error(chalk.red(`\nERROR updating all collections: ${error.message}`));
         if (process.env.DEBUG_CM === 'true' && error.stack) {
           console.error(chalk.red(error.stack));
         }
-        process.exit(1); // Exit on error
+        process.exit(1);
       }
     }
   }

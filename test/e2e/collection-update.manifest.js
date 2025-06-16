@@ -10,13 +10,17 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
 
     // 1. Create a bare git repo to act as the remote
     execSync(`git init --bare "${remoteRepoPath}"`);
+    // --- START MODIFICATION ---
+    // Explicitly set the default branch in the bare remote repo. This makes the
+    // environment more robust and prevents issues in clean CI environments.
+    execSync(`git -C "${remoteRepoPath}" symbolic-ref HEAD refs/heads/main`);
+    // --- END MODIFICATION ---
 
     // 2. Clone it, add a file, and push to create the initial state
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
+    // The cloned repo will now correctly start on the 'main' branch.
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
-    execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
-    execSync('git branch -m main', { cwd: initialClonePath });
     execSync('git push origin main', { cwd: initialClonePath });
 
     // 3. Add this initial clone as a collection to the CM
@@ -41,15 +45,6 @@ module.exports = [
       'update',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
-      // --- START MODIFICATION ---
-      // Add debug logging to see the output in the CI environment
-      console.log("--- DEBUG START: 3.13.1 ---");
-      console.log("Exit Code:", exitCode);
-      console.log("STDOUT:", stdout);
-      console.log("STDERR:", stderr);
-      console.log("--- DEBUG END: 3.13.1 ---");
-      // --- END MODIFICATION ---
-
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-all"/i);
       
@@ -70,15 +65,6 @@ module.exports = [
       'collection-to-update-one',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
-      // --- START MODIFICATION ---
-      // Add debug logging to see the output in the CI environment
-      console.log("--- DEBUG START: 3.13.2 ---");
-      console.log("Exit Code:", exitCode);
-      console.log("STDOUT:", stdout);
-      console.log("STDERR:", stderr);
-      console.log("--- DEBUG END: 3.13.2 ---");
-      // --- END MODIFICATION ---
-
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-one"/i);
 
@@ -98,15 +84,6 @@ module.exports = [
       'collection-to-update-alias',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
-      // --- START MODIFICATION ---
-      // Add debug logging to see the output in the CI environment
-      console.log("--- DEBUG START: 3.14.1 ---");
-      console.log("Exit Code:", exitCode);
-      console.log("STDOUT:", stdout);
-      console.log("STDERR:", stderr);
-      console.log("--- DEBUG END: 3.14.1 ---");
-      // --- END MODIFICATION ---
-
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-alias"/i);
 

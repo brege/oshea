@@ -1,3 +1,4 @@
+// src/commands/pluginCmd.js
 module.exports = {
   command: 'plugin <command>',
   describe: 'Manage plugins.',

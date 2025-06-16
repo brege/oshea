@@ -1,4 +1,4 @@
-// plugins/recipe-book/test/recipe-book-e2e.test.js
+// plugins/recipe-book/.contract/test/recipe-book-e2e.test.js
 
 const path = require('path');
 const os = require('os');
@@ -8,13 +8,13 @@ const {
     setupTestDirectory,
     cleanupTestDirectory,
     checkFile,
-} = require('../../../test/shared/test-helpers');
+} = require('../../../../test/shared/test-helpers');
 
 const {
     HUGO_EXAMPLE_SOURCE_IN_EXAMPLES,
-} = require('../../../test/shared/test-constants');
+} = require('../../../../test/shared/test-constants');
 
-const PROJECT_ROOT = path.resolve(__dirname, '../../..');
+const PROJECT_ROOT = path.resolve(__dirname, '../../../..');
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-book-plugin-e2e');
 const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
 

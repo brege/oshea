@@ -1,4 +1,8 @@
 # plugins/cv/cv.config.yaml
+plugin_name: "cv"
+version: "1.0.0"
+protocol: "v1"
+
 description: "Plugin for Curriculum Vitae (CV) documents."
 # Points to the handler script within this plugin's directory (plugins/cv/index.js).
 # This script will utilize the common src/default_handler.js for standard Markdown processing.

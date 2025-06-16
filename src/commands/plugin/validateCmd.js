@@ -1,4 +1,4 @@
-// src/commands/plugin/validateCmd.js - CORRECTED: Removed duplicate output
+// src/commands/plugin/validateCmd.js
 
 const path = require('path');
 const fs = require('fs');

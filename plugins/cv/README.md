@@ -1,6 +1,4 @@
 ---
-plugin_name: cv
-version: 1.0
 cli_help: |
   Plugin: cv
   Description: Handles the conversion of Curriculum Vitae (CV) or Resume Markdown files to PDF.

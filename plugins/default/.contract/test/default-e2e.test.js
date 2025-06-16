@@ -1,4 +1,4 @@
-// plugins/default/test/default-e2e.test.js
+// plugins/default/.contract/test/default-e2e.test.js
 
 const path = require('path');
 const os = require('os');
@@ -8,9 +8,9 @@ const {
     setupTestDirectory,
     cleanupTestDirectory,
     checkFile,
-} = require('../../../test/shared/test-helpers'); // Corrected path
+} = require('../../../../test/shared/test-helpers'); // Corrected path
 
-const PROJECT_ROOT = path.resolve(__dirname, '../../..'); // Navigates from plugins/default/test/ up to project root
+const PROJECT_ROOT = path.resolve(__dirname, '../../../..'); // Navigates from plugins/default/test/ up to project root
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'default-plugin-e2e');
 const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
 const DEFAULT_EXAMPLE_MD = path.join(PROJECT_ROOT, 'plugins', 'default', 'default-example.md');

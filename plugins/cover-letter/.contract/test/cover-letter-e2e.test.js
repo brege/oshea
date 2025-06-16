@@ -1,4 +1,4 @@
-// plugins/cover-letter/test/cover-letter-e2e.test.js
+// plugins/cover-letter/.contract/test/cover-letter-e2e.test.js
 
 const path = require('path');
 const os = require('os');
@@ -8,9 +8,9 @@ const {
     setupTestDirectory,
     cleanupTestDirectory,
     checkFile,
-} = require('../../../test/shared/test-helpers'); // Using the new shared helpers
+} = require('../../../../test/shared/test-helpers'); // Using the new shared helpers
 
-const PROJECT_ROOT = path.resolve(__dirname, '../../..'); // Navigates from plugins/cover-letter/test/ up to project root
+const PROJECT_ROOT = path.resolve(__dirname, '../../../..'); // Navigates from plugins/cover-letter/test/ up to project root
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'cover-letter-plugin-e2e');
 const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
 const COVER_LETTER_EXAMPLE_MD = path.join(PROJECT_ROOT, 'plugins', 'cover-letter', 'cover-letter-example.md');

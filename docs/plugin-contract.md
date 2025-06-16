@@ -4,13 +4,46 @@ This document outlines the formal contract that all plugins for `md-to-pdf` must
 
 The contract is enforced at runtime by a validation system that uses JSON Schemas. Every plugin's configuration is checked against a base schema, and optionally against its own specific schema.
 
-## The Base Contract: `base-plugin.schema.json`
+## Standard Directory Structure
 
-Every plugin configuration file (e.g., `my-plugin.config.yaml`) is validated against a base schema that defines the core set of properties available to all plugins.
+A plugin must follow a specific file structure to be considered valid. This structure separates the core functional files from supporting documentation and validation assets, creating an intuitive layout for developers.
 
-### Required Properties
+```
+plugins/my-plugin/
+├── README.md                  # REQUIRED: The primary human-readable documentation.
+├── my-plugin-example.md       # REQUIRED: A self-activating example file.
+├── my-plugin.config.yaml      # REQUIRED: The plugin's manifest and primary metadata.
+├── index.js                   # REQUIRED: The handler script.
+├── my-plugin.css              # OPTIONAL: Core CSS, as defined in config.
+│
+└── .contract/                 # OPTIONAL: Houses machine-readable/validation assets.
+    ├── my-plugin.schema.json  # OPTIONAL: The structural contract for the config.
+    └── test/                  # OPTIONAL: Co-located tests.
+        └── my-plugin-e2e.test.js
+```
+
+## The Primary Manifest: `<plugin-name>.config.yaml`
+
+The `.config.yaml` file is the heart of the plugin. It is the **single source of truth** for the plugin's identity and its default configuration.
+
+### Required Metadata Properties
 
 These properties **must** be present in every plugin's configuration file.
+
+#### `plugin_name`
+- **Type:** `string`
+- **Purpose:** The official, unique name of the plugin. This value **must** match the plugin's directory name.
+- **Example:** `"cv"`
+
+#### `version`
+- **Type:** `string`
+- **Purpose:** The version of the plugin, preferably following [SemVer](https://semver.org/).
+- **Example:** `"1.0.0"`
+
+#### `protocol`
+- **Type:** `string`
+- **Purpose:** The version of the `md-to-pdf` plugin contract this plugin adheres to. For this version, it must be `"v1"`.
+- **Example:** `"v1"`
 
 #### `description`
 - **Type:** `string`
@@ -19,7 +52,7 @@ These properties **must** be present in every plugin's configuration file.
 
 #### `handler_script`
 - **Type:** `string`
-- **Purpose:** The path to the Node.js module that serves as the plugin's entry point. This path is relative to the location of the plugin's configuration file. The script is responsible for executing the plugin's primary logic.
+- **Purpose:** The path to the Node.js module that serves as the plugin's entry point. This path is relative to the location of the plugin's configuration file.
 - **Example:** `"index.js"`
 
 ### Core Optional Properties
@@ -98,39 +131,6 @@ These are standard properties that plugins can use to hook into `md-to-pdf`'s fu
 
 ## Extending the Contract
 
-Plugins can extend the base contract by providing their own schema file, conventionally named `<plugin_name>.schema.json`. This allows plugins to define their own custom properties and enforce specific constraints.
+Plugins can extend the base contract by providing their own schema file, located at `.contract/<plugin_name>.schema.json`. This allows plugins to define their own custom properties and enforce specific constraints.
 
-When a plugin-specific schema is present, it is merged with the base schema.
-
-### Example: The `cv` Plugin Schema
-
-The `cv` plugin needs to enforce that the `format` option within `pdf_options` is either 'A4' or 'Letter'. It does this by extending the base contract.
-
-**`plugins/cv/cv.schema.json`:**
-```json
-{
-  "$schema": "[http://json-schema.org/draft-07/schema#](http://json-schema.org/draft-07/schema#)",
-  "title": "CV Plugin Schema",
-  "description": "Defines the structure for the cv.config.yaml file, extending the base plugin schema with CV-specific rules.",
-  "type": "object",
-  "allOf": [
-    {
-      "$ref": "base-plugin.schema.json"
-    }
-  ],
-  "properties": {
-    "pdf_options": {
-      "type": "object",
-      "properties": {
-        "format": {
-          "description": "The paper size. For CVs, 'A4' or 'Letter' are most common.",
-          "enum": ["A4", "Letter"]
-        }
-      }
-    }
-  }
-}
-```
-
-This schema inherits all the rules from the base contract and adds a specific validation rule for `pdf_options.format`, ensuring it can only be one of the two specified values. This demonstrates how plugins can build upon the common foundation to create more specialized and robust configurations.
-
+When a plugin-specific schema is present, it is merged with the base schema. See `plugins/cv/.contract/cv.schema.json` for an example.

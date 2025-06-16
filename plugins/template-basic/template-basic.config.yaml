@@ -1,8 +1,9 @@
 # plugins/template-basic/template-basic.config.yaml
-# This is a basic template for creating new md-to-pdf plugins.
-# When a new plugin is created from this template, instances of
-# 'template-basic' (and its PascalCase 'TemplateBasic') in filenames
-# and content will be replaced with the new plugin's name.
+# The plugin's identity is now defined here.
+# These values will be replaced by the 'plugin create' command.
+plugin_name: "template-basic"
+version: "1.0.0"
+protocol: "v1"
 
 description: "A new template-basic plugin for [describe your plugin's purpose here]."
 handler_script: "index.js" # Points to the handler within this plugin's directory

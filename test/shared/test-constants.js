@@ -1,4 +1,4 @@
-// test/test-constants.js
+// test/shared/test-constants.js
 const path = require('path');
 
 const TEST_DIR = __dirname; 

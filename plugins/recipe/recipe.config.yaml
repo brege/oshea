@@ -1,4 +1,8 @@
 # plugins/recipe/recipe.config.yaml
+plugin_name: "recipe"
+version: "1.0.0"
+protocol: "v1"
+
 description: "Plugin for individual Recipe documents."
 # Points to the handler script within this plugin's directory (plugins/recipe/index.js).
 handler_script: "index.js"

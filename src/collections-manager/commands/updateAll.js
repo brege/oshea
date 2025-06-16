@@ -13,8 +13,11 @@ module.exports = async function updateAllCollections(dependencies) {
   const downloadedCollectionInfos = await this.listCollections('downloaded');
 
   if (!downloadedCollectionInfos || downloadedCollectionInfos.length === 0) {
-      console.log(chalk.yellow("No collections are currently downloaded. Nothing to update."));
-      return { success: true, messages: ["No collections downloaded."]};
+      // --- START MODIFICATION ---
+      const message = "No collections are currently downloaded. Nothing to update.";
+      console.log(chalk.yellow(message));
+      return { success: true, messages: [message]};
+      // --- END MODIFICATION ---
   }
 
   console.log(chalk.blue("Processing updates for downloaded collections:"));
@@ -75,6 +78,9 @@ module.exports = async function updateAllCollections(dependencies) {
           allOverallSuccess = false;
       }
   }
-  console.log(chalk.blueBright("\nFinished attempting to update all collections."));
-  return { success: allOverallSuccess, messages: updateMessages };
+  // --- START MODIFICATION ---
+  const finalMessage = "Finished attempting to update all collections.";
+  console.log(chalk.blueBright(`\n${finalMessage}`));
+  return { success: allOverallSuccess, messages: [finalMessage, ...updateMessages] };
+  // --- END MODIFICATION ---
 };

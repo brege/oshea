@@ -121,11 +121,12 @@ module.exports = async function updateCollection(dependencies, collectionName) {
 
       if (this.debug) console.log(chalk.magenta(`  DEBUG: Resetting to 'origin/${defaultBranchName}' for ${collectionName}...`));
       await this._spawnGitProcess(['reset', '--hard', `origin/${defaultBranchName}`], collectionPath, `resetting ${collectionName}`);
-      console.log(chalk.green(`\n  Successfully updated collection "${collectionName}" by resetting to origin/${defaultBranchName}.`));
-
+      
       metadata.updated_on = new Date().toISOString();
       await this._writeCollectionMetadata(collectionName, metadata);
-      return { success: true, message: `Collection "${collectionName}" updated.` };
+      // --- START MODIFICATION ---
+      return { success: true, message: `Successfully updated collection "${collectionName}" by resetting to origin/${defaultBranchName}.` };
+      // --- END MODIFICATION ---
     } catch (error) {
       console.error(chalk.red(`  ERROR: Git update process failed for ${collectionName}: ${error.message}`));
       return { success: false, message: `Git update failed for ${collectionName}: ${error.message}` };
@@ -161,11 +162,12 @@ module.exports = async function updateCollection(dependencies, collectionName) {
           return true;
         }
       });
-      console.log(chalk.green(`  Successfully re-synced collection "${collectionName}" from local source "${originalSourcePath}".`));
       
       metadata.updated_on = new Date().toISOString();
       await this._writeCollectionMetadata(collectionName, metadata);
-      return { success: true, message: `Collection "${collectionName}" re-synced from local source.` };
+      // --- START MODIFICATION ---
+      return { success: true, message: `Successfully re-synced collection "${collectionName}" from local source "${originalSourcePath}".` };
+      // --- END MODIFICATION ---
     } catch (error) {
       console.error(chalk.red(`  ERROR: Failed to re-sync collection "${collectionName}" from local source "${originalSourcePath}": ${error.message}`));
       if (this.debug && error.stack) console.error(chalk.red(error.stack));

@@ -27,10 +27,13 @@ This command only syncs the collection files; it does not automatically enable a
       console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
       try {
         const result = await manager.updateCollection(args.collection_name);
-        // The manager.updateCollection method is expected to provide detailed console output.
-        if (result && !result.success) {
+        // --- START MODIFICATION ---
+        if (result && result.success) {
+            console.log(chalk.green(result.message));
+        } else if (result && !result.success) {
            console.warn(chalk.yellow(`Update for '${args.collection_name}' may have had issues: ${result.message || 'Please check output above.'}`));
         }
+        // --- END MODIFICATION ---
       } catch (error) {
         console.error(chalk.red(`\nERROR updating collection '${args.collection_name}': ${error.message}`));
         if (process.env.DEBUG_CM === 'true' && error.stack) {
@@ -42,14 +45,13 @@ This command only syncs the collection files; it does not automatically enable a
       console.log(chalk.blue(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`));
       try {
         const results = await manager.updateAllCollections();
-        // The manager.updateAllCollections method is expected to provide detailed console output.
+        // --- START MODIFICATION ---
         if (results && !results.success) {
             console.warn(chalk.yellow("\nSome collections may not have updated successfully or were skipped. Please check output above."));
-        } else if (results && results.success && results.messages && results.messages.length === 0) {
-            // This case might occur if there are no collections to update.
-            // manager.updateAllCollections should ideally print something like "No collections found to update."
-            // For now, we assume its output is sufficient.
+        } else if (results && results.success) {
+            // The manager's final log is sufficient here.
         }
+        // --- END MODIFICATION ---
       } catch (error) {
         console.error(chalk.red(`\nERROR updating all collections: ${error.message}`));
         if (process.env.DEBUG_CM === 'true' && error.stack) {

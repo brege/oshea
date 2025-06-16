@@ -1,5 +1,5 @@
 // test/e2e/harness.js
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
@@ -28,41 +28,31 @@ class TestHarness {
         }
 
         const fullArgs = [...defaultFlags, ...args];
+        // execSync needs a single command string
+        const command = `node "${cliPath}" ${fullArgs.join(' ')}`;
 
-        // --- START MODIFICATION ---
-        // Refactor how stdout/stderr are captured for more robust stream handling.
-        return new Promise((resolve) => {
-            console.log(`[HARNESS] Spawning: node ${cliPath} ${fullArgs.join(' ')}`);
-            const proc = spawn('node', [cliPath, ...fullArgs], { cwd: this.sandboxDir });
-            
-            const stdoutChunks = [];
-            const stderrChunks = [];
+        console.log(`[HARNESS] Executing synchronously: ${command}`);
 
-            proc.stdout.on('data', (data) => {
-                console.log(`[HARNESS] stdout chunk received: ${data.toString().substring(0, 50)}...`);
-                stdoutChunks.push(data);
+        try {
+            // execSync blocks until the command completes and returns the full stdout.
+            const stdout = execSync(command, { 
+                cwd: this.sandboxDir, 
+                encoding: 'utf8',
+                // Increase timeout just in case of slow CI environment
+                timeout: 30000 
             });
-
-            proc.stderr.on('data', (data) => {
-                console.log(`[HARNESS] stderr chunk received: ${data.toString().substring(0, 50)}...`);
-                stderrChunks.push(data);
-            });
-
-            proc.on('close', (exitCode) => {
-                const stdout = Buffer.concat(stdoutChunks).toString('utf8');
-                const stderr = Buffer.concat(stderrChunks).toString('utf8');
-                console.log(`[HARNESS] Process closed with code: ${exitCode}`);
-                console.log(`[HARNESS] Final stdout length: ${stdout.length}`);
-                console.log(`[HARNESS] Final stderr length: ${stderr.length}`);
-                resolve({ exitCode, stdout, stderr });
-            });
-
-            proc.on('error', (err) => {
-                console.error('[HARNESS] Spawn error:', err);
-                resolve({ exitCode: 1, stdout: '', stderr: err.message });
-            });
-        });
-        // --- END MODIFICATION ---
+            // If execSync completes without error, the exit code is 0.
+            return { exitCode: 0, stdout: stdout, stderr: '' };
+        } catch (error) {
+            // If the command returns a non-zero exit code, execSync throws an error.
+            // The output is available on the error object.
+            console.log(`[HARNESS] execSync caught error. Exit Code: ${error.status}`);
+            return {
+                exitCode: error.status,
+                stdout: error.stdout.toString('utf8'),
+                stderr: error.stderr.toString('utf8')
+            };
+        }
     }
 
     async cleanup() {

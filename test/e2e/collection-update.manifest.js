@@ -14,12 +14,12 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     // 2. Clone it, add a file, and push to create the initial state
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
-    // --- START MODIFICATION ---
     // Set local git config for the test repo to prevent GPG signing prompts
     execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
-    // --- END MODIFICATION ---
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
-    execSync('git push origin main', { cwd: initialClonePath });
+    // Push the current branch (HEAD) to the 'main' branch on the remote,
+    // making the command resilient to default branch name differences (main vs. master).
+    execSync('git push origin HEAD:main', { cwd: initialClonePath });
 
     // 3. Add this initial clone as a collection to the CM
     await harness.runCli(['collection', 'add', remoteRepoPath, '--name', collectionName]);

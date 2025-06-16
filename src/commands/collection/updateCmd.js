@@ -21,23 +21,26 @@ module.exports = {
 
     try {
       if (args.collection_name) {
-        console.log(`[HANDLER-DEBUG] collection update: STARTING for ${args.collection_name}`);
+        // --- START MODIFICATION ---
+        // The command handler is now fully responsible for logging its final status.
+        console.log(chalk.blueBright(`md-to-pdf collection: Attempting to update collection '${chalk.cyan(args.collection_name)}'...`));
         const cmResult = await manager.updateCollection(args.collection_name);
-        console.log(`[HANDLER-DEBUG] collection update: Manager returned: ${JSON.stringify(cmResult)}`);
         
         if (cmResult.success) {
-            console.log(chalk.green(cmResult.message));
+            // This is the message the E2E test will now correctly assert against.
+            console.log(chalk.green(`Successfully updated collection "${args.collection_name}".`));
         } else {
-            console.warn(chalk.yellow(`Update for '${args.collection_name}' reported issues.`));
+            console.warn(chalk.yellow(`Update for '${args.collection_name}' reported issues. Message: ${cmResult.message}`));
             if (cmResult.message && cmResult.message.toLowerCase().includes("not found")) {
                 commandShouldFailHard = true;
             }
         }
+        // --- END MODIFICATION ---
       } else {
         console.log(chalk.blueBright('md-to-pdf collection: Attempting to update all Git-based collections...'));
         const cmResults = await manager.updateAllCollections();
         if (!cmResults.success) { 
-           console.warn(chalk.yellow("The batch update process for all collections may have encountered issues."));
+           console.warn(chalk.yellow("The batch update process for all collections may have encountered issues. Check logs above for details."));
         }
       }
     } catch (error) { 

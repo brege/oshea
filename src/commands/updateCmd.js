@@ -24,16 +24,18 @@ This command only syncs the collection files; it does not automatically enable a
     const manager = args.manager;
 
     if (args.collection_name) {
-      console.log(`[HANDLER-DEBUG] update alias: STARTING for ${args.collection_name}`);
+      // --- START MODIFICATION ---
+      // This logic now mirrors the main command handler for consistency.
+      console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
       try {
         const result = await manager.updateCollection(args.collection_name);
-        console.log(`[HANDLER-DEBUG] update alias: Manager returned: ${JSON.stringify(result)}`);
-
+        
         if (result && result.success) {
-            console.log(chalk.green(result.message));
+            console.log(chalk.green(`Successfully updated collection "${args.collection_name}".`));
         } else if (result && !result.success) {
            console.warn(chalk.yellow(`Update for '${args.collection_name}' may have had issues: ${result.message || 'Please check output above.'}`));
         }
+      // --- END MODIFICATION ---
       } catch (error) {
         console.error(chalk.red(`\nERROR updating collection '${args.collection_name}': ${error.message}`));
         if (process.env.DEBUG_CM === 'true' && error.stack) {

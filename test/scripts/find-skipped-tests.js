@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const TEST_DIRS = [
+  // MODIFIED: Correctly navigate from test/scripts/ up to test/ and then to integration/ and e2e/
   path.join(__dirname, '../integration'),
   path.join(__dirname, '../e2e'),
 ];
@@ -48,4 +49,3 @@ filesWithItSkip.forEach(({ testCode, relPath, skips }) => {
   const skipCol = `${skips} it.skip()`.padEnd(12);
   console.log(`${tid}${skipCol}${relPath}`);
 });
-

@@ -17,6 +17,7 @@ function findAllJsFiles(dir) {
 }
 function buildTestIdToPathMap() {
   const dirs = [
+    // MODIFIED: Correctly navigate from test/scripts/ up to test/ and then to integration/ and e2e/
     path.join(__dirname, '../integration'),
     path.join(__dirname, '../e2e'),
   ];
@@ -36,7 +37,8 @@ function buildTestIdToPathMap() {
 }
 const testIdToPath = buildTestIdToPathMap();
 
-const AUDIT_LOG = path.join(__dirname, 'audit-log.md');
+// MODIFIED: Correctly navigate from test/scripts/ up to test/ and then to docs/
+const AUDIT_LOG = path.join(__dirname, '../docs/audit-log.md');
 const lines = fs.readFileSync(AUDIT_LOG, 'utf8').split('\n');
 const results = [];
 
@@ -66,4 +68,3 @@ for (let i = 0; i < lines.length; i++) {
     }
   }
 }
-

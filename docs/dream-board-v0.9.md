@@ -300,7 +300,7 @@ to dissipate the all-too predictable accretion of content fatigue on my continue
 ### Actual Outcome -- Live Checklist: T0 ➜ T4 
 
 | Task #  | Phase    | Outcome                                                                        |
-|:-------:|:---------|:-------------------------------------------------------------------------      |
+|:-------:|:---------|:-------------------------------------------------------------------------------|
 | **T0**  | ✔ coded  | `.mocharc.js` and `test/runner.js` implemented                                 |
 | **T1**  | ✔ coded  | `test/default-handler/*.test.*.js` now at parity                               |
 | **T3**  | ✔ coded  | 1. pilot `cv`, `{base-plugin, plugins/cv/cv}.schema.json`                      |
@@ -332,7 +332,7 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
  7. ✔ checks README front matter for {plugin-name} and {version}
  8. ✔ write self-activation tests for the validator to run *against* a plugin **(A)**
  
- We paused work at this point to hop to **T4**. These implementations were tended to after **T4**'s completion:
+ We paused work at this point to hop to **T4**. These implementations are to be tended to after **T4**'s completion:
 
  9. ○ update archetyper to produce schema, e2e test, and pin 
     `protocol` / `plugin-name` / `version` to front matter **(C\)**
@@ -370,7 +370,7 @@ The third task is a little more involved.
 ### Final Trilogy of Tasks
 
  - ✔ **T0 ➜ T3**  | Checkpoint: Current Test Suite Status
- - ✔ **T4**       | Implement the E2E manifest testing procdure 
+ - ✔ **T4**       | Implement the E2E manifest testing procedure 
  - ➜ **T5**       | Outline prequisites as a checklist
 
 ### T0 ➜ T3 | Checkpoint: Current Test Suite Status
@@ -401,7 +401,6 @@ These scenarios are defined in the checklists but do not yet have corresponding 
 | Code   | Test Scenario          | Description                                                       |
 |:------:|:-----------------------|:------------------------------------------------------------------|
 | `L1Y7` | **`math_integration`** | **nice-to-have** entire test suite is pending--low-priority       |
-| `L2Y4` | **`plugin_validator`** | **only `2.4.1`** requires archetyping `test/` and `*.schema.json` |
 | `L2Y3` | **`pdf_generator`**    | **only `2.3.9`** `[S]` functionality is covered by other tests    |
 
 #### 2. Implemented but Skipped Tests (Requires Refactoring)
@@ -436,14 +435,14 @@ Very generally speacking, these epochs are
 
 This doesn't require a permutation matrix, but you could construct one like:
 
-|          |          |        | difficulty         | vibe |
-|:--------:|:--------:|:------:|:------------------:|:----:|
-|**T3.x**  |**T3.y**  |**T4**  | **High**           | prefectionism, but chronological |
-|**T3.y**  |**T3.x**  |**T4**  | **Medium**         | bring new tests to status parity of L1/L2 tests |
-|**T3.y**  |**T4**    |**T3.x**| **Low**            | adds new L2 tests first, then L3 framework tests |
-|**T3.x**  |**T4**    |**T3.y**| **High**           | minimizes debt, structure oriented |
-|**T4**    |**T3.x**  |**T3.y**| **No Benefit**     | schizo |
-|**T4**    |**T3.y**  |**T3.x**| **Low**            | adds new L3 test framework first |
+|          |          |        | difficulty      | vibe |
+|:--------:|:--------:|:------:|:----------------|:-----|
+|**T3.x**  |**T3.y**  |**T4**  | **High**        | prefectionism, but chronological |
+|**T3.y**  |**T3.x**  |**T4**  | **Medium**      | bring new tests to status parity of L1/L2 tests |
+|**T3.y**  |**T4**    |**T3.x**| **Low**         | adds new L2 tests first, then L3 framework tests |
+|**T3.x**  |**T4**    |**T3.y**| **High**        | minimizes debt, structure oriented |
+|**T4**    |**T3.x**  |**T3.y**| **No Benefit**  | schizo |
+|**T4**    |**T3.y**  |**T3.x**| **Low**         | adds new L3 test framework first |
 
 The pathway **T4 ➜ T3.x ➜ T3.y** and **T3.x ➜ T4 ➜ T3.y** are the most logical.
 
@@ -455,23 +454,20 @@ Using the harness to test these system-level interactions is more direct and les
 
 **This hybrid strategy ensures we use the right testing style for the right job--a harness for external system validation and stubs for internal logic verification.**
 
-Conclusion: **[T4 ↔ T3.x] ➜ T3.y** is the logical progression.
+**Conclusion: [T4 ↔ T3.x] ➜ T3.y** is the ideal logical progression.
 
 This approach makes final the total map of tests for all logic belonging to the planned v1.0 release.
 This will provide a measure of coverage during the *release candidate* (**rc**) phase of finalization.
 
-Having some non-breaking bugs that touch multiple layers could act as a means of intentional incompleteness,
-as it would bring me more abreast of the clicking of the gears while polishing the body of the watch.
-The more I think about the permutation matrix, the gladder I am about the choice of path.
+Having some non-breaking bugs that touch multiple layers could act as a means of intentional incompleteness, as it would bring me more abreast of the clicking of the gears while polishing the body of the watch. The more I think about the permutation matrix, the gladder I am about the choice of path.
 
 #### Sidebar: how can we execute `plugin validate` tests?
 
 Let's **illustrate** how enforcing the rules of the **protocol** affects
 the enforcement of the **contract**.  For illustration, let's say
-- a **v1**-valid plugin is required to have a sane file structure
-- a **v2**-valid plugin is required to have a sane file structure and E2E tests
-- a **v3**-valid plugin is required to have *in-situ* tests and *self-activation* tests, but no longer requires a sane file structure, because the self-activation test implicitly checks for a sane file structure 
-
+ - a **v1**-valid plugin is required to have a sane file structure
+ - a **v2**-valid plugin is required to have a sane file structure and E2E tests
+ - a **v3**-valid plugin is required to have *in-situ* tests and *self-activation* tests, but no longer requires a sane file structure, because the self-activation test implicitly checks for a sane file structure 
 
 | Protocol | File Structure Check | E2E Test Check | Self-Activation Check | How it's Implemented in the "Plugin Contract" Service |
 | :--- | :---: | :---: | :---: | :--- |
@@ -488,8 +484,7 @@ The **L2Y4** test should be **composable** and **extendable**.
 
 ###  T3 ➜ T4 | 2. ) The Bridge to Systemizing End-to-End Testing
 
-The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application. 
-This involves running the `cli.js` command with a variety of arguments and asserting that the application's behavior--including file outputs, console messages, and exit codes--is correct.
+The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application. This involves running the `cli.js` command with a variety of arguments and asserting that the application's behavior--including file outputs, console messages, and exit codes--is correct.
 
 <details>
 <summary><strong>Systemizing End-to-End Testing</strong></summary>
@@ -618,9 +613,12 @@ test/
 
 </details>
 
+The above, toggled has since been implemented in full.
+The following section is thusly focused on **Level 3** end-to-end testing.
+
 ### T4 | E2E Testing Integration
 
-The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application's user-land behavior. Our strategy is not to test every possible permutation, but to define a **basis set** of tests that provides maximum confidence with minimal redundancy. 
+Our strategy is not to test every possible permutation, but to define a **basis set** of tests that provides maximum confidence with minimal redundancy. 
 
 To achieve this efficiently, the testing architecture combines a reusable `TestHarness` for sandboxing, a `test-runner-factory` to eliminate boilerplate, and manifest files to clearly define test cases for each command. This approach proves invaluable, as implementing the suite becomes a powerful final validation of the entire application, uncovering subtle bugs that only appear during full end-to-end execution.
 
@@ -653,7 +651,6 @@ To achieve this efficiently, the testing architecture combines a reusable `TestH
 | `collection` | `remove` | `<name>` (Required) | -- |  |
 | `collection` | `update` | `[name]` (Optional) | -- | If omitted, updates all collections |
 | `update` | -- | `[name]` (Optional) | -- | Alias for `collection update` |
-
 
 ---
 

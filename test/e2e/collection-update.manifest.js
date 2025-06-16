@@ -23,8 +23,13 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
     console.log(`[CI DEBUG] Committing v1 to local clone...`);
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
 
+    // --- START MODIFICATION ---
+    console.log(`[CI DEBUG] Renaming default branch to 'main' to ensure consistency...`);
+    execSync('git branch -m main', { cwd: initialClonePath });
+    // --- END MODIFICATION ---
+
     console.log(`[CI DEBUG] Pushing v1 to remote...`);
-    execSync('git push origin main', { cwd: initialClonePath });
+    execSync('git push -u origin main', { cwd: initialClonePath });
 
     // 3. Add this initial clone as a collection to the CM
     console.log(`[CI DEBUG] Adding collection '${collectionName}' to CollectionsManager via CLI...`);

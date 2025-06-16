@@ -142,8 +142,10 @@ const groups = {
     insitu: [paths.insitu_e2e], 
     
     // Default
-    all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/test/*.test.js']
+    all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/test/*.test.js'],
 
+    // Debug collection update command
+    debug: ['test/e2e/collection-update.*.js']
 };
 
 const spec = groups[group] || groups.all;

@@ -10,14 +10,13 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
 
     // 1. Create a bare git repo to act as the remote
     execSync(`git init --bare "${remoteRepoPath}"`);
+    execSync(`git symbolic-ref HEAD refs/heads/main`, { cwd: remoteRepoPath });
 
     // 2. Clone it, add a file, and push to create the initial state
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);
     await fs.writeFile(path.join(initialClonePath, 'v1.txt'), 'version 1');
-    // --- START MODIFICATION ---
     // Set local git config for the test repo to prevent GPG signing prompts
     execSync('git config user.name "Test" && git config user.email "test@example.com" && git config commit.gpgsign false', { cwd: initialClonePath });
-    // --- END MODIFICATION ---
     execSync('git add . && git commit -m "v1"', { cwd: initialClonePath });
     execSync('git push origin main', { cwd: initialClonePath });
 

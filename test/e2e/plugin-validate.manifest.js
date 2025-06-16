@@ -19,17 +19,16 @@ class DummyHandler {
 }
 module.exports = DummyHandler;
 `;
-    await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: A well-formed plugin.`);
+    await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent); 
+    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: A well-formed plugin.`);            
     await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-    await fs.writeFile(path.join(pluginDir, 'test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
-    
-    // --- START MODIFICATION ---
-    // Add version and a dummy schema to satisfy all conditions for VALID status
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.schema.json`), `{}`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);
-    // --- END MODIFICATION ---
-}
+    await fs.ensureDir(path.join(pluginDir, '.contract')); 
+    await fs.ensureDir(path.join(pluginDir, '.contract/test'));
+    await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');    
+    await fs.writeFile(path.join(pluginDir, `.contract/${pluginName}.schema.json`), `{}`);
+    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);     
+    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);         
+}           
 
 module.exports = [
   {

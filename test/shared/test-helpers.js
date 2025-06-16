@@ -1,4 +1,4 @@
-// test/test-helpers.js
+// test/shared/test-helpers.js
 const fs_promises = require('fs').promises;
 const fss = require('fs'); // Sync operations (and now for fs.constants.F_OK)
 const path = require('path');

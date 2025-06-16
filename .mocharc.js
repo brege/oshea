@@ -50,7 +50,7 @@ const paths = {
     global_flags: 'test/e2e/global-flags.*.js',
 
     // --- In-Situ E2E Tests for Bundled Plugins ---
-    insitu_e2e: 'plugins/**/test/*.test.js',
+    insitu_e2e: 'plugins/**/.contract/test/*.test.js',
 };
 
 const groups = {
@@ -142,7 +142,7 @@ const groups = {
     insitu: [paths.insitu_e2e], 
     
     // Default
-    all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/test/*.test.js']
+    all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/.contract/test/*.test.js']
 
 };
 

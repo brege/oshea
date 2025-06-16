@@ -1,4 +1,4 @@
-// plugins/cv/test/cv-e2e.test.js
+// plugins/recipe/.contract/test/recipe-e2e.test.js
 
 const path = require('path');
 const os = require('os');
@@ -8,16 +8,16 @@ const {
     setupTestDirectory,
     cleanupTestDirectory,
     checkFile,
-} = require('../../../test/shared/test-helpers'); 
+} = require('../../../../test/shared/test-helpers'); // Corrected path
 
-const PROJECT_ROOT = path.resolve(__dirname, '../../..'); // Navigates from plugins/cv/test/ up to project root
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'cv-plugin-e2e');
+const PROJECT_ROOT = path.resolve(__dirname, '../../../..'); // Navigates from plugins/recipe/test/ up to project root
+const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-plugin-e2e');
 const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
-const CV_EXAMPLE_MD = path.join(PROJECT_ROOT, 'plugins', 'cv', 'cv-example.md');
-const EXPECTED_PDF_FILENAME = 'example-curriculum-vitae.pdf'; // Default filename for cv-example.md
+const RECIPE_EXAMPLE_MD = path.join(PROJECT_ROOT, 'plugins', 'recipe', 'recipe-example.md');
+const EXPECTED_PDF_FILENAME = 'example-recipe-title.pdf'; // Based on convert-command.test-cases.js
 const MIN_PDF_SIZE = 1000; // Minimum size in bytes for a valid PDF
 
-describe('CV Plugin E2E Test', function() {
+describe('Recipe Plugin E2E Test', function() {
     this.timeout(10000); // Set a higher timeout for E2E tests
 
     before(async () => {
@@ -31,13 +31,13 @@ describe('CV Plugin E2E Test', function() {
         await cleanupTestDirectory(TEST_OUTPUT_DIR, keepOutput);
     });
 
-    it('should convert cv-example.md to PDF using the cv plugin and generate a non-empty PDF', async () => {
+    it('should convert recipe-example.md to PDF using the recipe plugin and generate a non-empty PDF', async () => {
         const outputPdfPath = path.join(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME);
 
         const commandArgs = [
             'convert',
-            CV_EXAMPLE_MD,
-            '--plugin', 'cv',
+            RECIPE_EXAMPLE_MD,
+            '--plugin', 'recipe',
             '--outdir', TEST_OUTPUT_DIR,
             '--filename', EXPECTED_PDF_FILENAME,
             '--no-open', // Prevent opening the PDF viewer during test
@@ -53,8 +53,6 @@ describe('CV Plugin E2E Test', function() {
         // Verify the PDF was created and is not empty
         await checkFile(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME, MIN_PDF_SIZE);
 
-        // Optional: More specific checks can be added here if needed,
-        // but for a basic E2E, existence and size are often sufficient.
         console.log(`  Successfully created and verified: ${outputPdfPath}`);
     });
 });

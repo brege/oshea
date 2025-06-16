@@ -1,4 +1,8 @@
 # plugins/default/default.config.yaml
+plugin_name: "default"
+version: "1.0.0"
+protocol: "v1"
+
 description: "Default plugin for generic Markdown documents."
 # Points to the handler script within this plugin's directory.
 # This script will, in turn, utilize the common src/default_handler.js.

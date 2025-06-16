@@ -1,4 +1,4 @@
-// dev/src/plugin-validator.js - DISPATCHER (Final State)
+// src/plugin-validator.js
 
 const fs = require('fs');
 const path = require('path');
@@ -33,10 +33,7 @@ function resolvePluginPath(pluginIdentifier) {
 
 /**
  * Universal metadata lookup function.
- * Prioritized lookup order for 'plugin_name', 'version', and 'protocol'.
- * 1. plugins/{plugin-name}/{plugin-name}.schema.json
- * 2. plugins/{plugin-name}/{plugin-name}.config.yaml
- * 3. plugins/{plugin-name}/README.md (front matter)
+ * Looks for 'plugin_name', 'version', and 'protocol' in the plugin's config file.
  *
  * @param {string} pluginDirectoryPath - The absolute path to the plugin's root directory.
  * @param {string} pluginName - The name of the plugin (directory name).
@@ -52,19 +49,6 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
 
     console.log(chalk.cyan(`Resolving plugin metadata for '${pluginName}'...`));
 
-    const readJsonFile = (filePath) => {
-        if (fs.existsSync(filePath)) {
-            try {
-                const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-                console.log(chalk.gray(`    (Read JSON from: ${path.basename(filePath)})`));
-                return content;
-            } catch (e) {
-                warnings.push(`Could not parse JSON from '${path.basename(filePath)}': ${e.message}`);
-            }
-        }
-        return null;
-    };
-
     const readYamlFile = (filePath) => {
         if (fs.existsSync(filePath)) {
             try {
@@ -78,75 +62,21 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
         return null;
     };
 
-    const readReadmeFrontMatter = (readmePath) => {
-        if (fs.existsSync(readmePath)) {
-            const readmeContent = fs.readFileSync(readmePath, 'utf8');
-            const frontMatterDelimiter = '---';
-            const parts = readmeContent.split(frontMatterDelimiter);
-            if (parts.length >= 3 && parts[0].trim() === '') {
-                try {
-                    const content = yaml.load(parts[1]);
-                    console.log(chalk.gray(`    (Read front matter from: ${path.basename(readmePath)})`));
-                    return content;
-                } catch (e) {
-                        warnings.push(`Could not parse YAML front matter from '${path.basename(readmePath)}': ${e.message}`);
-                }
-            }
-        }
-        return null;
-    };
-
-    // --- 1. Check .schema.json ---
-    const schemaPath = path.join(pluginDirectoryPath, `${pluginName}.schema.json`);
-    const schemaContent = readJsonFile(schemaPath);
-    if (schemaContent) {
-        if (schemaContent.plugin_name && metadata.plugin_name.value === undefined) {
-            metadata.plugin_name.value = schemaContent.plugin_name;
-            metadata.plugin_name.source = 'schema';
-        }
-        if (schemaContent.version && metadata.version.value === undefined) {
-            metadata.version.value = schemaContent.version;
-            metadata.version.source = 'schema';
-        }
-        if (schemaContent.protocol && metadata.protocol.value === undefined) {
-            metadata.protocol.value = schemaContent.protocol;
-            metadata.protocol.source = 'schema';
-        }
-    }
-
-    // --- 2. Check .config.yaml ---
+    // --- Check .config.yaml ---
     const configPath = path.join(pluginDirectoryPath, `${pluginName}.config.yaml`);
     const configContent = readYamlFile(configPath);
     if (configContent) {
-        if (configContent.plugin_name && metadata.plugin_name.value === undefined) {
+        if (configContent.plugin_name) {
             metadata.plugin_name.value = configContent.plugin_name;
             metadata.plugin_name.source = 'config';
         }
-        if (configContent.version && metadata.version.value === undefined) {
+        if (configContent.version) {
             metadata.version.value = configContent.version;
             metadata.version.source = 'config';
         }
-        if (configContent.protocol && metadata.protocol.value === undefined) {
+        if (configContent.protocol) {
             metadata.protocol.value = configContent.protocol;
             metadata.protocol.source = 'config';
-        }
-    }
-
-    // --- 3. Check README.md front matter ---
-    const readmePath = path.join(pluginDirectoryPath, 'README.md');
-    const readmeFrontMatter = readReadmeFrontMatter(readmePath);
-    if (readmeFrontMatter) {
-        if (readmeFrontMatter.plugin_name && metadata.plugin_name.value === undefined) {
-            metadata.plugin_name.value = readmeFrontMatter.plugin_name;
-            metadata.plugin_name.source = 'README';
-        }
-        if (readmeFrontMatter.version && metadata.version.value === undefined) {
-            metadata.version.value = readmeFrontMatter.version;
-            metadata.version.source = 'README';
-        }
-        if (readmeFrontMatter.protocol && metadata.protocol.value === undefined) {
-            metadata.protocol.value = readmeFrontMatter.protocol;
-            metadata.protocol.source = 'README';
         }
     }
 
@@ -154,16 +84,16 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     if (metadata.plugin_name.value === undefined) {
         metadata.plugin_name.value = pluginName; // Default to directory name if not found anywhere
         metadata.plugin_name.source = 'default (directory name)';
-        warnings.push(`Plugin name not found in schema, config, or README. Defaulting to directory name: '${pluginName}'.`);
+        warnings.push(`Plugin name not found in config. Defaulting to directory name: '${pluginName}'.`);
     }
     if (metadata.version.value === undefined) {
         metadata.version.source = 'default';
-        warnings.push(`Plugin version not found in schema, config, or README.`);
+        warnings.push(`Plugin version not found in config.`);
     }
     if (metadata.protocol.value === undefined) {
         metadata.protocol.value = 'v1'; // Default to v1 as per requirements
         metadata.protocol.source = 'default (v1)';
-        warnings.push(`Plugin protocol not found in schema, config, or README. Defaulting to 'v1'.`);
+        warnings.push(`Plugin protocol not found in config. Defaulting to 'v1'.`);
     }
 
     // Ensure protocol is a string
@@ -220,7 +150,7 @@ function validate(pluginIdentifier) {
             const errorMsg = `Unsupported plugin protocol '${pluginMetadata.protocol.value}' for plugin '${pluginName}'.`;
             console.error(chalk.red(`\n[✖] Plugin is INVALID: ${errorMsg}`));
             errors.push(errorMsg);
-            validationResult = { isValid: false, errors: errors, warnings: [] };
+            validationResult = { isValid: false, errors: [errorMsg], warnings: [] };
             break;
     }
 

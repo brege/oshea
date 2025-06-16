@@ -196,3 +196,16 @@ This document summarizes key limitations and discrepancies in the `md-to-pdf` co
 - **description:** The `plugin create` command does not yet generate a fully compliant plugin out-of-the-box (it omits the `test/` directory and `schema.json`), preventing the "happy path" validator test from passing without a custom fixture.
 - **impact:** A user cannot immediately validate a freshly created plugin.
 - **suggested_action:** The E2E test now bypasses this by programmatically creating a compliant fixture. The `plugin create` command should be improved in the future.
+
+---
+
+## Entry: 2.4.4
+
+- **test_id:** 2.4.4
+- **title:** Metadata Precedence: `.schema` > `.config` > `README`
+- **component:** plugin-validator
+- **status:** CLOSED
+- **description:** This test is obsolete. The plugin metadata fields (`protocol`, `plugin_name`, `version`) are now required to be present exclusively in `<plugin>.config.yaml` at the root. The previous metadata precedence (schema, config, README) is no longer supported or relevant.
+- **impact:** The scenario is not possible under the current contract; validator logic and documentation have been updated to reflect this simplification.
+- **suggested_action:** Remove or permanently skip this test. Ensure all metadata validation relies solely on the config YAML file.
+

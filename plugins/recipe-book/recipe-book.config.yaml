@@ -1,4 +1,8 @@
 # plugins/recipe-book/recipe-book.config.yaml
+plugin_name: "recipe-book"
+version: "1.0.0"
+protocol: "v1"
+
 description: "Plugin for creating a combined Recipe Book PDF."
 handler_script: "index.js"
 

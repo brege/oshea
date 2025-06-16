@@ -1,4 +1,8 @@
 # plugins/cover-letter/cover-letter.config.yaml
+plugin_name: "cover-letter"
+version: "1.0.0"
+protocol: "v1"
+
 description: "Plugin for Cover Letter documents."
 # Points to the handler script within this plugin's directory (plugins/cover-letter/index.js).
 # This script will utilize the common src/default_handler.js for standard Markdown processing.

@@ -1,4 +1,4 @@
-// dev/src/plugin-validators/v1.js
+// src/plugin-validators/v1.js
 
 const fs = require('fs');
 const path = require('path');
@@ -59,20 +59,21 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
         }
     }
     console.log(chalk.cyan(`  Checking for optional files...`));
-    const testDir = path.join(pluginDirectoryPath, 'test');
+    const contractDir = path.join(pluginDirectoryPath, '.contract');
+    const testDir = path.join(contractDir, 'test');
     if (fs.existsSync(testDir)) {
-        console.log(chalk.green(`    [✔] Found optional 'test/' directory.`));
+        console.log(chalk.green(`    [✔] Found optional '.contract/test/' directory.`));
     } else {
-        warnings.push(`Missing optional 'test/' directory.`);
-        console.log(chalk.yellow(`    [!] Missing optional 'test/' directory.`));
+        warnings.push(`Missing optional '.contract/test/' directory.`);
+        console.log(chalk.yellow(`    [!] Missing optional '.contract/test/' directory.`));
     }
     const schemaFileName = `${pluginName}.schema.json`;
-    const schemaPath = path.join(pluginDirectoryPath, schemaFileName);
+    const schemaPath = path.join(contractDir, schemaFileName);
     if (fs.existsSync(schemaPath)) {
         console.log(chalk.green(`    [✔] Plugin has a schema file ('${schemaFileName}').`));
     } else {
-        warnings.push(`Missing optional schema file ('${schemaFileName}').`);
-        console.log(chalk.yellow(`    [!] Plugin does not have a specific schema file ('${schemaFileName}').`));
+        warnings.push(`Missing optional schema file ('${schemaFileName}') in .contract/ directory.`);
+        console.log(chalk.yellow(`    [!] Plugin does not have a specific schema file in .contract/ directory.`));
     }
 };
 
@@ -85,9 +86,9 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
  */
 const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
     console.log(chalk.cyan(`  Checking plugin's test setup...`));
-    const e2eTestPath = path.join(pluginDirectoryPath, 'test', `${pluginName}-e2e.test.js`);
+    const e2eTestPath = path.join(pluginDirectoryPath, '.contract', 'test', `${pluginName}-e2e.test.js`);
     if (!fs.existsSync(e2eTestPath)) {
-        warnings.push(`Missing E2E test file, skipping test run: '${path.basename(e2eTestPath)}'.`);
+        warnings.push(`Missing E2E test file, skipping test run: '${path.join('.contract/test', `${pluginName}-e2e.test.js`)}'.`);
         console.log(chalk.yellow(`    [!] Missing E2E test file, skipping run.`));
         return;
     }

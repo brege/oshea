@@ -1,4 +1,3 @@
-// cli.js
 #!/usr/bin/env node
 // cli.js
 

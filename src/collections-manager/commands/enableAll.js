@@ -1,5 +1,5 @@
 // src/collections-manager/commands/enableAll.js
-// No longer requires fs, path, chalk, or constants
+const { validate } = require('../../plugin-validator');
 
 module.exports = async function enableAllPluginsInCollection(dependencies, collectionName, options = {}) {
   // Destructure dependencies
@@ -52,6 +52,13 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
       else invokeName = `${defaultPrefixToUse}${plugin.plugin_id}`;
 
       try {
+          console.log(chalk.blue(`  Validating ${collectionPluginId}...`));
+          const validationResult = validate(plugin.base_path);
+          if (!validationResult.isValid) {
+              throw new Error(`Plugin failed validation. See details above.`);
+          }
+          console.log(chalk.green(`  Validation passed.`));
+
           // Calls the already refactored and bound this.enablePlugin
           const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName });
           results.push({ plugin: collectionPluginId, invoke_name: enableResult.invoke_name, status: 'enabled', message: enableResult.message });

@@ -166,16 +166,16 @@
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) Successfully enables a plugin from a collection.
 
-* [x] 3.7.2 (Happy Path) The `plugin enable` command successfully enables a valid plugin.
+* [ ] 3.7.2 (Happy Path) The `plugin enable` command successfully enables a valid plugin.
   - **test_id:** 3.7.2
-  - **status:** CLOSED
+  - **status:** OPEN
   - **test_target:** plugin enable
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) The `plugin enable` command successfully enables a valid plugin. This implicitly verifies that the pre-enable validation check passes on a known-good plugin.
 
-* [x] 3.7.3 (Sad Path) The `plugin enable` command fails to enable an invalid plugin and reports validation errors.
+* [ ] 3.7.3 (Sad Path) The `plugin enable` command fails to enable an invalid plugin and reports validation errors.
   - **test_id:** 3.7.3
-  - **status:** CLOSED
+  - **status:** OPEN
   - **test_target:** plugin enable
   - **test_type:** E2E_CLI
   - **description:** (Sad Path) The `plugin enable` command fails to enable an invalid plugin and reports validation errors. Verifies that the command exits with a non-zero code and that the invalid plugin is not added to the enabled manifest.

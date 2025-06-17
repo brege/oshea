@@ -1,5 +1,5 @@
 // src/collections-manager/commands/enable.js
-const { validate } = require('../../plugin-validator');
+// No longer requires fs, path, yaml, chalk, or constants
 
 module.exports = async function enablePlugin(dependencies, collectionPluginId, options = {}) {
   // Destructure dependencies
@@ -27,17 +27,8 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
   if (!pluginToEnable.config_path || !fss.existsSync(pluginToEnable.config_path)) {
       throw new Error(`Config path for plugin "${pluginId}" in collection "${collectionName}" is invalid or not found: ${pluginToEnable.config_path}`);
   }
-  
-  const pluginDirectoryPath = pluginToEnable.base_path;
-  console.log(chalk.blue(`  Validating plugin '${pluginId}' before enablement...`));
-  const validationResult = validate(pluginDirectoryPath);
-
-  if (!validationResult.isValid) {
-    throw new Error(`Plugin '${collectionPluginId}' failed validation and cannot be enabled. Please run 'md-to-pdf plugin validate "${pluginDirectoryPath}"' for details.`);
-  }
-  console.log(chalk.green(`  Validation passed.`));
-
   const absolutePluginConfigPath = pluginToEnable.config_path;
+
   let invokeName = options.name || pluginId;
   if (!/^[a-zA-Z0-9_.-]+$/.test(invokeName)) {
       throw new Error(`Invalid invoke_name: "${invokeName}". Must be alphanumeric, underscores, hyphens, or periods.`);

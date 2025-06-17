@@ -3,17 +3,22 @@
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
+
+const PROJECT_ROOT = process.cwd();
+const HELPERS_PATH = path.join(PROJECT_ROOT, 'test', 'shared', 'test-helpers.js');
+
 const {
     runCliCommand,
     setupTestDirectory,
     cleanupTestDirectory,
     checkFile,
-} = require('../../../../test/shared/test-helpers'); // Corrected path
+} = require(HELPERS_PATH);
 
-const PROJECT_ROOT = path.resolve(__dirname, '../../../..'); // Navigates from plugins/default/test/ up to project root
+// Corrected: The plugin root is two levels up from .contract/test/
+const PLUGIN_ROOT = path.resolve(__dirname, '../../');
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'default-plugin-e2e');
 const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
-const DEFAULT_EXAMPLE_MD = path.join(PROJECT_ROOT, 'plugins', 'default', 'default-example.md');
+const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'default-example.md');
 const EXPECTED_PDF_FILENAME = 'default-example-output.pdf'; // Explicit filename for the test
 const MIN_PDF_SIZE = 1000; // Minimum size in bytes for a valid PDF
 
@@ -36,14 +41,14 @@ describe('Default Plugin E2E Test', function() {
 
         const commandArgs = [
             'convert',
-            DEFAULT_EXAMPLE_MD,
-            '--plugin', 'default',
+            EXAMPLE_MD_PATH,
+            '--plugin', PLUGIN_ROOT, // Use the correct, absolute path to the plugin directory
             '--outdir', TEST_OUTPUT_DIR,
             '--filename', EXPECTED_PDF_FILENAME,
             '--no-open', // Prevent opening the PDF viewer during test
         ];
 
-        console.log(`\n  Running command: md-to-pdf ${commandArgs.join(' ')}`);
+        // console.log(`\n  Running command: md-to-pdf ${commandArgs.join(' ')}`);
         const result = await runCliCommand(commandArgs, CLI_PATH, PROJECT_ROOT);
 
         if (!result.success) {
@@ -53,6 +58,9 @@ describe('Default Plugin E2E Test', function() {
         // Verify the PDF was created and is not empty
         await checkFile(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME, MIN_PDF_SIZE);
 
+        // Optional: More specific checks can be added here if needed,
+        // but for a basic E2E, existence and size are often sufficient.
         console.log(`  Successfully created and verified: ${outputPdfPath}`);
     });
 });
+

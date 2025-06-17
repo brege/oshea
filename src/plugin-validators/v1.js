@@ -103,6 +103,15 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
     } catch (e) {
         errors.push('In-situ E2E test failed');
         console.log(chalk.red(`    [✖] In-situ test failed.`));
+        // --- DIAGNOSTIC PROBE ---
+        console.error(chalk.grey("\n--- Begin In-Situ Test Error Output ---"));
+        if (e.stderr) {
+            console.error(e.stderr.toString());
+        } else {
+            console.error("No STDERR captured. Full error object:", e);
+        }
+        console.error(chalk.grey("--- End In-Situ Test Error Output ---\n"));
+        // --- END DIAGNOSTIC PROBE ---
     }
 };
 

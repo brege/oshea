@@ -735,9 +735,9 @@ With the core E2E tests implemented, this checklist outlines the remaining **har
 
 | ✔ |        |<span style="white-space:nowrap">Plugin System Hardening</span>| Command | Value|`#`|   
 |---|--------|:-----------------------------|:-----------------|:-----------------------------|---|
-| ➜ | **A1** | `v1` Plugin Contract Final   |`plugin validate` | Specification & Automation   |`2`|
-| ○ | **A2** | Fully Valid Archetyping      |`plugin create`   | Feature Completeness         |`3`|
-| ○ | **A3** | Integrate Validator          |`plugin enable`   | Code Hardening               |`4`|
+| ✔ | **A1** | `v1` Plugin Contract Final   |`plugin validate` | Specification & Automation   |`2`|
+| ✔ | **A2** | Fully Valid Archetyping      |`plugin create`   | Feature Completeness         |`3`|
+| ➜ | **A3** | Integrate Validator          |`plugin enable`   | Code Hardening               |`4`|
 |   |        | <span style="white-space:nowrap">**CLI Polish & Usability**</span>       |     |   |
 | ○ | **B1** | Tab Completion               |`cli.js` `<TAB>`  | User Experience Polish       |`6`|
 |   |        | <span style="white-space:nowrap">**Test Suite Completion**</span>        |     |   |

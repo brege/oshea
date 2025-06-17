@@ -13,20 +13,20 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
   const idParts = sourcePluginIdentifier.split('/');
   const isPotentiallyCmIdentifier = idParts.length === 2 && idParts[0] && idParts[1] &&
                                  !sourcePluginIdentifier.startsWith('.') &&
-                                 !sourcePluginIdentifier.startsWith('~') && 
+                                 !sourcePluginIdentifier.startsWith('~') &&
                                  !path.isAbsolute(sourcePluginIdentifier);
 
   if (isPotentiallyCmIdentifier) {
     const sourceCollectionName = idParts[0];
     const sourcePluginId = idParts[1];
-    
+
     const availableSourcePlugins = await this.listAvailablePlugins(sourceCollectionName);
     const foundPlugin = availableSourcePlugins.find(p => p.plugin_id === sourcePluginId && p.collection === sourceCollectionName);
 
     if (foundPlugin && foundPlugin.base_path && foundPlugin.config_path) {
         sourcePluginInfo = { ...foundPlugin };
         sourcePluginIdForReplacement = sourcePluginId;
-        sourceIsDirectPath = false; 
+        sourceIsDirectPath = false;
         if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Identified source as CM plugin: ${sourceCollectionName}/${sourcePluginId}`));
     } else {
         throw new Error(`Source plugin "${sourcePluginId}" in collection "${sourceCollectionName}" not found via CollectionsManager. If providing a direct path, ensure it's valid and accessible and correctly formatted (e.g. starts with './', '~/', or an absolute path).`);
@@ -34,7 +34,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
   } else {
     sourceIsDirectPath = true;
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Treating source '${sourcePluginIdentifier}' as a direct path.`));
-    
+
     const resolvedSourcePath = path.resolve(sourcePluginIdentifier);
     if (!fss.existsSync(resolvedSourcePath) || !fss.lstatSync(resolvedSourcePath).isDirectory()) {
       throw new Error(`Source plugin path "${resolvedSourcePath}" (from identifier "${sourcePluginIdentifier}") not found or is not a directory.`);
@@ -59,7 +59,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
     }
     sourcePluginInfo = {
       collection: chalk.gray('[direct path source]'),
-      plugin_id: sourcePluginIdForReplacement, 
+      plugin_id: sourcePluginIdForReplacement,
       base_path: resolvedSourcePath,
       config_path: configPath,
       description: `Plugin from path: ${sourcePluginIdForReplacement}`
@@ -72,7 +72,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
         if (this.debug) console.warn(chalk.yellow(`WARN (CM:archetypePlugin): Could not read description from direct path source config ${configPath}: ${e.message}`));
     }
   }
-  
+
   const sourcePluginBasePath = sourcePluginInfo.base_path;
   const originalSourceConfigFilename = path.basename(sourcePluginInfo.config_path);
   const originalPluginDescriptionFromSource = sourcePluginInfo.description || `Plugin ${sourcePluginIdForReplacement}`;
@@ -93,7 +93,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
     await fsExtra.rm(archetypePath, { recursive: true, force: true });
   }
 
-  let configDataFromSpecificLogic; 
+  let configDataFromSpecificLogic;
 
   try {
     await fs.mkdir(targetBaseDir, { recursive: true });
@@ -139,7 +139,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
         const cssIndex = tempConfigData.css_files.findIndex(f => typeof f === 'string' && f.toLowerCase() === conventionalCssToRename.toLowerCase());
 
         if (cssIndex !== -1) {
-          const oldCssPathInArchetype = path.join(archetypePath, tempConfigData.css_files[cssIndex]); 
+          const oldCssPathInArchetype = path.join(archetypePath, tempConfigData.css_files[cssIndex]);
           const newCssName = `${newArchetypeName}.css`;
           const newCssPathInArchetype = path.join(archetypePath, newCssName);
 
@@ -148,7 +148,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
               await fs.rename(oldCssPathInArchetype, newCssPathInArchetype);
               messages.push(`Renamed CSS file ${tempConfigData.css_files[cssIndex]} to ${newCssName}.`);
             }
-            tempConfigData.css_files[cssIndex] = newCssName; 
+            tempConfigData.css_files[cssIndex] = newCssName;
             messages.push(`Updated CSS file reference in ${newConfigFilename} to ${newCssName}.`);
             if (processExtensions.includes(path.extname(newCssName).toLowerCase()) && !filesToProcessForStringReplacement.includes(newCssPathInArchetype)) {
               filesToProcessForStringReplacement.push(newCssPathInArchetype);
@@ -157,51 +157,54 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
         }
       }
 
-      const conventionalOldHandlerName = `${sourcePluginIdForReplacement}.js`;
-      if (tempConfigData.handler_script && tempConfigData.handler_script.toLowerCase() === conventionalOldHandlerName.toLowerCase() && conventionalOldHandlerName.toLowerCase() !== 'index.js') {
-        const oldHandlerPathInArchetype = path.join(archetypePath, tempConfigData.handler_script); 
-        const newHandlerName = `${newArchetypeName}.js`;
-        const newHandlerPathInArchetype = path.join(archetypePath, newHandlerName);
-
-        if (fss.existsSync(oldHandlerPathInArchetype)) {
-          if (oldHandlerPathInArchetype.toLowerCase() !== newHandlerPathInArchetype.toLowerCase()) {
-            await fs.rename(oldHandlerPathInArchetype, newHandlerPathInArchetype);
-            messages.push(`Renamed handler script ${tempConfigData.handler_script} to ${newHandlerName}.`);
-          }
-          tempConfigData.handler_script = newHandlerName; 
-          messages.push(`Updated handler_script in ${newConfigFilename} to ${newHandlerName}.`);
-          if (processExtensions.includes(path.extname(newHandlerName).toLowerCase()) && !filesToProcessForStringReplacement.includes(newHandlerPathInArchetype)) {
-            filesToProcessForStringReplacement.push(newHandlerPathInArchetype);
-          }
-        }
+      const conventionalOldHandlerName = `index.js`;
+      if (tempConfigData.handler_script && tempConfigData.handler_script.toLowerCase() === conventionalOldHandlerName.toLowerCase()) {
+         const handlerPathInArchetype = path.join(archetypePath, tempConfigData.handler_script);
+         if (processExtensions.includes(path.extname(handlerPathInArchetype).toLowerCase()) && !filesToProcessForStringReplacement.includes(handlerPathInArchetype)) {
+           filesToProcessForStringReplacement.push(handlerPathInArchetype);
+         }
       }
-      configDataFromSpecificLogic = { ...tempConfigData }; 
+      configDataFromSpecificLogic = { ...tempConfigData };
       await fs.writeFile(newConfigPathInArchetype, yaml.dump(configDataFromSpecificLogic));
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Saved specifically updated config fields in ${newConfigFilename}.`));
     } else {
       messages.push(`Original config file ${originalSourceConfigFilename} not found in copied archetype at ${archetypePath}. Cannot rename or modify.`);
       console.warn(chalk.yellow(`WARN (CM:archetypePlugin): ${messages[messages.length - 1]}`));
     }
-    
-    // --- NEW: Schema File Handling ---
-    const filesInArchetype = await fs.readdir(archetypePath);
-    const originalSchemaFile = filesInArchetype.find(f => f.toLowerCase() === `${sourcePluginIdForReplacement}.schema.json`);
 
-    if (originalSchemaFile) {
-        const oldSchemaPath = path.join(archetypePath, originalSchemaFile);
-        const newSchemaFilename = `${newArchetypeName}.schema.json`;
-        const newSchemaPath = path.join(archetypePath, newSchemaFilename);
-        
-        if (oldSchemaPath.toLowerCase() !== newSchemaPath.toLowerCase()) {
-            await fs.rename(oldSchemaPath, newSchemaPath);
-            messages.push(`Renamed schema file to ${newSchemaFilename}.`);
+    const contractDirInArchetype = path.join(archetypePath, '.contract');
+    if (fss.existsSync(contractDirInArchetype) && fss.lstatSync(contractDirInArchetype).isDirectory()) {
+        const oldSchemaName = `${sourcePluginIdForReplacement}.schema.json`;
+        const oldSchemaPath = path.join(contractDirInArchetype, oldSchemaName);
+        if (fss.existsSync(oldSchemaPath)) {
+            const newSchemaName = `${newArchetypeName}.schema.json`;
+            const newSchemaPath = path.join(contractDirInArchetype, newSchemaName);
+            if (oldSchemaPath.toLowerCase() !== newSchemaPath.toLowerCase()) {
+                await fs.rename(oldSchemaPath, newSchemaPath);
+                messages.push(`Renamed schema file to ${newSchemaName}.`);
+            }
+            if (!filesToProcessForStringReplacement.includes(newSchemaPath)) {
+                filesToProcessForStringReplacement.push(newSchemaPath);
+            }
         }
-        
-        if (!filesToProcessForStringReplacement.includes(newSchemaPath)) {
-            filesToProcessForStringReplacement.push(newSchemaPath);
+
+        const testDirInArchetype = path.join(contractDirInArchetype, 'test');
+        if (fss.existsSync(testDirInArchetype) && fss.lstatSync(testDirInArchetype).isDirectory()) {
+            const oldTestName = `${sourcePluginIdForReplacement}-e2e.test.js`;
+            const oldTestPath = path.join(testDirInArchetype, oldTestName);
+            if (fss.existsSync(oldTestPath)) {
+                const newTestName = `${newArchetypeName}-e2e.test.js`;
+                const newTestPath = path.join(testDirInArchetype, newTestName);
+                if (oldTestPath.toLowerCase() !== newTestPath.toLowerCase()) {
+                    await fs.rename(oldTestPath, newTestPath);
+                    messages.push(`Renamed E2E test file to ${newTestName}.`);
+                }
+                if (!filesToProcessForStringReplacement.includes(newTestPath)) {
+                    filesToProcessForStringReplacement.push(newTestPath);
+                }
+            }
         }
     }
-    // --- END NEW ---
 
     const currentArchetypeFiles = await fs.readdir(archetypePath, { withFileTypes: true });
     for (const dirent of currentArchetypeFiles) {
@@ -218,7 +221,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
         try {
           let fileContent = await fs.readFile(filePath, 'utf8');
           let originalFileContentForCompare = fileContent;
-          
+
           if (sourcePluginIdForReplacement && sourcePluginIdForReplacement !== newArchetypeName) {
             const regexId = new RegExp(sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
             fileContent = fileContent.replace(regexId, newArchetypeName);
@@ -229,7 +232,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
           }
 
           if (fileContent !== originalFileContentForCompare) {
-            if (filePath.toLowerCase() === newConfigPathInArchetype.toLowerCase() && configDataFromSpecificLogic) { 
+            if (filePath.toLowerCase() === newConfigPathInArchetype.toLowerCase() && configDataFromSpecificLogic) {
               let tempConfigData = yaml.load(fileContent);
               tempConfigData.description = configDataFromSpecificLogic.description;
               tempConfigData.css_files = configDataFromSpecificLogic.css_files;
@@ -266,7 +269,7 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
 
     const exampleMdPattern = new RegExp(`^${sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([-_])example\\.md$`, 'i');
     const newExampleMdName = `${newArchetypeName}-example.md`;
-    const finalListOfFiles = await fs.readdir(archetypePath); 
+    const finalListOfFiles = await fs.readdir(archetypePath);
 
     for (const fileName of finalListOfFiles) {
       if (exampleMdPattern.test(fileName)) {
@@ -298,6 +301,6 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
         console.error(chalk.red(`ERROR (CM:archetypePlugin): Failed to cleanup partially created archetype directory ${archetypePath}: ${cleanupError.message}`));
       }
     }
-    throw error; 
+    throw error;
   }
 };

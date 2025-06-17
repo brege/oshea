@@ -1,4 +1,5 @@
 // src/collections-manager/commands/enableAll.js
+const { validate: pluginValidator } = require('../../plugin-validator'); // Import plugin-validator
 // No longer requires fs, path, chalk, or constants
 
 module.exports = async function enableAllPluginsInCollection(dependencies, collectionName, options = {}) {
@@ -51,9 +52,30 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
       else if (options.prefix && typeof options.prefix === 'string') invokeName = `${options.prefix}${plugin.plugin_id}`;
       else invokeName = `${defaultPrefixToUse}${plugin.plugin_id}`;
 
+      // Add validation logic here, conditionally based on options.bypassValidation
+      if (!options.bypassValidation) {
+        if (this.debug) console.log(chalk.blue(`  Running validation for plugin '${plugin.plugin_id}' before enabling (batch mode)...`));
+        const pluginDirectoryPath = plugin.base_path; // Use base_path for validator
+        const validationResult = pluginValidator(pluginDirectoryPath);
+
+        if (!validationResult.isValid) {
+            allSucceeded = false;
+            const errorMessages = validationResult.errors.join('\n  - ');
+            results.push({ plugin: collectionPluginId, invoke_name: invokeName, status: 'failed', message: `Validation failed: ${errorMessages}` });
+            console.warn(chalk.yellow(`  Failed to enable ${collectionPluginId} as ${invokeName}: Validation failed.`));
+            // Log validator's output as it's typically more detailed
+            validationResult.errors.forEach(e => console.warn(chalk.red(`    - ${e}`)));
+            validationResult.warnings.forEach(w => console.warn(chalk.yellow(`    - ${w}`)));
+            continue; // Continue to the next plugin in the batch
+        }
+        if (this.debug) console.log(chalk.green(`  Plugin '${plugin.plugin_id}' passed validation.`));
+      } else {
+        if (this.debug) console.log(chalk.yellow(`  Validation bypassed for plugin '${plugin.plugin_id}' (batch mode --bypass-validation flag detected).`));
+      }
+
       try {
-          // Calls the already refactored and bound this.enablePlugin
-          const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName });
+          // Pass the bypassValidation option down to enablePlugin
+          const enableResult = await this.enablePlugin(collectionPluginId, { name: invokeName, bypassValidation: options.bypassValidation });
           results.push({ plugin: collectionPluginId, invoke_name: enableResult.invoke_name, status: 'enabled', message: enableResult.message });
           countEnabled++;
       } catch (error) {

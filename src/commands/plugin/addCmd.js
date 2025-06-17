@@ -16,6 +16,11 @@ module.exports = {
         alias: 'n',
         describe: 'Optional. A specific invoke name for this plugin.',
         type: 'string',
+      })
+      .option('bypass-validation', {
+        describe: 'Optional. Skips plugin validation during enablement. Use with caution.',
+        type: 'boolean',
+        default: false,
       });
   },
   handler: async (args) => {
@@ -42,7 +47,8 @@ module.exports = {
     console.log(chalk.gray(`  Requested Invoke Name: ${invokeNameAttempt}`));
 
     try {
-      const result = await args.manager.addSingletonPlugin(absolutePluginPath, { name: args.name });
+      const addSingletonOptions = { name: args.name, bypassValidation: args.bypassValidation };
+      const result = await args.manager.addSingletonPlugin(absolutePluginPath, addSingletonOptions);
       
       if (result && result.success) {
         console.log(chalk.greenBright(`\nSuccessfully processed 'plugin add' for '${chalk.yellow(result.invoke_name)}'.`));

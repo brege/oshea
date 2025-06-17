@@ -42,6 +42,11 @@ module.exports = {
         describe: 'Optional. Disables all automatic prefixing when using --all, using only plugin_id as invoke_name. Use with caution due to potential conflicts.',
         type: 'boolean',
         default: false
+      })
+      .option('bypass-validation', { // ADDED: --bypass-validation flag
+        describe: 'Optional. Skips plugin validation during enablement. Use with caution.',
+        type: 'boolean',
+        default: false
       });
   },
   handler: async (args) => {
@@ -70,7 +75,7 @@ module.exports = {
             if(process.env.DEBUG_CM === 'true') console.warn(chalk.yellow(`  WARN: Could not read metadata for prefix fallback heuristic: ${e.message}`));
         }
         
-        if (args.prefix) { // Corrected from argv.prefix to args.prefix
+        if (args.prefix) {
           console.log(`  Using custom prefix for invoke names: ${chalk.yellow(args.prefix)}`);
         } else if (args.noPrefix) {
           console.log(chalk.yellow('  --no-prefix specified: Attempting to enable plugins with their original IDs as invoke names.'));
@@ -82,7 +87,8 @@ module.exports = {
           prefix: args.prefix,
           noPrefix: args.noPrefix,
           isCliCall: true, 
-          originalSourceForPrefixFallback
+          originalSourceForPrefixFallback,
+          bypassValidation: args.bypassValidation // ADDED: Pass bypassValidation
         });
       } else {
         console.log(chalk.blueBright(`md-to-pdf plugin: Attempting to enable plugin...`));
@@ -93,7 +99,10 @@ module.exports = {
         if (args.prefix || args.noPrefix){
             console.warn(chalk.yellow("WARN: --prefix and --no-prefix options are ignored when not using --all."))
         }
-        const result = await manager.enablePlugin(args.target, { name: args.name });
+        const result = await manager.enablePlugin(args.target, { 
+          name: args.name,
+          bypassValidation: args.bypassValidation // ADDED: Pass bypassValidation
+        });
         if (result && result.success) {
             const finalInvokeName = result.invoke_name || args.target.split('/')[1]; 
             console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));

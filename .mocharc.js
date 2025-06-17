@@ -140,7 +140,7 @@ const groups = {
     //  By Specific Study ---
     validator: [paths.plugin_validator, paths.plugin_validate],
     insitu: [paths.insitu_e2e], 
-    
+    debug: [paths.plugin_add], 
     // Default
     all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/.contract/test/*.test.js']
 

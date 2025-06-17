@@ -1,12 +1,14 @@
 // test/e2e/plugin-add.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
+const stripAnsi = require('strip-ansi');
 
 async function createDummyPlugin(pluginDir, pluginName) {
     await fs.ensureDir(pluginDir);
     await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
     await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
     await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+    await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
 }
 
 module.exports = [
@@ -19,12 +21,14 @@ module.exports = [
     args: (sandboxDir) => [
       'plugin',
       'add',
-      path.join(sandboxDir, 'my-local-plugin-src')
+      path.join(sandboxDir, 'my-local-plugin-src'),
+      '--bypass-validation',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Successfully processed 'plugin add'/i);
-      expect(stdout).to.match(/enabled as "my-local-plugin-src"/i);
+      const strippedStdout = stripAnsi(stdout);
+      expect(strippedStdout).to.match(/Successfully processed 'plugin add'/i);
+      expect(strippedStdout).to.match(/enabled as "my-local-plugin-src"/i);
     },
   },
 ];

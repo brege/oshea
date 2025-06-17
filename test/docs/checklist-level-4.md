@@ -25,6 +25,13 @@ Status Legend:
   - **test_type:** E2E_WORKFLOW
   - **description:** A user can successfully perform the entire lifecycle of adding a plugin collection, enabling a plugin from it, using that plugin to convert a document, disabling the plugin, and finally removing the collection. This verifies the integrity of the collections manager state across multiple commands.
 
+* [ ] 4.1.2 A user can successfully archetype a plugin from a managed collection, add it back as a new managed plugin, and use it for a conversion.
+  - **test_id:** 4.1.2
+  - **status:** OPEN
+  - **test_target:** CLI Commands Interaction
+  - **test_type:** E2E_WORKFLOW
+  - **description:** A user can successfully add a collection, create a new plugin by archetyping from it, add that new local plugin to be managed by the system, use it to convert a document, and then disable/remove it, verifying a complete user workflow.
+
 ## Y.2 Watch Mode
 
 * [ ] 4.2.1 (Happy Path) The `--watch` flag successfully triggers an initial conversion, and upon modification of the source Markdown file, automatically triggers a re-conversion.

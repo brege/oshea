@@ -133,11 +133,20 @@ function removeShortcodes(content, patterns) {
         // Sort patterns by length, descending, to match more specific patterns (like blocks) first.
         const sortedPatterns = [...patterns].sort((a, b) => b.length - a.length);
 
-        sortedPatterns.forEach(patternStr => {
+        sortedPatterns.forEach((patternStr, index) => {
             if (typeof patternStr !== 'string' || patternStr.trim() === '') return;
             try {
-                const regex = new RegExp(patternStr, 'gs');
+                let regex;
+                if (patternStr.includes('([\\s\\S]*?)')) { // Assuming this indicates a block pattern
+                    // Use the pattern directly, ensuring it's global and multiline
+                    regex = new RegExp(patternStr, 'gs'); // 's' for dotall, 'g' for global
+                } else {
+                    // For inline or single-line patterns
+                    regex = new RegExp(patternStr, 'g'); // 'g' for global
+                }
+
                 processedContent = processedContent.replace(regex, '');
+
             } catch (e) {
                 console.warn(`WARN: Invalid regex pattern for shortcode removal: '${patternStr}'. Skipping. Error: ${e.message}`);
             }

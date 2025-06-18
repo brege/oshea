@@ -374,9 +374,9 @@
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `determinePluginToUse` correctly prioritizes a plugin specified via the CLI argument (`args.plugin`) over all other sources.
 
-* [ ] 1.3.2 Test `determinePluginToUse` correctly prioritizes a plugin specified in the Markdown file's front matter (`frontMatter.md_to_pdf_plugin`) when no CLI argument is present.
+* [x] 1.3.2 Test `determinePluginToUse` correctly prioritizes a plugin specified in the Markdown file's front matter (`frontMatter.md_to_pdf_plugin`) when no CLI argument is present.
   - **test_id:** 1.3.2
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** plugin_determiner
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `determinePluginToUse` correctly prioritizes a plugin specified in the Markdown file's front matter (`frontMatter.md_to_pdf_plugin`) when no CLI argument is present.
@@ -564,16 +564,16 @@
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `_initialize` sets `xdgConfigContents` to an empty object if `xdgGlobalConfigPath` does not exist or loading fails.
 
-* [ ] 1.4.14 Test `_initialize` loads `projectConfigContents` from `projectManifestConfigPath` if it exists and is not the primary config.
+* [x] 1.4.14 Test `_initialize` loads `projectConfigContents` from `projectManifestConfigPath` if it exists and is not the primary config.
   - **test_id:** 1.4.14
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** main_config_loader
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `_initialize` loads `projectConfigContents` from `projectManifestConfigPath` if it exists and is not the primary config.
 
-* [ ] 1.4.15 Verify `_initialize` sets `projectConfigContents` to an empty object if `projectManifestConfigPath` does not exist or loading fails.
+* [x] 1.4.15 Verify `_initialize` sets `projectConfigContents` to an empty object if `projectManifestConfigPath` does not exist or loading fails.
   - **test_id:** 1.4.15
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** main_config_loader
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `_initialize` sets `projectConfigContents` to an empty object if `projectManifestConfigPath` does not exist or loading fails.

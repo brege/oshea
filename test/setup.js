@@ -36,10 +36,17 @@ module.exports = {
             this.ensureAndPreprocessHeadingStub = this.sandbox.stub(markdown_utils, 'ensureAndPreprocessHeading');
             this.substituteAllPlaceholdersStub = this.sandbox.stub(markdown_utils, 'substituteAllPlaceholders');
 
-            // 3. Clear cache and stub math_integration
+            // 3. Clear cache and re-require math_integration as a factory function, then call it
             delete require.cache[require.resolve('../src/math_integration')];
-            const math_integration = require('../src/math_integration'); // Re-require for fresh module object
-            this.getMathCssContentStub = this.sandbox.stub(math_integration, 'getMathCssContent');
+            const createMathIntegration = require('../src/math_integration'); 
+            // This is now the factory function
+            
+            // Call the factory function to get the object with the methods for stubbing.
+            // - For setup.js, we let it use its default (real) dependencies since it's not 
+            //   proxyquired like the specific math_integration tests.
+            const math_integration_instance = createMathIntegration(); 
+            this.getMathCssContentStub = this.sandbox.stub(math_integration_instance, 'getMathCssContent');
+            this.configureMarkdownItForMathStub = this.sandbox.stub(math_integration_instance, 'configureMarkdownItForMath'); // Also stub configureMarkdownItForMath for consistency if it gets called globally.
 
             // 4. Stub fs and fss methods (Node.js built-ins, usually don't need cache clearing)
             this.readFileStub = this.sandbox.stub(fs, 'readFile');
@@ -63,4 +70,3 @@ module.exports = {
         }
     }
 };
-

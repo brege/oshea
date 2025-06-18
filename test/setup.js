@@ -5,7 +5,7 @@ const path = require('path');
 
 // Require core Node.js modules and utility modules that don't need special caching handling
 const fs = require('fs').promises;
-const fss = require('fs');
+const fss = require('fs'); // Sync operations (and now for fs.constants.F_OK)
 
 // Make these globally available in the test context
 global.expect = expect;
@@ -19,7 +19,6 @@ module.exports = {
             // Create a Sinon sandbox for this test's stubs to ensure proper restoration
             this.sandbox = sinon.createSandbox();
 
-            // --- CRITICAL MODULE STUBBING ORDER ---
             // Clear cache and stub dependencies BEFORE the main module (DefaultHandler) that uses them.
 
             // 1. Clear cache and stub pdf_generator
@@ -53,7 +52,6 @@ module.exports = {
             const DefaultHandler = require('../src/default_handler');
             this.defaultHandler = new DefaultHandler();
 
-            // --- END CRITICAL MODULE STUBBING ORDER ---
             
             if (done) done();
         },
@@ -65,3 +63,4 @@ module.exports = {
         }
     }
 };
+

@@ -52,47 +52,28 @@ describe('ConfigResolver _initializeResolverIfNeeded Registry Caching (1.1.2)', 
         // Arrange
         const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // AGGRESSIVE DEBUGGING
-        console.log('DEBUG 1.1.2 Test 1: First call to _initializeResolverIfNeeded');
-        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // First call
 
-        // AGGRESSIVE DEBUGGING
-        console.log('DEBUG 1.1.2 Test 1: Second call to _initializeResolverIfNeeded (conditions unchanged)');
-        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // Second call
 
         // Assert
         // The registry builder should only be called once.
-        // AGGRESSIVE DEBUGGING
-        console.log('DEBUG 1.1.2 Test 1: MockPluginRegistryBuilder.callCount', MockPluginRegistryBuilder.callCount);
-        // END AGGRESSIVE DEBUGGING
         expect(MockPluginRegistryBuilder.callCount).to.equal(1);
     });
 
-    // REMOVED .skip()
     it('should rebuild the registry if useFactoryDefaultsOnly changes between calls', async () => {
         // Arrange
         const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // AGGRESSIVE DEBUGGING
-        console.log('DEBUG 1.1.2 Test 2: First call to _initializeResolverIfNeeded (useFactoryDefaultsOnly = false)');
-        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // First call, builds with useFactoryDefaultsOnly = false
 
         // Manually change the property on the instance to simulate a different run condition
         resolver.useFactoryDefaultsOnly = true;
 
-        // AGGRESSIVE DEBUGGING
-        console.log('DEBUG 1.1.2 Test 2: Second call to _initializeResolverIfNeeded (useFactoryDefaultsOnly = true)');
-        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // Second call
 
         // Assert
         // The registry builder should be called twice.
-        // AGGRESSIVE DEBUGGING
-        console.log('DEBUG 1.1.2 Test 2: MockPluginRegistryBuilder.callCount', MockPluginRegistryBuilder.callCount);
-        // END AGGRESSIVE DEBUGGING
         expect(MockPluginRegistryBuilder.callCount).to.equal(2);
     });
 });

@@ -4,40 +4,48 @@ const path = require('path');
 
 // --- Helper functions for all three sources ---
 
-// 1. Build testId -> testTarget, checklistStatus
-function getChecklistOpenTests() {
+// 1. Build testId -> testTarget, checklistStatus for ALL checklist entries
+function getChecklistStatuses() {
   const DOCS_DIR = path.join(__dirname, '../docs');
   const checklistFiles = fs.readdirSync(DOCS_DIR)
     .filter(f => /^checklist-level-\d+\.md$/.test(f))
     .map(f => path.join(DOCS_DIR, f));
 
-  const openTests = {};
+  const allChecklistStatuses = {};
   for (const file of checklistFiles) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
     for (let i = 0; i < lines.length; i++) {
-      const checklistMatch = lines[i].match(/^\*\s*\[\s*\]\s+(\d+\.\d+\.\d+)/);
+      // Capture the test ID and its status marker [ ], [x], [S], [?]
+      const checklistMatch = lines[i].match(/^\*\s*\[(\s*|x|S|\?)\s*\]\s+(\d+\.\d+\.\d+)/);
       if (checklistMatch) {
-        const testId = checklistMatch[1];
-        let isOpen = false;
+        const marker = checklistMatch[1].trim();
+        const testId = checklistMatch[2];
+ 
+        let checklistStatus = '';
+        if (marker === 'x') {
+            checklistStatus = 'CLOSED';
+        } else if (marker === 'S') {
+            checklistStatus = 'SKIPPED';
+        } else if (marker === '?') {
+            checklistStatus = 'PENDING';
+        } else if (marker === '') {
+            checklistStatus = 'OPEN';
+        }
+
         let testTarget = '';
+        // Look ahead for test_target (status is already parsed from marker)
         for (let j = i + 1; j < lines.length; j++) {
-          const statusLine = lines[j].trim();
-          if (statusLine.startsWith('- **status:**') && statusLine.match(/OPEN/i)) {
-            isOpen = true;
-          }
           const targetMatch = lines[j].match(/- \*\*test_target:\*\*\s*(.*)/);
           if (targetMatch) {
             testTarget = targetMatch[1].trim();
           }
-          if (lines[j].startsWith('* [')) break;
+          if (lines[j].startsWith('* [')) break; // Stop if another checklist item starts
         }
-        if (isOpen) {
-          openTests[testId] = { testTarget, checklistStatus: 'OPEN' };
-        }
+        allChecklistStatuses[testId] = { testTarget, checklistStatus };
       }
     }
   }
-  return openTests;
+  return allChecklistStatuses;
 }
 
 // 2. Build testId -> {skips, testFilePath}
@@ -70,7 +78,7 @@ function getTestIdToFileAndSkipMap() {
         const relPath = idx !== -1 ? file.slice(idx + 1) : file;
         const content = fs.readFileSync(file, 'utf8');
         const skips = (content.match(/it\.skip\s*\(/g) || []).length;
-        if (skips > 0) {
+        if (skips > 0) { // Only add if skips exist
           testIdToFile[testId] = { testFilePath: relPath, skips };
         }
       }
@@ -94,10 +102,11 @@ function getAuditLogMap() {
       for (let j = i + 1; j < Math.min(i + 15, lines.length); j++) {
         const tidMatch = lines[j].match(/- \*\*test_id:\*\* (.+)$/);
         if (tidMatch) testIdRaw = tidMatch[1].trim();
-        const statusMatch = lines[j].match(/- \*\*status:\*\* (.+)$/);
+        const statusMatch = lines[j].match(/- \*\*status:\*\*\s*(.+)$/);
         if (statusMatch) { status = statusMatch[1].trim().toUpperCase(); break; }
         if (lines[j].startsWith('## Entry:')) break;
       }
+      // Only add to auditMap if status is NOT 'CLOSED'
       if (status !== 'CLOSED') {
         const testIds = testIdRaw.split(',').map(s => s.trim()).filter(Boolean);
         for (const testId of testIds) {
@@ -113,12 +122,12 @@ function getAuditLogMap() {
 // --- Main execution logic ---
 
 function generateDashboardContent() {
-    const openTests = getChecklistOpenTests();
+    const checklistStatuses = getChecklistStatuses();
     const testIdToFile = getTestIdToFileAndSkipMap();
     const auditMap = getAuditLogMap();
 
     const allTestIds = new Set([
-      ...Object.keys(openTests),
+      ...Object.keys(checklistStatuses), 
       ...Object.keys(testIdToFile),
       ...Object.keys(auditMap)
     ]);
@@ -138,15 +147,26 @@ function generateDashboardContent() {
     outputLines.push('|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|');
 
     for (const testId of sortedIds) {
-      const t = openTests[testId] || {};
+      const checklistEntry = checklistStatuses[testId] || {};
       const f = testIdToFile[testId] || {};
       const a = auditMap[testId] || '';
-      const checklistStatus = t.checklistStatus || '';
-      const testTarget = t.testTarget || '';
-      const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
-      const testFilePath = f.testFilePath || '';
-      if (checklistStatus || skips || a) {
+
+      const checklistStatus = checklistEntry.checklistStatus || '';
+      const testTarget = checklistEntry.testTarget || ''; // Use testTarget from checklist
+
+      // Only include if checklist status is NOT 'CLOSED'
+      // OR if it's an audit entry not found in the checklist
+      // OR if it has skips not found in the checklist
+      if (checklistStatus !== 'CLOSED' && (checklistStatus || f.skips || a)) {
+        const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
+        const testFilePath = f.testFilePath || '';
         outputLines.push(
+          `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
+        );
+      } else if (!checklistStatus && (f.skips || a)) { // For tests not in checklist but in skips or audit
+         const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
+         const testFilePath = f.testFilePath || '';
+         outputLines.push(
           `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
         );
       }
@@ -156,8 +176,8 @@ function generateDashboardContent() {
 
 function updateReadme(dashboardLines) {
     const readmePath = path.join(__dirname, '..', 'README.md');
-    const startMarker = '<!--qa-dashboard-start-->';
-    const endMarker = '<!--qa-dashboard-end-->';
+    const startMarker = '';
+    const endMarker = '';
 
     let readmeContent;
     try {

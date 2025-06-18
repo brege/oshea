@@ -66,14 +66,14 @@ const groups = {
     ],
     // --- By Level ---
     level1: [
+        paths.collections_manager,
         paths.ConfigResolver,
-        paths.plugin_determiner,
-        paths.PluginRegistryBuilder,
         paths.main_config_loader,
-        paths.plugin_config_loader,
-        paths.PluginManager,
         paths.math_integration,
-        paths.cm_utils
+        paths.plugin_config_loader,
+        paths.plugin_determiner,
+        paths.PluginManager,
+        paths.PluginRegistryBuilder,
     ],
     level2: [
         paths.default_handler, 
@@ -140,7 +140,7 @@ const groups = {
     //  By Specific Study ---
     validator: [paths.plugin_validator, paths.plugin_validate],
     insitu: [paths.insitu_e2e], 
-    debug: [paths.ConfigResolver], 
+    debug: [paths.plugin_determiner], //main_config_loader], 
     // Default
     all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/.contract/test/*.test.js']
 

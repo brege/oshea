@@ -92,7 +92,7 @@ class ConfigResolver {
                     const path = err.instancePath ? `${err.instancePath.substring(1)}.${property}`.replace(/\//g, '.') : property;
                     console.warn(`  - Unknown property '${path}' found in '${pluginConfigPath}'.`);
                 });
-                console.warn(`  INFO: To see the final effective configuration, run 'md-to-pdf config --plugin ${pluginName}'`);
+                console.warn(`  INFO: To see the final applied settings, run 'md-to-pdf config --plugin ${pluginName}'`);
             }
             
             if (otherErrors.length > 0) {
@@ -106,7 +106,7 @@ class ConfigResolver {
 
 
     async _initializeResolverIfNeeded() {
-        if (this._initialized) return;
+        // REMOVED: if (this._initialized) return;
 
         const primary = await this.mainConfigLoader.getPrimaryMainConfig();
         this.primaryMainConfig = primary.config;

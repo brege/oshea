@@ -36,7 +36,7 @@ The [`qa-dashboard.js`](scripts/qa-dashboard.js) script synthesizes this informa
 <!--qa-dashboard-start-->
 | Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |
 |-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|
-| 1.1.2    | ConfigResolver      | OPEN     | 2 it.skip()| audit-log:7  | test/integration/config-resolver/config-resolver.test.1.1.2.js|
+| 1.1.2    |                     |          |            | audit-log:7  |                                                       |
 | 1.2.4    | PluginRegistryBuilder| OPEN     | 1 it.skip()| audit-log:44 | test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.4.js|
 | 1.2.8    | PluginRegistryBuilder| OPEN     | 1 it.skip()| audit-log:44 | test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.8.js|
 | 1.2.24   | PluginRegistryBuilder| OPEN     | 1 it.skip()| audit-log:56 | test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.24.js|
@@ -61,6 +61,7 @@ The [`qa-dashboard.js`](scripts/qa-dashboard.js) script synthesizes this informa
 | 2.2.2    |                     |          | 1 it.skip()|              | test/integration/default-handler/default-handler.test.2.2.2.js|
 | 2.3.9    |                     |          |            | audit-log:178|                                                       |
 | 4.1.1    | CLI Commands Interaction| OPEN     |            |              |                                                       |
+| 4.1.2    | CLI Commands Interaction| OPEN     |            |              |                                                       |
 | 4.2.1    | convert --watch     | OPEN     |            |              |                                                       |
 | 4.2.2    | convert --watch     | OPEN     |            |              |                                                       |
 | 4.3.1    | collection update   | OPEN     |            |              |                                                       |

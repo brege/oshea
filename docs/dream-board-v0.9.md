@@ -737,11 +737,11 @@ With the core E2E tests implemented, this checklist outlines the remaining **har
 |---|--------|:-----------------------------|:-----------------|:-----------------------------|---|
 | ✔ | **A1** | `v1` Plugin Contract Final   |`plugin validate` | Specification & Automation   |`2`|
 | ✔ | **A2** | Fully Valid Archetyping      |`plugin create`   | Feature Completeness         |`3`|
-| ➜ | **A3** | Integrate Validator          |`plugin enable`   | Code Hardening               |`4`|
+| ✔ | **A3** | Integrate Validator          |`plugin enable`   | Code Hardening               |`4`|
 |   |        | <span style="white-space:nowrap">**CLI Polish & Usability**</span>       |     |   |
 | ○ | **B1** | Tab Completion               |`cli.js` `<TAB>`  | User Experience Polish       |`6`|
 |   |        | <span style="white-space:nowrap">**Test Suite Completion**</span>        |     |   |
-| ○ | **C1** | Shrink Gaps in Test Coverage |`×L2 ×L1 ○L4 ×L3` | Technical Debt               |`5`|
+| ○ | **C1** | Shrink Gaps in Test Coverage |`×L2 ×L1 ✔L4 ×L3` | Technical Debt               |`5`|
 | ✔ | **C2** | Housekeeping Tests & CI      |`test/integration`| Code Quality                 |`1`|
 
 **Proposed Sequence | C2 ➜ A1 ➜ A2 ➜ A3 ➜ C1 ➜ B1**

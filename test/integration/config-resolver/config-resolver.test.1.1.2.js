@@ -29,7 +29,17 @@ describe('ConfigResolver _initializeResolverIfNeeded Registry Caching (1.1.2)', 
         mockDependencies = {
             MainConfigLoader: MockMainConfigLoader,
             PluginConfigLoader: sinon.stub(),
-            PluginRegistryBuilder: MockPluginRegistryBuilder
+            PluginRegistryBuilder: MockPluginRegistryBuilder,
+            fs: { existsSync: sinon.stub().returns(true), readFileSync: sinon.stub().returns('{}') }, // For schema loading
+            path: {
+                resolve: sinon.stub().returnsArg(0),
+                join: (...args) => args.join('/'),
+                dirname: sinon.stub().returns('/fake/dir')
+            },
+            os: { homedir: sinon.stub().returns('/fake/home') },
+            loadYamlConfig: sinon.stub().resolves({}),
+            deepMerge: (a, b) => ({...a, ...b}),
+            Ajv: sinon.stub().returns({ addSchema: sinon.stub(), getSchema: sinon.stub().returns({ schema: {} }), compile: sinon.stub().returns(() => true) }),
         };
     });
 
@@ -37,33 +47,52 @@ describe('ConfigResolver _initializeResolverIfNeeded Registry Caching (1.1.2)', 
         sinon.restore();
     });
 
-    it.skip('should not rebuild the registry on a second call if conditions are unchanged', async () => {
+    // REMOVED .skip()
+    it('should not rebuild the registry on a second call if conditions are unchanged', async () => {
         // Arrange
         const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // Act
+        // AGGRESSIVE DEBUGGING
+        console.log('DEBUG 1.1.2 Test 1: First call to _initializeResolverIfNeeded');
+        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // First call
+
+        // AGGRESSIVE DEBUGGING
+        console.log('DEBUG 1.1.2 Test 1: Second call to _initializeResolverIfNeeded (conditions unchanged)');
+        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // Second call
 
         // Assert
         // The registry builder should only be called once.
+        // AGGRESSIVE DEBUGGING
+        console.log('DEBUG 1.1.2 Test 1: MockPluginRegistryBuilder.callCount', MockPluginRegistryBuilder.callCount);
+        // END AGGRESSIVE DEBUGGING
         expect(MockPluginRegistryBuilder.callCount).to.equal(1);
     });
 
-    it.skip('should rebuild the registry if useFactoryDefaultsOnly changes between calls', async () => {
+    // REMOVED .skip()
+    it('should rebuild the registry if useFactoryDefaultsOnly changes between calls', async () => {
         // Arrange
         const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // Act
+        // AGGRESSIVE DEBUGGING
+        console.log('DEBUG 1.1.2 Test 2: First call to _initializeResolverIfNeeded (useFactoryDefaultsOnly = false)');
+        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // First call, builds with useFactoryDefaultsOnly = false
 
         // Manually change the property on the instance to simulate a different run condition
         resolver.useFactoryDefaultsOnly = true;
 
+        // AGGRESSIVE DEBUGGING
+        console.log('DEBUG 1.1.2 Test 2: Second call to _initializeResolverIfNeeded (useFactoryDefaultsOnly = true)');
+        // END AGGRESSIVE DEBUGGING
         await resolver._initializeResolverIfNeeded(); // Second call
 
         // Assert
-        // --- FIX: Corrected typo in variable name ---
+        // The registry builder should be called twice.
+        // AGGRESSIVE DEBUGGING
+        console.log('DEBUG 1.1.2 Test 2: MockPluginRegistryBuilder.callCount', MockPluginRegistryBuilder.callCount);
+        // END AGGRESSIVE DEBUGGING
         expect(MockPluginRegistryBuilder.callCount).to.equal(2);
     });
 });

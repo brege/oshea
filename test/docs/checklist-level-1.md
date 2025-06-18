@@ -9,7 +9,7 @@
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify that `_initializeResolverIfNeeded` correctly loads and merges primary, XDG, and project main configurations, and sets `primaryMainConfig`, `primaryMainConfigPathActual`, and `resolvedCollRoot`.
 
-* [ ] 1.1.2 Test that `_initializeResolverIfNeeded` correctly rebuilds the `mergedPluginRegistry` when `useFactoryDefaultsOnly` or `isLazyLoadMode` changes, or when `primaryMainConfigLoadReason` changes.
+* [x] 1.1.2 Test that `_initializeResolverIfNeeded` correctly rebuilds the `mergedPluginRegistry` when `useFactoryDefaultsOnly` or `isLazyLoadMode` changes, or when `primaryMainConfigLoadReason` changes.
   - **test_id:** 1.1.2
   - **status:** OPEN
   - **test_target:** ConfigResolver

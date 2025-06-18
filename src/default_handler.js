@@ -1,6 +1,6 @@
 // src/default_handler.js
 const fs = require('fs').promises;
-const fss = 'fs'; // Synchronous for operations like existsSync
+const fss = require('fs'); // Corrected to require('fs') for sync operations
 const path = require('path');
 
 const {
@@ -20,7 +20,7 @@ class DefaultHandler {
         const { markdownFilePath } = data;
         
         try {
-            if (!markdownFilePath || !require('fs').existsSync(markdownFilePath)) {
+            if (!markdownFilePath || !fss.existsSync(markdownFilePath)) {
                 throw new Error(`Input Markdown file not found: ${markdownFilePath}`);
             }
             await fs.mkdir(outputDir, { recursive: true });
@@ -54,10 +54,14 @@ class DefaultHandler {
                 ...(pluginSpecificConfig.remove_shortcodes_patterns || [])
             ];
             const cleanedContent = removeShortcodes(contentAfterFMSubst, patternsToRemove);
+            // This line needs to be robust if removeShortcodes itself returns undefined.
+            // console.log(`DEBUG DefaultHandler: Content after shortcode removal (length ${cleanedContent ? cleanedContent.length : 'undefined'}): \n${cleanedContent ? cleanedContent.substring(0,200) + '...' : 'undefined'}`);
+
 
             let finalOutputFilename = outputFilenameOpt;
             if (!finalOutputFilename) {
                 const baseInputName = path.basename(markdownFilePath, path.extname(markdownFilePath));
+
                 let nameParts = [];
                 const titleFromFM = processedFmData.title || '';
                 const titleSlug = generateSlug(titleFromFM);
@@ -78,8 +82,15 @@ class DefaultHandler {
                 }
                 if (dateStrForFilename) nameParts.push(dateStrForFilename);
                 
-                finalOutputFilename = nameParts.filter(part => part && String(part).trim() !== '').join('-');
-                finalOutputFilename = finalOutputFilename.replace(/--+/g, '-') + '.pdf';
+                const joinedNameParts = nameParts.filter(part => part && String(part).trim() !== '').join('-');
+                finalOutputFilename = joinedNameParts.replace(/--+/g, '-');
+                
+                // Add conditional logic to handle cases where finalOutputFilename might be empty
+                if (!finalOutputFilename || finalOutputFilename === '-' || finalOutputFilename.trim() === '') {
+                    finalOutputFilename = generateSlug(baseInputName);
+                }
+                finalOutputFilename += '.pdf';
+
                 if (finalOutputFilename === '.pdf' || finalOutputFilename === '-.pdf') {
                     finalOutputFilename = generateSlug(baseInputName) + '.pdf';
                 }
@@ -132,10 +143,10 @@ class DefaultHandler {
             const pluginCssFiles = pluginSpecificConfig.css_files || [];
             for (const cssFileName of pluginCssFiles) {
                 const cssFilePath = path.resolve(pluginBasePath, cssFileName);
-                if (require('fs').existsSync(cssFilePath)) {
+                if (fss.existsSync(cssFilePath)) {
                     cssFileContentsArray.push(await fs.readFile(cssFilePath, 'utf8'));
                 } else {
-                    if (path.isAbsolute(cssFileName) && require('fs').existsSync(cssFileName)) {
+                    if (path.isAbsolute(cssFileName) && fss.existsSync(cssFileName)) {
                         cssFileContentsArray.push(await fs.readFile(cssFileName, 'utf8'));
                     } else {
                         console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'}) (original path in config: ${cssFileName})`);
@@ -162,7 +173,7 @@ class DefaultHandler {
             let htmlTemplateContent = null;
             if (pluginSpecificConfig.html_template_path) {
                 const templatePath = path.resolve(pluginBasePath, pluginSpecificConfig.html_template_path);
-                if (require('fs').existsSync(templatePath)) {
+                if (fss.existsSync(templatePath)) {
                     htmlTemplateContent = await fs.readFile(templatePath, 'utf8');
                 } else {
                     console.warn(`WARN: HTML template not found at specified path: ${templatePath}`);

@@ -95,7 +95,8 @@ class PluginRegistryBuilder {
                 console.warn(`WARN (PluginRegistryBuilder): Alias '${aliasName}' used in plugin path '${rawPath}' could not be resolved to a base path. Skipping registration.`);
                 return null;
             }
-        } else if (resolvedPath.startsWith('~/') || resolvedPath.startsWith('~\\')) {
+        }
+        else if (resolvedPath.startsWith('~/') || resolvedPath.startsWith('~\\')) {
             resolvedPath = path.join(os.homedir(), resolvedPath.substring(2));
         }
 
@@ -214,13 +215,14 @@ class PluginRegistryBuilder {
     }
 
     async buildRegistry() {
-        if (this._builtRegistry &&
-            this._builtRegistry.builtWithFactoryDefaults === this.useFactoryDefaultsOnly &&
-            this._builtRegistry.projectManifestPathUsed === this.projectManifestConfigPath &&
-            this._builtRegistry.isLazyLoadMode === this.isLazyLoadMode &&
-            this._builtRegistry.primaryMainConfigLoadReason === this.primaryMainConfigLoadReason &&
-            this._builtRegistry.collectionsManagerInstance === this.collectionsManager
-        ) {
+        let needsRegistryBuild = this._builtRegistry === null ||
+                                 this._builtRegistry.builtWithFactoryDefaults !== this.useFactoryDefaultsOnly ||
+                                 this._builtRegistry.projectManifestPathUsed !== this.projectManifestConfigPath ||
+                                 this._builtRegistry.isLazyLoadMode !== this.isLazyLoadMode ||
+                                 this._builtRegistry.primaryMainConfigLoadReason !== this.primaryMainConfigLoadReason ||
+                                 this._builtRegistry.collectionsManagerInstance !== this.collectionsManager;
+
+        if (!needsRegistryBuild) {
             return this._builtRegistry.registry;
         }
 
@@ -352,7 +354,7 @@ class PluginRegistryBuilder {
                     enabledInstances.forEach(instance => {
                         pluginDetailsMap.set(instance.invokeName, {
                             name: instance.invokeName, description: availableCmPlugin.description,
-                            configPath: instance.configPath,
+                            configPath: instance.config_path,
                             registrationSourceDisplay: `CollectionsManager (CM: ${fullCmId})`,
                             status: 'Enabled (CM)', cmCollection: availableCmPlugin.collection,
                             cmPluginId: availableCmPlugin.plugin_id, cmInvokeName: instance.invokeName,

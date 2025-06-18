@@ -138,7 +138,7 @@
 
 * [x] 1.2.4 Test `_resolveAlias` resolves a tilde-prefixed alias value to an absolute path in the user's home directory.
   - **test_id:** 1.2.4
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** PluginRegistryBuilder
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `_resolveAlias` resolves a tilde-prefixed alias value to an absolute path in the user's home directory.
@@ -174,7 +174,7 @@
 
 * [x] 1.2.8 Test `_resolvePluginConfigPath` resolves a tilde-prefixed raw path to an absolute path in the user's home directory.
   - **test_id:** 1.2.8
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** PluginRegistryBuilder
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `_resolvePluginConfigPath` resolves a tilde-prefixed raw path to an absolute path in the user's home directory.
@@ -296,9 +296,9 @@
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `buildRegistry` correctly merges registrations from Bundled Definitions, then XDG Global, then Project Manifest when `useFactoryDefaultsOnly` is false.
 
-* [ ] 1.2.24 Test `buildRegistry`'s caching mechanism, ensuring it returns a cached registry if relevant build parameters haven't changed.
+* [x] 1.2.24 Test `buildRegistry`'s caching mechanism, ensuring it returns a cached registry if relevant build parameters haven't changed.
   - **test_id:** 1.2.24
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** PluginRegistryBuilder
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `buildRegistry`'s caching mechanism, ensuring it returns a cached registry if relevant build parameters haven't changed.

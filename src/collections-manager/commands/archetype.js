@@ -4,13 +4,12 @@
 module.exports = async function archetypePlugin(dependencies, sourcePluginIdentifier, newArchetypeName, options = {}) {
   const { fs, fss, path, fsExtra, chalk, yaml, matter, constants, cmUtils } = dependencies;
 
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Archetyping from '${sourcePluginIdentifier}' to '${newArchetypeName}'. Options: ${JSON.stringify(options)}`));
-
   let sourcePluginInfo = {};
   let sourceIsDirectPath = false;
   let sourcePluginIdForReplacement = '';
 
   const idParts = sourcePluginIdentifier.split('/');
+  // Check if it's a CM-managed collection/plugin ID (e.g., 'collection_name/plugin_id')
   const isPotentiallyCmIdentifier = idParts.length === 2 && idParts[0] && idParts[1] &&
                                  !sourcePluginIdentifier.startsWith('.') &&
                                  !sourcePluginIdentifier.startsWith('~') &&
@@ -27,15 +26,14 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
         sourcePluginInfo = { ...foundPlugin };
         sourcePluginIdForReplacement = sourcePluginId;
         sourceIsDirectPath = false;
-        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Identified source as CM plugin: ${sourceCollectionName}/${sourcePluginId}`));
     } else {
         throw new Error(`Source plugin "${sourcePluginId}" in collection "${sourceCollectionName}" not found via CollectionsManager. If providing a direct path, ensure it's valid and accessible and correctly formatted (e.g. starts with './', '~/', or an absolute path).`);
     }
-  } else {
+  } else { // Handle direct path source (absolute, relative, tilde)
     sourceIsDirectPath = true;
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Treating source '${sourcePluginIdentifier}' as a direct path.`));
 
     const resolvedSourcePath = path.resolve(sourcePluginIdentifier);
+
     if (!fss.existsSync(resolvedSourcePath) || !fss.lstatSync(resolvedSourcePath).isDirectory()) {
       throw new Error(`Source plugin path "${resolvedSourcePath}" (from identifier "${sourcePluginIdentifier}") not found or is not a directory.`);
     }
@@ -52,7 +50,6 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
       const foundConfig = filesInDir.find(f => f.toLowerCase().endsWith('.config.yaml') || f.toLowerCase().endsWith('.yaml'));
       if (foundConfig) {
         configPath = path.join(resolvedSourcePath, foundConfig);
-        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Found config file '${foundConfig}' in direct path source.`));
       } else {
         throw new Error(`Config file (.config.yaml or .yaml) not found in source plugin directory "${resolvedSourcePath}".`);
       }
@@ -106,7 +103,6 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
         return true;
       }
     });
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Copied from ${sourcePluginBasePath} to ${archetypePath}`));
 
     const originalConfigPathInArchetype = path.join(archetypePath, originalSourceConfigFilename);
     const newConfigFilename = `${newArchetypeName}.config.yaml`;
@@ -222,14 +218,22 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
           let fileContent = await fs.readFile(filePath, 'utf8');
           let originalFileContentForCompare = fileContent;
 
-          if (sourcePluginIdForReplacement && sourcePluginIdForReplacement !== newArchetypeName) {
-            const regexId = new RegExp(sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-            fileContent = fileContent.replace(regexId, newArchetypeName);
-          }
-          if (sourcePluginIdPascal && newArchetypeNamePascal && sourcePluginIdPascal !== newArchetypeNamePascal) {
-            const regexPascal = new RegExp(sourcePluginIdPascal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-            fileContent = fileContent.replace(regexPascal, newArchetypeNamePascal);
-          }
+          // Check if it's the index.js handler file AND it contains 'DefaultHandler'
+          const isIndexJs = path.basename(filePath).toLowerCase() === 'index.js';
+          const containsDefaultHandler = isIndexJs && fileContent.includes('DefaultHandler'); // Check only if it's index.js
+
+          // Only perform general string replacement if it's not the specific case of index.js
+          // with a DefaultHandler reference that we want to preserve.
+          if (!containsDefaultHandler) { // Apply replacement if not the specific problematic case
+            if (sourcePluginIdForReplacement && sourcePluginIdForReplacement !== newArchetypeName) {
+                const regexId = new RegExp(sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                fileContent = fileContent.replace(regexId, newArchetypeName);
+            }
+            if (sourcePluginIdPascal && newArchetypeNamePascal && sourcePluginIdPascal !== newArchetypeNamePascal) {
+                const regexPascal = new RegExp(sourcePluginIdPascal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                fileContent = fileContent.replace(regexPascal, newArchetypeNamePascal);
+            }
+          } else {}
 
           if (fileContent !== originalFileContentForCompare) {
             if (filePath.toLowerCase() === newConfigPathInArchetype.toLowerCase() && configDataFromSpecificLogic) {
@@ -243,7 +247,6 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
               fileContent = yaml.dump(tempConfigData);
             }
             await fs.writeFile(filePath, fileContent);
-            if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin SR): Performed string replacements in ${path.basename(filePath)}.`));
           }
         } catch (srError) {
           messages.push(`Error processing content in ${path.basename(filePath)}: ${srError.message.substring(0, 30)}...`);
@@ -284,7 +287,6 @@ module.exports = async function archetypePlugin(dependencies, sourcePluginIdenti
     }
 
     const successMessage = `Archetype '${newArchetypeName}' created successfully from '${sourcePluginIdentifier}'.`;
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:archetypePlugin): Archetype creation operations: ${messages.join('; ')}`));
     console.log(chalk.green(successMessage));
     return { success: true, message: successMessage, archetypePath: archetypePath };
 

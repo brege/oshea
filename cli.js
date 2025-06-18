@@ -227,6 +227,8 @@ async function main() {
             });
 
             argv.manager = managerInstance;
+            argv.configResolver = initialConfigResolver; // Attach ConfigResolver to args
+            // REMOVED DEBUG LOG: if (process.env.DEBUG_CM === 'true') console.log(chalk.magenta('DEBUG (cli.js middleware): ConfigResolver attached to args.'));
         })
         .command({
             ...convertCmdModule.defaultCmd,

@@ -98,7 +98,14 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
         const projectRoot = path.resolve(__dirname, '../../');
         const mochaPath = path.join(projectRoot, 'node_modules', 'mocha', 'bin', 'mocha');
         const command = `node "${mochaPath}" "${e2eTestPath}" --no-config --no-opts`;
-        execSync(command, { cwd: projectRoot, stdio: 'pipe' });
+        execSync(command, {
+            cwd: projectRoot,
+            stdio: 'pipe',
+            env: {
+                ...process.env, // Inherit existing environment variables
+                NODE_PATH: path.join(projectRoot, 'node_modules') // Add project's node_modules
+            }
+        });
         console.log(chalk.green(`    [✔] In-situ test passes.`));
     } catch (e) {
         errors.push('In-situ E2E test failed');

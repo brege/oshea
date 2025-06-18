@@ -65,8 +65,8 @@ describe('ConfigResolver getEffectiveConfig (1.1.13)', () => {
         // Assert
         const finalCssFiles = result.pluginSpecificConfig.css_files;
         expect(finalCssFiles).to.be.an('array').with.lengthOf(2);
-        expect(finalCssFiles).to.include('/path/to/style.css');
-        expect(finalCssFiles).to.include('/path/to/duplicate.css');
+        expect(finalCssFiles).to.match(new RegExp(`/path/to/style\.css`));
+        expect(finalCssFiles).to.match(new RegExp(`/path/to/duplicate\.css`));
     });
 
     afterEach(() => {

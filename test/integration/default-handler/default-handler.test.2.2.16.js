@@ -50,7 +50,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
 
         // Assert that the error was logged to console.error
         expect(this.consoleErrorStub.calledOnce).to.be.true;
-        expect(this.consoleErrorStub.getCall(0).args[0]).to.include('Error during document generation: Mock file read error during test');
+        expect(this.consoleErrorStub.getCall(0).args[0]).to.match(new RegExp(`Error during document generation: Mock file read error during test`));
         
         // Ensure that generatePdf was NOT called since an earlier step failed
         expect(this.generatePdfStub.notCalled).to.be.true;
@@ -72,7 +72,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
 
         expect(result).to.be.null;
         expect(this.consoleErrorStub.calledOnce).to.be.true;
-        expect(this.consoleErrorStub.getCall(0).args[0]).to.include('Error during document generation: Mock HTML rendering error during test');
+        expect(this.consoleErrorStub.getCall(0).args[0]).to.match(new RegExp(`Error during document generation: Mock HTML rendering error during test`));
         expect(this.generatePdfStub.notCalled).to.be.true;
         // --- MODIFIED END ---
     });
@@ -92,7 +92,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
 
         expect(result).to.be.null;
         expect(this.consoleErrorStub.calledOnce).to.be.true;
-        expect(this.consoleErrorStub.getCall(0).args[0]).to.include('Error during document generation: Mock PDF generation error during test');
+        expect(this.consoleErrorStub.getCall(0).args[0]).to.match(new RegExp(`Error during document generation: Mock PDF generation error during test`));
         expect(this.generatePdfStub.calledOnce).to.be.true; // generatePdf should have been called before failing
         // --- MODIFIED END ---
     });

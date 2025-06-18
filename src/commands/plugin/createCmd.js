@@ -13,7 +13,6 @@ module.exports = {
         describe: 'Name for the new plugin (e.g., my-custom-plugin). Must be alphanumeric with optional hyphens (not at start/end).',
         type: 'string'
       })
-      // ... (rest of the builder options remain the same) ...
       .option('from', {
         describe: `Optional. The source to create the plugin from.
                    Can be a CM-managed plugin identifier ('collection_name/plugin_id')
@@ -22,11 +21,11 @@ module.exports = {
         type: 'string',
         alias: 'f'
       })
-      .option('target-dir', { // MODIFIED: Renamed from 'dir'
-        alias: 't', // ADDED: Alias
+      .option('target-dir', {
+        alias: 't',
         describe: `Optional. The base directory in which to create the new plugin's folder ('<pluginName>').
                    - If --from is NOT used (creating from template): Defaults to the current working directory (e.g., './<pluginName>').
-                   - If --from IS used (archetyping an existing plugin): Defaults to a user-specific plugins directory (e.g., ~/.local/share/md-to-pdf/my-plugins/'). This default is handled by the underlying archetype command if --target-dir is omitted.`, // MODIFIED: Description updated
+                   - If --from IS used (archetyping an existing plugin): Defaults to a user-specific plugins directory (e.g., ~/.local/share/md-to-pdf/my-plugins/'). This default is handled by the underlying archetype command if --target-dir is omitted.`,
         type: 'string',
         normalize: true
       })
@@ -37,7 +36,7 @@ module.exports = {
       });
   },
   handler: async (args) => {
-    const newPluginName = args.pluginName; // Store before potential modification by yargs normalization? (though pluginName is positional)
+    const newPluginName = args.pluginName;
 
     if (!isValidPluginName(newPluginName)) {
       console.error(chalk.red(`ERROR: Invalid plugin name: "${newPluginName}". Name must be alphanumeric and can contain hyphens, but not start or end with them, and no underscores.`));
@@ -50,31 +49,46 @@ module.exports = {
       process.exit(1);
       return;
     }
+    
+    // ConfigResolver instance must be available in args from cli.js middleware
+    if (!args.configResolver) {
+        console.error(chalk.red('ERROR (createCmd): ConfigResolver instance not available in createCmd handler. This is a critical internal error.'));
+        process.exit(1);
+    }
 
-    // ... (rest of the handler from the previous turn remains the same) ...
     let sourceIdentifier;
     let targetDirOptionForArchetype;
 
     try {
       if (args.from) {
-        sourceIdentifier = args.from;
-        targetDirOptionForArchetype = args.targetDir ? path.resolve(args.targetDir) : undefined; // MODIFIED: args.dir to args.targetDir
-        console.log(chalk.blue(`Attempting to create plugin '${chalk.yellow(newPluginName)}' by archetyping from source '${chalk.cyan(sourceIdentifier)}'...`));
+        const configResolver = args.configResolver; 
+        await configResolver._initializeResolverIfNeeded(); // Ensure registry is built
+
+        const pluginRegistryEntry = configResolver.mergedPluginRegistry[args.from];
+
+        if (pluginRegistryEntry && pluginRegistryEntry.configPath) {
+          // If 'args.from' is a registered plugin name, resolve to its base path
+          sourceIdentifier = path.dirname(pluginRegistryEntry.configPath);
+        } else {
+          // If not a registered name, assume it's a direct path (relative or absolute)
+          sourceIdentifier = args.from;
+        }
+
+        targetDirOptionForArchetype = args.targetDir ? path.resolve(args.targetDir) : undefined;
+        console.log(chalk.blue(`Attempting to create plugin '${chalk.yellow(newPluginName)}' by archetyping from source '${chalk.cyan(args.from)}'...`));
+
       } else {
         const templateName = 'template-basic';
         sourceIdentifier = path.resolve(__dirname, '..', '..', '..', 'plugins', templateName);
-        targetDirOptionForArchetype = args.targetDir ? path.resolve(args.targetDir) : path.resolve(process.cwd()); // MODIFIED: args.dir to args.targetDir
+        targetDirOptionForArchetype = args.targetDir ? path.resolve(args.targetDir) : path.resolve(process.cwd());
         console.log(chalk.blue(`Attempting to create plugin '${chalk.yellow(newPluginName)}' from bundled template '${chalk.cyan(templateName)}'...`));
-        if (process.env.DEBUG_CM === 'true' || !args.from) {
-             console.log(chalk.gray(` (Template source resolved to: ${sourceIdentifier})`));
-        }
       }
 
       if (targetDirOptionForArchetype && args.from) {
         console.log(chalk.blue(`  Target base directory specified: ${chalk.underline(targetDirOptionForArchetype)}`));
       } else if (targetDirOptionForArchetype && !args.from) {
         console.log(chalk.blue(`  Target base directory (for template): ${chalk.underline(targetDirOptionForArchetype)}`));
-      } else if (args.from && !args.targetDir) { // MODIFIED: args.dir to args.targetDir
+      } else if (args.from && !args.targetDir) {
         console.log(chalk.blue(`  No target base directory specified, will use default for archetypes (e.g., ~/.local/share/md-to-pdf/my-plugins/).`));
       }
 
@@ -109,7 +123,7 @@ module.exports = {
       if (process.env.DEBUG_CM === 'true' && error.stack &&
           !(error.message && error.message.toLowerCase().includes('target archetype directory')) &&
           !(error.message && error.message.toLowerCase().includes('not found')) &&
-          !(error.message && error.message.toLowerCase().includes('invalid plugin name'))) { // Don't show stack for our clear error
+          !(error.message && error.message.toLowerCase().includes('invalid plugin name'))) {
           console.error(chalk.red(error.stack));
       }
       process.exit(1);

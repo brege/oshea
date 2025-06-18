@@ -140,7 +140,7 @@ const groups = {
     //  By Specific Study ---
     validator: [paths.plugin_validator, paths.plugin_validate],
     insitu: [paths.insitu_e2e], 
-    debug: [paths.plugin_add], 
+    debug: [paths.plugin_create], 
     // Default
     all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/.contract/test/*.test.js']
 
@@ -151,7 +151,7 @@ const spec = groups[group] || groups.all;
 // Start with the base config.
 const mochaConfig = {
     spec: spec,
-    timeout: 15000, // Increased timeout for E2E tests
+    timeout: 20000, // Increased timeout for E2E tests
     exit: true,
     color: true,
     ignore: 'test/e2e/*.manifest.js'

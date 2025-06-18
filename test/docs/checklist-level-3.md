@@ -134,14 +134,14 @@
   - **test_type:** E2E_CLI
   - **description:** (Key Option) Successfully archetypes a new plugin from a source with `--from`.
 
-* [ ] 3.5.3 (Happy Path) A plugin created from the default template passes validation.
+* [x] 3.5.3 (Happy Path) A plugin created from the default template passes validation.
   - **test_id:** 3.5.3
   - **status:** OPEN
   - **test_target:** plugin create
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) A plugin created from the default template passes validation. Verifies that `plugin create <name>` followed by `plugin validate <name>` exits successfully.
 
-* [ ] 3.5.4 (Happy Path) A plugin archetyped from a valid bundled plugin passes validation.
+* [x] 3.5.4 (Happy Path) A plugin archetyped from a valid bundled plugin passes validation.
   - **test_id:** 3.5.4
   - **status:** OPEN
   - **test_target:** plugin create --from
@@ -166,14 +166,14 @@
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) Successfully enables a plugin from a collection.
 
-* [ ] 3.7.2 (Happy Path) The `plugin enable` command successfully enables a valid plugin.
+* [x] 3.7.2 (Happy Path) The `plugin enable` command successfully enables a valid plugin.
   - **test_id:** 3.7.2
   - **status:** OPEN
   - **test_target:** plugin enable
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) The `plugin enable` command successfully enables a valid plugin. This implicitly verifies that the pre-enable validation check passes on a known-good plugin.
 
-* [ ] 3.7.3 (Sad Path) The `plugin enable` command fails to enable an invalid plugin and reports validation errors.
+* [x] 3.7.3 (Sad Path) The `plugin enable` command fails to enable an invalid plugin and reports validation errors.
   - **test_id:** 3.7.3
   - **status:** OPEN
   - **test_target:** plugin enable

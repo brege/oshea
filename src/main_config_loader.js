@@ -18,7 +18,7 @@ class MainConfigLoader {
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
 
         this.primaryConfig = null;
-        this.primaryConfigPath = null; // Initialize as null
+        this.primaryConfigPath = null;
         this.primaryConfigLoadReason = null;
         this.xdgConfigContents = null;
         this.projectConfigContents = null;
@@ -51,27 +51,19 @@ class MainConfigLoader {
         }
         this.primaryConfigLoadReason = loadedFromReason;
 
-        // Set primaryConfigPath based on the determined path before attempting to load.
-        // This ensures it correctly reflects the *attempted* path even if loading fails.
-        this.primaryConfigPath = configPathToLoad; // <--- MOVED THIS LINE
+        this.primaryConfigPath = configPathToLoad;
 
         if (configPathToLoad && this.fs.existsSync(configPathToLoad)) {
             try {
-                if (process.env.DEBUG) {
-                     console.log(`INFO (MainConfigLoader): Loading primary main configuration from: ${configPathToLoad} (Reason: ${this.primaryConfigLoadReason})`);
-                }
                 this.primaryConfig = await this.loadYamlConfig(configPathToLoad);
-                // No need to set this.primaryConfigPath here, it's already set above
             } catch (error) {
                 console.error(`ERROR (MainConfigLoader): loading primary main configuration from '${configPathToLoad}': ${error.message}`);
                 this.primaryConfig = {};
-                // If load fails, primaryConfigPath should remain the attempted path, which is already set.
             }
         } else {
             this.primaryConfig = {};
             this.primaryConfigLoadReason = "none found";
-            // If no config file could be identified or loaded, ensure primaryConfigPath is null.
-            this.primaryConfigPath = null; // <--- ADDED THIS LINE for the 'none found' case
+            this.primaryConfigPath = null;
             console.warn(`WARN (MainConfigLoader): Primary main configuration file could not be identified or loaded. Using empty global settings.`);
         }
         this.primaryConfig = this.primaryConfig || {};
@@ -103,7 +95,11 @@ class MainConfigLoader {
                     console.warn(`WARN (MainConfigLoader): Could not load project manifest from ${this.projectManifestConfigPath}: ${e.message}`);
                     this.projectConfigContents = {};
                 }
-            } else {
+            } else if (this.projectManifestConfigPath) {
+                console.warn(`WARN (MainConfigLoader): Project manifest config path provided but file does not exist: ${this.projectManifestConfigPath}`);
+                this.projectConfigContents = {};
+            }
+            else {
                 this.projectConfigContents = null;
             }
         } else {

@@ -741,7 +741,7 @@ With the core E2E tests implemented, this checklist outlines the remaining **har
 |   |        | <span style="white-space:nowrap">**CLI Polish & Usability**</span>       |     |   |
 | ○ | **B1** | Tab Completion               |`cli.js` `<TAB>`  | User Experience Polish       |`6`|
 |   |        | <span style="white-space:nowrap">**Test Suite Completion**</span>        |     |   |
-| ○ | **C1** | Shrink Gaps in Test Coverage |`×L2 ×L1 ✔L4 ×L3` | Technical Debt               |`5`|
+| ➜ | **C1** | Shrink Gaps in Test Coverage |`✔L2 ×L1 ✔L4 ×L3` | Technical Debt               |`5`|
 | ✔ | **C2** | Housekeeping Tests & CI      |`test/integration`| Code Quality                 |`1`|
 
 **Proposed Sequence | C2 ➜ A1 ➜ A2 ➜ A3 ➜ C1 ➜ B1**

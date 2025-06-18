@@ -37,8 +37,8 @@ The [`qa-dashboard.js`](scripts/qa-dashboard.js) script synthesizes this informa
 | Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |
 |-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|
 | 1.1.2    |                     |          |            | audit-log:7  |                                                       |
-| 1.2.4    | PluginRegistryBuilder| OPEN     | 1 it.skip()| audit-log:44 | test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.4.js|
-| 1.2.8    | PluginRegistryBuilder| OPEN     | 1 it.skip()| audit-log:44 | test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.8.js|
+| 1.2.4    |                     |          |            | audit-log:44 |                                                       |
+| 1.2.8    |                     |          |            | audit-log:44 |                                                       |
 | 1.2.24   | PluginRegistryBuilder| OPEN     | 1 it.skip()| audit-log:56 | test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.24.js|
 | 1.2.27   |                     |          |            | audit-log:68 |                                                       |
 | 1.2.28   |                     |          |            | audit-log:68 |                                                       |

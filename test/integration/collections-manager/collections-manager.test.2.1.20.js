@@ -29,7 +29,7 @@ describe('CollectionsManager enablePlugin (2.1.20)', () => {
         } catch (error) {
             // Now we should catch the correct error
             expect(error).to.be.an.instanceOf(Error);
-            expect(error.message).to.include('Invalid invoke_name');
+            expect(error.message).to.match(new RegExp(`Invalid invoke_name`));
         }
 
         // listAvailablePlugins is called before the name check, but the manifest reads should not be.

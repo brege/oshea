@@ -44,9 +44,9 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.27)', () => {
         expect(result).to.be.an('array').with.lengthOf(3);
 
         const names = result.map(p => p.name);
-        expect(names).to.include('traditional-plugin');
-        expect(names).to.include('enabled-plugin');
-        expect(names).to.include('cm-coll/cm-plugin-1');
+        expect(names).to.match(new RegExp(`traditional-plugin`));
+        expect(names).to.match(new RegExp(`enabled-plugin`));
+        expect(names).to.match(new RegExp(`cm-coll/cm-plugin-1`));
     });
 
     afterEach(() => {

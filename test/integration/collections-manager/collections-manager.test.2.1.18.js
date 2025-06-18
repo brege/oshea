@@ -40,7 +40,7 @@ describe('CollectionsManager enablePlugin (2.1.18)', () => {
             expect.fail('Expected enablePlugin to throw an error for duplicate invoke_name.');
         } catch (error) {
             expect(error).to.be.an.instanceOf(Error);
-            expect(error.message).to.include('is already in use');
+            expect(error.message).to.match(new RegExp(`is already in use`));
         }
 
         // Verify we did not attempt to write a new manifest

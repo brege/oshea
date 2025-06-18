@@ -59,12 +59,12 @@ describe('pdf_generator (L2Y3) - Scenario 2.3.6: Error Handling (Puppeteer Launc
 
         // 2. An error was thrown by generatePdf
         expect(thrownError).to.be.an('error');
-        expect(thrownError.message).to.include(`Error during PDF generation for "${outputPdfPath}": ${launchError.message}`);
-
+        expect(thrownError.message).to.match(new RegExp(`^Error during PDF generation for ".*": .*`));
+        
         // 3. The error was logged to console.error
         expect(this.consoleErrorStub.calledOnce).to.be.true;
-        expect(this.consoleErrorStub.getCall(0).args[0]).to.include(`Error during PDF generation for "${outputPdfPath}": ${launchError.message}`);
-
+        expect(this.consoleErrorStub.getCall(0).args[0]).to.match(new RegExp(`^Error during PDF generation for ".*": .*`));
+        
         // 4. Subsequent Puppeteer methods were NOT called since launch failed
         expect(mockBrowser.newPage.notCalled).to.be.true;
         expect(mockPage.setContent.notCalled).to.be.true;

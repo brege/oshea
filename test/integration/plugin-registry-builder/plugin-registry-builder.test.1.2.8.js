@@ -6,46 +6,78 @@ const PluginRegistryBuilder = require('../../../src/PluginRegistryBuilder');
 // Test suite for Scenario 1.2.8
 describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.8)', () => {
 
-    it.skip("should resolve a tilde-prefixed raw path to the user's home directory", () => {
-        // Arrange
-        const FAKE_HOME_DIR = '/home/user';
-        const RAW_PATH = '~/plugins/my-plugin.config.yaml';
-        const FINAL_RESOLVED_PATH = '/home/user/plugins/my-plugin.config.yaml';
+    let mockDependencies;
+    let builderInstance;
+    const FAKE_HOMEDIR = '/fake/user/home';
+    const TEST_RAW_PATH = '~/my-plugin-config.yaml';
+    const EXPECTED_RESOLVED_PATH = `${FAKE_HOMEDIR}/my-plugin-config.yaml`;
 
-        // --- FIX: Use the robust spy pattern to track the homedir call ---
-        const osMock = {
-            homedir: () => FAKE_HOME_DIR,
-            platform: () => 'linux'
-        };
-        const homedirSpy = sinon.spy(osMock, 'homedir');
-
-        const mockDependencies = {
-            os: osMock,
-            path: {
-                join: (a, b) => `${a}/${b}`,
-                isAbsolute: (p) => p.startsWith('/'),
-                dirname: () => '',
-                resolve: () => ''
-            },
+    beforeEach(() => {
+        mockDependencies = {
             fs: {
-                existsSync: sinon.stub().withArgs(FINAL_RESOLVED_PATH).returns(true),
-                statSync: sinon.stub().withArgs(FINAL_RESOLVED_PATH).returns({ isFile: () => true, isDirectory: () => false })
+                existsSync: sinon.stub().returns(true),
+                statSync: sinon.stub().returns({ isFile: () => true, isDirectory: () => false }),
+                readdirSync: sinon.stub().returns([])
             },
-            process: { env: {} }
+            fsPromises: {
+                readFile: sinon.stub().resolves('{}')
+            },
+            path: {
+                join: sinon.stub().callsFake((...args) => args.join('/')),
+                resolve: sinon.stub().callsFake((...args) => args.join('/')),
+                isAbsolute: sinon.stub().returns(false), // IMPORTANT: Simulate initially relative path
+                dirname: sinon.stub().returns('/fake/dir'),
+                basename: sinon.stub().returns('file.yaml'),
+                extname: sinon.stub().returns('.yaml')
+            },
+            os: {
+                homedir: sinon.stub().returns(FAKE_HOMEDIR),
+                platform: sinon.stub().returns('linux')
+            },
+            loadYamlConfig: sinon.stub().resolves({}),
+            yaml: {
+                load: sinon.stub().returns({})
+            },
+            process: {
+                env: { XDG_CONFIG_HOME: '/fake/xdg/config', ...process.env },
+                cwd: sinon.stub().returns('/fake/cwd')
+            }
         };
 
-        const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
+        builderInstance = new PluginRegistryBuilder(
+            '/fake/project/root',
+            null,
+            null,
+            false,
+            false,
+            null,
+            null,
+            mockDependencies
+        );
 
-        // Act
-        const result = builder._resolvePluginConfigPath(RAW_PATH, null, null);
+        // Stub path.isAbsolute to return true for the final resolved path for _resolvePluginConfigPath
+        // This is a common pattern for path mocks to ensure internal path.resolve calls work as expected.
+        mockDependencies.path.isAbsolute.withArgs(EXPECTED_RESOLVED_PATH).returns(true);
 
-        // Assert
-        expect(result).to.equal(FINAL_RESOLVED_PATH);
-        // Assert against the dedicated spy
-        expect(homedirSpy.calledOnce).to.be.true;
+        // Reset the spy's call history AFTER the constructor runs for this nested suite
+        mockDependencies.os.homedir.resetHistory();
     });
 
     afterEach(() => {
         sinon.restore();
+    });
+
+    it('should resolve a tilde-prefixed raw path to an absolute path in the user\'s home directory', () => {
+        // Arrange
+        const basePathForMainConfig = '/fake/main-config-dir';
+        const currentAliases = {};
+
+        // Act
+        const resolvedPath = builderInstance._resolvePluginConfigPath(TEST_RAW_PATH, basePathForMainConfig, currentAliases);
+
+        // Assert
+        expect(mockDependencies.os.homedir.calledOnce).to.be.true;
+        expect(resolvedPath).to.equal(EXPECTED_RESOLVED_PATH);
+        expect(mockDependencies.fs.existsSync.calledWith(EXPECTED_RESOLVED_PATH)).to.be.true;
     });
 });

@@ -136,7 +136,7 @@
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify the constructor correctly determines `cmCollRoot` based on `XDG_DATA_HOME` or OS-specific default paths.
 
-* [ ] 1.2.4 Test `_resolveAlias` resolves a tilde-prefixed alias value to an absolute path in the user's home directory.
+* [x] 1.2.4 Test `_resolveAlias` resolves a tilde-prefixed alias value to an absolute path in the user's home directory.
   - **test_id:** 1.2.4
   - **status:** OPEN
   - **test_target:** PluginRegistryBuilder
@@ -172,7 +172,7 @@
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `_resolvePluginConfigPath` correctly resolves an alias-prefixed raw path (e.g., `myAlias:path/to/plugin`) using provided `currentAliases`.
 
-* [ ] 1.2.8 Test `_resolvePluginConfigPath` resolves a tilde-prefixed raw path to an absolute path in the user's home directory.
+* [x] 1.2.8 Test `_resolvePluginConfigPath` resolves a tilde-prefixed raw path to an absolute path in the user's home directory.
   - **test_id:** 1.2.8
   - **status:** OPEN
   - **test_target:** PluginRegistryBuilder

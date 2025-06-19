@@ -810,23 +810,23 @@
 
 ### Function -- `configureMarkdownItForMath( ... )`
 
-* [ ] 1.7.1 Verify `configureMarkdownItForMath` successfully applies the `@vscode/markdown-it-katex` plugin to the `MarkdownIt` instance when math is enabled and engine is 'katex'.
+* [x] 1.7.1 Verify `configureMarkdownItForMath` successfully applies the `@vscode/markdown-it-katex` plugin to the `MarkdownIt` instance when math is enabled and engine is 'katex'.
   - **test_id:** 1.7.1
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `configureMarkdownItForMath` successfully applies the `@vscode/markdown-it-katex` plugin to the `MarkdownIt` instance when math is enabled and engine is 'katex'.
 
-* [ ] 1.7.2 Test `configureMarkdownItForMath` passes `mathConfig.katex_options` correctly to the KaTeX plugin.
+* [x] 1.7.2 Test `configureMarkdownItForMath` passes `mathConfig.katex_options` correctly to the KaTeX plugin.
   - **test_id:** 1.7.2
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `configureMarkdownItForMath` passes `mathConfig.katex_options` correctly to the KaTeX plugin.
 
-* [ ] 1.7.3 Verify `configureMarkdownItForMath` does nothing if math is not enabled or the engine is not 'katex'.
+* [x] 1.7.3 Verify `configureMarkdownItForMath` does nothing if math is not enabled or the engine is not 'katex'.
   - **test_id:** 1.7.3
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `configureMarkdownItForMath` does nothing if math is not enabled or the engine is not 'katex'.
@@ -842,30 +842,30 @@
 
 ### Function -- `getMathCssContent( ... )`
 
-* [ ] 1.7.5 Verify `getMathCssContent` returns the content of `katex.min.css` as a string within an array when math is enabled and the file exists.
+* [x] 1.7.5 Verify `getMathCssContent` returns the content of `katex.min.css` as a string within an array when math is enabled and the file exists.
   - **test_id:** 1.7.5
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `getMathCssContent` returns the content of `katex.min.css` as a string within an array when math is enabled and the file exists.
 
-* [ ] 1.7.6 Test `getMathCssContent` returns an empty array if math is not enabled or the engine is not 'katex'.
+* [x] 1.7.6 Test `getMathCssContent` returns an empty array if math is not enabled or the engine is not 'katex'.
   - **test_id:** 1.7.6
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `getMathCssContent` returns an empty array if math is not enabled or the engine is not 'katex'.
 
-* [ ] 1.7.7 Verify `getMathCssContent` returns an empty array and logs a warning if `katex.min.css` file does not exist at the expected path.
+* [x] 1.7.7 Verify `getMathCssContent` returns an empty array and logs a warning if `katex.min.css` file does not exist at the expected path.
   - **test_id:** 1.7.7
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `getMathCssContent` returns an empty array and logs a warning if `katex.min.css` file does not exist at the expected path.
 
-* [ ] 1.7.8 Test `getMathCssContent` returns an empty array and logs a warning if there's an error reading `katex.min.css` file.
+* [x] 1.7.8 Test `getMathCssContent` returns an empty array and logs a warning if there's an error reading `katex.min.css` file.
   - **test_id:** 1.7.8
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `getMathCssContent` returns an empty array and logs a warning if there's an error reading `katex.min.css` file.

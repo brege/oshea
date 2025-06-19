@@ -151,6 +151,18 @@ This document summarizes key limitations and discrepancies in the `md-to-pdf` co
 
 ---
 
+## Entry: 1.7.4
+
+- **test_id:** 1.7.4
+- **title:** Stubborn Mocking Issue in `math_integration` Test for `require` Failure
+- **component:** math_integration
+- **status:** SKIPPED
+- **description:** The challenge lies in reliably mocking this internal `require` behavior across different test scenarios using `proxyquire`
+- **impact:** The test scenario, while important for complete error handling coverage, is currently unverified by automated tests.
+- **suggested_action:** Revisit this test with a deeper investigation into advanced `proxyquire` patterns for dynamic `require` mocking.
+
+---
+
 ## Entry: L2Y1
 
 - **test_id:** L2Y1

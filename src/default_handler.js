@@ -1,6 +1,6 @@
 // src/default_handler.js
 const fs = require('fs').promises;
-const fss = require('fs'); // Corrected to require('fs') for sync operations
+const fss = require('fs');
 const path = require('path');
 
 const {
@@ -13,7 +13,8 @@ const {
 } = require('./markdown_utils');
 
 const { generatePdf } = require('./pdf_generator');
-const mathIntegration = require('./math_integration');
+const createMathIntegration = require('./math_integration');
+const mathIntegration = createMathIntegration();
 
 class DefaultHandler {
     async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
@@ -28,21 +29,9 @@ class DefaultHandler {
             const rawMarkdownContent = await fs.readFile(markdownFilePath, 'utf8');
             const { data: initialFrontMatter, content: contentWithoutFm } = extractFrontMatter(rawMarkdownContent);
 
-            let contextForPlaceholders = {};
-
-            if (globalConfig && globalConfig.params && typeof globalConfig.params === 'object') {
-                contextForPlaceholders = { ...globalConfig.params };
-            }
-
-            if (pluginSpecificConfig && pluginSpecificConfig.params && typeof pluginSpecificConfig.params === 'object') {
-                contextForPlaceholders = {
-                    ...contextForPlaceholders,
-                    ...pluginSpecificConfig.params
-                };
-            }
-
-            contextForPlaceholders = {
-                ...contextForPlaceholders,
+            const contextForPlaceholders = {
+                ...(globalConfig.params || {}),
+                ...(pluginSpecificConfig.params || {}),
                 ...initialFrontMatter
             };
 
@@ -54,46 +43,21 @@ class DefaultHandler {
                 ...(pluginSpecificConfig.remove_shortcodes_patterns || [])
             ];
             const cleanedContent = removeShortcodes(contentAfterFMSubst, patternsToRemove);
-            // This line needs to be robust if removeShortcodes itself returns undefined.
-            // console.log(`DEBUG DefaultHandler: Content after shortcode removal (length ${cleanedContent ? cleanedContent.length : 'undefined'}): \n${cleanedContent ? cleanedContent.substring(0,200) + '...' : 'undefined'}`);
-
 
             let finalOutputFilename = outputFilenameOpt;
             if (!finalOutputFilename) {
                 const baseInputName = path.basename(markdownFilePath, path.extname(markdownFilePath));
+                const titleSlug = generateSlug(processedFmData.title);
+                const authorSlug = generateSlug(processedFmData.author);
+                const dateSlug = processedFmData.date ? new Date(processedFmData.date).toISOString().split('T')[0] : '';
 
-                let nameParts = [];
-                const titleFromFM = processedFmData.title || '';
-                const titleSlug = generateSlug(titleFromFM);
-                nameParts.push(titleSlug || generateSlug(baseInputName));
-
-                const authorFromFM = processedFmData.author || '';
-                if (authorFromFM) nameParts.push(generateSlug(authorFromFM));
+                const nameParts = [
+                    titleSlug || generateSlug(baseInputName),
+                    authorSlug,
+                    dateSlug
+                ];
                 
-                let dateStrForFilename = '';
-                const dateValueFromFM = processedFmData.date;
-                 if (dateValueFromFM) {
-                    if (dateValueFromFM === processedFmData.CurrentDateISO) {
-                        dateStrForFilename = processedFmData.CurrentDateISO;
-                    } else if (typeof dateValueFromFM === 'string') {
-                        const match = dateValueFromFM.match(/^\d{4}-\d{2}-\d{2}/);
-                        if (match) dateStrForFilename = match[0];
-                    }
-                }
-                if (dateStrForFilename) nameParts.push(dateStrForFilename);
-                
-                const joinedNameParts = nameParts.filter(part => part && String(part).trim() !== '').join('-');
-                finalOutputFilename = joinedNameParts.replace(/--+/g, '-');
-                
-                // Add conditional logic to handle cases where finalOutputFilename might be empty
-                if (!finalOutputFilename || finalOutputFilename === '-' || finalOutputFilename.trim() === '') {
-                    finalOutputFilename = generateSlug(baseInputName);
-                }
-                finalOutputFilename += '.pdf';
-
-                if (finalOutputFilename === '.pdf' || finalOutputFilename === '-.pdf') {
-                    finalOutputFilename = generateSlug(baseInputName) + '.pdf';
-                }
+                finalOutputFilename = nameParts.filter(Boolean).join('-') + '.pdf';
             }
              if (!finalOutputFilename.toLowerCase().endsWith('.pdf')) {
                 finalOutputFilename += '.pdf';
@@ -101,16 +65,12 @@ class DefaultHandler {
             const outputPdfPath = path.join(outputDir, finalOutputFilename);
 
             let markdownToRender = cleanedContent;
-            const fmTitleForH1 = processedFmData.title;
-            
-            if (pluginSpecificConfig.inject_fm_title_as_h1 && !pluginSpecificConfig.omit_title_heading && fmTitleForH1) {
+            if (pluginSpecificConfig.inject_fm_title_as_h1 && !pluginSpecificConfig.omit_title_heading && processedFmData.title) {
                 markdownToRender = ensureAndPreprocessHeading(
                     cleanedContent,
-                    String(fmTitleForH1),
+                    String(processedFmData.title),
                     !!pluginSpecificConfig.aggressiveHeadingCleanup
                 );
-            } else if (!pluginSpecificConfig.inject_fm_title_as_h1 && !cleanedContent.trim().startsWith('# ') && !fmTitleForH1) {
-                 console.warn(`WARN: Document "${markdownFilePath}" does not appear to have an H1 title.`);
             }
 
             const mergedPdfOptions = {
@@ -127,7 +87,7 @@ class DefaultHandler {
                 pluginSpecificConfig.toc_options,
                 mergedPdfOptions.anchor_options,
                 pluginSpecificConfig.math,
-                null, // mdInstance - not used in this flow
+                null,
                 pluginSpecificConfig.markdown_it_options,
                 pluginSpecificConfig.markdown_it_plugins
             );
@@ -135,48 +95,17 @@ class DefaultHandler {
             const cssFileContentsArray = [];
             if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) {
                 const mathCssStrings = await mathIntegration.getMathCssContent(pluginSpecificConfig.math);
-                if (mathCssStrings && mathCssStrings.length > 0) {
-                    cssFileContentsArray.unshift(...mathCssStrings);
-                }
+                cssFileContentsArray.push(...mathCssStrings);
             }
 
-            const pluginCssFiles = pluginSpecificConfig.css_files || [];
-            for (const cssFileName of pluginCssFiles) {
-                const cssFilePath = path.resolve(pluginBasePath, cssFileName);
+            for (const cssFile of (pluginSpecificConfig.css_files || [])) {
+                const cssFilePath = path.resolve(pluginBasePath, cssFile);
                 if (fss.existsSync(cssFilePath)) {
                     cssFileContentsArray.push(await fs.readFile(cssFilePath, 'utf8'));
+                } else if (path.isAbsolute(cssFile) && fss.existsSync(cssFile)) {
+                    cssFileContentsArray.push(await fs.readFile(cssFile, 'utf8'));
                 } else {
-                    if (path.isAbsolute(cssFileName) && fss.existsSync(cssFileName)) {
-                        cssFileContentsArray.push(await fs.readFile(cssFileName, 'utf8'));
-                    } else {
-                        console.warn(`WARN: CSS file for plugin not found: ${cssFilePath} (referenced by ${pluginSpecificConfig.description || 'plugin'}) (original path in config: ${cssFileName})`);
-                    }
-                }
-            }
-
-            if (cssFileContentsArray.length === 0 && (pluginCssFiles.length > 0 || (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled))) {
-                let warningMsg = `WARN: No CSS files were actually loaded by the handler.`;
-                if (pluginCssFiles.length > 0) {
-                    const allAbsolute = pluginCssFiles.every(f => typeof f === 'string' && path.isAbsolute(f));
-                    let hint = `Check plugin CSS paths relative to ${pluginBasePath}.`;
-                    if (allAbsolute) {
-                        hint = `Ensure the absolute plugin CSS paths specified exist and are readable: ${pluginCssFiles.join(', ')}`;
-                    }
-                    warningMsg += ` Plugin CSS files specified: ${pluginCssFiles.join(', ')}. ${hint}`;
-                }
-                if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) {
-                    warningMsg += ` Math rendering was enabled, but its CSS might also be missing.`;
-                }
-                console.warn(warningMsg);
-            }
-
-            let htmlTemplateContent = null;
-            if (pluginSpecificConfig.html_template_path) {
-                const templatePath = path.resolve(pluginBasePath, pluginSpecificConfig.html_template_path);
-                if (fss.existsSync(templatePath)) {
-                    htmlTemplateContent = await fs.readFile(templatePath, 'utf8');
-                } else {
-                    console.warn(`WARN: HTML template not found at specified path: ${templatePath}`);
+                    console.warn(`WARN: CSS file not found: ${cssFilePath}`);
                 }
             }
 
@@ -186,6 +115,9 @@ class DefaultHandler {
                 body_html_end: pluginSpecificConfig.body_html_end || '',
                 lang: processedFmData.lang || 'en'
             };
+
+            const templatePath = pluginSpecificConfig.html_template_path ? path.resolve(pluginBasePath, pluginSpecificConfig.html_template_path) : null;
+            const htmlTemplateContent = templatePath && fss.existsSync(templatePath) ? await fs.readFile(templatePath, 'utf8') : null;
 
             await generatePdf(
                 htmlBodyContent,

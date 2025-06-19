@@ -49,17 +49,11 @@ class PluginRegistryBuilder {
         this.collectionsManager = collectionsManagerInstance;
         this._builtRegistry = null;
 
-        this.cmCollRoot = this._determineCmCollRoot();
+        this.cmCollRoot = this.dependencies.collRoot;
+        if (!this.cmCollRoot) {
+            throw new Error("PluginRegistryBuilder requires a collections root (collRoot) to be provided.");
+        }
         this.cmEnabledManifestPath = this.dependencies.path.join(this.cmCollRoot, CM_ENABLED_MANIFEST_FILENAME);
-    }
-
-    _determineCmCollRoot() {
-        const { os, path, process } = this.dependencies;
-        const xdgDataHome = process.env.XDG_DATA_HOME ||
-            (os.platform() === 'win32'
-                ? path.join(os.homedir(), 'AppData', 'Local')
-                : path.join(os.homedir(), '.local', 'share'));
-        return path.join(xdgDataHome, XDG_CONFIG_DIR_NAME, CM_COLLECTIONS_SUBDIR_NAME);
     }
 
     _resolveAlias(alias, aliasValue, basePathDefiningAlias) {

@@ -120,14 +120,15 @@ Use --short for a condensed view.`,
         }
         return true;
       })
-      .epilogue(chalk.gray("Note: To see a list of your downloaded collection names and their sources, use 'md-to-pdf collection list'.\nFor more information, refer to the README.md file.")); // Added epilogue
+      .epilogue(chalk.gray("Note: To see a list of your downloaded collection names and their sources, use 'md-to-pdf collection list'.\nFor more information, refer to the README.md file."));
   },
   handler: async (args) => {
     try {
       const projectRoot = path.resolve(__dirname, '../../../');
       const builderInstance = new PluginRegistryBuilder(
         projectRoot, null, args.config, args.factoryDefaults,
-        args.isLazyLoadMode || false, null, args.manager
+        args.isLazyLoadMode || false, null, args.manager,
+        { collRoot: args.manager.collRoot }
       );
 
       const allPluginDetails = await builderInstance.getAllPluginDetails();

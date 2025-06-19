@@ -460,6 +460,40 @@ This plugin architecture makes `md-to-pdf` not just a converter, but a versatile
   * To learn about the bundled plugins, see the [**Bundled Plugins Overview**](plugins/README.md).
   * For a complete guide on creating and managing your own plugins, including integrating community plugins and detailed configuration, refer to the [**Plugin Development Guide**](docs/plugin-development.md).
 
+### Configuration Hierarchy: Inclusive vs. Exclusive
+
+`md-to-pdf` uses two different models for applying configurations, and understanding the distinction is key to mastering the tool.
+
+#### Inclusive (Merging) Hierarchy: For Plugin Settings
+
+When determining the final settings for a specific plugin (e.g., its `pdf_options` or `params`), `md-to-pdf` uses an **inclusive, merging hierarchy**.
+
+Think of it like applying layers of paint. The system starts with the plugin's base defaults, then applies your user-global settings on top, and finally layers your project-specific settings over that. The final configuration is a composite of all these layers.
+
+> **Example:**
+> 1. The base `cv` plugin defines `format: A4`.
+> 2. Your user config (`~/.config/md-to-pdf/config.yaml`) defines `margin: { top: "0.8in" }` for the `cv` plugin.
+>
+> The result is an effective configuration that includes **both** `format: A4` and the `0.8in` top margin. The user config *adds to* the base config without replacing it entirely.
+
+#### Exclusive (Overriding) Hierarchy: For the Collections Root
+
+In contrast, the location of your plugin collections (`collRoot`) is handled with an **exclusive, either-or hierarchy**.
+
+Think of this like choosing which library to visit. You can only be in one at a time. When you specify a collections root, `md-to-pdf` looks in that single location and **ignores all others**.
+
+The precedence is:
+1.  `--coll-root <path>` (CLI Flag)
+2.  Environment Variable
+3.  `collections_root:` key in your `config.yaml`
+4.  Default XDG Path (`~/.local/share/md-to-pdf/collections`)
+
+> **Example:**
+> 1. Your default `collRoot` contains `plugin-A`.
+> 2. You run a command with `--coll-root /tmp/other_plugins`, and that directory contains `plugin-B`.
+>
+> For that one command, the application will **only** see `plugin-B`. It will act as if `plugin-A` doesn't exist. This allows you to safely and temporarily switch your entire plugin context without altering your persistent configuration.
+
 ### Batch Processing 'Eaches'
 
 To process multiple Markdown files in a batch job (e.g., converting all recipes in a directory to individual PDFs, or all weeks of a physics lab manual), example external scripts that call the `md-to-pdf convert` command for each file can be found in [`scripts/`](scripts/). 

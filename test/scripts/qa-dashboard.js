@@ -176,8 +176,8 @@ function generateDashboardContent() {
 
 function updateReadme(dashboardLines) {
     const readmePath = path.join(__dirname, '..', 'README.md');
-    const startMarker = '';
-    const endMarker = '';
+    const startMarker = '<!--qa-dashboard-start-->';
+    const endMarker = '<!--qa-dashboard-end-->';
 
     let readmeContent;
     try {
@@ -186,23 +186,29 @@ function updateReadme(dashboardLines) {
         console.error(`ERROR: Could not read README.md at ${readmePath}.`, error);
         return;
     }
-    
-    const newContent = [startMarker, ...dashboardLines, endMarker].join('\n');
-    
-    function escapeRegex(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-    }
 
-    const regex = new RegExp(`${escapeRegex(startMarker)}[\\s\\S]*${escapeRegex(endMarker)}`, 'g');
-    
+    const newContent = [
+        startMarker,
+        ...dashboardLines,
+        endMarker
+    ].join('\n');
+
+    function escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    const regex = new RegExp(
+        `${escapeRegex(startMarker)}[\\s\\S]*${escapeRegex(endMarker)}`,
+        'g'
+    );
+
     if (!regex.test(readmeContent)) {
         console.error(`ERROR: Could not find dashboard markers in ${readmePath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`);
         return;
     }
-    
+
     // Perform the replacement
     readmeContent = readmeContent.replace(regex, newContent);
-    
+
     fs.writeFileSync(readmePath, readmeContent, 'utf8');
     console.log(`Successfully updated dashboard in ${readmePath}`);
 }

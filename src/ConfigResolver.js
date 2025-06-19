@@ -13,7 +13,6 @@ const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class ConfigResolver {
     constructor(mainConfigPathFromCli, useFactoryDefaultsOnly = false, isLazyLoadMode = false, dependencies = {}) {
-        // --- REFACTOR: Define and merge dependencies ---
         const defaultDependencies = {
             fs, path, os,
             loadYamlConfig, deepMerge,
@@ -21,7 +20,6 @@ class ConfigResolver {
         };
         this.dependencies = { ...defaultDependencies, ...dependencies };
         
-        // --- Original constructor logic, with dependencies injected ---
         this.projectRoot = this.dependencies.path.resolve(__dirname, '..');
         this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
         this.isLazyLoadMode = isLazyLoadMode;
@@ -40,7 +38,8 @@ class ConfigResolver {
         this.primaryMainConfig = null;
         this.primaryMainConfigPathActual = null;
         this.primaryMainConfigLoadReason = null;
-        this.resolvedCollRoot = null;
+        
+        this.resolvedCollRoot = this.dependencies.collRoot || null;
 
         this.ajv = new Ajv({ allErrors: true });
         const baseSchemaPath = this.dependencies.path.join(this.projectRoot, 'src', 'base-plugin.schema.json');
@@ -65,10 +64,8 @@ class ConfigResolver {
             }
         }
     
-        // Create a strict version of the schema for typo-checking
         const strictSchema = this.dependencies.deepMerge(baseSchema, specificSchema);
         
-        // Safely set additionalProperties to false for all defined objects
         const objectsToRestrict = ['pdf_options', 'params', 'math', 'toc_options'];
         if (strictSchema.properties) {
             objectsToRestrict.forEach(key => {
@@ -106,7 +103,7 @@ class ConfigResolver {
 
 
     async _initializeResolverIfNeeded() {
-        // REMOVED: if (this._initialized) return;
+        if (this._initialized) return;
 
         const primary = await this.mainConfigLoader.getPrimaryMainConfig();
         this.primaryMainConfig = primary.config;
@@ -116,7 +113,9 @@ class ConfigResolver {
         const xdg = await this.mainConfigLoader.getXdgMainConfig();
         const project = await this.mainConfigLoader.getProjectManifestConfig();
 
-        this.resolvedCollRoot = this.primaryMainConfig.collections_root || null;
+        if (!this.resolvedCollRoot) {
+             this.resolvedCollRoot = this.primaryMainConfig.collections_root || null;
+        }
 
         this.pluginConfigLoader = new this.dependencies.PluginConfigLoader(
             xdg.baseDir, xdg.config, xdg.path,
@@ -139,7 +138,9 @@ class ConfigResolver {
                 this.projectRoot, xdg.baseDir, currentProjectManifestPath,
                 this.useFactoryDefaultsOnly,
                 this.isLazyLoadMode,
-                this.primaryMainConfigLoadReason
+                this.primaryMainConfigLoadReason,
+                null, 
+                { collRoot: this.resolvedCollRoot }
             );
             this.mergedPluginRegistry = await registryBuilder.buildRegistry();
             if (this.mergedPluginRegistry) {
@@ -177,7 +178,6 @@ class ConfigResolver {
         try {
             const rawConfig = await this.dependencies.loadYamlConfig(configFilePath);
             
-            // --- NEW: Perform validation after loading the raw config ---
             this._validatePluginConfig(pluginName, rawConfig, configFilePath);
             
             const initialCssPaths = this.dependencies.AssetResolver.resolveAndMergeCss(

@@ -15,6 +15,7 @@ const PluginManager = require('./src/PluginManager');
 const { setupWatch } = require('./src/watch_handler');
 const { determinePluginToUse } = require('./src/plugin_determiner');
 const CollectionsManager = require('./src/collections-manager');
+const MainConfigLoader = require('./src/main_config_loader.js');
 const markdownUtils = require('./src/markdown_utils');
 const yaml = require('js-yaml');
 
@@ -60,7 +61,7 @@ async function commonCommandHandler(args, executorFunction, commandType) {
                 }
             );
         } else {
-            const configResolver = new ConfigResolver(args.config, args.factoryDefaults, args.isLazyLoad || false);
+            const configResolver = new ConfigResolver(args.config, args.factoryDefaults, args.isLazyLoad || false, { collRoot: args.manager.collRoot });
             await executorFunction(args, configResolver);
         }
     } catch (error) {
@@ -211,13 +212,9 @@ async function main() {
             normalize: true,
         })
         .middleware(async (argv) => {
-            const initialConfigResolver = new ConfigResolver(
-                argv.config,
-                argv.factoryDefaults,
-                false
-            );
-            await initialConfigResolver._initializeResolverIfNeeded();
-            const collRootFromMainConfig = await initialConfigResolver.getResolvedCollRoot();
+            const mainConfigLoader = new MainConfigLoader(path.resolve(__dirname, '..'), argv.config, argv.factoryDefaults);
+            const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
+            const collRootFromMainConfig = primaryConfig.config.collections_root || null;
             const collRootCliOverride = argv['coll-root'] || null;
 
             managerInstance = new CollectionsManager({
@@ -225,16 +222,13 @@ async function main() {
                 collRootFromMainConfig: collRootFromMainConfig,
                 collRootCliOverride: collRootCliOverride
             });
-
+            
             argv.manager = managerInstance;
-            argv.configResolver = initialConfigResolver; // Attach ConfigResolver to args
-            // REMOVED DEBUG LOG: if (process.env.DEBUG_CM === 'true') console.log(chalk.magenta('DEBUG (cli.js middleware): ConfigResolver attached to args.'));
         })
         .command({
             ...convertCmdModule.defaultCmd,
             handler: async (args) => {
                 if (args.markdownFile) {
-                    // If the arg is not a real file and doesn't look like one, treat as an error.
                     const potentialFile = args.markdownFile;
                     if (!fs.existsSync(potentialFile) && !potentialFile.endsWith('.md') && !potentialFile.endsWith('.mdx')) {
                          console.error(chalk.red(`Error: Unknown command: '${potentialFile}'`));

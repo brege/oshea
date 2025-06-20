@@ -17,7 +17,9 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromFile (1.2.14)', () =>
             path: { join: (a, b) => `${a}/${b}`, dirname: () => '', resolve: () => '' },
             fs: { existsSync: sinon.stub().returns(true) },
             process: { env: {} },
-            loadYamlConfig: sinon.stub() // This is the main dependency for the method under test
+            loadYamlConfig: sinon.stub(), // This is the main dependency for the method under test
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
         

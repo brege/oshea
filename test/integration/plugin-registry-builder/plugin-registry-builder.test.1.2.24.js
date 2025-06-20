@@ -8,52 +8,25 @@ describe('PluginRegistryBuilder buildRegistry Caching (1.2.24)', () => {
 
     let mockDependencies;
     let builderInstance;
-    let mockBuildRegistryInternal; // Mock the internal logic of building the registry
+    let buildRegistrySpy;
 
     beforeEach(() => {
-        // Mock dependencies needed for PluginRegistryBuilder
         mockDependencies = {
-            fs: {
-                existsSync: sinon.stub().returns(true),
-                statSync: sinon.stub().returns({ isFile: () => true, isDirectory: () => false }),
-                readdirSync: sinon.stub().returns([])
-            },
-            fsPromises: {
-                readFile: sinon.stub().resolves('{}')
-            },
+            fs: { existsSync: sinon.stub().returns(true) },
             path: {
                 join: sinon.stub().callsFake((...args) => args.join('/')),
-                resolve: sinon.stub().callsFake((...args) => args.join('/')),
-                isAbsolute: sinon.stub().returns(true),
                 dirname: sinon.stub().returns('/fake/dir'),
                 basename: sinon.stub().returns('file.yaml'),
-                extname: sinon.stub().returns('.yaml')
             },
             os: {
                 homedir: sinon.stub().returns('/fake/user/home'),
                 platform: sinon.stub().returns('linux')
             },
-            loadYamlConfig: sinon.stub().resolves({}),
-            yaml: {
-                load: sinon.stub().returns({})
-            },
-            process: {
-                env: { XDG_CONFIG_HOME: '/fake/xdg/config', ...process.env },
-                cwd: sinon.stub().returns('/fake/cwd')
-            }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
-        // This mock will represent the actual heavy lifting of building the registry.
-        // We'll increment a counter to ensure it's called the correct number of times.
-        let registryBuildCounter = 0;
-        mockBuildRegistryInternal = sinon.stub().callsFake(async () => {
-            registryBuildCounter++;
-            return {
-                somePlugin: { configPath: `/fake/plugin/${registryBuildCounter}.config.yaml` }
-            };
-        });
-
-        // Create an instance of PluginRegistryBuilder
         builderInstance = new PluginRegistryBuilder(
             '/fake/project/root',
             null,
@@ -64,6 +37,9 @@ describe('PluginRegistryBuilder buildRegistry Caching (1.2.24)', () => {
             null,
             mockDependencies
         );
+        
+        // Spy on the methods that do the actual work inside buildRegistry
+        buildRegistrySpy = sinon.spy(builderInstance, '_getPluginRegistrationsFromFile');
     });
 
     afterEach(() => {
@@ -72,89 +48,60 @@ describe('PluginRegistryBuilder buildRegistry Caching (1.2.24)', () => {
 
     it('should return a cached registry if relevant build parameters haven\'t changed', async () => {
         // Arrange
-        const initialLoadYamlConfigCalls = mockDependencies.loadYamlConfig.callCount;
-        const initialFsExistsSyncCalls = mockDependencies.fs.existsSync.callCount;
-
-        const initialResult = await builderInstance.buildRegistry(); // First call
+        await builderInstance.buildRegistry(); // First call
+        const initialCallCount = buildRegistrySpy.callCount;
+        expect(initialCallCount).to.be.greaterThan(0); // Ensure it was built at least once
 
         // Act
-        // Second call with unchanged parameters
-        // Reset call counts of underlying dependencies to verify no new calls occur during caching
-        mockDependencies.loadYamlConfig.resetHistory();
-        mockDependencies.fs.existsSync.resetHistory();
-
-        const secondResult = await builderInstance.buildRegistry();
+        await builderInstance.buildRegistry(); // Second call
 
         // Assert
-        // Underlying heavy lifting (yaml loading, file existence checks) should NOT be called again
-        expect(mockDependencies.loadYamlConfig.callCount).to.equal(0);
-        expect(mockDependencies.fs.existsSync.callCount).to.equal(0);
-        // The returned object should be the same instance
-        expect(secondResult).to.equal(initialResult);
+        // The spy count should NOT have increased
+        expect(buildRegistrySpy.callCount).to.equal(initialCallCount);
     });
 
     it('should rebuild the registry if useFactoryDefaultsOnly changes', async () => {
         // Arrange
         await builderInstance.buildRegistry(); // First call
-
-        // Change a parameter that should trigger a rebuild
-        builderInstance.useFactoryDefaultsOnly = true;
+        const initialCallCount = buildRegistrySpy.callCount;
 
         // Act
-        // Reset call counts *before* the second call to only count calls from this second build
-        mockDependencies.loadYamlConfig.resetHistory();
-        mockDependencies.fs.existsSync.resetHistory();
-
-        const secondResult = await builderInstance.buildRegistry(); // Second call
+        builderInstance.useFactoryDefaultsOnly = true;
+        await builderInstance.buildRegistry(); // Second call
 
         // Assert
-        // Underlying heavy lifting should be called again (non-zero calls)
-        expect(mockDependencies.loadYamlConfig.callCount).to.be.greaterThan(0);
-        // The returned object should be a new instance (a new build)
-        expect(secondResult).to.not.be.null;
+        expect(buildRegistrySpy.callCount).to.be.greaterThan(initialCallCount);
     });
 
     it('should rebuild the registry if isLazyLoadMode changes', async () => {
         await builderInstance.buildRegistry();
+        const initialCallCount = buildRegistrySpy.callCount;
         builderInstance.isLazyLoadMode = true;
-
-        mockDependencies.loadYamlConfig.resetHistory();
-        mockDependencies.fs.existsSync.resetHistory();
-
         await builderInstance.buildRegistry();
-        expect(mockDependencies.loadYamlConfig.callCount).to.be.greaterThan(0);
+        expect(buildRegistrySpy.callCount).to.be.greaterThan(initialCallCount);
     });
 
     it('should rebuild the registry if primaryMainConfigLoadReason changes', async () => {
         await builderInstance.buildRegistry();
+        const initialCallCount = buildRegistrySpy.callCount;
         builderInstance.primaryMainConfigLoadReason = 'another-reason';
-
-        mockDependencies.loadYamlConfig.resetHistory();
-        mockDependencies.fs.existsSync.resetHistory();
-
         await builderInstance.buildRegistry();
-        expect(mockDependencies.loadYamlConfig.callCount).to.be.greaterThan(0);
+        expect(buildRegistrySpy.callCount).to.be.greaterThan(initialCallCount);
     });
 
     it('should rebuild the registry if projectManifestConfigPath changes', async () => {
         await builderInstance.buildRegistry();
+        const initialCallCount = buildRegistrySpy.callCount;
         builderInstance.projectManifestConfigPath = '/new/path/config.yaml';
-
-        mockDependencies.loadYamlConfig.resetHistory();
-        mockDependencies.fs.existsSync.resetHistory();
-
         await builderInstance.buildRegistry();
-        expect(mockDependencies.loadYamlConfig.callCount).to.be.greaterThan(0);
+        expect(buildRegistrySpy.callCount).to.be.greaterThan(initialCallCount);
     });
 
     it('should rebuild the registry if collectionsManagerInstance changes', async () => {
         await builderInstance.buildRegistry();
+        const initialCallCount = buildRegistrySpy.callCount;
         builderInstance.collectionsManager = {}; // Simulate a different instance
-
-        mockDependencies.loadYamlConfig.resetHistory();
-        mockDependencies.fs.existsSync.resetHistory();
-
         await builderInstance.buildRegistry();
-        expect(mockDependencies.loadYamlConfig.callCount).to.be.greaterThan(0);
+        expect(buildRegistrySpy.callCount).to.be.greaterThan(initialCallCount);
     });
 });

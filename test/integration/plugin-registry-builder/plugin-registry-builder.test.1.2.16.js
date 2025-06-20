@@ -15,7 +15,9 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromFile (1.2.16)', () =>
             fs: { existsSync: sinon.stub().withArgs(FAKE_CONFIG_PATH).returns(true) },
             process: { env: {} },
             // --- Key for this test: The YAML loader throws an error ---
-            loadYamlConfig: sinon.stub().withArgs(FAKE_CONFIG_PATH).rejects(new Error('Malformed YAML'))
+            loadYamlConfig: sinon.stub().withArgs(FAKE_CONFIG_PATH).rejects(new Error('Malformed YAML')),
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
 

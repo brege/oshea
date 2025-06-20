@@ -12,7 +12,6 @@ describe('PluginRegistryBuilder _resolveAlias (1.2.5)', () => {
         const FAKE_RESOLVED_PATH = '/path/to/config/dir/relative/path';
         
         const mockDependencies = {
-            // --- FIX: Provide a complete mock object for constructor dependencies ---
             path: {
                 isAbsolute: sinon.stub().returns(false),
                 resolve: sinon.stub().returns(FAKE_RESOLVED_PATH),
@@ -24,7 +23,9 @@ describe('PluginRegistryBuilder _resolveAlias (1.2.5)', () => {
                 platform: () => 'linux' // Needed by constructor
             },
             fs: { existsSync: () => true }, // Needed by constructor
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
 

@@ -3,15 +3,17 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const PluginRegistryBuilder = require('../../../src/PluginRegistryBuilder');
 
-// Test suite for Scenario 1.2.22
-describe('PluginRegistryBuilder buildRegistry (1.2.22)', () => {
+// Test suite for Scenario 1.2.23 (Corrected from 1.2.22)
+describe('PluginRegistryBuilder buildRegistry (1.2.23)', () => {
     it('should only load from factory defaults when useFactoryDefaultsOnly is true', async () => {
         // Arrange
         const mockDependencies = {
             os: { homedir: () => '', platform: () => 'linux' },
             path: { join: (a, b) => `${a}/${b}`, dirname: () => '', basename: () => 'config.example.yaml' },
             fs: { existsSync: sinon.stub().returns(true) },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, true, false, null, null, mockDependencies);
 

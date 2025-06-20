@@ -12,7 +12,9 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.31)', () => {
             os: { homedir: () => '/fake/home', platform: () => 'linux' },
             path: { join: (a, b) => `${a}/${b}`, dirname: () => '', basename: () => '' },
             fs: { existsSync: () => true },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         // --- Key for this test: The same plugin is enabled twice with different invoke_names ---

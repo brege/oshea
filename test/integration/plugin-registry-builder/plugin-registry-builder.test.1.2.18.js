@@ -33,7 +33,9 @@ enabled_plugins:
             fs: { existsSync: sinon.stub().returns(true) }, // The manifest and plugin config both exist
             fsPromises: { readFile: sinon.stub().withArgs(FAKE_MANIFEST_PATH, 'utf8').resolves(fakeYamlContent) },
             yaml: { load: sinon.stub().withArgs(fakeYamlContent).returns(fakeParsedData) },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/cm'
         };
 
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);

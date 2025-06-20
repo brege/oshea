@@ -14,7 +14,9 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.12)', () => {
             path: { join: (a, b) => `${a}/${b}`, isAbsolute: () => true, dirname: () => '', resolve: () => '' },
             // --- Key for this test: The path does NOT exist ---
             fs: { existsSync: sinon.stub().returns(false) },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);

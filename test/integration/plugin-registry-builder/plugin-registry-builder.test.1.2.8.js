@@ -41,7 +41,9 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.8)', () => {
             process: {
                 env: { XDG_CONFIG_HOME: '/fake/xdg/config', ...process.env },
                 cwd: sinon.stub().returns('/fake/cwd')
-            }
+            },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         builderInstance = new PluginRegistryBuilder(
@@ -56,7 +58,6 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.8)', () => {
         );
 
         // Stub path.isAbsolute to return true for the final resolved path for _resolvePluginConfigPath
-        // This is a common pattern for path mocks to ensure internal path.resolve calls work as expected.
         mockDependencies.path.isAbsolute.withArgs(EXPECTED_RESOLVED_PATH).returns(true);
 
         // Reset the spy's call history AFTER the constructor runs for this nested suite

@@ -34,7 +34,9 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.10)', () => {
                 existsSync: sinon.stub().returns(true),
                 statSync: statSyncStub
             },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);

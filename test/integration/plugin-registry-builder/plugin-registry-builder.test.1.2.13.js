@@ -3,8 +3,8 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const PluginRegistryBuilder = require('../../../src/PluginRegistryBuilder');
 
-// Test suite for Scenario 1.2.12
-describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.12)', () => {
+// Test suite for Scenario 1.2.13 (Corrected from 1.2.12)
+describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.13)', () => {
 
     it('should return null if the resolved path does not exist', () => {
         // Arrange
@@ -14,7 +14,9 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.12)', () => {
             path: { join: (a, b) => `${a}/${b}`, isAbsolute: () => true, dirname: () => '', resolve: () => '' },
             // --- Key for this test: The path does NOT exist ---
             fs: { existsSync: sinon.stub().returns(false) },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);

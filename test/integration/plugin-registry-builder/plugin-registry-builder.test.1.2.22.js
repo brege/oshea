@@ -11,7 +11,9 @@ describe('PluginRegistryBuilder buildRegistry (1.2.22)', () => {
             os: { homedir: () => '', platform: () => 'linux' },
             path: { join: (a, b) => `${a}/${b}`, dirname: () => '', basename: () => 'config.example.yaml' },
             fs: { existsSync: sinon.stub().returns(true) },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, true, false, null, null, mockDependencies);
 

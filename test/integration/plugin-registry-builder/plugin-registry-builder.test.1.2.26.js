@@ -13,7 +13,9 @@ describe('PluginRegistryBuilder buildRegistry (1.2.26)', () => {
             // --- Key for this test: The factory default config does NOT exist ---
             fs: { existsSync: sinon.stub().returns(false) },
             process: { env: {} },
-            loadYamlConfig: sinon.stub().resolves({})
+            loadYamlConfig: sinon.stub().resolves({}),
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
         

@@ -22,7 +22,9 @@ describe('PluginRegistryBuilder _resolveAlias (1.2.6)', () => {
                 resolve: () => ''
             },
             fs: { existsSync: () => true },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
     });
@@ -37,7 +39,7 @@ describe('PluginRegistryBuilder _resolveAlias (1.2.6)', () => {
     });
 
     it('should return null for an empty string aliasValue', () => {
-        const result = builder._resolveAlias('my-alias', '  ', '/some/base');
+        const result = builder._resolveAlias('my-alias', '   ', '/some/base');
         expect(result).to.be.null;
     });
 

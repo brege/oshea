@@ -13,7 +13,9 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.32)', () => {
             path: { join: (a, b) => `${a}/${b}`, dirname: () => '', basename: () => '' },
             fs: { existsSync: () => true, statSync: () => ({ isFile: () => true }) },
             process: { env: {} },
-            loadYamlConfig: sinon.stub().resolves({})
+            loadYamlConfig: sinon.stub().resolves({}),
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         const mockCollectionsManager = {
@@ -22,8 +24,8 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.32)', () => {
                 { collection: 'cm-coll', plugin_id: 'b-plugin' }
             ]),
             listCollections: sinon.stub().withArgs('enabled').resolves([
-                 { collection_name: 'cm-coll', plugin_id: 'x-plugin', invoke_name: 'x-plugin' },
-                 { collection_name: 'cm-coll', plugin_id: 'b-plugin', invoke_name: 'b-plugin' }
+                { collection_name: 'cm-coll', plugin_id: 'x-plugin', invoke_name: 'x-plugin' },
+                { collection_name: 'cm-coll', plugin_id: 'b-plugin', invoke_name: 'b-plugin' }
             ])
         };
 
@@ -33,11 +35,9 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.32)', () => {
             mockDependencies
         );
 
-        // --- FIX: Add the missing 'traditional-plugin' to the mock data ---
         const traditionalRegistry = {
             'zebra-plugin': { sourceType: 'Project', configPath: '...' },
             'apple-plugin': { sourceType: 'Bundled', configPath: '...' },
-            'traditional-plugin': { sourceType: 'XDG', configPath: '...' } // This was missing
         };
         sinon.stub(builder, 'buildRegistry').resolves(traditionalRegistry);
 
@@ -50,7 +50,6 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.32)', () => {
         const expectedOrder = [
             'apple-plugin',
             'b-plugin',
-            'traditional-plugin',
             'x-plugin',
             'zebra-plugin'
         ];

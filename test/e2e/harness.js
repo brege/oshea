@@ -29,6 +29,7 @@ class TestHarness {
      * forcing it to use the sandboxed collections root.
      * @param {string[]} [args=[]] - The arguments to pass to the CLI.
      * @param {object} [options={}] - Options for the CLI run.
+     * @param {boolean} [options.useFactoryDefaults=true] - Whether to include the --factory-defaults flag.
      * @returns {Promise<{exitCode: number, stdout: string, stderr: string}>}
      */
     runCli(args = [], options = {}) {

@@ -18,7 +18,7 @@ Status Legend:
 
 ## Y.1 Full User Workflow (Lifecycle)
 
-* [ ] 4.1.1 A user can successfully perform the entire lifecycle of adding a plugin collection, enabling a plugin from it, using that plugin to convert a document, disabling the plugin, and finally removing the collection. This verifies the integrity of the collections manager state across multiple commands.
+* [x] 4.1.1 A user can successfully perform the entire lifecycle of adding a plugin collection, enabling a plugin from it, using that plugin to convert a document, disabling the plugin, and finally removing the collection. This verifies the integrity of the collections manager state across multiple commands.
   - **test_id:** 4.1.1
   - **status:** OPEN
   - **test_target:** CLI Commands Interaction

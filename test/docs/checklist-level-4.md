@@ -5,8 +5,6 @@ This checklist outlines advanced End-to-End (E2E) scenarios. These tests verify 
 Status Legend:
 [ ] Proposed,
 [x] Completed (test implemented & passing),
-[S] Skipped by User,
-[?] Pending (see audit log for details).
 
 ## Test Target ID Mapping for Level 4
 
@@ -25,7 +23,7 @@ Status Legend:
   - **test_type:** E2E_WORKFLOW
   - **description:** A user can successfully perform the entire lifecycle of adding a plugin collection, enabling a plugin from it, using that plugin to convert a document, disabling the plugin, and finally removing the collection. This verifies the integrity of the collections manager state across multiple commands.
 
-* [ ] 4.1.2 A user can successfully archetype a plugin from a managed collection, add it back as a new managed plugin, and use it for a conversion.
+* [x] 4.1.2 A user can successfully archetype a plugin from a managed collection, add it back as a new managed plugin, and use it for a conversion.
   - **test_id:** 4.1.2
   - **status:** OPEN
   - **test_target:** CLI Commands Interaction
@@ -50,16 +48,16 @@ Status Legend:
 
 ## Y.3 Advanced Sad Paths & Edge Cases
 
-* [ ] 4.3.1 The `collection update` command correctly fails with a non-zero exit code and an informative error message when attempting to update a Git-based collection that has local, uncommitted changes.
+* [x] 4.3.1 The `collection update` command correctly fails with a non-zero exit code and an informative error message when attempting to update a Git-based collection that has local, uncommitted changes.
   - **test_id:** 4.3.1
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** collection update
   - **test_type:** E2E_SAD_PATH
   - **description:** The `collection update` command correctly fails with a non-zero exit code and an informative error message when attempting to update a Git-based collection that has local, uncommitted changes.
 
-* [ ] 4.3.2 The `plugin create --from <source>` command fails gracefully with a non-zero exit code when the `<source>` path points to a directory that is not a valid plugin (e.g., is missing a `*.config.yaml` or `index.js`).
+* [x] 4.3.2 The `plugin create --from <source>` command fails gracefully with a non-zero exit code when the `<source>` path points to a directory that is not a valid plugin (e.g., is missing a `*.config.yaml` or `index.js`).
   - **test_id:** 4.3.2
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** plugin create --from
   - **test_type:** E2E_SAD_PATH
   - **description:** The `plugin create --from <source>` command fails gracefully with a non-zero exit code when the `<source>` path points to a directory that is not a valid plugin (e.g., is missing a `*.config.yaml` or `index.js`).

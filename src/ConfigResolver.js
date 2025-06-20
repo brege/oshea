@@ -21,13 +21,13 @@ class ConfigResolver {
         this.dependencies = { ...defaultDependencies, ...dependencies };
         
         this.projectRoot = this.dependencies.path.resolve(__dirname, '..');
-        this.useFactoryDefaultsOnly = useFactoryDefaultsOnly;
-        this.isLazyLoadMode = isLazyLoadMode;
+        this._useFactoryDefaultsOnly = useFactoryDefaultsOnly;
+        this._isLazyLoadMode = isLazyLoadMode;
 
         this.mainConfigLoader = new this.dependencies.MainConfigLoader(
             this.projectRoot,
             mainConfigPathFromCli,
-            this.useFactoryDefaultsOnly
+            this._useFactoryDefaultsOnly
         );
         this.pluginConfigLoader = null;
         this.mergedPluginRegistry = null;
@@ -50,6 +50,31 @@ class ConfigResolver {
             console.error("CRITICAL: Base plugin schema not found. Validation will not work.");
         }
     }
+
+    // --- MODIFICATION START ---
+    get useFactoryDefaultsOnly() {
+        return this._useFactoryDefaultsOnly;
+    }
+
+    set useFactoryDefaultsOnly(value) {
+        if (this._useFactoryDefaultsOnly !== value) {
+            this._useFactoryDefaultsOnly = value;
+            this.mainConfigLoader.useFactoryDefaultsOnly = value; // Propagate change
+            this._initialized = false; // Force re-initialization on next call
+        }
+    }
+
+    get isLazyLoadMode() {
+        return this._isLazyLoadMode;
+    }
+
+    set isLazyLoadMode(value) {
+        if (this._isLazyLoadMode !== value) {
+            this._isLazyLoadMode = value;
+            this._initialized = false; // Force re-initialization on next call
+        }
+    }
+    // --- MODIFICATION END ---
 
     _validatePluginConfig(pluginName, configData, pluginConfigPath) {
         const baseSchema = this.ajv.getSchema('base-plugin.schema.json').schema;
@@ -124,36 +149,21 @@ class ConfigResolver {
         );
 
         const currentProjectManifestPath = project.path;
-        let needsRegistryBuild = this.mergedPluginRegistry === null ||
-                                 (this.mergedPluginRegistry._builtWithFactoryDefaults !== this.useFactoryDefaultsOnly) ||
-                                 (this._lastProjectManifestPathForRegistry !== currentProjectManifestPath) ||
-                                 (this.mergedPluginRegistry.isLazyLoadMode !== this.isLazyLoadMode) ||
-                                 (this.mergedPluginRegistry.primaryMainConfigLoadReason !== this.primaryMainConfigLoadReason);
-
-        if (needsRegistryBuild) {
-            if (process.env.DEBUG) {
-                console.log(`DEBUG (ConfigResolver): Rebuilding plugin registry. ProjectManifestPath: ${currentProjectManifestPath}, FactoryDefaults: ${this.useFactoryDefaultsOnly}, LazyLoad: ${this.isLazyLoadMode}, PrimaryLoadReason: ${this.primaryMainConfigLoadReason}`);
-            }
-            const registryBuilder = new this.dependencies.PluginRegistryBuilder(
-                this.projectRoot, xdg.baseDir, currentProjectManifestPath,
-                this.useFactoryDefaultsOnly,
-                this.isLazyLoadMode,
-                this.primaryMainConfigLoadReason,
-                null, 
-                { collRoot: this.resolvedCollRoot }
-            );
-            this.mergedPluginRegistry = await registryBuilder.buildRegistry();
-            if (this.mergedPluginRegistry) {
-                this.mergedPluginRegistry._builtWithFactoryDefaults = this.useFactoryDefaultsOnly;
-                this.mergedPluginRegistry.isLazyLoadMode = this.isLazyLoadMode;
-                this.mergedPluginRegistry.primaryMainConfigLoadReason = this.primaryMainConfigLoadReason;
-            }
-            this._lastProjectManifestPathForRegistry = currentProjectManifestPath;
-        }
+        
+        const registryBuilder = new this.dependencies.PluginRegistryBuilder(
+            this.projectRoot, xdg.baseDir, currentProjectManifestPath,
+            this.useFactoryDefaultsOnly,
+            this.isLazyLoadMode,
+            this.primaryMainConfigLoadReason,
+            null, 
+            { collRoot: this.resolvedCollRoot }
+        );
+        this.mergedPluginRegistry = await registryBuilder.buildRegistry();
+        
         this._initialized = true;
 
         if (process.env.DEBUG) {
-            console.log("DEBUG (ConfigResolver): Resolved Collections Root:", this.resolvedCollRoot);
+            console.log("DEBUG (ConfigResolver): Initialization complete. Resolved Collections Root:", this.resolvedCollRoot);
         }
     }
 

@@ -2,7 +2,7 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const path = require('path');
-const ConfigResolver = require('./ConfigResolver'); // Assuming ConfigResolver is correctly imported
+const ConfigResolver = require('./ConfigResolver'); // Still needed for type checking/reference, though not for new instantiation here.
 
 async function displayGlobalConfig(configResolver, isPure) {
     // Ensure ConfigResolver is initialized to get primaryMainConfigLoadReason
@@ -63,9 +63,8 @@ async function displayGlobalConfig(configResolver, isPure) {
     }
 }
 
-// displayPluginConfig remains the same as its source reporting logic is within PluginConfigLoader
 async function displayPluginConfig(configResolver, pluginName, isPure) {
-    await configResolver._initializeResolverIfNeeded(); // Ensures mainConfigLoader runs
+    await configResolver._initializeResolverIfNeeded();
     
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginName);
     const configSources = configResolver.getConfigFileSources();
@@ -99,8 +98,12 @@ async function displayPluginConfig(configResolver, pluginName, isPure) {
 
 async function displayConfig(args) {
     try {
-        // Pass isLazyLoad as false for the config command context
-        const configResolver = new ConfigResolver(args.config, args.factoryDefaults, false); 
+        // Use the configResolver instance provided by the CLI middleware instead of creating a new one.
+        const configResolver = args.configResolver;
+        if (!configResolver) {
+            throw new Error("ConfigResolver was not initialized by the CLI middleware.");
+        }
+        
         if (args.plugin) {
             await displayPluginConfig(configResolver, args.plugin, args.pure);
         } else {

@@ -11,11 +11,11 @@ describe('PluginRegistryBuilder constructor (1.2.1)', () => {
     const FAKE_HOME_DIR = '/fake/home';
     const FAKE_MANIFEST_PATH = '/fake/project/manifest.yaml';
     const FAKE_MANIFEST_DIR = '/fake/project';
+    const FAKE_COLL_ROOT = '/fake/coll-root'; // Define a constant for the fake collections root
 
     beforeEach(() => {
         mockDependencies = {
             fs: { existsSync: sinon.stub().returns(true) },
-            // --- FIX: The mock for 'os' now includes the 'platform' method ---
             os: {
                 homedir: sinon.stub().returns(FAKE_HOME_DIR),
                 platform: sinon.stub().returns('linux') // Default to a non-windows platform
@@ -24,7 +24,9 @@ describe('PluginRegistryBuilder constructor (1.2.1)', () => {
                 join: (a, b) => `${a}/${b}`,
                 dirname: sinon.stub().returns(FAKE_MANIFEST_DIR)
             },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency to the mock object
+            collRoot: FAKE_COLL_ROOT
         };
     });
 

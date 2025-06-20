@@ -67,9 +67,10 @@ module.exports = [
   {
     describe: '3.5.3: (Happy Path) A plugin created from the default template passes validation',
     setup: async (sandboxDir, harness) => {
-      // The plugin will be created in a subdirectory within the sandbox
+      // --- MODIFICATION START ---
+      // The setup runs the prerequisite 'plugin create' command.
+      // Assertions are removed and replaced with error throwing for robustness.
       const newPluginDir = path.join(sandboxDir, 'temp-valid-plugin');
-      // Create the plugin using the CLI command
       const createResult = await harness.runCli([
         'plugin',
         'create',
@@ -77,10 +78,15 @@ module.exports = [
         '--target-dir',
         sandboxDir
       ]);
-      expect(createResult.exitCode).to.equal(0);
-      // Ensure the plugin directory actually exists after creation
+      // If the prerequisite command fails, throw an error to halt the test.
+      if (createResult.exitCode !== 0) {
+        throw new Error(`Setup for 3.5.3 failed: 'plugin create' exited with code ${createResult.exitCode}.\nStderr: ${createResult.stderr}`);
+      }
       const pluginExists = await fs.pathExists(newPluginDir);
-      expect(pluginExists).to.be.true;
+      if (!pluginExists) {
+        throw new Error(`Setup for 3.5.3 failed: Plugin directory was not created at ${newPluginDir}.`);
+      }
+      // --- MODIFICATION END ---
     },
     args: (sandboxDir) => [
       'plugin',
@@ -96,9 +102,10 @@ module.exports = [
   {
     describe: '3.5.4: (Happy Path) A plugin archetyped from a valid bundled plugin passes validation',
     setup: async (sandboxDir, harness) => {
+      // The setup runs the prerequisite 'plugin create --from' command.
+      // Assertions are removed and replaced with error throwing.
       const newPluginName = 'archetype-from-bundled-plugin';
       const newPluginDir = path.join(sandboxDir, newPluginName);
-      // Create the plugin by archetyping from a bundled plugin (e.g., 'cv')
       const createResult = await harness.runCli([
         'plugin',
         'create',
@@ -108,9 +115,14 @@ module.exports = [
         '--target-dir',
         sandboxDir
       ]);
-      expect(createResult.exitCode).to.equal(0);
+      // If the prerequisite command fails, throw an error to halt the test.
+      if (createResult.exitCode !== 0) {
+          throw new Error(`Setup for 3.5.4 failed: 'plugin create --from cv' exited with code ${createResult.exitCode}.\nStderr: ${createResult.stderr}`);
+      }
       const pluginExists = await fs.pathExists(newPluginDir);
-      expect(pluginExists).to.be.true;
+      if (!pluginExists) {
+          throw new Error(`Setup for 3.5.4 failed: Archetype directory was not created at ${newPluginDir}.`);
+      }
     },
     args: (sandboxDir) => [
       'plugin',

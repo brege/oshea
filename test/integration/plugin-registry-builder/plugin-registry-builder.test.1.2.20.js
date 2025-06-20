@@ -25,7 +25,9 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromCmManifest (1.2.20)',
             fs: { existsSync: sinon.stub().returns(true) },
             fsPromises: { readFile: sinon.stub().resolves('') },
             yaml: { load: sinon.stub().returns(fakeParsedData) },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/cm'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
 

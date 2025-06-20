@@ -44,6 +44,9 @@ const paths = {
     collection_remove: 'test/e2e/collection-remove.*.js',
     collection_update: 'test/e2e/collection-update.*.js',
     global_flags: 'test/e2e/global-flags.*.js',
+    // Level 4
+    workflow_lifecycle: 'test/e2e/workflow-lifecycle.*.js',
+    sad_paths: 'test/e2e/sad-paths.*.js',
 
     // --- In-Situ E2E Tests for Bundled Plugins ---
     insitu_e2e: 'plugins/**/.contract/test/*.test.js',
@@ -93,6 +96,7 @@ const groups = {
         paths.collection_update,
         paths.global_flags,
     ],
+    level4: [paths.workflow_lifecycle, paths.sad_paths],
     // --- Subsystem & Module Integration Tests ---
     integration: [
         paths.default_handler,

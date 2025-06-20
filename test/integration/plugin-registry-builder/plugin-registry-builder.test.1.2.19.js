@@ -15,7 +15,9 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromCmManifest (1.2.19)',
             // --- Key for this test: The manifest file does NOT exist ---
             fs: { existsSync: sinon.stub().withArgs(FAKE_MANIFEST_PATH).returns(false) },
             fsPromises: { readFile: sinon.stub() },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/cm'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
 

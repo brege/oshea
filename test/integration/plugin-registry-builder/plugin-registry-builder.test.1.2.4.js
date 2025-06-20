@@ -42,7 +42,9 @@ describe('PluginRegistryBuilder _resolveAlias (1.2.4)', () => {
             process: {
                 env: { XDG_CONFIG_HOME: '/fake/xdg/config', ...process.env },
                 cwd: sinon.stub().returns('/fake/cwd')
-            }
+            },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         // Initialize PluginRegistryBuilder with specific mocks

@@ -20,7 +20,9 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.29)', () => {
                 statSync: () => ({ isFile: () => true })
             },
             process: { env: {} },
-            loadYamlConfig: sinon.stub().resolves({})
+            loadYamlConfig: sinon.stub().resolves({}),
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         // For this test, CM returns no plugins

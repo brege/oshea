@@ -13,7 +13,6 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.11)', () => {
         const ALTERNATIVE_CONFIG_NAME = 'alternative-name.config.yaml';
         const ALTERNATIVE_CONFIG_PATH = '/path/to/my-plugin/alternative-name.config.yaml';
 
-        // --- FIX: Create highly explicit stubs for every filesystem interaction ---
         const existsSyncStub = sinon.stub();
         const statSyncStub = sinon.stub();
         const readdirSyncStub = sinon.stub();
@@ -42,7 +41,9 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.11)', () => {
                 statSync: statSyncStub,
                 readdirSync: readdirSyncStub
             },
-            process: { env: {} }
+            process: { env: {} },
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);

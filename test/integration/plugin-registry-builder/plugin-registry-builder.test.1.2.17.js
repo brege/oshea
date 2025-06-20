@@ -21,7 +21,9 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromFile (1.2.17)', () =>
             loadYamlConfig: sinon.stub().resolves({
                 plugin_directory_aliases: { 'my-alias': './aliased-path' },
                 plugins: { 'my-plugin': 'my-alias:plugin.config.yaml' }
-            })
+            }),
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
         

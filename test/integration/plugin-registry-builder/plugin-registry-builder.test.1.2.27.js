@@ -12,10 +12,11 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.27)', () => {
             path: { join: (a, b) => `${a}/${b}`, dirname: () => '', basename: () => '' },
             fs: { existsSync: () => true, statSync: () => ({ isFile: () => true }) },
             process: { env: {} },
-            loadYamlConfig: sinon.stub().resolves({})
+            loadYamlConfig: sinon.stub().resolves({}),
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
 
-        // --- FIX: Ensure the 'available' list is a superset of the 'enabled' list ---
         const mockCollectionsManager = {
             listAvailablePlugins: sinon.stub().resolves([
                 { collection: 'cm-coll', plugin_id: 'cm-plugin-1', description: 'Available CM Plugin' },
@@ -43,10 +44,10 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.27)', () => {
         // Assert
         expect(result).to.be.an('array').with.lengthOf(3);
 
-        const names = result.map(p => p.name);
-        expect(names).to.match(new RegExp(`traditional-plugin`));
-        expect(names).to.match(new RegExp(`enabled-plugin`));
-        expect(names).to.match(new RegExp(`cm-coll/cm-plugin-1`));
+        const names = result.map(p => p.name).sort();
+        expect(names[0]).to.equal('cm-coll/cm-plugin-1');
+        expect(names[1]).to.equal('enabled-plugin');
+        expect(names[2]).to.equal('traditional-plugin');
     });
 
     afterEach(() => {

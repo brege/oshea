@@ -12,7 +12,6 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.28)', () => {
         const CM_CONFIG_PATH = '/path/to/cm.config.yaml';
         const CM_DESCRIPTION = 'A Collections Manager plugin.';
 
-        // The YAML loader is only needed for the traditional plugin in this flow
         const loadYamlConfigStub = sinon.stub();
         loadYamlConfigStub.withArgs(TRADITIONAL_CONFIG_PATH).resolves({ description: 'A traditional plugin.' });
         
@@ -24,16 +23,17 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.28)', () => {
                 statSync: sinon.stub().returns({ isFile: () => true })
             },
             process: { env: {} },
-            loadYamlConfig: loadYamlConfigStub
+            loadYamlConfig: loadYamlConfigStub,
+            // Add the mandatory collRoot dependency
+            collRoot: '/fake/coll-root'
         };
         
-        // --- FIX: Ensure the 'available' list contains the 'enabled' plugin ---
         const mockCollectionsManager = {
             listAvailablePlugins: sinon.stub().resolves([
                 { collection: 'cm-coll', plugin_id: 'cm-plugin', description: CM_DESCRIPTION, config_path: CM_CONFIG_PATH }
             ]),
             listCollections: sinon.stub().withArgs('enabled').resolves([
-                 { collection_name: 'cm-coll', plugin_id: 'cm-plugin', invoke_name: 'cm-plugin', config_path: CM_CONFIG_PATH }
+                { collection_name: 'cm-coll', plugin_id: 'cm-plugin', invoke_name: 'cm-plugin', config_path: CM_CONFIG_PATH }
             ])
         };
 
@@ -57,7 +57,6 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.28)', () => {
         const cmPlugin = result.find(p => p.name === 'cm-plugin');
 
         expect(traditionalPlugin.description).to.equal('A traditional plugin.');
-        // --- FIX: The description for the CM plugin can now be correctly retrieved ---
         expect(cmPlugin.description).to.equal(CM_DESCRIPTION);
     });
     

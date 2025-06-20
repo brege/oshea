@@ -11,6 +11,7 @@ async function setupLocalGitCollectionWithLocalChange(harness, collectionName) {
 
     // 1. Create a bare git repo to act as the remote
     execSync(`git init --bare "${remoteRepoPath}"`);
+    execSync(`git symbolic-ref HEAD refs/heads/main`, { cwd: remoteRepoPath });
 
     // 2. Clone it, add a file, and push to create the initial state
     execSync(`git clone "${remoteRepoPath}" "${initialClonePath}"`);

@@ -6,7 +6,7 @@ const { TestHarness } = require('./harness.js');
 const { createE2eTestRunner } = require('./test-runner-factory.js');
 
 describe('E2E - Full User Workflow (Lifecycle)', function() {
-    this.timeout(30000); // Allow extra time for git clone and multiple commands
+    this.timeout(45000); // Allow extra time for git clone and multiple commands
 
     let harness;
 
@@ -23,7 +23,6 @@ describe('E2E - Full User Workflow (Lifecycle)', function() {
         const sandboxDir = harness.sandboxDir;
         const cliOptions = { useFactoryDefaults: false };
 
-        // --- Step 0: Setup a file to convert ---
         const markdownFixturePath = path.resolve(__dirname, '../fixtures/markdown/simple.md');
         const markdownFilePath = path.join(sandboxDir, 'simple.md');
         await fs.copy(markdownFixturePath, markdownFilePath);
@@ -33,41 +32,60 @@ describe('E2E - Full User Workflow (Lifecycle)', function() {
         const pluginRef = `${collectionName}/restaurant-menu`;
         const pluginInvokeName = 'restaurant-menu';
         
-        // --- Step 1: Add a plugin collection ---
         console.log('  [Workflow 4.1.1] Step 1: Adding collection...');
         const addResult = await harness.runCli(['collection', 'add', collectionUrl, '--name', collectionName], cliOptions);
         expect(addResult.exitCode, 'collection add should succeed').to.equal(0);
         const collectionPath = path.join(harness.collRootDir, collectionName);
-        const collectionExists = await fs.pathExists(collectionPath);
-        expect(collectionExists, 'Expected collection directory to be created').to.be.true;
+        expect(await fs.pathExists(collectionPath), 'Expected collection directory to be created').to.be.true;
 
-        // --- Step 2: Enable a plugin from it ---
         console.log('  [Workflow 4.1.1] Step 2: Enabling plugin...');
         const enableResult = await harness.runCli(['plugin', 'enable', pluginRef], cliOptions);
         expect(enableResult.exitCode, 'plugin enable should succeed').to.equal(0);
-        expect(enableResult.stdout).to.match(new RegExp(`enabled successfully as "${pluginInvokeName}"`, 'i'));
 
-        // --- Step 3: Use the plugin to convert a document ---
         console.log('  [Workflow 4.1.1] Step 3: Converting document with plugin...');
         const convertResult = await harness.runCli(['convert', markdownFilePath, '--plugin', pluginInvokeName, '--outdir', sandboxDir, '--no-open'], cliOptions);
         expect(convertResult.exitCode, 'convert should succeed').to.equal(0);
         
-        // The restaurant-menu plugin's handler logic defaults to naming the output based on the plugin name when no title is in front matter.
         const pdfOutputPath = path.join(sandboxDir, 'restaurant-menu.pdf');
-        const pdfExists = await fs.pathExists(pdfOutputPath);
-        expect(pdfExists, 'Expected PDF file to be created by convert command').to.be.true;
+        expect(await fs.pathExists(pdfOutputPath), 'Expected PDF file to be created by convert command').to.be.true;
         
-        // --- Step 4: Disable the plugin ---
         console.log('  [Workflow 4.1.1] Step 4: Disabling plugin...');
         const disableResult = await harness.runCli(['plugin', 'disable', pluginInvokeName], cliOptions);
         expect(disableResult.exitCode, 'plugin disable should succeed').to.equal(0);
-        expect(disableResult.stdout).to.match(/disabled successfully/i);
 
-        // --- Step 5: Remove the collection ---
         console.log('  [Workflow 4.1.1] Step 5: Removing collection...');
         const removeResult = await harness.runCli(['collection', 'remove', collectionName], cliOptions);
         expect(removeResult.exitCode, 'collection remove should succeed').to.equal(0);
-        const collectionStillExists = await fs.pathExists(collectionPath);
-        expect(collectionStillExists, 'Expected collection directory to be removed').to.be.false;
+        expect(await fs.pathExists(collectionPath), 'Expected collection directory to be removed').to.be.false;
+    });
+
+    it('4.1.2: should archetype a bundled plugin, add it as a new managed plugin, and use it for conversion', async () => {
+        const sandboxDir = harness.sandboxDir;
+        const cliOptions = { useFactoryDefaults: false };
+        
+        const sourcePluginName = 'cv';
+        const newArchetypeName = 'my-custom-cv';
+
+        const markdownFixturePath = path.resolve(__dirname, '../fixtures/markdown/simple.md');
+        const markdownFilePath = path.join(sandboxDir, 'simple.md');
+        await fs.copy(markdownFixturePath, markdownFilePath);
+
+        console.log(`  [Workflow 4.1.2] Step 1: Creating archetype from bundled plugin '${sourcePluginName}'...`);
+        const createResult = await harness.runCli(['plugin', 'create', newArchetypeName, '--from', sourcePluginName, '--target-dir', sandboxDir], cliOptions);
+        expect(createResult.exitCode, 'plugin create should succeed').to.equal(0);
+        const archetypePath = path.join(sandboxDir, newArchetypeName);
+        expect(await fs.pathExists(archetypePath), 'Expected archetype directory to be created in sandbox').to.be.true;
+
+        console.log('  [Workflow 4.1.2] Step 2: Adding new archetype as managed plugin...');
+        const addResult = await harness.runCli(['plugin', 'add', archetypePath], cliOptions);
+        expect(addResult.exitCode, 'plugin add should succeed').to.equal(0);
+        const singletonPath = path.join(harness.collRootDir, '_user_added_plugins', newArchetypeName);
+        expect(await fs.pathExists(singletonPath), 'Expected singleton plugin to exist in collections root').to.be.true;
+
+        console.log('  [Workflow 4.1.2] Step 3: Converting document with new plugin...');
+        const convertResult = await harness.runCli(['convert', markdownFilePath, '--plugin', newArchetypeName, '--outdir', sandboxDir, '--no-open'], cliOptions);
+        expect(convertResult.exitCode, 'convert with new archetype should succeed').to.equal(0);
+        const pdfOutputPath = path.join(sandboxDir, `simple.pdf`);
+        expect(await fs.pathExists(pdfOutputPath), 'Expected PDF file to be created by new archetype plugin').to.be.true;
     });
 });

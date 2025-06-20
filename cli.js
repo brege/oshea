@@ -56,13 +56,13 @@ async function commonCommandHandler(args, executorFunction, commandType) {
         if (args.watch) {
             await setupWatch(args, null,
                 async (watchedArgs) => {
-                    const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults, watchedArgs.isLazyLoad || false);
+                    const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults, watchedArgs.isLazyLoad || false, { collRoot: watchedArgs.manager.collRoot });
                     await executorFunction(watchedArgs, currentConfigResolver);
                 }
             );
         } else {
-            const configResolver = new ConfigResolver(args.config, args.factoryDefaults, args.isLazyLoad || false, { collRoot: args.manager.collRoot });
-            await executorFunction(args, configResolver);
+            // ConfigResolver is now expected to be on args from the middleware
+            await executorFunction(args, args.configResolver);
         }
     } catch (error) {
         const pluginNameForError = args.pluginSpec || args.plugin || args.pluginName || 'N/A';
@@ -224,6 +224,15 @@ async function main() {
             });
             
             argv.manager = managerInstance;
+
+            // Create and attach the ConfigResolver here, making it available to ALL commands.
+            const configResolver = new ConfigResolver(
+                argv.config,
+                argv.factoryDefaults,
+                false, // isLazyLoadMode is handled by specific command handlers
+                { collRoot: managerInstance.collRoot }
+            );
+            argv.configResolver = configResolver;
         })
         .command({
             ...convertCmdModule.defaultCmd,

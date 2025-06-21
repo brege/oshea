@@ -503,33 +503,34 @@ The [**Batch Processing Guide**](docs/batch-processing-guide.md) provides exampl
 
 ## Testing
 
-The project includes an integration test suite.
+The project includes an integration test suite: **`npm test`**.  For more details, see [**`test/README.md`**](test#readme).
+
+Example commands to run tests more granularly:
 
 ```bash
-npm test
+npm test                        # all tests
+npm test -- --group level1      # module integration tests
+npm test -- --group level3      # end-to-end tests
+npm test -- 'test/e2e/plugin-create.test.js'      # single end-to-end test
+npm test -- 'test/integration/**/*.test.1.?.1.js' # first level1 test of each module
 ```
 
-Test scripts and configurations are in [`test/`](test/), and [`test/config.test.yaml`](test/config.test.yaml), which should reflect the plugin structure.
+The tests rely on [`mocha`](https://mochajs.org/) and are organized in [`.mocharc.js`](.mocharc.js).
 
-For more details, see [`test/README.md`](test#readme).
+The **CI** file [`.ci.yml`](.github/workflows/ci.yml) provides automatic testing and deployment to [github.com/brege/md-to-pdf/actions](https://github.com/brege/md-to-pdf/actions).
 
-To run tests more granularly, run
+For tests that are currently *not* mapped by the CI, see the [**QA Dashboard**](test/docs/qa-dashboard.md).
 
-```bash
-npm test -- help
-```
-
-**TODO:** There are currently ~50 tests, most of which are CLI integration tests 
-lacking deeper coverage on archetyping, `create --from`, etc.
-I am in the process of rewiring these in a testing manager--probably in [Ava](https://github.com/avajs/ava).
 
 ---
 
 ## Development & Project Tracking
 
+**A complete [index](docs/index.md) of all documentation is available at [docs/index.md](docs/index.md).**
+
 For ongoing development, historical changes, and future plans, please refer to the following documents.
 
-**[Changelogs](docs/changelog-vX.Y.md) -- `docs/changelog-vX.Y.md`** \
+**[Changelogs](#) -- `docs/changelog-vX.Y.md`** \
 Detailed records of changes, new features, and bug fixes for each version series, starting with `changelog-v0.7.md`, are the primary source for understanding what has been implemented. \
 [v0.7](docs/changelog-v0.7.md) 
 ·
@@ -558,6 +559,7 @@ The `docs/roadmap.md` file now serves primarily as a **historical overview** of 
 [v0.6](https://github.com/brege/md-to-pdf/blob/fb0ef9bcd8555cdc5400599d6c99b4cdbf950702/docs/roadmap.md)
 
 ---
+
 
 ## License
 

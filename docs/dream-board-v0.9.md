@@ -334,15 +334,15 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
  
  We paused work at this point to hop to **T4**. These implementations are to be tended to after **T4**'s completion:
 
- 9. ○ update archetyper to produce schema, e2e test, and pin 
+ 9. ✔ update archetyper to produce schema, e2e test, and pin 
     `protocol` / `plugin-name` / `version` to front matter **(C\)**
-10. ○ `plugin add/enable` could use the validator to validate new plugins 
-11. ○ `collection update` could use the validator to verify updated plugins
+10. ✔ `plugin add/enable` could use the validator to validate new plugins 
+11. ×`collection update` could use the validator to verify updated plugins
 
 **note** -- be careful with the degeneracy of terminology:
  - ✔ **A)** need to add a validation check for a plugin using a new test prototype (self-activation test)
  - ✔ **B)** need **module/subsystem** tests for the validator itself
- - ○ **C)** need to add a test template in `plugins/template-basic` for the archetyper to populate on
+ - ✔ **C)** need to add a test template in `plugins/template-basic` for the archetyper to populate on
  - **{A, B, C} are three distinct items**
 
 #### Checklist Key
@@ -371,7 +371,7 @@ The third task is a little more involved.
 
  - ✔ **T0 ➜ T3**  | Checkpoint: Current Test Suite Status
  - ✔ **T4**       | Implement the E2E manifest testing procedure 
- - ➜ **T5**       | Outline prequisites as a checklist
+ - ✔ **pre T5**   | Outline prequisites as a checklist
 
 ### T0 ➜ T3 | Checkpoint: Current Test Suite Status
 
@@ -427,9 +427,9 @@ See the [**T2 ➜ T3 Actual Outcome**](#actual-outcome) checklist and numbered n
 The **T4** implementation can be done now, but there are still many tasks left to do.
 Very generally speacking, these epochs are
 
-- **T3.x**: Implement the new `plugin validate` integration tests
-- **T3.y**: Pare down the 'Implemented but Skipped' and `math` integration tests
-- **T4**: Begin implementing the E2E testing procedure
+- ✔ **T3.x** | Implement the new `plugin validate` integration tests
+- ✔ **T3.y** | Pare down the 'Implemented but Skipped' and `math` integration tests
+- ✔ **T4**   | Begin implementing the E2E testing procedure
 
 This doesn't require a permutation matrix, but you could construct one like:
 
@@ -473,6 +473,7 @@ the enforcement of the **contract**.  For illustration, let's say
 | **v2** | **Required** | **Required** | Ignored | `v2.js` **imports** the structure check from `v1.js` and adds the new test check. |
 | **v3** | Ignored | **Required** | **Required** | `v3.js` **imports** the test check from `v2.js`, adds the new self-activation check, and **omits** the structure check. |
 
+***note**: this is only an illustration*
 
 This presciently informs us that in order for the L2Y4 testing to work (which will use the T4 architecture, as it's a very special case warranting that tooling), we need to break the validator down into stages for specifically the above purpose.
 
@@ -611,8 +612,8 @@ test/
 
 </details>
 
-The above, toggled has since been implemented in full.
-The following section is thusly focused on **Level 3** end-to-end testing.
+The above toggle has since been implemented in full.
+The following section is mostly focused on **Level 3** end-to-end testing.
 
 ### T4 | E2E Testing Integration
 
@@ -779,6 +780,8 @@ A major overhaul of the quality assurance process was executed. Static markdown 
 node test/scripts/qa-dashboard.js
 ```
 
+See [`test/README.md`](../test/README.md) for a static snapshot of this dashboard.
+
 Reducing the dashboard from a wall of troubles to a handful of justified skips and open features was more than a metric--it was a narrative of progress; a visible sign of intention and implementation.
 
 **CI Implementation**\
@@ -790,9 +793,7 @@ A GitHub Actions workflow was introduced to automate the testing process. An ini
 
 The reason I didn't dive into closing the test coverage first was in-part the uncertainty in *if* the validation logic was going to upend any UI, and also the fear of putting it off too long wouldn't afford it enough time to mature.
 
-Therefore, **A1, A2, A3**, hardening the plugin system, would *force* standardized archetyping. This is something I think is unique about this plugin system, so we better make sure it at least feels has some modicum of completeness. This meant finalizing the v1 plugin contract, ensuring archetyping was sound, and integrating validation into the enablement workflow. These tasks were not isolated: they were validated in the context of the real, end-to-end workflows established earlier.
-
-
+Therefore, **A1, A2, A3**, hardening the plugin system, would *force* standardized archetyping. This is something I think is unique about this plugin system, so we better make sure it at least feels has some modicum of completeness. This meant finalizing the v1 plugin contract, ensuring archetyping was sound, and integrating validation into the enablement workflow.
 
 * **A1 | Finalize v1 Plugin Contract** \
   Task **A1** was addressed by standardizing the plugin directory structure and centralizing essential metadata. A `.contract/` subdirectory was introduced to house machine-readable validation assets, and each plugin's `.config.yaml` was established as the single source of truth for its name, version, and protocol.
@@ -832,7 +833,7 @@ This was a pivotal refactor requiring deep architectural change.  This refactor 
 
 3. Because of this refactor, some older integration tests had to be updated to adhere to the new `collRoot` logic.
 
-This point 3 deserves some care to explain here. A key design component of this refactor was the formal separation of **context** from **configuration**.
+This **point 3.** deserves some extra care in explaination here. A key design component of this refactor was the formal separation of **context** from **configuration**.
 
 The **`collRoot`** acts as an **exclusive context switch**. When a specific collections root is chosen (via the `--coll-root` flag, an environment variable, or a `collections_root` key), the application operates *exclusively* within that "universe" of plugins for the command's duration. It provides a powerful, predictable way to switch between entire sets of plugins for different projects.
 
@@ -840,16 +841,19 @@ The **`collRoot`** acts as an **exclusive context switch**. When a specific coll
 
 This separation not only aids in test isolationism, but ensures that users can have both a stable, switchable context for their plugin sources.
 
+**In short..**
+- `--coll-root` = exclusive context switch.
+- `--plugin, --config` = inclusive, merging hierarchy.
+
 ---
 
-**Task B1 has been confidently moved into T5.**
+**Task B1 has been moved to T5.**
 
 ---
 
 ### T5 | Zuckerwerk
 
-This section's main focus is on finishing touches. Broadly, these tasks make the system more user-friendly, easier-to-use, and more enticing.
-This is the project's "**candy work**" phase.
+This section's main focus is on finishing touches. Broadly, these tasks make the system more user-friendly, easier-to-use, and more inviting. This is the project's "**candy work**" phase.
 
 #### T5.<!--ai-->ai -- LLM-Assisted Plugin Scaffolding
 

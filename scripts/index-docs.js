@@ -87,7 +87,7 @@ function updateIndexFile() {
         const post = indexContentLines.slice(endIdx);
         const finalContent = [...pre, '', ...post].join('\n');
         fs.writeFileSync(INDEX_FILE_PATH, finalContent, 'utf8');
-        console.log(' ✔ All discovered documents are already tracked in INDEX.md.');
+        console.log(' ✔ All discovered documents are already tracked in index.md.');
         return;
     }
     

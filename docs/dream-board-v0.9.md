@@ -377,54 +377,52 @@ The third task is a little more involved.
 
 This is a snapshot of all test scenarios that are not currently passing, grouped by their implementation status.
 
-[`./scripts/find-missing-tests.js`](../scripts/find-missing-tests.js)
+~~[`./scripts/find-missing-tests.js`](../scripts/find-missing-tests.js)~~
 
-This tool:
+**QA Dashboard** - [`test/scripts/qa-dashboard.js`](../test/scripts/qa-dashboard.js)
 
- 1. Determines from the checklists 
-      
-    - [`test/docs/test-scenario-checklist-Level_1.md`](../test/docs/test-scenario-checklist-Level_1.md)
-    
-    - [`test/docs/test-scenario-checklist-Level_2.md`](../test/docs/test-scenario-checklist-Level_2.md)
-    
-    which tests do not yet have corresponding test files: `[ ]`, `[S]`, `[?]`
- 
- 2. Determines via `it.skip()` and `descibe.skip()` which tests have files, but are disabled. 
-    Then, each is linked to an existing audit log entry.
+This script creates a dashboard of tests that are not yet implemented, skipped, or have audit log entries.
+It synthesizes three main scenarios.
 
-
-#### 1. Pending Scenarios (Missing Implementation Files)
+#### 1. Pending Scenarios -- Missing Implementation Files
 
 These scenarios are defined in the checklists but do not yet have corresponding test files.
 
+[`test/scripts/find-unchecked-tests.js`](../test/scripts/find-unchecked-tests.js)
+```
+1.7.4   math_integration    
+4.2.1   convert --watch     
+4.2.2   convert --watch
+```
 
-| Code   | Test Scenario          | Description                                                       |
-|:------:|:-----------------------|:------------------------------------------------------------------|
-| `L1Y7` | **`math_integration`** | **nice-to-have** entire test suite is pending--low-priority       |
-| `L2Y3` | **`pdf_generator`**    | **only `2.3.9`** `[S]` functionality is covered by other tests    |
+#### 2. Implemented but Skipped Tests -- Requires Refactoring
 
-#### 2. Implemented but Skipped Tests (Requires Refactoring)
+These scenarios have test files, but the tests are disabled with `it.skip()` due to known limitations in the source code. Each is linked to an existing audit log entry.
 
-These scenarios have test files, but the tests are disabled with `.skip()` due to known limitations in the source code. Each is linked to an existing audit log entry.
+[`test/scripts/find-skipped-tests.js`](../test/scripts/find-skipped-tests.js)
+```
+1.4.14    main_config_loader    config loading logic   skipped due to a conflict with the module's prioritization logic and inconsistent `console.warn` behavior.
+1.4.15    main_config_loader    ...                    ...
+2.2.2     default_handler       shortcode removal      skipped because the regex-based shortcode removal is not effective enough for reliable testing.
+```
+#### 3. Tests with Audit Log Entries
+
+These scenarios have entries in the audit log.
+
+[`test/scripts/find-non-closed-tests.js`](../test/scripts/find-non-closed-tests.js)
+```
+1.2.31  audit-log:68    test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.31.js
+1.2.32  audit-log:68    test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.32.js
+1.4.14  audit-log:104   test/integration/main-config-loader/main-config-loader.test.1.4.14.js
+```
 
 
-| Code     | Test Scenario  | Issue  | Reason  |
-|:---------|:---------------|:---------|---------|
-|**1.1.2** | `ConfigResolver` | caching | The caching/rebuild logic is not implemented due to a non-re-entrant design in `_initializeResolverIfNeeded` |
-|**1.2.4** | `PluginRegistryBuilder` | tilde path resolution | Skipped due to brittle and unreliable mocking of `os.homedir` in the test environment.|
-|**1.2.8** | `PluginRegistryBuilder` | ... | ... |
-|**1.2.24**| `PluginRegistryBuilder` | caching | The `buildRegistry` caching mechanism is not functioning as intended and fails to return cached results. |
-|**1.3.2** | `plugin_determiner` | front matter override | Skipped due to a subtle and unresolvable mock failure where `localConfigOverrides` consistently returns `null`.|
-|**1.4.14**| `main_config_loader` | config loading logic | Skipped due to a conflict with the module's prioritization logic and inconsistent `console.warn` behavior.|
-|**1.4.15**| `main_config_loader` | ... | ... |
-|**2.2.2** | `default_handler` | shortcode removal | Skipped because the regex-based shortcode removal is not effective enough for reliable testing.|
-
-#### 3. Ongoing Tasks
+#### 4. Ongoing Tasks
 
 See the [**T2 ➜ T3 Actual Outcome**](#actual-outcome) checklist and numbered notes.
 
 
-### T3 ➜ T4 | 1. ) A decision on the broader order of remaining tasks
+### T3 ➜ T4 | 1. A Decision on the Broader Order of Remaining Tasks
 
 The **T4** implementation can be done now, but there are still many tasks left to do.
 Very generally speacking, these epochs are
@@ -482,7 +480,7 @@ You cannot run self-activation tests on mocked dummy files. You need to check if
 We do not want to be stuck relying on one command to execute the others.
 The **L2Y4** test should be **composable** and **extendable**. 
 
-###  T3 ➜ T4 | 2. ) The Bridge to Systemizing End-to-End Testing
+###  T3 ➜ T4 | 2. The Bridge to Systemizing End-to-End Testing
 
 The primary goal of the T4 phase is to build a methodical, automated test suite that validates the application. This involves running the `cli.js` command with a variety of arguments and asserting that the application's behavior--including file outputs, console messages, and exit codes--is correct.
 
@@ -667,7 +665,7 @@ The successful implementation of this test plan provides a strong guarantee of t
 ---
 
 
-### T5 | Outline Prequisites as a Checklist
+### pre T5 | Outline Prequisites as a Checklist
 
 <details>
 <summary><strong>Expanded Prerequisites Checklist</strong></summary>
@@ -729,9 +727,9 @@ The successful implementation of this test plan provides a strong guarantee of t
 
 </details>
 
-## v0.9 Finalization & Release Candidate Checklist | Live
+## T4 ➜ T5 | v0.9 Finalization & Release Candidate Checklist | Live
 
-With the core E2E tests implemented, this checklist outlines the remaining **hardening** tasks required to reach a stable `v1.0.0-rc.1` release.
+With the core E2E tests implemented, this checklist table outlines the remaining **hardening** tasks required to reach a stable `v1.0.0-rc.1` release.
 
 | ✔ |        |<span style="white-space:nowrap">Plugin System Hardening</span>| Command | Value|`#`|   
 |---|--------|:-----------------------------|:-----------------|:-----------------------------|---|
@@ -741,7 +739,7 @@ With the core E2E tests implemented, this checklist outlines the remaining **har
 |   |        | <span style="white-space:nowrap">**CLI Polish & Usability**</span>       |     |   |
 | ○ | **B1** | Tab Completion               |`cli.js` `<TAB>`  | User Experience Polish       |`6`|
 |   |        | <span style="white-space:nowrap">**Test Suite Completion**</span>        |     |   |
-| ➜ | **C1** | Shrink Gaps in Test Coverage |`✔L2 ✔L1 ×L4 ✔L3` | Technical Debt               |`5`|
+| ✔ | **C1** | Shrink Gaps in Test Coverage |`✔L2 ✔L1 ➜L4 ✔L3` | Technical Debt               |`5`|
 | ✔ | **C2** | Housekeeping Tests & CI      |`test/integration`| Code Quality                 |`1`|
 
 **Proposed Sequence | C2 ➜ A1 ➜ A2 ➜ A3 ➜ C1 ➜ B1**
@@ -753,3 +751,155 @@ With the core E2E tests implemented, this checklist outlines the remaining **har
 ●
 ○
 -->
+
+### Task Trace
+
+This is the last task-group of core code work that, before a stable **v1.0.0-rc1** release, was intentionally left non-linear.  Some of that line of reasoning stems from the value I see in being able to move large chunks of work around to combat eventual fatigue.  It's also useful to link these tasks in a pivotable sequence so it's less a set of boxes to tick and more a map of the territory to traverse.
+
+#### Task C2 | Housekeeping Tests & CI
+
+These alphabetical A, B, C groups are only ordered by my fun-factor at the time of putting these tasks together.  But because I knew the validator was going to require at least two levels of testing, and deeper integration into workflows, I reordered these tasks, starting with **C2**--stabilizing the test harness and core modules. 
+
+**Test Reorganization**\
+The test suite was restructured by consolidating all module and subsystem integration tests into a new [`test/integration/`](../test/integration/) directory, and the Mocha configuration [`.mocharc.js`](../.mocharc.js) was updated to reflect this cleaner, more conventional layout.
+
+``` bash
+npm test -- --group level2
+npm test -- --group rank[1-2]
+npm test -- 'test/integration/**/*.test.1.?.1.js'
+```
+
+**Scriptable QA System**\
+Once I had most of the tests organized into different penetration levels, for different modules, value-prop priority, their management of concurrent documents began to be its own beastly complexity (audit log, checklists, test scenarios to remember ranks, the `.mocharc` evolution, the source code to find `it.skip`). *How do I keep track of tests not auto'd by Mocha?*
+
+A major overhaul of the quality assurance process was executed. Static markdown checklists were replaced with a scriptable system, featuring new scripts to parse structured audit logs and checklists to generate a dynamic QA Dashboard. This provides a verifiable, "single source of truth" for test coverage.
+
+[`test/scripts/qa-dashboard.js`](../test/scripts/qa-dashboard.js)
+``` bash
+node test/scripts/qa-dashboard.js
+```
+
+Reducing the dashboard from a wall of troubles to a handful of justified skips and open features was more than a metric--it was a narrative of progress; a visible sign of intention and implementation.
+
+**CI Implementation**\
+A GitHub Actions workflow was introduced to automate the testing process. An initial bug related to git branch handling in bare repositories within the CI environment was promptly identified and fixed to ensure stable automated runs.
+
+[Github Actions](https://github.com/brege/md-to-pdf/actions) -- Managed by [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
+
+#### Task A1, A2, A3 | Plugin System Hardening
+
+The reason I didn't dive into closing the test coverage first was in-part the uncertainty in *if* the validation logic was going to upend any UI, and also the fear of putting it off too long wouldn't afford it enough time to mature.
+
+Therefore, **A1, A2, A3**, hardening the plugin system, would *force* standardized archetyping. This is something I think is unique about this plugin system, so we better make sure it at least feels has some modicum of completeness. This meant finalizing the v1 plugin contract, ensuring archetyping was sound, and integrating validation into the enablement workflow. These tasks were not isolated: they were validated in the context of the real, end-to-end workflows established earlier.
+
+
+
+* **A1 | Finalize v1 Plugin Contract** \
+  Task **A1** was addressed by standardizing the plugin directory structure and centralizing essential metadata. A `.contract/` subdirectory was introduced to house machine-readable validation assets, and each plugin's `.config.yaml` was established as the single source of truth for its name, version, and protocol.
+
+* **A2 | Implement Fully Valid Archetyping** \
+  To complete Task **A2**, the `plugin create --from <source>` command was significantly improved to ensure that newly archetyped plugins are immediately v1-compliant and pass their own E2E tests "out-of-the-box". This involved making the in-situ E2E tests (and schemas) within the plugin templates portable so they function correctly in their new, archetyped location.
+
+* **A3 | Integrate Validator into Enablement** \
+  Task **A3** was implemented by integrating the plugin validator directly into the `plugin enable` and `plugin add` commands. To support a phased rollout and avoid breaking workflows for legacy plugins, a critical `--bypass-validation` flag was also introduced, allowing users to explicitly skip the validation step.
+
+#### Task C1 | Shrinking Gaps in Test Coverage -- QA + CI
+
+The final and most substantial phase of this period was dedicated to Task **C1**. This involved a multi-pronged effort to fix existing integration tests and implement a new suite of high-level E2E tests to validate a pivotal architectural refactor.
+
+**Resolving L1/L2 Integration Test Failures**\
+A systematic effort was made to fix long-standing test failures and close coverage gaps in the Level 1 and 2 integration tests. 
+
+This included:
+
+* Refactoring `plugin_determiner` tests to use a manifest-driven approach.
+* Adding module tests for `math_integration`
+* Fixing persistent failures in the `main_config_loader` and `ConfigResolver` tests.
+* Resolved a long-standing bug in the `default_handler` shortcode removal test.
+
+These tests required deep console-logging in several layers of application code.
+
+**Core Refactoring and L4 E2E Validation**\
+Surprisingly, in the build-out of *life-cycle*--**L4**--E2E tests,
+a large part of the C1 effort involved the discovery of new intelligence that
+the  previously implemented `collRoot` did not behave as expected.
+
+This was a pivotal refactor requiring deep architectural change.  This refactor involved:
+
+1. Centralizing and universalizing how the collections root directory `collRoot` is handled throughout the application.
+
+2. To validate this change, new life-cycle tests were implemented. These tests programmatically drive the CLI to simulate real user workflows and other potential, "*sad path*" failure conditions.
+
+3. Because of this refactor, some older integration tests had to be updated to adhere to the new `collRoot` logic.
+
+This point 3 deserves some care to explain here. A key design component of this refactor was the formal separation of **context** from **configuration**.
+
+The **`collRoot`** acts as an **exclusive context switch**. When a specific collections root is chosen (via the `--coll-root` flag, an environment variable, or a `collections_root` key), the application operates *exclusively* within that "universe" of plugins for the command's duration. It provides a powerful, predictable way to switch between entire sets of plugins for different projects.
+
+**Plugin configuration**, in contrast, remains an **inclusive, merging hierarchy**. Within the selected `collRoot` context, the final settings for any given plugin are still built by layering project-specific overrides on top of user-global settings, which in turn are layered on top of the plugin's base defaults.
+
+This separation not only aids in test isolationism, but ensures that users can have both a stable, switchable context for their plugin sources.
+
+---
+
+**Task B1 has been confidently moved into T5.**
+
+---
+
+### T5 | Zuckerwerk
+
+This section's main focus is on finishing touches. Broadly, these tasks make the system more user-friendly, easier-to-use, and more enticing.
+This is the project's "**candy work**" phase.
+
+#### T5.<!--ai-->ai -- LLM-Assisted Plugin Scaffolding
+
+**Already done: `template-basic` and Plugin Contract.**
+
+**An "Interaction Specification":** \
+This is the key missing piece. As outlined in the dream board, we need to create a new document that details the internal mechanics, file relationships, and APIs of the plugin system in a way that is optimized for a machine, not a human. It would be more direct and less narrative than the `plugin-development.md` guide.
+
+**An Example Prompting Guide:** This document would provide concrete examples of how a user could prompt an AI to build a plugin for this system, including the necessary context and desired output. The "simple pendulum" or "wedding invitation" examples you mentioned in the dream board would be perfect for this.
+
+#### T5.cli -- Tab Completion (fmr. B1) and `--help`
+
+1. **Tab Completion**
+   This is the final unchecked item on the v0.9 checklist and a significant user experience improvement for the CLI. Yargs has built-in support that we can leverage to enable this.
+
+2. **`--help`**
+   Standardize the help output to have consistent formatting, including consistent spacing and indentation. This will make it easier for users to navigate the help text and understand the structure of the command tree.
+
+#### T5.e2e -- E2E Testing Final Pass
+
+**Finish Deferred Tests** and: are more life-cycle tests needed? 
+    
+* **`--watch` mode tests (L4):** Implement the final two E2E tests (`4.2.1` and `4.2.2`) to verify that file changes correctly trigger re-conversions.
+* **`math_integration` test (L1):** Address the last skipped test (`1.7.4`) related to gracefully handling a `require` failure for the KaTeX package.
+
+
+#### T5.doc -- Documentation Polish
+
+Perform a final review of the main `README.md`, `cheat-sheet.md`, and `plugin-development.md` to ensure they are all consistent and reflect the final state of the v0.9 series.
+
+
+### T5 | Task Matrix
+
+This table outlines the assets and tasks required to enable an AI to reliably generate new plugins for 
+`md-to-pdf`, make the CLI more ergonomic and intuitive, and tie-up any remaining loose ends in testing and documentation.
+
+|          | Asset                            | ✔ | Description |
+|:---------|:---------------------------------|:--|:------------|
+|          | <span style="white-space:nowrap">**T5.<!--ai-->ai -- LLM Plugin Scaffolding**</span>  |   |
+| **A2**   |*`template-basic` Archetyping*    | ✔ |  Primary *technical* asset. Builds on the `plugin create` command. |
+| **A1**   | *Plugin Contract*                | ✔ |  Primary *human-readable* asset. `docs/plugin-contract.md` provides formal rules for generated plugin [context for the AI] |
+| **ai.1** | *Interaction Specification*      | ○ |  Details the internal mechanics, file relationships, and APIs of the plugin system--optimized for machines. |
+| **ai.2** | *Example Prompting Guide*        | ○ |  Concrete examples of how to *frame* an AI, examples like a "simple pendulum" physics handout or "wedding invitation" prompt. |
+|   | **T5.cli -- CLI Polish**                |   |
+| **B1**   | *Tab Completion*                 | ○ | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support. |
+| **B2**   | *Standardize `--help`*           | ○ | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency. |
+|   | **T5.e2e -- Deferred Tests**            |   |
+| **C3**   | *Deferred Test Completion*       | ○ | Implement the final pending E2E tests for `--watch` mode (`4.2.1`, `4.2.2`) and the remaining skipped `math_integration` test (`1.7.4`). |
+|   | **T5.doc -- Documentation Polish**      |   |
+| **D1**   | *Final Documentation Review*     | ○ | Perform a final consistency and accuracy review of the main user-facing documents: `README.md`, `cheat-sheet.md`, and `plugin-development.md`. |
+
+
+

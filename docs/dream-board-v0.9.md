@@ -350,8 +350,8 @@ We took a hybrid approach for the **[T2 ↔ T3]** phases:
 |:------:|:------------------|
 | **✔**  | Completed         |
 | **×**  | Incomplete        |
-| **➜**  | In Progress       |
-| ● / ○  | Active / Inactive |
+| **●**  | Active            |
+| **○**  | Inactive          |
 | **..** | No thoughts yet   |
 
 
@@ -621,13 +621,16 @@ Our strategy is not to test every possible permutation, but to define a **basis 
 
 To achieve this efficiently, the testing architecture combines a reusable `TestHarness` for sandboxing, a `test-runner-factory` to eliminate boilerplate, and manifest files to clearly define test cases for each command. This approach proves invaluable, as implementing the suite becomes a powerful final validation of the entire application, uncovering subtle bugs that only appear during full end-to-end execution.
 
+---
+
 #### Global Options
 
-| Option | Description |
-| :-- | :-- |
-| `--config <path>` | Specifies a path to a global configuration file |
-| `--version` | Shows the version number |
-| `--help` | Shows the help screen |
+| Option               | Description |
+| :------------------- | :---------- |
+| `--config <path>`    | Specifies a path to a global configuration file (hierarchical) |
+| `--coll-root <path>` | Specifies a path to a directory of plugins (context switch) |
+| `--version`          | Shows the version number |
+| `--help`             | Shows the help screen |
 
 
 ---
@@ -664,7 +667,6 @@ The successful implementation of this test plan provides a strong guarantee of t
 - **Notes/Details** -- Usage notes, defaults, or dynamic behavior.
 
 ---
-
 
 ### pre T5 | Outline Prequisites as a Checklist
 
@@ -728,6 +730,8 @@ The successful implementation of this test plan provides a strong guarantee of t
 
 </details>
 
+---
+
 ## T4 ➜ T5 | v0.9 Finalization & Release Candidate Checklist | Live
 
 With the core E2E tests implemented, this checklist table outlines the remaining **hardening** tasks required to reach a stable `v1.0.0-rc.1` release.
@@ -738,20 +742,23 @@ With the core E2E tests implemented, this checklist table outlines the remaining
 | ✔ | **A2** | Fully Valid Archetyping      |`plugin create`   | Feature Completeness         |`3`|
 | ✔ | **A3** | Integrate Validator          |`plugin enable`   | Code Hardening               |`4`|
 |   |        | <span style="white-space:nowrap">**CLI Polish & Usability**</span>       |     |   |
-| ○ | **B1** | Tab Completion               |`cli.js` `<TAB>`  | User Experience Polish       |`6`|
+| × | **B1** | Tab Completion               |`cli.js` `<TAB>`  | User Experience Polish       |`-`|
 |   |        | <span style="white-space:nowrap">**Test Suite Completion**</span>        |     |   |
-| ✔ | **C1** | Shrink Gaps in Test Coverage |`✔L2 ✔L1 ➜L4 ✔L3` | Technical Debt               |`5`|
+| ✔ | **C1** | Shrink Gaps in Test Coverage |`✔L2 ✔L1 ●L4 ✔L3` | Technical Debt               |`5`|
 | ✔ | **C2** | Housekeeping Tests & CI      |`test/integration`| Code Quality                 |`1`|
 
 **Proposed Sequence | C2 ➜ A1 ➜ A2 ➜ A3 ➜ C1 ➜ B1**
 
 <!--
-✔
-×
-➜
-●
-○
+✔ = Complete
+× = Incomplete
+● = In Progress
+○ = Pending
 -->
+
+abbr.\
+- **CI = Continuous Integration** \
+- **QA = Quality Assurance**
 
 ### Task Trace
 
@@ -787,7 +794,7 @@ Reducing the dashboard from a wall of troubles to a handful of justified skips a
 **CI Implementation**\
 A GitHub Actions workflow was introduced to automate the testing process. An initial bug related to git branch handling in bare repositories within the CI environment was promptly identified and fixed to ensure stable automated runs.
 
-[Github Actions](https://github.com/brege/md-to-pdf/actions) -- Managed by [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
+[**Github Actions**](https://github.com/brege/md-to-pdf/actions) -- Managed by [`.github/workflows/ci.yml`](../.github/workflows/ci.yml)
 
 #### Task A1, A2, A3 | Plugin System Hardening
 
@@ -821,7 +828,7 @@ This included:
 These tests required deep console-logging in several layers of application code.
 
 **Core Refactoring and L4 E2E Validation**\
-Surprisingly, in the build-out of *life-cycle*--**L4**--E2E tests,
+Surprisingly, in the build-out of *lifecycle*--**L4**--E2E tests,
 a large part of the C1 effort involved the discovery of new intelligence that
 the  previously implemented `collRoot` did not behave as expected.
 
@@ -829,7 +836,7 @@ This was a pivotal refactor requiring deep architectural change.  This refactor 
 
 1. Centralizing and universalizing how the collections root directory `collRoot` is handled throughout the application.
 
-2. To validate this change, new life-cycle tests were implemented. These tests programmatically drive the CLI to simulate real user workflows and other potential, "*sad path*" failure conditions.
+2. To validate this change, new lifecycle tests were implemented. These tests programmatically drive the CLI to simulate real user workflows and other potential, "*sad path*" failure conditions.
 
 3. Because of this refactor, some older integration tests had to be updated to adhere to the new `collRoot` logic.
 
@@ -851,7 +858,7 @@ This separation not only aids in test isolationism, but ensures that users can h
 
 ---
 
-### T5 | Zuckerwerk
+## T5 | Zuckerwerk
 
 This section's main focus is on finishing touches. Broadly, these tasks make the system more user-friendly, easier-to-use, and more inviting. This is the project's "**candy work**" phase.
 
@@ -859,30 +866,40 @@ This section's main focus is on finishing touches. Broadly, these tasks make the
 
 **Already done: `template-basic` and Plugin Contract.**
 
-**An "Interaction Specification":** \
-This is the key missing piece. As outlined in the dream board, we need to create a new document that details the internal mechanics, file relationships, and APIs of the plugin system in a way that is optimized for a machine, not a human. It would be more direct and less narrative than the `plugin-development.md` guide.
+1. **ai.1 | An "Interaction Specification"**\
+   This is the key missing piece. As outlined in the dream board, we need to create a new document that details the internal mechanics, file relationships, and APIs of the plugin system in a way that is optimized for a machine, not a human. It would be more direct and less narrative than the `plugin-development.md` guide.
 
-**An Example Prompting Guide:** This document would provide concrete examples of how a user could prompt an AI to build a plugin for this system, including the necessary context and desired output. The "simple pendulum" or "wedding invitation" examples you mentioned in the dream board would be perfect for this.
+2. **ai.2 | An Example Prompting Guide**\
+   This document would provide concrete examples of how a user could prompt an AI to build a plugin for this system, including the necessary context and desired output. The "simple pendulum" or "wedding invitation" examples you mentioned in the dream board would be perfect for this.
 
-#### T5.cli -- Tab Completion (fmr. B1) and `--help`
+#### T5.cli -- Tab Completion, `--help`
 
-1. **Tab Completion**
+1. **B1 | Tab Completion**\
    This is the final unchecked item on the v0.9 checklist and a significant user experience improvement for the CLI. Yargs has built-in support that we can leverage to enable this.
 
-2. **`--help`**
+2. **B2 | Standardize `--help`**\
    Standardize the help output to have consistent formatting, including consistent spacing and indentation. This will make it easier for users to navigate the help text and understand the structure of the command tree.
 
-#### T5.e2e -- E2E Testing Final Pass
+#### T5.e2e -- C3 | E2E Testing Final Pass
 
-**Finish Deferred Tests** and: are more life-cycle tests needed? 
+**Finish Deferred Tests** and: are more lifecycle tests needed? 
     
-* **`--watch` mode tests (L4):** Implement the final two E2E tests (`4.2.1` and `4.2.2`) to verify that file changes correctly trigger re-conversions.
-* **`math_integration` test (L1):** Address the last skipped test (`1.7.4`) related to gracefully handling a `require` failure for the KaTeX package.
-
+* **`--watch` mode tests [Level 4]:** Implement the final two E2E tests (`4.2.1` and `4.2.2`) to verify that file changes correctly trigger re-conversions.
+* **`math_integration` test [Level 1]:** Address the last skipped test (`1.7.4`) related to gracefully handling a `require` failure for the KaTeX package.
 
 #### T5.doc -- Documentation Polish
 
-Perform a final review of the main `README.md`, `cheat-sheet.md`, and `plugin-development.md` to ensure they are all consistent and reflect the final state of the v0.9 series.
+1. **D1 | Documentation Index & Journals**
+
+   Four Pillars of Documentation: **Reference**, **Tutorial**, **Explanation**, and **How-to's**
+   * Organize and index all architectural, historical, and process documents.
+   * Produce a Node.js script that is configurable and can be used to generate a list and index of all documentation.
+
+2. **D2 | Final Documentation Review**
+   
+    Four C's of Documentation: **Clarity**, **Consistency**, **Completeness**, and **Conciseness**
+
+   * Perform a final review of the main `README.md`, `cheat-sheet.md`, and `plugin-development.md` to ensure they are all consistent and reflect the final state of the v0.9 series.
 
 
 ### T5 | Task Matrix
@@ -890,20 +907,60 @@ Perform a final review of the main `README.md`, `cheat-sheet.md`, and `plugin-de
 This table outlines the assets and tasks required to enable an AI to reliably generate new plugins for 
 `md-to-pdf`, make the CLI more ergonomic and intuitive, and tie-up any remaining loose ends in testing and documentation.
 
-|          | Asset                            | ✔ | Description |
-|:---------|:---------------------------------|:--|:------------|
-|          | <span style="white-space:nowrap">**T5.<!--ai-->ai -- LLM Plugin Scaffolding**</span>  |   |
-| **A2**   |*`template-basic` Archetyping*    | ✔ |  Primary *technical* asset. Builds on the `plugin create` command. |
-| **A1**   | *Plugin Contract*                | ✔ |  Primary *human-readable* asset. `docs/plugin-contract.md` provides formal rules for generated plugin [context for the AI] |
-| **ai.1** | *Interaction Specification*      | ○ |  Details the internal mechanics, file relationships, and APIs of the plugin system--optimized for machines. |
-| **ai.2** | *Example Prompting Guide*        | ○ |  Concrete examples of how to *frame* an AI, examples like a "simple pendulum" physics handout or "wedding invitation" prompt. |
-|   | **T5.cli -- CLI Polish**                |   |
-| **B1**   | *Tab Completion*                 | ○ | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support. |
-| **B2**   | *Standardize `--help`*           | ○ | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency. |
-|   | **T5.e2e -- Deferred Tests**            |   |
-| **C3**   | *Deferred Test Completion*       | ○ | Implement the final pending E2E tests for `--watch` mode (`4.2.1`, `4.2.2`) and the remaining skipped `math_integration` test (`1.7.4`). |
-|   | **T5.doc -- Documentation Polish**      |   |
-| **D1**   | *Final Documentation Review*     | ○ | Perform a final consistency and accuracy review of the main user-facing documents: `README.md`, `cheat-sheet.md`, and `plugin-development.md`. |
+| ✔ | **ID** | Asset                            | Description  |`#`|
+|:-:|:------:|:---------------------------------|:-------------|:-:|
+|   |        | <span style="white-space:nowrap">**T5<!--ai-->.ai -- LLM Plugin Scaffolding**</span> | | |
+| ✔ | **A2** | *`template-basic` Archetyping*   | Primary *technical* asset. Builds on the `plugin create` command.  |`.`|
+| ✔ | **A1** | *Plugin Contract*                | Primary *human-readable* asset. `docs/plugin-contract.md` provides formal rules for generated plugin [context for the AI]  |`.`|
+| ○ | **ai.1**| *Interaction Specification*     | Details the internal mechanics, file relationships, and APIs of the plugin system--optimized for machines.  |  |  
+| ○ | **ai.2**| *Example Prompting Guide*       | Concrete examples of how to *frame* an AI, examples like a "simple pendulum" physics handout or "wedding invitation" prompt.  |  |
+|   |        | <span style="white-space:nowrap">**T5.cli -- CLI Polish**</span> | | |
+| ○ | **B1** | *Tab Completion*                 | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support.  |  |  
+| ○ | **B2** | *Standardize `--help`*           | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency.  |  |
+|   |        | <span style="white-space:nowrap">**T5.e2e -- Deferred Tests**</span> | | |
+| ○ | **C3** | *Deferred Test Completion*       | Implement the final pending tests and decide if more lifecycle tests are needed. |  |
+|   |        | <span style="white-space:nowrap">**T5.doc -- Documentation Polish**</span> | | | 
+| ✔ | **D1** | *Documentation Index & Journals* | Organize and index all architectural, historical, and process docs. |`1`| 
+| ○ | **D2** | *Final Documentation Review*     | Perform a final consistency and accuracy review of main user-facing docs. |  |
 
+
+**Legend**
+| | | | | |
+|:-----:|:------------------------|-|:-:|:-----------|
+| `ai`  | Artificial Intelligence | | ✔ | Completed  |
+| `cli` | Command Line Interface  | | × | Incomplete |
+| `e2e` | End-to-End              | | ● | Active     |
+| `doc` | Documentation           | | ○ | Inactive   |
+
+### T5 | Timeline
+
+#### A2 + A1 | Archetyping & Plugin Contract
+
+The core plugin system hardening tasks (A1: Plugin Contract, A2: Archetyping) 
+were completed in the previous push before **T5**.
+Their mention is simply ceremonial, as these two specific tasks **seed** the work in **ai.1** and **ai.2**.
+
+#### D1 | Documentation Index & Journals
+
+The project had accumulated a significant number of valuable but disparate documents, including changelogs, design notes, and user guides. To improve discoverability and provide a clear entry point for users and contributors, a documentation index was established.
+
+The process was as follows:
+1. A new master landing page has been introduced at [`docs/index.md`](index.md).
+2. This index was structured using the **Diátaxis framework** to categorize all existing documentation into four distinct pillars: Tutorials, Reference, Explanation, and How-To Guides.
+
+3. To ensure the index remains comprehensive over time, a new Node.js script was developed at 
+  [`scripts/index-docs.js`](../scripts/index-docs.js). 
+   ``` bash
+   node scripts/index-docs.js  # [update]
+   ```
+   This configurable tool programmatically finds all `*.md` files and automatically updates
+   [`index.md`](index.md)   with their entries.
+   This facilitated honing *which* `*.md` were important for records
+   (e.g., ignore [`plugins/`](../plugins) but keep [`plugins/README.md`](../plugins/README.md)),
+   gradually reducing the number of actual documentation files.
+
+4. The script allowed me to reconcile the untracked architectural "lucidity" journals 
+   I had written along the way, during pivotal hours of this project's history.
+   These journals have now been formally added to the repository at [**`docs/lucidity`**](./lucidity).
 
 

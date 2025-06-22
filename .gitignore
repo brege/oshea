@@ -34,7 +34,7 @@ config.yaml
 config/
 
 # Optional: ignore built shell outputs if any
-# *.sh.bak
+*.sh
 
 # Optional: npm debug files
 npm-debug.log*

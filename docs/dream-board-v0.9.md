@@ -934,6 +934,18 @@ This table outlines the assets and tasks required to enable an AI to reliably ge
 
 ### T5 | Timeline
 
+**Proposed Order of Implementation:**
+
+**✔A2 + ✔A1 ➜ ✔D1 ➜ B2 ➜ B1 ➜ ai.1 ➜ ai.2 ➜ D2 ➜ C3**
+
+**Thematically:**
+
+1. **Polish**
+2. **Document**
+3. **Speculate**
+4. **Debt**
+
+
 #### A2 + A1 | Archetyping & Plugin Contract
 
 The core plugin system hardening tasks (A1: Plugin Contract, A2: Archetyping) 
@@ -962,5 +974,8 @@ The process was as follows:
 4. The script allowed me to reconcile the untracked architectural "lucidity" journals 
    I had written along the way, during pivotal hours of this project's history.
    These journals have now been formally added to the repository at [**`docs/lucidity`**](./lucidity).
+
+
+#### B2 | Standardize `--help` Text
 
 

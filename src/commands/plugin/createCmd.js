@@ -2,38 +2,34 @@
 const path = require('path');
 const chalk = require('chalk');
 const fs = require('fs');
-const { isValidPluginName } = require('../../collections-manager/cm-utils'); // Ensure correct relative path
+const { isValidPluginName } = require('../../collections-manager/cm-utils');
 
 module.exports = {
   command: 'create <pluginName>',
-  describe: 'Create a new plugin boilerplate from a template, or archetype from an existing plugin.',
+  describe: 'create a new plugin from template or existing plugin',
   builder: (yargs) => {
     yargs
       .positional('pluginName', {
-        describe: 'Name for the new plugin (e.g., my-custom-plugin). Must be alphanumeric with optional hyphens (not at start/end).',
+        describe: 'name for the new plugin',
         type: 'string'
       })
       .option('from', {
-        describe: `Optional. The source to create the plugin from.
-                   Can be a CM-managed plugin identifier ('collection_name/plugin_id')
-                   or a direct filesystem path to an existing plugin directory.
-                   If omitted, a default bundled template will be used.`,
+        describe: `source to archetype from ('collection/id' or path)`,
         type: 'string',
         alias: 'f'
       })
       .option('target-dir', {
         alias: 't',
-        describe: `Optional. The base directory in which to create the new plugin's folder ('<pluginName>').
-                   - If --from is NOT used (creating from template): Defaults to the current working directory (e.g., './<pluginName>').
-                   - If --from IS used (archetyping an existing plugin): Defaults to a user-specific plugins directory (e.g., ~/.local/share/md-to-pdf/my-plugins/'). This default is handled by the underlying archetype command if --target-dir is omitted.`,
+        describe: `directory to create the new plugin in`,
         type: 'string',
         normalize: true
       })
       .option('force', {
-        describe: 'Overwrite existing plugin directory if it exists.',
+        describe: 'overwrite target directory if it exists',
         type: 'boolean',
         default: false
-      });
+      })
+      .epilogue(`If --from is omitted, a default template is used.\nIf --target-dir is omitted, defaults to the current directory.`);
   },
   handler: async (args) => {
     const newPluginName = args.pluginName;
@@ -50,7 +46,6 @@ module.exports = {
       return;
     }
     
-    // ConfigResolver instance must be available in args from cli.js middleware
     if (!args.configResolver) {
         console.error(chalk.red('ERROR (createCmd): ConfigResolver instance not available in createCmd handler. This is a critical internal error.'));
         process.exit(1);
@@ -62,15 +57,13 @@ module.exports = {
     try {
       if (args.from) {
         const configResolver = args.configResolver; 
-        await configResolver._initializeResolverIfNeeded(); // Ensure registry is built
+        await configResolver._initializeResolverIfNeeded();
 
         const pluginRegistryEntry = configResolver.mergedPluginRegistry[args.from];
 
         if (pluginRegistryEntry && pluginRegistryEntry.configPath) {
-          // If 'args.from' is a registered plugin name, resolve to its base path
           sourceIdentifier = path.dirname(pluginRegistryEntry.configPath);
         } else {
-          // If not a registered name, assume it's a direct path (relative or absolute)
           sourceIdentifier = args.from;
         }
 

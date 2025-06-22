@@ -978,4 +978,25 @@ The process was as follows:
 
 #### B2 | Standardize `--help` Text
 
+A major motivation for this task was to bring our CLI help output in line with the conventions of established Node.js and Linux command-line tools. This consistency improves comprehension by adopting familiar layouts and voicings, making the CLI more approachable for both new users and Linux veterans.
+
+This telegraphic standardization also provided the athletics needed to address several other longstanding issues that had been deferred until a broad, systematic refactor was feasible. By iterating over many files with such targeted, incremental changes--instead of large, sweeping rewrites--we could opportunistically clean up accrued technical debt and minor annoyances throughout the codebase.
+
+  - **Telegraphic Style**\
+    All command and option descriptions were rewritten as concise, lowercase, phrase-based "telegraphic style" entries, eliminating unnecessary words and full sentences.
+  
+  - **Structural Cleanup**\
+    Lengthy or explanatory help content was moved from `describe` properties into `.epilogue()` blocks, keeping the main help output scannable and focused.
+  
+  - **Process Automation**\
+    Developed and used `scripts/generate-help-checklist.js` to systematically discover, track, and verify help text for all commands. The tool now also tracks checklist state and supports grouped help output for command families.
+  
+  - **Deprecation Cleanup**\
+    Deprecated commands (e.g., `collection archetype`) and outdated aliases (e.g., `up` for `update`) were removed, further streamlining the CLI.
+  
+  - **Orphaned File Cleanup**\
+    Unused source files (such as `plugin_scaffolder.js`) were identified and deleted.
+
+**Result:** The CLI now delivers a consistent, familiar, and efficient user experience, with help text that is easy to scan, easy to maintain, and in line with best practices for modern command-line tools.
+xt
 

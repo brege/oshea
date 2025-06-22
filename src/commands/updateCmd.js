@@ -2,18 +2,16 @@
 const chalk = require('chalk');
 
 module.exports = {
-  command: ['update [<collection_name>]', 'up [<collection_name>]'],
-  describe: 'Updates a Git-based plugin collection(s). (Shortcut for "collection update")',
+  command: 'update [<collection_name>]',
+  describe: 'update a git-based plugin collection(s)',
   builder: (yargsCmd) => {
     yargsCmd
       .positional('collection_name', {
-        describe: 'Optional. The name of the specific collection to update. If omitted, updates all Git-based collections.',
+        describe: 'name of a specific collection to update',
         type: 'string',
       })
-      .epilogue(`This command provides a convenient shortcut for "md-to-pdf collection update".
-It fetches updates from the collection's remote Git source.
-Local modifications in the collection directory may be overwritten.
-This command only syncs the collection files; it does not automatically enable any new plugins that might be added to the remote source.`);
+      .epilogue(`This is a shortcut for "collection update". If no name is provided, all collections are updated.
+It fetches updates from the remote Git source. Local modifications may be overwritten.`);
   },
   handler: async (args) => {
     if (!args.manager) {
@@ -27,7 +25,6 @@ This command only syncs the collection files; it does not automatically enable a
       console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
       try {
         const result = await manager.updateCollection(args.collection_name);
-        // The manager.updateCollection method is expected to provide detailed console output.
         if (result && !result.success) {
            console.warn(chalk.yellow(`Update for '${args.collection_name}' may have had issues: ${result.message || 'Please check output above.'}`));
         }
@@ -36,26 +33,21 @@ This command only syncs the collection files; it does not automatically enable a
         if (process.env.DEBUG_CM === 'true' && error.stack) {
           console.error(chalk.red(error.stack));
         }
-        process.exit(1); // Exit on error to ensure scriptability
+        process.exit(1);
       }
     } else {
       console.log(chalk.blue(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`));
       try {
         const results = await manager.updateAllCollections();
-        // The manager.updateAllCollections method is expected to provide detailed console output.
         if (results && !results.success) {
             console.warn(chalk.yellow("\nSome collections may not have updated successfully or were skipped. Please check output above."));
-        } else if (results && results.success && results.messages && results.messages.length === 0) {
-            // This case might occur if there are no collections to update.
-            // manager.updateAllCollections should ideally print something like "No collections found to update."
-            // For now, we assume its output is sufficient.
         }
       } catch (error) {
         console.error(chalk.red(`\nERROR updating all collections: ${error.message}`));
         if (process.env.DEBUG_CM === 'true' && error.stack) {
           console.error(chalk.red(error.stack));
         }
-        process.exit(1); // Exit on error
+        process.exit(1);
       }
     }
   }

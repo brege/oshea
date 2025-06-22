@@ -1,14 +1,13 @@
 // src/commands/plugin/disableCmd.js
 const chalk = require('chalk');
-// CollectionsManager instance will be passed via args.manager
 
 module.exports = {
   command: 'disable <invoke_name>',
-  describe: 'Disables an active plugin by removing it from the enabled manifest.',
+  describe: 'disables an active plugin',
   builder: (yargsCmd) => {
     yargsCmd
       .positional('invoke_name', {
-        describe: 'The current "invoke_name" of the plugin to disable.',
+        describe: "current 'invoke_name' of plugin to disable",
         type: 'string',
         demandOption: true,
       });
@@ -23,7 +22,6 @@ module.exports = {
     console.log(chalk.blueBright(`md-to-pdf plugin: Attempting to disable plugin...`));
     console.log(`  Plugin Invoke Name: ${chalk.cyan(args.invoke_name)}`);
     try {
-      // The disablePlugin method in CM handles console output
       await manager.disablePlugin(args.invoke_name);
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'plugin disable' command: ${error.message}`));

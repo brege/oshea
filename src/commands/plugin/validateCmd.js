@@ -1,5 +1,4 @@
 // src/commands/plugin/validateCmd.js
-
 const path = require('path');
 const fs = require('fs');
 const { validate: pluginValidator } = require('../../plugin-validator');
@@ -7,11 +6,11 @@ const chalk = require('chalk');
 
 module.exports = {
   command: 'validate <pluginIdentifier>',
-  describe: 'Validate a plugin by its name or path against the contract.',
+  describe: 'validate a plugin by name or path',
   builder: (yargs) => {
     yargs
       .positional('pluginIdentifier', {
-        describe: 'The name of the plugin (e.g., "cv") or the path to its directory (e.g., "plugins/my-custom-plugin").',
+        describe: "name or path of plugin e.g. 'cv'",
         type: 'string',
       })
       .demandOption('pluginIdentifier', 'Please provide a plugin name or path to validate.');
@@ -37,14 +36,11 @@ module.exports = {
             }
         }
 
-        // The pluginValidator.validate function now handles all console output itself.
         const validationResult = pluginValidator(pluginDirectoryPath);
 
-        // Based on the validation result, determine the exit code.
         if (!validationResult.isValid) {
             process.exit(1);
         }
-        // If isValid is true, process will exit with 0 (success) implicitly.
 
     } catch (error) {
         console.error(chalk.red(`An unexpected error occurred during validation: ${error.message}`));

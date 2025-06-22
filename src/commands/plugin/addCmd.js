@@ -1,24 +1,24 @@
 // src/commands/plugin/addCmd.js
 const path = require('path');
 const chalk = require('chalk');
-const fss = require('fs'); // For existsSync, lstatSync
+const fss = require('fs');
 
 module.exports = {
   command: 'add <path_to_plugin_dir>',
-  describe: 'Adds a local plugin directory to CollectionsManager and enables it.',
+  describe: 'add and enable a local plugin directory',
   builder: (yargsCmd) => {
     yargsCmd
       .positional('path_to_plugin_dir', {
-        describe: 'Filesystem path to the local plugin directory.',
+        describe: 'path to local plugin directory',
         type: 'string',
       })
       .option('name', {
         alias: 'n',
-        describe: 'Optional. A specific invoke name for this plugin.',
+        describe: 'set a custom invoke name for this plugin',
         type: 'string',
       })
       .option('bypass-validation', {
-        describe: 'Optional. Skips plugin validation during enablement. Use with caution.',
+        describe: 'skip plugin validation during enablement',
         type: 'boolean',
         default: false,
       });

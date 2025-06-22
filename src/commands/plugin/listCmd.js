@@ -79,48 +79,47 @@ function displayShortPluginEntry(plugin, statusColWidth, nameColWidth) {
 
 module.exports = {
   command: 'list [<collection_name_filter>]',
-  describe: `List plugins.
-Default: All usable plugins (traditionally registered & CM-enabled).
-Status flags (--available, --enabled, --disabled) provide specific views, primarily for CollectionsManager-managed plugins.
-Use --short for a condensed view.`,
+  describe: 'list all discoverable plugins and their status',
   builder: (yargs) => {
     yargs
       .positional('collection_name_filter', {
-        describe: 'Optional. Filter CM-managed plugins by this collection name when using status flags or --short.',
+        describe: 'filter CM-managed plugins by collection name',
         type: 'string',
         default: null,
       })
       .option('available', {
-        describe: 'List all plugins within CollectionsManager-managed collections (`COLL_ROOT`) that can be used or enabled.',
+        describe: 'list all available plugins from managed collections',
         type: 'boolean',
         default: false,
       })
       .option('enabled', {
-        describe: 'List all enabled plugins (both traditionally registered and CM-enabled). CM-enabled plugins can be filtered by collection.',
+        describe: 'list all currently enabled plugins',
         type: 'boolean',
         default: false,
       })
       .option('disabled', {
-        describe: 'List plugins within CollectionsManager-managed collections that are available but not currently enabled.',
+        describe: 'list available but disabled plugins',
         type: 'boolean',
         default: false,
       })
       .option('short', {
-        describe: 'Display a condensed, one-line summary for each plugin.',
+        describe: 'display a condensed, one-line summary',
         type: 'boolean',
         default: false,
       })
       .check((argv) => {
         const statusFlags = [argv.available, argv.enabled, argv.disabled].filter(Boolean).length;
         if (statusFlags > 1) {
-          throw new Error('Error: --available, --enabled, and --disabled flags are mutually exclusive. Please use only one.');
+          throw new Error('Error: --available, --enabled, and --disabled flags are mutually exclusive.');
         }
         if (argv.collection_name_filter && statusFlags === 0 && !argv.short) {
-          console.warn(chalk.yellow("Warning: <collection_name_filter> is ignored when no status flag (--available, --enabled, --disabled) or --short flag is provided. Default list shows all resolvable plugins."));
+          console.warn(chalk.yellow("Warning: Filter is ignored unless a status flag (--available, --enabled, --disabled) or --short is used."));
         }
         return true;
       })
-      .epilogue(chalk.gray("Note: To see a list of your downloaded collection names and their sources, use 'md-to-pdf collection list'.\nFor more information, refer to the README.md file."));
+      .epilogue(`Default view shows all usable plugins (registered and CM-enabled).
+Status flags (--available, --disabled) filter within CM-managed collections.
+For a list of collection names, use 'md-to-pdf collection list'.`);
   },
   handler: async (args) => {
     try {

@@ -1,22 +1,24 @@
-// scripts/generate-help-checklist.js
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
+const chalk = require('chalk');
 
 // --- Configuration ---
 const COMMANDS_DIR = path.resolve(__dirname, '../src/commands');
 const CHECKLIST_PATH = path.resolve(__dirname, '../test/docs/help-text-checklist.md');
 const ROOT_CMD_NAME = 'md-to-pdf';
 const CLI_PATH = path.resolve(__dirname, '../cli.js');
-
 const START_MARKER = '<!-- help-checklist-start -->';
 const END_MARKER = '<!-- help-checklist-end -->';
 
+// --- Utility ---
+function getRelativeChecklistPath() {
+    return path.relative(process.cwd(), CHECKLIST_PATH);
+}
 
 // --- Discovery Logic ---
-
 function parseBaseCommand(commandDef) {
     const cmdString = Array.isArray(commandDef) ? commandDef[0] : commandDef;
     return cmdString.split(' ')[0];
@@ -52,7 +54,6 @@ function discoverCommands(dir, prefixParts = []) {
 }
 
 // --- Checklist Interaction Logic ---
-
 function getExistingChecklistStates(content) {
     const states = new Map();
     const checklistRegex = /-\s\[([ x])\]\s`(.+?) --help`/g;
@@ -91,9 +92,77 @@ function updateChecklistFile() {
     console.log(`✔ Successfully updated checklist in ${CHECKLIST_PATH}`);
 }
 
+// --- Epilogue Helper ---
+function printChecklistEpilogue() {
+    console.log(`\n(${chalk.bold('Checklist markdown')}: ${chalk.cyan(getRelativeChecklistPath())})`);
+}
+
+// --- CLI Setup ---
+const yargsInstance = yargs(hideBin(process.argv))
+    .scriptName("generate-help-checklist")
+    .command('list', 'Prints the checklist with current state.', () => {}, (argv) => {
+        printChecklistWithState();
+        printChecklistEpilogue();
+    })
+    .command('update', 'Updates the checklist file in test/docs/.', () => {}, (argv) => {
+        updateChecklistFile();
+        printChecklistEpilogue();
+    })
+    .command('next', 'Finds the next unchecked item in the checklist and executes its --help command.', () => {}, (argv) => {
+        executeNextUnchecked();
+    })
+    .command('all', 'Runs --help for every checklist item in order.', () => {}, (argv) => {
+        executeAllHelp();
+    })
+    .command('group <group>', 'Show help for a group: base, plugin, or collection', (yargs) => {
+        yargs.positional('group', {
+            describe: 'Group to show: base, plugin, or collection',
+            choices: ['base', 'plugin', 'collection']
+        });
+    }, (argv) => {
+        executeGroupHelp(argv.group);
+    })
+    .help(false) // We'll handle epilogue ourselves
+    .wrap(null);
+
+const argv = yargsInstance.argv;
+
+// If no command is provided, default to "list"
+if (!argv._[0]) {
+    yargsInstance.parse('list');
+}
+
+// --- Overriding Help Output to Add Epilogue ---
+if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    yargsInstance.showHelp();
+    printChecklistEpilogue();
+    process.exit(0);
+}
+
+// --- Checklist State-Aware List ---
+function printChecklistWithState() {
+    if (!fs.existsSync(CHECKLIST_PATH)) {
+        console.error(`ERROR: Checklist file not found at ${CHECKLIST_PATH}`);
+        return;
+    }
+    const originalContent = fs.readFileSync(CHECKLIST_PATH, 'utf8');
+    const existingStates = getExistingChecklistStates(originalContent);
+
+    const commandPartsList = discoverCommands(COMMANDS_DIR);
+    commandPartsList.push([]);
+    const allCommands = Array.from(new Set(commandPartsList.map(p => [ROOT_CMD_NAME, ...p].join(' ')))).sort();
+
+    allCommands.forEach(cmd => {
+        const status = existingStates.get(cmd) || ' ';
+        console.log(`- [${status}] \`${cmd} --help\``);
+    });
+}
+
+// --- Next Command with Gray Help Output ---
 function executeNextUnchecked() {
     if (!fs.existsSync(CHECKLIST_PATH)) {
         console.error(`ERROR: Checklist file not found at ${CHECKLIST_PATH}`);
+        printChecklistEpilogue();
         return;
     }
     const content = fs.readFileSync(CHECKLIST_PATH, 'utf8');
@@ -116,36 +185,118 @@ function executeNextUnchecked() {
             if (error) {
                 console.error(`Execution failed: ${error.message}`);
                 console.error(stderr);
+                printChecklistEpilogue();
                 return;
             }
-            console.log(stdout);
+            process.stdout.write(chalk.gray(stdout));
+            printChecklistEpilogue();
         });
     } else {
         console.log('✔ All items in the checklist are complete. Nothing to do!');
+        printChecklistEpilogue();
     }
 }
 
-// --- CLI Setup ---
+// --- All Command: Run help for every checklist item ---
+function executeAllHelp() {
+    if (!fs.existsSync(CHECKLIST_PATH)) {
+        console.error(`ERROR: Checklist file not found at ${CHECKLIST_PATH}`);
+        printChecklistEpilogue();
+        return;
+    }
+    const content = fs.readFileSync(CHECKLIST_PATH, 'utf8');
+    const checklistRegex = /-\s\[([ x])\]\s`(.+?) --help`/g;
+    let match;
+    const commands = [];
 
-yargs(hideBin(process.argv))
-    .scriptName("generate-help-checklist")
-    .command('$0', 'Prints a new checklist to stdout.', () => {}, (argv) => {
-        // Default behavior is to show help
-        yargs.showHelp();
-    })
-    .command('list', 'Prints a new checklist to stdout (same as default).', () => {}, (argv) => {
-        const commandPartsList = discoverCommands(COMMANDS_DIR);
-        commandPartsList.push([]);
-        const allCommands = Array.from(new Set(commandPartsList.map(p => [ROOT_CMD_NAME, ...p].join(' ')))).sort();
-        console.log(allCommands.map(cmd => `- [ ] \`${cmd} --help\``).join('\n'));
-    })
-    .command('update', 'Updates the checklist file in test/docs/.', () => {}, (argv) => {
-        updateChecklistFile();
-    })
-    .command('next', 'Finds the next unchecked item in the checklist and executes its --help command.', () => {}, (argv) => {
-        executeNextUnchecked();
-    })
-    .demandCommand(1, 'Please specify a command: `list`, `update`, or `next`.')
-    .help()
-    .argv;
+    while ((match = checklistRegex.exec(content)) !== null) {
+        commands.push(match[2]);
+    }
+
+    if (commands.length === 0) {
+        console.log('No commands found in the checklist.');
+        printChecklistEpilogue();
+        return;
+    }
+
+    (function runNext(i) {
+        if (i >= commands.length) {
+            printChecklistEpilogue();
+            return;
+        }
+        const cmd = commands[i];
+        console.log(`\n➜ [${i + 1}/${commands.length}] ${cmd} --help\n`);
+        const commandArgs = cmd.replace(ROOT_CMD_NAME, '').trim();
+        exec(`node "${CLI_PATH}" ${commandArgs} --help`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Execution failed: ${error.message}`);
+                console.error(stderr);
+            } else {
+                process.stdout.write(chalk.gray(stdout));
+            }
+            runNext(i + 1);
+        });
+    })(0);
+}
+
+// --- Group Command: Show help for a group of commands ---
+function executeGroupHelp(group) {
+    if (!['base', 'plugin', 'collection'].includes(group)) {
+        console.error(`Unknown group: ${group}`);
+        printChecklistEpilogue();
+        return;
+    }
+    if (!fs.existsSync(CHECKLIST_PATH)) {
+        console.error(`ERROR: Checklist file not found at ${CHECKLIST_PATH}`);
+        printChecklistEpilogue();
+        return;
+    }
+    const content = fs.readFileSync(CHECKLIST_PATH, 'utf8');
+    const checklistRegex = /-\s\[([ x])\]\s`(.+?) --help`/g;
+    let match;
+    const commands = [];
+
+    while ((match = checklistRegex.exec(content)) !== null) {
+        const cmd = match[2];
+        if (group === 'base') {
+            // Only top-level commands (no space after root)
+            if (!cmd.startsWith(`${ROOT_CMD_NAME} `) || cmd.split(' ').length === 2) {
+                commands.push(cmd);
+            }
+        } else if (group === 'plugin') {
+            if (cmd.startsWith(`${ROOT_CMD_NAME} plugin`)) {
+                commands.push(cmd);
+            }
+        } else if (group === 'collection') {
+            if (cmd.startsWith(`${ROOT_CMD_NAME} collection`)) {
+                commands.push(cmd);
+            }
+        }
+    }
+
+    if (commands.length === 0) {
+        console.log(`No commands found for group: ${group}`);
+        printChecklistEpilogue();
+        return;
+    }
+
+    (function runNext(i) {
+        if (i >= commands.length) {
+            printChecklistEpilogue();
+            return;
+        }
+        const cmd = commands[i];
+        console.log(`\n➜ [${i + 1}/${commands.length}] ${cmd} --help\n`);
+        const commandArgs = cmd.replace(ROOT_CMD_NAME, '').trim();
+        exec(`node "${CLI_PATH}" ${commandArgs} --help`, (error, stdout, stderr) => {
+            if (error) {
+                console.error(`Execution failed: ${error.message}`);
+                console.error(stderr);
+            } else {
+                process.stdout.write(chalk.gray(stdout));
+            }
+            runNext(i + 1);
+        });
+    })(0);
+}
 

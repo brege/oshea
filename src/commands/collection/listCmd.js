@@ -4,25 +4,27 @@ const stripAnsi = require('strip-ansi');
 
 module.exports = {
   command: 'list [type_or_collection_name]',
-  describe: 'Lists available, downloaded, or enabled plugin collections and plugins.',
+  describe: 'list downloaded collections or plugins',
   builder: (yargsCmd) => {
     yargsCmd
       .positional('type_or_collection_name', {
-        describe: `Specify 'collections' for downloaded collections, 'available' for plugins across all collections, 'enabled' for enabled plugins, or provide a specific collection name to list plugins within it. Default is 'collections'.`,
+        describe: `type to list (collections, available, enabled) or a collection name`,
         type: 'string',
         default: 'collections',
       })
       .option('short', {
         alias: 's',
-        describe: 'Display a condensed, short list of downloaded collections.',
+        describe: 'display condensed list of downloaded collections',
         type: 'boolean',
         default: false,
       })
       .option('raw', {
-        describe: 'Display raw JSON output.',
+        describe: 'display raw JSON output',
         type: 'boolean',
         default: false,
-      });
+      })
+      .example('$0 list available', 'list all available plugins from all collections')
+      .example('$0 list enabled', 'list all currently active plugins');
   },
   handler: async (args) => {
     if (!args.manager) {
@@ -32,18 +34,17 @@ module.exports = {
     const manager = args.manager;
     let typeOrCollectionName = args.type_or_collection_name;
 
-    // If --short is used without a type, assume they want to list 'collections'
     if (args.short && typeOrCollectionName.toLowerCase() !== 'collections') {
       typeOrCollectionName = 'collections';
     }
 
-    let listType = 'downloaded'; // Default
+    let listType = 'downloaded';
     let collectionFilter = null;
 
     const recognizedTypes = ['collections', 'all', 'available', 'enabled'];
     if (recognizedTypes.includes(typeOrCollectionName.toLowerCase())) {
       listType = typeOrCollectionName.toLowerCase();
-      if (listType === 'collections') listType = 'downloaded'; // Translate to internal type
+      if (listType === 'collections') listType = 'downloaded';
     } else {
       listType = 'available';
       collectionFilter = typeOrCollectionName;
@@ -137,7 +138,7 @@ module.exports = {
           console.log(chalk.greenBright(`  - Invoke Name: ${chalk.cyan(p.invoke_name)}`));
           console.log(chalk.gray(`    Plugin ID: ${p.plugin_id}`));
           console.log(chalk.gray(`    Collection: ${p.collection_name}`));
-          if (p.is_singleton) { // Check if p.is_singleton is true
+          if (p.is_singleton) {
             let originalSourceDisplay = p.original_source || 'N/A';
             if (p.is_original_source_missing) {
               originalSourceDisplay += chalk.red.bold(' (MISSING)');

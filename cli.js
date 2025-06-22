@@ -144,7 +144,7 @@ async function executeGeneration(args, configResolver) {
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse, null, null);
     const mainLoadedConfig = effectiveConfig.mainConfig;
 
-    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'factoryDefault', 'fd', 'pluginSpec', 'isLazyLoad', 'manager'];
+    const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'pluginSpec', 'isLazyLoad', 'manager'];
     const cliArgsForPlugin = {};
     for (const key in args) {
         if (!knownGenerateOptions.includes(key) && Object.prototype.hasOwnProperty.call(args, key)) {
@@ -195,19 +195,17 @@ async function main() {
         .scriptName("md-to-pdf")
         .usage("Usage: $0 <command_or_markdown_file> [options]")
         .option('config', {
-            describe: 'Path to a custom YAML configuration file. This acts as the project-specific main config.',
+            describe: 'path to a project-specific YAML config file',
             type: 'string',
             normalize: true,
         })
         .option('factory-defaults', {
-            alias: ['factory-default', 'fd'],
-            describe: 'Use only bundled default configurations, ignoring user (XDG) and project (--config) overrides.',
+            describe: 'use only bundled default config, ignores overrides',
             type: 'boolean',
             default: false,
         })
         .option('coll-root', {
-            alias: 'cr',
-            describe: 'Specify the root directory for collections and plugins. Overrides config file and environment variables.',
+            describe: 'overrides the main collection directory',
             type: 'string',
             normalize: true,
         })
@@ -225,11 +223,10 @@ async function main() {
             
             argv.manager = managerInstance;
 
-            // Create and attach the ConfigResolver here, making it available to ALL commands.
             const configResolver = new ConfigResolver(
                 argv.config,
                 argv.factoryDefaults,
-                false, // isLazyLoadMode is handled by specific command handlers
+                false, 
                 { collRoot: managerInstance.collRoot }
             );
             argv.configResolver = configResolver;
@@ -269,8 +266,8 @@ async function main() {
         .command(collectionCmd)
         .command(updateCmd)
         .command(configCmd)
-        .alias("help", "h")
-        .alias("version", "v")
+        .alias('h', 'help')
+        .alias('v', 'version')
         .strict()
         .fail((msg, err, yargsInstance) => {
             if (err) {
@@ -282,7 +279,7 @@ async function main() {
             }
              if (msg && msg.includes("Unknown argument")) {
                  const firstArg = process.argv[2];
-                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--fd', '--coll-root', '-cr'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
+                 if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--coll-root'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
                      console.error(chalk.red(`ERROR: ${msg}`));
                      console.error(chalk.yellow(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`));
                      yargsInstance.showHelp();

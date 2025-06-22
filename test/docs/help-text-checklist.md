@@ -10,24 +10,24 @@ This checklist is used to track the progress of standardizing the `--help` text 
 
 <!-- help-checklist-start -->
 
-- [ ] `md-to-pdf --help`
-- [ ] `md-to-pdf collection --help`
-- [ ] `md-to-pdf collection add --help`
-- [ ] `md-to-pdf collection archetype --help`
-- [ ] `md-to-pdf collection list --help`
-- [ ] `md-to-pdf collection remove --help`
-- [ ] `md-to-pdf collection update --help`
-- [ ] `md-to-pdf config --help`
-- [ ] `md-to-pdf convert --help`
-- [ ] `md-to-pdf generate --help`
-- [ ] `md-to-pdf plugin --help`
-- [ ] `md-to-pdf plugin add --help`
-- [ ] `md-to-pdf plugin create --help`
-- [ ] `md-to-pdf plugin disable --help`
-- [ ] `md-to-pdf plugin enable --help`
-- [ ] `md-to-pdf plugin help --help`
-- [ ] `md-to-pdf plugin list --help`
-- [ ] `md-to-pdf plugin validate --help`
-- [ ] `md-to-pdf update --help`
+- [x] `md-to-pdf --help`
+- [x] `md-to-pdf collection --help`
+- [x] `md-to-pdf collection add --help`
+- [x] `md-to-pdf collection archetype --help`
+- [x] `md-to-pdf collection list --help`
+- [x] `md-to-pdf collection remove --help`
+- [x] `md-to-pdf collection update --help`
+- [x] `md-to-pdf config --help`
+- [x] `md-to-pdf convert --help`
+- [x] `md-to-pdf generate --help`
+- [x] `md-to-pdf plugin --help`
+- [x] `md-to-pdf plugin add --help`
+- [x] `md-to-pdf plugin create --help`
+- [x] `md-to-pdf plugin disable --help`
+- [x] `md-to-pdf plugin enable --help`
+- [x] `md-to-pdf plugin help --help`
+- [x] `md-to-pdf plugin list --help`
+- [x] `md-to-pdf plugin validate --help`
+- [x] `md-to-pdf update --help`
 
 <!-- help-checklist-end -->

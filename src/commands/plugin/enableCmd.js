@@ -1,53 +1,53 @@
 // src/commands/plugin/enableCmd.js
 const chalk = require('chalk');
-const path = require('path'); // Required for path.join if constructing messages with paths
-const fs = require('fs'); // For existsSync
-const fsp = require('fs').promises; // For readFile
-const yaml = require('js-yaml'); // To read metadata for prefix heuristic
-
-// CollectionsManager instance will be passed via args.manager
+const path = require('path');
+const fs = require('fs');
+const fsp = require('fs').promises;
+const yaml = require('js-yaml');
+const { validate: pluginValidator } = require('../../plugin-validator');
 
 module.exports = {
   command: 'enable <target>',
-  describe: 'Enables a plugin or all plugins from a collection.',
+  describe: 'enable a plugin or all plugins from a collection',
   builder: (yargsCmd) => {
     yargsCmd
       .positional('target', {
-        describe: 'The plugin to enable ("collection_name/plugin_id") OR the collection name (if using --all).',
+        describe: 'plugin to enable (e.g., "collection/plugin_id"), \n or collection name (with --all)',
         type: 'string',
         demandOption: true,
       })
       .option('name', {
-        alias: 'as', // Retaining 'as' as an alias
-        describe: 'Optional. An alternative "invoke_name" to register the plugin under (only for single plugin enablement).',
+        alias: 'as',
+        describe: 'set a custom "invoke_name" for the plugin',
         type: 'string'
       })
       .option('all', {
-        describe: `Enable all available plugins from the specified collection name.
-                 Default prefixing behavior for invoke names when using --all:
-                 - GitHub/GitLab source: Uses <username>-<plugin_id>.
-                 - Other Git source: Uses <collection_name>-<plugin_id>.
-                 - Local path source: Uses <plugin_id> (no prefix).
-                 Use --prefix or --no-prefix to override this default.
-                 Note: This is a point-in-time action. If the collection is updated later with new plugins,
-                 this command needs to be re-run if you wish to enable those new plugins.`,
+        describe: 'enable all available plugins from a collection.',
         type: 'boolean',
         default: false
       })
       .option('prefix', {
-        describe: 'Optional. A custom prefix string for invoke names when using --all. Overrides default prefixing.',
+        describe: 'prefix for invoke names when using --all',
         type: 'string'
       })
       .option('no-prefix', {
-        describe: 'Optional. Disables all automatic prefixing when using --all, using only plugin_id as invoke_name. Use with caution due to potential conflicts.',
+        describe: 'disable invoke name prefixing when using --all',
         type: 'boolean',
         default: false
       })
-      .option('bypass-validation', { // ADDED: --bypass-validation flag
-        describe: 'Optional. Skips plugin validation during enablement. Use with caution.',
+      .option('bypass-validation', {
+        describe: 'skip plugin validation during enablements',
         type: 'boolean',
         default: false
-      });
+      })
+      .epilogue(`
+Default prefixing behavior for --all:
+  - GitHub/GitLab source: uses <username>-<plugin_id>
+  - Other Git sources: uses <collection_name>-<plugin_id>
+  - Local path sources: uses <plugin_id> (no prefix)
+
+Note: This is a point-in-time action. If a collection is updated,
+you must re-run this command to enable any new plugins.`);
   },
   handler: async (args) => {
     if (!args.manager) {
@@ -88,7 +88,7 @@ module.exports = {
           noPrefix: args.noPrefix,
           isCliCall: true, 
           originalSourceForPrefixFallback,
-          bypassValidation: args.bypassValidation // ADDED: Pass bypassValidation
+          bypassValidation: args.bypassValidation
         });
       } else {
         console.log(chalk.blueBright(`md-to-pdf plugin: Attempting to enable plugin...`));
@@ -101,7 +101,7 @@ module.exports = {
         }
         const result = await manager.enablePlugin(args.target, { 
           name: args.name,
-          bypassValidation: args.bypassValidation // ADDED: Pass bypassValidation
+          bypassValidation: args.bypassValidation
         });
         if (result && result.success) {
             const finalInvokeName = result.invoke_name || args.target.split('/')[1]; 

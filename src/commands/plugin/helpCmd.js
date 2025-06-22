@@ -1,20 +1,18 @@
 // src/commands/plugin/helpCmd.js
-const { displayPluginHelp } = require('../../get_help'); // Adjusted path
+const { displayPluginHelp } = require('../../get_help');
 
 module.exports = {
   command: 'help <pluginName>',
-  describe: 'Display detailed help for a specific plugin.',
+  describe: 'display detailed help for a plugin',
   builder: (yargs) => {
     yargs
       .positional('pluginName', {
-        describe: 'Name of the plugin for which to display help.',
+        describe: 'name of plugin to display help for',
         type: 'string'
       });
   },
   handler: async (args) => {
     try {
-      // Ensure isLazyLoad is false if displayPluginHelp or its dependencies (like ConfigResolver) use it.
-      // displayPluginHelp itself passes args down, so this should be fine.
       args.isLazyLoad = false; 
       await displayPluginHelp(args.pluginName, args);
     } catch (error) {

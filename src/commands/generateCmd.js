@@ -1,42 +1,38 @@
 // src/commands/generateCmd.js
-// Note: commonCommandHandler and executeGeneration are assumed to be in cli.js
-
 module.exports = {
   command: "generate <pluginName>",
-  describe: "Generate a document using a specified plugin that requires complex inputs.",
+  describe: "generate a document from a complex plugin",
   builder: (yargs) => {
     yargs
       .positional("pluginName", { 
-        describe: "Name of the plugin.", 
+        describe: "name of the plugin to use", 
         type: "string" 
       })
       .option("outdir", { 
         alias: "o", 
-        describe: "Output directory.", 
+        describe: "output directory", 
         type: "string", 
         default: "." 
       })
       .option("filename", { 
         alias: "f", 
-        describe: "Output PDF filename.", 
+        describe: "output pdf filename", 
         type: "string" 
       })
       .option("open", { 
-        describe: "Open PDF after generation.", 
+        describe: "open pdf after generation", 
         type: "boolean", 
         default: true 
       })
       .option("watch", { 
         alias: "w", 
-        describe: "Watch for changes.", 
+        describe: "watch for changes and re-generate", 
         type: "boolean", 
         default: false 
       })
-      .strict(false); // Allows extra options for the plugin
+      .strict(false);
   },
   handler: async (args) => {
     args.isLazyLoad = false;
-    // Similar to convert, the actual execution is orchestrated by cli.js's
-    // main yargs setup calling commonCommandHandler.
   }
 };

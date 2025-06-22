@@ -3,18 +3,18 @@ const chalk = require('chalk');
 
 module.exports = {
   command: 'update [<collection_name>]',
-  describe: `Updates a Git-based plugin collection. If no name, updates all Git-based collections.`,
+  describe: 'update a git-based plugin collection',
   builder: (yargsCmd) => {
     yargsCmd
       .positional('collection_name', {
-        describe: 'Optional. The name of the specific collection to update.',
+        describe: 'name of the collection to update; omit for all',
         type: 'string'
       });
   },
   handler: async (args) => {
     if (!args.manager) {
       console.error(chalk.red("FATAL ERROR: CollectionsManager instance not found in CLI arguments."));
-      process.exit(1); // Definitely a hard fail
+      process.exit(1);
     }
     const manager = args.manager;
     let commandShouldFailHard = false;
@@ -26,7 +26,6 @@ module.exports = {
         
         if (!cmResult.success) {
             console.warn(chalk.yellow(`Update for '${args.collection_name}' reported issues (see CM logs above for details).`));
-            // Any failure reported by the manager should now be treated as a CLI failure.
             commandShouldFailHard = true;
         }
       } else {
@@ -34,7 +33,6 @@ module.exports = {
         const cmResults = await manager.updateAllCollections();
         if (!cmResults.success) { 
            console.warn(chalk.yellow("The batch update process for all collections may have encountered issues for some collections. Check CM logs above."));
-           // A partial failure in a batch operation can still be considered a non-zero exit.
            commandShouldFailHard = true;
         }
       }

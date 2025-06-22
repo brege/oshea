@@ -1,26 +1,23 @@
 // src/commands/collectionCmd.js
-const chalk = require('chalk'); // Added for the epilogue
+const chalk = require('chalk');
 const addCmd = require('./collection/addCmd');
 const listCmd = require('./collection/listCmd');
 const removeCmd = require('./collection/removeCmd');
 const updateCmd = require('./collection/updateCmd');
-const archetypeCmd = require('./collection/archetypeCmd'); // Import the new command
+// const archetypeCmd = require('./collection/archetypeCmd'); // DELETED
 
 module.exports = {
   command: 'collection <subcommand>',
-  describe: 'Manage plugin collections (Note: "collection archetype" is deprecated).',
+  describe: 'manage plugin collections',
   builder: (yargs) => {
     return yargs
       .command(addCmd)
       .command(listCmd)
       .command(removeCmd)
       .command(updateCmd)
-      .command(archetypeCmd) // Register the archetype command
-      .demandCommand(1, 'You need to specify a collection subcommand (e.g., add, list, remove, update).')
-      .strict()
-      .epilogue(chalk.yellow('For creating new plugin instances from existing ones, prefer "md-to-pdf plugin create <newName> --from <source>".'));
+      // .command(archetypeCmd) // DELETED
+      .demandCommand(1, 'A subcommand (add, list, remove, update) is required.')
+      .strict();
   },
-  handler: (argv) => {
-    // This top-level handler for 'collection' won't be called if a subcommand is matched.
-  }
+  handler: (argv) => {}
 };

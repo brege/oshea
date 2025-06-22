@@ -23,8 +23,8 @@ const updateCollectionCmd = require('./commands/update');
 const updateAllCollectionsCmd = require('./commands/updateAll');
 const listAvailablePluginsCmd = require('./commands/listAvailable');
 const listCollectionsCmd = require('./commands/list');
-const archetypePluginCmd = require('./commands/archetype');
 const addSingletonPluginCmd = require('./commands/addSingleton');
+const archetypePluginCmd = require('./commands/archetype');
 
 class CollectionsManager {
   constructor(options = {}, dependencies = {}) {

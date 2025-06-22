@@ -1,24 +1,24 @@
 // src/commands/configCmd.js
-const { displayConfig } = require('../config_display'); // Adjusted path
+const { displayConfig } = require('../config_display');
 
 module.exports = {
   command: "config",
-  describe: "Display active configuration settings. Use --pure for config-only output.",
+  describe: "display active configuration settings",
   builder: (yargs) => {
     yargs
       .option("plugin", {
         alias: "p",
-        describe: "Display effective configuration for a specific plugin.",
+        describe: "display the effective configuration for a plugin",
         type: "string"
       })
       .option("pure", {
-        describe: "Output only the raw configuration data, suitable for piping or copying.",
+        describe: "output raw configuration data (for piping)",
         type: "boolean",
         default: false
       });
   },
   handler: async (args) => {
-    args.isLazyLoad = false; // Ensure this context is set for ConfigResolver via displayConfig
+    args.isLazyLoad = false;
     await displayConfig(args);
   }
 };

@@ -637,22 +637,22 @@ To achieve this efficiently, the testing architecture combines a reusable `TestH
 
 #### Command Matrix
 
-| Command | Subcommand | Positional(s) | Options/Flags | Notes/Details |
-| :-- | :-- | :-- | :-- | :-- |
-| `convert` | -- | `<file>` (Required) | `--plugin, -p`<br>`--outdir, -o`<br>`--filename, -f` | Default command (`$0`) |
-| `generate` | -- | `<plugin>` (Required) | *(Dynamic options from plugin.config.yaml)* | Plugin-specific options loaded at runtime |
-| `config` | -- | -- | `--plugin, -p`<br>`--pure` | Shows merged config for a plugin |
-| `plugin` | `list` | -- | `--enabled`<br>`--disabled`<br>`--available`<br>`--all` | `--all` is default |
-| `plugin` | `create` | `<plugin_name>` (Required) | `--from <source_plugin>`<br>`--target-dir <path>`<br>`--force` | Archetype from existing plugin, set target dir, force overwrite |
-| `plugin` | `add` | `<path>` (Required) | -- | Add and enable a singleton plugin directory |
-| `plugin` | `enable` | `<plugin_ref>` (Required) | -- | Reference: `collection_name/plugin_id` |
-| `plugin` | `disable` | `<invoke_name>` (Required) | -- |  |
-| `plugin` | `validate` | `[path]` (Optional) | `--schema <version>` | Defaults to current directory if no path provided |
-| `collection` | `add` | `<source>` (Required) | -- | Source can be git URL or local path |
-| `collection` | `list` | -- | -- |  |
-| `collection` | `remove` | `<name>` (Required) | -- |  |
-| `collection` | `update` | `[name]` (Optional) | -- | If omitted, updates all collections |
-| `update` | -- | `[name]` (Optional) | -- | Alias for `collection update` |
+| Command      | Subcommand | Positional(s)              | Options/Flags | Notes/Details |
+| :----------- | :--------- | :------------------------- | :------------ | :------------ |
+| `convert`    |  --        | `<file>` (Required)        | `--plugin, -p`<br>`--outdir, -o`<br>`--filename, -f` | Default command (`$0`) |
+| `generate`   |  --        | `<plugin>` (Required)      | *(Dynamic options from plugin.config.yaml)* | Plugin-specific options loaded at runtime |
+| `config`     |  --        |  --                        | `--plugin, -p`<br>`--pure` | Shows merged config for a plugin |
+| `plugin`     | `list`     |  --                        | `--enabled`<br>`--disabled`<br>`--available`<br>`--all` | `--all` is default |
+| `plugin`     | `create`   | `<plugin_name>` (Required) | `--from <source_plugin>`<br>`--target-dir <path>`<br>`--force` | Archetype from existing plugin, set target dir, force overwrite |
+| `plugin`     | `add`      | `<path>` (Required)        | -- | Add and enable a singleton plugin directory |
+| `plugin`     | `enable`   | `<plugin_ref>` (Required)  | -- | Reference: `collection_name/plugin_id` |
+| `plugin`     | `disable`  | `<invoke_name>` (Required) | -- |  |
+| `plugin`     | `validate` | `[path]` (Optional)        | `--schema <version>` | Defaults to current directory if no path provided |
+| `collection` | `add`      | `<source>` (Required)      | -- | Source can be git URL or local path |
+| `collection` | `list`     | --                         | -- |  |
+| `collection` | `remove`   | `<name>` (Required)        | -- |  |
+| `collection` | `update`   | `[name]` (Optional)        | -- | If omitted, updates all collections |
+| `update`     |  --        | `[name]` (Optional)        | -- | Alias for `collection update` |
 
 ---
 
@@ -920,7 +920,7 @@ This table outlines the assets and tasks required to enable an AI to reliably ge
 | ○ | **ai.1**| *Interaction Specification*     | Details the internal mechanics, file relationships, and APIs of the plugin system--optimized for machines.  |  |  
 | ○ | **ai.2**| *Example Prompting Guide*       | Concrete examples of how to *frame* an AI, examples like a "simple pendulum" physics handout or "wedding invitation" prompt.  |  |
 |   |        | <span style="white-space:nowrap">**T5.cli -- CLI Polish**</span> | | |
-| ○ | **B1** | *Tab Completion*                 | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support.  |  |  
+| ● | **B1** | *Tab Completion*                 | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support.  |  |  
 | ✔ | **B2** | *Standardize `--help`*           | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency.  |  |
 | ✔ | **B3** | *Decouple `archetype` from CM*   | Eliminate the final remnants of the deprecated `collection archetype` compatibility layer.  |  |
 |   |        | <span style="white-space:nowrap">**T5.e2e -- Deferred Tests**</span> | | |
@@ -1027,4 +1027,108 @@ While the user-facing impact is minimal—no commands have changed—the interna
 **Result:**
 The codebase is now free of the backwards-compatibility shims for plugin archetyping. This brings us closer to a maintainable, modern architecture where each module’s purpose is clear. **The groundwork is laid for further improvements, such as new plugin types or more flexible creation workflows, without legacy constraints.**
 
+## B1 | Tab Completion
+
+**This design an my grappling with this "world" is documented in
+[`lucidity/tab-completion-assay.md`](./lucidity/tab-completion-assay.md).**
+
+Below is the high-level overview of the tab-completion features at each echelon of complexity:
+
+### Level 1 -- Static Command/Flag Completion
+Enabled via `yargs`, this provides completion for the static syntax of the CLI: command names, subcommand names, and option flags (e.g., `--plugin`, `--outdir`). It has no knowledge of the valid *values* for those options.
+
+### Level 2 -- Static Value Completion
+Builds on Level 1 by suggesting a fixed, pre-defined set of possible string values for a specific argument. This is achieved by explicitly defining choices in the command's builder, such as the `<type>` argument for `collection list` suggesting `names`, `available`, etc.
+
+### Level 3 -- Dynamic Value Completion
+
+This integration echelon requires determining a command tree.
+If we are going to have any chance at both determining dynamic value completion
+*and* producing a method that is extensible and reproducible,
+then we need to predict `<Tab>`-pathways through the command tree.
+
+[**`node scripts/generate-cli-tree.js`**](../scripts/generate-cli-tree.js)
+``` text
+md-to-pdf command tree:
+collection
+  add <url_or_path>
+    --name
+  list <type> <collection_name>
+    --short
+    --raw
+  remove <collection_name>
+    --force
+  update <collection_name>
+collection
+  add <url_or_path>
+    --name
+  list <type> <collection_name>
+    --short
+    --raw
+  remove <collection_name>
+    --force
+  update <collection_name>
+config
+  --plugin
+  --pure
+convert
+convert <markdownFile>
+  --plugin
+  --outdir
+  --filename
+  --open
+  --watch
+$0 <markdownFile>
+  --plugin
+  --outdir
+  --filename
+  --open
+  --watch
+generate <pluginName>
+  --outdir
+  --filename
+  --open
+  --watch
+plugin
+  add <path_to_plugin_dir>
+    --name
+    --bypass-validation
+  create <pluginName>
+    --from
+    --target-dir
+    --force
+  disable <invoke_name>
+  enable <target>
+    --name
+    --all
+    --prefix
+    --no-prefix
+    --bypass-validation
+  help <pluginName>
+  list <collection_name_filter>
+    --available
+    --enabled
+    --disabled
+    --short
+  validate <pluginIdentifier>
+plugin
+update <collection_name>
+```
+
+Let's consolidate the above command tree into a single, easily digestible table, 
+where `#` indicates the order of implementation.
+
+|`#`| Command / Usage         | Dynamic Completion Suggestions                                    |
+|:-:| ----------------------- | ----------------------------------------------------------------- |
+|   | `convert --plugin `     | Suggests all enabled/registered plugins.                          |
+|   | `generate `             | Suggests enabled plugins that are primarily generators.           |
+|   | `config --plugin `      | Suggests all enabled/registered plugins.                          |
+|   | `plugin create --from ` | Suggests all known plugins as potential archetypes.               |
+|   | `plugin enable `        | Suggests available but disabled plugins from managed collections. |
+|   | `plugin disable `       | Suggests all currently enabled plugins.                           |
+|`1`| `plugin help `          | Suggests all enabled/registered plugins.                          |
+|   | `plugin validate `      | Suggests all known plugins for validation.                        |
+|   | `collection remove `    | Suggests all downloaded collections for removal.                  |
+|   | `collection update [collection_name]` | Suggests all downloaded collections for updating.   |
+|   | `update [collection_name]` | Suggests all downloaded collections for updating (alias).      |
 

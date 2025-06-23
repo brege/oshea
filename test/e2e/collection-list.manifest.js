@@ -19,6 +19,7 @@ module.exports = [
     args: (sandboxDir) => [
       'collection',
       'list',
+      'names',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);

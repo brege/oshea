@@ -4,9 +4,9 @@ const fss = require('fs'); // Synchronous
 const path = require('path');
 const { extractFrontMatter } = require('./markdown_utils');
 const PluginRegistryBuilder = require('./PluginRegistryBuilder');
-const yaml = require('js-yaml'); // Moved to top-level require
+const yaml = require('js-yaml');
 
-async function displayPluginHelp(pluginName, cliArgs) {
+async function displayPluginHelp(pluginName, manager, cliArgs) {
     // cliArgs might contain --config, --factory-defaults which are needed for PluginRegistryBuilder
     console.log(`INFO: Attempting to display help for plugin: ${pluginName}`);
 
@@ -15,7 +15,11 @@ async function displayPluginHelp(pluginName, cliArgs) {
             path.resolve(__dirname, '..'), // projectRoot
             null, // xdgBaseDir (let builder determine)
             cliArgs.config, // projectManifestConfigPath from CLI
-            cliArgs.factoryDefaults // useFactoryDefaultsOnly from CLI
+            cliArgs.factoryDefaults, // useFactoryDefaultsOnly from CLI
+            false,
+            null,
+            manager, // Pass the manager instance
+            { collRoot: manager.collRoot } // Explicitly pass collRoot
         );
 
         const pluginRegistry = await registryBuilder.buildRegistry();

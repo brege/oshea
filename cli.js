@@ -210,6 +210,11 @@ async function main() {
             normalize: true,
         })
         .middleware(async (argv) => {
+            // If this is a completion run, do not perform any expensive setup.
+            if ('get-yargs-completions' in argv) {
+                return;
+            }
+
             const mainConfigLoader = new MainConfigLoader(path.resolve(__dirname, '..'), argv.config, argv.factoryDefaults);
             const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
             const collRootFromMainConfig = primaryConfig.config.collections_root || null;
@@ -269,7 +274,7 @@ async function main() {
         .completion()
         .alias('h', 'help')
         .alias('v', 'version')
-        .strict()
+        .strictCommands()
         .fail((msg, err, yargsInstance) => {
             if (err) {
                 console.error(chalk.red(msg || err.message));
@@ -292,15 +297,13 @@ async function main() {
             if (msg) console.error(chalk.yellow("For usage details, run with --help."));
             process.exit(1);
         })
-        .epilogue(
+        .epilogue(chalk.gray(
             "For more information, refer to the README.md file.\n" +
-            chalk.gray(
-              "Tip - <Tab>-completion:\n" +
-              "    echo 'source <(md-to-pdf completion)' >> ~/.bashrc\n" +
-              "    echo 'source <(md-to-pdf completion)' >> ~/.zshrc\n" +
-              "then run 'source ~/.bashrc' or 'source ~/.zshrc'"
-            )
-        );
+            "Tab-completion Tip:\n" +
+            "   echo 'source <(md-to-pdf completion)' >> ~/.bashrc\n" +
+            "   echo 'source <(md-to-pdf completion)' >> ~/.zshrc\n" +
+            "then run `source ~/.bashrc` or `source ~/.zshrc`"
+        ));
 
     await argvBuilder.argv;
 }

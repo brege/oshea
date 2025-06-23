@@ -24,7 +24,7 @@ const updateAllCollectionsCmd = require('./commands/updateAll');
 const listAvailablePluginsCmd = require('./commands/listAvailable');
 const listCollectionsCmd = require('./commands/list');
 const addSingletonPluginCmd = require('./commands/addSingleton');
-const archetypePluginCmd = require('./commands/archetype');
+// DELETED: const archetypePluginCmd = require('./commands/archetype');
 
 class CollectionsManager {
   constructor(options = {}, dependencies = {}) {
@@ -54,7 +54,7 @@ class CollectionsManager {
     this.updateAllCollections = updateAllCollectionsCmd.bind(this, this.dependencies);
     this.listAvailablePlugins = listAvailablePluginsCmd.bind(this, this.dependencies);
     this.listCollections = listCollectionsCmd.bind(this, this.dependencies);
-    this.archetypePlugin = archetypePluginCmd.bind(this, this.dependencies);
+    // DELETED: this.archetypePlugin = archetypePluginCmd.bind(this, this.dependencies);
     this.addSingletonPlugin = addSingletonPluginCmd.bind(this, this.dependencies);
   }
 
@@ -208,7 +208,6 @@ class CollectionsManager {
     return new Promise((resolve, reject) => {
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
       
-      // Make git non-interactive to prevent prompts for credentials.
       const spawnOptions = {
         cwd,
         stdio: ['pipe', 'pipe', 'pipe'],

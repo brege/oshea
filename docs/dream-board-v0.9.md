@@ -880,6 +880,11 @@ This section's main focus is on finishing touches. Broadly, these tasks make the
 2. **B2 | Standardize `--help`**\
    Standardize the help output to have consistent formatting, including consistent spacing and indentation. This will make it easier for users to navigate the help text and understand the structure of the command tree.
 
+3. **B3 | Decouple `archetype` from CM**\
+   Eliminate the final remnants of the deprecated `collection archetype` compatibility layer.
+   This refactor completes the decoupling of plugin creation logic from the core `CollectionsManager`, clarifying architectural boundaries, reducing maintenance overhead, and paying down technical debt.
+   Thematically, this refactor also culminates in the removal of the now-obsolete and -deprecated compatibility layers.
+
 #### T5.e2e -- C3 | E2E Testing Final Pass
 
 **Finish Deferred Tests** and: are more lifecycle tests needed? 
@@ -916,7 +921,8 @@ This table outlines the assets and tasks required to enable an AI to reliably ge
 | ○ | **ai.2**| *Example Prompting Guide*       | Concrete examples of how to *frame* an AI, examples like a "simple pendulum" physics handout or "wedding invitation" prompt.  |  |
 |   |        | <span style="white-space:nowrap">**T5.cli -- CLI Polish**</span> | | |
 | ○ | **B1** | *Tab Completion*                 | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support.  |  |  
-| ○ | **B2** | *Standardize `--help`*           | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency.  |  |
+| ✔ | **B2** | *Standardize `--help`*           | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency.  |  |
+| ✔ | **B3** | *Decouple `archetype` from CM*   | Eliminate the final remnants of the deprecated `collection archetype` compatibility layer.  |  |
 |   |        | <span style="white-space:nowrap">**T5.e2e -- Deferred Tests**</span> | | |
 | ○ | **C3** | *Deferred Test Completion*       | Implement the final pending tests and decide if more lifecycle tests are needed. |  |
 |   |        | <span style="white-space:nowrap">**T5.doc -- Documentation Polish**</span> | | | 
@@ -998,5 +1004,27 @@ This telegraphic standardization also provided the athletics needed to address s
     Unused source files (such as `plugin_scaffolder.js`) were identified and deleted.
 
 **Result:** The CLI now delivers a consistent, familiar, and efficient user experience, with help text that is easy to scan, easy to maintain, and in line with best practices for modern command-line tools.
-xt
+
+
+#### B3 | Finalize Archetype Decoupling
+
+The goal of this milestone was to eliminate the final remnants of the deprecated `collection archetype` compatibility layer. This refactor completes the decoupling of plugin creation logic from the core `CollectionsManager`, clarifying architectural boundaries, reducing maintenance overhead, and paying down technical debt.
+
+While the user-facing impact is minimal—no commands have changed—the internal structure is now far more coherent and robust. **With previous groundwork in place, this was the right time to finish the separation and simplify the codebase for future evolution.**
+
+  - **Extracted to a Dedicated Module (`plugin_archetyper.js`)**\
+    The core logic for transforming a source plugin is now fully encapsulated in its own library module, `src/plugin_archetyper.js`. This provides a single, well-defined, and testable home for all plugin creation operations.
+
+  - **Simplified Command Handler (`createCmd.js`)**\
+    The `plugin create` command has been re-wired to call the new archetyper module directly. This makes its handler a "thin wrapper" responsible only for parsing arguments and orchestrating the call, not for implementing the complex logic itself.
+
+  - **Orphan & Dead Code Removal**\
+    The now-obsolete `archetypePlugin` method and its wrapper file (`src/collections-manager/commands/archetype.js`) were removed from the `CollectionsManager`. This cleanup prevents accidental usage of deprecated code paths and simplifies the manager's API.
+
+  - **Clearer Architectural Boundaries*\
+    With this change, the `CollectionsManager`’s responsibilities are more focused. The general-purpose logic for archetyping plugins is now correctly isolated, making it easier to maintain and evolve independently of the collection management system.
+
+**Result:**
+The codebase is now free of the backwards-compatibility shims for plugin archetyping. This brings us closer to a maintainable, modern architecture where each module’s purpose is clear. **The groundwork is laid for further improvements, such as new plugin types or more flexible creation workflows, without legacy constraints.**
+
 

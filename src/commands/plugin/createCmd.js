@@ -1,8 +1,18 @@
 // src/commands/plugin/createCmd.js
 const path = require('path');
 const chalk = require('chalk');
-const fs = require('fs');
 const { isValidPluginName } = require('../../collections-manager/cm-utils');
+const { createArchetype } = require('../../plugin_archetyper');
+
+// Dependencies required by the archetyper logic
+const fs = require('fs').promises;
+const fss = require('fs');
+const fsExtra = require('fs-extra');
+const yaml = require('js-yaml');
+const matter = require('gray-matter');
+const cmUtils = require('../../collections-manager/cm-utils');
+const constants = require('../../collections-manager/constants');
+
 
 module.exports = {
   command: 'create <pluginName>',
@@ -35,11 +45,11 @@ module.exports = {
     const newPluginName = args.pluginName;
 
     if (!isValidPluginName(newPluginName)) {
-      console.error(chalk.red(`ERROR: Invalid plugin name: "${newPluginName}". Name must be alphanumeric and can contain hyphens, but not start or end with them, and no underscores.`));
+      console.error(chalk.red(`ERROR: Invalid plugin name: "${newPluginName}".`));
       process.exit(1);
     }
 
-    if (!args.manager || typeof args.manager.archetypePlugin !== 'function' || !args.configResolver) {
+    if (!args.manager || !args.configResolver) {
       console.error(chalk.red('ERROR: Manager or ConfigResolver not available. This is an internal setup issue.'));
       process.exit(1);
     }
@@ -58,7 +68,6 @@ module.exports = {
           sourceIdentifier = args.from;
         }
       } else {
-        // CORRECTED: The path was off by one directory level. Added one '..'
         sourceIdentifier = path.resolve(__dirname, '..', '..', '..', 'plugins', 'template-basic');
       }
 
@@ -67,7 +76,17 @@ module.exports = {
         force: args.force
       };
 
-      const result = await args.manager.archetypePlugin(sourceIdentifier, newPluginName, options);
+      // Assemble the dependencies and context for the new archetyper function
+      const dependencies = { chalk, cmUtils, constants, fs, fss, fsExtra, yaml, matter, path };
+      
+      const managerContext = {
+        collRoot: args.manager.collRoot,
+        debug: args.manager.debug,
+        listAvailablePlugins: args.manager.listAvailablePlugins.bind(args.manager)
+      };
+
+      // This is the single logical change: calling the new decoupled function.
+      const result = await createArchetype(dependencies, managerContext, sourceIdentifier, newPluginName, options);
 
       if (result && result.success && result.archetypePath) {
         console.log(chalk.greenBright(`\nPlugin '${chalk.yellow(newPluginName)}' created successfully.`));

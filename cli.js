@@ -266,6 +266,7 @@ async function main() {
         .command(collectionCmd)
         .command(updateCmd)
         .command(configCmd)
+        .completion()
         .alias('h', 'help')
         .alias('v', 'version')
         .strict()
@@ -291,7 +292,15 @@ async function main() {
             if (msg) console.error(chalk.yellow("For usage details, run with --help."));
             process.exit(1);
         })
-        .epilogue("For more information, refer to the README.md file.");
+        .epilogue(
+            "For more information, refer to the README.md file.\n" +
+            chalk.gray(
+              "Tip - <Tab>-completion:\n" +
+              "    echo 'source <(md-to-pdf completion)' >> ~/.bashrc\n" +
+              "    echo 'source <(md-to-pdf completion)' >> ~/.zshrc\n" +
+              "then run 'source ~/.bashrc' or 'source ~/.zshrc'"
+            )
+        );
 
     await argvBuilder.argv;
 }

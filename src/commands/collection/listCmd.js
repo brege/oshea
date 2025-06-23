@@ -3,18 +3,22 @@ const chalk = require('chalk');
 const stripAnsi = require('strip-ansi');
 
 module.exports = {
-  command: 'list [type_or_collection_name]',
+  command: 'list <type> [collection_name]',
   describe: 'list downloaded collections or plugins',
   builder: (yargsCmd) => {
     yargsCmd
-      .positional('type_or_collection_name', {
-        describe: `type to list (collections, available, enabled) or a collection name`,
+      .positional('type', {
+        describe: `the type of items to list`,
         type: 'string',
-        default: 'collections',
+        choices: ['names', 'available', 'enabled', 'all'],
+      })
+      .positional('collection_name', {
+        describe: 'filter available/enabled plugins by collection name',
+        type: 'string',
       })
       .option('short', {
         alias: 's',
-        describe: 'display condensed list of downloaded collections',
+        describe: "display condensed list of downloaded collection 'names'",
         type: 'boolean',
         default: false,
       })
@@ -24,7 +28,7 @@ module.exports = {
         default: false,
       })
       .example('$0 list available', 'list all available plugins from all collections')
-      .example('$0 list enabled', 'list all currently active plugins');
+      .example('$0 list enabled my-collection', 'list enabled plugins from "my-collection"');
   },
   handler: async (args) => {
     if (!args.manager) {
@@ -32,25 +36,12 @@ module.exports = {
       process.exit(1);
     }
     const manager = args.manager;
-    let typeOrCollectionName = args.type_or_collection_name;
+    let listType = args.type.toLowerCase();
+    const collectionFilter = args.collection_name;
 
-    if (args.short && typeOrCollectionName.toLowerCase() !== 'collections') {
-      typeOrCollectionName = 'collections';
-    }
-
-    let listType = 'downloaded';
-    let collectionFilter = null;
-
-    const recognizedTypes = ['collections', 'all', 'available', 'enabled'];
-    if (recognizedTypes.includes(typeOrCollectionName.toLowerCase())) {
-      listType = typeOrCollectionName.toLowerCase();
-      if (listType === 'collections') listType = 'downloaded';
-    } else {
-      listType = 'available';
-      collectionFilter = typeOrCollectionName;
-      if (!args.short) {
-        console.log(chalk.blueBright(`md-to-pdf collection: Listing plugins in collection: ${chalk.cyan(collectionFilter)}`));
-      }
+    // Internally, 'names' is handled by the 'downloaded' logic in the manager.
+    if (listType === 'names') {
+      listType = 'downloaded';
     }
 
     try {
@@ -106,12 +97,12 @@ module.exports = {
             });
         }
 
-      } else if (listType === 'available') {
+      } else if (listType === 'available' || listType === 'all') { // 'all' is an alias for 'available' now
         if (results.length === 0) {
-          console.log(chalk.yellow(`No available plugins found for collection "${collectionFilter || 'all'}"`));
+          console.log(chalk.yellow(`No available plugins found ${collectionFilter ? `in collection "${collectionFilter}"` : 'in any collection'}.`));
           return;
         }
-        console.log(chalk.blueBright(`\nAvailable plugins in collection "${collectionFilter || 'all'}"`));
+        console.log(chalk.blueBright(`\nAvailable plugins ${collectionFilter ? `in collection "${collectionFilter}"` : ''}:`));
         results.forEach(p => {
           console.log(chalk.greenBright(`  - Plugin ID: ${chalk.yellow(p.plugin_id)}`));
           console.log(chalk.gray(`    Description: ${p.description}`));

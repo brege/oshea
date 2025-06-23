@@ -21,7 +21,11 @@ module.exports = {
         describe: 'skip plugin validation during enablement',
         type: 'boolean',
         default: false,
-      });
+      })
+      .epilogue(chalk.gray(
+        `If --name is omitted, the plugin directory name will be used as the invoke name.` +
+        '\n' + "Tip: Use 'md-to-pdf plugin list' to see all currently enabled plugins."
+      ));
   },
   handler: async (args) => {
     if (!args.manager || typeof args.manager.addSingletonPlugin !== 'function') {

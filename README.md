@@ -501,6 +501,19 @@ The [**Batch Processing Guide**](docs/batch-processing-guide.md) provides exampl
 
 ---
 
+## Tab Completion
+
+To enable tab completion for Bash or Zsh, run:
+
+    source <(md-to-pdf completion)
+
+To enable it permanently, add the above line to your ~/.bashrc or ~/.zshrc.
+
+For more details, see [Tab Completion in the yargs docs](https://yargs.js.org/docs/#api-reference-completion).
+
+
+---
+
 ## Testing
 
 The project includes an integration test suite: **`npm test`**.  For more details, see [**`test/README.md`**](test#readme).

@@ -773,7 +773,7 @@ The test suite was restructured by consolidating all module and subsystem integr
 
 ``` bash
 npm test -- --group level2
-npm test -- --group rank[1-2]
+npm test -- --group debug
 npm test -- 'test/integration/**/*.test.1.?.1.js'
 ```
 
@@ -942,7 +942,7 @@ This table outlines the assets and tasks required to enable an AI to reliably ge
 
 **Proposed Order of Implementation:**
 
-**✔A2 + ✔A1 ➜ ✔D1 ➜ B2 ➜ B1 ➜ ai.1 ➜ ai.2 ➜ D2 ➜ C3**
+**✔A2 + ✔A1 ➜ ✔D1 ➜ ✔B2 ➜ ✔B3 ➜ ●B1 ➜ ai.1 ➜ ai.2 ➜ D2 ➜ C3**
 
 **Thematically:**
 

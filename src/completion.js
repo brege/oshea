@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const completionProvider = require('./completion_provider');
+const completionTracker = require('./completion_tracker');
 
 const CACHE_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.cache/md-to-pdf/cli-tree.json');
 
@@ -14,7 +14,7 @@ function loadCache() {
     try {
         return JSON.parse(fs.readFileSync(CACHE_PATH, 'utf8'));
     } catch (e) {
-        console.error(`Error loading cache: ${e.message}`);
+        // Fail silently or log only in debug mode for completion
         return [];
     }
 }
@@ -38,44 +38,11 @@ function findNode(tree, parts) {
         if (node.children && node.children.length > 0) return findNode(node.children, rest);
         return node;
     }
-    if (rest.length === 0) {
+    // If it's a partial match for a command, return the parent's children
+    if (rest.length === 0 && tree.some(n => n.name.startsWith(head))) {
         return { children: tree, name: '$partial_match_parent', options: [], positionals: [] };
     }
     return null;
-}
-
-/**
- * Get dynamic suggestions for a given command context.
- * This function is now SYNCHRONOUS.
- * @param {string} commandPathStr The string representation of the command path (e.g., 'plugin help').
- * @param {Object} argv Parsed arguments object.
- * @returns {Array<string>|null} An array of dynamic suggestions, or null if none.
- */
-function getDynamicSuggestions(commandPathStr, argv) { // Removed 'async' keyword
-    switch (commandPathStr) {
-        case 'plugin help':
-        case 'generate':
-        case 'config --plugin':
-            return completionProvider.getUsablePlugins(argv); // Removed 'await'
-            
-        case 'convert':
-            if (argv.plugin === '' || (argv.p && argv.p === '')) {
-                return completionProvider.getUsablePlugins(argv); // Removed 'await'
-            }
-            break;
-
-        case 'plugin disable':
-            return completionProvider.getEnabledPlugins(argv); // Removed 'await'
-            
-        case 'plugin enable':
-            return completionProvider.getAvailablePlugins(argv); // Removed 'await'
-
-        case 'collection remove':
-        case 'collection update':
-        case 'update':
-            return completionProvider.getDownloadedCollections(argv); // Removed 'await'
-    }
-    return null; // No dynamic provider for this context
 }
 
 /**
@@ -85,46 +52,82 @@ function getDynamicSuggestions(commandPathStr, argv) { // Removed 'async' keywor
  * @param {string} current The string currently being typed by the user.
  * @returns {Array<string>} An array of suggested completion strings.
  */
-function getSuggestions(argv, current) { // Removed 'async' keyword
-    const commandPathParts = argv._.slice(1).filter(Boolean);
-    const commandPathStr = commandPathParts.join(' ');
-    
-    // Attempt to get dynamic suggestions first if not typing a flag
-    if (!current.startsWith('-')) {
-        const dynamicSuggestions = getDynamicSuggestions(commandPathStr, argv); // Removed 'await'
-        if (dynamicSuggestions !== null && Array.isArray(dynamicSuggestions)) {
-            return dynamicSuggestions.filter(s => s.startsWith(current));
-        }
-    }
-    
-    // Fallback to Static Completion Logic
+function getSuggestions(argv, current) {
+    const commandPathParts = argv._.slice(1).filter(Boolean); // Extract command/subcommand parts
     const cache = loadCache();
     let suggestions = [];
+
     const globalNode = cache.find(n => n.name === '$0');
-    let globalOptionsAsFlags = (globalNode?.options || []).map(opt => `--${opt}`);
+    let globalOptionsAsFlags = (globalNode?.options || []).map(opt => `--${opt.name}`);
+
+    let currentNode = findNode(cache, commandPathParts);
+    if (!currentNode) {
+        // If no matching command node, provide global options or top-level commands
+        if (current.startsWith('-')) {
+            suggestions.push(...globalOptionsAsFlags);
+        } else {
+            suggestions.push(...cache.filter(n => n.name !== '$0').map(n => n.name)); // Top-level commands
+            if (globalNode && globalNode.positionals) {
+                suggestions.push(...globalNode.positionals.map(p => p.key));
+            }
+        }
+        return [...new Set(suggestions)].filter(s => s.startsWith(current));
+    }
+
+    let targetCompletionKey = null;
 
     if (current.startsWith('-')) {
-        let commandOptionsAsFlags = [];
-        let currentNode = findNode(cache, commandPathParts);
-        if (currentNode && currentNode.options) {
-            commandOptionsAsFlags = currentNode.options.map(opt => `--${opt}`);
+        // User is typing an option (e.g., --plugin)
+        const partialOptionName = current.substring(2);
+        const matchedOption = [...(currentNode.options || []), ...(globalNode?.options || [])]
+            .find(opt => opt.name === partialOptionName || opt.name.startsWith(partialOptionName));
+
+        if (matchedOption && matchedOption.completionKey) {
+            targetCompletionKey = matchedOption.completionKey;
         }
-        suggestions = [...new Set([...commandOptionsAsFlags, ...globalOptionsAsFlags])];
+
+        // Add static options if no dynamic key found or to complement dynamic suggestions
+        suggestions.push(...(currentNode.options || []).map(opt => `--${opt.name}`));
+        suggestions.push(...globalOptionsAsFlags);
+
     } else {
-        let currentNode = findNode(cache, commandPathParts);
-        if (currentNode && (currentNode.name === '$partial_match_parent' || currentNode.isRoot)) {
-            if (currentNode.children) suggestions.push(...currentNode.children.map(n => n.name).filter(n => n !== '$0'));
-            if (currentNode.isRoot && globalNode && globalNode.positionals) {
-                suggestions.push(...globalNode.positionals);
+        // User is typing a positional argument OR a command/subcommand
+        // Determine the index of the positional argument being completed relative to the command's positionals array
+        // argv._ contains: [script_name, command, subcommand, positional_arg_1, ...]
+        // commandPathParts contains: [command, subcommand, ...]
+        const numCommandPartsInArgv = commandPathParts.length; // e.g., for 'plugin help', this is 2
+        // The index of the positional argument in the 'positionals' array of the current node
+        // is simply the number of arguments provided AFTER the command/subcommand path.
+        const positionalIndexInNode = argv._.length - (numCommandPartsInArgv + 1); // +1 for script name
+
+        if (currentNode.positionals && currentNode.positionals[positionalIndexInNode]) {
+            const positionalDef = currentNode.positionals[positionalIndexInNode];
+            if (positionalDef.completionKey) {
+                targetCompletionKey = positionalDef.completionKey;
             }
-        } else if (currentNode) {
-            if (currentNode.children && currentNode.children.length > 0) {
-                suggestions.push(...currentNode.children.map(n => n.name));
-            } else if (currentNode.positionals) {
-                suggestions.push(...currentNode.positionals);
-            }
+        }
+        
+        // Add static subcommands or positionals
+        if (currentNode.children && currentNode.name !== '$partial_match_parent') {
+            suggestions.push(...currentNode.children.map(n => n.name).filter(n => n !== '$0'));
+        }
+        if (currentNode.positionals && currentNode.name !== '$partial_match_parent') {
+            suggestions.push(...currentNode.positionals.map(p => p.key));
         }
     }
+
+    // Call dynamic completion based on targetCompletionKey
+    if (targetCompletionKey) {
+        const dynamicSuggestionsFn = completionTracker[`get${targetCompletionKey.charAt(0).toUpperCase() + targetCompletionKey.slice(1)}`];
+        if (typeof dynamicSuggestionsFn === 'function') {
+            const dynamicCompletions = dynamicSuggestionsFn();
+            suggestions.push(...dynamicCompletions);
+        } else {
+            // Log only in debug mode for completion, as it can be noisy
+            // console.warn(`WARN: No completion tracker function found for key: ${targetCompletionKey}`);
+        }
+    }
+    
     return [...new Set(suggestions)].filter(s => s.startsWith(current));
 }
 

@@ -1,4 +1,7 @@
 // src/commands/generateCmd.js
+const path = require('path'); 
+const chalk = require('chalk'); 
+
 module.exports = {
   command: "generate <pluginName>",
   describe: "generate a document from a complex plugin",
@@ -6,7 +9,8 @@ module.exports = {
     yargs
       .positional("pluginName", { 
         describe: "name of the plugin to use", 
-        type: "string" 
+        type: "string",
+        completionKey: 'usablePlugins' 
       })
       .option("outdir", { 
         alias: "o", 

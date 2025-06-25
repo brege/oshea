@@ -8,7 +8,8 @@ module.exports = {
     yargsCmd
       .positional('collection_name', {
         describe: 'name of the collection to update; omit for all',
-        type: 'string'
+        type: 'string',
+        completionKey: 'downloadedCollections' 
       });
   },
   handler: async (args) => {
@@ -35,6 +36,14 @@ module.exports = {
            console.warn(chalk.yellow("The batch update process for all collections may have encountered issues for some collections. Check CM logs above."));
            commandShouldFailHard = true;
         }
+      }
+
+      const cliPath = path.resolve(__dirname, '../../../cli.js'); // Go up 3 levels: collection -> commands -> src -> md-to-pdf
+      try {
+        const { execSync } = require('child_process');
+        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
+      } catch (error) {
+        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
       }
     } catch (error) { 
       const context = args.collection_name ? `'collection update ${args.collection_name}'` : "'collection update all'";

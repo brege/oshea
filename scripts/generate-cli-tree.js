@@ -23,6 +23,11 @@ function createYargsStub() {
     }, {
         get(target, prop) {
             if (prop in target) return target[prop];
+            if (['command', 'demandCommand', 'epilog', 'help', 'version', 'alias', 'strictCommands', 'usage', 'middleware', 'completion', 'fail'].includes(prop)) {
+                 return (...args) => stub;
+            }
+            if (prop === 'argv') return {};
+            if (prop === 'showHelp') return () => {};
             return (...args) => stub;
         }
     });
@@ -35,99 +40,117 @@ function parseBaseCommand(commandDef) {
     return cmdString.split(' ')[0];
 }
 
-function isMultiCommandModule(mod) {
-    // Heuristic: has multiple keys, each with a 'command' property
-    return Object.values(mod).every(
-        v => v && typeof v === 'object' && 'command' in v
-    );
-}
-
 function discoverCommandTree(dir, prefixParts = []) {
-    let tree = [];
+    const nodesMap = new Map();
     const entries = fs.readdirSync(dir);
+
+    // Get global options and default command info from the main cli.js if this is the top level discovery
+    if (prefixParts.length === 0) {
+        let globalOptionsList = [
+            'config', 'factory-defaults', 'coll-root', // Explicitly known global options
+            'help', 'version', 'h', 'v' // Standard Yargs global options and aliases
+        ];
+        let defaultCommandPositionals = [];
+        let defaultCommandOptions = [];
+
+        try {
+            // Simulate the default command to extract its specific options/positionals
+            // This is your implicit `convert` via markdown file.
+            const convertCmdModule = require('../src/commands/convertCmd.js');
+            const defaultCmdStub = createYargsStub();
+            if (typeof convertCmdModule.defaultCmd.builder === 'function') {
+                convertCmdModule.defaultCmd.builder(defaultCmdStub);
+            }
+            defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => `<${p.key}>`);
+            defaultCommandOptions = Object.keys(defaultCmdStub.options || {});
+        } catch (builderError) {
+            console.warn(chalk.yellow(`WARN: Could not extract default command builder info for $0 node: ${builderError.message}`));
+        }
+
+        // Combine unique global options and default command options for $0
+        const finalOptionsFor$0 = [...new Set([...globalOptionsList, ...defaultCommandOptions])].sort();
+        const finalPositionalsFor$0 = [...new Set([...defaultCommandPositionals])];
+
+
+        nodesMap.set('$0', {
+            name: '$0',
+            options: finalOptionsFor$0,
+            positionals: finalPositionalsFor$0,
+            children: []
+        });
+    }
+
 
     for (const entry of entries) {
         const fullPath = path.join(dir, entry);
         if (fs.statSync(fullPath).isDirectory()) {
-            // Group command: recurse into subdirectory
             const groupName = path.basename(fullPath);
-            tree.push({
+            nodesMap.set(groupName, {
                 name: groupName,
-                children: discoverCommandTree(fullPath, [...prefixParts, groupName])
+                children: discoverCommandTree(fullPath, [...prefixParts, groupName]),
+                options: [],
+                positionals: []
             });
         } else if (entry.endsWith('Cmd.js')) {
             const commandModule = require(fullPath);
 
-            // --- Multi-Command Module ---
+            const processAndAddCommand = (cmdObj) => {
+                const commandDefinition = cmdObj.command;
+                if (!commandDefinition) return;
+
+                const commandName = parseBaseCommand(commandDefinition);
+                const yargsStub = createYargsStub();
+
+                if (typeof cmdObj.builder === 'function') {
+                    try {
+                        cmdObj.builder(yargsStub);
+                    } catch (e) {
+                         // console.error(chalk.yellow(`WARN: Error in builder for ${commandName}: ${e.message}`));
+                    }
+                }
+                const options = Object.keys(yargsStub.options || {});
+                const positionals = (yargsStub.positionals || []).map(p => `<${p.key}>`);
+
+                let children = [];
+                if (/<subcommand>/.test(commandDefinition) && fs.existsSync(path.join(dir, commandName))) {
+                    children = discoverCommandTree(
+                        path.join(dir, commandName),
+                        [...prefixParts, commandName]
+                    );
+                }
+
+                if (nodesMap.has(commandName)) {
+                    const existingNode = nodesMap.get(commandName);
+                    existingNode.options = [...new Set([...existingNode.options, ...options])];
+                    existingNode.positionals = [...new Set([...existingNode.positionals, ...positionals])];
+                    if (children.length > 0 && existingNode.children.length === 0) {
+                         existingNode.children = children;
+                    }
+                } else {
+                    nodesMap.set(commandName, {
+                        name: commandName,
+                        options,
+                        positionals,
+                        children
+                    });
+                }
+            };
+
             if (
                 typeof commandModule === 'object' &&
                 !Array.isArray(commandModule) &&
                 Object.keys(commandModule).length > 0 &&
-                isMultiCommandModule(commandModule)
+                Object.values(commandModule).every(v => v && typeof v === 'object' && 'command' in v)
             ) {
-                for (const [key, cmdObj] of Object.entries(commandModule)) {
-                    const commandDefinition = cmdObj.command;
-                    const commandName = parseBaseCommand(commandDefinition);
-
-                    // Collect options/flags and positionals if available
-                    const yargsStub = createYargsStub();
-                    if (typeof cmdObj.builder === 'function') {
-                        try {
-                            cmdObj.builder(yargsStub);
-                        } catch (e) {}
-                    }
-                    const options = Object.keys(yargsStub.options || {});
-                    const positionals = (yargsStub.positionals || []).map(p => `<${p.key}>`);
-
-                    tree.push({
-                        name: commandName,
-                        options,
-                        positionals,
-                        children: []
-                    });
+                for (const cmdObj of Object.values(commandModule)) {
+                    processAndAddCommand(cmdObj);
                 }
-                continue;
+            } else {
+                processAndAddCommand(commandModule);
             }
-
-            // --- Simple/Group Command Module ---
-            if (!commandModule.command) continue;
-            let commandDefinition = commandModule.command;
-            const commandName = parseBaseCommand(commandDefinition);
-
-            // If this is a group command (e.g., plugin <subcommand>), recurse into subdir if present
-            if (
-                /<subcommand>/.test(commandDefinition) &&
-                fs.existsSync(path.join(dir, commandName))
-            ) {
-                tree.push({
-                    name: commandName,
-                    children: discoverCommandTree(
-                        path.join(dir, commandName),
-                        [...prefixParts, commandName]
-                    )
-                });
-                continue;
-            }
-
-            // Collect options/flags and positionals if available
-            const yargsStub = createYargsStub();
-            if (typeof commandModule.builder === 'function') {
-                try {
-                    commandModule.builder(yargsStub);
-                } catch (e) {}
-            }
-            const options = Object.keys(yargsStub.options || {});
-            const positionals = (yargsStub.positionals || []).map(p => `<${p.key}>`);
-
-            tree.push({
-                name: commandName,
-                options,
-                positionals,
-                children: []
-            });
         }
     }
-    return tree;
+    return Array.from(nodesMap.values());
 }
 
 // --- Pretty Print Tree ---
@@ -139,7 +162,7 @@ function printTree(nodes, indent = '') {
         }
         console.log(line);
         if (node.options && node.options.length) {
-            for (const opt of node.options) {
+            for (const opt of node.options.sort()) {
                 console.log(indent + '  ' + chalk.gray('--' + opt));
             }
         }
@@ -150,7 +173,11 @@ function printTree(nodes, indent = '') {
 }
 
 // --- Run ---
-const commandTree = discoverCommandTree(COMMANDS_DIR);
-console.log(chalk.cyan('md-to-pdf command tree:'));
-printTree(commandTree);
+if (require.main === module) {
+    const commandTree = discoverCommandTree(COMMANDS_DIR);
+    console.log(chalk.cyan('md-to-pdf command tree:'));
+    printTree(commandTree);
+}
 
+// Export for use in generate-completion-cache.js
+module.exports = { discoverCommandTree };

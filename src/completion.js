@@ -75,55 +75,62 @@ function getSuggestions(argv, current) {
     }
 
     let targetCompletionKey = null;
+    let targetChoices = null;
 
+    // Logic for completing Options (flags like --plugin)
     if (current.startsWith('-')) {
-        // User is typing an option (e.g., --plugin)
         const partialOptionName = current.substring(2);
-        const matchedOption = [...(currentNode.options || []), ...(globalNode?.options || [])]
-            .find(opt => opt.name === partialOptionName || opt.name.startsWith(partialOptionName));
+        const allOptions = [...(currentNode.options || []), ...(globalNode?.options || [])];
+        const matchedOption = allOptions.find(opt => opt.name === partialOptionName || opt.name.startsWith(partialOptionName));
 
-        if (matchedOption && matchedOption.completionKey) {
-            targetCompletionKey = matchedOption.completionKey;
+        if (matchedOption) {
+            if (matchedOption.choices) {
+                targetChoices = matchedOption.choices;
+            } else if (matchedOption.completionKey) {
+                targetCompletionKey = matchedOption.completionKey;
+            }
         }
 
-        // Add static options if no dynamic key found or to complement dynamic suggestions
+        // Add static options (e.g., --help, --outdir)
         suggestions.push(...(currentNode.options || []).map(opt => `--${opt.name}`));
         suggestions.push(...globalOptionsAsFlags);
 
     } else {
-        // User is typing a positional argument OR a command/subcommand
-        // Determine the index of the positional argument being completed relative to the command's positionals array
-        // argv._ contains: [script_name, command, subcommand, positional_arg_1, ...]
-        // commandPathParts contains: [command, subcommand, ...]
-        const numCommandPartsInArgv = commandPathParts.length; // e.g., for 'plugin help', this is 2
-        // The index of the positional argument in the 'positionals' array of the current node
-        // is simply the number of arguments provided AFTER the command/subcommand path.
-        const positionalIndexInNode = argv._.length - (numCommandPartsInArgv + 1); // +1 for script name
+        // Logic for completing Positional Arguments OR Subcommands
+        const numCommandPartsInArgv = commandPathParts.length;
+        const positionalIndexInNode = argv._.length - (numCommandPartsInArgv + 1);
 
+        // Check if the current context implies a positional argument from the current command node
         if (currentNode.positionals && currentNode.positionals[positionalIndexInNode]) {
             const positionalDef = currentNode.positionals[positionalIndexInNode];
-            if (positionalDef.completionKey) {
+            if (positionalDef.choices) {
+                targetChoices = positionalDef.choices;
+            } else if (positionalDef.completionKey) {
                 targetCompletionKey = positionalDef.completionKey;
             }
-        }
-        
-        // Add static subcommands or positionals
-        if (currentNode.children && currentNode.name !== '$partial_match_parent') {
-            suggestions.push(...currentNode.children.map(n => n.name).filter(n => n !== '$0'));
-        }
-        if (currentNode.positionals && currentNode.name !== '$partial_match_parent') {
-            suggestions.push(...currentNode.positionals.map(p => p.key));
+
+        } else {
+            // If no specific positional is matched, suggest subcommands or general positional keys
+            if (currentNode.children && currentNode.name !== '$partial_match_parent') {
+                suggestions.push(...currentNode.children.map(n => n.name).filter(n => n !== '$0'));
+            }
+            // Add static positional keys that haven't been 'consumed' yet
+            if (currentNode.positionals) {
+                const unconsumedPositionals = currentNode.positionals.slice(positionalIndexInNode);
+                suggestions.push(...unconsumedPositionals.filter(p => !p.choices && !p.completionKey).map(p => p.key));
+            }
         }
     }
 
-    // Call dynamic completion based on targetCompletionKey
-    if (targetCompletionKey) {
+    // Prioritize suggestions based on targetChoices, then targetCompletionKey
+    if (targetChoices) {
+        suggestions.push(...targetChoices);
+    } else if (targetCompletionKey) {
         const dynamicSuggestionsFn = completionTracker[`get${targetCompletionKey.charAt(0).toUpperCase() + targetCompletionKey.slice(1)}`];
         if (typeof dynamicSuggestionsFn === 'function') {
             const dynamicCompletions = dynamicSuggestionsFn();
             suggestions.push(...dynamicCompletions);
         } else {
-            // Log only in debug mode for completion, as it can be noisy
             // console.warn(`WARN: No completion tracker function found for key: ${targetCompletionKey}`);
         }
     }

@@ -1,12 +1,51 @@
 #!/usr/bin/env node
 // cli.js
 
-const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
-const fsp = require('fs').promises;
+
+const argvRaw = hideBin(process.argv);
+const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
+
+if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
+    const { getSuggestions } = require('./src/completion.js'); 
+
+    const completionArgv = {
+        _: [],
+        'get-yargs-completions': true 
+    };
+    let currentWord = '';
+
+    for (let i = 0; i < argvRaw.length; i++) {
+        const arg = argvRaw[i];
+        if (arg === '--get-yargs-completions') {
+            continue;
+        }
+        if (arg.startsWith('-')) {
+            if (i === argvRaw.length - 1) {
+                currentWord = arg;
+            }
+        } else {
+            completionArgv._.push(arg);
+            if (i === argvRaw.length - 1) {
+                currentWord = arg;
+            }
+        }
+    }
+
+    if (completionArgv._.length > 0 && completionArgv._[completionArgv._.length - 1] === currentWord && !currentWord.startsWith('-')) {
+        completionArgv._.pop();
+    } 
+
+    const suggestions = getSuggestions(completionArgv, currentWord);
+    console.log(suggestions.join('\n'));
+    process.exit(0);
+}
+
+
+const os = require('os'); 
+const fsp = require('fs').promises; 
 const chalk = require('chalk');
 const { spawn } = require('child_process');
 
@@ -19,14 +58,15 @@ const MainConfigLoader = require('./src/main_config_loader.js');
 const markdownUtils = require('./src/markdown_utils');
 const yaml = require('js-yaml');
 
+const yargs = require('yargs/yargs');
 
-// Command modules
 const configCmd = require('./src/commands/configCmd.js');
 const pluginCmd = require('./src/commands/pluginCmd.js');
 const convertCmdModule = require('./src/commands/convertCmd.js');
 const generateCmd = require('./src/commands/generateCmd.js');
 const collectionCmd = require('./src/commands/collectionCmd.js');
 const updateCmd = require('./src/commands/updateCmd.js');
+
 
 function openPdf(pdfPath, viewerCommand) {
     if (!viewerCommand) {
@@ -190,9 +230,9 @@ async function executeGeneration(args, configResolver) {
 async function main() {
     let managerInstance;
 
-    const argvBuilder = yargs(hideBin(process.argv))
+    const argvBuilder = yargs(hideBin(process.argv)) 
         .parserConfiguration({ 'short-option-groups': false })
-        .scriptName("md-to-pdf")
+        .scriptName("md-to-pdf") 
         .usage("Usage: $0 <command_or_markdown_file> [options]")
         .option('config', {
             describe: 'path to a project-specific YAML config file',
@@ -208,13 +248,9 @@ async function main() {
             describe: 'overrides the main collection directory',
             type: 'string',
             normalize: true,
-        })
-        .middleware(async (argv) => {
-            // If this is a completion run, do not perform any expensive setup.
-            if ('get-yargs-completions' in argv) {
-                return;
-            }
+        });
 
+        argvBuilder.middleware(async (argv) => {
             const mainConfigLoader = new MainConfigLoader(path.resolve(__dirname, '..'), argv.config, argv.factoryDefaults);
             const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
             const collRootFromMainConfig = primaryConfig.config.collections_root || null;
@@ -235,12 +271,16 @@ async function main() {
                 { collRoot: managerInstance.collRoot }
             );
             argv.configResolver = configResolver;
-        })
+        });
+
+        argvBuilder.completion();
+
+        argvBuilder
         .command({
             ...convertCmdModule.defaultCmd,
             handler: async (args) => {
-                if (args.markdownFile) {
-                    const potentialFile = args.markdownFile;
+                const potentialFile = args.markdownFile;
+                if (potentialFile) { // Check if markdownFile was provided
                     if (!fs.existsSync(potentialFile) && !potentialFile.endsWith('.md') && !potentialFile.endsWith('.mdx')) {
                          console.error(chalk.red(`Error: Unknown command: '${potentialFile}'`));
                          console.error(chalk.yellow("\nTo convert a file, provide a valid path. For other commands, see --help."));
@@ -248,7 +288,7 @@ async function main() {
                     }
                     args.isLazyLoad = true;
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
-                } else {
+                } else { 
                     argvBuilder.showHelp();
                 }
             }
@@ -271,7 +311,6 @@ async function main() {
         .command(collectionCmd)
         .command(updateCmd)
         .command(configCmd)
-        .completion()
         .alias('h', 'help')
         .alias('v', 'version')
         .strictCommands()

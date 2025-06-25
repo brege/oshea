@@ -84,5 +84,8 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 <!-- etc-start -->
 
+- [docs/lucidity/tab-completion-assay.md](lucidity/tab-completion-assay.md)
+- [test/docs/help-text-checklist.md](../test/docs/help-text-checklist.md)
+
 <!-- etc-end -->
 

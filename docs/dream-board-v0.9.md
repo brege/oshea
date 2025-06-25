@@ -1132,3 +1132,40 @@ where `#` indicates the order of implementation.
 |   | `collection update [collection_name]` | Suggests all downloaded collections for updating.   |
 |   | `update [collection_name]` | Suggests all downloaded collections for updating (alias).      |
 
+
+### Fast Tab Completion Architecture
+
+The standard implementation of tab-completion often suffers from a critical performance flaw: each completion request forces the entire application to bootstrap, resulting in noticeable lag. The following architecture, developed in the `toy` branch, solves this by completely decoupling completion from the main application startup, relying on a fast, cache-first model.
+
+#### The Core Problem: Startup Latency
+
+A naive completion system is slow because it is synchronous with the application's full initialization. Every press of the `<Tab>` key loads all modules, parses all configurations, and builds the entire command structure—a process that can take seconds, destroying the user experience.
+
+#### Architectural Attempt at a Shim & Cache Model
+
+The high-performance model treats completion as a distinct, lightweight process. It never loads the main application. This is achieved through three core pillars:
+
+**The CLI Shim: A Performance Gateway**
+
+A small block of code is placed at the very top of the main `cli.js` entrypoint. Its sole purpose is to inspect the command-line arguments for the `--get-yargs-completions` flag. If this flag is detected, the shim immediately diverts the process to a lightweight completion handler and then exits. The main application's dependency tree is never traversed, avoiding all startup latency.
+
+**The Two-Tiered Cache System**
+
+Instead of discovering commands and data at runtime, the system relies on two pre-computed JSON caches stored in the user's cache directory (e.g., `~/.cache/md-to-pdf/`).
+
+  * **Static Cache (`cli-tree.json`)**\
+    A complete, static snapshot of the CLI's command structure (commands, subcommands, flags). This file is generated once by `scripts/generate-cli-tree.js` and only needs to be updated when the CLI's command definitions are changed. Reading this file is instantaneous.
+
+  * **Dynamic Cache (`dynamic-completion-data.json`)** \
+    A snapshot of user-specific data that can change during runtime (e.g., installed plugins, downloaded collections).
+
+**The Background Cache & Provider**
+
+The dynamic cache is kept fresh without blocking the user.
+
+  * **Background Updates:** A dedicated script (`scripts/generate-completion-dynamic-cache.js`) is responsible for generating the dynamic cache. The `completion_provider.js` module can spawn this script as a *detached background process* whenever it detects the cache is stale.
+
+  * **Synchronous Provider:** The `completion_provider.js` module provides a synchronous, non-blocking interface. When asked for data, it reads the current cache from disk instantly. If the cache is stale, it returns the old data while silently triggering the background update. This ensures the user always gets an immediate response, even if the data is a few seconds out of date.
+
+**WORK IN PROGRESS**
+

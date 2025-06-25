@@ -1,48 +1,122 @@
 // src/completion_provider.js
-const path = require('path');
-const PluginRegistryBuilder = require('./PluginRegistryBuilder');
-const CollectionsManager = require('./collections-manager');
 
-// This cache will persist for the duration of a single CLI completion request.
-const cache = {
-    usablePlugins: null,
-    downloadedCollections: null,
-    // Future caches can be added here.
-};
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
+const { spawn } = require('child_process');
+
+const CACHE_FRESHNESS_THRESHOLD = 5000; // 5 seconds in milliseconds
 
 /**
- * Gets a list of all registered or enabled plugins. Uses a cache.
- * @param {object} argv The yargs argv object provided by the completion handler.
- * @returns {Promise<string[]>} A list of usable plugin names.
+ * Determines the path for the dynamic completion cache file.
+ * @returns {string} The full path to the cache file.
  */
-async function getUsablePlugins(argv) {
-    if (cache.usablePlugins) {
-        return cache.usablePlugins;
+function getCachePath() {
+    const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
+    return path.join(xdgCacheHome, 'md-to-pdf', 'dynamic-completion-data.json');
+}
+
+/**
+ * Triggers the background script to regenerate the dynamic completion cache.
+ */
+function triggerCacheUpdate() {
+    const scriptPath = path.resolve(__dirname, '..', 'scripts', 'generate-completion-dynamic-cache.js');
+    if (!fs.existsSync(scriptPath)) {
+        return; // Silently fail if the script doesn't exist
     }
 
     try {
-        const projectRoot = path.resolve(__dirname, '..');
-        const manager = new CollectionsManager({
-            collRootCliOverride: argv.collRoot,
+        const child = spawn('node', [scriptPath], {
+            detached: true,
+            stdio: 'ignore'
         });
-        const builder = new PluginRegistryBuilder(
-            projectRoot, null, argv.config, argv.factoryDefaults,
-            false, null, manager, { collRoot: manager.collRoot }
-        );
-
-        const allPlugins = await builder.getAllPluginDetails();
-        const usablePluginNames = allPlugins
-            .filter(p => p.status && (p.status.startsWith('Registered') || p.status === 'Enabled (CM)'))
-            .map(p => p.name);
-        
-        cache.usablePlugins = usablePluginNames;
-        return cache.usablePlugins;
+        // Allow the parent process (the completion shim) to exit independently
+        child.unref();
     } catch (e) {
-        // In case of any error during discovery, return an empty list.
-        return [];
+        // Suppress errors from spawning the background process
     }
+}
+
+/**
+ * Reads the dynamic completion data cache. If the cache is stale or missing,
+ * it triggers a background update.
+ * @returns {object} The parsed dynamic data from the cache, or an empty object.
+ */
+function getDynamicData() {
+    const cachePath = getCachePath();
+    let cacheData = {};
+
+    if (fs.existsSync(cachePath)) {
+        try {
+            cacheData = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+            const lastUpdated = new Date(cacheData.lastUpdated || 0);
+            const now = new Date();
+            
+            // If cache is stale, trigger an update but still return the old data for now.
+            if (now - lastUpdated > CACHE_FRESHNESS_THRESHOLD) {
+                triggerCacheUpdate();
+            }
+        } catch (e) {
+            triggerCacheUpdate(); // Trigger update if cache is corrupt
+            return {};
+        }
+    } else {
+        triggerCacheUpdate(); // Trigger update if cache is missing
+        return {};
+    }
+    
+    return cacheData;
+}
+
+// --- Exported Provider Functions ---
+
+/**
+ * Provides a list of usable plugin names from the dynamic cache.
+ * This function is now SYNCHRONOUS.
+ * @param {Object} argv Parsed arguments object (currently unused, but kept for interface consistency).
+ * @returns {Array<string>} An array of usable plugin names.
+ */
+function getUsablePlugins(argv) { // Removed 'async' keyword
+    const data = getDynamicData();
+    return data.usablePlugins || [];
+}
+
+/**
+ * Provides a list of downloaded collection names from the dynamic cache.
+ * This function is now SYNCHRONOUS.
+ * @param {Object} argv Parsed arguments object (currently unused, but kept for interface consistency).
+ * @returns {Array<string>} An array of downloaded collection names.
+ */
+function getDownloadedCollections(argv) { // Removed 'async' keyword
+    const data = getDynamicData();
+    return data.downloadedCollections || [];
+}
+
+/**
+ * Provides a list of enabled plugin names from the dynamic cache.
+ * This function is now SYNCHRONOUS.
+ * @param {Object} argv Parsed arguments object (currently unused, but kept for interface consistency).
+ * @returns {Array<string>} An array of enabled plugin names.
+ */
+function getEnabledPlugins(argv) { // Removed 'async' keyword
+    const data = getDynamicData();
+    return data.enabledPlugins || [];
+}
+
+/**
+ * Provides a list of available (from CM) plugin names from the dynamic cache.
+ * This function is now SYNCHRONOUS.
+ * @param {Object} argv Parsed arguments object (currently unused, but kept for interface consistency).
+ * @returns {Array<string>} An array of available plugin names.
+ */
+function getAvailablePlugins(argv) { // Removed 'async' keyword
+    const data = getDynamicData();
+    return data.availablePlugins || [];
 }
 
 module.exports = {
     getUsablePlugins,
+    getDownloadedCollections,
+    getEnabledPlugins,
+    getAvailablePlugins
 };

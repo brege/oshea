@@ -1,5 +1,6 @@
 // src/commands/updateCmd.js
 const chalk = require('chalk');
+const path = require('path');
 
 module.exports = {
   command: 'update [<collection_name>]',
@@ -7,11 +8,10 @@ module.exports = {
   builder: (yargsCmd) => {
     yargsCmd
       .positional('collection_name', {
-        describe: 'name of a specific collection to update',
+        describe: 'name of a specific collection to update; omit for all',
         type: 'string',
-      })
-      .epilogue(`This is a shortcut for "collection update". If no name is provided, all collections are updated.
-It fetches updates from the remote Git source. Local modifications may be overwritten.`);
+        completionKey: 'downloadedCollections' 
+      });
   },
   handler: async (args) => {
     if (!args.manager) {
@@ -21,34 +21,43 @@ It fetches updates from the remote Git source. Local modifications may be overwr
     }
     const manager = args.manager;
 
-    if (args.collection_name) {
-      console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
-      try {
+    let commandShouldFailHard = false;
+
+    try {
+      if (args.collection_name) {
+        console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
         const result = await manager.updateCollection(args.collection_name);
-        if (result && !result.success) {
-           console.warn(chalk.yellow(`Update for '${args.collection_name}' may have had issues: ${result.message || 'Please check output above.'}`));
+        
+        if (!result.success) {
+            console.warn(chalk.yellow(`Update for '${args.collection_name}' reported issues (see CM logs above for details).`));
+            commandShouldFailHard = true;
         }
-      } catch (error) {
-        console.error(chalk.red(`\nERROR updating collection '${args.collection_name}': ${error.message}`));
-        if (process.env.DEBUG_CM === 'true' && error.stack) {
-          console.error(chalk.red(error.stack));
-        }
-        process.exit(1);
-      }
-    } else {
-      console.log(chalk.blue(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`));
-      try {
+      } else {
+        console.log(chalk.blue(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`));
         const results = await manager.updateAllCollections();
-        if (results && !results.success) {
-            console.warn(chalk.yellow("\nSome collections may not have updated successfully or were skipped. Please check output above."));
+        if (results && !results.success) { 
+           console.warn(chalk.yellow("\nSome collections may not have updated successfully or were skipped. Please check output above."));
+           commandShouldFailHard = true;
         }
-      } catch (error) {
-        console.error(chalk.red(`\nERROR updating all collections: ${error.message}`));
-        if (process.env.DEBUG_CM === 'true' && error.stack) {
-          console.error(chalk.red(error.stack));
-        }
-        process.exit(1);
       }
+      // Trigger cache regeneration after successful update operation
+      const cliPath = path.resolve(__dirname, '../../cli.js'); // Go up 2 levels: commands -> src -> md-to-pdf
+      try {
+        const { execSync } = require('child_process');
+        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
+      } catch (error) {
+        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
+      }
+    } catch (error) {
+      console.error(chalk.red(`\nERROR updating all collections: ${error.message}`));
+      if (process.env.DEBUG_CM === 'true' && error.stack) {
+        console.error(chalk.red(error.stack));
+      }
+      commandShouldFailHard = true;
+    }
+
+    if (commandShouldFailHard) {
+        process.exit(1);
     }
   }
 };

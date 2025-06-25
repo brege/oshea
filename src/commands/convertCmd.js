@@ -15,7 +15,8 @@ const cliOptionsForConvert = (yargs) => {
     .option("plugin", { 
       alias: "p", 
       describe: "plugin to use (name or path)", 
-      type: "string" 
+      type: "string",
+      completionKey: 'usablePlugins' 
     })
     .option("outdir", { 
       alias: "o", 

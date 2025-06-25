@@ -11,10 +11,12 @@ module.exports = {
         describe: `the type of items to list`,
         type: 'string',
         choices: ['names', 'available', 'enabled', 'all'],
+        completionKey: 'listTypes' 
       })
       .positional('collection_name', {
         describe: 'filter available/enabled plugins by collection name',
         type: 'string',
+        completionKey: 'downloadedCollections' 
       })
       .option('short', {
         alias: 's',
@@ -27,8 +29,8 @@ module.exports = {
         type: 'boolean',
         default: false,
       })
-      .example('$0 list available', 'list all available plugins from all collections')
-      .example('$0 list enabled my-collection', 'list enabled plugins from "my-collection"');
+      .example('$0 collection list available', 'list all available plugins from all collections')
+      .example('$0 collection list enabled my-collection', 'list enabled plugins from "my-collection"');
   },
   handler: async (args) => {
     if (!args.manager) {

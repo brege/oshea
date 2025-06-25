@@ -1,5 +1,6 @@
 // src/commands/collection/removeCmd.js
 const chalk = require('chalk');
+const path = require('path'); 
 
 module.exports = {
   command: 'remove <collection_name>',
@@ -10,6 +11,7 @@ module.exports = {
         describe: 'name of the collection to remove',
         type: 'string',
         demandOption: true,
+        completionKey: 'downloadedCollections' 
       })
       .option('force', {
         alias: 'f',
@@ -32,6 +34,14 @@ module.exports = {
     }
     try {
       await manager.removeCollection(args.collection_name, { force: args.force });
+      
+      const cliPath = path.resolve(__dirname, '../../../cli.js'); // Go up 3 levels: collection -> commands -> src -> md-to-pdf
+      try {
+        const { execSync } = require('child_process');
+        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
+      } catch (error) {
+        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
+      }
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'collection remove' command: ${error.message}`));
       if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));

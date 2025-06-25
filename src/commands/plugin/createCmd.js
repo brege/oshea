@@ -26,7 +26,8 @@ module.exports = {
       .option('from', {
         describe: `source to archetype from (registered plugin name, 'collection/id', or path)`,
         type: 'string',
-        alias: 'f'
+        alias: 'f',
+        completionKey: 'usablePlugins' 
       })
       .option('target-dir', {
         alias: 't',
@@ -93,6 +94,14 @@ module.exports = {
         console.log(chalk.blueBright("Next steps:"));
         console.log(chalk.gray(`  1. Customize the generated files in: ${chalk.underline(result.archetypePath)}`));
         console.log(chalk.gray(`  2. Register your new plugin in a main config file.`));
+      }
+      
+      const cliPath = path.resolve(__dirname, '../../../cli.js'); // Go up 3 levels: plugin -> commands -> src -> md-to-pdf
+      try {
+        const { execSync } = require('child_process');
+        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
+      } catch (error) {
+        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
       }
 
     } catch (error) {

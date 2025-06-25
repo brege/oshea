@@ -13,11 +13,11 @@ function createYargsStub() {
         options: {},
         positionals: [],
         option(key, opt) {
-            this.options[key] = opt;
+            this.options[key] = { ...opt, completionKey: opt.completionKey }; // Store completionKey
             return stub;
         },
         positional(key, opt) {
-            this.positionals.push({ key, ...opt });
+            this.positionals.push({ key, ...opt, completionKey: opt.completionKey }); // Store completionKey
             return stub;
         }
     }, {
@@ -61,14 +61,14 @@ function discoverCommandTree(dir, prefixParts = []) {
             if (typeof convertCmdModule.defaultCmd.builder === 'function') {
                 convertCmdModule.defaultCmd.builder(defaultCmdStub);
             }
-            defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => `<${p.key}>`);
-            defaultCommandOptions = Object.keys(defaultCmdStub.options || {});
+            defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey})); // Include completionKey
+            defaultCommandOptions = Object.keys(defaultCmdStub.options || {}).map(optKey => ({name: optKey, completionKey: defaultCmdStub.options[optKey].completionKey})); // Include completionKey
         } catch (builderError) {
             console.warn(chalk.yellow(`WARN: Could not extract default command builder info for $0 node: ${builderError.message}`));
         }
 
         // Combine unique global options and default command options for $0
-        const finalOptionsFor$0 = [...new Set([...globalOptionsList, ...defaultCommandOptions])].sort();
+        const finalOptionsFor$0 = [...new Set([...globalOptionsList.map(name => ({name})), ...defaultCommandOptions])].sort((a,b) => a.name.localeCompare(b.name));
         const finalPositionalsFor$0 = [...new Set([...defaultCommandPositionals])];
 
 
@@ -108,8 +108,8 @@ function discoverCommandTree(dir, prefixParts = []) {
                          // console.error(chalk.yellow(`WARN: Error in builder for ${commandName}: ${e.message}`));
                     }
                 }
-                const options = Object.keys(yargsStub.options || {});
-                const positionals = (yargsStub.positionals || []).map(p => `<${p.key}>`);
+                const options = Object.keys(yargsStub.options || {}).map(optKey => ({name: optKey, completionKey: yargsStub.options[optKey].completionKey})); // Include completionKey
+                const positionals = (yargsStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey})); // Include completionKey
 
                 let children = [];
                 if (/<subcommand>/.test(commandDefinition) && fs.existsSync(path.join(dir, commandName))) {
@@ -121,8 +121,15 @@ function discoverCommandTree(dir, prefixParts = []) {
 
                 if (nodesMap.has(commandName)) {
                     const existingNode = nodesMap.get(commandName);
-                    existingNode.options = [...new Set([...existingNode.options, ...options])];
-                    existingNode.positionals = [...new Set([...existingNode.positionals, ...positionals])];
+                    // Merge options and positionals, handling duplicates and preserving completionKey
+                    const mergedOptions = new Map();
+                    [...existingNode.options, ...options].forEach(opt => mergedOptions.set(opt.name, opt));
+                    existingNode.options = Array.from(mergedOptions.values());
+
+                    const mergedPositionals = new Map();
+                    [...existingNode.positionals, ...positionals].forEach(pos => mergedPositionals.set(pos.key, pos));
+                    existingNode.positionals = Array.from(mergedPositionals.values());
+
                     if (children.length > 0 && existingNode.children.length === 0) {
                          existingNode.children = children;
                     }
@@ -158,12 +165,16 @@ function printTree(nodes, indent = '') {
     for (const node of nodes) {
         let line = indent + chalk.bold(node.name);
         if (node.positionals && node.positionals.length) {
-            line += ' ' + node.positionals.join(' ');
+            line += ' ' + node.positionals.map(p => `<${p.key}>`).join(' ');
         }
         console.log(line);
         if (node.options && node.options.length) {
-            for (const opt of node.options.sort()) {
-                console.log(indent + '  ' + chalk.gray('--' + opt));
+            for (const opt of node.options.sort((a,b) => a.name.localeCompare(b.name))) {
+                let optString = `--${opt.name}`;
+                if (opt.completionKey) {
+                    optString += ` (compKey: ${opt.completionKey})`;
+                }
+                console.log(indent + '  ' + chalk.gray(optString));
             }
         }
         if (node.children && node.children.length) {

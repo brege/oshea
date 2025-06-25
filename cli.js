@@ -47,7 +47,7 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
 const os = require('os'); 
 const fsp = require('fs').promises; 
 const chalk = require('chalk');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process'); // MODIFIED: Added execSync
 
 const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
@@ -274,6 +274,30 @@ async function main() {
         });
 
         argvBuilder.completion();
+
+        // NEW: Internal command for plumbing (cache generation)
+        argvBuilder.command({
+            command: '_tab_cache',
+            describe: false, // Hide from help output
+            builder: (yargsCmd) => {
+                yargsCmd.option('config', { type: 'string' }) // Allow passing config for context
+                         .option('coll-root', { type: 'string' }); // Allow passing coll-root for context
+            },
+            handler: (args) => {
+                const staticCacheScript = path.resolve(__dirname, 'scripts', 'generate-completion-cache.js');
+                const dynamicCacheScript = path.resolve(__dirname, 'scripts', 'generate-completion-dynamic-cache.js');
+                
+                try {
+                    // Execute static cache generation (will use the updated generate-cli-tree.js)
+                    execSync(`node "${staticCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+                    // Execute dynamic cache generation
+                    execSync(`node "${dynamicCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+                } catch (error) {
+                    console.error(chalk.red(`ERROR: Cache generation failed: ${error.message}`));
+                    process.exit(1);
+                }
+            }
+        }); // END NEW
 
         argvBuilder
         .command({

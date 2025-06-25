@@ -1,6 +1,6 @@
 // src/commands/plugin/helpCmd.js
 const { displayPluginHelp } = require('../../get_help');
-const completionProvider = require('../../completion_provider');
+const completionTracker = require('../../completion_tracker');
 
 module.exports = {
   command: 'help <pluginName>',
@@ -9,13 +9,9 @@ module.exports = {
     yargs
       .positional('pluginName', {
         describe: 'name of plugin to display help for',
-        type: 'string'
+        type: 'string',
+        completionKey: 'usablePlugins'
       })
-      .completion('completion', async function (current, argv) {
-        // All complexity is now abstracted into the provider.
-        const usablePluginNames = await completionProvider.getUsablePlugins(argv);
-        return usablePluginNames.filter(name => name.startsWith(current));
-      });
   },
   handler: async (args) => {
     // This guard prevents the handler from running during any completion activity.

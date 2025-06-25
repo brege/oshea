@@ -1188,18 +1188,16 @@ The dynamic cache is kept fresh without blocking the user.
 
 ## Checklist 
 
-# Outcome
+### Outcome
 
-Thank you for the clarifications! Here’s your revised, organized summary with a checkmark system for satisfaction, updated notes, and corrections as requested.
+#### Summary Table of Command Completion Status
 
-## Summary Table of Command Completion Status
-
-| Command/Flag/Arg     | Type | c-Key |\_tab- | ok | Notes |
-|----------------------|:-----|:-----------:|:----------:|:------------:|:------|
-|`collection`          | `<type>`           | ✗ | ○ | ✓ | **static completion**  |
-|`plugin`              | `<type>`           | ✗ | ○ | ✓ | **static completion**  |
+| Command/Flag/Arg     | Type |c\*Key |\_tab\*| ok? | Notes |
+|----------------------|:-----|:-----:|:-----:|:---:|:------|
+|`collection`          | `<type>`           | ○ | ○ | ✓ | **static completion**  |
+|`plugin`              | `<type>`           | ○ | ○ | ✓ | **static completion**  |
 |`collection add`      | `url_or_path`      | ✗ | ● | ✓ | not dynamic data; stub literal present |
-|`collection list`     | `type`             | ✗ | ○ | ✗ | does not tab-complete names, enabled, .. |
+|`collection list`     | `type`             | ✓ | ○ | ✓ | stub literal present |
 |`collection list`     | `[collection_name]`| ✓ | ○ | ✓ | does not tab-complete collection names |
 |`collection remove`   | `[collection_name]`| ✓ | ● | ✓ | stub literal present |
 |`collection update`   | `[collection_name]`| ✓ | ● | ✓ | stub literal present |
@@ -1216,10 +1214,10 @@ Thank you for the clarifications! Here’s your revised, organized summary with 
 |`plugin list`         | `[collection_name]`| ✗ | ○ | ✗ | does not tab-complete collection name filters|
 
 ### Legend
-
-- **c-Key:** ✓ Has a `completionKey` for dynamic completion, ✗ if not implemented.
-- **_tab-:** ● Triggers `_tab_cache` on success, ○ if it should not.
-- **ok:** ✓ if behavior is as expected, ✗ if there are known issues.
+- ○ .. is not needed
+- **c\*Key** .. ✓ Has a `completionKey` for dynamic completion, ✗ if not implemented, ○ if not needed.
+- **_tab\*** .. ● Triggers `_tab_cache` on success, ○ if it should not, ✗ if known issues.
+- **ok?** .. ✓ if behavior is as expected, ✗ if there are known issues.
 - **stub literal present:** The argument uses a placeholder like `"pluginName"` or `"collection_name"`
   for dynamic data, which is populating the suggestions literally.
 

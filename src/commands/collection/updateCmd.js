@@ -1,5 +1,6 @@
 // src/commands/collection/updateCmd.js
 const chalk = require('chalk');
+const path = require('path');
 
 module.exports = {
   command: 'update [<collection_name>]',
@@ -24,7 +25,6 @@ module.exports = {
       if (args.collection_name) {
         console.log(chalk.blueBright(`md-to-pdf collection: Attempting to update collection '${chalk.cyan(args.collection_name)}'...`));
         const cmResult = await manager.updateCollection(args.collection_name);
-        
         if (!cmResult.success) {
             console.warn(chalk.yellow(`Update for '${args.collection_name}' reported issues (see CM logs above for details).`));
             commandShouldFailHard = true;

@@ -1133,15 +1133,15 @@ where `#` indicates the order of implementation.
 |   | `update [collection_name]` | Suggests all downloaded collections for updating (alias).      |
 
 
-### Fast Tab Completion Architecture
+### Fast Tab Completion
 
 The standard implementation of tab-completion often suffers from a critical performance flaw: each completion request forces the entire application to bootstrap, resulting in noticeable lag. The following architecture, developed in the `toy` branch, solves this by completely decoupling completion from the main application startup, relying on a fast, cache-first model.
 
-#### The Core Problem: Startup Latency
+#### Startup Latency
 
 A naive completion system is slow because it is synchronous with the application's full initialization. Every press of the `<Tab>` key loads all modules, parses all configurations, and builds the entire command structure—a process that can take seconds, destroying the user experience.
 
-#### Architectural Attempt at a Shim & Cache Model
+#### Architecture -- Shim & Cache Model
 
 The high-performance model treats completion as a distinct, lightweight process. It never loads the main application. This is achieved through three core pillars:
 
@@ -1167,5 +1167,63 @@ The dynamic cache is kept fresh without blocking the user.
 
   * **Synchronous Provider:** The `completion_provider.js` module provides a synchronous, non-blocking interface. When asked for data, it reads the current cache from disk instantly. If the cache is stale, it returns the old data while silently triggering the background update. This ensures the user always gets an immediate response, even if the data is a few seconds out of date.
 
-**WORK IN PROGRESS**
+**TODO**
+
+
+| Phase | Step | Description | Status | Notes |
+|:------|:-----|:------------|:-------|:------|
+| **Phase 1: Cache Foundations** | | | | |
+| 1 | 1.1 | Implement Static CLI Tree Generation with `completionKey` | ✔ Complete | `scripts/generate-cli-tree.js` captures `completionKey` |
+| 1 | 1.2 | Implement Dynamic Completion Data Cache Generation | ✔ Complete | `scripts/generate-completion-dynamic-cache.js` provides data |
+| 1 | 1.3 | Refactor Completion Tracker for Sync. Cache Reading | ✔ Complete | `src/completion_tracker.js` is simplified reader |
+| 1 | 1.4 | Create Internal Cache Builder Command (`_tab_cache`) | ✔ Complete | `cli.js` command added, orchestrates cache generation |
+| **Phase 2: CLI Integration** | | | | |
+| 2 | 2.1 | Implement CLI Shim in `cli.js` | ✔ Complete | `cli.js` bypasses main app for completion |
+| 2 | 2.2 | Implement Generic Completion Engine in `src/completion.js` | ● In Progress | Engine refactored, but needs further refinement for all edge cases (e.g., `choices` handling in positional arguments) |
+| 2 | 2.3 | Pilot Declarative `completionKey` (`plugin help`) | ✔ Complete | `plugin help <tab>` now dynamically suggests plugins |
+| **Phase 3: Final Integrations** | | | | |
+| 3 | 3.1 | Integrate Event-Driven Cache Refresh (Sly Updates) | ● In Progress | Core state-changing commands updated (e.g., `enable`, `add`, `remove`, `update` alias). Remaining handlers to be updated. |
+| 3 | 3.2 | "Johnny Appleseed" `completionKey`s | ● In Progress | Many core command arguments now have `completionKey`s. Remaining arguments to be identified and updated. |
+
+
+## Checklist 
+
+# Outcome
+
+Thank you for the clarifications! Here’s your revised, organized summary with a checkmark system for satisfaction, updated notes, and corrections as requested.
+
+## Summary Table of Command Completion Status
+
+| Command/Flag/Arg     | Type | c-Key |\_tab- | ok | Notes |
+|----------------------|:-----|:-----------:|:----------:|:------------:|:------|
+|`collection`          | `<type>`           | ✗ | ○ | ✓ | **static completion**  |
+|`plugin`              | `<type>`           | ✗ | ○ | ✓ | **static completion**  |
+|`collection add`      | `url_or_path`      | ✗ | ● | ✓ | not dynamic data; stub literal present |
+|`collection list`     | `type`             | ✗ | ○ | ✗ | does not tab-complete names, enabled, .. |
+|`collection list`     | `[collection_name]`| ✓ | ○ | ✓ | does not tab-complete collection names |
+|`collection remove`   | `[collection_name]`| ✓ | ● | ✓ | stub literal present |
+|`collection update`   | `[collection_name]`| ✓ | ● | ✓ | stub literal present |
+|`config --plugin`     | `pluginName`       | ✓ | ○ | ✗ | tabs to system paths |
+|`convert --plugin`    | `markdownFile`     | ✓ | ○ | ✗ | stub literal present |
+|`generate`            | `pluginName`       | ✓ | ○ | ✓ | stub literal present |
+|`plugin add`          | `url_or_path`      | ✗ | ● | ✓ | not dynamic data; stub literal present |
+|`plugin create --from`| `pluginName`       | ✓ | ● | ✗ | does not tab-complete types |
+|`plugin disable`      | `invoke_name`      | ✓ | ● | ✓ | stub literal present |
+|`plugin enable`       | `target`           | ✓ | ● | ✓ | stub literal present |
+|`plugin help`         | `pluginName`       | ✓ | ○ | ✓ | stub literal present |
+|`plugin validate`     | `pluginIdentifier` | ✓ | ○ | ✓ | stub literal present |
+|`plugin list`         | `type`             | ✗ | ○ | ✗ | does not tab-complete available, enabled, ..|
+|`plugin list`         | `[collection_name]`| ✗ | ○ | ✗ | does not tab-complete collection name filters|
+
+### Legend
+
+- **c-Key:** ✓ Has a `completionKey` for dynamic completion, ✗ if not implemented.
+- **_tab-:** ● Triggers `_tab_cache` on success, ○ if it should not.
+- **ok:** ✓ if behavior is as expected, ✗ if there are known issues.
+- **stub literal present:** The argument uses a placeholder like `"pluginName"` or `"collection_name"`
+  for dynamic data, which is populating the suggestions literally.
+
+**Key Points:**
+- **Parent commands** (`collection`, `plugin`) are static only and do not require dynamic completion.
+- **Path/URL arguments** are not dynamically completed and are noted as such. These should turn over to normal shell completion.
 

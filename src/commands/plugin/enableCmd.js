@@ -15,6 +15,7 @@ module.exports = {
         describe: 'plugin to enable (e.g., "collection/plugin_id"), \n or collection name (with --all)',
         type: 'string',
         demandOption: true,
+        completionKey: 'availablePlugins' 
       })
       .option('name', {
         alias: 'as',
@@ -107,6 +108,14 @@ you must re-run this command to enable any new plugins.`);
             const finalInvokeName = result.invoke_name || args.target.split('/')[1]; 
             console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));
         }
+      }
+      // Trigger cache regeneration after successful enable operation
+      const cliPath = path.resolve(__dirname, '../../../cli.js'); // Go up 3 levels: plugin -> commands -> src -> md-to-pdf
+      try {
+        const { execSync } = require('child_process');
+        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
+      } catch (error) {
+        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
       }
     } catch (error) {
       const commandType = args.all ? 'plugin enable --all' : 'plugin enable';

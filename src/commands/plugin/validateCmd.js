@@ -12,6 +12,8 @@ module.exports = {
       .positional('pluginIdentifier', {
         describe: "name or path of plugin e.g. 'cv'",
         type: 'string',
+        demandOption: true,
+        completionKey: 'usablePlugins' 
       })
       .demandOption('pluginIdentifier', 'Please provide a plugin name or path to validate.');
   },

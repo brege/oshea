@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.9.33",
+  "version": "0.9.34",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -11,7 +11,8 @@
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
     "test": "mocha",
-    "test:watch": "mocha --watch"
+    "test:watch": "mocha --watch",
+    "dep-tree": "madge --json src/"
   },
   "keywords": [
     "markdown",
@@ -58,6 +59,7 @@
     "chai": "^4.3.4",
     "jsdom": "^22.1.0",
     "lodash": "^4.17.21",
+    "madge": "^8.0.0",
     "minimatch": "^10.0.3",
     "mocha": "^9.2.2",
     "proxyquire": "^2.1.3",

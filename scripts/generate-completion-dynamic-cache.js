@@ -1,4 +1,8 @@
 // scripts/generate-completion-dynamic-cache.js
+
+// This script generates a dynamic completion cache for the md-to-pdf CLI. 
+// It is runtime tool for the user's machine.
+
 const fs = require('fs');
 const path = require('path');
 const os = require('os');

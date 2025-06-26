@@ -9,7 +9,7 @@ const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
 
 if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
-    const { getSuggestions } = require('./src/completion.js'); 
+    const { getSuggestions } = require('./src/tab-completion/engine.js'); 
 
     const completionArgv = {
         _: [],
@@ -47,7 +47,7 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
 const os = require('os'); 
 const fsp = require('fs').promises; 
 const chalk = require('chalk');
-const { spawn, execSync } = require('child_process'); // MODIFIED: Added execSync
+const { spawn, execSync } = require('child_process');
 
 const ConfigResolver = require('./src/ConfigResolver');
 const PluginManager = require('./src/PluginManager');
@@ -101,7 +101,6 @@ async function commonCommandHandler(args, executorFunction, commandType) {
                 }
             );
         } else {
-            // ConfigResolver is now expected to be on args from the middleware
             await executorFunction(args, args.configResolver);
         }
     } catch (error) {
@@ -275,36 +274,33 @@ async function main() {
 
         argvBuilder.completion();
 
-        // NEW: Internal command for plumbing (cache generation)
         argvBuilder.command({
             command: '_tab_cache',
-            describe: false, // Hide from help output
+            describe: false,
             builder: (yargsCmd) => {
-                yargsCmd.option('config', { type: 'string' }) // Allow passing config for context
-                         .option('coll-root', { type: 'string' }); // Allow passing coll-root for context
+                yargsCmd.option('config', { type: 'string' })
+                         .option('coll-root', { type: 'string' });
             },
             handler: (args) => {
                 const staticCacheScript = path.resolve(__dirname, 'scripts', 'generate-completion-cache.js');
                 const dynamicCacheScript = path.resolve(__dirname, 'scripts', 'generate-completion-dynamic-cache.js');
                 
                 try {
-                    // Execute static cache generation (will use the updated generate-cli-tree.js)
                     execSync(`node "${staticCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
-                    // Execute dynamic cache generation
                     execSync(`node "${dynamicCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
                 } catch (error) {
                     console.error(chalk.red(`ERROR: Cache generation failed: ${error.message}`));
                     process.exit(1);
                 }
             }
-        }); // END NEW
+        });
 
         argvBuilder
         .command({
             ...convertCmdModule.defaultCmd,
             handler: async (args) => {
                 const potentialFile = args.markdownFile;
-                if (potentialFile) { // Check if markdownFile was provided
+                if (potentialFile) {
                     if (!fs.existsSync(potentialFile) && !potentialFile.endsWith('.md') && !potentialFile.endsWith('.mdx')) {
                          console.error(chalk.red(`Error: Unknown command: '${potentialFile}'`));
                          console.error(chalk.yellow("\nTo convert a file, provide a valid path. For other commands, see --help."));

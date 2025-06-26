@@ -1196,7 +1196,7 @@ The dynamic cache is kept fresh without blocking the user.
 |----------------------|:-----|:-----:|:-----:|:---:|:------|
 |`collection`          | `<type>`           | ○ | ○ | ✓ | **static completion**  |
 |`plugin`              | `<type>`           | ○ | ○ | ✓ | **static completion**  |
-|`collection add`      | `url_or_path`      | ✗ | ● | ✓ | not dynamic data; stub literal present |
+|`collection add`      | `url_or_path`      | ✗ | ● | ✓ | (not dynamic data) stub literal present |
 |`collection list`     | `type`             | ✓ | ○ | ✓ | stub literal present |
 |`collection list`     | `[collection_name]`| ✓ | ○ | ✓ | does not tab-complete collection names |
 |`collection remove`   | `[collection_name]`| ✓ | ● | ✓ | stub literal present |
@@ -1204,14 +1204,14 @@ The dynamic cache is kept fresh without blocking the user.
 |`config --plugin`     | `pluginName`       | ✓ | ○ | ✗ | tabs to system paths |
 |`convert --plugin`    | `markdownFile`     | ✓ | ○ | ✗ | stub literal present |
 |`generate`            | `pluginName`       | ✓ | ○ | ✓ | stub literal present |
-|`plugin add`          | `url_or_path`      | ✗ | ● | ✓ | not dynamic data; stub literal present |
+|`plugin add`          | `url_or_path`      | ✗ | ● | ✓ | (not dynamic data) stub literal present |
 |`plugin create --from`| `pluginName`       | ✓ | ● | ✗ | does not tab-complete types |
 |`plugin disable`      | `invoke_name`      | ✓ | ● | ✓ | stub literal present |
 |`plugin enable`       | `target`           | ✓ | ● | ✓ | stub literal present |
 |`plugin help`         | `pluginName`       | ✓ | ○ | ✓ | stub literal present |
 |`plugin validate`     | `pluginIdentifier` | ✓ | ○ | ✓ | stub literal present |
 |`plugin list`         | `type`             | ✗ | ○ | ✗ | does not tab-complete available, enabled, ..|
-|`plugin list`         | `[collection_name]`| ✗ | ○ | ✗ | does not tab-complete collection name filters|
+|`plugin list`         | `[collection_n...]`| ✗ | ○ | ✗ | does not tab-complete collection_name_filters|
 
 ### Legend
 - ○ .. is not needed
@@ -1224,4 +1224,11 @@ The dynamic cache is kept fresh without blocking the user.
 **Key Points:**
 - **Parent commands** (`collection`, `plugin`) are static only and do not require dynamic completion.
 - **Path/URL arguments** are not dynamically completed and are noted as such. These should turn over to normal shell completion.
+
+Figure out:
+
+- commands with two or more dynamic args (e.g., `collection add`)
+- see if `plugin list` can implement same logic as `collection list`?
+- `command --flag` does not dynamically complete anywhere currently. It should.
+
 

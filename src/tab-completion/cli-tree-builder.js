@@ -1,11 +1,11 @@
-// scripts/generate-cli-tree.js
+// src/tab-completion/cli-tree-builder.js
 
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 
 // --- Configuration ---
-const COMMANDS_DIR = path.resolve(__dirname, '../src/commands');
+const COMMANDS_DIR = path.resolve(__dirname, '../commands');
 
 // --- Dynamic Proxy Yargs Stub ---
 function createYargsStub() {
@@ -44,33 +44,28 @@ function discoverCommandTree(dir, prefixParts = []) {
     const nodesMap = new Map();
     const entries = fs.readdirSync(dir);
 
-    // Get global options and default command info from the main cli.js if this is the top level discovery
     if (prefixParts.length === 0) {
         let globalOptionsList = [
-            'config', 'factory-defaults', 'coll-root', // Explicitly known global options
-            'help', 'version', 'h', 'v' // Standard Yargs global options and aliases
+            'config', 'factory-defaults', 'coll-root',
+            'help', 'version', 'h', 'v'
         ];
         let defaultCommandPositionals = [];
         let defaultCommandOptions = [];
 
         try {
-            // Simulate the default command to extract its specific options/positionals
-            // This is your implicit `convert` via markdown file.
-            const convertCmdModule = require('../src/commands/convertCmd.js');
+            const convertCmdModule = require('../commands/convertCmd.js');
             const defaultCmdStub = createYargsStub();
             if (typeof convertCmdModule.defaultCmd.builder === 'function') {
                 convertCmdModule.defaultCmd.builder(defaultCmdStub);
             }
-            defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey, choices: p.choices})); 
-            defaultCommandOptions = Object.keys(defaultCmdStub.options || {}).map(optKey => ({name: optKey, completionKey: defaultCmdStub.options[optKey].completionKey, choices: defaultCmdStub.options[optKey].choices})); 
+            defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey, choices: p.choices}));
+            defaultCommandOptions = Object.keys(defaultCmdStub.options || {}).map(optKey => ({name: optKey, completionKey: defaultCmdStub.options[optKey].completionKey, choices: defaultCmdStub.options[optKey].choices}));
         } catch (builderError) {
             console.warn(chalk.yellow(`WARN: Could not extract default command builder info for $0 node: ${builderError.message}`));
         }
 
-        // Combine unique global options and default command options for $0
         const finalOptionsFor$0 = [...new Set([...globalOptionsList.map(name => ({name})), ...defaultCommandOptions])].sort((a,b) => a.name.localeCompare(b.name));
         const finalPositionalsFor$0 = [...new Set([...defaultCommandPositionals])];
-
 
         nodesMap.set('$0', {
             name: '$0',
@@ -79,7 +74,6 @@ function discoverCommandTree(dir, prefixParts = []) {
             children: []
         });
     }
-
 
     for (const entry of entries) {
         const fullPath = path.join(dir, entry);
@@ -95,8 +89,8 @@ function discoverCommandTree(dir, prefixParts = []) {
             const commandModule = require(fullPath);
 
             const processAndAddCommand = (cmdObj) => {
+                if (!cmdObj || !cmdObj.command) return;
                 const commandDefinition = cmdObj.command;
-                if (!commandDefinition) return;
 
                 const commandName = parseBaseCommand(commandDefinition);
                 const yargsStub = createYargsStub();
@@ -121,7 +115,6 @@ function discoverCommandTree(dir, prefixParts = []) {
 
                 if (nodesMap.has(commandName)) {
                     const existingNode = nodesMap.get(commandName);
-                    // Merge options and positionals, handling duplicates and preserving completionKey/choices
                     const mergedOptions = new Map();
                     [...existingNode.options, ...options].forEach(opt => mergedOptions.set(opt.name, opt));
                     existingNode.options = Array.from(mergedOptions.values());
@@ -160,38 +153,4 @@ function discoverCommandTree(dir, prefixParts = []) {
     return Array.from(nodesMap.values());
 }
 
-// --- Pretty Print Tree ---
-function printTree(nodes, indent = '') {
-    for (const node of nodes) {
-        let line = indent + chalk.bold(node.name);
-        if (node.positionals && node.positionals.length) {
-            line += ' ' + node.positionals.map(p => `<${p.key}>`).join(' ');
-        }
-        console.log(line);
-        if (node.options && node.options.length) {
-            for (const opt of node.options.sort((a,b) => a.name.localeCompare(b.name))) {
-                let optString = `--${opt.name}`;
-                if (opt.completionKey) {
-                    optString += ` (compKey: ${opt.completionKey})`;
-                }
-                if (opt.choices) { 
-                    optString += ` (choices: ${opt.choices.join(', ')})`;
-                }
-                console.log(indent + '  ' + chalk.gray(optString));
-            }
-        }
-        if (node.children && node.children.length) {
-            printTree(node.children, indent + '  ');
-        }
-    }
-}
-
-// --- Run ---
-if (require.main === module) {
-    const commandTree = discoverCommandTree(COMMANDS_DIR);
-    console.log(chalk.cyan('md-to-pdf command tree:'));
-    printTree(commandTree);
-}
-
-// Export for use in generate-completion-cache.js
 module.exports = { discoverCommandTree };

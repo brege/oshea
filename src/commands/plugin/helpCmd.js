@@ -1,6 +1,5 @@
 // src/commands/plugin/helpCmd.js
 const { displayPluginHelp } = require('../../get_help');
-const completionTracker = require('../../completion_tracker');
 
 module.exports = {
   command: 'help <pluginName>',

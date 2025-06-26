@@ -1,41 +1,30 @@
 // scripts/generate-completion-cache.js
 
+// This script generates a completion cache for the md-to-pdf CLI. This script is for development use only.
+
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const chalk = require('chalk'); // Added chalk for consistent logging
+const chalk = require('chalk');
 
-// Import the tree discovery logic from generate-cli-tree.js
-const { discoverCommandTree } = require('./generate-cli-tree'); 
+// Import the tree discovery logic from its new location
+const { discoverCommandTree } = require('../src/tab-completion/cli-tree-builder');
 
-// Define the directory where your command modules reside
 const COMMANDS_DIR = path.resolve(__dirname, '../src/commands');
 
-/**
- * Determines the correct cache file path based on XDG_CACHE_HOME or user's home directory.
- * @returns {string} The full path to the completion cache file.
- */
 function getCachePath() {
-    const xdg = process.env.XDG_CACHE_HOME;
-    if (xdg) {
-        return path.join(xdg, 'md-to-pdf', 'cli-tree.json');
-    }
-    return path.join(os.homedir(), '.cache', 'md-to-pdf', 'cli-tree.json');
+    const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
+    const cacheDir = path.join(xdgCacheHome, 'md-to-pdf');
+    return path.join(cacheDir, 'cli-tree.json');
 }
 
-/**
- * Main function to discover the command tree and write it to a cache file.
- */
 function main() {
     try {
         console.log(chalk.blue('Generating CLI completion cache...'));
-        const commandTree = discoverCommandTree(COMMANDS_DIR); // Use the imported discovery function
+        const commandTree = discoverCommandTree(COMMANDS_DIR);
         const cachePath = getCachePath();
 
-        // Ensure the directory exists
         fs.mkdirSync(path.dirname(cachePath), { recursive: true });
-
-        // Write the discovered tree to the cache file
         fs.writeFileSync(cachePath, JSON.stringify(commandTree, null, 2));
 
         console.log(chalk.green(`Completion cache successfully written to: ${cachePath}`));
@@ -44,13 +33,10 @@ function main() {
         if (error.stack) {
             console.error(chalk.red(error.stack));
         }
-        process.exit(1); // Exit with an error code
+        process.exit(1);
     }
 }
 
-// Execute the main function when the script is run
 if (require.main === module) {
     main();
 }
-
-// If you need to export anything from this file (unlikely for a script like this), do so here.

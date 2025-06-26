@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const completionTracker = require('./tracker'); // Adjusted path
+const completionTracker = require('./tracker');
 
 const CACHE_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.cache/md-to-pdf/cli-tree.json');
 
@@ -55,40 +55,47 @@ function getSuggestions(argv, current) {
     let targetCompletionKey = null;
     let targetChoices = null;
 
-    if (current.startsWith('-')) {
-        const partialOptionName = current.substring(2);
-        const allOptions = [...(currentNode.options || []), ...(globalNode?.options || [])];
-        const matchedOption = allOptions.find(opt => opt.name === partialOptionName || opt.name.startsWith(partialOptionName));
+    const allOptions = [...(currentNode.options || []), ...(globalNode?.options || [])];
+    const previousArg = process.argv[process.argv.length - 2];
 
-        if (matchedOption) {
-            if (matchedOption.choices) {
-                targetChoices = matchedOption.choices;
-            } else if (matchedOption.completionKey) {
-                targetCompletionKey = matchedOption.completionKey;
-            }
+    // --- LOGICAL CHANGE START ---
+    // Check if the PREVIOUS argument was a flag that needs a value.
+    if (previousArg && previousArg.startsWith('--')) {
+        const prevOptionName = previousArg.substring(2);
+        const prevOptionDef = allOptions.find(opt => opt.name === prevOptionName);
+
+        if (prevOptionDef && prevOptionDef.completionKey) {
+            targetCompletionKey = prevOptionDef.completionKey;
+        } else if (prevOptionDef && prevOptionDef.choices) {
+            targetChoices = prevOptionDef.choices;
         }
+    }
+    // --- LOGICAL CHANGE END ---
 
+
+    if (current.startsWith('-')) {
         suggestions.push(...(currentNode.options || []).map(opt => `--${opt.name}`));
         suggestions.push(...globalOptionsAsFlags);
-
     } else {
-        const numCommandPartsInArgv = commandPathParts.length;
-        const positionalIndexInNode = argv._.length - (numCommandPartsInArgv + 1);
+        if (!targetCompletionKey && !targetChoices) {
+            const numCommandPartsInArgv = commandPathParts.length;
+            const positionalIndexInNode = argv._.length - (numCommandPartsInArgv + 1);
 
-        if (currentNode.positionals && currentNode.positionals[positionalIndexInNode]) {
-            const positionalDef = currentNode.positionals[positionalIndexInNode];
-            if (positionalDef.choices) {
-                targetChoices = positionalDef.choices;
-            } else if (positionalDef.completionKey) {
-                targetCompletionKey = positionalDef.completionKey;
-            }
-        } else {
-            if (currentNode.children && currentNode.name !== '$partial_match_parent') {
-                suggestions.push(...currentNode.children.map(n => n.name).filter(n => n !== '$0'));
-            }
-            if (currentNode.positionals) {
-                const unconsumedPositionals = currentNode.positionals.slice(positionalIndexInNode);
-                suggestions.push(...unconsumedPositionals.filter(p => !p.choices && !p.completionKey).map(p => p.key));
+            if (currentNode.positionals && currentNode.positionals[positionalIndexInNode]) {
+                const positionalDef = currentNode.positionals[positionalIndexInNode];
+                if (positionalDef.choices) {
+                    targetChoices = positionalDef.choices;
+                } else if (positionalDef.completionKey) {
+                    targetCompletionKey = positionalDef.completionKey;
+                }
+            } else {
+                if (currentNode.children && currentNode.name !== '$partial_match_parent') {
+                    suggestions.push(...currentNode.children.map(n => n.name).filter(n => n !== '$0'));
+                }
+                if (currentNode.positionals) {
+                    const unconsumedPositionals = currentNode.positionals.slice(positionalIndexInNode);
+                    suggestions.push(...unconsumedPositionals.filter(p => !p.choices && !p.completionKey).map(p => p.key));
+                }
             }
         }
     }

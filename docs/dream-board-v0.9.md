@@ -1194,32 +1194,30 @@ The dynamic cache is kept fresh without blocking the user.
 
 | Command/Flag/Arg     | Type |c\*Key |\_tab\*| ok? | Notes |
 |----------------------|:-----|:-----:|:-----:|:---:|:------|
-|`collection`          | `<type>`           | ○ | ○ | ✓ | **static completion**  |
-|`plugin`              | `<type>`           | ○ | ○ | ✓ | **static completion**  |
-|`collection add`      | `url_or_path`      | ✗ | ● | ✓ | (not dynamic data) stub literal present |
-|`collection list`     | `type`             | ✓ | ○ | ✓ | stub literal present |
-|`collection list`     | `[collection_name]`| ✓ | ○ | ✓ | does not tab-complete collection names |
-|`collection remove`   | `[collection_name]`| ✓ | ● | ✓ | stub literal present |
-|`collection update`   | `[collection_name]`| ✓ | ● | ✓ | stub literal present |
-|`config --plugin`     | `pluginName`       | ✓ | ○ | ✗ | tabs to system paths |
-|`convert --plugin`    | `markdownFile`     | ✓ | ○ | ✗ | stub literal present |
-|`generate`            | `pluginName`       | ✓ | ○ | ✓ | stub literal present |
-|`plugin add`          | `url_or_path`      | ✗ | ● | ✓ | (not dynamic data) stub literal present |
-|`plugin create --from`| `pluginName`       | ✓ | ● | ✗ | does not tab-complete types |
-|`plugin disable`      | `invoke_name`      | ✓ | ● | ✓ | stub literal present |
-|`plugin enable`       | `target`           | ✓ | ● | ✓ | stub literal present |
-|`plugin help`         | `pluginName`       | ✓ | ○ | ✓ | stub literal present |
-|`plugin validate`     | `pluginIdentifier` | ✓ | ○ | ✓ | stub literal present |
-|`plugin list`         | `type`             | ✗ | ○ | ✗ | does not tab-complete available, enabled, ..|
-|`plugin list`         | `[collection_n...]`| ✗ | ○ | ✗ | does not tab-complete collection_name_filters|
+|`collection`          | `<type>`           | ○ | ○ | ✓ | **static**  |
+|`plugin`              | `<type>`           | ○ | ○ | ✓ | **static**  |
+|`collection add`      | `url_or_path`      | ✓ | ● | ✓ | --- |
+|`collection list`     | `type`             | ✓ | ○ | ✓ | --- |
+|`collection list`     | `[collection_name]`| ✓ | ○ | ✗ | doesn't \<tab> `collection_name`s |
+|`collection remove`   | `[collection_name]`| ✓ | ● | ✓ | --- |
+|`collection update`   | `[collection_name]`| ✓ | ● | ✓ | --- |
+|`config --plugin`     | `pluginName`       | ✓ | ○ | ✓ | --- |
+|`convert --plugin`    | `markdownFile`     | ✓ | ○ | ✓ | --- |
+|`generate`            | `pluginName`       | ✓ | ○ | ✓ | --- |
+|`plugin add`          | `url_or_path`      | ✓ | ● | ✓ | --- |
+|`plugin create --from`| `pluginName`       | ✓ | ● | ✓ | --- |
+|`plugin disable`      | `invoke_name`      | ✓ | ● | ✗ | --- |
+|`plugin enable`       | `target`           | ✓ | ● | ✓ | --- |
+|`plugin help`         | `pluginName`       | ✓ | ○ | ✓ | --- |
+|`plugin validate`     | `pluginIdentifier` | ✓ | ○ | ✓ | --- |
+|`plugin list`         | `type`             | ✓ | ○ | ✓ | --- |
+|`plugin list`         | `[collection_n...]`| ✓ | ○ | ✗ | doesn't \<tab> `collection_name_filter` |
 
 ### Legend
-- ○ .. is not needed
+- ○ .. is not needed.
 - **c\*Key** .. ✓ Has a `completionKey` for dynamic completion, ✗ if not implemented, ○ if not needed.
 - **_tab\*** .. ● Triggers `_tab_cache` on success, ○ if it should not, ✗ if known issues.
 - **ok?** .. ✓ if behavior is as expected, ✗ if there are known issues.
-- **stub literal present:** The argument uses a placeholder like `"pluginName"` or `"collection_name"`
-  for dynamic data, which is populating the suggestions literally.
 
 **Key Points:**
 - **Parent commands** (`collection`, `plugin`) are static only and do not require dynamic completion.
@@ -1228,7 +1226,8 @@ The dynamic cache is kept fresh without blocking the user.
 Figure out:
 
 - commands with two or more dynamic args (e.g., `collection add`)
+  - these might require refactoring the actual commands, or building a new 
+    node hopper trick in the engine
 - see if `plugin list` can implement same logic as `collection list`?
-- `command --flag` does not dynamically complete anywhere currently. It should.
 
 

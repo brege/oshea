@@ -920,9 +920,9 @@ This table outlines the assets and tasks required to enable an AI to reliably ge
 | ○ | **ai.1**| *Interaction Specification*     | Details the internal mechanics, file relationships, and APIs of the plugin system--optimized for machines.  |  |  
 | ○ | **ai.2**| *Example Prompting Guide*       | Concrete examples of how to *frame* an AI, examples like a "simple pendulum" physics handout or "wedding invitation" prompt.  |  |
 |   |        | <span style="white-space:nowrap">**T5.cli -- CLI Polish**</span> | | |
-| ● | **B1** | *Tab Completion*                 | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support.  |  |  
-| ✔ | **B2** | *Standardize `--help`*           | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency.  |  |
-| ✔ | **B3** | *Decouple `archetype` from CM*   | Eliminate the final remnants of the deprecated `collection archetype` compatibility layer.  |  |
+| ✔ | **B1** | *Tab Completion*                 | A significant user-experience improvement to aid discoverability and usage of the CLI. Can be enabled via Yargs' built-in support.  |`4`|  
+| ✔ | **B2** | *Standardize `--help`*           | A final pass to standardize the formatting, spacing, and indentation of all `--help` text to improve readability and consistency.  |`2`|
+| ✔ | **B3** | *Decouple `archetype` from CM*   | Eliminate the final remnants of the deprecated `collection archetype` compatibility layer.  |`3`|
 |   |        | <span style="white-space:nowrap">**T5.e2e -- Deferred Tests**</span> | | |
 | ○ | **C3** | *Deferred Test Completion*       | Implement the final pending tests and decide if more lifecycle tests are needed. |  |
 |   |        | <span style="white-space:nowrap">**T5.doc -- Documentation Polish**</span> | | | 
@@ -940,11 +940,11 @@ This table outlines the assets and tasks required to enable an AI to reliably ge
 
 ### T5 | Timeline
 
-**Proposed Order of Implementation:**
+**--- Proposed Order of Implementation ---**
 
-**✔A2 + ✔A1 ➜ ✔D1 ➜ ✔B2 ➜ ✔B3 ➜ ●B1 ➜ ai.1 ➜ ai.2 ➜ D2 ➜ C3**
+**✔A2 + ✔A1 ➜ ✔D1 ➜ ✔B2 ➜ ✔B3 ➜ ✔B1 ➜ ai.1 ➜ ai.2 ➜ D2 ➜ C3**
 
-**Thematically:**
+**--- Thematically ---**
 
 1. **Polish**
 2. **Document**
@@ -1059,101 +1059,31 @@ collection
   remove <collection_name>
     --force
   update <collection_name>
-collection
-  add <url_or_path>
-    --name
-  list <type> <collection_name>
-    --short
-    --raw
-  remove <collection_name>
-    --force
-  update <collection_name>
-config
-  --plugin
-  --pure
-convert
-convert <markdownFile>
-  --plugin
-  --outdir
-  --filename
-  --open
-  --watch
-$0 <markdownFile>
-  --plugin
-  --outdir
-  --filename
-  --open
-  --watch
-generate <pluginName>
-  --outdir
-  --filename
-  --open
-  --watch
-plugin
-  add <path_to_plugin_dir>
-    --name
-    --bypass-validation
-  create <pluginName>
-    --from
-    --target-dir
-    --force
-  disable <invoke_name>
-  enable <target>
-    --name
-    --all
-    --prefix
-    --no-prefix
-    --bypass-validation
-  help <pluginName>
-  list <collection_name_filter>
-    --available
-    --enabled
-    --disabled
-    --short
-  validate <pluginIdentifier>
-plugin
-update <collection_name>
+...
 ```
-
-Let's consolidate the above command tree into a single, easily digestible table, 
-where `#` indicates the order of implementation.
-
-|`#`| Command / Usage         | Dynamic Completion Suggestions                                    |
-|:-:| ----------------------- | ----------------------------------------------------------------- |
-|   | `convert --plugin `     | Suggests all enabled/registered plugins.                          |
-|   | `generate `             | Suggests enabled plugins that are primarily generators.           |
-|   | `config --plugin `      | Suggests all enabled/registered plugins.                          |
-|   | `plugin create --from ` | Suggests all known plugins as potential archetypes.               |
-|   | `plugin enable `        | Suggests available but disabled plugins from managed collections. |
-|   | `plugin disable `       | Suggests all currently enabled plugins.                           |
-|`1`| `plugin help `          | Suggests all enabled/registered plugins.                          |
-|   | `plugin validate `      | Suggests all known plugins for validation.                        |
-|   | `collection remove `    | Suggests all downloaded collections for removal.                  |
-|   | `collection update [collection_name]` | Suggests all downloaded collections for updating.   |
-|   | `update [collection_name]` | Suggests all downloaded collections for updating (alias).      |
 
 
 ### Fast Tab Completion
 
-The standard implementation of tab-completion often suffers from a critical performance flaw: each completion request forces the entire application to bootstrap, resulting in noticeable lag. The following architecture, developed in the `toy` branch, solves this by completely decoupling completion from the main application startup, relying on a fast, cache-first model.
+The standard implementation of tab-completion leads to suffering from a critical performance flaw: each completion request forces the entire application to bootstrap, resulting in noticeable lag. The following architecture, developed in a 'toy' branch, solves this by completely decoupling completion from the main application startup, relying on a fast, cache-first model.
 
 #### Startup Latency
 
-A naive completion system is slow because it is synchronous with the application's full initialization. Every press of the `<Tab>` key loads all modules, parses all configurations, and builds the entire command structure—a process that can take seconds, destroying the user experience.
+A naive completion system is slow because it is synchronous with the application's full initialization. Every press of the `<Tab>` key loads all modules, parses all configurations, and builds the entire command structure—a process that can take seconds--you might as well use bio-memory at that point.
 
 #### Architecture -- Shim & Cache Model
 
 The high-performance model treats completion as a distinct, lightweight process. It never loads the main application. This is achieved through three core pillars:
 
-**The CLI Shim: A Performance Gateway**
-
+**The CLI Shim**
+ 
 A small block of code is placed at the very top of the main `cli.js` entrypoint. Its sole purpose is to inspect the command-line arguments for the `--get-yargs-completions` flag. If this flag is detected, the shim immediately diverts the process to a lightweight completion handler and then exits. The main application's dependency tree is never traversed, avoiding all startup latency.
 
 **The Two-Tiered Cache System**
 
 Instead of discovering commands and data at runtime, the system relies on two pre-computed JSON caches stored in the user's cache directory (e.g., `~/.cache/md-to-pdf/`).
 
-  * **Static Cache (`cli-tree.json`)**\
+  * **Static Cache (`cli-tree.json`)** \
     A complete, static snapshot of the CLI's command structure (commands, subcommands, flags). This file is generated once by `scripts/generate-cli-tree.js` and only needs to be updated when the CLI's command definitions are changed. Reading this file is instantaneous.
 
   * **Dynamic Cache (`dynamic-completion-data.json`)** \
@@ -1163,71 +1093,75 @@ Instead of discovering commands and data at runtime, the system relies on two pr
 
 The dynamic cache is kept fresh without blocking the user.
 
-  * **Background Updates:** A dedicated script (`scripts/generate-completion-dynamic-cache.js`) is responsible for generating the dynamic cache. The `completion_provider.js` module can spawn this script as a *detached background process* whenever it detects the cache is stale.
+  * **Background Updates** \
+    A dedicated script (`scripts/generate-completion-dynamic-cache.js`) is responsible for generating the dynamic cache. The `completion_tracker.js` module can spawn this script as a *detached background process* whenever it detects the cache is stale.
 
-  * **Synchronous Provider:** The `completion_provider.js` module provides a synchronous, non-blocking interface. When asked for data, it reads the current cache from disk instantly. If the cache is stale, it returns the old data while silently triggering the background update. This ensures the user always gets an immediate response, even if the data is a few seconds out of date.
-
-**TODO**
-
-
-| Phase | Step | Description | Status | Notes |
-|:------|:-----|:------------|:-------|:------|
-| **Phase 1: Cache Foundations** | | | | |
-| 1 | 1.1 | Implement Static CLI Tree Generation with `completionKey` | ✔ Complete | `scripts/generate-cli-tree.js` captures `completionKey` |
-| 1 | 1.2 | Implement Dynamic Completion Data Cache Generation | ✔ Complete | `scripts/generate-completion-dynamic-cache.js` provides data |
-| 1 | 1.3 | Refactor Completion Tracker for Sync. Cache Reading | ✔ Complete | `src/completion_tracker.js` is simplified reader |
-| 1 | 1.4 | Create Internal Cache Builder Command (`_tab_cache`) | ✔ Complete | `cli.js` command added, orchestrates cache generation |
-| **Phase 2: CLI Integration** | | | | |
-| 2 | 2.1 | Implement CLI Shim in `cli.js` | ✔ Complete | `cli.js` bypasses main app for completion |
-| 2 | 2.2 | Implement Generic Completion Engine in `src/completion.js` | ● In Progress | Engine refactored, but needs further refinement for all edge cases (e.g., `choices` handling in positional arguments) |
-| 2 | 2.3 | Pilot Declarative `completionKey` (`plugin help`) | ✔ Complete | `plugin help <tab>` now dynamically suggests plugins |
-| **Phase 3: Final Integrations** | | | | |
-| 3 | 3.1 | Integrate Event-Driven Cache Refresh (Sly Updates) | ● In Progress | Core state-changing commands updated (e.g., `enable`, `add`, `remove`, `update` alias). Remaining handlers to be updated. |
-| 3 | 3.2 | "Johnny Appleseed" `completionKey`s | ● In Progress | Many core command arguments now have `completionKey`s. Remaining arguments to be identified and updated. |
+  * **Synchronous Provider** \
+    The `completion_tracker.js` module provides a synchronous, non-blocking interface. When asked for data, it reads the current cache from disk instantly. If the cache is stale, it returns the old data while silently triggering the background update. This ensures the user always gets an immediate response, even if the data is a few seconds out of date.
 
 
-## Checklist 
+|       | Description | ✔ | Notes |
+|:------|:------------|:-------|:------|
+| <span style="white-space:nowrap">**Phase 1**</span> | **Cache Foundations** | | |
+| 1.1 | Implement Static CLI Tree Generation with `completionKey` | ✔ | `scripts/generate-cli-tree.js` captures `completionKey` |
+| 1.2 | Implement Dynamic Completion Data Cache Generation | ✔ | `scripts/generate-completion-dynamic-cache.js` provides data |
+| 1.3 | Refactor Completion Tracker for Sync. Cache Reading | ✔ | `src/completion_tracker.js` is simplified reader |
+| 1.4 | Create Internal Cache Builder Command (`_tab_cache`) | ✔ | `cli.js` command added, orchestrates cache generation |
+| **Phase 2** | **CLI Integration** | | |
+| 2.1 | Implement CLI Shim in `cli.js` | ✔ | `cli.js` bypasses main app for completion |
+| 2.2 | Implement Generic Completion Engine in `src/completion.js` | ✔ | Engine refactored, but needs further refinement for all edge cases (e.g., `choices` handling in positional arguments) |
+| 2.3 | Pilot Declarative `completionKey` (`plugin help`) | ✔ | `plugin help <tab>` now dynamically suggests plugins |
+| **Phase 3** | **Final Integrations** | | |
+| 3.1 | Integrate Event-Driven Cache Refresh (Sly Updates) | ✔ | Core state-changing commands updated (e.g., `enable`, `add`, `remove`, `update` alias). All handlers updated. |
+| 3.2 | "Johnny Appleseed" `completionKey`s | ✔ | Many core command arguments now have `completionKey`s. All arguments have been accounted for and updated. |
 
-### Outcome
+The above table is the overall planned execution sequence. 
+However, Step 2.2 and 3.1 became a bit of an implementation slurry.
 
-#### Summary Table of Command Completion Status
+The `c_Key` column in the below table is **3.2**.
+The `_tab` column in the below table is **3.1**.
+The `ok?` column in the below table is the slurry of **2.2** and **3.1**.
+This is because of time spent on the completion engine. 
+
+#### Summary Table of Command Tab-Completion Status
+**2022-06-26 -- tab completion has been implemented for all commands.**
 
 | Command/Flag/Arg     | Type |c\*Key |\_tab\*| ok? | Notes |
-|----------------------|:-----|:-----:|:-----:|:---:|:------|
-|`collection`          | `<type>`           | ○ | ○ | ✓ | **static**  |
-|`plugin`              | `<type>`           | ○ | ○ | ✓ | **static**  |
-|`collection add`      | `url_or_path`      | ✓ | ● | ✓ | --- |
-|`collection list`     | `type`             | ✓ | ○ | ✓ | --- |
-|`collection list`     | `[collection_name]`| ✓ | ○ | ✗ | doesn't \<tab> `collection_name`s |
-|`collection remove`   | `[collection_name]`| ✓ | ● | ✓ | --- |
-|`collection update`   | `[collection_name]`| ✓ | ● | ✓ | --- |
-|`config --plugin`     | `pluginName`       | ✓ | ○ | ✓ | --- |
-|`convert --plugin`    | `markdownFile`     | ✓ | ○ | ✓ | --- |
-|`generate`            | `pluginName`       | ✓ | ○ | ✓ | --- |
-|`plugin add`          | `url_or_path`      | ✓ | ● | ✓ | --- |
-|`plugin create --from`| `pluginName`       | ✓ | ● | ✓ | --- |
-|`plugin disable`      | `invoke_name`      | ✓ | ● | ✗ | --- |
-|`plugin enable`       | `target`           | ✓ | ● | ✓ | --- |
-|`plugin help`         | `pluginName`       | ✓ | ○ | ✓ | --- |
-|`plugin validate`     | `pluginIdentifier` | ✓ | ○ | ✓ | --- |
-|`plugin list`         | `type`             | ✓ | ○ | ✓ | --- |
-|`plugin list`         | `[collection_n...]`| ✓ | ○ | ✗ | doesn't \<tab> `collection_name_filter` |
+|----------------------|:-----|:-----:|:-----:|:---:|:-----:|
+|`collection`          | `<type>`           | ○ | ○ | ✓ | - |
+|`plugin`              | `<type>`           | ○ | ○ | ✓ | - |
+|`collection add`      | `url_or_path`      | ✓ | ● | ✓ | - |
+|`collection list`     | `type`             | ✓ | ○ | ✓ | - |
+|`collection list`     | `[collection_name]`| ✓ | ○ | ✓ | - |
+|`collection remove`   | `[collection_name]`| ✓ | ● | ✓ | - |
+|`collection update`   | `[collection_name]`| ✓ | ● | ✓ | - |
+|`config --plugin`     | `pluginName`       | ✓ | ○ | ✓ | - |
+|`convert --plugin`    | `markdownFile`     | ✓ | ○ | ✓ | - |
+|`generate`            | `pluginName`       | ✓ | ○ | ✓ | - |
+|`plugin add`          | `url_or_path`      | ✓ | ● | ✓ | - |
+|`plugin create --from`| `pluginName`       | ✓ | ● | ✓ | - |
+|`plugin disable`      | `invoke_name`      | ✓ | ● | ✓ | - |
+|`plugin enable`       | `target`           | ✓ | ● | ✓ | - |
+|`plugin help`         | `pluginName`       | ✓ | ○ | ✓ | - |
+|`plugin validate`     | `pluginIdentifier` | ✓ | ○ | ✓ | - |
+|`plugin list`         | `type`             | ✓ | ○ | ✓ | - |
+|`plugin list`         | `[collection_n...]`| ✓ | ○ | ✓ | - |
 
-### Legend
-- ○ .. is not needed.
-- **c\*Key** .. ✓ Has a `completionKey` for dynamic completion, ✗ if not implemented, ○ if not needed.
-- **_tab\*** .. ● Triggers `_tab_cache` on success, ○ if it should not, ✗ if known issues.
-- **ok?** .. ✓ if behavior is as expected, ✗ if there are known issues.
 
-**Key Points:**
-- **Parent commands** (`collection`, `plugin`) are static only and do not require dynamic completion.
-- **Path/URL arguments** are not dynamically completed and are noted as such. These should turn over to normal shell completion.
+##### Legend
+| abbr       |                 |             |
+|:----------:|:---------------:|:-----------:|
+| **c\*Key** | `completionKey` | ✓ Has a `completionKey` for dynamic completion, ✗ if not implemented, ○ if not needed.  |
+| **_tab**\* | `_tab_cache`    | ● Triggers `_tab_cache` on success, ○ if it should not, ✗ if known issues.  |
+| **ok?**    |  status         | ✓ if behavior is as expected, ✗ if there are known issues. |
 
-Figure out:
+○ .. is a good thing here.
 
-- commands with two or more dynamic args (e.g., `collection add`)
-  - these might require refactoring the actual commands, or building a new 
-    node hopper trick in the engine
-- see if `plugin list` can implement same logic as `collection list`?
+**Parent commands** -- [`collection`, `plugin`] -- are static only and do not require dynamic completion.
+**Path/URL arguments** -- [`url_or_path`, `markdownFile`] -- are not dynamically completed and are noted as such. These should turn over to normal shell completion.
 
+##### Area for Improvement
+We could add a `completionKey` to `collection list <type>` positional argument, `src/collection/listCmd.js`, and a corresponding function in the tracker to provide these static choices. 
+
+This would make the completion system fully declarative, even for static lists, rather than relying solely on `yargs`'s `choices` array
 

@@ -86,6 +86,7 @@ module.exports = {
         describe: 'filter CM-managed plugins by collection name',
         type: 'string',
         default: null,
+        completionKey: 'downloadedCollections'
       })
       .option('available', {
         describe: 'list all available plugins from managed collections',

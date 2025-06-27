@@ -96,7 +96,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 **8. Batch Processing 'Eaches'**
 
   * For batch operations (e.g., converting all recipes from a Hugo content folder or other collections), `md-to-pdf` now recommends using external scripts.
-  * See the [Batch Processing Guide](./batch-processing-guide.md) for examples in Node.js and Bash.
+  * See the [Batch Processing Guide](../guides/batch-processing-guide.md) for examples in Node.js and Bash.
 
     **Bash Example**
     ```bash
@@ -349,7 +349,7 @@ params:
   project_code: "Alpha123"
 ```
 
-Document front matter `params` (or top-level keys) have the highest precedence overall. See [Plugin Development Guide](./plugin-development.md#placeholder-context-and-params-merging-precedence) for full merge order.
+Document front matter `params` (or top-level keys) have the highest precedence overall. See [Plugin Development Guide](../guides/plugin-development.md#placeholder-context-and-params-merging-precedence) for full merge order.
 
 ### Registering a Custom Plugin
 
@@ -384,7 +384,7 @@ recipe: # Inline override for 'recipe'
     margin: { top: "0.5in", bottom: "0.5in" }
 ```
 
-More details in the [Plugin Development Guide](./plugin-development.md#overriding-plugin-settings).
+More details in the [Plugin Development Guide](../guides/plugin-development.md#overriding-plugin-settings).
 
 ## Markdown & Front Matter Essentials
 
@@ -485,5 +485,5 @@ Today's long date: {{ .CurrentDateFormatted }}
 
 ---
 
-Refer to the full [`README.md`](../README.md) and [Plugin Development Guide](./plugin-development.md) for detailed explanations.
+Refer to the full [`README.md`](../../README.md) and [Plugin Development Guide](../guides/plugin-development.md) for detailed explanations.
 

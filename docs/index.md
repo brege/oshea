@@ -98,7 +98,7 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 ## 5. Untracked Documents
 *A dynamically generated list of documents that have not yet been categorized.*
-*This list is automatically updated by [`scripts/index-docs.js`](../scripts/index-docs.js).*
+*This list is automatically updated by [`scripts/index-docs.js`](../scripts/repo-health/index-docs.js).*
 
 <!-- etc-start -->
 

@@ -1,6 +1,6 @@
 # Plugin Development Guide - md-to-pdf
 
-This document serves as a comprehensive reference for creating, configuring, and managing custom plugins for the `md-to-pdf` tool. For general usage and quick examples, please refer to the main [README.md](../README.md) and the [cheat-sheet.md](cheat-sheet.md).
+This document serves as a comprehensive reference for creating, configuring, and managing custom plugins for the `md-to-pdf` tool. For general usage and quick examples, please refer to the main [README.md](../../README.md) and the [../refs/../refs/../refs/cheat-sheet.md](cheat-sheet.md).
 
 ## Understanding Plugins
 
@@ -561,7 +561,7 @@ md-to-pdf config --plugin cv
 md-to-pdf config --plugin cv --pure # For raw YAML output
 ```
 
-This is invaluable for debugging how settings and `params` are being applied. Refer to the [Cheat Sheet](docs/cheat-sheet.md#configuration-inspection) for more examples.
+This is invaluable for debugging how settings and `params` are being applied. Refer to the [Cheat Sheet](../refs/cheat-sheet.md#configuration-inspection) for more examples.
 
 ### Plugin Help via CLI
 
@@ -762,7 +762,7 @@ This command will create the following structure:
 
 For a complete, working example of a custom "business-card" plugin, you can also inspect the one used in our test kit located at [`test/custom_plugins/business-card/`](../test/custom_plugins/business-card/).
 
-To compile and view the sample [`example-business-card.md`](../test/assets/example-business-card.md) using the test `business-card` plugin, which is registered in [`test/config.test.yaml`](../test/config.test.yaml):
+To compile and view the sample [`example-business-card.md`](../test/assets/example-business-card.md) using the test `business-card` plugin, which is registered in [`test/config.test.yaml`](../../test/shared/config.test.yaml):
 
 ```bash
 md-to-pdf convert test/assets/example-business-card.md \
@@ -770,7 +770,7 @@ md-to-pdf convert test/assets/example-business-card.md \
     --config test/config.test.yaml
 ```
 
-Refer to the [**cheat-sheet.md**](cheat-sheet.md#plugin--collection-management-commands) for more command syntax details.
+Refer to the [**cheat-sheet.md**](../refs/cheat-sheet.md#plugin--collection-management-commands) for more command syntax details.
 
 ## Advanced Example
 
@@ -789,7 +789,7 @@ The **advanced-card** plugin serves as an example of this. It generates a busine
 
 **Location**
 
-[`examples/custom_plugin_showcase/advanced-card/`](../examples/custom_plugin_showcase/advanced-card/)
+[`examples/custom_plugin_showcase/advanced-card/`](../../examples/custom_plugin_showcase/advanced-card/)
 
 ### Why a Custom Handler for "advanced-card"?
 
@@ -991,8 +991,8 @@ This **advanced-card** example illustrates how to take full control when the sta
 
 ### 5\. Execution
 
-To compile and view the [`advanced-card-example.md`](../examples/custom_plugin_showcase/advanced-card/advanced-card-example.md) using this **advanced-card** plugin, which should be registered in a main `config.yaml` pointing to
-[`examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml`](../examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml),
+To compile and view the [`advanced-card-example.md`](../../examples/custom_plugin_showcase/advanced-card/advanced-card-example.md) using this **advanced-card** plugin, which should be registered in a main `config.yaml` pointing to
+[`examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml`](../../examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml),
 run the following command:
 
 ```bash
@@ -1003,7 +1003,7 @@ md-to-pdf convert $md_file --plugin advanced-card --outdir ./test_output --watch
 This also highlights the use of the `--watch` flag, which is quite handy when iterating CSS and JavaScript tweaks.
 
 You can find the full source code for this **advanced-card** plugin, including the example Markdown file, in the
-[`examples/custom_plugin_showcase/advanced-card/`](../examples/custom_plugin_showcase/advanced-card/)
+[`examples/custom_plugin_showcase/advanced-card/`](../../examples/custom_plugin_showcase/advanced-card/)
 directory, which contains:
 
 ```bash
@@ -1043,7 +1043,7 @@ async generate(data, pluginSpecificConfig, /* ...other args */) {
 
 For broader context and future plans, refer to:
 
-  * [Dream Board (`docs/dream-board-v0.8.md`)](docs/dream-board-v0.8.md)
-  * [Changelog (`docs/changelog-v0.8.md`)](docs/changelog-v0.8.md)
+  * [Dream Board (`dream-board-v0.8.md`)](../archive/v0.8/dream-board-v0.8.md)
+  * [Changelog (`changelog-v0.8.md`)](../archive/v0.8/changelog-v0.8.md)
 
 

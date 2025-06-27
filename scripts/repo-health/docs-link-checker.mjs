@@ -1,4 +1,5 @@
-// scripts/devel/docs-link-checker.mjs
+// scripts/repo-health/docs-link-checker.mjs
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,14 +13,18 @@ const ROOT_DIR_TO_SCAN = 'docs/';
 const EXCLUDE_PATTERNS = [
   'node_modules/**',
   '.git/**',
-  '**/test/fixtures/**', // Exclude test fixtures which may have intentionally broken links
+  '**/test/fixtures/**',
+  'docs/archive/**',   // Example: exclude all of docs/archive
+  // Add more as needed
 ];
 
 // --- CLI flags ---
 const args = process.argv.slice(2);
 const verbose = args.includes('--verbose');
+const fixMode = args.includes('--fix');
+const dryRun = args.includes('--dry-run');
 
-// --- Setup: Robustly find and set project root ---
+// --- Setup ---
 function findProjectRoot() {
     let currentDir = path.dirname(fileURLToPath(import.meta.url));
     while (currentDir !== '/') {
@@ -30,11 +35,17 @@ function findProjectRoot() {
     }
     throw new Error('Could not find project root. Make sure package.json is present.');
 }
-
 const projectRoot = findProjectRoot();
 process.chdir(projectRoot);
 
 // --- Helper Functions ---
+function isSymlink(p) {
+    try {
+        return fs.lstatSync(p).isSymbolicLink();
+    } catch {
+        return false;
+    }
+}
 
 function isExcluded(filePath) {
   const relPath = path.relative(process.cwd(), filePath).split(path.sep).join('/');
@@ -42,10 +53,10 @@ function isExcluded(filePath) {
 }
 
 function getMarkdownFiles(dir, files = []) {
-  if (isExcluded(dir)) return files;
+  if (isExcluded(dir) || isSymlink(dir)) return files;
   for (const entry of fs.readdirSync(dir)) {
     const fullPath = path.join(dir, entry);
-    if (isExcluded(fullPath)) continue;
+    if (isExcluded(fullPath) || isSymlink(fullPath)) continue;
     if (fs.statSync(fullPath).isDirectory()) {
       getMarkdownFiles(fullPath, files);
     } else if (entry.endsWith('.md')) {
@@ -55,9 +66,56 @@ function getMarkdownFiles(dir, files = []) {
   return files;
 }
 
-// --- Main Logic ---
+function buildFileIndex(rootDir) {
+    const index = new Map();
+    function walk(dir) {
+        if (isExcluded(dir) || isSymlink(dir)) return;
+        const entries = fs.readdirSync(dir);
+        for (const entry of entries) {
+            const fullPath = path.join(dir, entry);
+            if (isExcluded(fullPath) || isSymlink(fullPath)) continue;
+            const stat = fs.statSync(fullPath);
+            if (stat.isDirectory()) {
+                walk(fullPath);
+            } else {
+                const key = path.basename(entry).toLowerCase();
+                if (!index.has(key)) index.set(key, new Set());
+                index.get(key).add(fullPath);
+            }
+        }
+    }
+    walk(rootDir);
+    return index;
+}
 
-async function auditMarkdownLinks(filePath) {
+function computeRelativePath(sourceFile, targetFile) {
+    const sourceDir = path.dirname(sourceFile);
+    let relative = path.relative(sourceDir, targetFile);
+    return relative.replace(/\\/g, '/');
+}
+
+function updateLinkInLine(lineText, oldLink, newLink) {
+    // Replace only the first occurrence of the old link in the line
+    return lineText.replace(oldLink, newLink);
+}
+
+function updateLinkInFile(filePath, oldLink, newLink, line) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const lines = content.split('\n');
+    if (line >= 1 && line <= lines.length) {
+        const lineText = lines[line - 1];
+        const updatedLine = updateLinkInLine(lineText, oldLink, newLink);
+        if (updatedLine !== lineText) {
+            lines[line - 1] = updatedLine;
+            fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
+            return true;
+        }
+    }
+    return false;
+}
+
+// --- Main Logic ---
+async function auditAndFixMarkdownLinks(filePath, fileIndex, fixMode = false, dryRun = false) {
     const brokenLinks = [];
     const content = fs.readFileSync(filePath, 'utf8');
     const tree = remark().parse(content);
@@ -65,27 +123,77 @@ async function auditMarkdownLinks(filePath) {
 
     visit(tree, 'link', (node) => {
         let linkUrl = node.url;
-        // Ignore external links and self-references
         if (!linkUrl || /^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(linkUrl) || linkUrl.startsWith('#')) {
             return;
         }
 
+        // Separate anchor from link, if any
+        let anchor = '';
         const anchorIndex = linkUrl.indexOf('#');
         if (anchorIndex !== -1) {
+            anchor = linkUrl.substring(anchorIndex);
             linkUrl = linkUrl.substring(0, anchorIndex);
         }
-
-        if (!linkUrl) {
-            return;
-        }
+        if (!linkUrl) return;
 
         const absolutePath = path.resolve(fileDir, linkUrl);
         if (!fs.existsSync(absolutePath)) {
-            brokenLinks.push({
-                line: node.position?.start.line,
-                link: node.url,
-                resolvedPath: absolutePath
-            });
+            const basename = path.basename(linkUrl).toLowerCase();
+            const candidates = fileIndex.get(basename) || new Set();
+
+            if (candidates.size === 1) {
+                const [targetFile] = candidates;
+                let newRelativePath = computeRelativePath(filePath, targetFile) + anchor;
+
+                // Only fix if the normalized paths (without anchor) are different
+                const normalizedCurrent = path.normalize(path.resolve(fileDir, linkUrl));
+                const normalizedTarget = path.normalize(path.resolve(targetFile));
+                if (normalizedCurrent === normalizedTarget) {
+                    // Already correct, skip
+                    return;
+                }
+
+                brokenLinks.push({
+                    line: node.position?.start.line,
+                    oldLink: node.url,
+                    newLink: newRelativePath,
+                    resolved: targetFile
+                });
+
+                // Apply fix if in fix mode or dry-run
+                if (fixMode || dryRun) {
+                    const contentLines = content.split('\n');
+                    const lineIdx = node.position.start.line - 1;
+                    const before = contentLines[lineIdx];
+                    const after = updateLinkInLine(before, node.url, newRelativePath);
+
+                    if (dryRun) {
+                        console.log(`\n[DRY-RUN] Would fix in ${filePath} (line ${node.position.start.line}):`);
+                        console.log(`  - BEFORE: ${before}`);
+                        console.log(`  - AFTER : ${after}`);
+                    } else if (fixMode) {
+                        const updated = updateLinkInFile(
+                            filePath, node.url, newRelativePath, node.position.start.line
+                        );
+                        if (updated) {
+                            console.log(`  ✓ Fixed: ${node.url} → ${newRelativePath} in ${filePath} (line ${node.position.start.line})`);
+                        }
+                    }
+                }
+            } else if (candidates.size > 1) {
+                brokenLinks.push({
+                    line: node.position?.start.line,
+                    oldLink: node.url,
+                    candidates: Array.from(candidates),
+                    ambiguous: true
+                });
+            } else {
+                brokenLinks.push({
+                    line: node.position?.start.line,
+                    oldLink: node.url,
+                    unresolvable: true
+                });
+            }
         }
     });
     return brokenLinks;
@@ -94,19 +202,27 @@ async function auditMarkdownLinks(filePath) {
 async function main() {
     console.log(`Auditing Markdown links in '${ROOT_DIR_TO_SCAN}' from project root: ${process.cwd()}`);
     const mdFiles = getMarkdownFiles(ROOT_DIR_TO_SCAN);
+    const fileIndex = buildFileIndex(projectRoot);
+
     let totalBrokenLinks = 0;
 
     for (const file of mdFiles) {
         if (verbose) {
             console.log(`- Scanning: ${file}`);
         }
-        const brokenLinks = await auditMarkdownLinks(file);
+        const brokenLinks = await auditAndFixMarkdownLinks(file, fileIndex, fixMode, dryRun);
         if (brokenLinks.length > 0) {
             console.log(`\n[✖] Found ${brokenLinks.length} broken link(s) in ${file}:`);
             brokenLinks.forEach(item => {
-                console.log(`  - Line ${item.line}: [link](${item.link})`);
-                if (verbose) {
-                     console.log(`    (Resolved to non-existent path: ${item.resolvedPath})`);
+                if (item.newLink) {
+                    if (!fixMode && !dryRun) {
+                        console.log(`  - Line ${item.line}: [link](${item.oldLink}) → [should fix](${item.newLink})`);
+                    }
+                } else if (item.ambiguous) {
+                    console.log(`  - Line ${item.line}: [link](${item.oldLink}) is ambiguous. Candidates:`);
+                    item.candidates.forEach(c => console.log(`    • ${c}`));
+                } else {
+                    console.log(`  - Line ${item.line}: [link](${item.oldLink}) - no matching file found`);
                 }
             });
             totalBrokenLinks += brokenLinks.length;
@@ -118,8 +234,12 @@ async function main() {
         console.log('Success: No broken relative links found.');
     } else {
         console.log(`Audit Complete: Found a total of ${totalBrokenLinks} broken link(s).`);
+        if (fixMode || dryRun) {
+            console.log(`\n${dryRun ? '[DRY-RUN] ' : ''}Auto-fix attempted for unambiguous links.`);
+        }
         process.exit(1);
     }
 }
 
 main().catch(console.error);
+

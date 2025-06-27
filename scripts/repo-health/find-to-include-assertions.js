@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 
-const projectRoot = path.resolve(__dirname, '../');
+const projectRoot = path.resolve(__dirname, '../../');
 const testDir = path.join(projectRoot, 'test');
 const contextLines = 3; // Number of lines before/after match to show
 

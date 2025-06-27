@@ -16,7 +16,7 @@ fi
 SOURCE_BASE_DIR_ARG="$1"
 OUTPUT_BASE_DIR_ARG="$2"
 BASE_PLUGIN_ARG="$3"
-MD_TO_PDF_CLI_PATH_ARG="${4:-$(dirname "$0")/../cli.js}" # Default path relative to this script
+MD_TO_PDF_CLI_PATH_ARG="${4:-$(dirname "$0")/../../cli.js}" # Default path relative to this script
 
 # Resolve to absolute paths
 SOURCE_BASE_DIR=$(readlink -f "$SOURCE_BASE_DIR_ARG")

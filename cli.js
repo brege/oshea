@@ -282,8 +282,8 @@ async function main() {
                          .option('coll-root', { type: 'string' });
             },
             handler: (args) => {
-                const staticCacheScript = path.resolve(__dirname, 'scripts', 'generate-completion-cache.js');
-                const dynamicCacheScript = path.resolve(__dirname, 'scripts', 'generate-completion-dynamic-cache.js');
+                const staticCacheScript = path.resolve(__dirname, 'scripts', 'completion', 'generate-completion-cache.js');
+                const dynamicCacheScript = path.resolve(__dirname, 'scripts', 'completion', 'generate-completion-dynamic-cache.js');
                 
                 try {
                     execSync(`node "${staticCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });

@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 // If running from scripts/, move to project root
 if (path.basename(__dirname) === 'scripts') {
-  process.chdir(path.resolve(__dirname, '..'));
+  process.chdir(path.resolve(__dirname, '../..'));
 }
 
 // --- Other imports ---

@@ -10,7 +10,7 @@ const chalk = require('chalk');
 
 // --- Dynamically require necessary application modules ---
 // This script is allowed to be "heavy" as it runs in the background.
-const projectRoot = path.resolve(__dirname, '..');
+const projectRoot = path.resolve(__dirname, '../..');
 const PluginRegistryBuilder = require(path.join(projectRoot, 'src', 'PluginRegistryBuilder.js'));
 const CollectionsManager = require(path.join(projectRoot, 'src', 'collections-manager', 'index.js'));
 const MainConfigLoader = require(path.join(projectRoot, 'src', 'main_config_loader.js'));

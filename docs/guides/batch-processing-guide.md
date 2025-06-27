@@ -35,7 +35,7 @@ PDFs will be generated in `batch_output/hugo_recipes_node/`, with each recipe in
       * `--source-dir`: Points to the directory containing your Markdown collections (`examples/hugo-example`).
       * `--output-dir`: Specifies where the generated PDFs (and their subdirectories) will be saved.
       * `--base-plugin`: The `md-to-pdf` plugin to use for styling each recipe.
-      * You can also use the (optional) `--md-to-pdf-path` argument if your [`cli.js`](../cli.js) file is not at the default location relative to the script.
+      * You can also use the (optional) `--md-to-pdf-path` argument if your [`cli.js`](../../cli.js) file is not at the default location relative to the script.
 
 PDFs will be generated in `batch_output/hugo_recipes_node/`, with each recipe in its own subfolder. You can adapt the glob pattern, metadata extraction, and filename logic within the script for different needs and output requirements.
 
@@ -76,16 +76,16 @@ PDFs will be generated in `batch_output/hugo_recipes_bash/`, with each recipe in
         recipe
     ```
 
-      * The first argument is the source directory ([`./examples/hugo-example`](../examples/hugo-example)).
+      * The first argument is the source directory ([`./examples/hugo-example`](../../examples/hugo-example)).
       * The second argument is the base directory where PDFs will be saved.
       * The third argument is the `md-to-pdf` plugin to use for styling.
-      * You can also use the (optional) `--md-to-pdf-path` argument if your [`cli.js`](../cli.js) file is not at the default location relative to the script.
+      * You can also use the (optional) `--md-to-pdf-path` argument if your [`cli.js`](../../cli.js) file is not at the default location relative to the script.
 
 PDFs will be generated in `batch_output/hugo_recipes_bash/`, with each recipe in its own subfolder. You can adapt the `find` command, metadata extraction logic (especially the `get_fm_value` function), and filename construction within the script for different needs and output requirements.
 
 ## General Tips for Customizing Your Batch Scripts
 
-These tips apply to modifying the example scripts located in the [`scripts/`](../scripts/) directory.
+These tips apply to modifying the example scripts located in the [`scripts/`](../../scripts/) directory.
 
 ### Node.js
 

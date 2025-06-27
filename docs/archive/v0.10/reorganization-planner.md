@@ -11,14 +11,14 @@ This reorganization will be conducted in a series of stages, beginning with prep
 ### Table of Contents
 
 <!-- toc-start level-4 -->
-- [ ] [P1 -- Stage 1 | Preparatory Tooling & Analysis](#p1-stage-1-preparatory-tooling-analysis)
-  - [ ] [P1 | Step 1 -- Dependency Analysis -- "Before" Snapshot](#p1-step-1-dependency-analysis-before-snapshot)
-  - [ ] [P1 | Step 2 -- Docs Link-Checker [ .md ]](#p1-step-2-docs-link-checker-md-)
-  - [ ] [P1 | Step 3 -- Path Correction Script [ .js ]](#p1-step-3-path-correction-script-js-)
-- [ ] [P2 -- Stage 2 | Low-Impact Reorganization -- Docs & Scripts](#p2-stage-2-low-impact-reorganization-docs-scripts)
-  - [ ] [P2 | Step 1 -- Reorganize docs/ Directory](#p2-step-1-reorganize-docs-directory)
-  - [ ] [P2 | Step 2 -- Update Documentation Indexer](#p2-step-2-update-documentation-indexer)
-  - [ ] [P2 | Step 3 -- Reorganize scripts/ Directory](#p2-step-3-reorganize-scripts-directory)
+- [x] [P1 -- Stage 1 | Preparatory Tooling & Analysis](#p1-stage-1-preparatory-tooling-analysis)
+  - [x] [P1 | Step 1 -- Dependency Analysis -- "Before" Snapshot](#p1-step-1-dependency-analysis-before-snapshot)
+  - [x] [P1 | Step 2 -- Docs Link-Checker [ .md ]](#p1-step-2-docs-link-checker-md-)
+  - [x] [P1 | Step 3 -- Path Correction Script [ .js ]](#p1-step-3-path-correction-script-js-)
+- [x] [P2 -- Stage 2 | Low-Impact Reorganization -- Docs & Scripts](#p2-stage-2-low-impact-reorganization-docs-scripts)
+  - [x] [P2 | Step 1 -- Reorganize docs/ Directory](#p2-step-1-reorganize-docs-directory)
+  - [x] [P2 | Step 2 -- Update Documentation Indexer](#p2-step-2-update-documentation-indexer)
+  - [x] [P2 | Step 3 -- Reorganize scripts/ Directory](#p2-step-3-reorganize-scripts-directory)
   - [ ] [P2 | Step 4 -- Full Documentation Link Audit](#p2-step-4-full-documentation-link-audit)
 - [ ] [P3 -- Stage 3 | Reorganize App and Test Code [ src/ + test/ ]](#p3-stage-3-reorganize-app-and-test-code-src-test-)
   - [ ] [P3 | Step 1 -- Re-organize src/ Directory](#p3-step-1-re-organize-src-directory)

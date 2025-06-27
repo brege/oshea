@@ -44,18 +44,20 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 * [Test Structure Evolution](lucidity/current-vs-proposed-test-structure.md):
   Provides an early look at the *ad hoc* brittle, mostly end-to-end, test structure before 
   [mocha](https://mochajs.org/), before test grouping.
+* [Tab Completion Assay](lucidity/tab-completion-assay.md):
+  Breaks down tab-completion schemes into difficulty levels, design pathways, examples, and an optimal approach.
+* [Final Reorganization Planner](lucidity/reorganization-planner.md):
+  Planning strategy for the final polish, reorganization, and AI integration push.
 
 ---
 
 ## 3. Tutorials & How-To Guides
-
 *Practical walkthroughs providing demonstration and step-by-step instructions.*
 
-* [Batch Processing Guide](batch-processing-guide.md): Explains how to convert multiple Markdown files at once using external scripts that leverage the `md-to-pdf` CLI.
-* [Collections Manager Walkthrough](../src/collections-manager/walkthrough.md):
-  Uses the original `md-to-pdf-cm` CLI tool for remote plugin management.
+* [Batch Processing Guide](batch-processing-guide.md):
+  Explains how to convert multiple Markdown files at once using external scripts that leverage the `md-to-pdf` CLI.
 
-**TODO:** Remove, and replace CM walkthough with walkthrough mirroring Level 4 lifecycle tests--just make them the same to save headaches.
+**TODO:** Make walkthroughs that replicate Level 4 lifecycle tests--this way there's a robot version and a human version for the same execution.
 
 ---
 
@@ -76,6 +78,8 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 * [Checklist Level 3](../test/docs/checklist-level-3.md): End-to-End CLI test scenarios.
 * [Checklist Level 4](../test/docs/checklist-level-4.md): End-to-End lifecycle test scenarios.
 
+* [Help Text Checklist](../test/docs/help-text-checklist.md): Systematic review of CLI help text.
+
 ---
 
 ## 5. Untracked Documents
@@ -84,8 +88,6 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 <!-- etc-start -->
 
-- [docs/lucidity/tab-completion-assay.md](lucidity/tab-completion-assay.md)
-- [test/docs/help-text-checklist.md](../test/docs/help-text-checklist.md)
 
 <!-- etc-end -->
 

@@ -3,18 +3,26 @@
 This document is a central index for all documentation within the `md-to-pdf` repo.
 It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk](https://diataxis.fr/) taxonomy),
 
+**Active Documents and Checklists** \
+*For convenience, these are symlinks to the latest version of each document below.*
+
+* [**Reoganization Planner**](reorganization-planner.md):
+    **Planning strategy** for the final polish, reorganization, and AI integration push.
+* [**Dream Board**](dream-board.md):
+    **Standardization**. Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
+
 
 ---
 
 ## 1. Reference Documentation
 *Technical descriptions of the project's commands, APIs, and structure.*
 
-* [Project README](../README.md): Provides a high-level overview, quick start, and feature summary.
+* [**Project README**](../README.md): Provides a high-level overview, quick start, and feature summary.
 * [Plugins README](../plugins/README.md): Introduces the bundled plugins and how to use them.
-* [Plugin Development Guide](plugin-development.md): 
+* [Plugin Development Guide](guides/plugin-development.md): 
   Details the plugins development cycle in creating, cnofiguring and managing plugins. Part reference, part walkthrough.
-* [Cheat Sheet](cheat-sheet.md): Compactly lists CLI commands, common usage, and config snippets.
-* [Plugin Contract](plugin-contract.md): Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
+* [**Cheat Sheet**](refs/cheat-sheet.md): Compactly lists CLI commands, common usage, and config snippets.
+* [Plugin Contract](refs/plugin-contract.md): Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
 
 ---
 
@@ -24,29 +32,35 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 ### High-Level Vision & History
 *The main "living" documents of the project's evolution and direction--updated in commit timescales*
 
-* [Dream Board v0.9](dream-board-v0.9.md): **Standardization**. Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
+* [**Dream Board v0.9**](archive/v0.9/dream-board-v0.9.md):
+  **Standardization**. Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
   Muxes changelogs, task checklists, and outlook from a central, living document.
-* [Dream Board v0.8](dream-board-v0.8.md): **Unification**. Merges plugin and collection management under a single CLI.
-* [Dream Board v0.7](dream-board-v0.7.md): **Plugin Installation**. Introduces the Collections Manager concept.
-* [Changelog v0.8](changelog-v0.8.md): Chronologically lists the major changes in the v0.8.x series.
-* [Changelog v0.7](changelog-v0.7.md): Chronologically lists the major changes in the v0.7.x series.
-* [Roadmap](roadmap.md): Provides an historical overview of major features and milestones completed prior to v0.7.0.
+* [Dream Board v0.8](archive/v0.8/dream-board-v0.8.md): **Unification**. 
+  Merges plugin and collection management under a single CLI.
+* [Dream Board v0.7](archive/v0.7/dream-board-v0.7.md): **Plugin Installation**.
+  Introduces the Collections Manager concept.
+* [Changelog v0.8](archive/v0.8/changelog-v0.8.md):
+  Chronologically lists the major changes in the v0.8.x series.
+* [Changelog v0.7](archive/v0.7/changelog-v0.7.md):
+  Chronologically lists the major changes in the v0.7.x series.
+* [Roadmap](archive/v0.6/roadmap.md):
+  Provides an historical overview of major features and milestones completed prior to v0.7.0.
 
 ### Design Decisions & Lucidity
 *Transparency travelogues that track rationale, choices, regrets--updated in point-release timescales*
 
-* [Should We Have Used a Config Library?](lucidity/should-we-have-used-a-config-library.md):
+* [Should We Have Used a Config Library?](archive/v0.6/should-we-have-used-a-config-library.md):
   Journals the choices between bespoke config-system versus adopting a config library.
-* [Plugin Validation Philosophy](lucidity/schema-validation-philosophy.md):
+* [Plugin Validation Philosophy](archive/v0.9/schema-validation-philosophy.md):
   Explains the "warn, don't fail" approach to configuration schema validation.
-* [Purge Command Deferral](lucidity/purge.md):
+* [Purge Command Deferral](archive/v0.8/should-cm-purge-orphans.md):
   Details the reasoning for deferring a potentially dangerous "purge" feature in favor of user data safety.
-* [Test Structure Evolution](lucidity/current-vs-proposed-test-structure.md):
+* [Test Structure Evolution](archive/v0.8/current-vs-proposed-test-structure.md):
   Provides an early look at the *ad hoc* brittle, mostly end-to-end, test structure before 
   [mocha](https://mochajs.org/), before test grouping.
-* [Tab Completion Assay](lucidity/tab-completion-assay.md):
+* [Tab Completion Assay](archive/v0.9/tab-completion-assay.md):
   Breaks down tab-completion schemes into difficulty levels, design pathways, examples, and an optimal approach.
-* [Final Reorganization Planner](lucidity/reorganization-planner.md):
+* [**Reorganization Planner**](archive/v0.10/reorganization-planner.md):
   Planning strategy for the final polish, reorganization, and AI integration push.
 
 ---
@@ -54,7 +68,7 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 ## 3. Tutorials & How-To Guides
 *Practical walkthroughs providing demonstration and step-by-step instructions.*
 
-* [Batch Processing Guide](batch-processing-guide.md):
+* [Batch Processing Guide](guides/batch-processing-guide.md):
   Explains how to convert multiple Markdown files at once using external scripts that leverage the `md-to-pdf` CLI.
 
 **TODO:** Make walkthroughs that replicate Level 4 lifecycle tests--this way there's a robot version and a human version for the same execution.
@@ -87,7 +101,6 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 *This list is automatically updated by [`scripts/index-docs.js`](../scripts/index-docs.js).*
 
 <!-- etc-start -->
-
 
 <!-- etc-end -->
 

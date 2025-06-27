@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.9.35",
+  "version": "0.10.0",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -56,6 +56,8 @@
     "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "acorn": "^8.15.0",
+    "acorn-walk": "^8.3.4",
     "chai": "^4.3.4",
     "jsdom": "^22.1.0",
     "lodash": "^4.17.21",

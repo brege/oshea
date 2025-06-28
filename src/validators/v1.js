@@ -118,7 +118,6 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
             console.error("No STDERR captured. Full error object:", e);
         }
         console.error(chalk.grey("--- End In-Situ Test Error Output ---\n"));
-        // --- END DIAGNOSTIC PROBE ---
     }
 };
 

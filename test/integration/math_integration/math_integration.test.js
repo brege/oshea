@@ -26,7 +26,7 @@ describe('math_integration (Module Integration Tests)', function() {
 
     beforeEach(function() {
         // Clear module cache for math_integration module.
-        delete require.cache[require.resolve('../../../src/math_integration')];
+        delete require.cache[require.resolve('../../../src/core/math_integration')];
 
         mockFsPromises = { readFile: sinon.stub(), };
         mockFsSync = { existsSync: sinon.stub().returns(false), statSync: sinon.stub(), };
@@ -45,7 +45,7 @@ describe('math_integration (Module Integration Tests)', function() {
         mockKatexPluginModule = { default: mockKatexPluginFunction };
 
         // Get the createMathIntegration factory function using proxyquire
-        mathIntegrationFactory = proxyquire(path.resolve(__dirname, '../../../src/math_integration'), {
+        mathIntegrationFactory = proxyquire(path.resolve(__dirname, '../../../src/core/math_integration'), {
             // Stub the internal require('@vscode/markdown-it-katex') inside the factory function
             '@vscode/markdown-it-katex': mockKatexPluginModule,
             // No need to stub fs, fs/promises, path here, as they are now injected into the factory function itself.
@@ -73,7 +73,7 @@ describe('math_integration (Module Integration Tests)', function() {
     afterEach(function() {
         sinon.restore();
         // Clear require cache for the module under test and its immediate dependencies
-        delete require.cache[require.resolve('../../../src/math_integration')];
+        delete require.cache[require.resolve('../../../src/core/math_integration')];
         if (console.lastLog !== undefined) {
              console.lastLog = "";
         }

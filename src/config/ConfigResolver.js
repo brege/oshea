@@ -20,7 +20,7 @@ class ConfigResolver {
         };
         this.dependencies = { ...defaultDependencies, ...dependencies };
         
-        this.projectRoot = this.dependencies.path.resolve(__dirname, '..');
+        this.projectRoot = this.dependencies.path.resolve(__dirname, '..', '..');
         this._useFactoryDefaultsOnly = useFactoryDefaultsOnly;
         this._isLazyLoadMode = isLazyLoadMode;
 
@@ -42,7 +42,7 @@ class ConfigResolver {
         this.resolvedCollRoot = this.dependencies.collRoot || null;
 
         this.ajv = new Ajv({ allErrors: true });
-        const baseSchemaPath = this.dependencies.path.join(this.projectRoot, 'src', 'base-plugin.schema.json');
+        const baseSchemaPath = this.dependencies.path.join(this.projectRoot, 'src', 'validators', 'base-plugin.schema.json');
         if (this.dependencies.fs.existsSync(baseSchemaPath)) {
             const baseSchema = JSON.parse(this.dependencies.fs.readFileSync(baseSchemaPath, 'utf8'));
             this.ajv.addSchema(baseSchema, 'base-plugin.schema.json');
@@ -51,7 +51,6 @@ class ConfigResolver {
         }
     }
 
-    // --- MODIFICATION START ---
     get useFactoryDefaultsOnly() {
         return this._useFactoryDefaultsOnly;
     }
@@ -74,7 +73,6 @@ class ConfigResolver {
             this._initialized = false; // Force re-initialization on next call
         }
     }
-    // --- MODIFICATION END ---
 
     _validatePluginConfig(pluginName, configData, pluginConfigPath) {
         const baseSchema = this.ajv.getSchema('base-plugin.schema.json').schema;

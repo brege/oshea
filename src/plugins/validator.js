@@ -20,9 +20,7 @@ function resolvePluginPath(pluginIdentifier) {
     if (fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory()) {
         return { pluginDirectoryPath: resolvedIdentifier, pluginName: path.basename(resolvedIdentifier) };
     }
-    // CORRECTED: Adjust projectRoot resolution from dev/src/ to dev/
-    // This finds the project root (dev/) which contains the 'plugins' directory.
-    const projectRoot = path.resolve(__dirname, '../'); // Changed from '../../' to '../'
+    const projectRoot = path.resolve(__dirname, '../../'); 
     const pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
     if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
         throw new Error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'.`);

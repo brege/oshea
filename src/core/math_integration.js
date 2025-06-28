@@ -12,7 +12,7 @@ function createMathIntegration(dependencies = {}) {
 
     const katexPluginModule = dependencies.katexPluginModule || require('@vscode/markdown-it-katex');
 
-    const KATEX_CSS_PATH = path_module.resolve(__dirname, '../assets/css/katex.min.css');
+    const KATEX_CSS_PATH = path_module.resolve(__dirname, '../../assets/css/katex.min.css');
 
     /**
      * Configures a MarkdownIt instance for math rendering using KaTeX.

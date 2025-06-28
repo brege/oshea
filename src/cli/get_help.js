@@ -12,7 +12,7 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
 
     try {
         const registryBuilder = new PluginRegistryBuilder(
-            path.resolve(__dirname, '..'), // projectRoot
+            path.resolve(__dirname, '../..'), // projectRoot
             null, // xdgBaseDir (let builder determine)
             cliArgs.config, // projectManifestConfigPath from CLI
             cliArgs.factoryDefaults, // useFactoryDefaultsOnly from CLI

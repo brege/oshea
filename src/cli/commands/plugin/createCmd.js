@@ -69,7 +69,7 @@ module.exports = {
           sourceIdentifier = args.from;
         }
       } else {
-        sourceIdentifier = path.resolve(__dirname, '..', '..', '..', 'plugins', 'template-basic');
+        sourceIdentifier = path.resolve(__dirname, '..', '..', '..', '..', 'plugins', 'template-basic');
       }
 
       const options = {
@@ -96,7 +96,7 @@ module.exports = {
         console.log(chalk.gray(`  2. Register your new plugin in a main config file.`));
       }
       
-      const cliPath = path.resolve(__dirname, '../../../cli.js'); // Go up 3 levels: plugin -> commands -> src -> md-to-pdf
+      const cliPath = path.resolve(__dirname, '../../../../cli.js'); 
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });

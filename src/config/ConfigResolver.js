@@ -1,13 +1,13 @@
-// src/ConfigResolver.js
+// src/config/ConfigResolver.js
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const Ajv = require('ajv');
 const { loadYamlConfig, deepMerge } = require('./config_utils');
-const PluginRegistryBuilder = require('./PluginRegistryBuilder');
+const PluginRegistryBuilder = require('../plugins/PluginRegistryBuilder');
 const MainConfigLoader = require('./main_config_loader');
 const PluginConfigLoader = require('./plugin_config_loader');
-const AssetResolver = require('./asset_resolver');
+const AssetResolver = require('../utils/asset_resolver');
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 

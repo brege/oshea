@@ -1,10 +1,10 @@
-// src/commands/plugin/enableCmd.js
+// src/cli/commands/plugin/enableCmd.js
 const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs').promises;
 const yaml = require('js-yaml');
-const { validate: pluginValidator } = require('../../plugin-validator');
+const { validate: pluginValidator } = require('../../../plugins/validator');
 
 module.exports = {
   command: 'enable <target>',

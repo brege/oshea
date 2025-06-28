@@ -1,4 +1,4 @@
-// src/commands/collection/removeCmd.js
+// src/cli/commands/collection/removeCmd.js
 const chalk = require('chalk');
 const path = require('path'); 
 

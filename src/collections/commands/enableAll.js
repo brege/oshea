@@ -1,6 +1,5 @@
-// src/collections-manager/commands/enableAll.js
-const { validate: pluginValidator } = require('../../plugin-validator'); // Import plugin-validator
-// No longer requires fs, path, chalk, or constants
+// src/collections/commands/enableAll.js
+const { validate: pluginValidator } = require('../../plugins/validator'); 
 
 module.exports = async function enableAllPluginsInCollection(dependencies, collectionName, options = {}) {
   // Destructure dependencies

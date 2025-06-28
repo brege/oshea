@@ -1,7 +1,7 @@
-// test/integration/plugin-config-loader/plugin-config-loader.test.1.6.14.js
+// test/integration/config/plugin-config-loader.test.1.6.14.js
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginConfigLoader = require('../../../src/plugin_config_loader');
+const PluginConfigLoader = require('../../../src/config/plugin_config_loader');
 
 // Define this constant locally to ensure consistency with the module under test
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';

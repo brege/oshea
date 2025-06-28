@@ -1,7 +1,7 @@
-// test/integration/main-config-loader/main-config-loader.test.1.4.1.js
+// test/integration/config/main-config-loader.test.1.4.1.js
 const { expect } = require('chai');
 const path = require('path');
-const MainConfigLoader = require('../../../src/main_config_loader');
+const MainConfigLoader = require('../../../src/config/main_config_loader');
 
 describe('MainConfigLoader (1.4.1)', () => {
     describe('constructor', () => {

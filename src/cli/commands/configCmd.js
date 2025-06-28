@@ -1,4 +1,4 @@
-// src/commands/configCmd.js
+// src/cli/commands/configCmd.js
 const { displayConfig } = require('../config_display');
 const path = require('path'); 
 const chalk = require('chalk'); 

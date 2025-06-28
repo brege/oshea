@@ -1,4 +1,4 @@
-// src/plugin_archetyper.js
+// src/plugins/plugin_archetyper.js
 const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');

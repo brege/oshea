@@ -1,4 +1,4 @@
-// src/math_integration.js
+// src/core/math_integration.js
 
 /**
  * @fileoverview Module for math rendering integration, initially supporting KaTeX.

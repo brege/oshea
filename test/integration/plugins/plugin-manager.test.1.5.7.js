@@ -1,11 +1,11 @@
-// test/integration/plugin-manager/plugin-manager.test.1.5.7.js
+// test/integration/plugins/plugin-manager.test.1.5.7.js
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 
-const PluginManager = require('../../../src/PluginManager');
+const PluginManager = require('../../../src/plugins/PluginManager');
 
 describe('PluginManager invokeHandler (1.5.7)', () => {
     let mockDefaultHandler;

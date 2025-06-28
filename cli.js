@@ -9,7 +9,7 @@ const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
 
 if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
-    const { getSuggestions } = require('./src/tab-completion/engine.js'); 
+    const { getSuggestions } = require('./src/completion/engine'); 
 
     const completionArgv = {
         _: [],
@@ -49,23 +49,23 @@ const fsp = require('fs').promises;
 const chalk = require('chalk');
 const { spawn, execSync } = require('child_process');
 
-const ConfigResolver = require('./src/ConfigResolver');
-const PluginManager = require('./src/PluginManager');
-const { setupWatch } = require('./src/watch_handler');
-const { determinePluginToUse } = require('./src/plugin_determiner');
-const CollectionsManager = require('./src/collections-manager');
-const MainConfigLoader = require('./src/main_config_loader.js');
-const markdownUtils = require('./src/markdown_utils');
+const ConfigResolver = require('./src/config/ConfigResolver');
+const PluginManager = require('./src/plugins/PluginManager');
+const { setupWatch } = require('./src/core/watch_handler');
+const { determinePluginToUse } = require('./src/plugins/plugin_determiner');
+const CollectionsManager = require('./src/collections');
+const MainConfigLoader = require('./src/config/main_config_loader');
+const markdownUtils = require('./src/core/markdown_utils');
 const yaml = require('js-yaml');
 
 const yargs = require('yargs/yargs');
 
-const configCmd = require('./src/commands/configCmd.js');
-const pluginCmd = require('./src/commands/pluginCmd.js');
-const convertCmdModule = require('./src/commands/convertCmd.js');
-const generateCmd = require('./src/commands/generateCmd.js');
-const collectionCmd = require('./src/commands/collectionCmd.js');
-const updateCmd = require('./src/commands/updateCmd.js');
+const configCmd = require('./src/cli/commands/configCmd');
+const pluginCmd = require('./src/cli/commands/pluginCmd');
+const convertCmdModule = require('./src/cli/commands/convertCmd');
+const generateCmd = require('./src/cli/commands/generateCmd');
+const collectionCmd = require('./src/cli/commands/collectionCmd');
+const updateCmd = require('./src/cli/commands/updateCmd.js');
 
 
 function openPdf(pdfPath, viewerCommand) {

@@ -1,4 +1,4 @@
-// src/commands/plugin/addCmd.js
+// src/cli/commands/plugin/addCmd.js
 const path = require('path');
 const chalk = require('chalk');
 const fss = require('fs');

@@ -1,4 +1,4 @@
-// src/markdown_utils.js
+// src/core/markdown_utils.js
 
 /**
  * @fileoverview Provides utility functions for Markdown processing, including

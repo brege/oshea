@@ -1,8 +1,8 @@
-// test/integration/config-resolver/config-resolver.test.1.1.12.js
+// test/integration/config/config-resolver.test.1.1.12.js
 const { expect } = require('chai');
 const sinon = require('sinon');
 const _ = require('lodash');
-const ConfigResolver = require('../../../src/ConfigResolver');
+const ConfigResolver = require('../../../src/config/ConfigResolver');
 
 // Test suite for Scenario 1.1.12
 describe('ConfigResolver getEffectiveConfig (1.1.12)', () => {

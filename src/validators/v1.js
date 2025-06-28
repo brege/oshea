@@ -1,4 +1,4 @@
-// src/plugin-validators/v1.js
+// src/validators/v1.js
 
 const fs = require('fs');
 const path = require('path');

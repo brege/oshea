@@ -1,4 +1,4 @@
-// test/integration/plugin_determiner/plugin_determiner.manifest.js
+// test/integration/plugins/plugin_determiner.manifest.js
 const path = require('path');
 const fs = require('fs').promises;
 

@@ -1,4 +1,4 @@
-// src/collections-manager/index.js
+// src/collections/index.js
 const fs = require('fs').promises;
 const fss = require('fs'); // For synchronous checks like existsSync
 const path = require('path');
@@ -24,7 +24,6 @@ const updateAllCollectionsCmd = require('./commands/updateAll');
 const listAvailablePluginsCmd = require('./commands/listAvailable');
 const listCollectionsCmd = require('./commands/list');
 const addSingletonPluginCmd = require('./commands/addSingleton');
-// DELETED: const archetypePluginCmd = require('./commands/archetype');
 
 class CollectionsManager {
   constructor(options = {}, dependencies = {}) {
@@ -54,7 +53,6 @@ class CollectionsManager {
     this.updateAllCollections = updateAllCollectionsCmd.bind(this, this.dependencies);
     this.listAvailablePlugins = listAvailablePluginsCmd.bind(this, this.dependencies);
     this.listCollections = listCollectionsCmd.bind(this, this.dependencies);
-    // DELETED: this.archetypePlugin = archetypePluginCmd.bind(this, this.dependencies);
     this.addSingletonPlugin = addSingletonPluginCmd.bind(this, this.dependencies);
   }
 

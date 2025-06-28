@@ -1,8 +1,8 @@
-// src/PluginRegistryBuilder.js
+// src/plugins/PluginRegistryBuilder.js
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { loadConfig: loadYamlConfig } = require('./markdown_utils');
+const { loadConfig: loadYamlConfig } = require('../core/markdown_utils');
 const yaml = require('js-yaml');
 
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';

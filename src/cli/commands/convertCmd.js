@@ -1,10 +1,10 @@
-// src/commands/convertCmd.js
+// src/cli/commands/convertCmd.js
 const path = require('path');
 const os = require('os');
 const fs = require('fs');
 const fsp = require('fs').promises;
-const { determinePluginToUse } = require('../plugin_determiner');
-const PluginManager = require('../PluginManager');
+const { determinePluginToUse } = require('../../plugins/plugin_determiner');
+const PluginManager = require('../../plugins/PluginManager');
 
 const cliOptionsForConvert = (yargs) => {
   yargs

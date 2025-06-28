@@ -1,4 +1,4 @@
-// src/tab-completion/cli-tree-builder.js
+// src/completion/cli-tree-builder.js
 
 const fs = require('fs');
 const path = require('path');
@@ -53,7 +53,7 @@ function discoverCommandTree(dir, prefixParts = []) {
         let defaultCommandOptions = [];
 
         try {
-            const convertCmdModule = require('../commands/convertCmd.js');
+            const convertCmdModule = require('../cli/commands/convertCmd');
             const defaultCmdStub = createYargsStub();
             if (typeof convertCmdModule.defaultCmd.builder === 'function') {
                 convertCmdModule.defaultCmd.builder(defaultCmdStub);

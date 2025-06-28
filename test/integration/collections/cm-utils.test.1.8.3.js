@@ -1,7 +1,7 @@
-// test/integration/collections-manager/cm-utils.test.1.8.3.js
+// test/integration/collections/cm-utils.test.1.8.3.js
 
 const { expect } = require('chai');
-const { isValidPluginName } = require('../../../src/collections-manager/cm-utils');
+const { isValidPluginName } = require('../../../src/collections/cm-utils');
 
 describe('L1C8.3: isValidPluginName - Validation', () => {
   // Valid cases

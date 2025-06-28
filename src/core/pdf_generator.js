@@ -1,4 +1,4 @@
-// src/pdf_generator.js
+// src/core/pdf_generator.js
 const puppeteer = require('puppeteer');
 const path = require('path');
 

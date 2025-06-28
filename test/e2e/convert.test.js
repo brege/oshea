@@ -1,14 +1,14 @@
 // test/e2e/convert.test.js
-const { createE2eTestRunner } = require('./test-runner-factory.js');
+const { createE2eTestRunner } = require('./test-runner-factory');
 
 // Create the test suite for the 'convert' command
-createE2eTestRunner('convert', './convert.manifest.js');
+createE2eTestRunner('convert', './convert.manifest');
 /*
 const { expect } = require('chai');
 const path = require('path');
 const fs = require('fs-extra');
-const { TestHarness } = require('./harness.js');
-const testManifest = require('./convert.manifest.js');
+const { TestHarness } = require('./harness');
+const testManifest = require('./convert.manifest');
 
 describe('E2E - convert Command', function() {
     this.timeout(15000); // Set a generous timeout for E2E tests involving PDF generation

@@ -1,9 +1,9 @@
-// src/get_help.js
+// src/cli/get_help.js
 const fs = require('fs').promises;
 const fss = require('fs'); // Synchronous
 const path = require('path');
-const { extractFrontMatter } = require('./markdown_utils');
-const PluginRegistryBuilder = require('./PluginRegistryBuilder');
+const { extractFrontMatter } = require('../core/markdown_utils');
+const PluginRegistryBuilder = require('../plugins/PluginRegistryBuilder');
 const yaml = require('js-yaml');
 
 async function displayPluginHelp(pluginName, manager, cliArgs) {

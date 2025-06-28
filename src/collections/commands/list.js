@@ -1,4 +1,4 @@
-// src/collections-manager/commands/list.js
+// src/collections/commands/list.js
 // No longer requires fs, path, or chalk
 
 module.exports = async function listCollections(dependencies, type = 'downloaded', collectionNameFilter = null) {

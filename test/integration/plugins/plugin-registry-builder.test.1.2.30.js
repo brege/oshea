@@ -1,7 +1,7 @@
-// test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.30.js
+// test/integration/plugins/plugin-registry-builder.test.1.2.30.js
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginRegistryBuilder = require('../../../src/PluginRegistryBuilder');
+const PluginRegistryBuilder = require('../../../src/plugins/PluginRegistryBuilder');
 
 // Test suite for Scenario 1.2.30
 describe('PluginRegistryBuilder getAllPluginDetails (1.2.30)', () => {

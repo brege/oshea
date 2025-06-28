@@ -1,4 +1,4 @@
-// src/commands/plugin/disableCmd.js
+// src/cli/commands/plugin/disableCmd.js
 const chalk = require('chalk');
 const path = require('path'); 
 

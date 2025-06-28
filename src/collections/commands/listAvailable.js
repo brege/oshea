@@ -1,4 +1,4 @@
-// src/collections-manager/commands/listAvailable.js
+// src/collections/commands/listAvailable.js
 // No longer requires fs, path, chalk, yaml, or constants
 
 async function _findPluginsInCollectionDir(dependencies, collectionPath, collectionName, debug, _readCollectionMetadataFunc) {

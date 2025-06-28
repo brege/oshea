@@ -1,4 +1,4 @@
-// src/commands/collection/addCmd.js
+// src/cli/commands/collection/addCmd.js
 const chalk = require('chalk');
 
 module.exports = {

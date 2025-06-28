@@ -1,8 +1,8 @@
-// test/integration/collections-manager/collections-manager.test.2.1.1.js
+// test/integration/collections/collections-manager.test.2.1.1.js
 const { expect } = require('chai');
 const sinon = require('sinon');
 const path = require('path');
-const CollectionsManager = require('../../../src/collections-manager');
+const CollectionsManager = require('../../../src/collections');
 
 // Test suite for Scenario 2.1.1
 describe('CollectionsManager Constructor Path Initialization (2.1.1)', () => {

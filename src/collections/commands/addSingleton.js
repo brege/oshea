@@ -1,4 +1,4 @@
-// src/collections-manager/commands/addSingleton.js
+// src/collections/commands/addSingleton.js
 // No longer requires fs, path, fs-extra, chalk, yaml, constants, or cm-utils
 
 /**

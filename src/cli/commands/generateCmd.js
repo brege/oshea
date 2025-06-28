@@ -1,4 +1,4 @@
-// src/commands/generateCmd.js
+// src/cli/commands/generateCmd.js
 const path = require('path'); 
 const chalk = require('chalk'); 
 

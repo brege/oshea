@@ -1,11 +1,11 @@
-// test/integration/plugin_determiner/plugin_determiner.test.js
+// test/integration/plugins/plugin_determiner.test.js
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
-const { determinePluginToUse } = require('../../../src/plugin_determiner'); // Direct import of the module under test
+const { determinePluginToUse } = require('../../../src/plugins/plugin_determiner'); // Direct import of the module under test
 
 // Import the manifest containing test cases
-const testManifest = require('./plugin_determiner.manifest.js');
+const testManifest = require('./plugin_determiner.manifest');
 
 describe('determinePluginToUse (Module Integration Tests)', function() {
     let determinePluginToUse; // Declare it here to be assigned in beforeEach
@@ -27,7 +27,7 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
 
     beforeEach(function() {
         // Clear module cache for plugin_determiner *before* stubbing globals.
-        delete require.cache[require.resolve('../../../src/plugin_determiner')];
+        delete require.cache[require.resolve('../../../src/plugins/plugin_determiner')];
 
         // Setup all mocks *before* re-requiring the module under test
         mockFsPromises = { readFile: sinon.stub(), };
@@ -55,7 +55,7 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
         };
 
         // Re-require determinePluginToUse *after* mocks (especially global ones) are set up.
-        determinePluginToUse = require('../../../src/plugin_determiner').determinePluginToUse;
+        determinePluginToUse = require('../../../src/plugins/plugin_determiner').determinePluginToUse;
 
         // Setup console stubs after all other setup.
         // CRITICAL CHANGE: Removed .callThrough() to suppress output during normal test runs.

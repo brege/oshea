@@ -1,9 +1,6 @@
-// src/collections-manager/commands/enable.js
-const { validate: pluginValidator } = require('../../plugin-validator');
-
+// src/collections/commands/enable.js
+const { validate: pluginValidator } = require('../../plugins/validator');
 module.exports = async function enablePlugin(dependencies, collectionPluginId, options = {}) {
-  // Removed: DEBUG console.log statements
-  // console.log('DEBUG (enable.js): Start of enablePlugin function for ID:', collectionPluginId, 'Options:', options);
 
   // Destructure dependencies
   const { fss, chalk } = dependencies;

@@ -1,7 +1,7 @@
-// test/integration/plugin-config-loader/plugin-config-loader.test.1.6.13.js
+// test/integration/config/plugin-config-loader.test.1.6.13.js
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginConfigLoader = require('../../../src/plugin_config_loader');
+const PluginConfigLoader = require('../../../src/config/plugin_config_loader');
 
 describe('PluginConfigLoader applyOverrideLayers (1.6.13)', () => {
     let mockFs;

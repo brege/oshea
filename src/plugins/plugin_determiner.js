@@ -1,4 +1,4 @@
-// src/plugin_determiner.js
+// src/plugins/plugin_determiner.js
 // Dependencies for this module are now injected via the function arguments.
 // No direct 'require' statements for fs, path, yaml, markdownUtils here.
 

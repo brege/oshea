@@ -1,4 +1,4 @@
-// scripts/index-docs.js
+// scripts/repo-health/index-docs.js
 const fs = require('fs');
 const path = require('path');
 const { minimatch } = require('minimatch');

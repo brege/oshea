@@ -1,4 +1,4 @@
-// test/integration/default-handler/default-handler.test.2.2.3.js
+// test/integration/core/default-handler.test.2.2.3.js
 // This file assumes 'test/setup.js' is loaded via Mocha's --require option.
 
 describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.3)', () => {

@@ -1,4 +1,4 @@
-// src/main_config_loader.js
+// src/config/main_config_loader.js
 const os = require('os');
 
 class MainConfigLoader {

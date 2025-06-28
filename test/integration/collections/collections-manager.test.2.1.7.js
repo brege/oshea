@@ -1,7 +1,7 @@
-// test/integration/collections-manager/collections-manager.test.2.1.7.js
+// test/integration/collections/collections-manager.test.2.1.7.js
 const { expect } = require('chai');
 const sinon = require('sinon');
-const CollectionsManager = require('../../../src/collections-manager');
+const CollectionsManager = require('../../../src/collections');
 
 // Test suite for Scenario 2.1.7
 describe('CollectionsManager removeCollection (2.1.7)', () => {

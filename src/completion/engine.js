@@ -1,4 +1,4 @@
-// src/tab-completion/engine.js
+// src/completion/engine.js
 
 const fs = require('fs');
 const path = require('path');

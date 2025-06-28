@@ -7,9 +7,9 @@ const fs = require('fs').promises;
 const fss = require('fs'); // Sync operations (and now for fs.constants.F_OK)
 
 // Require all modules that will be stubbed globally
-const markdownUtils = require('../src/markdown_utils');
-const pdfGenerator = require('../src/pdf_generator');
-const createMathIntegration = require('../src/math_integration'); // The factory
+const markdownUtils = require('../src/core/markdown_utils');
+const pdfGenerator = require('../src/core/pdf_generator');
+const createMathIntegration = require('../src/core/math_integration'); // The factory
 
 // Make these globally available in the test context
 global.expect = expect;
@@ -37,8 +37,8 @@ module.exports = {
             const mathIntegrationInstance = createMathIntegration();
             this.getMathCssContentStub = this.sandbox.stub(mathIntegrationInstance, 'getMathCssContent');
             this.configureMarkdownItForMathStub = this.sandbox.stub(mathIntegrationInstance, 'configureMarkdownItForMath');
-            // Hijack the require cache so any call to require('./math_integration') gets our stubbed instance's factory
-            require.cache[require.resolve('../src/math_integration')] = {
+            // Hijack the require cache so any call to require('../src/core/math_integration') gets our stubbed instance's factory
+            require.cache[require.resolve('../src/core/math_integration')] = {
                 exports: () => mathIntegrationInstance
             };
             
@@ -47,8 +47,8 @@ module.exports = {
             this.existsSyncStub = this.sandbox.stub(fss, 'existsSync');
 
             // Re-require DefaultHandler to ensure it picks up all stubbed dependencies
-            delete require.cache[require.resolve('../src/default_handler')];
-            const DefaultHandler = require('../src/default_handler');
+            delete require.cache[require.resolve('../src/core/default_handler')];
+            const DefaultHandler = require('../src/core/default_handler');
             this.defaultHandler = new DefaultHandler();
             
             if (done) done();
@@ -58,8 +58,8 @@ module.exports = {
             // Restore the sandbox
             this.sandbox.restore();
             // Clean up the require cache to prevent test pollution
-            delete require.cache[require.resolve('../src/math_integration')];
-            delete require.cache[require.resolve('../src/default_handler')];
+            delete require.cache[require.resolve('../src/core/math_integration')];
+            delete require.cache[require.resolve('../src/core/default_handler')];
             if (done) done();
         }
     }

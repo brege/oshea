@@ -7,7 +7,7 @@ const path = require('path');
 const proxyquire = require('proxyquire');
 
 // Import the manifest containing test cases
-const testManifest = require('./math_integration.manifest.js');
+const testManifest = require('./math_integration.manifest');
 
 describe('math_integration (Module Integration Tests)', function() {
     let mockFsPromises;

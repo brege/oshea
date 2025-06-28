@@ -1,8 +1,8 @@
-// test/integration/default-handler/default-handler.test.2.2.16.js
+// test/integration/core/default-handler.test.2.2.16.js
 
 // The 'expect' and 'sinon' globals are provided by test/setup.js
 // along with stubbed versions of the modules being tested.
-const DefaultHandler = require('../../../src/default_handler');
+const DefaultHandler = require('../../../src/core/default_handler');
 const path = require('path');
 const fs = require('fs').promises;
 

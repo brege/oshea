@@ -1,4 +1,4 @@
-// src/default_handler.js
+// src/core/default_handler.js
 const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');

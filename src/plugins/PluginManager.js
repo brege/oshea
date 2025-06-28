@@ -1,8 +1,8 @@
-// src/PluginManager.js
+// src/plugins/PluginManager.js
 const path = require('path');
-const DefaultHandler = require('./default_handler');
-const markdownUtils = require('./markdown_utils');
-const pdfGenerator = require('./pdf_generator'); // CORRECTED: Changed path from './src/pdf_generator' to './pdf_generator'
+const DefaultHandler = require('../core/default_handler');
+const markdownUtils = require('../core/markdown_utils');
+const pdfGenerator = require('../core/pdf_generator'); // CORRECTED: Changed path from './src/pdf_generator' to '../core/pdf_generator'
 
 // Object containing core utilities to be injected into plugins
 const coreUtils = {

@@ -1,4 +1,4 @@
-// src/collections-manager/commands/update.js
+// src/collections/commands/update.js
 // No longer requires fs, path, chalk, or fs-extra
 
 module.exports = async function updateCollection(dependencies, collectionName) {

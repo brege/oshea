@@ -1,8 +1,9 @@
-# examples/custom_plugin_showcase/advanced-card/advanced-card.config.yaml
+# plugins/advanced-card/advanced-card.config.yaml
 description: "An advanced card plugin demonstrating custom HTML generation and dynamic content from Markdown." 
 handler_script: "index.js"
 css_files:
   - "advanced-card.css"
+schema_file: ".contract/advanced-card.schema.json"
 
 pdf_options:
   width: "3.5in"  # Standard business card width
@@ -17,4 +18,4 @@ pdf_options:
 inject_fm_title_as_h1: false 
 aggressiveHeadingCleanup: false 
 math:
-  enabled: false 
+  enabled: false

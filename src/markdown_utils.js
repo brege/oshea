@@ -16,7 +16,9 @@ const matter = require('gray-matter');
 const MarkdownIt = require('markdown-it');
 const anchorPlugin = require('markdown-it-anchor');
 const tocPlugin = 'markdown-it-toc-done-right';
-const mathIntegration = require('./math_integration');
+const createMathIntegration = require('./math_integration');
+const mathIntegration = createMathIntegration();
+
 
 /**
  * Loads and parses a YAML configuration file.

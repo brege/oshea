@@ -1,4 +1,4 @@
-// examples/custom_plugin_showcase/advanced-card/index.js
+// plugins/advanced-card/index.js
 const fs = require('fs').promises;
 const fss = require('fs'); // Synchronous for operations like existsSync
 const path = require('path');

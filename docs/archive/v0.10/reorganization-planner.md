@@ -26,8 +26,8 @@ This reorganization will be conducted in a series of stages, beginning with prep
   - [ ] [P3 | Step 3 — Global Automated Path Correction](#p3-step-3-—-global-automated-path-correction)
   - [ ] [P3 | Step 4 — Iterative Test Suite Verification](#p3-step-4-—-iterative-test-suite-verification)
 - [ ] [P4 -- Stage 4 | Reorganize Documentation [ docs/ + examples/ ]](#p4-stage-4-reorganize-documentation-docs-examples-)
-  - [ ] [P4 | Step 1 -- Deprecate examples/ and Consolidate Assets](#p4-step-1-deprecate-examples-and-consolidate-assets)
-  - [ ] [P4 | Step 2 -- Update Test Configurations](#p4-step-2-update-test-configurations)
+  - [x] [P4 | Step 1 -- Deprecate examples/ and Consolidate Assets](#p4-step-1-deprecate-examples-and-consolidate-assets)
+  - [x] [P4 | Step 2 -- Update Test Configurations](#p4-step-2-update-test-configurations)
   - [ ] [P4 | Step 3 -- Full System Verification](#p4-step-3-full-system-verification)
 - [ ] [D2 -- Stage 5 | Documentation Content Overhaul](#d2-stage-5-documentation-content-overhaul)
 - [ ] [ai -- Stage 6 | AI Reproducibility & Unified Examples](#ai-stage-6-ai-reproducibility-unified-examples)
@@ -37,6 +37,31 @@ This reorganization will be conducted in a series of stages, beginning with prep
 <!-- toc-end -->
 
 
+**Tracking Reorgnization Notes in git commits**\
+I've been documenting things that pop up as I'm revisiting older material that 
+has become stale or obsolete. To track items in the git log in the various re-
+organization stages, I'm using YAML-style blocks.
+
+**Example**
+``` 
+--- NOTE[reorg-discovery] ---
+Blocks of reorganization notes can be added here.
+
+With other blocks, like this one.
+--- END NOTE[reorg-discovery] ---
+```
+
+**Command**
+``` bash
+git log --pretty=format:"%b" |
+awk '
+  /^--- NOTE\[.*\] ---/ {flag=1; tag=$0; print "\n" tag; next}
+  /^--- END NOTE\[.*\] ---/ {print $0; flag=0; next}
+  flag
+'
+```
+
+**Alias -- `git notes reorg-discovery`**
 
 ---
 

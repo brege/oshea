@@ -59,6 +59,11 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
             }
         };
 
+        // If the incoming options specify dimensions, delete the format from our defaults.
+        if (pdfOptions && (pdfOptions.width || pdfOptions.height)) {
+            delete defaultPdfOptions.format;
+        }
+
         const finalPdfOptions = {
             ...defaultPdfOptions,
             ...(pdfOptions || {}),

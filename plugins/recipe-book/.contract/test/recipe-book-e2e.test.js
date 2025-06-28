@@ -1,74 +1,53 @@
 // plugins/recipe-book/.contract/test/recipe-book-e2e.test.js
-
+const { expect } = require('chai');
 const path = require('path');
-const os = require('os');
-const fs = require('fs');
-
-const PROJECT_ROOT = process.cwd();
-const HELPERS_PATH = path.join(PROJECT_ROOT, 'test', 'shared', 'test-helpers.js');
-const CONSTANTS_PATH = path.join(PROJECT_ROOT, 'test', 'shared', 'test-constants.js');
-
+const fs = require('fs-extra');
+const { TestHarness } = require('../../../../test/e2e/harness');
 const {
-    runCliCommand,
-    setupTestDirectory,
-    cleanupTestDirectory,
+    checkFileExists,
     checkFile,
-} = require(HELPERS_PATH);
+    readFileContent,
+} = require('../../../../test/shared/test-helpers');
 
-const {
-    HUGO_EXAMPLE_SOURCE_IN_EXAMPLES,
-} = require(CONSTANTS_PATH);
+describe('Recipe Book Plugin E2E Test (Generate Command)', function () {
+    this.timeout(20000);
 
-// Corrected: The plugin root is two levels up from .contract/test/
-const PLUGIN_ROOT = path.resolve(__dirname, '../../');
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-book-plugin-e2e');
-const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
+    let harness;
+    const hugoExamplePath = path.resolve(__dirname, '../../../../test/fixtures/hugo-example'); 
 
-// Use the relative path as expected by the CLI and the plugin's internal resolution.
-const RECIPES_BASE_DIR_CLI_ARG = HUGO_EXAMPLE_SOURCE_IN_EXAMPLES;
-
-const EXPECTED_PDF_FILENAME = 'test-recipe-book.pdf';
-const MIN_PDF_SIZE = 50000; // Minimum size in bytes for a valid recipe book PDF
-
-describe('Recipe Book Plugin E2E Test (Generate Command)', function() {
-    this.timeout(15000); // Set a higher timeout for E2E tests
-
-    before(async () => {
-        // Ensure the test output directory exists and is clean
-        await setupTestDirectory(TEST_OUTPUT_DIR);
+    beforeEach(async () => {
+        harness = new TestHarness();
+        await harness.createSandbox();
+        // Copy the hugo-example fixture into the sandbox for the test run
+        const fixtureDest = path.join(harness.sandboxDir, 'hugo-example-src');
+        await fs.copy(hugoExamplePath, fixtureDest);
     });
 
-    after(async () => {
-        // Clean up the test output directory unless KEEP_OUTPUT is set
-        const keepOutput = process.env.KEEP_OUTPUT === 'true';
-        await cleanupTestDirectory(TEST_OUTPUT_DIR, keepOutput);
+    afterEach(async () => {
+        await harness.cleanup();
     });
 
     it('should generate a PDF book from Hugo examples using the recipe-book plugin and produce a non-empty PDF', async () => {
-        const outputPdfPath = path.join(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME);
-
-        const commandArgs = [
+        const sandboxDir = harness.sandboxDir;
+        const cliArgs = [
             'generate',
-            PLUGIN_ROOT, // Use the correct, absolute path to the plugin directory
-            '--recipes-base-dir', RECIPES_BASE_DIR_CLI_ARG, // Use the relative path here
-            '--outdir', TEST_OUTPUT_DIR,
-            '--filename', EXPECTED_PDF_FILENAME,
-            '--no-open', // Prevent opening the PDF viewer during test
+            'recipe-book',
+            '--recipes-base-dir',
+            path.join(sandboxDir, 'hugo-example-src'),
+            '--outdir',
+            sandboxDir,
+            '--filename',
+            'hugo-recipe-book.pdf',
+            '--no-open',
         ];
 
-        // console.log(`\n  Running command: md-to-pdf ${commandArgs.join(' ')}`);
-        const result = await runCliCommand(commandArgs, CLI_PATH, PROJECT_ROOT);
+        const result = await harness.runCli(cliArgs, { useFactoryDefaults: false });
 
-        if (!result.success) {
-            throw new Error(`CLI command failed: ${result.stderr || result.error.message}`);
+        if (result.exitCode !== 0) {
+            throw new Error(`CLI command failed: ${result.stderr || result.stdout}`);
         }
 
-        // Verify the PDF was created and is not empty
-        await checkFile(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME, MIN_PDF_SIZE);
-
-        // Optional: More specific checks can be added here if needed,
-        // but for a basic E2E, existence and size are often sufficient.
-        console.log(`  Successfully created and verified: ${outputPdfPath}`);
+        expect(result.exitCode).to.equal(0);
+        await checkFile(sandboxDir, 'hugo-recipe-book.pdf', 20000); // Check for a substantial file size
     });
 });
-

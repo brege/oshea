@@ -4,12 +4,12 @@ set -e
 
 # --- Path Variables for Portability ---
 REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-EXAMPLES_DIR="$REPO_ROOT/examples"
+PLUGINS_DIR="$REPO_ROOT/plugins"
 SCREENSHOTS_DIR="$REPO_ROOT/docs/images/screenshots"
 # The external plugins directory is a sibling to the project root
 PLUGIN_DIR_EXTERNAL="$REPO_ROOT/../md-to-pdf-plugins"
 
-# Change to the project root to ensure md-to-pdf command is found
+# Change to the project root to ensure all paths are resolved correctly
 cd "$REPO_ROOT" || exit 1
 
 # --- Configuration ---
@@ -36,39 +36,31 @@ fi
 
 mkdir -p "$SCREENSHOTS_DIR"
 
-# --- Run md-to-pdf commands from the 'examples' directory ---
-# This ensures that the paths inside screenshot-config.yaml are resolved correctly.
-cd "$EXAMPLES_DIR" || exit 1
+echo "--- Generating PDFs for Screenshots ---"
 
-# --- Single Page Examples ---
-node ../cli.js convert "example-recipe.md" \
-           --plugin recipe \
-           --config "./screenshot-config.yaml" \
+# --- Bundled Plugin Examples ---
+# These commands now use the self-activating example files from within the plugins directory.
+# The `--config` flag is no longer needed.
+
+node ./cli.js "plugins/recipe/recipe-example.md" \
            --filename example-recipe.pdf \
            --outdir "$SCREENSHOTS_DIR" \
            --no-open
 
-node ../cli.js convert "example-cv.md" \
-           --plugin cv \
-           --config "./screenshot-config.yaml" \
+node ./cli.js "plugins/cv/cv-example.md" \
            --filename example-cv.pdf \
            --outdir "$SCREENSHOTS_DIR" \
            --no-open
 
-node ../cli.js convert "example-cover-letter.md" \
-           --plugin cover-letter \
-           --config "./screenshot-config.yaml" \
+node ./cli.js "plugins/cover-letter/cover-letter-example.md" \
            --filename example-cover-letter.pdf \
            --outdir "$SCREENSHOTS_DIR" \
            --no-open
 
-# --- Business Card Example ---
-node ../cli.js convert "custom_plugin_showcase/advanced-card/advanced-card-example.md" \
-             --plugin advanced-card \
-             --config "./screenshot-config.yaml" \
-             --filename advanced-business-card.pdf \
-             --outdir "$SCREENSHOTS_DIR" \
-             --no-open
+node ./cli.js "plugins/advanced-card/advanced-card-example.md" \
+           --filename advanced-business-card.pdf \
+           --outdir "$SCREENSHOTS_DIR" \
+           --no-open
 
 # --- External Plugin Examples ---
 echo "Checking for external plugins..."
@@ -78,38 +70,35 @@ RESTAURANT_MD_PATH="$PLUGIN_DIR_EXTERNAL/restaurant-menu/restaurant-menu-example
 
 if [ -f "$D3_MD_PATH" ]; then
   echo "Generating D3 Histogram Slide..."
-  node ../cli.js convert "$D3_MD_PATH" \
-            --config "./screenshot-config.yaml" \
-            --filename d3-histogram-slide.pdf \
-            --outdir "$SCREENSHOTS_DIR" \
-            --no-open
+  node ./cli.js "$D3_MD_PATH" \
+           --filename d3-histogram-slide.pdf \
+           --outdir "$SCREENSHOTS_DIR" \
+           --no-open
 else
   echo "Skipping D3 Histogram Slide generation: Markdown file not found at $D3_MD_PATH"
 fi
 
 if [ -f "$RESTAURANT_MD_PATH" ]; then
   echo "Generating Restaurant Menu (Single View)..."
-  node ../cli.js convert "$RESTAURANT_MD_PATH" \
-            --config "./screenshot-config.yaml" \
-            --filename restaurant-menu.pdf \
-            --outdir "$SCREENSHOTS_DIR" \
-            --no-open
+  node ./cli.js "$RESTAURANT_MD_PATH" \
+           --filename restaurant-menu.pdf \
+           --outdir "$SCREENSHOTS_DIR" \
+           --no-open
 else
   echo "Skipping Restaurant Menu generation: Markdown file not found at $RESTAURANT_MD_PATH"
 fi
 
-# Return to project root before image conversion
-cd "$REPO_ROOT" || exit 1
 
 # --- Convert PDFs to PNGs ---
-for f in "$SCREENSHOTS_DIR"/*.pdf; do 
+echo "--- Converting PDFs to PNGs ---"
+for f in "$SCREENSHOTS_DIR"/*.pdf; do
   output_base="$SCREENSHOTS_DIR/$(basename "$f" .pdf)"
   output_png="${output_base}.png"
-  
+
   if [ "$USE_PDFTOPPM" = true ]; then
     echo "Converting '$f' to PNG using pdftoppm and magick..."
-    temp_pdftoppm_output_prefix="/tmp/$(basename "$f" .pdf)" 
-    expected_output_file="${temp_pdftoppm_output_prefix}-1.png" 
+    temp_pdftoppm_output_prefix="/tmp/$(basename "$f" .pdf)"
+    expected_output_file="${temp_pdftoppm_output_prefix}-1.png"
 
     pdftoppm_output=$(pdftoppm -png -r 600 "$f" "${temp_pdftoppm_output_prefix}" 2>&1)
     pdftoppm_exit_status=$?
@@ -118,9 +107,9 @@ for f in "$SCREENSHOTS_DIR"/*.pdf; do
       echo "ERROR: pdftoppm failed for $f. Exit status: $pdftoppm_exit_status"
       echo "pdftoppm output/errors:"
       echo "$pdftoppm_output"
-    elif [ -f "$expected_output_file" ]; then 
+    elif [ -f "$expected_output_file" ]; then
       magick "$expected_output_file" -background white -alpha remove -alpha off -quality 92 "$output_png"
-      rm "$expected_output_file" 
+      rm "$expected_output_file"
     else
       echo "WARN: pdftoppm did not produce the expected PNG output for $f."
     fi
@@ -134,3 +123,5 @@ done
 if [ "$SAVE_PDFS_FOR_DEBUGGING" = false ]; then
   rm -f "$SCREENSHOTS_DIR"/*.pdf
 fi
+
+echo "--- Screenshot generation complete. ---"

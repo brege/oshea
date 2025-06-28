@@ -25,11 +25,11 @@ cover_page:
 
 toc_options:
   enabled: true
-  placeholder: "%%RECIPE_BOOK_TOC%%"
-  level: [1]
-  listType: "ol"
+  options:
+    placeholder: "%%RECIPE_BOOK_TOC%%"
+    level: [1]
+    listType: "ol"
 
-# Math rendering for this plugin (defaulting to disabled)
 math:
   enabled: false
 

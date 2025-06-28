@@ -38,4 +38,4 @@ This `advanced-card` plugin is a demonstration of advanced plugin capabilities w
 
 It serves as an educational example for developers looking to create plugins with highly specific output requirements beyond standard Markdown-to-HTML conversion.
 
-**Location:** `examples/custom_plugin_showcase/advanced-card/`
+**Location:** `plugins/advanced-card/`

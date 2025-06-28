@@ -3,6 +3,7 @@ website: "https://www.innovatech.example.com/evance" # Used for QR if qr_data is
 qr_data: "mailto:e.vance@innovatech.example.com"     # Data for the QR code
 brandingColor: "#2a9d8f"                             # Custom branding color
 # title: "Business Card: Dr. Eleanor Vance"          # For PDF metadata, not card display
+md_to_pdf_plugin: './advanced-card.config.yaml'
 ---
 
 # Dr. Eleanor Vance

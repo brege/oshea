@@ -110,7 +110,7 @@ you must re-run this command to enable any new plugins.`);
         }
       }
       // Trigger cache regeneration after successful enable operation
-      const cliPath = path.resolve(__dirname, '../../../cli.js'); // Go up 3 levels: plugin -> commands -> src -> md-to-pdf
+      const cliPath = path.resolve(__dirname, '../../../../cli.js'); 
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });

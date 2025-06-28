@@ -5,7 +5,7 @@ const path = require('path');
 const chalk = require('chalk');
 
 // --- Configuration ---
-const COMMANDS_DIR = path.resolve(__dirname, '../commands');
+const COMMANDS_DIR = path.resolve(__dirname, '../cli/commands');
 
 // --- Dynamic Proxy Yargs Stub ---
 function createYargsStub() {

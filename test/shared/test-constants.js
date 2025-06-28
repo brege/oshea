@@ -4,13 +4,13 @@ const path = require('path');
 const TEST_DIR = __dirname;
 const PROJECT_ROOT = path.join(TEST_DIR, '..', '..');
 const TEST_CONFIG_PATH = path.join(TEST_DIR, 'config.test.yaml');
-const EXAMPLES_DIR = path.join(PROJECT_ROOT, 'examples');
+const EXAMPLES_DIR = path.join(PROJECT_ROOT, 'test', 'fixtures'); // Corrected Path
 const CLI_SCRIPT_PATH = path.join(PROJECT_ROOT, 'cli.js');
 
 const TEST_OUTPUT_DIR_NAME = 'test_output';
 const TEST_OUTPUT_BASE_DIR = path.join(TEST_DIR, TEST_OUTPUT_DIR_NAME);
 
-const HUGO_EXAMPLE_SOURCE_IN_EXAMPLES = path.join(PROJECT_ROOT, 'test', 'fixtures', 'hugo-example');
+const HUGO_EXAMPLE_SOURCE_IN_EXAMPLES = path.join(PROJECT_ROOT, 'test', 'fixtures', 'hugo-example'); // Corrected Path
 
 const CREATED_PLUGINS_SUBDIR = 'created_plugins_test';
 const CREATED_PLUGINS_DIR = path.join(TEST_OUTPUT_BASE_DIR, CREATED_PLUGINS_SUBDIR);

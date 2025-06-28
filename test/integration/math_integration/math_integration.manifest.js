@@ -115,9 +115,14 @@ module.exports = [
     },
     assert: async (mocks, constants, expect) => {
       const { mockConsoleError } = mocks;
-      const mathIntegrationFactoryPath = path.resolve(__dirname, '../../../src/math_integration');
+      const mathIntegrationFactoryPath = path.resolve(__dirname, '../../../src/core/math_integration');
       
       expect(true).to.be.true; // Placeholder assertion for skipped test
+      // Corrected assertion:
+      const mathIntegration = mathIntegrationFactory(mocks.mockFsPromises, mocks.mockFsSync, mocks.path, mocks.mockProcess);
+      const result = await mathIntegration.getMathCssContent();
+      expect(result).to.be.an('array').that.is.empty;
+      expect(mockConsoleError.calledWith(sinon.match.string)).to.be.true;
     },
   },
   {

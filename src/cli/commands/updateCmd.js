@@ -41,7 +41,7 @@ module.exports = {
         }
       }
       // Trigger cache regeneration after successful update operation
-      const cliPath = path.resolve(__dirname, '../../cli.js'); // Go up 2 levels: commands -> src -> md-to-pdf
+      const cliPath = path.resolve(__dirname, '../../../cli.js');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });

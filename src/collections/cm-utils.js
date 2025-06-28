@@ -1,4 +1,4 @@
-// src/collections-manager/cm-utils.js
+// src/collections/cm-utils.js
 const path = require('path');
 
 /**

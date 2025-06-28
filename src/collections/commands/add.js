@@ -1,4 +1,4 @@
-// src/collections-manager/commands/add.js
+// src/collections/commands/add.js
 // No longer needs its own require() statements for fs, path, etc.
 
 module.exports = async function addCollection(dependencies, source, options = {}) {

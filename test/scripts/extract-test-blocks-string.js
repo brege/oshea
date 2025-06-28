@@ -1,3 +1,4 @@
+// test/scripts/extract-test-blocks-string.js
 const fs = require('fs');
 const path = require('path');
 

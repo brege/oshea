@@ -1,10 +1,10 @@
-// test/integration/collections-manager/collections-manager.test.2.1.3.js
+// test/integration/collections/collections-manager.test.2.1.3.js
 const { expect } = require('chai');
 const sinon = require('sinon');
 // We still need the real modules to configure the stubs that setup.js creates on them.
 const fs = require('fs'); 
 const fsPromises = require('fs').promises;
-const CollectionsManager = require('../../../src/collections-manager');
+const CollectionsManager = require('../../../src/collections');
 
 // Test suite for Scenario 2.1.3
 describe('CollectionsManager addCollection (2.1.3)', () => {

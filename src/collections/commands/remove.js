@@ -1,4 +1,4 @@
-// src/collections-manager/commands/remove.js
+// src/collections/commands/remove.js
 // No longer requires fs, path, fs-extra, chalk, or constants
 
 module.exports = async function removeCollection(dependencies, collectionName, options = {}) {

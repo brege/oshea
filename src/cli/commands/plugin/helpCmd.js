@@ -1,4 +1,4 @@
-// src/commands/plugin/helpCmd.js
+// src/cli/commands/plugin/helpCmd.js
 const { displayPluginHelp } = require('../../get_help');
 
 module.exports = {

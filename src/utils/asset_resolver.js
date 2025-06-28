@@ -1,4 +1,4 @@
-// src/asset_resolver.js
+// src/utils/asset_resolver.js
 const fs = require('fs'); // Using synchronous 'fs' for existsSync
 const path = require('path');
 

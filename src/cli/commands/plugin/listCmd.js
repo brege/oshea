@@ -1,5 +1,5 @@
-// src/commands/plugin/listCmd.js
-const PluginRegistryBuilder = require('../../PluginRegistryBuilder');
+// src/cli/commands/plugin/listCmd.js
+const PluginRegistryBuilder = require('../../../plugins/PluginRegistryBuilder');
 const path = require('path');
 const chalk = require('chalk');
 const stripAnsi = require('strip-ansi');

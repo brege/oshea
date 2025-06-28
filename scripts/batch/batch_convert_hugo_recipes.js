@@ -1,4 +1,4 @@
-// scripts/batch_convert_hugo_recipes.js
+// scripts/batch/batch_convert_hugo_recipes.js
 const { exec } = require('child_process');
 const fs = require('fs').promises;
 const fss = require('fs'); // For existsSync

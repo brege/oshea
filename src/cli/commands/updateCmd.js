@@ -1,4 +1,4 @@
-// src/commands/updateCmd.js
+// src/cli/commands/updateCmd.js
 const chalk = require('chalk');
 const path = require('path');
 

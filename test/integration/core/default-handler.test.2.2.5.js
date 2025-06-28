@@ -1,9 +1,9 @@
-// test/integration/default-handler/default-handler.test.2.2.5.js
+// test/integration/core/default-handler.test.2.2.5.js
 
 // The 'expect' and 'sinon' globals are provided by test/setup.js
 // along with stubbed versions of the modules being tested.
 // The DefaultHandler class will be the one whose dependencies are stubbed.
-const DefaultHandler = require('../../../src/default_handler'); // Path from test/default-handler/ to src/default_handler.js
+const DefaultHandler = require('../../../src/core/default_handler'); // Path from test/default-handler/ to src/default_handler.js
 const path = require('path'); // Available globally via setup.js
 
 describe('DefaultHandler (L2Y2) - Scenario 2.2.5: Math Rendering Integration', function() {

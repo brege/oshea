@@ -1,4 +1,4 @@
-// src/commands/collection/listCmd.js
+// src/cli/commands/collection/listCmd.js
 const chalk = require('chalk');
 const stripAnsi = require('strip-ansi');
 

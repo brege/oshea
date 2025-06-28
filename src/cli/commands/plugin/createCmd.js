@@ -1,8 +1,8 @@
-// src/commands/plugin/createCmd.js
+// src/cli/commands/plugin/createCmd.js
 const path = require('path');
 const chalk = require('chalk');
-const { isValidPluginName } = require('../../collections-manager/cm-utils');
-const { createArchetype } = require('../../plugin_archetyper');
+const { isValidPluginName } = require('../../../collections/cm-utils');
+const { createArchetype } = require('../../../plugins/plugin_archetyper');
 
 // Dependencies required by the archetyper logic
 const fs = require('fs').promises;
@@ -10,8 +10,8 @@ const fss = require('fs');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
-const cmUtils = require('../../collections-manager/cm-utils');
-const constants = require('../../collections-manager/constants');
+const cmUtils = require('../../../collections/cm-utils');
+const constants = require('../../../collections/constants');
 
 
 module.exports = {

@@ -1,4 +1,4 @@
-// src/collections-manager/commands/disable.js
+// src/collections/commands/disable.js
 // No longer requires fs, path, yaml, chalk, or constants
 
 module.exports = async function disablePlugin(dependencies, invokeName) {

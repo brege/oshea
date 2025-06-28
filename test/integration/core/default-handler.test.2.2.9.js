@@ -1,6 +1,6 @@
-// test/integration/default-handler/default-handler.test.2.2.9.js
+// test/integration/core/default-handler.test.2.2.9.js
 
-const DefaultHandler = require('../../../src/default_handler');
+const DefaultHandler = require('../../../src/core/default_handler');
 const path = require('path');
 
 describe('DefaultHandler (L2Y2) - Scenario 2.2.9: Custom HTML Template', function() {

@@ -1,4 +1,4 @@
-// src/config_utils.js
+// src/config/config_utils.js
 const fs = require('fs'); // Used by _loadYamlConfig (moved from ConfigResolver for broader use if needed)
 const yaml = require('js-yaml'); // Used by _loadYamlConfig
 

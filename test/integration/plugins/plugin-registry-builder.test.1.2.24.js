@@ -1,7 +1,7 @@
-// test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.24.js
+// test/integration/plugins/plugin-registry-builder.test.1.2.24.js
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginRegistryBuilder = require('../../../src/PluginRegistryBuilder');
+const PluginRegistryBuilder = require('../../../src/plugins/PluginRegistryBuilder');
 
 // Test suite for Scenario 1.2.24
 describe('PluginRegistryBuilder buildRegistry Caching (1.2.24)', () => {

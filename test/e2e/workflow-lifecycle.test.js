@@ -2,8 +2,8 @@
 const { expect } = require('chai');
 const path = require('path');
 const fs = require('fs-extra');
-const { TestHarness } = require('./harness.js');
-const { createE2eTestRunner } = require('./test-runner-factory.js');
+const { TestHarness } = require('./harness');
+const { createE2eTestRunner } = require('./test-runner-factory');
 
 describe('E2E - Full User Workflow (Lifecycle)', function() {
     this.timeout(45000); // Allow extra time for git clone and multiple commands

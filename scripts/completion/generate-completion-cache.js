@@ -8,7 +8,7 @@ const os = require('os');
 const chalk = require('chalk');
 
 // Import the tree discovery logic from its new location
-const { discoverCommandTree } = require('../../src/tab-completion/cli-tree-builder');
+const { discoverCommandTree } = require('../../src/completion/cli-tree-builder');
 
 const COMMANDS_DIR = path.resolve(__dirname, '../../src/commands');
 

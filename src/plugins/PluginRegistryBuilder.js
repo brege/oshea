@@ -30,7 +30,7 @@ class PluginRegistryBuilder {
         }
 
         this.bundledMainConfigPath = this.dependencies.path.join(this.projectRoot, 'config.yaml');
-        this.factoryDefaultMainConfigPath = this.dependencies.path.join(this.projectRoot, 'config.example.yaml');
+        this.factoryDefaultMainConfigPath = this.dependencies.path.join(this.projectRoot,  'config.example.yaml');
         this.isLazyLoadMode = isLazyLoadMode;
         this.primaryMainConfigLoadReason = primaryMainConfigLoadReason;
 

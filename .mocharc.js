@@ -10,23 +10,23 @@ const group = argv.group || (hasFiles ? 'custom' : 'all');
 console.log(`[Mocha] Running test group: '${group}'`);
 
 const paths = {
-    // --- Subsystem & Module Integration Test Paths ---
+    // --- Subsystem & Module Integration Test Paths (Updated) ---
     // Rank 0
-    default_handler: 'test/integration/default-handler/**/*.js',
-    pdf_generator: 'test/integration/pdf-generator/**/*.js',
+    default_handler: 'test/integration/core/default-handler.*.js',
+    pdf_generator: 'test/integration/core/pdf-generator.*.js',
     // Rank 1
-    ConfigResolver: 'test/integration/config-resolver/**/*.js',
-    plugin_determiner: 'test/integration/plugin_determiner/**/*.js',
-    collections_manager: 'test/integration/collections-manager/**/*.js',
+    ConfigResolver: 'test/integration/config/config-resolver.*.js',
+    plugin_determiner: 'test/integration/plugins/plugin_determiner.*.js',
+    collections_manager: 'test/integration/collections/collections-manager.*.js',
     // Rank 2
-    PluginRegistryBuilder: 'test/integration/plugin-registry-builder/**/*.js',
-    main_config_loader: 'test/integration/main-config-loader/**/*.js',
-    plugin_config_loader: 'test/integration/plugin-config-loader/**/*.js',
-    PluginManager: 'test/integration/plugin-manager/**/*.js',
-    math_integration: 'test/integration/math_integration/**/*.js',
-    cm_utils: 'test/integration/collections-manager/**/*.js',
+    PluginRegistryBuilder: 'test/integration/plugins/plugin-registry-builder.*.js',
+    main_config_loader: 'test/integration/config/main-config-loader.*.js',
+    plugin_config_loader: 'test/integration/config/plugin-config-loader.*.js',
+    PluginManager: 'test/integration/plugins/plugin-manager.*.js',
+    math_integration:'test/integration/math_integration/math_integration.*.js',
+    cm_utils: 'test/integration/collections/cm-utils.*.js',
 
-    // --- End-to-End Test Paths ---
+    // --- End-to-End Test Paths (Unchanged) ---
     // Level 2
     plugin_validator: 'test/e2e/plugin-validator.*.js',
     // Level 3
@@ -66,6 +66,7 @@ const groups = {
     // --- By Level ---
     level1: [
         paths.collections_manager,
+        paths.cm_utils,
         paths.ConfigResolver,
         paths.main_config_loader,
         paths.math_integration,
@@ -75,8 +76,8 @@ const groups = {
         paths.PluginRegistryBuilder,
     ],
     level2: [
-        paths.default_handler, 
-        paths.pdf_generator, 
+        paths.default_handler,
+        paths.pdf_generator,
         paths.collections_manager,
         paths.plugin_validator
     ],
@@ -99,34 +100,11 @@ const groups = {
     level4: [paths.workflow_lifecycle, paths.sad_paths],
     // --- Subsystem & Module Integration Tests ---
     integration: [
-        paths.default_handler,
-        paths.pdf_generator,
-        paths.ConfigResolver, 
-        paths.plugin_determiner, 
-        paths.collections_manager,
-        paths.PluginRegistryBuilder, 
-        paths.main_config_loader, 
-        paths.plugin_config_loader,
-        paths.PluginManager, 
-        paths.math_integration
+        'test/integration/**/*.js'
     ],
     // --- End-to-End Tests ---
     e2e: [
-        paths.plugin_validator,
-        paths.plugin_convert,
-        paths.plugin_generate, 
-        paths.plugin_config, 
-        paths.plugin_list, 
-        paths.plugin_create, 
-        paths.plugin_add, 
-        paths.plugin_enable, 
-        paths.plugin_disable, 
-        paths.plugin_validate, 
-        paths.collection_add, 
-        paths.collection_list, 
-        paths.collection_remove, 
-        paths.collection_update, 
-        paths.global_flags, 
+        'test/e2e/**/*.js',
         paths.insitu_e2e
     ],
     // --- By Toolchain ---
@@ -137,10 +115,10 @@ const groups = {
         paths.plugin_determiner,
         paths.PluginRegistryBuilder
     ],
-    //  By Specific Study ---
+    //  By Specific Study ---
     validator: [paths.plugin_validator, paths.plugin_validate],
-    insitu: [paths.insitu_e2e], 
-    debug: [paths.main_config_loader], //'test/integration/main-config-loader/**/*.1.4.15.js'], 
+    insitu: [paths.insitu_e2e],
+    debug: [paths.main_config_loader], //'test/integration/main-config-loader/**/*.1.4.15.js'],
     // Default
     all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/.contract/test/*.test.js']
 };
@@ -163,4 +141,3 @@ if (group !== 't4' && group !== 'e2e' && group !== 'level3' && group !== 'valida
 }
 
 module.exports = mochaConfig;
-

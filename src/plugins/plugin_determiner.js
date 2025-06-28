@@ -88,7 +88,6 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
     }
     // If still defaultPluginName, determinationSource remains 'default'
 
-    // --- NEW LOGIC FOR SELF-ACTIVATION ---
     // If the determined pluginSpec is a name (not already a path) AND it originated from
     // front matter or a local config (meaning it's likely a local plugin for the markdown file),
     // try to resolve it to a full path for "lazy-loading".
@@ -122,7 +121,6 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
             pluginSpec = path.resolve(processCwd(), pluginSpec);
         }
     }
-    // --- END NEW LOGIC ---
 
     // This line is not used.
     let logMessage = `INFO: Using plugin '${pluginSpec}' (determined via ${determinationSource})`;

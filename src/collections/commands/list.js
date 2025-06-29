@@ -2,7 +2,6 @@
 // No longer requires fs, path, or chalk
 
 module.exports = async function listCollections(dependencies, type = 'downloaded', collectionNameFilter = null) {
-  // Destructure dependencies
   const { fss, fs, path, chalk, constants } = dependencies;
   const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
 

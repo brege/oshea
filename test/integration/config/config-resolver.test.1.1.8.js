@@ -16,12 +16,10 @@ describe('ConfigResolver getEffectiveConfig (1.1.8)', () => {
                 resolve: sinon.stub().returnsArg(0),
                 dirname: sinon.stub().returns(''),
                 sep: '/',
-                // FIX: Added path.join
                 join: (...args) => args.join('/')
             },
             fs: {
                 existsSync: sinon.stub().returns(false),
-                // FIX: Added fs.readFileSync
                 readFileSync: sinon.stub().returns('{}')
             }
         };

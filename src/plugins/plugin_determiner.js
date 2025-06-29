@@ -1,6 +1,4 @@
 // src/plugins/plugin_determiner.js
-// Dependencies for this module are now injected via the function arguments.
-// No direct 'require' statements for fs, path, yaml, markdownUtils here.
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
@@ -23,7 +21,7 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
     let determinationSource = 'default';
     let localConfigOverrides = null;
 
-    const cliPluginArg = args.plugin; // CORRECTED: This line is now definitively present.
+    const cliPluginArg = args.plugin;
 
     let fmPlugin = null;
     let localCfgPlugin = null;

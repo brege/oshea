@@ -89,7 +89,7 @@ const headings = tocStart !== -1 ? parseHeadings(lines, tocStart) : parseHeading
 
 // Determine maxLevel: CLI flag > marker > default
 const maxLevel = cliLevel || markerLevel || 4;
-const baseLevel = 3; // <<<<<<<<<<< YOUR BASE LEVEL
+const baseLevel = 3;
 
 // Build new TOC
 let output = [];

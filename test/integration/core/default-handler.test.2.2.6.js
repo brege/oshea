@@ -114,7 +114,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.6: MarkdownIt Plugins (Anchor & T
 
         expect(actualHtmlContent).to.equal(expectedRenderedHtml);
         expect(actualOutputPdfPath).to.equal(expectedOutputPdfPath);
-        // FIX: The actualPdfOptions should now include the anchor_options as well as the default margin.
         expect(actualPdfOptions).to.deep.equal({ anchor_options: anchorOptions, margin: {} }); 
         expect(actualCssContentArray).to.deep.equal([]); // No CSS files configured for this test
 

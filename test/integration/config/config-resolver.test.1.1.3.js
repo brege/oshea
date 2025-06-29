@@ -33,7 +33,6 @@ describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {
                 join: (...args) => args.join('/'),
                 resolve: sinon.stub().returnsArg(0),
                 dirname: sinon.stub().returns('/fake/plugin'),
-                // FIX: Added the missing basename function to the mock
                 basename: (p, ext) => {
                     const base = p.split('/').pop();
                     if (ext && base.endsWith(ext)) {

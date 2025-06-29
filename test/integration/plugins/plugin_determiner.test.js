@@ -58,7 +58,6 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
         determinePluginToUse = require('../../../src/plugins/plugin_determiner').determinePluginToUse;
 
         // Setup console stubs after all other setup.
-        // CRITICAL CHANGE: Removed .callThrough() to suppress output during normal test runs.
         consoleLogStub = sinon.stub(console, 'log');
         consoleWarnStub = sinon.stub(console, 'warn');
         console.lastLog = "";

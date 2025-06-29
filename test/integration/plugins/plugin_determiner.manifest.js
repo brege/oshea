@@ -13,7 +13,7 @@ const fs = require('fs').promises;
  */
 function setupTestFiles(mocks, constants, fileContents = {}, parsedContents = {}) {
     const { mockFsPromises, mockFsSync, mockMarkdownUtils, mockYaml } = mocks;
-    const { DUMMY_MARKDOWN_FILE_PATH, DUMMY_LOCAL_CONFIG_FILE_PATH } = constants; // Corrected typo here
+    const { DUMMY_MARKDOWN_FILE_PATH, DUMMY_LOCAL_CONFIG_FILE_PATH } = constants; 
 
     // Markdown file setup
     if (fileContents.markdown !== undefined) { // Check for undefined to allow explicit null/empty string for testing

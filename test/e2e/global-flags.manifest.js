@@ -29,7 +29,6 @@ module.exports = [
     args: (sandboxDir) => ['this-is-not-a-command'],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(1);
-      // Corrected assertion to match the new error logic in cli.js
       expect(stderr).to.match(/Error: Unknown command/i);
     },
   },

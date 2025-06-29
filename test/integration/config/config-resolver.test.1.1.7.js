@@ -14,7 +14,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.7)', () => {
                 resolve: sinon.stub().returnsArg(0),
                 sep: '/',
                 isAbsolute: sinon.stub().returns(true),
-                // FIX: Added path.join
                 join: (...args) => args.join('/')
             },
             fs: {
@@ -23,7 +22,6 @@ describe('ConfigResolver getEffectiveConfig (1.1.7)', () => {
                     isDirectory: () => false, 
                     isFile: () => false 
                 }),
-                // FIX: Added fs.readFileSync
                 readFileSync: sinon.stub().returns('{}')
             }
         };

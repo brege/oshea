@@ -14,7 +14,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.14: lang Attribute Handling', fun
         this.readFileStub.resolves(`---\ntitle: Lang Test\nlang: fr\n---\nContent`);
         this.mkdirStub.resolves();
         
-        // ADDED: Stub for extractFrontMatter to prevent TypeError.
         // Its output is not critical as substituteAllPlaceholdersStub is the true source of data for this test.
         this.extractFrontMatterStub.returns({ data: {}, content: 'Content' });
 

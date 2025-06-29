@@ -17,9 +17,7 @@ async function readFileContent(filePath) {
 async function checkFile(baseDir, relativeFilePath, minSize) {
     const fullPath = path.join(baseDir, relativeFilePath);
     try {
-        // --- START MODIFICATION ---
         await fs_promises.access(fullPath, fss.constants.F_OK); // Use fss.constants.F_OK
-        // --- END MODIFICATION ---
     } catch (e) {
         throw new Error(`File not found or not accessible: ${fullPath} - ${e.message}`);
     }
@@ -47,11 +45,9 @@ async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPa
     }
     
     let command = `node "${cliScriptPath}" ${cliArgs.join(' ')}`;
-    // --- START MODIFICATION ---
     if (applyTestConfig && typeof testConfigPath === 'string' && testConfigPath.length > 0) {
         command += ` --config "${testConfigPath}"`;
     }
-    // --- END MODIFICATION ---
 
     console.log(`  Executing: ${command}`);
     try {

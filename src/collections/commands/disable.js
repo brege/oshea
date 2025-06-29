@@ -2,7 +2,6 @@
 // No longer requires fs, path, yaml, chalk, or constants
 
 module.exports = async function disablePlugin(dependencies, invokeName) {
-  // Destructure dependencies
   const { chalk } = dependencies;
 
   // 'this' will be the CollectionsManager instance

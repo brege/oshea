@@ -163,7 +163,6 @@ function validate(pluginIdentifier) {
             console.log(chalk.rgb(255, 165, 0)(`[!] Plugin '${pluginName}' is USABLE (with warnings).`));
         }
     } else {
-        // Corrected: Output 'INVALID' summary to stdout as per previous requirement
         console.log(chalk.red(`[✖] Plugin '${pluginName}' is INVALID.`));
     }
 

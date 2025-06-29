@@ -2,7 +2,7 @@
 const path = require('path');
 const DefaultHandler = require('../core/default_handler');
 const markdownUtils = require('../core/markdown_utils');
-const pdfGenerator = require('../core/pdf_generator'); // CORRECTED: Changed path from './src/pdf_generator' to '../core/pdf_generator'
+const pdfGenerator = require('../core/pdf_generator');
 
 // Object containing core utilities to be injected into plugins
 const coreUtils = {
@@ -70,7 +70,6 @@ class PluginManager {
             }
 
             // If generate signature were to be changed for non-class plugins:
-            // return await handlerInstance.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath, coreUtils);
             return await handlerInstance.generate(
                 data,
                 pluginSpecificConfig,

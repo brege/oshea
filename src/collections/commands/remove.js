@@ -2,7 +2,6 @@
 // No longer requires fs, path, fs-extra, chalk, or constants
 
 module.exports = async function removeCollection(dependencies, collectionName, options = {}) {
-  // Destructure dependencies for cleaner code
   const { fss, path, fsExtra, chalk, constants } = dependencies;
 
   // 'this' is the CollectionsManager instance

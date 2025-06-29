@@ -2,7 +2,6 @@
 const { validate: pluginValidator } = require('../../plugins/validator');
 module.exports = async function enablePlugin(dependencies, collectionPluginId, options = {}) {
 
-  // Destructure dependencies
   const { fss, chalk } = dependencies;
 
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): Enabling ID: ${collectionPluginId}, options: ${JSON.stringify(options)}`));
@@ -27,8 +26,6 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
   }
   const absolutePluginConfigPath = pluginToEnable.config_path;
 
-  // Removed: DEBUG console.log statements
-  // console.log('DEBUG (enable.js): Before validation check, bypassValidation is:', options.bypassValidation);
   if (!options.bypassValidation) {
     console.log(chalk.blue(`  Running validation for plugin '${pluginId}' before enabling...`));
     const pluginDirectoryPath = pluginToEnable.base_path;
@@ -40,8 +37,6 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
     }
     console.log(chalk.green(`  Plugin '${pluginId}' passed validation.`));
   } else {
-    // Removed: DEBUG console.log statements
-    // console.log('DEBUG (enable.js): Inside bypass validation block.');
     console.log(chalk.yellow(`  Validation bypassed for plugin '${pluginId}' (--bypass-validation flag detected).`));
   }
 

@@ -18,8 +18,6 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
 
         let template = htmlTemplateStr;
         if (!template || typeof template !== 'string') {
-            // This template now EXACTLY matches the structure from the test files,
-            // including internal indentation and newlines.
             template = `
         <!DOCTYPE html>
         <html lang="en">

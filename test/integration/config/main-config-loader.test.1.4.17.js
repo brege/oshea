@@ -53,7 +53,6 @@ describe('MainConfigLoader (1.4.17)', () => {
 
             // --- Assertions for the returned object structure ---
             expect(primaryConfigResult).to.be.an('object', 'The returned result should be an object');
-            // Corrected: Removed the custom message from have.all.keys to resolve the type error.
             expect(primaryConfigResult).to.have.all.keys(['config', 'path', 'baseDir', 'reason']);
 
             // --- Assertions for the 'config' object ---

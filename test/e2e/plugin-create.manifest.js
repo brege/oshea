@@ -67,7 +67,6 @@ module.exports = [
   {
     describe: '3.5.3: (Happy Path) A plugin created from the default template passes validation',
     setup: async (sandboxDir, harness) => {
-      // --- MODIFICATION START ---
       // The setup runs the prerequisite 'plugin create' command.
       // Assertions are removed and replaced with error throwing for robustness.
       const newPluginDir = path.join(sandboxDir, 'temp-valid-plugin');
@@ -86,7 +85,6 @@ module.exports = [
       if (!pluginExists) {
         throw new Error(`Setup for 3.5.3 failed: Plugin directory was not created at ${newPluginDir}.`);
       }
-      // --- MODIFICATION END ---
     },
     args: (sandboxDir) => [
       'plugin',

@@ -53,7 +53,6 @@ describe('MainConfigLoader (1.4.2)', () => {
             // Expected xdgBaseDir when XDG_CONFIG_HOME is not set, falling back to os.homedir()
             const expectedXdgBaseDir = path.join(mockOsHomeDir, '.config', xdgConfigDirName);
             expect(loader.xdgBaseDir).to.equal(expectedXdgBaseDir);
-            // Corrected variable name from expectedXDG_BaseDir to expectedXdgBaseDir
             expect(loader.xdgGlobalConfigPath).to.equal(path.join(expectedXdgBaseDir, 'config.yaml'));
             expect(osHomdirStub.calledOnce).to.be.true; // os.homedir should be called once
         });

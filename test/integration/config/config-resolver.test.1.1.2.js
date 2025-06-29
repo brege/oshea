@@ -47,7 +47,6 @@ describe('ConfigResolver _initializeResolverIfNeeded Registry Caching (1.1.2)', 
         sinon.restore();
     });
 
-    // REMOVED .skip()
     it('should not rebuild the registry on a second call if conditions are unchanged', async () => {
         // Arrange
         const resolver = new ConfigResolver(null, false, false, mockDependencies);

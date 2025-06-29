@@ -139,12 +139,10 @@ function removeShortcodes(content, patterns) {
             if (typeof patternStr !== 'string' || patternStr.trim() === '') return;
             try {
                 let regex;
-                if (patternStr.includes('([\\s\\S]*?)')) { // Assuming this indicates a block pattern
-                    // Use the pattern directly, ensuring it's global and multiline
-                    regex = new RegExp(patternStr, 'gs'); // 's' for dotall, 'g' for global
+                if (patternStr.includes('([\\s\\S]*?)')) {
+                    regex = new RegExp(patternStr, 'gs');
                 } else {
-                    // For inline or single-line patterns
-                    regex = new RegExp(patternStr, 'g'); // 'g' for global
+                    regex = new RegExp(patternStr, 'g');
                 }
 
                 processedContent = processedContent.replace(regex, '');
@@ -406,5 +404,5 @@ module.exports = {
     renderMarkdownToHtml,
     generateSlug,
     ensureAndPreprocessHeading,
-    substituteAllPlaceholders // Added for export
+    substituteAllPlaceholders 
 };

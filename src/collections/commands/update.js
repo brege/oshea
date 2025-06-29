@@ -2,7 +2,6 @@
 // No longer requires fs, path, chalk, or fs-extra
 
 module.exports = async function updateCollection(dependencies, collectionName) {
-  // Destructure dependencies
   const { fss, fs, path, chalk, fsExtra, constants } = dependencies;
   const { METADATA_FILENAME } = constants;
 

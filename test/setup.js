@@ -33,7 +33,6 @@ module.exports = {
             this.ensureAndPreprocessHeadingStub = this.sandbox.stub(markdownUtils, 'ensureAndPreprocessHeading');
             this.substituteAllPlaceholdersStub = this.sandbox.stub(markdownUtils, 'substituteAllPlaceholders');
 
-            // --- FIX: Add the missing math_integration stubs ---
             const mathIntegrationInstance = createMathIntegration();
             this.getMathCssContentStub = this.sandbox.stub(mathIntegrationInstance, 'getMathCssContent');
             this.configureMarkdownItForMathStub = this.sandbox.stub(mathIntegrationInstance, 'configureMarkdownItForMath');

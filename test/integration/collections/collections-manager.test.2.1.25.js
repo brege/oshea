@@ -7,7 +7,6 @@ const CollectionsManager = require('../../../src/collections');
 describe('CollectionsManager listAvailablePlugins (2.1.25)', () => {
     it('should correctly filter results when a collectionName is provided', async () => {
         // Arrange
-        // --- FIX: lstatSync now returns an object with both isDirectory and isFile methods ---
         const lstatSyncStub = sinon.stub();
         lstatSyncStub.withArgs('/fake/collRoot/collection-a').returns({ isDirectory: () => true, isFile: () => false });
         lstatSyncStub.withArgs('/fake/collRoot/collection-a/plugin-1/plugin-1.config.yaml').returns({ isDirectory: () => false, isFile: () => true });

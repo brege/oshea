@@ -2,7 +2,6 @@
 const { validate: pluginValidator } = require('../../plugins/validator'); 
 
 module.exports = async function enableAllPluginsInCollection(dependencies, collectionName, options = {}) {
-  // Destructure dependencies
   const { fss, path, chalk, constants } = dependencies;
 
   // 'this' will be the CollectionsManager instance

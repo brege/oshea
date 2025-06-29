@@ -67,7 +67,6 @@ describe('MainConfigLoader (1.4.18)', () => {
 
             // --- Assertions for the returned object structure ---
             expect(xdgConfigResult).to.be.an('object', 'The returned result should be an object');
-            // Corrected: Removed the custom message from have.all.keys to resolve the type error.
             expect(xdgConfigResult).to.have.all.keys(['config', 'path', 'baseDir']);
 
             // --- Assertions for the 'config' object ---

@@ -7,7 +7,6 @@ const CollectionsManager = require('../../../src/collections');
 describe('CollectionsManager enablePlugin (2.1.20)', () => {
     it('should throw an error for an invalid invoke_name format', async () => {
         // Arrange
-        // --- FIX: Mock dependencies to ensure the config_path check passes ---
         const mockDependencies = {
             fss: { existsSync: sinon.stub().returns(true) }, // Make the config path appear valid
             // Removed: Custom chalk mock. Now relies on the global chalk mock from test/setup.js

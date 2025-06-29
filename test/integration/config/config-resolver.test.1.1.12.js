@@ -18,12 +18,10 @@ describe('ConfigResolver getEffectiveConfig (1.1.12)', () => {
                 sep: '/',
                 basename: sinon.stub().returns(''),
                 extname: sinon.stub().returns(''),
-                // FIX: Added path.join
                 join: (...args) => args.join('/')
             },
             fs: {
                 existsSync: sinon.stub().returns(true),
-                // FIX: Added fs.readFileSync
                 readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: deepMergeSpy

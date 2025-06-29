@@ -2,7 +2,6 @@
 // No longer needs its own require() statements for fs, path, etc.
 
 module.exports = async function addCollection(dependencies, source, options = {}) {
-  // Destructure the dependencies object for cleaner code
   const { fs, fss, path, fsExtra, chalk, cmUtils } = dependencies;
   
   // 'this' is still the CollectionsManager instance

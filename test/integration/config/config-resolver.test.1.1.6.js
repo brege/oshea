@@ -21,13 +21,11 @@ describe('ConfigResolver getEffectiveConfig (1.1.6)', () => {
                 dirname: sinon.stub().returns(PLUGIN_BASE_PATH),
                 basename: sinon.stub().returns('my-plugin'),
                 extname: sinon.stub().returns('.yaml'),
-                // FIX: Added path.join
                 join: (...args) => args.join('/')
             },
             fs: {
                 existsSync: sinon.stub().returns(true),
                 statSync: sinon.stub().returns({ isDirectory: () => false, isFile: () => true }),
-                // FIX: Added fs.readFileSync
                 readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({...a, ...b})

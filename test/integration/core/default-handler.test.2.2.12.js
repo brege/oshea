@@ -22,7 +22,6 @@ describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.12)', () => {
         // Mock fss.existsSync to return false, simulating a non-existent file
         this.existsSyncStub.withArgs('/input/nonexistent.md').returns(false);
 
-        // --- MODIFIED START ---
         // Since the method now returns null instead of throwing, we await the result directly.
         const result = await this.defaultHandler.generate(
             data,
@@ -41,6 +40,5 @@ describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.12)', () => {
         expect(this.mkdirStub.notCalled).to.be.true;
         expect(this.extractFrontMatterStub.notCalled).to.be.true;
         expect(this.generatePdfStub.notCalled).to.be.true;
-        // --- MODIFIED END ---
     });
 });

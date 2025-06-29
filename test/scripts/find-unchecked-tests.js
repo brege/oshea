@@ -19,7 +19,6 @@ function findAllJsFiles(dir) {
 }
 function buildTestIdToPathMap() {
   const dirs = [
-    // MODIFIED: Correctly navigate from test/scripts/ up to test/ and then to integration/ and e2e/
     path.join(__dirname, '../integration'),
     path.join(__dirname, '../e2e'),
   ];
@@ -39,7 +38,6 @@ function buildTestIdToPathMap() {
 }
 const testIdToPath = buildTestIdToPathMap();
 
-// MODIFIED: Point to the docs directory relative to the new script location
 const DOCS_DIR = path.join(__dirname, '../docs');
 const checklistFiles = fs.readdirSync(DOCS_DIR)
   .filter(f => /^checklist-level-\d+\.md$/.test(f))

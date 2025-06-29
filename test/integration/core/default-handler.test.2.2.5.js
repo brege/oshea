@@ -102,7 +102,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.5: Math Rendering Integration', f
         expect(actualHtmlContent).to.equal(renderedHtmlWithMath);
         expect(actualOutputPdfPath).to.equal(expectedOutputPdfPath);
         
-        // FIX: The default_handler.js always initializes mergedPdfOptions with a margin object,
         // even if globalConfig.global_pdf_options is empty.
         expect(actualPdfOptions).to.deep.equal({ margin: {} }); 
         expect(actualCssContentArray).to.deep.equal(expectedMathCssContent); // Ensure math CSS is passed to pdf_generator

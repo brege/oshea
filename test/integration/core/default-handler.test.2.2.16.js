@@ -37,7 +37,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         this.readFileStub.withArgs(markdownFilePath, 'utf8').rejects(new Error('Mock file read error during test'));
         this.existsSyncStub.withArgs(markdownFilePath).returns(true); // Ensure it's found but fails to read
 
-        // --- MODIFIED START ---
         // Call the method under test and expect a null result
         const result = await defaultHandler.generate(
             { markdownFilePath: markdownFilePath },
@@ -54,7 +53,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         
         // Ensure that generatePdf was NOT called since an earlier step failed
         expect(this.generatePdfStub.notCalled).to.be.true;
-        // --- MODIFIED END ---
     });
 
     // Test Case 2: renderMarkdownToHtml fails
@@ -63,7 +61,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         this.readFileStub.withArgs(markdownFilePath, 'utf8').resolves('Valid Markdown');
         this.renderMarkdownToHtmlStub.throws(new Error('Mock HTML rendering error during test'));
 
-        // --- MODIFIED START ---
         const result = await defaultHandler.generate(
             { markdownFilePath: markdownFilePath },
             { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
@@ -74,7 +71,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         expect(this.consoleErrorStub.calledOnce).to.be.true;
         expect(this.consoleErrorStub.getCall(0).args[0]).to.match(new RegExp(`Error during document generation: Mock HTML rendering error during test`));
         expect(this.generatePdfStub.notCalled).to.be.true;
-        // --- MODIFIED END ---
     });
 
     // Test Case 3: generatePdf fails
@@ -83,7 +79,6 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         this.readFileStub.withArgs(markdownFilePath, 'utf8').resolves('Valid Markdown');
         this.generatePdfStub.rejects(new Error('Mock PDF generation error during test'));
 
-        // --- MODIFIED START ---
         const result = await defaultHandler.generate(
             { markdownFilePath: markdownFilePath },
             { inject_fm_title_as_h1: true, css_files: [], math: { enabled: false } },
@@ -94,6 +89,5 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         expect(this.consoleErrorStub.calledOnce).to.be.true;
         expect(this.consoleErrorStub.getCall(0).args[0]).to.match(new RegExp(`Error during document generation: Mock PDF generation error during test`));
         expect(this.generatePdfStub.calledOnce).to.be.true; // generatePdf should have been called before failing
-        // --- MODIFIED END ---
     });
 });

@@ -9,7 +9,6 @@ describe('CollectionsManager listAvailablePlugins (2.1.24)', () => {
     let mockDependencies;
 
     beforeEach(() => {
-        // --- FIX: lstatSync now returns a complete object with both methods ---
         const lstatSyncStub = sinon.stub();
         lstatSyncStub.returns({ isDirectory: () => true, isFile: () => false }); // Default to directory
         lstatSyncStub.withArgs('/fake/collRoot/collection-a/plugin-1/plugin-1.config.yaml').returns({ isDirectory: () => false, isFile: () => true });

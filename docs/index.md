@@ -10,6 +10,7 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
     **Planning strategy** for the final polish, reorganization, and AI integration push.
 * [**Dream Board**](dream-board.md):
     **Standardization**. Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
+* [An Argument for adding a Pathing Registry](why-i-should-make-a-pathing-registry.md).
 
 
 ---
@@ -23,7 +24,10 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
   Details the plugins development cycle in creating, cnofiguring and managing plugins. Part reference, part walkthrough.
 * [**Cheat Sheet**](refs/cheat-sheet.md): Compactly lists CLI commands, common usage, and config snippets.
 * [Plugin Contract](refs/plugin-contract.md): Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
-
+* [**Scripts Index**](../scripts/index.md): An index of tools and utilities used by the project, from analysis to guides, documentation, linting, and more.
+  - [Refactoring Tools](../scripts/refactor/fix-require-paths/index.md):
+    Probes, repairs, validators, and other tools used in the reoganization of `md-to-pdf`.
+    
 ---
 
 ## 2. Architecture & Reasoning (Explanation)
@@ -32,8 +36,10 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 ### High-Level Vision & History
 *The main "living" documents of the project's evolution and direction--updated in commit timescales*
 
-* [**Dream Board v0.9**](archive/v0.9/dream-board-v0.9.md):
-  **Standardization**. Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
+* [**Release Candidate Checklist**](rc-checklist.md): **Hygiene**. 
+  Updating user docs and internal refactoring of code for ease of use.
+* [**Dream Board v0.9**](archive/v0.9/dream-board-v0.9.md): **Standardization**.
+  Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
   Muxes changelogs, task checklists, and outlook from a central, living document.
 * [Dream Board v0.8](archive/v0.8/dream-board-v0.8.md): **Unification**. 
   Merges plugin and collection management under a single CLI.
@@ -62,6 +68,7 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
   Breaks down tab-completion schemes into difficulty levels, design pathways, examples, and an optimal approach.
 * [**Reorganization Planner**](archive/v0.10/reorganization-planner.md):
   Planning strategy for the final polish, reorganization, and AI integration push.
+* [An Argument for adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md).    
 
 ---
 
@@ -87,11 +94,10 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
   Logs known issues, limitations, and discrepancies discovered during testing and code audits.
 
 ### Technical Reference
-* [Checklist Level 1](../test/docs/checklist-level-1.md): Module integration test scenarios.
-* [Checklist Level 2](../test/docs/checklist-level-2.md): Subsystem integration test scenarios.
-* [Checklist Level 3](../test/docs/checklist-level-3.md): End-to-End CLI test scenarios.
-* [Checklist Level 4](../test/docs/checklist-level-4.md): End-to-End lifecycle test scenarios.
-
+* [Test Suite Checklist Level 1](../test/docs/checklist-level-1.md): Module integration test scenarios.
+* [Test Suite Checklist Level 2](../test/docs/checklist-level-2.md): Subsystem integration test scenarios.
+* [Test Suite Checklist Level 3](../test/docs/checklist-level-3.md): End-to-End CLI test scenarios.
+* [Test Suite Checklist Level 4](../test/docs/checklist-level-4.md): End-to-End lifecycle test scenarios.
 * [Help Text Checklist](../test/docs/help-text-checklist.md): Systematic review of CLI help text.
 
 ---
@@ -100,7 +106,9 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 *A dynamically generated list of documents that have not yet been categorized.*
 *This list is automatically updated by [`scripts/index-docs.js`](../scripts/repo-health/index-docs.js).*
 
+
 <!-- etc-start -->
+
 
 <!-- etc-end -->
 

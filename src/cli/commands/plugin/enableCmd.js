@@ -109,14 +109,16 @@ you must re-run this command to enable any new plugins.`);
             console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));
         }
       }
-      // Trigger cache regeneration after successful enable operation
+      
+      // Trigger tab-completion cache regeneration after successful update operation 
       const cliPath = path.resolve(__dirname, '../../../../cli.js'); 
       try {
         const { execSync } = require('child_process');
-        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
-      } catch (error) {
-        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
+        execSync(`node "${cliPath}" _tab_cache`);
+      } catch (error) {                                                                                 
+        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));                                                                                                 
       }
+
     } catch (error) {
       const commandType = args.all ? 'plugin enable --all' : 'plugin enable';
       console.error(chalk.red(`\nERROR in '${commandType}' command: ${error.message}`));

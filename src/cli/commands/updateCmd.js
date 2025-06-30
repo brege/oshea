@@ -40,14 +40,16 @@ module.exports = {
            commandShouldFailHard = true;
         }
       }
-      // Trigger cache regeneration after successful update operation
+
+      // Trigger tab-completion cache regeneration after successful update operation 
       const cliPath = path.resolve(__dirname, '../../../cli.js');
       try {
         const { execSync } = require('child_process');
-        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
+        execSync(`node "${cliPath}" _tab_cache`);
       } catch (error) {
-        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
+        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
       }
+
     } catch (error) {
       console.error(chalk.red(`\nERROR updating all collections: ${error.message}`));
       if (process.env.DEBUG_CM === 'true' && error.stack) {

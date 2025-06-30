@@ -1,7 +1,7 @@
 // scripts/completion/generate-completion-dynamic-cache.js
 
 // This script generates a dynamic completion cache for the md-to-pdf CLI. 
-// It is runtime tool for the user's machine.
+// It is a runtime tool for the user's machine.
 
 const fs = require('fs');
 const path = require('path');
@@ -11,9 +11,9 @@ const chalk = require('chalk');
 // --- Dynamically require necessary application modules ---
 // This script is allowed to be "heavy" as it runs in the background.
 const projectRoot = path.resolve(__dirname, '../..');
-const PluginRegistryBuilder = require(path.join(projectRoot, 'src', 'PluginRegistryBuilder.js'));
-const CollectionsManager = require(path.join(projectRoot, 'src', 'collections-manager', 'index.js'));
-const MainConfigLoader = require(path.join(projectRoot, 'src', 'main_config_loader.js'));
+const PluginRegistryBuilder = require(path.join(projectRoot, 'src', 'plugins', 'PluginRegistryBuilder.js'));
+const CollectionsManager = require(path.join(projectRoot, 'src', 'collections', 'index.js'));
+const MainConfigLoader = require(path.join(projectRoot, 'src', 'config', 'main_config_loader.js'));
 
 /**
  * Determines the path for the dynamic completion cache file.
@@ -85,6 +85,7 @@ async function generateCache() {
         if (process.env.DEBUG) {
             console.error(chalk.red('Error generating dynamic completion cache:'), error);
         }
+        process.exit(1);
     }
 }
 

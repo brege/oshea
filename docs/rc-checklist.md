@@ -8,11 +8,11 @@
 | ○ | State   | Document                                | Notes                                  |
 |:--|:--------|:----------------------------------------|----------------------------------------|
 |   |         | [ **Phase 1** ]                         | **Foundational Update**                |
-| ○ | Now     | **`guides/plugin-development.md`**      | Rewrite completely                     |
-| ○ | Now     | **`refs/cheat-sheet.md`**               | Modernize - doubles as *smoketester*   |
-| ○ | Medium  | **`plugins/README.md`**                 | Modernize                              |
+| ✔ | Now     | **`guides/plugin-development.md`**      | Rewrite completely                     |
+| ✔ | Now     | **`refs/cheat-sheet.md`**               | Modernize - doubles as *smoketester*   |
+| ✔ | Medium  | **`plugins/README.md`**                 | Modernize                              |
 | ○ | Low     | **`refs/plugin-contract.md`**           | Consistency                            |
-| ○ | ---     | **`scripts/index.md`**                  | `node scripts/docs/update-scripts.js`  |
+| ✔ | Auto    | **`scripts/index.md`**                  | `node scripts/docs/update-scripts.js`  |
 |   |         | [ **Phase 2** ]                         | **Strategic Synthesis**                |
 | ○ | **New** | **`docs/dream-board-v0.10.md`**         | Retrospect of reorg + new priorities   |
 | ○ | Low     | **`test/README.md`**                    | Modernize                              |

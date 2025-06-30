@@ -21,7 +21,9 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 * [**Project README**](../README.md): Provides a high-level overview, quick start, and feature summary.
 * [Plugins README](../plugins/README.md): Introduces the bundled plugins and how to use them.
 * [Plugin Development Guide](guides/plugin-development.md): 
-  Details the plugins development cycle in creating, cnofiguring and managing plugins. Part reference, part walkthrough.
+  Details the plugins development cycle in creating, configuring and managing plugins.
+- [Configuration Hierarchies](guides/configuration-hierarchies.md):
+  Nitty-gritty details of the configuration system and the hierarchical structure of plugin and system conf files.
 * [**Cheat Sheet**](refs/cheat-sheet.md): Compactly lists CLI commands, common usage, and config snippets.
 * [Plugin Contract](refs/plugin-contract.md): Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
 * [**Scripts Index**](../scripts/index.md): An index of tools and utilities used by the project, from analysis to guides, documentation, linting, and more.
@@ -108,7 +110,6 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 
 <!-- etc-start -->
-
 
 <!-- etc-end -->
 

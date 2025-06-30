@@ -27,7 +27,6 @@
 
 These are internal, code-hygiene tasks.
 
-
 | ○ |     | Task Description                                                 |
 |:--|:----|:-----------------------------------------------------------------|
 |   | pR  | **Pathing & Dependency Management**                              |
@@ -55,17 +54,18 @@ These are internal, code-hygiene tasks.
 | ○ | PM4 | Explore smarter resource loading via dedicated Node package.     |
 | ○ | PM5 | Re-evaluate hardness in `pdf_generator` for flexibility and fun. |
 |   |     |                                                                  |
-| ○ | tC  | **Tab Completion Errata**                                        |
-| ○ | tC1 | Prevent tab completion errors from blocking core operations.     |
-| ○ | tC2 | Decouple completion errors from state-changing commands.         |
-| ○ | tC3 | Optimize system path completion for zero perceived delay.        |
-| ○ | tC4 | Hand off dynamic content earlier for smoother experience.        |
+| ✔ | tC  | **Tab Completion Errata**                                        |
+| ✔ | tC1 | Prevent tab completion errors from blocking core operations.     |
+| ✔ | tC2 | Decouple completion errors from state-changing commands.         |
+| × | tC3 | Optimize system path completion for zero perceived delay.        |
+| × | tC4 | Hand off dynamic content earlier for smoother experience.        |
 
 <!--
 ✔ = Complete
-× = Incomplete
 ● = In Progress
-○ = Pending
+○ = Open
+× = Wontfix
+‖ = Paused
 -->
 
 

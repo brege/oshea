@@ -97,12 +97,13 @@ module.exports = {
       }
       
       const cliPath = path.resolve(__dirname, '../../../../cli.js'); 
+      const cliPath = path.resolve(__dirname, '../../../cli.js');
       try {
         const { execSync } = require('child_process');
-        execSync(`node "${cliPath}" _tab_cache`, { stdio: 'inherit' });
-      } catch (error) {
-        console.error(chalk.red(`WARN: Failed to regenerate completion cache: ${error.message}`));
-      }
+        execSync(`node "${cliPath}" _tab_cache`);
+      } catch (error) {                                                                                 
+        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));                                                                                                 
+      }   
 
     } catch (error) {
       console.error(chalk.red(`\nERROR during 'plugin create ${newPluginName}': ${error.message}`));

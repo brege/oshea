@@ -52,11 +52,11 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
   } else if (type === 'enabled') {
       const enabledManifest = await this._readEnabledManifest();
       let pluginsFromManifest = enabledManifest.enabled_plugins;
-      
+
       if (collectionNameFilter) {
           pluginsFromManifest = pluginsFromManifest.filter(p => p.collection_name === collectionNameFilter);
       }
-      
+
       const processedEnabledPlugins = [];
       for (const p of pluginsFromManifest) {
         const pluginEntry = { ...p }; // Clone

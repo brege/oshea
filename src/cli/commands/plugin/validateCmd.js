@@ -13,7 +13,7 @@ module.exports = {
         describe: "name or path of plugin e.g. 'cv'",
         type: 'string',
         demandOption: true,
-        completionKey: 'usablePlugins' 
+        completionKey: 'usablePlugins'
       })
       .demandOption('pluginIdentifier', 'Please provide a plugin name or path to validate.');
   },

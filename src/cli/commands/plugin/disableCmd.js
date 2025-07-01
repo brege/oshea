@@ -1,6 +1,6 @@
 // src/cli/commands/plugin/disableCmd.js
 const chalk = require('chalk');
-const path = require('path'); 
+const path = require('path');
 
 module.exports = {
   command: 'disable <invoke_name>',
@@ -11,7 +11,7 @@ module.exports = {
         describe: "current 'invoke_name' of plugin to disable",
         type: 'string',
         demandOption: true,
-        completionKey: 'enabledPlugins' 
+        completionKey: 'enabledPlugins'
       });
   },
   handler: async (args) => {
@@ -25,14 +25,14 @@ module.exports = {
     console.log(`  Plugin Invoke Name: ${chalk.cyan(args.invoke_name)}`);
     try {
       await manager.disablePlugin(args.invoke_name);
-      
+
       const cliPath = path.resolve(__dirname, '../../../../cli.js');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
-      } catch (error) {                                                                                 
-        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));                                                                                                 
-      }    
+      } catch (error) {
+        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
+      }
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'plugin disable' command: ${error.message}`));
       if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));

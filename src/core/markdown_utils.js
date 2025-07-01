@@ -404,5 +404,5 @@ module.exports = {
     renderMarkdownToHtml,
     generateSlug,
     ensureAndPreprocessHeading,
-    substituteAllPlaceholders 
+    substituteAllPlaceholders
 };

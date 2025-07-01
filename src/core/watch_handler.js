@@ -62,7 +62,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
                         if (sourceEntry.base_path_from_cli_arg && currentArgs[sourceEntry.base_path_from_cli_arg]) {
                             globBase = path.resolve(currentArgs[sourceEntry.base_path_from_cli_arg]);
                         }
-                        
+
                         // Placeholder substitution for glob patterns and base paths
                         const placeholderRegex = /\{\{\s*cliArgs\.([\w-]+)\s*\}\}/g;
                         let match;

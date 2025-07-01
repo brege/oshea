@@ -11,12 +11,12 @@ module.exports = {
         describe: `the type of items to list`,
         type: 'string',
         choices: ['names', 'available', 'enabled', 'all'],
-        completionKey: 'listTypes' 
+        completionKey: 'listTypes'
       })
       .positional('collection_name', {
         describe: 'filter available/enabled plugins by collection name',
         type: 'string',
-        completionKey: 'downloadedCollections' 
+        completionKey: 'downloadedCollections'
       })
       .option('short', {
         alias: 's',
@@ -59,7 +59,7 @@ module.exports = {
           console.log(chalk.yellow("No downloaded collections found."));
           return;
         }
-        
+
         if (args.short) {
             console.log(chalk.blueBright("\nDownloaded plugin collections:"));
             let maxNameWidth = "NAME".length;

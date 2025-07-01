@@ -58,7 +58,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   const sourcePluginBasePath = sourcePluginInfo.base_path;
   const originalSourceConfigFilename = path.basename(sourcePluginInfo.config_path);
   const originalPluginDescriptionFromSource = sourcePluginInfo.description || `Plugin ${sourcePluginIdForReplacement}`;
-  
+
   const targetBaseDir = options.targetDir ? path.resolve(options.targetDir) : path.join(path.dirname(collRoot), constants.DEFAULT_ARCHETYPE_BASE_DIR_NAME);
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
@@ -103,7 +103,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
         }
       }
     }
-    
+
     if (tempConfigData.handler_script && fss.existsSync(path.join(archetypePath, tempConfigData.handler_script))) {
         filesToProcessForStringReplacement.push(path.join(archetypePath, tempConfigData.handler_script));
     }

@@ -1,7 +1,7 @@
 // src/cli/commands/configCmd.js
 const { displayConfig } = require('../config_display');
-const path = require('path'); 
-const chalk = require('chalk'); 
+const path = require('path');
+const chalk = require('chalk');
 
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
         alias: "p",
         describe: "display the effective configuration for a plugin",
         type: "string",
-        completionKey: 'usablePlugins' 
+        completionKey: 'usablePlugins'
       })
       .option("pure", {
         describe: "output raw configuration data (for piping)",

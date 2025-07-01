@@ -10,7 +10,7 @@ module.exports = {
       .positional('collection_name', {
         describe: 'name of a specific collection to update; omit for all',
         type: 'string',
-        completionKey: 'downloadedCollections' 
+        completionKey: 'downloadedCollections'
       });
   },
   handler: async (args) => {
@@ -27,7 +27,7 @@ module.exports = {
       if (args.collection_name) {
         console.log(chalk.blue(`Attempting to update collection '${chalk.cyan(args.collection_name)}' (via md-to-pdf ${args.$0})...`));
         const result = await manager.updateCollection(args.collection_name);
-        
+
         if (!result.success) {
             console.warn(chalk.yellow(`Update for '${args.collection_name}' reported issues (see CM logs above for details).`));
             commandShouldFailHard = true;
@@ -35,13 +35,13 @@ module.exports = {
       } else {
         console.log(chalk.blue(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`));
         const results = await manager.updateAllCollections();
-        if (results && !results.success) { 
+        if (results && !results.success) {
            console.warn(chalk.yellow("\nSome collections may not have updated successfully or were skipped. Please check output above."));
            commandShouldFailHard = true;
         }
       }
 
-      // Trigger tab-completion cache regeneration after successful update operation 
+      // Trigger tab-completion cache regeneration after successful update operation
       const cliPath = path.resolve(__dirname, '../../../cli.js');
       try {
         const { execSync } = require('child_process');

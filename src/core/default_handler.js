@@ -19,7 +19,7 @@ const mathIntegration = createMathIntegration();
 class DefaultHandler {
     async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
         const { markdownFilePath } = data;
-        
+
         try {
             if (!markdownFilePath || !fss.existsSync(markdownFilePath)) {
                 throw new Error(`Input Markdown file not found: ${markdownFilePath}`);
@@ -56,7 +56,7 @@ class DefaultHandler {
                     authorSlug,
                     dateSlug
                 ];
-                
+
                 finalOutputFilename = nameParts.filter(Boolean).join('-') + '.pdf';
             }
              if (!finalOutputFilename.toLowerCase().endsWith('.pdf')) {
@@ -76,12 +76,12 @@ class DefaultHandler {
             const mergedPdfOptions = {
                 ...(globalConfig.global_pdf_options || {}),
                 ...(pluginSpecificConfig.pdf_options || {}),
-                margin: { 
+                margin: {
                     ...((globalConfig.global_pdf_options || {}).margin || {}),
                     ...((pluginSpecificConfig.pdf_options || {}).margin || {}),
                 }
             };
-            
+
             const htmlBodyContent = renderMarkdownToHtml(
                 markdownToRender,
                 pluginSpecificConfig.toc_options,
@@ -122,7 +122,7 @@ class DefaultHandler {
             await generatePdf(
                 htmlBodyContent,
                 outputPdfPath,
-                mergedPdfOptions, 
+                mergedPdfOptions,
                 cssFileContentsArray,
                 htmlTemplateContent,
                 injectionPoints

@@ -63,6 +63,6 @@ module.exports = async function removeCollection(dependencies, collectionName, o
   } else {
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection): Collection directory ${collectionPath} did not exist or was not a directory. No file system removal needed.`));
   }
-  
+
   return { success: true, message: `Collection "${collectionName}" processed for removal.` };
 };

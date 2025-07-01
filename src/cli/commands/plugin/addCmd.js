@@ -42,7 +42,7 @@ module.exports = {
       process.exit(1);
       return;
     }
-    
+
     const derivedPluginId = path.basename(absolutePluginPath);
     const invokeNameAttempt = args.name || derivedPluginId;
 
@@ -53,10 +53,10 @@ module.exports = {
     try {
       const addSingletonOptions = { name: args.name, bypassValidation: args.bypassValidation };
       const result = await args.manager.addSingletonPlugin(absolutePluginPath, addSingletonOptions);
-      
+
       if (result && result.success) {
         console.log(chalk.greenBright(`\nSuccessfully processed 'plugin add' for '${chalk.yellow(result.invoke_name)}'.`));
-        
+
         console.log(chalk.blue("Important Notes:"));
         console.log(chalk.gray(`  - A copy of your plugin from '${absolutePluginPath}' is now managed by md-to-pdf at:`));
         console.log(chalk.gray(`    ${chalk.underline(result.path)}`));
@@ -65,7 +65,7 @@ module.exports = {
         console.log(chalk.gray(`  - To sync any changes from your original plugin into the managed version, run:`));
         console.log(chalk.cyanBright(`    md-to-pdf collection update _user_added_plugins`));
         console.log(chalk.gray(`    (This command re-syncs all locally added plugins from their original sources)`));
-        
+
         console.log(chalk.blue("\nNext Steps:"));
         console.log(chalk.gray(`  - List active plugins: md-to-pdf plugin list`));
         console.log(chalk.gray(`  - Use your new plugin: md-to-pdf convert mydoc.md --plugin ${result.invoke_name}`));

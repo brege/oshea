@@ -10,7 +10,7 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
         const page = await browser.newPage();
-        
+
         // Combine CSS content with the exact separator the test expects.
         const combinedCss = (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
 
@@ -33,9 +33,9 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
         </body>
         </html>`;
         }
-        
+
         const documentTitle = (pdfOptions && pdfOptions.title) ? pdfOptions.title : path.basename(outputPdfPath, '.pdf');
-        
+
         // Perform replacements to build the final HTML.
         const finalHtml = template
             .replace('{{{title}}}', documentTitle)

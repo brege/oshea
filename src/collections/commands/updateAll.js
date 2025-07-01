@@ -31,7 +31,7 @@ module.exports = async function updateAllCollections(dependencies) {
               if (dirent.isDirectory()) {
                 const singletonPluginId = dirent.name;
                 const singletonCollectionNameForUpdate = path.join(USER_ADDED_PLUGINS_DIR_NAME, singletonPluginId);
-                
+
                 if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Attempting to update singleton: ${singletonCollectionNameForUpdate}`));
                 try {
                   const result = await this.updateCollection(singletonCollectionNameForUpdate);

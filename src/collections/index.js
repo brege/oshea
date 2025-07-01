@@ -205,7 +205,7 @@ class CollectionsManager {
     const { spawn, chalk, process } = this.dependencies;
     return new Promise((resolve, reject) => {
       if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
-      
+
       const spawnOptions = {
         cwd,
         stdio: ['pipe', 'pipe', 'pipe'],

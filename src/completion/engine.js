@@ -15,7 +15,7 @@ function loadCache() {
 }
 
 // This helper function correctly identifies the true command path by
-// stopping when it encounters an argument that is not a defined 
+// stopping when it encounters an argument that is not a defined
 // subcommand.
 function getCommandPath(tree, parts) {
     const commandPath = [];
@@ -125,7 +125,7 @@ function getSuggestions(argv, current) {
             suggestions.push(...dynamicCompletions);
         }
     }
-    
+
     return [...new Set(suggestions)].filter(s => s.startsWith(current));
 }
 

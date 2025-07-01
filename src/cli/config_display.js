@@ -6,7 +6,7 @@ const ConfigResolver = require('../config/ConfigResolver'); // Still needed for 
 
 async function displayGlobalConfig(configResolver, isPure) {
     // Ensure ConfigResolver is initialized to get primaryMainConfigLoadReason
-    await configResolver._initializeResolverIfNeeded(); 
+    await configResolver._initializeResolverIfNeeded();
     const mainConfig = configResolver.primaryMainConfig || {};
     const mainConfigPath = configResolver.primaryMainConfigPathActual;
     const loadReason = configResolver.primaryMainConfigLoadReason; // Get the stored reason
@@ -51,12 +51,12 @@ async function displayGlobalConfig(configResolver, isPure) {
         }
         console.log("# Active Global Configuration:\n");
     }
-    
+
     const configToDump = { ...mainConfig };
-    delete configToDump._sourcePath; 
+    delete configToDump._sourcePath;
 
     console.log(yaml.dump(configToDump, { indent: 2, sortKeys: false, lineWidth: -1, noRefs: true }));
-    
+
     if (!isPure) {
         console.log("\n# Note: This shows the global settings from the primary main configuration file.");
         console.log("# To see the full effective configuration for a specific plugin, use 'md-to-pdf config --plugin <pluginName>'.");
@@ -65,7 +65,7 @@ async function displayGlobalConfig(configResolver, isPure) {
 
 async function displayPluginConfig(configResolver, pluginName, isPure) {
     await configResolver._initializeResolverIfNeeded();
-    
+
     const effectiveConfig = await configResolver.getEffectiveConfig(pluginName);
     const configSources = configResolver.getConfigFileSources();
 
@@ -74,7 +74,7 @@ async function displayPluginConfig(configResolver, pluginName, isPure) {
     }
 
     console.log(yaml.dump(effectiveConfig.pluginSpecificConfig, { indent: 2, sortKeys: true, lineWidth: -1, noRefs: true }));
-    
+
     if (!isPure) {
         console.log("\n# Source Information:");
         console.log(`#   Plugin Base Path: ${effectiveConfig.pluginBasePath}`);
@@ -85,7 +85,7 @@ async function displayPluginConfig(configResolver, pluginName, isPure) {
             console.log(`#     - Primary Main Config (for global settings): ${configSources.mainConfigPath}`);
         }
         configSources.pluginConfigPaths.forEach(p => console.log(`#     - ${p}`));
-        
+
         console.log("\n# Resolved CSS Files (order matters):");
         if (effectiveConfig.pluginSpecificConfig.css_files && effectiveConfig.pluginSpecificConfig.css_files.length > 0) {
             effectiveConfig.pluginSpecificConfig.css_files.forEach(p => console.log(`#     - ${p}`));
@@ -103,7 +103,7 @@ async function displayConfig(args) {
         if (!configResolver) {
             throw new Error("ConfigResolver was not initialized by the CLI middleware.");
         }
-        
+
         if (args.plugin) {
             await displayPluginConfig(configResolver, args.plugin, args.pure);
         } else {
@@ -111,7 +111,7 @@ async function displayConfig(args) {
         }
     } catch (error) {
         console.error(`ERROR displaying configuration: ${error.message}`);
-        if (error.stack && !args.pure) console.error(error.stack); 
+        if (error.stack && !args.pure) console.error(error.stack);
         process.exit(1);
     }
 }

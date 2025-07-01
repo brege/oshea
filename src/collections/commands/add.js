@@ -3,7 +3,7 @@
 
 module.exports = async function addCollection(dependencies, source, options = {}) {
   const { fs, fss, path, fsExtra, chalk, cmUtils } = dependencies;
-  
+
   // 'this' is still the CollectionsManager instance
   console.log(chalk.blue(`CollectionsManager: Adding collection from source: ${chalk.underline(source)}`));
   if (options.name) {

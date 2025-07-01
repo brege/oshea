@@ -16,11 +16,11 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromCmManifest (1.2.21)',
                 config_path: MISSING_CONFIG_PATH
             }]
         };
-        
+
         const existsSyncStub = sinon.stub();
         existsSyncStub.withArgs(FAKE_MANIFEST_PATH).returns(true); // The manifest itself exists
         // --- Key for this test: The plugin's config_path does NOT exist ---
-        existsSyncStub.withArgs(MISSING_CONFIG_PATH).returns(false); 
+        existsSyncStub.withArgs(MISSING_CONFIG_PATH).returns(false);
 
         const mockDependencies = {
             os: { homedir: () => '/fake/home', platform: () => 'linux' },

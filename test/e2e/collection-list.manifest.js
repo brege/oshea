@@ -9,7 +9,7 @@ module.exports = [
     setup: async (sandboxDir, harness) => {
       // 1. Add a collection from a live git URL
       await harness.runCli(['collection', 'add', 'https://github.com/brege/md-to-pdf-plugins.git']);
-      
+
       // 2. Add a collection from a local path
       const localCollPath = path.join(sandboxDir, 'my-local-collection-src');
       await fs.ensureDir(localCollPath);

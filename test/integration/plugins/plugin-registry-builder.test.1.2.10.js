@@ -52,7 +52,7 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.10)', () => {
         expect(mockDependencies.fs.existsSync.calledWith(PLUGIN_DIR_PATH)).to.be.true;
         expect(mockDependencies.fs.existsSync.calledWith(CONVENTIONAL_CONFIG_PATH)).to.be.true;
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

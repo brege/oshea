@@ -9,11 +9,11 @@ describe('ConfigResolver getEffectiveConfig (1.1.13)', () => {
     it('should consolidate and filter css_files to be unique and existing', async () => {
         // Arrange
         const existsSyncStub = sinon.stub();
-        
+
         existsSyncStub.withArgs('/path/to/style.css').returns(true);
         existsSyncStub.withArgs('/path/to/duplicate.css').returns(true);
         existsSyncStub.withArgs('/resolved/path/to/handler.js').returns(true);
-        existsSyncStub.withArgs('/fake/path').returns(true); 
+        existsSyncStub.withArgs('/fake/path').returns(true);
         existsSyncStub.withArgs('/path/to/non-existent.css').returns(false);
 
         const mockDependencies = {
@@ -59,7 +59,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.13)', () => {
 
         // Act
         const result = await resolver.getEffectiveConfig('my-plugin');
-        
+
         // Assert
         const finalCssFiles = result.pluginSpecificConfig.css_files;
         expect(finalCssFiles).to.be.an('array').with.lengthOf(2);

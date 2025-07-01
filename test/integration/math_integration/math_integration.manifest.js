@@ -22,7 +22,7 @@ module.exports = [
           trust: false,
         },
       };
-      
+
     },
     assert: async (mocks, constants, expect) => {
       const { configureMarkdownItForMath } = mocks.mathIntegration;
@@ -32,7 +32,7 @@ module.exports = [
 
       expect(mdInstance.use.calledOnce).to.be.true;
       expect(mdInstance.use.calledWith(mockKatexPluginFunction, mathConfig.katex_options)).to.be.true;
-      expect(mockConsoleError.called).to.be.false; 
+      expect(mockConsoleError.called).to.be.false;
 
     },
   },
@@ -53,7 +53,7 @@ module.exports = [
           macros: { "\\myMacro": "macroValue" }
         },
       };
-      
+
     },
     assert: async (mocks, constants, expect) => {
       const { configureMarkdownItForMath } = mocks.mathIntegration;
@@ -88,12 +88,12 @@ module.exports = [
       expect(mdInstance.use.called).to.be.false;
       expect(mockConsoleError.called).to.be.false;
 
-      mdInstance.use.resetHistory(); 
+      mdInstance.use.resetHistory();
       configureMarkdownItForMath(mdInstance, mathConfig2);
       expect(mdInstance.use.called).to.be.false;
       expect(mockConsoleError.called).to.be.false;
 
-      mdInstance.use.resetHistory(); 
+      mdInstance.use.resetHistory();
       configureMarkdownItForMath(mdInstance, mathConfig3);
       expect(mdInstance.use.called).to.be.false;
       expect(mockConsoleError.called).to.be.false;
@@ -116,7 +116,7 @@ module.exports = [
     assert: async (mocks, constants, expect) => {
       const { mockConsoleError } = mocks;
       const mathIntegrationFactoryPath = path.resolve(__dirname, '../../../src/core/math_integration');
-      
+
       expect(true).to.be.true; // Placeholder assertion for skipped test
       const mathIntegration = mathIntegrationFactory(mocks.mockFsPromises, mocks.mockFsSync, mocks.path, mocks.mockProcess);
       const result = await mathIntegration.getMathCssContent();
@@ -169,13 +169,13 @@ module.exports = [
 
       let result1 = await getMathCssContent(mathConfig1);
       expect(result1).to.deep.equal([]);
-      expect(mockFsSync.existsSync.called).to.be.false; 
+      expect(mockFsSync.existsSync.called).to.be.false;
       expect(mockFsPromises.readFile.called).to.be.false;
       expect(mockConsoleWarn.called).to.be.false;
       expect(mockConsoleError.called).to.be.false;
 
-      mockFsSync.existsSync.resetHistory(); 
-      mockFsPromises.readFile.resetHistory(); 
+      mockFsSync.existsSync.resetHistory();
+      mockFsPromises.readFile.resetHistory();
       mockConsoleWarn.resetHistory();
       mockConsoleError.resetHistory();
 
@@ -220,7 +220,7 @@ module.exports = [
       const result = await getMathCssContent(mathConfig);
 
       expect(mockFsSync.existsSync.calledWith(constants.KATEX_CSS_PATH)).to.be.true;
-      expect(mockFsPromises.readFile.called).to.be.false; 
+      expect(mockFsPromises.readFile.called).to.be.false;
       expect(result).to.deep.equal([]);
       expect(mockConsoleWarn.calledOnce).to.be.true;
       expect(mockConsoleWarn.getCall(0).args[0]).to.include("KaTeX CSS file not found at expected path");

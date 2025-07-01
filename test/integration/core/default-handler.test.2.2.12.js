@@ -34,7 +34,7 @@ describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.12)', () => {
 
         // Assert that the result is null as expected on failure
         expect(result).to.be.null;
-        
+
         // Assert that no further processing (like PDF generation) was attempted
         expect(this.readFileStub.notCalled).to.be.true;
         expect(this.mkdirStub.notCalled).to.be.true;

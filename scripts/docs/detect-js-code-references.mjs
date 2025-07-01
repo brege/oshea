@@ -1,4 +1,4 @@
-// detect-js-reference-contexts.mjs
+// scripts/docs/detect-js-code-references.mjs
 
 // --- Ensure script runs from project root, even if launched from scripts/ ---
 import path from 'path';
@@ -347,7 +347,7 @@ async function main() {
       // Show missing references only if not muted or if verbose
       if (!hit.knownJsFile && muteMissing && !verboseMissing) continue;
 
-      let output = 
+      let output =
         `File: ${hit.mdPath}\n  Line: ${hit.lineNum}\n  Reference: ${hit.reference}\n  Format: ${hit.format}` +
         (hit.linkText ? `\n  Link text: ${hit.linkText}` : '') +
         `\n  Context: ${hit.context}`;

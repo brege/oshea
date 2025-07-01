@@ -14,7 +14,7 @@ describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {
             _rawPluginYamlCache: {}
         };
         const MockPluginConfigLoader = sinon.stub().returns(mockPluginConfigLoaderInstance);
-        
+
         const mockRegistryBuilderInstance = { buildRegistry: sinon.stub().resolves({}) };
         const MockPluginRegistryBuilder = sinon.stub().returns(mockRegistryBuilderInstance);
         const mockMainConfigLoaderInstance = {
@@ -69,22 +69,22 @@ describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {
         const fakeConfigPath = '/fake/plugin/plugin.config.yaml';
         const fakeAssetsPath = '/fake/plugin';
         const fakePluginName = 'my-plugin';
-        
+
         const rawConfigData = { css_files: ['style.css'], inherit_css: true };
         const resolvedCssPaths = ['/fake/plugin/style.css'];
 
         mockDependencies.loadYamlConfig.withArgs(fakeConfigPath).resolves(rawConfigData);
-        
+
         mockDependencies.AssetResolver.resolveAndMergeCss
             .withArgs(rawConfigData.css_files, fakeAssetsPath, [], false, fakePluginName, fakeConfigPath)
             .returns(resolvedCssPaths);
-        
+
         // Act
         const result = await resolver._loadPluginBaseConfig(fakeConfigPath, fakeAssetsPath, fakePluginName);
 
         // Assert
         expect(mockDependencies.loadYamlConfig.calledOnceWith(fakeConfigPath)).to.be.true;
-        
+
         expect(mockDependencies.AssetResolver.resolveAndMergeCss.calledOnce).to.be.true;
         sinon.assert.calledWith(mockDependencies.AssetResolver.resolveAndMergeCss,
             rawConfigData.css_files, fakeAssetsPath, [], false, fakePluginName, fakeConfigPath

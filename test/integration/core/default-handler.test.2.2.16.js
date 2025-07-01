@@ -50,7 +50,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.16: Error Handling (Critical Step
         // Assert that the error was logged to console.error
         expect(this.consoleErrorStub.calledOnce).to.be.true;
         expect(this.consoleErrorStub.getCall(0).args[0]).to.match(new RegExp(`Error during document generation: Mock file read error during test`));
-        
+
         // Ensure that generatePdf was NOT called since an earlier step failed
         expect(this.generatePdfStub.notCalled).to.be.true;
     });

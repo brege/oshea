@@ -25,7 +25,7 @@ describe('ConfigResolver _initializeResolverIfNeeded (1.1.1)', () => {
             getXdgMainConfig: sinon.stub().resolves(xdgConfig),
             getProjectManifestConfig: sinon.stub().resolves(projectConfig)
         };
-        
+
         // Mock the classes themselves, so we can control their instantiation
         const MockMainConfigLoader = sinon.stub().returns(mockMainConfigLoaderInstance);
         const MockPluginConfigLoader = sinon.stub();
@@ -60,10 +60,10 @@ describe('ConfigResolver _initializeResolverIfNeeded (1.1.1)', () => {
         // 2. Verify the primary config properties were set correctly on the resolver instance
         expect(resolver.primaryMainConfig).to.deep.equal({ collections_root: '/fake/collections/root', some_other_key: 'value' });
         expect(resolver.primaryMainConfigPathActual).to.equal('/fake/path/to/main-config.yaml');
-        
+
         // 3. Verify that the collections root path was correctly extracted
         expect(resolver.resolvedCollRoot).to.equal('/fake/collections/root');
-        
+
         // 4. Verify that the helper classes for plugin loading were instantiated
         expect(mockDependencies.PluginConfigLoader.calledOnce).to.be.true;
         expect(mockDependencies.PluginRegistryBuilder.calledOnce).to.be.true;

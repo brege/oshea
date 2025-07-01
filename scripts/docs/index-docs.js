@@ -1,4 +1,4 @@
-// scripts/repo-health/index-docs.js
+// scripts/docs/index-docs.js
 const fs = require('fs');
 const path = require('path');
 const { minimatch } = require('minimatch');
@@ -90,7 +90,7 @@ function updateIndexFile() {
         console.log(' ✔ All discovered documents are already tracked in index.md.');
         return;
     }
-    
+
     console.log(`Found ${untrackedDocs.length} untracked document(s) to add.`);
 
     const newContentLines = untrackedDocs.map(doc => `- [${doc}](${path.relative(DOCS_ROOT, doc).replace(/\\/g, '/')})`);
@@ -99,7 +99,7 @@ function updateIndexFile() {
     const pre = indexContentLines.slice(0, startIdx + 1);
     const post = indexContentLines.slice(endIdx);
     const finalContent = [...pre, '', ...newContentLines, '', ...post].join('\n');
-    
+
     fs.writeFileSync(INDEX_FILE_PATH, finalContent, 'utf8');
     console.log(` ✔ Successfully updated ${INDEX_FILE_PATH} with ${untrackedDocs.length} untracked document(s).`);
 }

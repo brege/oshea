@@ -23,7 +23,7 @@ describe('CollectionsManager removeCollection (2.1.7)', () => {
             fsExtra: {
                 rm: sinon.stub().resolves()
             },
-            path: { 
+            path: {
                 join: (a, b) => `${a}/${b}`,
                 sep: '/'
             },
@@ -61,7 +61,7 @@ describe('CollectionsManager removeCollection (2.1.7)', () => {
 
         // 2. Verify it attempted to disable the plugins from that collection
         expect(disableAllStub.calledWith(COLLECTION_TO_REMOVE)).to.be.true;
-        
+
         // 3. Verify it attempted to remove the directory
         expect(mockDependencies.fsExtra.rm.calledWith(FAKE_COLLECTION_PATH, { recursive: true, force: true })).to.be.true;
     });

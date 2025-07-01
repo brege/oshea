@@ -1,4 +1,4 @@
-// scripts/path-validator.js
+// scripts/refactor/join-path-probe.js
 const fs = require('fs');
 const path = require('path');
 const parser = require('@babel/parser');
@@ -58,8 +58,8 @@ function analyzeFile(filePath) {
     traverse(ast, {
         CallExpression(pathNode) {
             const callee = pathNode.node.callee;
-            if (callee.type !== 'MemberExpression' || 
-                callee.object.name !== 'path' || 
+            if (callee.type !== 'MemberExpression' ||
+                callee.object.name !== 'path' ||
                 !['join', 'resolve'].includes(callee.property.name)) {
                 return;
             }
@@ -84,8 +84,8 @@ function analyzeFile(filePath) {
 function main() {
     // Get target directory from CLI argument
     const targetDir = process.argv[2] || DEFAULT_TARGET;
-    const absTargetDir = path.isAbsolute(targetDir) 
-        ? targetDir 
+    const absTargetDir = path.isAbsolute(targetDir)
+        ? targetDir
         : path.join(PROJECT_ROOT, targetDir);
 
     if (!fs.existsSync(absTargetDir)) {
@@ -94,7 +94,7 @@ function main() {
     }
 
     console.log(`Scanning: ${path.relative(PROJECT_ROOT, absTargetDir)}`);
-    
+
     const files = getJsFiles(absTargetDir);
     const allFindings = files.flatMap(analyzeFile);
 

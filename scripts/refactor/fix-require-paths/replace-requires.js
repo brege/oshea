@@ -1,4 +1,4 @@
-// scripts/repo-health/fix-require-paths/replace-requires.js
+// scripts/refactor/fix-require-paths/replace-requires.js
 const fs = require('fs');
 const path = require('path');
 

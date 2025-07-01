@@ -13,7 +13,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.14: lang Attribute Handling', fun
         this.existsSyncStub.returns(true);
         this.readFileStub.resolves(`---\ntitle: Lang Test\nlang: fr\n---\nContent`);
         this.mkdirStub.resolves();
-        
+
         // Its output is not critical as substituteAllPlaceholdersStub is the true source of data for this test.
         this.extractFrontMatterStub.returns({ data: {}, content: 'Content' });
 
@@ -59,7 +59,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.14: lang Attribute Handling', fun
 
         expect(this.generatePdfStub.calledOnce).to.be.true;
         const injectionPoints = this.generatePdfStub.lastCall.args[5];
-        
+
         expect(injectionPoints).to.be.an('object');
         expect(injectionPoints.lang).to.equal('en');
     });

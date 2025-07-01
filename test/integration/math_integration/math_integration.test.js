@@ -50,7 +50,7 @@ describe('math_integration (Module Integration Tests)', function() {
             '@vscode/markdown-it-katex': mockKatexPluginModule,
             // No need to stub fs, fs/promises, path here, as they are now injected into the factory function itself.
         });
-        
+
         // Instantiate mathIntegration with default (passing) dependencies for general tests.
         // Individual test cases in the manifest can create new instances with different mocks.
         this.mathIntegration = mathIntegrationFactory({

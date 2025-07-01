@@ -42,7 +42,7 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.9)', () => {
         // Verify that path.resolve was called correctly
         expect(mockDependencies.path.resolve.calledWith(BASE_PATH, RAW_PATH)).to.be.true;
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

@@ -20,11 +20,11 @@ describe('ConfigResolver getEffectiveConfig (1.1.4)', () => {
                 resolve: sinon.stub().returnsArg(0),
                 basename: sinon.stub().returns(''),
                 extname: sinon.stub().returns(''),
-                join: (...args) => args.join('/') 
+                join: (...args) => args.join('/')
             },
             fs: {
                 existsSync: sinon.stub().returns(true),
-                readFileSync: sinon.stub().returns('{}') 
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({...a, ...b})
         };
@@ -49,7 +49,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.4)', () => {
             global_pdf_options: {},
             math: {}
         };
-        
+
         loadBaseConfigStub = sinon.stub(resolver, '_loadPluginBaseConfig').resolves({
             rawConfig: { handler_script: 'index.js' },
             resolvedCssPaths: [],
@@ -66,7 +66,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.4)', () => {
 
         // Assert
         expect(resolver._initializeResolverIfNeeded.calledOnce).to.be.true;
-        
+
         expect(loadBaseConfigStub.calledOnce).to.be.true;
         const callArgs = loadBaseConfigStub.firstCall.args;
         const pluginOwnConfigPath = callArgs[0];

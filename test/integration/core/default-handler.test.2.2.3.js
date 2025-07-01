@@ -11,17 +11,17 @@ describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.3)', () => {
     it('should correctly substitute placeholders in Markdown content', async function() {
         const markdownContent = '---\ntitle: Placeholder Test\nauthor: {{ .authorName }}\ndate: 2023-01-15\n---\nHello {{ .name }}!';
         const contentWithoutFm = 'Hello {{ .name }}!';
-        
-        const processedFmData = { 
-            title: 'Placeholder Test', 
-            author: 'John Doe', 
-            name: 'World', 
-            date: '2023-01-15', 
+
+        const processedFmData = {
+            title: 'Placeholder Test',
+            author: 'John Doe',
+            name: 'World',
+            date: '2023-01-15',
             CurrentDateISO: '2023-01-15',
-            CurrentDateFormatted: sinon.match.string 
+            CurrentDateFormatted: sinon.match.string
         };
 
-        const contentAfterSubst = 'Hello World!'; 
+        const contentAfterSubst = 'Hello World!';
         const mockPdfPath = '/output/placeholder-test-john-doe-2023-01-15.pdf';
 
         this.existsSyncStub.withArgs('/input/placeholder.md').returns(true);
@@ -29,9 +29,9 @@ describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.3)', () => {
         this.mkdirStub.resolves();
 
         this.extractFrontMatterStub.returns({ data: { title: 'Placeholder Test', author: '{{ .authorName }}', date: '2023-01-15' }, content: contentWithoutFm });
-        
+
         this.substituteAllPlaceholdersStub.returns({ processedFmData: processedFmData, processedContent: contentAfterSubst });
-        
+
         this.removeShortcodesStub.returns(contentAfterSubst);
         this.ensureAndPreprocessHeadingStub.returns(`# Placeholder Test\n${contentAfterSubst}`);
         this.renderMarkdownToHtmlStub.returns('<h1>Placeholder Test</h1><p>Hello World!</p>');
@@ -66,13 +66,13 @@ describe('DefaultHandler (Level 2 - Subsystem Integration Test 2.2.3)', () => {
         );
 
         expect(this.substituteAllPlaceholdersStub.calledOnce).to.be.true;
-        
+
         const actualContextForPlaceholders = this.substituteAllPlaceholdersStub.getCall(0).args[1];
         expect(actualContextForPlaceholders).to.deep.include({
             title: 'Placeholder Test',
             author: '{{ .authorName }}',
             date: '2023-01-15',
-            name: 'World', 
+            name: 'World',
             authorName: 'John Doe',
         });
 

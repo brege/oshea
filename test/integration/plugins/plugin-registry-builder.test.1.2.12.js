@@ -27,7 +27,7 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.12)', () => {
         // Assert
         expect(result).to.be.null;
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

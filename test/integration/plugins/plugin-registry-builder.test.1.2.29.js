@@ -15,7 +15,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.29)', () => {
                 dirname: () => '',
                 basename: (p) => p.split('/').pop() // Simple basename mock
             },
-            fs: { 
+            fs: {
                 existsSync: () => true,
                 statSync: () => ({ isFile: () => true })
             },
@@ -32,7 +32,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.29)', () => {
         };
 
         const builder = new PluginRegistryBuilder(
-            '/fake/project', null, null, false, false, null, 
+            '/fake/project', null, null, false, false, null,
             mockCollectionsManager,
             mockDependencies
         );

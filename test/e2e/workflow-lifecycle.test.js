@@ -26,12 +26,12 @@ describe('E2E - Full User Workflow (Lifecycle)', function() {
         const markdownFixturePath = path.resolve(__dirname, '../fixtures/markdown/simple.md');
         const markdownFilePath = path.join(sandboxDir, 'simple.md');
         await fs.copy(markdownFixturePath, markdownFilePath);
-        
+
         const collectionUrl = 'https://github.com/brege/md-to-pdf-plugins.git';
         const collectionName = 'lifecycle-collection';
         const pluginRef = `${collectionName}/restaurant-menu`;
         const pluginInvokeName = 'restaurant-menu';
-        
+
         console.log('  [Workflow 4.1.1] Step 1: Adding collection...');
         const addResult = await harness.runCli(['collection', 'add', collectionUrl, '--name', collectionName], cliOptions);
         expect(addResult.exitCode, 'collection add should succeed').to.equal(0);
@@ -45,10 +45,10 @@ describe('E2E - Full User Workflow (Lifecycle)', function() {
         console.log('  [Workflow 4.1.1] Step 3: Converting document with plugin...');
         const convertResult = await harness.runCli(['convert', markdownFilePath, '--plugin', pluginInvokeName, '--outdir', sandboxDir, '--no-open'], cliOptions);
         expect(convertResult.exitCode, 'convert should succeed').to.equal(0);
-        
+
         const pdfOutputPath = path.join(sandboxDir, 'restaurant-menu.pdf');
         expect(await fs.pathExists(pdfOutputPath), 'Expected PDF file to be created by convert command').to.be.true;
-        
+
         console.log('  [Workflow 4.1.1] Step 4: Disabling plugin...');
         const disableResult = await harness.runCli(['plugin', 'disable', pluginInvokeName], cliOptions);
         expect(disableResult.exitCode, 'plugin disable should succeed').to.equal(0);
@@ -62,7 +62,7 @@ describe('E2E - Full User Workflow (Lifecycle)', function() {
     it('4.1.2: should archetype a bundled plugin, add it as a new managed plugin, and use it for conversion', async () => {
         const sandboxDir = harness.sandboxDir;
         const cliOptions = { useFactoryDefaults: false };
-        
+
         const sourcePluginName = 'cv';
         const newArchetypeName = 'my-custom-cv';
 

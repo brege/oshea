@@ -1,7 +1,7 @@
 // test/integration/config/config-resolver.test.1.1.11.js
 const { expect } = require('chai');
 const sinon = require('sinon');
-const _ = require('lodash'); 
+const _ = require('lodash');
 const ConfigResolver = require('../../../src/config/ConfigResolver');
 
 // Test suite for Scenario 1.1.11
@@ -34,7 +34,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
         resolver.primaryMainConfig = {
             global_pdf_options: {
                 format: 'A4',
-                margin: { top: '1in', bottom: '1in' } 
+                margin: { top: '1in', bottom: '1in' }
             },
             math: {}
         };
@@ -60,7 +60,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
             rawConfig: { handler_script: 'index.js' },
             resolvedCssPaths: [],
         });
-        
+
         // Act
         const result = await resolver.getEffectiveConfig('my-plugin');
 
@@ -70,7 +70,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.11)', () => {
         const finalPdfOptions = result.pluginSpecificConfig.pdf_options;
         expect(finalPdfOptions.format).to.equal('A4');
         expect(finalPdfOptions.printBackground).to.be.true;
-        
+
         const finalMargin = finalPdfOptions.margin;
         expect(finalMargin.top).to.equal('0.5in');
         expect(finalMargin.bottom).to.equal('1in');

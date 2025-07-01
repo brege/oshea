@@ -46,7 +46,7 @@ module.exports = [
       'plugin',
       'enable',
       'test-collection/plugin-to-enable',
-      '--bypass-validation', 
+      '--bypass-validation',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
@@ -101,7 +101,7 @@ module.exports = [
       expect(exitCode).to.equal(1); // Expect non-zero exit code
       // Assert specific output to stdout and stderr
       expect(stdout).to.match(/Running validation for plugin 'invalid-plugin' before enabling/i); // This message should be on stdout
-      expect(stdout).to.match(/Plugin 'invalid-plugin' is INVALID/i); 
+      expect(stdout).to.match(/Plugin 'invalid-plugin' is INVALID/i);
       expect(stderr).to.match(/Errors:\s+- Missing required file: 'index.js'/i); // Specific validation error in stderr
       expect(stderr).to.match(/Plugin validation failed for 'invalid-plugin'/i); // Error message about overall failure
 

@@ -13,7 +13,7 @@ describe('CollectionsManager enablePlugin (2.1.20)', () => {
             // chalk: { magenta: str => str, blueBright: str => str, }
         };
         const manager = new CollectionsManager({}, mockDependencies);
-        
+
         const listPluginsStub = sinon.stub(manager, 'listAvailablePlugins').resolves([{
             plugin_id: 'my-plugin', collection: 'test-collection', config_path: '/fake/path'
         }]);

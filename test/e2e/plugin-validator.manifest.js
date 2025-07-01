@@ -1,7 +1,7 @@
 // test/e2e/plugin-validator.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
-const os = require('os'); 
+const os = require('os');
 
 function expectStringsOnSameLine(output, strings, expect) {
   expect(
@@ -24,26 +24,26 @@ class DummyHandler {
         const pdfPath = path.join(outputDir, outputFilenameOpt || 'dummy.pdf');
         await fs.writeFile(pdfPath, 'dummy pdf content');
         return pdfPath;
-    } 
-}     
-module.exports = DummyHandler;    
-`;    
-    await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent); 
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: A well-formed plugin.`);            
+    }
+}
+module.exports = DummyHandler;
+`;
+    await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent);
+    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: A well-formed plugin.`);
     await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-    await fs.ensureDir(path.join(pluginDir, '.contract')); 
+    await fs.ensureDir(path.join(pluginDir, '.contract'));
     await fs.ensureDir(path.join(pluginDir, '.contract/test'));
-    await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');    
+    await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
     await fs.writeFile(path.join(pluginDir, `.contract/${pluginName}.schema.json`), `{}`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);     
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);         
-      
-}           
+    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
+    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);
+
+}
 
 module.exports = [
   {
     describe: '2.4.6: Should PASS a validation check for a structurally compliant plugin',
-    args: (pluginDir) => ['plugin', 'validate', pluginDir], 
+    args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
       await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
@@ -61,12 +61,12 @@ module.exports = [
     setup: async (pluginDir) => {
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
     },
-    assert: ({ exitCode, stdout, stderr }, expect) => { 
+    assert: ({ exitCode, stdout, stderr }, expect) => {
       expect(exitCode).to.equal(1);
       expect(/INVALID/.test(stdout)).to.be.true;
-      //expect(stderr).to.include('Missing required file: \'README.md\''); 
+      //expect(stderr).to.include('Missing required file: \'README.md\'');
       //don't use to.include because the error message is different on windows
-      
+
     }
   },
   {
@@ -203,7 +203,7 @@ protocol: v1
     },
     assert: async ({ exitCode, stdout, stderr }, expect) => {
       expect(exitCode).to.equal(1);
-      expect(/INVALID/.test(stdout)).to.be.true; 
+      expect(/INVALID/.test(stdout)).to.be.true;
       expect(stderr).to.match(/Self-activation failed/i);
     }
   },

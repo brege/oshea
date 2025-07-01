@@ -1,7 +1,7 @@
 // plugins/recipe/index.js
 
 class PluginRecipeHandler {
-    constructor(coreUtils) { 
+    constructor(coreUtils) {
         this.handler = new coreUtils.DefaultHandler();
     }
 

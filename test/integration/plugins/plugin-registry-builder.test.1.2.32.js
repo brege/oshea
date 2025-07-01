@@ -30,7 +30,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.32)', () => {
         };
 
         const builder = new PluginRegistryBuilder(
-            '/fake/project', null, null, false, false, null, 
+            '/fake/project', null, null, false, false, null,
             mockCollectionsManager,
             mockDependencies
         );
@@ -53,7 +53,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.32)', () => {
             'x-plugin',
             'zebra-plugin'
         ];
-        
+
         expect(names).to.deep.equal(expectedOrder);
     });
 

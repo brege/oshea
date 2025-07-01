@@ -20,7 +20,7 @@ describe('CollectionsManager listAvailablePlugins (2.1.25)', () => {
             chalk: {}
         };
         const manager = new CollectionsManager({ collRootFromMainConfig: '/fake/collRoot' }, mockDependencies);
-        
+
         // Act
         const result = await manager.listAvailablePlugins('collection-a');
 

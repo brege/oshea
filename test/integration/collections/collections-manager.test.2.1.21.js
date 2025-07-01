@@ -31,7 +31,7 @@ describe('CollectionsManager enablePlugin (2.1.21)', () => {
             expect(error.message).to.contain('is invalid or not found');
             expect(error.message).to.contain(FAKE_CONFIG_PATH);
         }
-        
+
         expect(readManifestStub.called).to.be.false;
     });
 });

@@ -26,7 +26,7 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromFile (1.2.17)', () =>
             collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
-        
+
         // Stub the helper methods to isolate the orchestration logic
         const resolveAliasStub = sinon.stub(builder, '_resolveAlias').returns(RESOLVED_ALIAS_PATH);
         const resolvePluginPathStub = sinon.stub(builder, '_resolvePluginConfigPath').returns(FINAL_PLUGIN_PATH);
@@ -37,7 +37,7 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromFile (1.2.17)', () =>
         // Assert
         // 1. Verify that _resolveAlias was called correctly.
         expect(resolveAliasStub.calledWith('my-alias', './aliased-path', BASE_PATH)).to.be.true;
-        
+
         // 2. Verify that _resolvePluginConfigPath was called with the map of resolved aliases.
         const expectedAliasesMap = { 'my-alias': RESOLVED_ALIAS_PATH };
         expect(resolvePluginPathStub.calledWith(

@@ -19,12 +19,12 @@ describe('CollectionsManager removeCollection (2.1.8)', () => {
             fss: {
                 existsSync: sinon.stub().returns(false),
                 // lstatSync should not be called if existsSync is false, but we stub it just in case
-                lstatSync: sinon.stub() 
+                lstatSync: sinon.stub()
             },
             fsExtra: {
                 rm: sinon.stub().resolves()
             },
-            path: { 
+            path: {
                 join: (a, b) => `${a}/${b}`,
                 sep: '/'
             },
@@ -38,7 +38,7 @@ describe('CollectionsManager removeCollection (2.1.8)', () => {
         };
 
         manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT }, mockDependencies);
-        
+
         // The command will still check the manifest for cleanup
         sinon.stub(manager, '_readEnabledManifest').resolves({ enabled_plugins: [] });
     });

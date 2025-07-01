@@ -17,7 +17,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.9: Custom HTML Template', functio
         this.existsSyncStub.withArgs(templatePath).returns(true);
         this.readFileStub.withArgs(sinon.match.any, 'utf8').resolves(`---\ntitle: Template Test\n---\nContent`);
         this.readFileStub.withArgs(templatePath, 'utf8').resolves(templateContent); // Mock template file read
-        
+
         this.mkdirStub.resolves();
         this.extractFrontMatterStub.returns({ data: { title: 'Template Test' }, content: 'Content' });
         this.substituteAllPlaceholdersStub.returns({ processedFmData: { title: 'Template Test' }, processedContent: 'Content' });

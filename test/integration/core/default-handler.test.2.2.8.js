@@ -49,7 +49,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.8: CSS File Resolution and Mergin
         this.ensureAndPreprocessHeadingStub
             .withArgs('Hello world.', 'Document with Custom CSS', false)
             .returns('# Document with Custom CSS\n\nHello world.');
-        
+
         this.renderMarkdownToHtmlStub.returns(expectedRenderedHtml);
 
         // CONFIGURE generateSlug STUB for filename generation

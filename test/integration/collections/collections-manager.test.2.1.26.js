@@ -25,7 +25,7 @@ describe('CollectionsManager listAvailablePlugins (2.1.26)', () => {
     it('should return an empty array for a collection with no directories', async () => {
         // Arrange
         mockDependencies.fs.readdir.withArgs('/fake/collRoot/empty-collection', { withFileTypes: true }).resolves([]);
-        
+
         // Act
         const result = await manager.listAvailablePlugins('empty-collection');
 

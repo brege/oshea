@@ -1,4 +1,4 @@
-// scripts/repo-health/fix-require-paths/require-catalogue.js
+// scripts/refactor/fix-require-paths/require-catalogue.js
 
 // --- Configuration ---
 const path = require('path');
@@ -38,7 +38,7 @@ function getAllJsFiles(dir, fileList = [], excludeDirs = []) {
     for (const entry of fs.readdirSync(fullDir, { withFileTypes: true })) {
         const relativeEntryPath = path.join(dir, entry.name);
         if (excludeDirs.some(ex => relativeEntryPath.startsWith(ex))) continue;
-        
+
         const fullEntryPath = path.join(REPO_ROOT, relativeEntryPath);
         if (entry.isDirectory()) {
             getAllJsFiles(relativeEntryPath, fileList, excludeDirs);

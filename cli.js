@@ -9,11 +9,11 @@ const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
 
 if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
-    const { getSuggestions } = require('./src/completion/engine'); 
+    const { getSuggestions } = require('./src/completion/engine');
 
     const completionArgv = {
         _: [],
-        'get-yargs-completions': true 
+        'get-yargs-completions': true
     };
     let currentWord = '';
 
@@ -36,7 +36,7 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
 
     if (completionArgv._.length > 0 && completionArgv._[completionArgv._.length - 1] === currentWord && !currentWord.startsWith('-')) {
         completionArgv._.pop();
-    } 
+    }
 
     const suggestions = getSuggestions(completionArgv, currentWord);
     console.log(suggestions.join('\n'));
@@ -44,8 +44,8 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
 }
 
 
-const os = require('os'); 
-const fsp = require('fs').promises; 
+const os = require('os');
+const fsp = require('fs').promises;
 const chalk = require('chalk');
 const { spawn, execSync } = require('child_process');
 
@@ -229,9 +229,9 @@ async function executeGeneration(args, configResolver) {
 async function main() {
     let managerInstance;
 
-    const argvBuilder = yargs(hideBin(process.argv)) 
+    const argvBuilder = yargs(hideBin(process.argv))
         .parserConfiguration({ 'short-option-groups': false })
-        .scriptName("md-to-pdf") 
+        .scriptName("md-to-pdf")
         .usage("Usage: $0 <command_or_markdown_file> [options]")
         .option('config', {
             describe: 'path to a project-specific YAML config file',
@@ -260,13 +260,13 @@ async function main() {
                 collRootFromMainConfig: collRootFromMainConfig,
                 collRootCliOverride: collRootCliOverride
             });
-            
+
             argv.manager = managerInstance;
 
             const configResolver = new ConfigResolver(
                 argv.config,
                 argv.factoryDefaults,
-                false, 
+                false,
                 { collRoot: managerInstance.collRoot }
             );
             argv.configResolver = configResolver;
@@ -284,7 +284,7 @@ async function main() {
             handler: (args) => {
                 const staticCacheScript = path.resolve(__dirname, 'scripts', 'completion', 'generate-completion-cache.js');
                 const dynamicCacheScript = path.resolve(__dirname, 'scripts', 'completion', 'generate-completion-dynamic-cache.js');
-                
+
                 try {
                     execSync(`node "${staticCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
                     execSync(`node "${dynamicCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
@@ -308,7 +308,7 @@ async function main() {
                     }
                     args.isLazyLoad = true;
                     await commonCommandHandler(args, executeConversion, 'convert (implicit)');
-                } else { 
+                } else {
                     argvBuilder.showHelp();
                 }
             }

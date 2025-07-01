@@ -1,4 +1,4 @@
-// scripts/repo-health/docs-link-checker.mjs
+// scripts/docs/docs-link-checker.mjs
 
 import fs from 'fs';
 import path from 'path';

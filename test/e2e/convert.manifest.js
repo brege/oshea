@@ -16,7 +16,7 @@ async function checkPdf(outputDir, expectedFilename, minSize = 1000) {
 }
 
 module.exports = [
-  { 
+  {
     describe: '3.1.1: (Happy Path) Successfully converts a basic markdown file to PDF using the default plugin',
     setup: async (sandboxDir) => {
       // Copy the simple.md fixture into the sandbox

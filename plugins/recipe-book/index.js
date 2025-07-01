@@ -33,12 +33,12 @@ class RecipeBookHandler {
         if (!fss.existsSync(recipesBaseDir)) {
             throw new Error(`Recipe source directory not found: ${recipesBaseDir}`);
         }
-        
+
         await fs.mkdir(outputDir, { recursive: true });
 
         const outputPdfFilename = outputFilenameOpt || pluginSpecificConfig.default_filename || "recipe-book.pdf";
         const outputPdfPath = path.join(outputDir, outputPdfFilename);
-        
+
         let combinedMarkdown = "";
         const collectedRecipeDetails = [];
 
@@ -79,10 +79,10 @@ class RecipeBookHandler {
             console.log(`  Adding to book: ${recipeDetail.filePath}`);
             const rawRecipeContent = await fs.readFile(recipeDetail.filePath, 'utf8');
             const { data: frontMatter, content: contentWithoutFm } = extractFrontMatter(rawRecipeContent);
-            
+
             const patternsToRemove = [
-                ...(globalConfig.global_remove_shortcodes || []), 
-                ...(pluginSpecificConfig.remove_shortcodes_patterns || []) 
+                ...(globalConfig.global_remove_shortcodes || []),
+                ...(pluginSpecificConfig.remove_shortcodes_patterns || [])
             ];
             const cleanedContent = removeShortcodes(contentWithoutFm, patternsToRemove);
 
@@ -90,12 +90,12 @@ class RecipeBookHandler {
             const processedRecipeMarkdown = ensureAndPreprocessHeading(
                 cleanedContent,
                 recipeTitle,
-                true 
+                true
             );
             combinedMarkdown += processedRecipeMarkdown;
             combinedMarkdown += "\n\n<div style=\"page-break-before: always;\"></div>\n\n";
         }
-        
+
         const bookPdfOptions = {
             ...(globalConfig.global_pdf_options || {}),
             ...(pluginSpecificConfig.pdf_options || {}),

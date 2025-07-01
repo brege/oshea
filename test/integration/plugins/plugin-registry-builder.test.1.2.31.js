@@ -29,7 +29,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.31)', () => {
         };
 
         const builder = new PluginRegistryBuilder(
-            '/fake/project', null, null, false, false, null, 
+            '/fake/project', null, null, false, false, null,
             mockCollectionsManager,
             mockDependencies
         );
@@ -48,14 +48,14 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.31)', () => {
         // Verify both instances are present in the list
         expect(instanceOne).to.not.be.undefined;
         expect(instanceTwo).to.not.be.undefined;
-        
+
         // Verify they are correctly identified
         expect(instanceOne.status).to.equal('Enabled (CM)');
         expect(instanceTwo.status).to.equal('Enabled (CM)');
         expect(instanceOne.cmPluginId).to.equal('multi-plugin');
         expect(instanceTwo.cmPluginId).to.equal('multi-plugin');
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

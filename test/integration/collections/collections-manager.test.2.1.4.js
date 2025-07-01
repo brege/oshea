@@ -21,13 +21,13 @@ describe('CollectionsManager addCollection (2.1.4)', () => {
         mockDependencies = {
             // --- Key for this test: Simulate that the directory already exists ---
             fss: {
-                existsSync: sinon.stub().returns(true) 
+                existsSync: sinon.stub().returns(true)
             },
             fs: {
                 mkdir: sinon.stub().resolves()
             },
-            path: { 
-                join: (a, b) => `${a}/${b}` 
+            path: {
+                join: (a, b) => `${a}/${b}`
             },
             cmUtils: {
                 deriveCollectionName: sinon.stub().returns(DERIVED_COLLECTION_NAME)
@@ -43,7 +43,7 @@ describe('CollectionsManager addCollection (2.1.4)', () => {
 
         // Instantiate the manager with our mocked dependencies
         manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT }, mockDependencies);
-        
+
         // Stub the internal methods that should NOT be called if the logic is correct
         spawnGitStub = sinon.stub(manager, '_spawnGitProcess');
         writeMetaStub = sinon.stub(manager, '_writeCollectionMetadata');

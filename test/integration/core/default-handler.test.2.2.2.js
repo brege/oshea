@@ -11,7 +11,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.2: Shortcode Removal', function()
     const markdownWithShortcodes = `---\ntitle: Document with Shortcodes\n---\nThis is some content with a {{< customShortcode param="value" >}} inline shortcode and a\n\n{{% blockShortcode %}}\nBlock content here\n{{% /blockShortcode %}\n\nfinal paragraph.`;
     // Expected content after shortcode removal
     const cleanedMarkdownContentExpected = `This is some content with a  inline shortcode and a\n\n\n\nfinal paragraph.`; // This is the expected *body content* after FM and shortcodes are removed
-    
+
     // Patterns for shortcode removal
     const combinedShortcodePatterns = [
         '\\{\\{<\\s*[^>]*>\\}\\}', // Matches {{< ... >}} inline shortcodes
@@ -36,9 +36,9 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.2: Shortcode Removal', function()
             processedFmData: { title: 'Document with Shortcodes', CurrentDateISO: '2025-06-05', CurrentDateFormatted: 'June 5, 2025' },
             processedContent: `This is some content with a {{< customShortcode param="value" >}} inline shortcode and a\n\n{{% blockShortcode %}}\nBlock content here\n{{% /blockShortcode %}}\n\nfinal paragraph.`
         });
-        
+
         // Ensure removeShortcodesStub calls the real function from markdown_utils
-        this.removeShortcodesStub.callThrough(); 
+        this.removeShortcodesStub.callThrough();
         this.generateSlugStub.callThrough(); // Ensure generateSlug also calls through for filename generation
 
         // Stubs for functions called after shortcode removal, ensuring they process the expected content.
@@ -84,7 +84,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.2: Shortcode Removal', function()
         expect(this.mkdirStub.calledWith(outputDir, { recursive: true })).to.be.true;
         expect(this.extractFrontMatterStub.calledOnce).to.be.true;
         expect(this.substituteAllPlaceholdersStub.calledOnce).to.be.true;
-        
+
         const removeShortcodesCallArgs = this.removeShortcodesStub.getCall(0).args;
         expect(removeShortcodesCallArgs[0]).to.equal(this.extractFrontMatterStub.getCall(0).returnValue.content);
         expect(removeShortcodesCallArgs[1]).to.deep.equal(combinedShortcodePatterns);
@@ -93,7 +93,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.2: Shortcode Removal', function()
         expect(this.ensureAndPreprocessHeadingStub.calledOnce).to.be.true;
         expect(this.renderMarkdownToHtmlStub.calledOnce).to.be.true;
         expect(this.generatePdfStub.calledOnce).to.be.true;
-        
+
         // Detailed assertion for arguments passed to generatePdf
         const [
             actualHtmlContent,

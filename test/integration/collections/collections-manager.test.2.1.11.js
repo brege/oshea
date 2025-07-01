@@ -34,7 +34,7 @@ describe('CollectionsManager updateCollection (2.1.11)', () => {
         // Assert
         expect(result.success).to.be.false;
         expect(result.message).to.equal('Collection "non-existent-collection" not found.');
-        
+
         // Ensure it exited early and did not attempt to read metadata
         expect(readMetaStub.called).to.be.false;
     });

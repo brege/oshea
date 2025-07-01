@@ -17,7 +17,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.4: Markdown-It Options Applicatio
         this.substituteAllPlaceholdersStub.returns({ processedFmData: { title: 'MDIT Options Test' }, processedContent: 'line1\nline2' });
         this.removeShortcodesStub.returns('line1\nline2');
         this.ensureAndPreprocessHeadingStub.returns('# MDIT Options Test\n\nline1\nline2');
-        
+
         // Stub the target function to check its arguments
         this.renderMarkdownToHtmlStub.returns('<p>dummy html</p>');
 
@@ -37,7 +37,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.4: Markdown-It Options Applicatio
             inject_fm_title_as_h1: true,
             markdown_it_options: markdownItOptions
         };
-        
+
         // Execute the handler
         await defaultHandler.generate(data, pluginSpecificConfig, {}, '/output', null);
 

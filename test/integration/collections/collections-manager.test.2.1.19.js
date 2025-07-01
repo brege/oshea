@@ -8,7 +8,7 @@ describe('CollectionsManager enablePlugin (2.1.19)', () => {
     it('should throw an error when trying to enable a non-existent plugin', async () => {
         // Arrange
         const manager = new CollectionsManager({}, { chalk: { magenta: str => str, blueBright: str => str }});
-        
+
         // --- Key for this test: The plugin is not in the list of available plugins ---
         sinon.stub(manager, 'listAvailablePlugins').resolves([
             { plugin_id: 'some-other-plugin', collection: 'test-collection' }
@@ -23,7 +23,7 @@ describe('CollectionsManager enablePlugin (2.1.19)', () => {
             expect(error).to.be.an.instanceOf(Error);
             expect(error.message).to.contain('is not available or does not exist');
         }
-        
+
         // Verify it failed early
         expect(readManifestStub.called).to.be.false;
     });

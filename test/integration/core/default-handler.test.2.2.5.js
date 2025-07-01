@@ -11,7 +11,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.5: Math Rendering Integration', f
     const markdownWithMath = `---\ntitle: Math Document\n---\nThis document contains inline math $a^2 + b^2 = c^2$ and block math:\n\n$$ \\int_0^1 x^2 dx = \\frac{1}{3} $$`;
     // The actual HTML output for math would contain complex KaTeX spans,
     // here we use a simplified representation for stubbing purposes.
-    const renderedHtmlWithMath = `<h1>Math Document</h1><p>This document contains inline math <span class="katex">...</span> and block math:</p>\n<p><span class="katex">...</span></p>`; 
+    const renderedHtmlWithMath = `<h1>Math Document</h1><p>This document contains inline math <span class="katex">...</span> and block math:</p>\n<p><span class="katex">...</span></p>`;
     const expectedMathCssContent = ['/* KaTeX CSS content from getMathCssContent stub */'];
 
     beforeEach(function() {
@@ -35,7 +35,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.5: Math Rendering Integration', f
         this.ensureAndPreprocessHeadingStub
             .withArgs(`This document contains inline math $a^2 + b^2 = c^2$ and block math:\n\n$$ \\int_0^1 x^2 dx = \\frac{1}{3} $$`, 'Math Document', false)
             .returns('# Math Document\n\n' + `This document contains inline math $a^2 + b^2 = c^2$ and block math:\n\n$$ \\int_0^1 x^2 dx = \\frac{1}{3} $$`);
-        
+
         // renderMarkdownToHtml will be called with the math config
         this.renderMarkdownToHtmlStub.returns(renderedHtmlWithMath);
 
@@ -84,7 +84,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.5: Math Rendering Integration', f
         expect(this.removeShortcodesStub.calledOnce).to.be.true;
         expect(this.ensureAndPreprocessHeadingStub.calledOnce).to.be.true;
         expect(this.renderMarkdownToHtmlStub.calledOnce).to.be.true;
-        
+
         // Assertion for math_integration.getMathCssContent
         // This verifies that DefaultHandler correctly requests CSS when math is enabled.
         expect(this.getMathCssContentStub.calledOnce).to.be.true;
@@ -101,9 +101,9 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.5: Math Rendering Integration', f
 
         expect(actualHtmlContent).to.equal(renderedHtmlWithMath);
         expect(actualOutputPdfPath).to.equal(expectedOutputPdfPath);
-        
+
         // even if globalConfig.global_pdf_options is empty.
-        expect(actualPdfOptions).to.deep.equal({ margin: {} }); 
+        expect(actualPdfOptions).to.deep.equal({ margin: {} });
         expect(actualCssContentArray).to.deep.equal(expectedMathCssContent); // Ensure math CSS is passed to pdf_generator
 
         // Verify the function returns the correct output path

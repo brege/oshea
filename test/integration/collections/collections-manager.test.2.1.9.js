@@ -22,7 +22,7 @@ describe('CollectionsManager removeCollection (2.1.9)', () => {
                 // --- Key for this test: Simulate that fs-extra fails to remove the directory ---
                 rm: sinon.stub().rejects(new Error('EPERM: permission denied'))
             },
-            path: { 
+            path: {
                 join: (a, b) => `${a}/${b}`,
                 sep: '/'
             },

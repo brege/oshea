@@ -18,7 +18,7 @@ describe('PluginRegistryBuilder buildRegistry (1.2.26)', () => {
             collRoot: '/fake/coll-root'
         };
         const builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
-        
+
         // Spy on the method that should NOT be called
         const getFromFileSpy = sinon.spy(builder, '_getPluginRegistrationsFromFile');
         let error = null;

@@ -25,12 +25,12 @@ module.exports = [
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully cloned/i);
-      
+
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
       const collectionPath = path.join(collRootDir, 'brege-plugins-test');
       // A more robust check: verify that the .git directory was created by the clone.
       const gitConfigPath = path.join(collectionPath, '.git', 'config');
-      
+
       const collectionExists = await fs.pathExists(collectionPath);
       const gitConfigExists = await fs.pathExists(gitConfigPath);
 
@@ -61,7 +61,7 @@ module.exports = [
 
       const collectionExists = await fs.pathExists(collectionPath);
       const pluginFileExists = await fs.pathExists(pluginConfigPath);
-      
+
       expect(collectionExists).to.be.true;
       expect(pluginFileExists).to.be.true;
     },

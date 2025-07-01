@@ -28,11 +28,11 @@ describe('ConfigResolver getEffectiveConfig (1.1.5)', () => {
             fs: {
                 existsSync: sinon.stub().returns(true),
                 statSync: sinon.stub().returns({ isDirectory: () => true, isFile: () => false }),
-                readFileSync: sinon.stub().returns('{}') 
+                readFileSync: sinon.stub().returns('{}')
             },
             deepMerge: (a, b) => ({...a, ...b})
         };
-        
+
         mockDependencies.fs.existsSync.withArgs(CONVENTIONAL_CONFIG_PATH).returns(true);
 
         resolver = new ConfigResolver(null, false, false, mockDependencies);

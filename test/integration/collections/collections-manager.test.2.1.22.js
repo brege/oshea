@@ -35,7 +35,7 @@ describe('CollectionsManager disablePlugin (2.1.22)', () => {
 
         // Assert
         expect(result.success).to.be.true;
-        
+
         // Verify that a new manifest was written
         expect(writeManifestStub.calledOnce).to.be.true;
 

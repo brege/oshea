@@ -26,7 +26,7 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.11)', () => {
 
         // 3. The directory contents include an alternative config file.
         readdirSyncStub.withArgs(PLUGIN_DIR_PATH).returns(['index.js', ALTERNATIVE_CONFIG_NAME]);
-        
+
         const mockDependencies = {
             os: { homedir: () => '/fake/home', platform: () => 'linux' },
             path: {
@@ -54,7 +54,7 @@ describe('PluginRegistryBuilder _resolvePluginConfigPath (1.2.11)', () => {
         // Assert
         expect(result).to.equal(ALTERNATIVE_CONFIG_PATH);
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

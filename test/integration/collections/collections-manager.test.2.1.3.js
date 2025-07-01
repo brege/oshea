@@ -2,7 +2,7 @@
 const { expect } = require('chai');
 const sinon = require('sinon');
 // We still need the real modules to configure the stubs that setup.js creates on them.
-const fs = require('fs'); 
+const fs = require('fs');
 const fsPromises = require('fs').promises;
 const CollectionsManager = require('../../../src/collections');
 
@@ -40,7 +40,7 @@ describe('CollectionsManager addCollection (2.1.3)', () => {
         };
 
         manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT }, mockDependencies);
-        
+
         spawnGitStub = sinon.stub(manager, '_spawnGitProcess').resolves({ success: true });
         writeMetaStub = sinon.stub(manager, '_writeCollectionMetadata').resolves();
     });
@@ -55,15 +55,15 @@ describe('CollectionsManager addCollection (2.1.3)', () => {
 
         // Assert
         expect(result).to.equal(FAKE_COLLECTION_PATH);
-        
+
         // Assert against the stubs, which are now the globally managed ones
         expect(fsPromises.mkdir.calledWith(FAKE_COLL_ROOT, { recursive: true })).to.be.true;
         expect(fs.existsSync.calledWith(FAKE_COLLECTION_PATH)).to.be.true;
 
         const expectedGitArgs = ['clone', FAKE_REPO_URL, FAKE_COLLECTION_PATH];
         expect(spawnGitStub.calledWith(expectedGitArgs)).to.be.true;
-        
-        const expectedMetadataMatch = { 
+
+        const expectedMetadataMatch = {
             source: FAKE_REPO_URL,
             name: DERIVED_COLLECTION_NAME,
         };

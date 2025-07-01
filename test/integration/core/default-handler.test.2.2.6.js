@@ -10,7 +10,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.6: MarkdownIt Plugins (Anchor & T
     let defaultHandler;
     const markdownContentWithHeadings = `---\ntitle: Document with TOC & Anchors\n---\n# Main Heading\n\n## Section One\n\n### Subsection A\n\n## Section Two\n\n{{toc}}`;
     // Simplified HTML representation after TOC and anchor processing (exact content not verified, just arguments passed)
-    const expectedRenderedHtml = `<h1>Main Heading</h1><h2>Section One</h2><h3>Subsection A</h3><h2>Section Two</h2><p>Here is a TOC:</p>\n<ul><li><a href="#section-one">Section One</a></li><li><a href="#subsection-a">Subsection A</a></li><li><a href="#section-two">Section Two</a></li></ul>`; 
+    const expectedRenderedHtml = `<h1>Main Heading</h1><h2>Section One</h2><h3>Subsection A</h3><h2>Section Two</h2><p>Here is a TOC:</p>\n<ul><li><a href="#section-one">Section One</a></li><li><a href="#subsection-a">Subsection A</a></li><li><a href="#section-two">Section Two</a></li></ul>`;
 
     beforeEach(function() {
         defaultHandler = this.defaultHandler;
@@ -33,7 +33,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.6: MarkdownIt Plugins (Anchor & T
         this.ensureAndPreprocessHeadingStub
             .withArgs(`# Main Heading\n\n## Section One\n\n### Subsection A\n\n## Section Two\n\n{{toc}}`, 'Document with TOC & Anchors', false)
             .returns(`# Document with TOC & Anchors\n\n# Main Heading\n\n## Section One\n\n### Subsection A\n\n## Section Two\n\n{{toc}}`);
-        
+
         // This is the key stub for this test: verify arguments passed to it
         this.renderMarkdownToHtmlStub.returns(expectedRenderedHtml);
 
@@ -85,7 +85,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.6: MarkdownIt Plugins (Anchor & T
         expect(this.substituteAllPlaceholdersStub.calledOnce).to.be.true;
         expect(this.removeShortcodesStub.calledOnce).to.be.true;
         expect(this.ensureAndPreprocessHeadingStub.calledOnce).to.be.true;
-        
+
         // Assert that renderMarkdownToHtml was called with the correct TOC and Anchor options
         expect(this.renderMarkdownToHtmlStub.calledOnce).to.be.true;
         const [
@@ -101,7 +101,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.6: MarkdownIt Plugins (Anchor & T
         expect(actualMathConfig).to.deep.equal({ enabled: false }); // Math was disabled
 
         // Assert that getMathCssContent was NOT called because math is disabled
-        expect(this.getMathCssContentStub.notCalled).to.be.true; 
+        expect(this.getMathCssContentStub.notCalled).to.be.true;
 
         // Assertions for PDF generation
         expect(this.generatePdfStub.calledOnce).to.be.true;
@@ -114,7 +114,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.6: MarkdownIt Plugins (Anchor & T
 
         expect(actualHtmlContent).to.equal(expectedRenderedHtml);
         expect(actualOutputPdfPath).to.equal(expectedOutputPdfPath);
-        expect(actualPdfOptions).to.deep.equal({ anchor_options: anchorOptions, margin: {} }); 
+        expect(actualPdfOptions).to.deep.equal({ anchor_options: anchorOptions, margin: {} });
         expect(actualCssContentArray).to.deep.equal([]); // No CSS files configured for this test
 
         // Verify the function returns the correct output path

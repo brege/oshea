@@ -32,7 +32,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.8)', () => {
                 configPath: FAKE_CONFIG_PATH
             }
         };
-        
+
         const loadBaseConfigStub = sinon.stub(resolver, '_loadPluginBaseConfig');
 
         // Act & Assert
@@ -43,7 +43,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.8)', () => {
             expect(error).to.be.an.instanceOf(Error);
             expect(error.message).to.contain(`not found at registered path: '${FAKE_CONFIG_PATH}'`);
         }
-        
+
         expect(loadBaseConfigStub.called).to.be.false;
     });
 });

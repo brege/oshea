@@ -10,7 +10,7 @@ describe('PluginRegistryBuilder _resolveAlias (1.2.5)', () => {
         // Arrange
         const FAKE_BASE_PATH = '/path/to/config/dir';
         const FAKE_RESOLVED_PATH = '/path/to/config/dir/relative/path';
-        
+
         const mockDependencies = {
             path: {
                 isAbsolute: sinon.stub().returns(false),

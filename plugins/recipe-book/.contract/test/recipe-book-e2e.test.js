@@ -13,7 +13,7 @@ describe('Recipe Book Plugin E2E Test (Generate Command)', function () {
     this.timeout(20000);
 
     let harness;
-    const hugoExamplePath = path.resolve(__dirname, '../../../../test/fixtures/hugo-example'); 
+    const hugoExamplePath = path.resolve(__dirname, '../../../../test/fixtures/hugo-example');
 
     beforeEach(async () => {
         harness = new TestHarness();

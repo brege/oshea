@@ -1,6 +1,6 @@
 // src/cli/commands/collection/removeCmd.js
 const chalk = require('chalk');
-const path = require('path'); 
+const path = require('path');
 
 module.exports = {
   command: 'remove <collection_name>',
@@ -11,7 +11,7 @@ module.exports = {
         describe: 'name of the collection to remove',
         type: 'string',
         demandOption: true,
-        completionKey: 'downloadedCollections' 
+        completionKey: 'downloadedCollections'
       })
       .option('force', {
         alias: 'f',
@@ -34,14 +34,14 @@ module.exports = {
     }
     try {
       await manager.removeCollection(args.collection_name, { force: args.force });
-      
-      const cliPath = path.resolve(__dirname, '../../../../cli.js'); 
+
+      const cliPath = path.resolve(__dirname, '../../../../cli.js');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
-      } catch (error) {                                                                                 
-        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));                                                                                                 
-      }   
+      } catch (error) {
+        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
+      }
 
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'collection remove' command: ${error.message}`));

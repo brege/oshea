@@ -21,8 +21,8 @@ function createMathIntegration(dependencies = {}) {
      */
     function configureMarkdownItForMath(mdInstance, mathConfig) {
         if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
-            let currentKatexPluginModule = katexPluginModule; 
-            
+            let currentKatexPluginModule = katexPluginModule;
+
             let pluginFunction = currentKatexPluginModule;
 
             if (currentKatexPluginModule && typeof currentKatexPluginModule.default === 'function') {
@@ -32,11 +32,11 @@ function createMathIntegration(dependencies = {}) {
                 console.error("ERROR: Actual loaded module was:", currentKatexPluginModule);
                 return;
             }
-            
+
             const currentKatexOptions = mathConfig.katex_options || {};
-            
+
             try {
-                mdInstance.use(pluginFunction, currentKatexOptions); 
+                mdInstance.use(pluginFunction, currentKatexOptions);
                 console.log("INFO: KaTeX math rendering enabled for markdown-it (md.use successful).");
             } catch (useError) {
                 console.error("ERROR: mdInstance.use(katexPlugin) failed directly:", useError);
@@ -55,11 +55,11 @@ function createMathIntegration(dependencies = {}) {
      */
     async function getMathCssContent(mathConfig) {
         if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
-            console.log(`[math_integration.js] getMathCssContent: Checking for KaTeX CSS at ${KATEX_CSS_PATH}`); 
+            console.log(`[math_integration.js] getMathCssContent: Checking for KaTeX CSS at ${KATEX_CSS_PATH}`);
 
             if (fss.existsSync(KATEX_CSS_PATH)) {
                 try {
-                    const cssContent = await fs_promises.readFile(KATEX_CSS_PATH, 'utf8'); 
+                    const cssContent = await fs_promises.readFile(KATEX_CSS_PATH, 'utf8');
                     console.log("INFO: KaTeX CSS loaded.");
                     return [cssContent];
                 } catch (error) {

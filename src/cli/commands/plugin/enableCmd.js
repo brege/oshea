@@ -15,7 +15,7 @@ module.exports = {
         describe: 'plugin to enable (e.g., "collection/plugin_id"), \n or collection name (with --all)',
         type: 'string',
         demandOption: true,
-        completionKey: 'availablePlugins' 
+        completionKey: 'availablePlugins'
       })
       .option('name', {
         alias: 'as',
@@ -75,7 +75,7 @@ you must re-run this command to enable any new plugins.`);
         } catch (e) {
             if(process.env.DEBUG_CM === 'true') console.warn(chalk.yellow(`  WARN: Could not read metadata for prefix fallback heuristic: ${e.message}`));
         }
-        
+
         if (args.prefix) {
           console.log(`  Using custom prefix for invoke names: ${chalk.yellow(args.prefix)}`);
         } else if (args.noPrefix) {
@@ -87,7 +87,7 @@ you must re-run this command to enable any new plugins.`);
         await manager.enableAllPluginsInCollection(args.target, {
           prefix: args.prefix,
           noPrefix: args.noPrefix,
-          isCliCall: true, 
+          isCliCall: true,
           originalSourceForPrefixFallback,
           bypassValidation: args.bypassValidation
         });
@@ -100,23 +100,23 @@ you must re-run this command to enable any new plugins.`);
         if (args.prefix || args.noPrefix){
             console.warn(chalk.yellow("WARN: --prefix and --no-prefix options are ignored when not using --all."))
         }
-        const result = await manager.enablePlugin(args.target, { 
+        const result = await manager.enablePlugin(args.target, {
           name: args.name,
           bypassValidation: args.bypassValidation
         });
         if (result && result.success) {
-            const finalInvokeName = result.invoke_name || args.target.split('/')[1]; 
+            const finalInvokeName = result.invoke_name || args.target.split('/')[1];
             console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));
         }
       }
-      
-      // Trigger tab-completion cache regeneration after successful update operation 
-      const cliPath = path.resolve(__dirname, '../../../../cli.js'); 
+
+      // Trigger tab-completion cache regeneration after successful update operation
+      const cliPath = path.resolve(__dirname, '../../../../cli.js');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
-      } catch (error) {                                                                                 
-        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));                                                                                                 
+      } catch (error) {
+        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
       }
 
     } catch (error) {

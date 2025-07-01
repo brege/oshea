@@ -19,7 +19,7 @@ class ConfigResolver {
             PluginRegistryBuilder, MainConfigLoader, PluginConfigLoader, AssetResolver
         };
         this.dependencies = { ...defaultDependencies, ...dependencies };
-        
+
         this.projectRoot = this.dependencies.path.resolve(__dirname, '..', '..');
         this._useFactoryDefaultsOnly = useFactoryDefaultsOnly;
         this._isLazyLoadMode = isLazyLoadMode;
@@ -38,7 +38,7 @@ class ConfigResolver {
         this.primaryMainConfig = null;
         this.primaryMainConfigPathActual = null;
         this.primaryMainConfigLoadReason = null;
-        
+
         this.resolvedCollRoot = this.dependencies.collRoot || null;
 
         this.ajv = new Ajv({ allErrors: true });
@@ -78,7 +78,7 @@ class ConfigResolver {
         const baseSchema = this.ajv.getSchema('base-plugin.schema.json').schema;
         let specificSchema = {};
         const pluginSchemaPath = this.dependencies.path.join(this.dependencies.path.dirname(pluginConfigPath), `${this.dependencies.path.basename(pluginConfigPath, '.config.yaml')}.schema.json`);
-    
+
         if (this.dependencies.fs.existsSync(pluginSchemaPath)) {
             try {
                 specificSchema = JSON.parse(this.dependencies.fs.readFileSync(pluginSchemaPath, 'utf8'));
@@ -86,9 +86,9 @@ class ConfigResolver {
                 console.warn(`WARN: Could not read or parse schema file at ${pluginSchemaPath}. Error: ${e.message}`);
             }
         }
-    
+
         const strictSchema = this.dependencies.deepMerge(baseSchema, specificSchema);
-        
+
         const objectsToRestrict = ['pdf_options', 'params', 'math', 'toc_options'];
         if (strictSchema.properties) {
             objectsToRestrict.forEach(key => {
@@ -97,10 +97,10 @@ class ConfigResolver {
                 }
             });
         }
-    
+
         const validate = this.ajv.compile(strictSchema);
         const isValid = validate(configData);
-    
+
         if (!isValid) {
             const typoErrors = validate.errors.filter(e => e.keyword === 'additionalProperties');
             const otherErrors = validate.errors.filter(e => e.keyword !== 'additionalProperties');
@@ -114,7 +114,7 @@ class ConfigResolver {
                 });
                 console.warn(`  INFO: To see the final applied settings, run 'md-to-pdf config --plugin ${pluginName}'`);
             }
-            
+
             if (otherErrors.length > 0) {
                 console.warn(`WARN: Configuration for plugin '${pluginName}' has validation errors:`);
                 otherErrors.forEach(err => {
@@ -147,17 +147,17 @@ class ConfigResolver {
         );
 
         const currentProjectManifestPath = project.path;
-        
+
         const registryBuilder = new this.dependencies.PluginRegistryBuilder(
             this.projectRoot, xdg.baseDir, currentProjectManifestPath,
             this.useFactoryDefaultsOnly,
             this.isLazyLoadMode,
             this.primaryMainConfigLoadReason,
-            null, 
+            null,
             { collRoot: this.resolvedCollRoot }
         );
         this.mergedPluginRegistry = await registryBuilder.buildRegistry();
-        
+
         this._initialized = true;
 
         if (process.env.DEBUG) {
@@ -185,9 +185,9 @@ class ConfigResolver {
         }
         try {
             const rawConfig = await this.dependencies.loadYamlConfig(configFilePath);
-            
+
             this._validatePluginConfig(pluginName, rawConfig, configFilePath);
-            
+
             const initialCssPaths = this.dependencies.AssetResolver.resolveAndMergeCss(
                 rawConfig.css_files, assetsBasePath, [], false,
                 pluginName, configFilePath

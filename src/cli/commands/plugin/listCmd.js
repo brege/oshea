@@ -28,7 +28,7 @@ function displayPluginEntry(plugin) {
         console.log(`    CM Invoke Name: ${chalk.yellow(plugin.cmInvokeName)}`);
     }
   }
-  
+
   console.log(`    Description: ${plugin.description}`);
   let sourceDisplayMessage = plugin.registrationSourceDisplay;
   if (plugin.status === 'Enabled (CM)' && plugin.cmCollection && plugin.cmPluginId) {
@@ -64,7 +64,7 @@ function displayShortPluginEntry(plugin, statusColWidth, nameColWidth) {
   }
 
   const S_NAME = chalk.yellow(plugin.name);
-  
+
   let S_CM_ORIGIN = chalk.gray("n/a");
   if (plugin.cmCollection && plugin.cmPluginId) {
     S_CM_ORIGIN = `${chalk.magenta(plugin.cmCollection)}/${chalk.magenta(plugin.cmPluginId)}`;
@@ -147,7 +147,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
           return isEnabledCM || isRegisteredTraditional;
         });
         if (results.length === 0) console.log(chalk.yellow(`No plugins are currently enabled${collectionFilter ? ` matching filter '${collectionFilter}'` : ''}.`));
-      
+
       } else if (args.available) {
         headerMessage = chalk.blue(`\nAvailable CM-managed plugins${inCollectionMsg}:`);
         results = allPluginDetails.filter(p =>
@@ -155,7 +155,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
           p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
         );
         if (results.length === 0) console.log(chalk.yellow(`No CM-managed plugins found${inCollectionMsg}.`));
-      
+
       } else if (args.disabled) {
         headerMessage = chalk.blue(`\nDisabled (but available) CM-managed plugins${inCollectionMsg}:`);
         results = allPluginDetails.filter(p =>
@@ -164,14 +164,14 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
         );
         if (results.length === 0) console.log(chalk.yellow(`No disabled (but available) CM-managed plugins found${inCollectionMsg}.`));
 
-      } else { 
+      } else {
         results = allPluginDetails.filter(p =>
           (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)' || (args.short && p.status === 'Available (CM)')
         );
-         if (collectionFilter && args.short) { 
+         if (collectionFilter && args.short) {
             results = results.filter(p => p.cmCollection === collectionFilter || !(p.cmCollection)) ;
         }
-        
+
         if (!args.short) {
             const usablePluginsCount = results.filter(p => (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)').length;
             headerMessage = chalk.blue(`\nFound ${usablePluginsCount} plugin(s) usable by md-to-pdf:`);
@@ -194,7 +194,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
                 p.status === 'Available (CM)' ? chalk.gray.bold(p.status) : p.status || 'N/A'
             );
             if (plainStatus.length > maxStatusWidth) maxStatusWidth = plainStatus.length;
-            const plainName = stripAnsi(chalk.yellow(p.name)); 
+            const plainName = stripAnsi(chalk.yellow(p.name));
             if (plainName.length > maxNameWidth) maxNameWidth = plainName.length;
           });
           console.log(chalk.bold(`  ${'STATUS'.padEnd(maxStatusWidth)} | ${'NAME/INVOKE KEY'.padEnd(maxNameWidth)} | CM ORIGIN`));

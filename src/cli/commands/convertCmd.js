@@ -8,36 +8,36 @@ const PluginManager = require('../../plugins/PluginManager');
 
 const cliOptionsForConvert = (yargs) => {
   yargs
-    .positional("markdownFile", { 
-      describe: "path to the input markdown file", 
-      type: "string" 
+    .positional("markdownFile", {
+      describe: "path to the input markdown file",
+      type: "string"
     })
-    .option("plugin", { 
-      alias: "p", 
-      describe: "plugin to use (name or path)", 
+    .option("plugin", {
+      alias: "p",
+      describe: "plugin to use (name or path)",
       type: "string",
-      completionKey: 'usablePlugins' 
+      completionKey: 'usablePlugins'
     })
-    .option("outdir", { 
-      alias: "o", 
-      describe: "output directory (defaults to system temp)", 
-      type: "string" 
+    .option("outdir", {
+      alias: "o",
+      describe: "output directory (defaults to system temp)",
+      type: "string"
     })
-    .option("filename", { 
-      alias: "f", 
-      describe: "output pdf filename", 
-      type: "string" 
+    .option("filename", {
+      alias: "f",
+      describe: "output pdf filename",
+      type: "string"
     })
-    .option("open", { 
-      describe: "open pdf after generation", 
-      type: "boolean", 
-      default: true 
+    .option("open", {
+      describe: "open pdf after generation",
+      type: "boolean",
+      default: true
     })
-    .option("watch", { 
-      alias: "w", 
-      describe: "watch for changes and re-convert", 
-      type: "boolean", 
-      default: false 
+    .option("watch", {
+      alias: "w",
+      describe: "watch for changes and re-convert",
+      type: "boolean",
+      default: false
     })
     .epilogue('Plugin precedence: --plugin flag > front matter > local .config.yaml > default.');
 };

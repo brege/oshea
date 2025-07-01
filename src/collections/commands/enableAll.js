@@ -1,5 +1,5 @@
 // src/collections/commands/enableAll.js
-const { validate: pluginValidator } = require('../../plugins/validator'); 
+const { validate: pluginValidator } = require('../../plugins/validator');
 
 module.exports = async function enableAllPluginsInCollection(dependencies, collectionName, options = {}) {
   const { fss, path, chalk, constants } = dependencies;

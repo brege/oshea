@@ -161,7 +161,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
         }
       });
       console.log(chalk.green(`  Successfully re-synced collection "${collectionName}" from local source "${originalSourcePath}".`));
-      
+
       metadata.updated_on = new Date().toISOString();
       await this._writeCollectionMetadata(collectionName, metadata);
       return { success: true, message: `Collection "${collectionName}" re-synced from local source.` };

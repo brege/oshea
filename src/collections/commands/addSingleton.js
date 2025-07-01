@@ -50,28 +50,28 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
 
   // 3. Target Directory for singletons
   const singletonsBaseDir = path.join(this.collRoot, constants.USER_ADDED_PLUGINS_DIR_NAME);
-  const targetPluginDir = path.join(singletonsBaseDir, pluginId); 
+  const targetPluginDir = path.join(singletonsBaseDir, pluginId);
 
   if (fss.existsSync(targetPluginDir)) {
     throw new Error(`A plugin with ID "${pluginId}" already exists in the user-added plugins directory: "${targetPluginDir}". Remove it first or choose a different source plugin directory name.`);
   }
-  await fs.mkdir(singletonsBaseDir, { recursive: true }); 
+  await fs.mkdir(singletonsBaseDir, { recursive: true });
   await fs.mkdir(targetPluginDir, { recursive: true });
   if (this.debug) console.log(chalk.magenta(`DEBUG (CM:addSingletonPlugin): Created target directory for singleton: ${targetPluginDir}`));
 
   // 4. Copy plugin contents
   try {
-    await fsExtra.copy(sourcePluginPath, targetPluginDir); 
+    await fsExtra.copy(sourcePluginPath, targetPluginDir);
     if (this.debug) console.log(chalk.magenta(`DEBUG (CM:addSingletonPlugin): Copied plugin from ${sourcePluginPath} to ${targetPluginDir}`));
   } catch (copyError) {
     await fsExtra.rm(targetPluginDir, { recursive: true, force: true }).catch(() => {});
     throw new Error(`Failed to copy plugin from "${sourcePluginPath}" to "${targetPluginDir}": ${copyError.message}`);
   }
-  
+
   const metadataHoldingCollectionName = path.join(constants.USER_ADDED_PLUGINS_DIR_NAME, pluginId);
   const metadataContent = {
     name: pluginId,
-    source: path.resolve(sourcePluginPath), 
+    source: path.resolve(sourcePluginPath),
     type: 'singleton',
     added_on: new Date().toISOString(),
   };
@@ -80,7 +80,7 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
 
   // 6. Automatically enable the plugin
   const collectionPluginIdForEnable = `${constants.USER_ADDED_PLUGINS_DIR_NAME}/${pluginId}`;
-  
+
   try {
     await this.enablePlugin(collectionPluginIdForEnable, { name: invokeName });
     console.log(chalk.green(`Singleton plugin "${pluginId}" from "${sourcePluginPath}" added and enabled as "${invokeName}".`));

@@ -70,12 +70,12 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
         if (pluginInfoBase.is_singleton && pluginInfoBase.original_source) {
             if (!fss.existsSync(pluginInfoBase.original_source)) {
                 pluginInfoBase.is_original_source_missing = true;
-                if (debug) { 
+                if (debug) {
                     console.log(chalk.bgYellow.black(`DEBUG (listAvailable): Set 'is_original_source_missing' for plugin_id: ${pluginId}`));
                 }
             }
         }
-        
+
         availablePlugins.push(pluginInfoBase);
 
       } else {

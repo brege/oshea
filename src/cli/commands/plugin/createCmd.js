@@ -27,7 +27,7 @@ module.exports = {
         describe: `source to archetype from (registered plugin name, 'collection/id', or path)`,
         type: 'string',
         alias: 'f',
-        completionKey: 'usablePlugins' 
+        completionKey: 'usablePlugins'
       })
       .option('target-dir', {
         alias: 't',
@@ -54,12 +54,12 @@ module.exports = {
       console.error(chalk.red('ERROR: Manager or ConfigResolver not available. This is an internal setup issue.'));
       process.exit(1);
     }
-    
+
     try {
       let sourceIdentifier;
 
       if (args.from) {
-        const configResolver = args.configResolver; 
+        const configResolver = args.configResolver;
         await configResolver._initializeResolverIfNeeded();
         const pluginRegistryEntry = configResolver.mergedPluginRegistry[args.from];
 
@@ -79,7 +79,7 @@ module.exports = {
 
       // Assemble the dependencies and context for the new archetyper function
       const dependencies = { chalk, cmUtils, constants, fs, fss, fsExtra, yaml, matter, path };
-      
+
       const managerContext = {
         collRoot: args.manager.collRoot,
         debug: args.manager.debug,
@@ -95,15 +95,14 @@ module.exports = {
         console.log(chalk.gray(`  1. Customize the generated files in: ${chalk.underline(result.archetypePath)}`));
         console.log(chalk.gray(`  2. Register your new plugin in a main config file.`));
       }
-      
-      const cliPath = path.resolve(__dirname, '../../../../cli.js'); 
-      const cliPath = path.resolve(__dirname, '../../../cli.js');
+
+      const cliPath = path.resolve(__dirname, '../../../../cli.js');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
-      } catch (error) {                                                                                 
-        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));                                                                                                 
-      }   
+      } catch (error) {
+        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
+      }
 
     } catch (error) {
       console.error(chalk.red(`\nERROR during 'plugin create ${newPluginName}': ${error.message}`));

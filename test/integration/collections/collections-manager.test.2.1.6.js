@@ -28,7 +28,7 @@ describe('CollectionsManager addCollection Name Derivation (2.1.6)', () => {
         };
 
         manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT }, mockDependencies);
-        
+
         // Stub internal methods that are called after the name is determined
         spawnGitStub = sinon.stub(manager, '_spawnGitProcess').resolves({ success: true });
         sinon.stub(manager, '_writeCollectionMetadata').resolves();
@@ -45,7 +45,7 @@ describe('CollectionsManager addCollection Name Derivation (2.1.6)', () => {
         // Assert
         // Verify that the utility was called as expected
         expect(mockDependencies.cmUtils.deriveCollectionName.calledWith(FAKE_SOURCE_URL)).to.be.true;
-        
+
         // Verify that the derived name was used in the subsequent git clone call
         const cloneArgs = spawnGitStub.firstCall.args[0];
         const targetPath = cloneArgs[2];

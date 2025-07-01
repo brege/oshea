@@ -32,18 +32,18 @@ async function checkFile(baseDir, relativeFilePath, minSize) {
 async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPath) {
     const cliArgs = [...argsArray];
     const hasCustomConfig = cliArgs.some(arg => arg === '--config' || arg.startsWith('--config='));
-    
+
     let applyTestConfig = !hasCustomConfig &&
                          !cliArgs.includes('--factory-defaults') &&
                          !cliArgs.includes('--factory-default') &&
                          !cliArgs.includes('-fd');
 
     if (cliArgs[0] === 'config' && applyTestConfig) {
-        if (!cliArgs.includes('--plugin') && cliArgs.length === 1) { 
+        if (!cliArgs.includes('--plugin') && cliArgs.length === 1) {
             applyTestConfig = false;
         }
     }
-    
+
     let command = `node "${cliScriptPath}" ${cliArgs.join(' ')}`;
     if (applyTestConfig && typeof testConfigPath === 'string' && testConfigPath.length > 0) {
         command += ` --config "${testConfigPath}"`;

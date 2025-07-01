@@ -1,4 +1,4 @@
-// scripts/repo-health/generate-toc.js
+// scripts/docs/generate-toc.js
 const fs = require('fs');
 
 // GitHub anchor generator

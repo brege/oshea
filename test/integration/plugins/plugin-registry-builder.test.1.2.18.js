@@ -57,7 +57,7 @@ enabled_plugins:
         expect(registration.cmOriginalPluginId).to.equal('my-cm-plugin');
         expect(registration.sourceType).to.contain('CM: test-collection/my-cm-plugin');
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

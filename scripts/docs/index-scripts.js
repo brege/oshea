@@ -1,4 +1,4 @@
-// scripts/repo-health/index-scripts.js
+// scripts/docs/index-scripts.js
 const fs = require('fs');
 const path = require('path');
 

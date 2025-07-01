@@ -37,7 +37,7 @@ describe('PluginRegistryBuilder buildRegistry Caching (1.2.24)', () => {
             null,
             mockDependencies
         );
-        
+
         // Spy on the methods that do the actual work inside buildRegistry
         buildRegistrySpy = sinon.spy(builderInstance, '_getPluginRegistrationsFromFile');
     });

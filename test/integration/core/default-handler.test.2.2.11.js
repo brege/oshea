@@ -35,7 +35,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.11: Output Filename Determination
         this.ensureAndPreprocessHeadingStub
             .withArgs('Content here.', 'My Awesome Document', false)
             .returns('# My Awesome Document\n\nContent here.');
-        
+
         this.renderMarkdownToHtmlStub.returns(expectedHtml);
 
         // CONFIGURE generateSlug STUB for filename generation:

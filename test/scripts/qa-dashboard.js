@@ -20,7 +20,7 @@ function getChecklistStatuses() {
       if (checklistMatch) {
         const marker = checklistMatch[1].trim();
         const testId = checklistMatch[2];
- 
+
         let checklistStatus = '';
         if (marker === 'x') {
             checklistStatus = 'CLOSED';
@@ -127,7 +127,7 @@ function generateDashboardContent() {
     const auditMap = getAuditLogMap();
 
     const allTestIds = new Set([
-      ...Object.keys(checklistStatuses), 
+      ...Object.keys(checklistStatuses),
       ...Object.keys(testIdToFile),
       ...Object.keys(auditMap)
     ]);

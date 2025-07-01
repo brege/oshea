@@ -64,7 +64,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.12)', () => {
             rawConfig: { handler_script: 'index.js' },
             resolvedCssPaths: [],
         });
-        
+
         // Act
         const result = await resolver.getEffectiveConfig('my-plugin');
 

@@ -46,7 +46,7 @@ describe('PluginRegistryBuilder _resolveAlias (1.2.6)', () => {
     it('should return null for a relative path when basePathDefiningAlias is missing', () => {
         // Arrange
         // The mock path.isAbsolute will return false for this input.
-        
+
         // Act
         const result = builder._resolveAlias('my-alias', './relative/path', null);
 

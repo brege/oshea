@@ -44,7 +44,7 @@ module.exports = [
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Successfully updated collection "collection-to-update-all"/i);
-      
+
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
       const updatedFile = path.join(collRootDir, 'collection-to-update-all', 'v2.txt');
       const fileExists = await fs.pathExists(updatedFile);

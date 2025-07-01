@@ -27,7 +27,7 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromFile (1.2.16)', () =>
         // Assert
         expect(result).to.be.an('object').that.is.empty;
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

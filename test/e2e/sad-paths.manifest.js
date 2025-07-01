@@ -32,7 +32,7 @@ async function setupLocalGitCollectionWithLocalChange(harness, collectionName) {
 module.exports = [
   {
     describe: '4.3.2: (Sad Path) `plugin create --from` fails with invalid source',
-    useFactoryDefaults: false, 
+    useFactoryDefaults: false,
     setup: async (sandboxDir) => {
         const invalidSourceDir = path.join(sandboxDir, 'invalid-source-plugin');
         await fs.ensureDir(invalidSourceDir);

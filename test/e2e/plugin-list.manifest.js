@@ -16,7 +16,7 @@ async function setupCollectionWithOneEnabled(sandboxDir, harness) {
     const collDir = path.join(sandboxDir, 'test-collection');
     await createDummyPlugin(path.join(collDir, 'plugin-one'), 'plugin-one');
     await createDummyPlugin(path.join(collDir, 'plugin-two'), 'plugin-two');
-    
+
     // Use the harness to run the prerequisite setup commands
     await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection'], { useFactoryDefaults: false });
     await harness.runCli(['plugin', 'enable', 'test-collection/plugin-one', '--name', 'enabled-one'], { useFactoryDefaults: false });

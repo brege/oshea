@@ -13,7 +13,7 @@ const fs = require('fs').promises;
  */
 function setupTestFiles(mocks, constants, fileContents = {}, parsedContents = {}) {
     const { mockFsPromises, mockFsSync, mockMarkdownUtils, mockYaml } = mocks;
-    const { DUMMY_MARKDOWN_FILE_PATH, DUMMY_LOCAL_CONFIG_FILE_PATH } = constants; 
+    const { DUMMY_MARKDOWN_FILE_PATH, DUMMY_LOCAL_CONFIG_FILE_PATH } = constants;
 
     // Markdown file setup
     if (fileContents.markdown !== undefined) { // Check for undefined to allow explicit null/empty string for testing
@@ -143,11 +143,11 @@ md_to_pdf_plugin: ${fmPluginName}
             markdownContent: '# Markdown Content for FM',
             parsedLocalConfig: { plugin: localCfgPluginName, anotherOverride: 'someValue' }
         };
-        
+
         setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
     assert: async (result, args, mocks, constants, expect) => {
-        const fmPluginName = 'front-matter-plugin-from-doc'; 
+        const fmPluginName = 'front-matter-plugin-from-doc';
         expect(result.pluginSpec).to.equal(fmPluginName);
         expect(result.source).to.equal(`front matter in '${constants.DUMMY_MARKDOWN_FILENAME}'`);
         expect(result.localConfigOverrides).to.deep.equal({ anotherOverride: 'someValue' });
@@ -165,7 +165,7 @@ md_to_pdf_plugin: ${fmPluginName}
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
         const localCfgPluginName = 'local-config-only-plugin';
-        
+
         args.markdownFile = constants.DUMMY_MARKDOWN_FILE_PATH;
 
         const fileContents = {
@@ -226,7 +226,7 @@ some_other_key: some_value
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
         const localCfgPluginName = 'plugin-with-overrides';
-        
+
         args.markdownFile = constants.DUMMY_MARKDOWN_FILE_PATH;
 
         const fileContents = {
@@ -263,7 +263,7 @@ some_other_fm_key: fm_value
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
         args.markdownFile = path.join(constants.DUMMY_MARKDOWN_FILE_PATH.replace('my-document.md', 'non-existent-document.md'));
-        
+
         setupTestFiles(mocks, constants, { markdownContent: undefined, localConfigContent: undefined });
 
         mocks.mockFsSync.existsSync.withArgs(args.markdownFile).returns(false);
@@ -310,7 +310,7 @@ some_other_fm_key: fm_value
             fmData: {},
             parsedLocalConfig: undefined,
         };
-        
+
         setupTestFiles(mocks, constants, fileContents, parsedContents);
         mocks.mockMarkdownUtils.extractFrontMatter.withArgs(fileContents.markdown).throws(new Error(MALFORMED_FM_ERROR_MESSAGE));
     },
@@ -358,7 +358,7 @@ some_other_key: some_value
             fmData: { some_other_key: 'some_value' },
             parsedLocalConfig: {},
         };
-        
+
         setupTestFiles(mocks, constants, fileContents, parsedContents);
         mocks.mockYaml.load.withArgs(fileContents.localConfig).throws(new Error(MALFORMED_LOCAL_CONFIG_ERROR_MESSAGE));
     },
@@ -370,7 +370,7 @@ some_other_key: some_value
 
         expect(mocks.mockFsSync.existsSync.calledWith(constants.DUMMY_MARKDOWN_FILE_PATH)).to.be.true;
         expect(mocks.mockFsSync.existsSync.calledWith(constants.DUMMY_LOCAL_CONFIG_FILE_PATH)).to.be.true;
-        
+
         expect(mocks.mockFsPromises.readFile.calledWith(constants.DUMMY_MARKDOWN_FILE_PATH, 'utf8')).to.be.true;
         expect(mocks.mockMarkdownUtils.extractFrontMatter.calledOnce).to.be.true;
 
@@ -394,7 +394,7 @@ some_other_key: some_value
     setup: async (args, mocks, constants) => {
         const pluginName = 'my-custom-plugin';
         args.markdownFile = constants.DUMMY_MARKDOWN_FILE_PATH;
-        
+
         const fileContents = {
             markdown: `---
 md_to_pdf_plugin: ${pluginName}

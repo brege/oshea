@@ -22,7 +22,7 @@ describe('PluginRegistryBuilder _getPluginRegistrationsFromFile (1.2.14)', () =>
             collRoot: '/fake/coll-root'
         };
         builder = new PluginRegistryBuilder('/fake/project', null, null, false, false, null, null, mockDependencies);
-        
+
         // Stub the helper methods that are called by _getPluginRegistrationsFromFile
         resolveAliasStub = sinon.stub(builder, '_resolveAlias');
         resolvePluginPathStub = sinon.stub(builder, '_resolvePluginConfigPath');

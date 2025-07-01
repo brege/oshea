@@ -29,7 +29,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.27)', () => {
         };
 
         const builder = new PluginRegistryBuilder(
-            '/fake/project', null, null, false, false, null, 
+            '/fake/project', null, null, false, false, null,
             mockCollectionsManager,
             mockDependencies
         );

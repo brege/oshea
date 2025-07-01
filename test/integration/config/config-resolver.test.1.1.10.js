@@ -9,7 +9,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.10)', () => {
     it('should correctly apply localConfigOverrides, including CSS resolution', async () => {
         // Arrange
         const mockAssetResolver = { resolveAndMergeCss: sinon.stub().returns(['/path/to/markdown/styles/override.css']) };
-        
+
         const deepMergeStub = sinon.stub().callsFake((base, override) => {
             return { ...base, ...override, pdf_options: { ...base.pdf_options, ...override.pdf_options }};
         });
@@ -61,7 +61,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.10)', () => {
 
         // Assert
         expect(deepMergeStub.calledWith(sinon.match(baseConfig), localConfigOverrides)).to.be.true;
-        
+
         expect(mockAssetResolver.resolveAndMergeCss.calledWith(
             localConfigOverrides.css_files,
             '/path/to/markdown',

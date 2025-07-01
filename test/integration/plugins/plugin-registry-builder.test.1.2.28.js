@@ -14,11 +14,11 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.28)', () => {
 
         const loadYamlConfigStub = sinon.stub();
         loadYamlConfigStub.withArgs(TRADITIONAL_CONFIG_PATH).resolves({ description: 'A traditional plugin.' });
-        
+
         const mockDependencies = {
             os: { homedir: () => '/fake/home', platform: () => 'linux' },
             path: { join: (a, b) => `${a}/${b}`, dirname: () => '', basename: () => '' },
-            fs: { 
+            fs: {
                 existsSync: sinon.stub().returns(true),
                 statSync: sinon.stub().returns({ isFile: () => true })
             },
@@ -27,7 +27,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.28)', () => {
             // Add the mandatory collRoot dependency
             collRoot: '/fake/coll-root'
         };
-        
+
         const mockCollectionsManager = {
             listAvailablePlugins: sinon.stub().resolves([
                 { collection: 'cm-coll', plugin_id: 'cm-plugin', description: CM_DESCRIPTION, config_path: CM_CONFIG_PATH }
@@ -38,7 +38,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.28)', () => {
         };
 
         const builder = new PluginRegistryBuilder(
-            '/fake/project', null, null, false, false, null, 
+            '/fake/project', null, null, false, false, null,
             mockCollectionsManager,
             mockDependencies
         );
@@ -59,7 +59,7 @@ describe('PluginRegistryBuilder getAllPluginDetails (1.2.28)', () => {
         expect(traditionalPlugin.description).to.equal('A traditional plugin.');
         expect(cmPlugin.description).to.equal(CM_DESCRIPTION);
     });
-    
+
     afterEach(() => {
         sinon.restore();
     });

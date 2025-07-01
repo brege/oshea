@@ -41,7 +41,7 @@ describe('DefaultHandler (L2Y2) - Scenario 2.2.13: Verify generatePdf Call with 
         this.ensureAndPreprocessHeadingStub
             .withArgs('Hello world.', 'Test Document', false)
             .returns('# Test Document\n\nHello world.');
-        
+
         this.renderMarkdownToHtmlStub.returns(expectedRenderedHtml);
 
         // CONFIGURE generateSlug STUB for filename generation

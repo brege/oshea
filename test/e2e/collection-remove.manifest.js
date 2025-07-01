@@ -9,7 +9,7 @@ module.exports = [
       const localCollPath = path.join(sandboxDir, 'collection-to-remove');
       await fs.ensureDir(localCollPath);
       await fs.writeFile(path.join(localCollPath, 'plugin.config.yaml'), 'description: test');
-      
+
       // Add the collection first
       await harness.runCli(['collection', 'add', localCollPath]);
     },

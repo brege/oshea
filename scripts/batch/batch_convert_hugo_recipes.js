@@ -68,9 +68,9 @@ async function processRecipe(markdownFilePath) {
         const rawContent = await fs.readFile(markdownFilePath, 'utf8');
         const { data: frontMatter, content: bodyContent } = matter(rawContent);
 
-        const itemSlug = path.basename(path.dirname(markdownFilePath)); 
+        const itemSlug = path.basename(path.dirname(markdownFilePath));
         const title = frontMatter.title || itemSlug.replace(/-/g, ' ');
-        
+
         let author = '';
         if (frontMatter.author_credit) {
             author = generateSlug(frontMatter.author_credit);
@@ -78,7 +78,7 @@ async function processRecipe(markdownFilePath) {
             const bodyAuthor = extractAuthorFromContent(bodyContent);
             if (bodyAuthor) author = bodyAuthor;
         }
-        
+
         const date = frontMatter.date ? new Date(frontMatter.date).toISOString().split('T')[0] : '';
 
         let outputFilename = generateSlug(title);

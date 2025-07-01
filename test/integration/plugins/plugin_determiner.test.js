@@ -32,9 +32,9 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
         // Setup all mocks *before* re-requiring the module under test
         mockFsPromises = { readFile: sinon.stub(), };
         mockFsSync = { existsSync: sinon.stub().returns(false), statSync: sinon.stub(), };
-        
+
         // Explicitly stub path.resolve as well for diagnostic purposes.
-        mockPath = { 
+        mockPath = {
             resolve: sinon.stub().callsFake((...args) => require('path').resolve(...args)),
             dirname: require('path').dirname,
             basename: require('path').basename,
@@ -44,9 +44,9 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
 
         mockYaml = { load: sinon.stub(), };
         mockMarkdownUtils = { extractFrontMatter: sinon.stub(), };
-        
+
         // Stub global process.cwd directly and ensure it calls through
-        mockProcessCwd = sinon.stub(process, 'cwd').callThrough(); 
+        mockProcessCwd = sinon.stub(process, 'cwd').callThrough();
 
         // Assemble dependencies object with all the mocks
         dependencies = {

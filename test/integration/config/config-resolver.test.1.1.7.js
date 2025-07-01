@@ -18,9 +18,9 @@ describe('ConfigResolver getEffectiveConfig (1.1.7)', () => {
             },
             fs: {
                 existsSync: sinon.stub().returns(true),
-                statSync: sinon.stub().returns({ 
-                    isDirectory: () => false, 
-                    isFile: () => false 
+                statSync: sinon.stub().returns({
+                    isDirectory: () => false,
+                    isFile: () => false
                 }),
                 readFileSync: sinon.stub().returns('{}')
             }

@@ -20,7 +20,7 @@ describe('CollectionsManager addCollection Error Handling (2.1.5)', () => {
             fss: { existsSync: sinon.stub() },
             fs: { mkdir: sinon.stub().resolves() },
             fsExtra: { copy: sinon.stub() },
-            path: { 
+            path: {
                 join: (a, b) => `${a}/${b}`,
                 resolve: p => `/resolved/${p}`
             },
@@ -32,7 +32,7 @@ describe('CollectionsManager addCollection Error Handling (2.1.5)', () => {
         };
 
         manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT }, mockDependencies);
-        
+
         // Stub the metadata method, which shouldn't be called in case of failure
         writeMetaStub = sinon.stub(manager, '_writeCollectionMetadata');
     });
@@ -45,10 +45,10 @@ describe('CollectionsManager addCollection Error Handling (2.1.5)', () => {
         // Arrange
         const gitUrl = 'https://github.com/fake/invalid-repo.git';
         const gitError = new Error('Git clone failed');
-        
+
         // Simulate that the target directory does not exist yet
         mockDependencies.fss.existsSync.returns(false);
-        
+
         // Stub the git process to fail
         const spawnGitStub = sinon.stub(manager, '_spawnGitProcess').rejects(gitError);
 
@@ -70,11 +70,11 @@ describe('CollectionsManager addCollection Error Handling (2.1.5)', () => {
         // Arrange
         const localPath = './non-existent-dir';
         const resolvedPath = `/resolved/${localPath}`;
-        
+
         // Simulate target does not exist, but source also does not exist
         mockDependencies.fss.existsSync.withArgs(FAKE_COLLECTION_PATH).returns(false);
         mockDependencies.fss.existsSync.withArgs(resolvedPath).returns(false);
-        
+
         // Git process should not be called for a local path
         const spawnGitStub = sinon.stub(manager, '_spawnGitProcess');
 

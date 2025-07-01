@@ -25,7 +25,7 @@ module.exports = {
 
             // Stub all external dependencies that the DefaultHandler test suite relies on.
             this.generatePdfStub = this.sandbox.stub(pdfGenerator, 'generatePdf');
-            
+
             this.extractFrontMatterStub = this.sandbox.stub(markdownUtils, 'extractFrontMatter');
             this.removeShortcodesStub = this.sandbox.stub(markdownUtils, 'removeShortcodes');
             this.renderMarkdownToHtmlStub = this.sandbox.stub(markdownUtils, 'renderMarkdownToHtml');
@@ -40,7 +40,7 @@ module.exports = {
             require.cache[require.resolve('../src/core/math_integration')] = {
                 exports: () => mathIntegrationInstance
             };
-            
+
             this.readFileStub = this.sandbox.stub(fs, 'readFile');
             this.mkdirStub = this.sandbox.stub(fs, 'mkdir');
             this.existsSyncStub = this.sandbox.stub(fss, 'existsSync');
@@ -49,7 +49,7 @@ module.exports = {
             delete require.cache[require.resolve('../src/core/default_handler')];
             const DefaultHandler = require('../src/core/default_handler');
             this.defaultHandler = new DefaultHandler();
-            
+
             if (done) done();
         },
 

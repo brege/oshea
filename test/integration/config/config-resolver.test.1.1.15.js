@@ -29,7 +29,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.15)', () => {
         sinon.stub(resolver, '_initializeResolverIfNeeded').resolves();
         resolver.primaryMainConfig = { global_pdf_options: {}, math: {} };
         resolver.mergedPluginRegistry = { 'my-plugin': { configPath: '/fake/path' } };
-        
+
         const applyOverridesSpy = sinon.stub().resolves({
             mergedConfig: { handler_script: 'index.js' },
             mergedCssPaths: []
@@ -42,7 +42,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.15)', () => {
             rawConfig: { handler_script: 'index.js' },
             resolvedCssPaths: [],
         });
-        
+
         // Act
         const result1 = await resolver.getEffectiveConfig('my-plugin', { some: 'override' });
         const result2 = await resolver.getEffectiveConfig('my-plugin', { some: 'override' });

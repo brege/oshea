@@ -49,7 +49,7 @@ describe('ConfigResolver getEffectiveConfig (1.1.14)', () => {
             rawConfig: { handler_script: FAKE_HANDLER_SCRIPT_NAME },
             resolvedCssPaths: [],
         });
-        
+
         // Act & Assert
         try {
             await resolver.getEffectiveConfig('my-plugin');

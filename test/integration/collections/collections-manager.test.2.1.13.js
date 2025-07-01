@@ -14,9 +14,9 @@ describe('CollectionsManager listCollections (2.1.13)', () => {
 
     beforeEach(() => {
         mockDependencies = {
-            fss: { 
+            fss: {
                 // Simulate the main collection root directory exists
-                existsSync: sinon.stub().returns(true) 
+                existsSync: sinon.stub().returns(true)
             },
             fs: {
                 // Simulate reading the contents of the collection root
@@ -67,11 +67,11 @@ describe('CollectionsManager listCollections (2.1.13)', () => {
         expect(result[0].source).to.equal('https://a.com/repo.git');
         expect(result[1].name).to.equal('collection-b');
         expect(result[1].source).to.equal('https://b.com/repo.git');
-        
+
         // 3. Verify that the correct underlying functions were called
         expect(mockDependencies.fs.readdir.calledWith(FAKE_COLL_ROOT)).to.be.true;
         expect(readMetaStub.calledTwice).to.be.true;
-        
+
         // 4. Verify it did NOT check the enabled manifest, as per the code's implementation
         expect(readEnabledManifestStub.called).to.be.false;
     });

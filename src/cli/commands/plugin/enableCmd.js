@@ -4,7 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const fsp = require('fs').promises;
 const yaml = require('js-yaml');
-const { validate: pluginValidator } = require('../../../plugins/validator');
+const { validatorPath } = require('@paths');
+const { validate: pluginValidator } = require(validatorPath);
 
 module.exports = {
   command: 'enable <target>',

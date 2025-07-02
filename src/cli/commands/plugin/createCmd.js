@@ -1,8 +1,9 @@
 // src/cli/commands/plugin/createCmd.js
 const path = require('path');
 const chalk = require('chalk');
-const { isValidPluginName } = require('../../../collections/cm-utils');
-const { createArchetype } = require('../../../plugins/plugin_archetyper');
+const { cmUtilsPath, pluginArchetyperPath, collectionsConstantsPath } = require('@paths');
+const { isValidPluginName } = require(cmUtilsPath);
+const { createArchetype } = require(pluginArchetyperPath);
 
 // Dependencies required by the archetyper logic
 const fs = require('fs').promises;
@@ -10,9 +11,8 @@ const fss = require('fs');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
-const cmUtils = require('../../../collections/cm-utils');
-const constants = require('../../../collections/constants');
-
+const cmUtils = require(cmUtilsPath);
+const constants = require(collectionsConstantsPath);
 
 module.exports = {
   command: 'create <pluginName>',

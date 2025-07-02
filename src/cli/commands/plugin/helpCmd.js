@@ -1,5 +1,6 @@
 // src/cli/commands/plugin/helpCmd.js
-const { displayPluginHelp } = require('../../get_help');
+const { getHelpPath } = require('@paths');
+const { displayPluginHelp } = require(getHelpPath);
 
 module.exports = {
   command: 'help <pluginName>',

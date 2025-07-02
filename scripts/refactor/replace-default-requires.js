@@ -27,7 +27,7 @@ function findInsertIndex(lines) {
   return idx;
 }
 
-// 4. Allow custom root (src or test)
+// 4. Allow custom roots (src, test, or both)
 const roots = process.argv.slice(2).length ? process.argv.slice(2) : ['src'];
 
 for (const root of roots) {
@@ -50,15 +50,23 @@ for (const root of roots) {
       }
 
       const reqPath = match[3];
-      // Resolve require path to absolute
       let absTarget = path.resolve(path.dirname(file), reqPath);
-      if (!absTarget.endsWith('.js')) absTarget += '.js';
-      let anchor = anchorMap[absTarget];
+      let anchor = null;
 
-      // Try without .js if not found (covers both require('./foo') and require('./foo.js'))
-      if (!anchor) {
-        const absTargetNoJs = absTarget.replace(/\.js$/, '');
-        anchor = anchorMap[absTargetNoJs];
+      // Node-like resolution order:
+      // 1. If it's a file (with or without .js)
+      if (fs.existsSync(absTarget) && fs.statSync(absTarget).isFile()) {
+        anchor = anchorMap[absTarget];
+      }
+      if (!anchor && fs.existsSync(absTarget + '.js') && fs.statSync(absTarget + '.js').isFile()) {
+        anchor = anchorMap[absTarget + '.js'];
+      }
+      // 2. If it's a directory, try index.js inside it
+      if (!anchor && fs.existsSync(absTarget) && fs.statSync(absTarget).isDirectory()) {
+        const indexJs = path.join(absTarget, 'index.js');
+        if (fs.existsSync(indexJs) && fs.statSync(indexJs).isFile()) {
+          anchor = anchorMap[indexJs];
+        }
       }
 
       if (!anchor) {

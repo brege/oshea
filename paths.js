@@ -1,7 +1,7 @@
 // paths.js
 const path = require('path');
 
-// Project root [paths.js lives here]
+// Project root [paths.js lives here] 
 const projectRoot = __dirname;
 
 // Top-level source directory
@@ -11,6 +11,7 @@ const srcRoot = path.join(projectRoot, 'src');
 const cliPath = path.join(projectRoot, 'cli.js');
 const cliRoot = path.join(srcRoot, 'cli');
 const cliCommandsPath = path.join(cliRoot, 'commands');
+const convertCmdPath = path.join(cliCommandsPath, 'convertCmd.js');
 
 const getHelpPath = path.join(cliRoot, 'get_help.js');
 const configDisplayPath = path.join(cliRoot, 'config_display.js');
@@ -18,13 +19,14 @@ const configDisplayPath = path.join(cliRoot, 'config_display.js');
 // Templates
 const templateBasicPlugin = path.join(projectRoot, 'plugins', 'template-basic');
 const configExamplePath = path.join(projectRoot, 'config.example.yaml');
-const defaultConfigPath = path.join(projectRoot, 'config.yaml')
+const defaultConfigPath = path.join(projectRoot, 'config.yaml');
 const factoryDefaultConfigPath = path.join(projectRoot, 'config.example.yaml');
 
 // Collections
 const collectionsRoot = path.join(srcRoot, 'collections');
 const cmUtilsPath = path.join(collectionsRoot, 'cm-utils.js');
 const collectionsCommandsRoot = path.join(collectionsRoot, 'commands');
+const collectionsConstantsPath = path.join(collectionsRoot, 'constants.js');
 
 // Plugins
 const pluginsRoot = path.join(srcRoot, 'plugins');
@@ -76,9 +78,9 @@ module.exports = {
 
   // CLI
   cliRoot,
-
   cliPath,
   cliCommandsPath,
+  convertCmdPath,
   getHelpPath,
   configDisplayPath,
 
@@ -92,6 +94,7 @@ module.exports = {
   collectionsRoot,
   cmUtilsPath,
   collectionsCommandsRoot,
+  collectionsConstantsPath,
 
   // Plugins
   pluginsRoot,

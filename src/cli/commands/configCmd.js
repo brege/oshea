@@ -1,8 +1,8 @@
 // src/cli/commands/configCmd.js
-const { displayConfig } = require('../config_display');
+const { configDisplayPath } = require('@paths');
+const { displayConfig } = require(configDisplayPath);
 const path = require('path');
 const chalk = require('chalk');
-
 
 module.exports = {
   command: "config",

@@ -1,7 +1,8 @@
 // src/cli/commands/plugin/validateCmd.js
 const path = require('path');
 const fs = require('fs');
-const { validate: pluginValidator } = require('../../../plugins/validator');
+const { validatorPath } = require('@paths');
+const { validate: pluginValidator } = require(validatorPath);
 const chalk = require('chalk');
 
 module.exports = {

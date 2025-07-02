@@ -42,7 +42,7 @@ module.exports = {
       }
 
       // Trigger tab-completion cache regeneration after successful update operation
-      const cliPath = path.resolve(__dirname, '../../../cli.js');
+      const { cliPath } = require('@paths');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);

@@ -4,6 +4,7 @@ const path = require('path');
 const os = require('os');
 const { loadConfig: loadYamlConfig } = require('../core/markdown_utils');
 const yaml = require('js-yaml');
+const { defaultConfigPath, factoryDefaultConfigPath } = require('@paths');
 
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
@@ -29,8 +30,8 @@ class PluginRegistryBuilder {
             throw new Error("PluginRegistryBuilder: projectRoot must be a valid path string.");
         }
 
-        this.bundledMainConfigPath = this.dependencies.path.join(this.projectRoot, 'config.yaml');
-        this.factoryDefaultMainConfigPath = this.dependencies.path.join(this.projectRoot,  'config.example.yaml');
+        this.bundledMainConfigPath = defaultConfigPath;
+        this.factoryDefaultMainConfigPath = factoryDefaultConfigPath;
         this.isLazyLoadMode = isLazyLoadMode;
         this.primaryMainConfigLoadReason = primaryMainConfigLoadReason;
 

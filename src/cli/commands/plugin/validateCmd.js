@@ -28,7 +28,7 @@ module.exports = {
         if (isPath) {
             pluginDirectoryPath = resolvedIdentifier;
         } else {
-            const projectRoot = path.resolve(__dirname, '../../../../');
+            const { projectRoot } = require('@paths');
             pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
 
             if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {

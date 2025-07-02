@@ -69,7 +69,8 @@ module.exports = {
           sourceIdentifier = args.from;
         }
       } else {
-        sourceIdentifier = path.resolve(__dirname, '..', '..', '..', '..', 'plugins', 'template-basic');
+        const { templateBasicPlugin } = require('@paths');
+        sourceIdentifier = templateBasicPlugin;
       }
 
       const options = {
@@ -96,7 +97,7 @@ module.exports = {
         console.log(chalk.gray(`  2. Register your new plugin in a main config file.`));
       }
 
-      const cliPath = path.resolve(__dirname, '../../../../cli.js');
+      const { cliPath } = require('@paths');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);

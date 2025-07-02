@@ -124,7 +124,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
   },
   handler: async (args) => {
     try {
-      const projectRoot = path.resolve(__dirname, '../../../../');
+      const { projectRoot } = require('@paths');
       const builderInstance = new PluginRegistryBuilder(
         projectRoot, null, args.config, args.factoryDefaults,
         args.isLazyLoadMode || false, null, args.manager,

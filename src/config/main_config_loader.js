@@ -1,15 +1,16 @@
 // src/config/main_config_loader.js
 const os = require('os');
+const { defaultConfigPath, factoryDefaultConfigPath, configUtilsPath } = require('@paths');
 
 class MainConfigLoader {
     constructor(projectRoot, mainConfigPathFromCli, useFactoryDefaultsOnly = false, xdgBaseDir = null, dependencies = {}) {
         this.fs = dependencies.fs || require('fs');
         this.path = dependencies.path || require('path');
-        this.loadYamlConfig = dependencies.loadYamlConfig || require('./config_utils').loadYamlConfig;
+        this.loadYamlConfig = dependencies.loadYamlConfig || require(configUtilsPath).loadYamlConfig;
 
         this.projectRoot = projectRoot;
-        this.defaultMainConfigPath = this.path.join(this.projectRoot, 'config.yaml');
-        this.factoryDefaultMainConfigPath = this.path.join(this.projectRoot, 'config.example.yaml');
+        this.defaultMainConfigPath = defaultConfigPath;
+        this.factoryDefaultMainConfigPath = factoryDefaultConfigPath;
 
         this.xdgBaseDir = xdgBaseDir || this.path.join(process.env.XDG_CONFIG_HOME || this.path.join(os.homedir(), '.config'), 'md-to-pdf');
         this.xdgGlobalConfigPath = this.path.join(this.xdgBaseDir, 'config.yaml');

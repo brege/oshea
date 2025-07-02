@@ -20,7 +20,7 @@ function resolvePluginPath(pluginIdentifier) {
     if (fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory()) {
         return { pluginDirectoryPath: resolvedIdentifier, pluginName: path.basename(resolvedIdentifier) };
     }
-    const projectRoot = path.resolve(__dirname, '../../');
+    const { projectRoot } = require('@paths');
     const pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
     if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
         throw new Error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'.`);

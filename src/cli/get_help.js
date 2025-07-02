@@ -11,8 +11,9 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
     console.log(`INFO: Attempting to display help for plugin: ${pluginName}`);
 
     try {
+        const { projectRoot } = require('@paths');
         const registryBuilder = new PluginRegistryBuilder(
-            path.resolve(__dirname, '../..'), // projectRoot
+            projectRoot,
             null, // xdgBaseDir (let builder determine)
             cliArgs.config, // projectManifestConfigPath from CLI
             cliArgs.factoryDefaults, // useFactoryDefaultsOnly from CLI

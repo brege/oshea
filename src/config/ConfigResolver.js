@@ -20,7 +20,7 @@ class ConfigResolver {
         };
         this.dependencies = { ...defaultDependencies, ...dependencies };
 
-        this.projectRoot = this.dependencies.path.resolve(__dirname, '..', '..');
+        this.projectRoot = require('@paths').projectRoot;
         this._useFactoryDefaultsOnly = useFactoryDefaultsOnly;
         this._isLazyLoadMode = isLazyLoadMode;
 

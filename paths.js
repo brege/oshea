@@ -27,6 +27,7 @@ const collectionsRoot = path.join(srcRoot, 'collections');
 const cmUtilsPath = path.join(collectionsRoot, 'cm-utils.js');
 const collectionsCommandsRoot = path.join(collectionsRoot, 'commands');
 const collectionsConstantsPath = path.join(collectionsRoot, 'constants.js');
+const collectionsIndexPath = path.join(collectionsRoot, 'index.js');
 
 // Plugins
 const pluginsRoot = path.join(srcRoot, 'plugins');
@@ -95,6 +96,7 @@ module.exports = {
   cmUtilsPath,
   collectionsCommandsRoot,
   collectionsConstantsPath,
+  collectionsIndexPath,
 
   // Plugins
   pluginsRoot,

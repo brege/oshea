@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // cli.js
 
+require('module-alias')(__dirname);
+
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs');

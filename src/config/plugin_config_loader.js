@@ -1,4 +1,5 @@
 // src/config/plugin_config_loader.js
+const { configUtilsPath, assetResolverPath } = require('@paths');
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
@@ -26,8 +27,8 @@ class PluginConfigLoader {
         this.fs = dependencies.fs || require('fs');
         this.path = dependencies.path || require('path');
         this.os = dependencies.os || require('os');
-        this.configUtils = dependencies.configUtils || require('./config_utils');
-        this.AssetResolver = dependencies.AssetResolver || require('../utils/asset_resolver');
+        this.configUtils = dependencies.configUtils || require(configUtilsPath);
+        this.AssetResolver = dependencies.AssetResolver || require(assetResolverPath);
     }
 
     async _loadSingleConfigLayer(configFilePath, assetsBasePath, pluginName) {

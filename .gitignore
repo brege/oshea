@@ -31,7 +31,7 @@ community_plugins/*
 
 # User should copy config.yaml.example to config.yaml
 config.yaml
-config/
+/config/
 
 # Optional: ignore built shell outputs if any
 *.sh

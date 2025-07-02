@@ -8,22 +8,23 @@ const fsExtra = require('fs-extra');
 const chalk = require('chalk');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
+const { cmUtilsPath, collectionsConstantsPath, collectionsCommandsRoot } = require('@paths');
 
 // Internal Utilities
-const cmUtils = require('./cm-utils');
-const constants = require('./constants');
+const cmUtils = require(cmUtilsPath);
+const constants = require(collectionsConstantsPath);
 
 // Command Modules
-const addCollectionCmd = require('./commands/add');
-const enablePluginCmd = require('./commands/enable');
-const enableAllPluginsInCollectionCmd = require('./commands/enableAll');
-const disablePluginCmd = require('./commands/disable');
-const removeCollectionCmd = require('./commands/remove');
-const updateCollectionCmd = require('./commands/update');
-const updateAllCollectionsCmd = require('./commands/updateAll');
-const listAvailablePluginsCmd = require('./commands/listAvailable');
-const listCollectionsCmd = require('./commands/list');
-const addSingletonPluginCmd = require('./commands/addSingleton');
+const addCollectionCmd = require(path.join(collectionsCommandsRoot, 'add.js'));
+const enablePluginCmd = require(path.join(collectionsCommandsRoot, 'enable.js'));
+const enableAllPluginsInCollectionCmd = require(path.join(collectionsCommandsRoot, 'enableAll.js'));
+const disablePluginCmd = require(path.join(collectionsCommandsRoot, 'disable.js'));
+const removeCollectionCmd = require(path.join(collectionsCommandsRoot, 'remove.js'));
+const updateCollectionCmd = require(path.join(collectionsCommandsRoot, 'update.js'));
+const updateAllCollectionsCmd = require(path.join(collectionsCommandsRoot, 'updateAll.js'));
+const listAvailablePluginsCmd = require(path.join(collectionsCommandsRoot, 'listAvailable.js'));
+const listCollectionsCmd = require(path.join(collectionsCommandsRoot, 'list.js'));
+const addSingletonPluginCmd = require(path.join(collectionsCommandsRoot, 'addSingleton.js'));
 
 class CollectionsManager {
   constructor(options = {}, dependencies = {}) {

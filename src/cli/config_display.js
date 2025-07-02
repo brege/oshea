@@ -1,8 +1,9 @@
 // src/cli/config_display.js
+const { configResolverPath } = require('@paths');
 const fs = require('fs');
 const yaml = require('js-yaml');
 const path = require('path');
-const ConfigResolver = require('../config/ConfigResolver'); // Still needed for type checking/reference, though not for new instantiation here.
+const ConfigResolver = require(configResolverPath); // Still needed for type checking/reference, though not for new instantiation here.
 
 async function displayGlobalConfig(configResolver, isPure) {
     // Ensure ConfigResolver is initialized to get primaryMainConfigLoadReason

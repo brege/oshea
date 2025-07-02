@@ -1,4 +1,5 @@
 // test/integration/plugins/plugin-manager.test.1.5.2.js
+const { defaultHandlerPath, markdownUtilsPath, pdfGeneratorPath, pluginManagerPath } = require('@paths');
 const path = require('path');
 const fs = require('fs');
 const chai = require('chai');
@@ -6,11 +7,11 @@ const expect = chai.expect;
 const sinon = require('sinon');
 
 // Import the actual core utility modules that PluginManager now directly uses
-const DefaultHandler = require('../../../src/core/default_handler');
-const markdownUtils = require('../../../src/core/markdown_utils');
-const pdfGenerator = require('../../../src/core/pdf_generator');
+const DefaultHandler = require(defaultHandlerPath);
+const markdownUtils = require(markdownUtilsPath);
+const pdfGenerator = require(pdfGeneratorPath);
 
-const PluginManager = require('../../../src/plugins/PluginManager');
+const PluginManager = require(pluginManagerPath);
 
 describe('PluginManager invokeHandler (1.5.2)', () => {
     let pluginManager;

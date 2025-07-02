@@ -1,11 +1,12 @@
 // test/integration/plugins/plugin-manager.test.1.5.5.js
+const { pluginManagerPath } = require('@paths');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 
 // Removed chai-as-promised dependencies as per your suggestion.
 
-const PluginManager = require('../../../src/plugins/PluginManager');
+const PluginManager = require(pluginManagerPath);
 
 describe('PluginManager invokeHandler (1.5.5)', () => {
     let mockDefaultHandler;

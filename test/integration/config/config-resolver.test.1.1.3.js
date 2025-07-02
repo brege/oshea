@@ -1,7 +1,8 @@
 // test/integration/config/config-resolver.test.1.1.3.js
+const { configResolverPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const ConfigResolver = require('../../../src/config/ConfigResolver');
+const ConfigResolver = require(configResolverPath);
 
 // Test suite for Scenario 1.1.3
 describe('ConfigResolver _loadPluginBaseConfig (1.1.3)', () => {

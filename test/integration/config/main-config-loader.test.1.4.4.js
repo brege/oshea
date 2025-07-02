@@ -1,9 +1,10 @@
 // test/integration/config/main-config-loader.test.1.4.4.js
+const { mainConfigLoaderPath } = require('@paths');
 const { expect } = require('chai');
 const path = require('path');
 const sinon = require('sinon');
 const os = require('os');
-const MainConfigLoader = require('../../../src/config/main_config_loader');
+const MainConfigLoader = require(mainConfigLoaderPath);
 
 describe('MainConfigLoader (1.4.3)', () => {
     let osHomdirStub;

@@ -1,6 +1,7 @@
 // test/integration/core/default-handler.test.2.2.14.js
+const { defaultHandlerPath } = require('@paths');
 
-const DefaultHandler = require('../../../src/core/default_handler');
+const DefaultHandler = require(defaultHandlerPath);
 const path = require('path');
 
 describe('DefaultHandler (L2Y2) - Scenario 2.2.14: lang Attribute Handling', function() {

@@ -1,10 +1,11 @@
 // test/integration/plugins/plugin-manager.test.1.5.1.js
+const { pluginManagerPath } = require('@paths');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 
 // Import the refactored PluginManager
-const PluginManager = require('../../../src/plugins/PluginManager');
+const PluginManager = require(pluginManagerPath);
 
 describe('PluginManager constructor (1.5.1)', () => {
     let pluginManager;

@@ -1,4 +1,5 @@
 // src/core/markdown_utils.js
+const { mathIntegrationPath } = require('@paths');
 
 /**
  * @fileoverview Provides utility functions for Markdown processing, including
@@ -16,7 +17,7 @@ const matter = require('gray-matter');
 const MarkdownIt = require('markdown-it');
 const anchorPlugin = require('markdown-it-anchor');
 const tocPlugin = 'markdown-it-toc-done-right';
-const createMathIntegration = require('./math_integration');
+const createMathIntegration = require(mathIntegrationPath);
 const mathIntegration = createMathIntegration();
 
 

@@ -13,7 +13,8 @@ function getCachePath() {
 }
 
 function triggerCacheUpdate() {
-    const scriptPath = path.resolve(__dirname, '../../scripts/completion', 'generate-completion-dynamic-cache.js');
+    const { completionRoot } = require('@paths');
+    const scriptPath = path.join(completionRoot, 'generate-completion-dynamic-cache.js');
     if (!fs.existsSync(scriptPath)) {
         return;
     }

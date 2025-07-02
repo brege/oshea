@@ -2,6 +2,7 @@
 const { expect } = require('chai');
 const path = require('path');
 const MainConfigLoader = require('../../../src/config/main_config_loader');
+const { defaultConfigPath, factoryDefaultConfigPath } = require('@paths');
 
 describe('MainConfigLoader (1.4.1)', () => {
     describe('constructor', () => {
@@ -15,10 +16,9 @@ describe('MainConfigLoader (1.4.1)', () => {
             expect(loader.projectRoot).to.equal(testProjectRoot);
 
             // Assert that defaultMainConfigPath is correctly derived from projectRoot
-            expect(loader.defaultMainConfigPath).to.equal(path.join(testProjectRoot, 'config.yaml'));
-
+            expect(loader.defaultMainConfigPath).to.equal(defaultConfigPath);
             // Assert that factoryDefaultMainConfigPath is correctly derived from projectRoot
-            expect(loader.factoryDefaultMainConfigPath).to.equal(path.join(testProjectRoot, 'config.example.yaml'));
+            expect(loader.factoryDefaultMainConfigPath).to.equal(factoryDefaultConfigPath);
         });
     });
 });

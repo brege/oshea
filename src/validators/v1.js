@@ -6,6 +6,7 @@ const { execSync } = require('child_process');
 const chalk = require('chalk');
 const yaml =require('js-yaml');
 const os = require('os');
+const { projectRoot, cliPath, mochaPath, nodeModulesPath } = require('@paths');
 
 /**
  * Helper function to check README.md front matter for v1 protocol.
@@ -95,15 +96,13 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
     console.log(chalk.green(`    [✔] Found E2E test file: '${path.basename(e2eTestPath)}'`));
     try {
         console.log(chalk.cyan(`    Running in-situ E2E test...`));
-        const projectRoot = path.resolve(__dirname, '../../');
-        const mochaPath = path.join(projectRoot, 'node_modules', 'mocha', 'bin', 'mocha');
         const command = `node "${mochaPath}" "${e2eTestPath}" --no-config --no-opts`;
         execSync(command, {
             cwd: projectRoot,
             stdio: 'pipe',
             env: {
                 ...process.env, // Inherit existing environment variables
-                NODE_PATH: path.join(projectRoot, 'node_modules') // Add project's node_modules
+                NODE_PATH: nodeModulesPath 
             }
         });
         console.log(chalk.green(`    [✔] In-situ test passes.`));
@@ -136,8 +135,8 @@ const runSelfActivation = (pluginDirectoryPath, pluginName, errors, warnings) =>
         console.log(chalk.red(`    [✖] Self-activation check failed (missing example/config).`));
         return;
     }
-    const projectRoot = path.resolve(__dirname, '../../');
-    const cliPath = path.join(projectRoot, 'cli.js');
+    const { projectRoot } = require('@paths');
+    const { cliPath } = require('@paths');
     const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), `md-to-pdf-test-${pluginName}-`));
     try {
         const command = `node "${cliPath}" convert "${exampleMdPath}" --outdir "${tempOutputDir}" --no-open`;

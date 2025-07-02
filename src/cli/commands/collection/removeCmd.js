@@ -35,7 +35,7 @@ module.exports = {
     try {
       await manager.removeCollection(args.collection_name, { force: args.force });
 
-      const cliPath = path.resolve(__dirname, '../../../../cli.js');
+      const { cliPath } = require('@paths');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);

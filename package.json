@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.10.05",
+  "version": "0.10.06",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -12,7 +12,11 @@
     "generate": "node cli.js generate",
     "test": "mocha",
     "test:watch": "mocha --watch",
+    "test:telemetry": "node scripts/telemetry/test-watcher.js",
     "dep-tree": "madge --json src/"
+  },
+  "_moduleAliases": {
+    "@paths": "paths.js"
   },
   "keywords": [
     "markdown",
@@ -51,6 +55,7 @@
     "markdown-it": "^14.0.0",
     "markdown-it-anchor": "^8.6.7",
     "markdown-it-toc-done-right": "^4.2.0",
+    "module-alias": "^2.2.3",
     "puppeteer": "^22.0.0",
     "strip-ansi": "^6.0.1",
     "yargs": "^17.7.2"

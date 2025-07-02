@@ -1,7 +1,8 @@
 // test/integration/collections/collections-manager.test.2.1.27.js
+const { collectionsIndexPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const CollectionsManager = require('../../../src/collections');
+const CollectionsManager = require(collectionsIndexPath);
 
 // Test suite for Scenario 2.1.27
 describe('CollectionsManager listAvailablePlugins (2.1.27)', () => {

@@ -1,8 +1,9 @@
 // test/integration/collections/collections-manager.test.2.1.5.js
+const { collectionsIndexPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const path = require('path');
-const CollectionsManager = require('../../../src/collections');
+const CollectionsManager = require(collectionsIndexPath);
 
 // Test suite for Scenario 2.1.5
 describe('CollectionsManager addCollection Error Handling (2.1.5)', () => {

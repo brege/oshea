@@ -11,6 +11,14 @@ const DEFAULT_GLOB_IGNORES = [
   '**/pdf-generator.test.2.3.10.js',
 ];
 
+// Directory names to ignore (non-glob)
+const DEFAULT_DIR_IGNORES = [
+  'node_modules',
+  '.git',
+  'assets',
+  '*-devel'
+];
+
 // Centralized glob patterns for JS/MJS files
 const DEFAULT_PATTERNS = ['**/*.{js,mjs}'];
 

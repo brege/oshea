@@ -1,7 +1,7 @@
 // paths.js
 const path = require('path');
 
-// Project root [paths.js lives here] 
+// Project root [paths.js lives here]
 const projectRoot = __dirname;
 
 // Top-level source directory
@@ -10,9 +10,16 @@ const srcRoot = path.join(projectRoot, 'src');
 // CLI entry points and directories
 const cliPath = path.join(projectRoot, 'cli.js');
 const cliRoot = path.join(srcRoot, 'cli');
+const cliCommandsPath = path.join(cliRoot, 'commands');
 
 const getHelpPath = path.join(cliRoot, 'get_help.js');
 const configDisplayPath = path.join(cliRoot, 'config_display.js');
+
+// Templates
+const templateBasicPlugin = path.join(projectRoot, 'plugins', 'template-basic');
+const configExamplePath = path.join(projectRoot, 'config.example.yaml');
+const defaultConfigPath = path.join(projectRoot, 'config.yaml')
+const factoryDefaultConfigPath = path.join(projectRoot, 'config.example.yaml');
 
 // Collections
 const collectionsRoot = path.join(srcRoot, 'collections');
@@ -32,6 +39,7 @@ const completionRoot = path.join(srcRoot, 'completion');
 const cliTreeBuilderPath = path.join(completionRoot, 'cli-tree-builder.js');
 const completionEnginePath = path.join(completionRoot, 'engine.js');
 const completionTrackerPath = path.join(completionRoot, 'tracker.js');
+const dynamicCompletionScriptPath = path.join(projectRoot, 'scripts', 'completion', 'generate-completion-dynamic-cache.js');
 
 // Config
 const configRoot = path.join(srcRoot, 'config');
@@ -57,6 +65,10 @@ const v1ValidatorPath = path.join(validatorsRoot, 'v1.js');
 const utilsRoot = path.join(srcRoot, 'utils');
 const assetResolverPath = path.join(utilsRoot, 'asset_resolver.js');
 
+// Node Modules
+const nodeModulesPath = path.join(projectRoot, 'node_modules');
+const mochaPath = path.join(nodeModulesPath, 'mocha', 'bin', 'mocha');
+
 // Export all anchors
 module.exports = {
   projectRoot,
@@ -64,9 +76,17 @@ module.exports = {
 
   // CLI
   cliRoot,
+
   cliPath,
+  cliCommandsPath,
   getHelpPath,
   configDisplayPath,
+
+  // Templates
+  templateBasicPlugin,
+  configExamplePath,
+  defaultConfigPath,
+  factoryDefaultConfigPath,
 
   // Collections
   collectionsRoot,
@@ -86,6 +106,7 @@ module.exports = {
   cliTreeBuilderPath,
   completionEnginePath,
   completionTrackerPath,
+  dynamicCompletionScriptPath,
 
   // Config
   configRoot,
@@ -110,5 +131,8 @@ module.exports = {
   // Utils
   utilsRoot,
   assetResolverPath,
-};
 
+  // Node Modules
+  nodeModulesPath,
+  mochaPath,
+};

@@ -1,7 +1,8 @@
 // test/integration/plugins/plugin-registry-builder.test.1.2.18.js
+const { pluginRegistryBuilderPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginRegistryBuilder = require('../../../src/plugins/PluginRegistryBuilder');
+const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 
 // Test suite for Scenario 1.2.18
 describe('PluginRegistryBuilder _getPluginRegistrationsFromCmManifest (1.2.18)', () => {

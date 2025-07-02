@@ -1,7 +1,8 @@
 // test/integration/config/plugin-config-loader.test.1.6.4.js
+const { pluginConfigLoaderPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginConfigLoader = require('../../../src/config/plugin_config_loader');
+const PluginConfigLoader = require(pluginConfigLoaderPath);
 
 describe('PluginConfigLoader _loadSingleConfigLayer (1.6.4)', () => {
     let mockFs;

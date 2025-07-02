@@ -1,4 +1,5 @@
 // test/setup.js
+require('module-alias/register');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const path = require('path');

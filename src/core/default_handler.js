@@ -3,6 +3,14 @@ const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');
 
+// --- Imports from Path Registry ---
+const {
+    markdownUtilsPath,
+    pdfGeneratorPath,
+    mathIntegrationPath
+} = require('@paths');
+
+// --- Original requires, now using path anchors ---
 const {
     extractFrontMatter,
     removeShortcodes,
@@ -10,10 +18,10 @@ const {
     generateSlug,
     ensureAndPreprocessHeading,
     substituteAllPlaceholders
-} = require('./markdown_utils');
+} = require(markdownUtilsPath);
 
-const { generatePdf } = require('./pdf_generator');
-const createMathIntegration = require('./math_integration');
+const { generatePdf } = require(pdfGeneratorPath);
+const createMathIntegration = require(mathIntegrationPath);
 const mathIntegration = createMathIntegration();
 
 class DefaultHandler {

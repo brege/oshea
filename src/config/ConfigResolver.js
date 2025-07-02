@@ -3,11 +3,13 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const Ajv = require('ajv');
-const { loadYamlConfig, deepMerge } = require('./config_utils');
-const PluginRegistryBuilder = require('../plugins/PluginRegistryBuilder');
-const MainConfigLoader = require('./main_config_loader');
-const PluginConfigLoader = require('./plugin_config_loader');
-const AssetResolver = require('../utils/asset_resolver');
+const { configUtilsPath, pluginRegistryBuilderPath, mainConfigLoaderPath, pluginConfigLoaderPath, assetResolverPath } = require('@paths');
+
+const { loadYamlConfig, deepMerge } = require(configUtilsPath);
+const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
+const MainConfigLoader = require(mainConfigLoaderPath);
+const PluginConfigLoader = require(pluginConfigLoaderPath);
+const AssetResolver = require(assetResolverPath);
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 

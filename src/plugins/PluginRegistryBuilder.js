@@ -2,9 +2,9 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { loadConfig: loadYamlConfig } = require('../core/markdown_utils');
+const { markdownUtilsPath, defaultConfigPath, factoryDefaultConfigPath } = require('@paths');
+const { loadConfig: loadYamlConfig } = require(markdownUtilsPath);
 const yaml = require('js-yaml');
-const { defaultConfigPath, factoryDefaultConfigPath } = require('@paths');
 
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';

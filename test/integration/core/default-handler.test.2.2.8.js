@@ -1,9 +1,10 @@
 // test/integration/core/default-handler.test.2.2.8.js
+const { defaultHandlerPath } = require('@paths');
 
 // The 'expect' and 'sinon' globals are provided by test/setup.js
 // along with stubbed versions of the modules being tested.
 // The DefaultHandler class will be the one whose dependencies are stubbed.
-const DefaultHandler = require('../../../src/core/default_handler'); // Path from test/default-handler/ to src/default_handler.js
+const DefaultHandler = require(defaultHandlerPath); // Path from test/default-handler/ to src/default_handler.js
 const path = require('path'); // Available globally via setup.js
 const fs = require('fs').promises; // Available globally via setup.js
 const fss = require('fs'); // Available globally via setup.js

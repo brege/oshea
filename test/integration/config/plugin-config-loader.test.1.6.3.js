@@ -1,7 +1,8 @@
 // test/integration/config/plugin-config-loader.test.1.6.3.js
+const { pluginConfigLoaderPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginConfigLoader = require('../../../src/config/plugin_config_loader'); // Path to the refactored module
+const PluginConfigLoader = require(pluginConfigLoaderPath); // Path to the refactored module
 
 describe('PluginConfigLoader _loadSingleConfigLayer (1.6.3)', () => {
     let mockFs;

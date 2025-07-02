@@ -1,9 +1,9 @@
 // test/integration/config/main-config-loader.test.1.4.10.js
+const { mainConfigLoaderPath, defaultConfigPath, factoryDefaultConfigPath } = require('@paths');
 const { expect } = require('chai');
 const path = require('path');
 const sinon = require('sinon');
-const MainConfigLoader = require('../../../src/config/main_config_loader');
-const { defaultConfigPath, factoryDefaultConfigPath } = require('@paths');
+const MainConfigLoader = require(mainConfigLoaderPath);
 
 describe('MainConfigLoader (1.4.10)', () => {
     let fsMock;

@@ -1,7 +1,8 @@
 // test/integration/config/plugin-config-loader.test.1.6.1.js
+const { pluginConfigLoaderPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const PluginConfigLoader = require('../../../src/config/plugin_config_loader'); // Adjust path as needed for project root
+const PluginConfigLoader = require(pluginConfigLoaderPath); // Adjust path as needed for project root
 
 describe('PluginConfigLoader constructor (1.6.1)', () => {
     let mockFs;

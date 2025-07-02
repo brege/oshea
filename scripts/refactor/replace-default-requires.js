@@ -1,7 +1,9 @@
 // scripts/refactor/replace-default-requires.js
+
 const path = require('path');
 const fs = require('fs');
 const { findFiles } = require('../shared/file-helpers');
+const { classifyRequireLine } = require('./require-classifier');
 
 // 1. Load all anchors from paths.js
 const paths = require('../../paths.js');
@@ -25,52 +27,64 @@ function findInsertIndex(lines) {
   return idx;
 }
 
-// 4. Process files
-for (const file of findFiles('src', {
-  filter: fname => fname.endsWith('.js') || fname.endsWith('.mjs'),
-})) {
-  let lines = fs.readFileSync(file, 'utf8').split('\n');
-  let changed = false;
-  let anchorsNeeded = new Set();
+// 4. Allow custom root (src or test)
+const roots = process.argv.slice(2).length ? process.argv.slice(2) : ['src'];
 
-  lines = lines.map((line) => {
-    const match = line.match(defaultRequireRegex);
-    if (!match) return line;
+for (const root of roots) {
+  for (const file of findFiles(root, {
+    filter: fname => fname.endsWith('.js') || fname.endsWith('.mjs'),
+  })) {
+    let lines = fs.readFileSync(file, 'utf8').split('\n');
+    let changed = false;
+    let anchorsNeeded = new Set();
 
-    const reqPath = match[3];
-    // Resolve require path to absolute
-    let absTarget = path.resolve(path.dirname(file), reqPath);
-    if (!absTarget.endsWith('.js')) absTarget += '.js';
-    let anchor = anchorMap[absTarget];
+    lines = lines.map((line) => {
+      const match = line.match(defaultRequireRegex);
+      if (!match) return line;
 
-    // Try without .js if not found (covers both require('./foo') and require('./foo.js'))
-    if (!anchor) {
-      const absTargetNoJs = absTarget.replace(/\.js$/, '');
-      anchor = anchorMap[absTargetNoJs];
+      // Use the classifier to skip package/builtin requires
+      const classification = classifyRequireLine(line);
+      if (!classification || classification.type !== 'pathlike') {
+        // Not a pathlike require, skip rewrite
+        return line;
+      }
+
+      const reqPath = match[3];
+      // Resolve require path to absolute
+      let absTarget = path.resolve(path.dirname(file), reqPath);
+      if (!absTarget.endsWith('.js')) absTarget += '.js';
+      let anchor = anchorMap[absTarget];
+
+      // Try without .js if not found (covers both require('./foo') and require('./foo.js'))
+      if (!anchor) {
+        const absTargetNoJs = absTarget.replace(/\.js$/, '');
+        anchor = anchorMap[absTargetNoJs];
+      }
+
+      if (!anchor) {
+        // Only warn for pathlike requires
+        console.warn(`[NO ANCHOR] ${file}: ${line.trim()}  -->  ${absTarget}`);
+        return line;
+      }
+
+      anchorsNeeded.add(anchor);
+      changed = true;
+      // Replace with anchor
+      return line.replace(/require\((['"`])(.*?)\1\)/, `require(${anchor})`);
+    });
+
+    if (changed && anchorsNeeded.size > 0) {
+      // Remove any old destructured @paths import
+      lines = lines.filter(l => !l.match(/^const\s+\{[^}]+\}\s*=\s*require\(['"]@paths['"]\);/));
+
+      // Insert new destructured @paths import at the right spot
+      const anchorLine = `const { ${Array.from(anchorsNeeded).join(', ')} } = require('@paths');`;
+      const insertIdx = findInsertIndex(lines);
+      lines.splice(insertIdx, 0, anchorLine);
+
+      fs.writeFileSync(file, lines.join('\n'), 'utf8');
+      console.log(`Refactored: ${file}`);
     }
-
-    if (!anchor) {
-      console.warn(`[NO ANCHOR] ${file}: ${line.trim()}  -->  ${absTarget}`);
-      return line;
-    }
-
-    anchorsNeeded.add(anchor);
-    changed = true;
-    // Replace with anchor
-    return line.replace(/require\((['"`])(.*?)\1\)/, `require(${anchor})`);
-  });
-
-  if (changed && anchorsNeeded.size > 0) {
-    // Remove any old destructured @paths import
-    lines = lines.filter(l => !l.match(/^const\s+\{[^}]+\}\s*=\s*require\(['"]@paths['"]\);/));
-
-    // Insert new destructured @paths import at the right spot
-    const anchorLine = `const { ${Array.from(anchorsNeeded).join(', ')} } = require('@paths');`;
-    const insertIdx = findInsertIndex(lines);
-    lines.splice(insertIdx, 0, anchorLine);
-
-    fs.writeFileSync(file, lines.join('\n'), 'utf8');
-    console.log(`Refactored: ${file}`);
   }
 }
 

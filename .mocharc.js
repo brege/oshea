@@ -10,7 +10,7 @@ const group = argv.group || (hasFiles ? 'custom' : 'all');
 console.log(`[Mocha] Running test group: '${group}'`);
 
 const paths = {
-    // --- Subsystem & Module Integration Test Paths (Updated) ---
+    // --- Subsystem & Module Integration Test Paths ---
     // Rank 0
     default_handler: 'test/integration/core/default-handler.*.js',
     pdf_generator: 'test/integration/core/pdf-generator.*.js',
@@ -26,7 +26,7 @@ const paths = {
     math_integration:'test/integration/math_integration/math_integration.*.js',
     cm_utils: 'test/integration/collections/cm-utils.*.js',
 
-    // --- End-to-End Test Paths (Unchanged) ---
+    // --- End-to-End Test Paths ---
     // Level 2
     plugin_validator: 'test/e2e/plugin-validator.*.js',
     // Level 3
@@ -98,15 +98,13 @@ const groups = {
         paths.global_flags,
     ],
     level4: [paths.workflow_lifecycle, paths.sad_paths],
+
     // --- Subsystem & Module Integration Tests ---
-    integration: [
-        'test/integration/**/*.js'
-    ],
+    integration: ['test/integration/**/*.js'],
+
     // --- End-to-End Tests ---
-    e2e: [
-        'test/e2e/**/*.js',
-        paths.insitu_e2e
-    ],
+    e2e: ['test/e2e/**/*.js', paths.insitu_e2e],
+ 
     // --- By Toolchain ---
     config: [
         paths.ConfigResolver,
@@ -115,29 +113,27 @@ const groups = {
         paths.plugin_determiner,
         paths.PluginRegistryBuilder
     ],
-    //  By Specific Study ---
     validator: [paths.plugin_validator, paths.plugin_validate],
     insitu: [paths.insitu_e2e],
-    debug: [paths.main_config_loader], //'test/integration/main-config-loader/**/*.1.4.15.js'],
-    // Default
+
+    // --- By Specific Study ---
+    debug: [paths.main_config_loader],
+
+    // --- Default ---
     all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/.contract/test/*.test.js']
 };
 
 // If files are specified on the CLI, use them; else use group logic
 const spec = hasFiles ? argv._ : (groups[group] || groups.all);
+// npm test -- --group level3
+// npm test -- 'test/integration/main-config-loader/**/*.1.4.15.js'
 
-// Start with the base config.
 const mochaConfig = {
     spec: spec,
-    timeout: 20000, // Increased timeout for E2E tests
+    timeout: 20000, // Increased timeout for lifecycle tests
     exit: true,
     color: true,
-    ignore: 'test/e2e/*.manifest.js'
+    require: 'test/setup.js'
 };
-
-// Conditionally add the 'require' property only if the group is not an E2E group
-if (group !== 't4' && group !== 'e2e' && group !== 'level3' && group !== 'validator' && group !== 'insitu') {
-    mochaConfig.require = 'test/setup.js';
-}
 
 module.exports = mochaConfig;

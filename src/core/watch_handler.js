@@ -1,9 +1,10 @@
 // src/core/watch_handler.js
+const { configResolverPath } = require('@paths');
 const path = require('path');
 const fsp = require('fs').promises;
 const fs = require('fs');
 const chokidar = require('chokidar');
-const ConfigResolver = require('../config/ConfigResolver');
+const ConfigResolver = require(configResolverPath);
 
 async function setupWatch(args, configResolverForInitialPaths, commandExecutor) {
     let isProcessing = false;

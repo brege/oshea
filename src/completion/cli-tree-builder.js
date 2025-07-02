@@ -5,7 +5,7 @@ const path = require('path');
 const chalk = require('chalk');
 
 // --- Configuration ---
-const { cliCommandsPath } = require('@paths');
+const { cliCommandsPath, convertCmdPath } = require('@paths'); // Added convertCmdPath
 const COMMANDS_DIR = cliCommandsPath;
 
 // --- Dynamic Proxy Yargs Stub ---
@@ -36,11 +36,6 @@ function createYargsStub() {
 }
 
 // --- Command Tree Discovery ---
-function parseBaseCommand(commandDef) {
-    const cmdString = Array.isArray(commandDef) ? commandDef[0] : commandDef;
-    return cmdString.split(' ')[0];
-}
-
 function discoverCommandTree(dir, prefixParts = []) {
     const nodesMap = new Map();
     const entries = fs.readdirSync(dir);
@@ -54,7 +49,7 @@ function discoverCommandTree(dir, prefixParts = []) {
         let defaultCommandOptions = [];
 
         try {
-            const convertCmdModule = require('../cli/commands/convertCmd');
+            const convertCmdModule = require(convertCmdPath); // Refactored Line
             const defaultCmdStub = createYargsStub();
             if (typeof convertCmdModule.defaultCmd.builder === 'function') {
                 convertCmdModule.defaultCmd.builder(defaultCmdStub);

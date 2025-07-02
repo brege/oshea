@@ -1,4 +1,5 @@
 // src/plugins/validator.js
+const { v1ValidatorPath } = require('@paths');
 
 const fs = require('fs');
 const path = require('path');
@@ -6,7 +7,7 @@ const chalk = require('chalk');
 const yaml = require('js-yaml');
 
 // Load versioned validators
-const v1Validator = require('../validators/v1');
+const v1Validator = require(v1ValidatorPath);
 
 /**
  * Resolves the absolute path and name of a plugin.

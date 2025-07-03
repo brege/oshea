@@ -1,7 +1,8 @@
 // test/integration/collections/cm-utils.test.1.8.1.js
+const { cmUtilsPath } = require("@paths");
 
 const { expect } = require('chai');
-const { deriveCollectionName } = require('../../../src/collections/cm-utils');
+const { deriveCollectionName } = require(cmUtilsPath);
 
 describe('L1C8.1: deriveCollectionName - Basic Functionality and Edge Cases', () => {
   it('1.8.1.1 should correctly derive a sanitized name from a full Git URL', () => {

@@ -1,7 +1,8 @@
 // test/integration/collections/cm-utils.test.1.8.2.js
+const { cmUtilsPath } = require("@paths");
 
 const { expect } = require('chai');
-const { toPascalCase } = require('../../../src/collections/cm-utils');
+const { toPascalCase } = require(cmUtilsPath);
 
 describe('L1C8.2: toPascalCase - String Conversion', () => {
   it('1.8.2.1 should convert a hyphenated string to PascalCase', () => {

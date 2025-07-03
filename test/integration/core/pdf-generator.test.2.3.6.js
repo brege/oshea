@@ -1,7 +1,8 @@
 // test/integration/core/pdf-generator.test.2.3.6.js
+const { pdfGeneratorPath } = require("@paths");
 
 // Require the actual pdf_generator module for testing its internal logic
-const { generatePdf } = require('../../../src/core/pdf_generator');
+const { generatePdf } = require(pdfGeneratorPath);
 // Require puppeteer to stub its methods
 const puppeteer = require('puppeteer');
 // Access global test utilities from setup.js

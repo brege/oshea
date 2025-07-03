@@ -1,8 +1,9 @@
 // test/integration/plugins/plugin_determiner.test.js
+const { pluginDeterminerPath } = require("@paths");
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
-const { determinePluginToUse } = require('../../../src/plugins/plugin_determiner'); // Direct import of the module under test
+const { determinePluginToUse } = require(pluginDeterminerPath); // Direct import of the module under test
 
 // Import the manifest containing test cases
 const testManifest = require('./plugin_determiner.manifest');
@@ -55,7 +56,7 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
         };
 
         // Re-require determinePluginToUse *after* mocks (especially global ones) are set up.
-        determinePluginToUse = require('../../../src/plugins/plugin_determiner').determinePluginToUse;
+        determinePluginToUse = require(pluginDeterminerPath).determinePluginToUse;
 
         // Setup console stubs after all other setup.
         consoleLogStub = sinon.stub(console, 'log');

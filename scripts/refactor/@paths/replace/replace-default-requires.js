@@ -1,12 +1,12 @@
-// scripts/refactor/replace-default-requires.js
+// scripts/refactor/@paths/replace/replace-default-requires.js
 
 const path = require('path');
 const fs = require('fs');
-const { findFiles } = require('../shared/file-helpers');
-const { classifyRequireLine } = require('./require-classifier');
+const { findFiles } = require('../../../shared/file-helpers');
+const { classifyRequireLine } = require('../probe/require-classifier');
 
 // 1. Load all anchors from paths.js
-const paths = require('../../paths.js');
+const paths = require('../../../../paths.js');
 const anchorMap = {};
 for (const [anchor, absPath] of Object.entries(paths)) {
   if (typeof absPath === 'string' && absPath.endsWith('.js')) {
@@ -95,4 +95,3 @@ for (const root of roots) {
     }
   }
 }
-

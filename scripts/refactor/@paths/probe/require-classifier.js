@@ -1,4 +1,4 @@
-// scripts/refactor/require-classifier.js
+// scripts/refactor/@paths/probe/require-classifier.js
 
 /**
  * Classifies a require() call as 'pathlike', 'package', or null (not a require).

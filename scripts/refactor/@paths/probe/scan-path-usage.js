@@ -1,11 +1,11 @@
-// scripts/scan-path-usage.js
+// scripts/refactor/@paths/probe/scan-path-usage.js
 
 // This script scans a directory for files that use pathing patterns
 // of the type that are NOT in require(), path.join(), or path.resolve().
 
 const path = require('path');
 const fs = require('fs');
-const { findFiles } = require('../../shared/file-helpers');
+const { findFiles } = require('../../../shared/file-helpers');
 
 // Regexes for various pathing patterns
 const patterns = [
@@ -55,4 +55,3 @@ function main() {
 if (require.main === module) {
   main();
 }
-

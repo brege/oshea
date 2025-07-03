@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/refactor/replace-pattern.js
+// scripts/refactor/@paths/replace/replace-pattern.js
 
 const fs = require('fs');
 const path = require('path');

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/refactor/probe-require-and-path.js
+// scripts/refactor/@paths/probe/probe-require-and-path.js
 
 // This script scans a directory for files that use pathing patterns
 // of the type that ARE in require(), path.join(), or path.resolve().
@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
-const { getPatternsFromArgs, getDefaultGlobIgnores } = require('../../shared/file-helpers');
+const { getPatternsFromArgs, getDefaultGlobIgnores } = require('../../../shared/file-helpers');
 
 // --- Configuration & CLI Argument Parsing ---
 const PROJECT_ROOT = process.cwd();

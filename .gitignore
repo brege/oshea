@@ -33,8 +33,8 @@ community_plugins/*
 config.yaml
 /config/
 
-# Optional: ignore built shell outputs if any
-*.sh
+# Optional: ignore one-off shell outputs in the repo root
+/*.sh
 
 # Optional: npm debug files
 npm-debug.log*

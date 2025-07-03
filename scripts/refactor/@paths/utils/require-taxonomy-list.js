@@ -1,8 +1,8 @@
-// scripts/refactor/require-taxonomy-list.js
+// scripts/refactor/@paths/utils/require-taxonomy-list.js
 const path = require('path');
 const fs = require('fs');
-const { findFiles } = require('../shared/file-helpers');
-const { classifyRequireLine } = require('./require-classifier');
+const { findFiles } = require('../../../shared/file-helpers');
+const { classifyRequireLine } = require('../probe/require-classifier');
 
 // Parse CLI args
 const showPackageType = process.argv.includes('--show-package-type');
@@ -83,4 +83,3 @@ if (showPackageType && taxonomy.package.length) {
     console.log(`${file}:${line}\t"${requiredPath}"\t${code}`);
   }
 }
-

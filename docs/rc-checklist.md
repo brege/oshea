@@ -15,13 +15,13 @@
 | ✔ | Auto    | **`scripts/index.md`**                  | `node scripts/docs/update-scripts.js`  |
 |   |         | [ **Phase 2** ]                         | **Strategic Synthesis**                |
 | ○ | **New** | **`docs/dream-board-v0.10.md`**         | Retrospect of reorg + new priorities   |
-| ○ | Low     | **`test/README.md`**                    | Modernize                              |
+| ✔ | Low     | **`test/README.md`**                    | Modernize                              |
 | ✔ | Low     | **`docs/reorganization-planner.md`**    | Move to `docs/archive/v0.10/`          |
 |   |         | [ **Phase 3** ]                         | **Future-Facing Content**              |
 | ○ | **New** | `docs/guides/` + `test/e2ewalkthroughs/`| Rearrange `e2e`, lifecycles            |
 | ○ | **New** | `docs/robots/`                          | AI specification documents**           |
 
-
+At the onset of the above task table, all documents were in a v0.9.00 state and need to be updated to v0.10.x state. 
 
 #### Repo Health
 

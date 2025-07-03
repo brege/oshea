@@ -16,8 +16,8 @@ Follow these steps from the **repository root directory**.
 First, run the `require-catalogue.js` script. This scans the codebase and creates a `require-catalogue.json` file in the root of the repository, which maps every module and its dependencies.
 
 ```bash
-node scripts/repo-health/fix-require-paths/require-catalogue.js
-````
+node scripts/refactor/fix-require-paths/require-catalogue.js
+```
 
 ### Step 2: Run the Automated Path Replacer
 
@@ -26,7 +26,7 @@ Next, run the `replace-requires.js` script with the `--write` flag. This script 
 It will also generate a "Degenerate Basename Report" for any ambiguous paths it could not resolve.
 
 ```bash
-node scripts/repo-health/fix-require-paths/replace-requires.js --write
+node scripts/refactor/fix-require-paths/replace-requires.js --write
 ```
 
 ### Step 3: Validate and Identify Remaining Issues
@@ -34,12 +34,12 @@ node scripts/repo-health/fix-require-paths/replace-requires.js --write
 Finally, run the `path-validator.sh` script. This utility checks all relative `require()` paths in the project and produces a definitive list of all remaining broken links.
 
 ```bash
-bash scripts/repo-health/fix-require-paths/path-validator.sh
+bash scripts/refactor/fix-require-paths/require-path-validator.sh
 ```
 
 ### Step 4: Manual Cleanup
 
-The output from the validator script is your to-do list for manual cleanup. The remaining errors will be "Ghost" and "Degenerate" modules that require your direct intervention.
+The output from the validator script is your to-do list for manual cleanup. The remaining errors will be "Ghost" and "Degenerate" modules that you need to address manually.
 
 Based on the latest run, the manual fixes fall into these patterns:
 
@@ -67,7 +67,7 @@ After all paths are repaired, you can run this utility script to ensure every `.
 The script will add or replace the first or second line of each file with `// path/to/your/file.js`. It intelligently handles files with and without shebangs (`#!`).
 
 ```bash
-bash scripts/repo-health/standardize-js-line-one-all.sh
+bash scripts/linting/standardize-js-line-one-all.sh
 ```
 
 By the end of this process, running the `path-validator.sh` script should produce no `MISSING` output.

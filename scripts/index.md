@@ -26,17 +26,54 @@ This document is a central index for all developer and automation scripts within
 
   - [ [`dump-code-comments.js`](linting/dump-code-comments.js) ] -- Dumps all code comments from a target directory for review and cleanup.
   - [ [`find-to-include-assertions.js`](linting/find-to-include-assertions.js) ] -- A utility to find potentially brittle `to.include` assertions within the test suite.
-  - [ [`standardize-js-line-one-all.sh`](linting/standardize-js-line-one-all.sh) ] -- A shell script to enforce a consistent header comment in all project `.js` files.
+  - [ [`standardize-js-line-one-all.js`](linting/standardize-js-line-one-all.js) ] -- A shell script to enforce a consistent header comment in all project `.js` files.
+  - [ [`strip-trailing-whitespace.js`](linting/strip-trailing-whitespace.js) ] -- A shell script to strip trailing whitespace from all project `.js` files.
 
 ### Refactoring & Auditing [ `refactor/` ]
 
-  - [ [`fix-require-paths/`](refactor/fix-require-paths/) ] -- A suite of tools to analyze and repair broken `require()` paths after large-scale file reorganizations.
-    - [ [`replace-requires.js`](refactor/fix-require-paths/replace-requires.js) ] -- Replaces paths in a target directory based on a require-catalogue.json file.
-    - [ [`require-catalogue.js`](refactor/fix-require-paths/require-catalogue.js) ] -- Generates a catalogue of `require()` paths in a target directory.
-    - [ [`require-path-validator.sh`](refactor/fix-require-paths/require-path-validator.sh) ] -- Validates that the `require()` paths in a target directory are correct.
-  - [ [`join-path-probe.js`](refactor/join-path-probe.js) ] -- Scans for `path.join` and `path.resolve` usage and performs crude, first-order checks if the resulting paths exist.
-  - [ [`mocha-path-validator.sh`](refactor/mocha-path-validator.sh) ] -- Validates that the test file paths and patterns in `.mocharc.js` are correct.
+  - [ [`fix-require-paths/`](refactor/fix-require-paths/) ]
+    -- A suite of tools to analyze and repair broken `require()` paths after large-scale file reorganizations.
+    - [ [`replace-requires.js`](refactor/fix-require-paths/replace-requires.js) ]
+      -- Replaces paths in a target directory based on a require-catalogue.json file.
+    - [ [`require-catalogue.js`](refactor/fix-require-paths/require-catalogue.js) ]
+      -- Generates a catalogue of `require()` paths in a target directory.
+  - [ [`@paths/`](refactor/@paths/) ]
+    -- A collection of tools to probe and replace brittle `require()` paths with modern `@paths` patterns.
+    - [ [`probe/`](refactor/@paths/probe/) ]
+      -- A collection of tools to scan for broken `require()` paths and taxonomize them.
+      - [ [`probe-require-and-path.js`](refactor/@paths/probe/probe-require-and-path.js) ]
+        -- For probind the three key pathed functions: `require()`, `path.join()`, and `path.resolve()`.
+      - [ [`require-classifier.js`](refactor/@paths/probe/require-classifier.js) ]
+        -- For classifying `require()` paths as 'pathlike', 'package', or `null`.
+      - [ [`scan-path-usage.js`](refactor/@paths/probe/scan-path-usage.js) ]
+        -- For scanning everything besides `probe-require-and-path.js`'s three key pathed functions.
 
+    - [ [`replace/`](refactor/@paths/replace/) ]
+      -- A collection of tools to replace brittle `require()` paths with modern `@paths` patterns.
+      - [ [`replace-default-requires.js`](refactor/@paths/replace/replace-default-requires.js) ]
+        -- For replacing `require()` static paths with `@paths` patterns.
+      - [ [`replace-pattern.js`](refactor/@paths/replace/replace-pattern.js) ]
+        -- A `sed`-like tool more useful for huge codebases--over-engineered in this case. 
+
+    - [ [`utils/`](refactor/@paths/utils/) ]
+      -- Useful pipes for slicing `require()` paths via `probe-require-and-path.js` and `scan-path-usage.js`.
+      - [ [`better_anchor_grep.sh`](refactor/@paths/utils/better_anchor_grep.sh) ] 
+        -- Useful for slicing by `--not-anchor` vs `--anchor` type require paths.
+      - [ [`better_cat.sh`](refactor/@paths/utils/better_cat.sh) ]
+        -- Condenses any output streams by `-n` flag (25% beginning, 50% middle, 25% end).
+      - [ [`better_grep.sh`](refactor/@paths/utils/better_grep.sh) ]
+        -- Very useful for detecting `..`, `./`, and `../` patterns in `require()`, `join()`, and `resolve()` paths.
+      - [ [`require-taxonomy-list.js`](refactor/@paths/utils/require-taxonomy-list.js) ]
+        -- Second layer for bucketing path-types: destructured, dynamic, chained, and static (default).
+
+  - [ [`validators/`](refactor/validators/) ]
+    -- A collection of tools to validate the paths or various organizers.
+    - [ [`mocha-path-validator.sh`](refactor/validators/mocha-path-validator.sh) ]
+      -- Validates that the test file paths and patterns in `.mocharc.js` are correct.
+    - [ [`paths-js-validator.js`](refactor/validators/paths-js-validator.js) ]
+      -- Validates that the paths in `paths.js` are correct.
+    - [ [`require-path-validator.sh`](refactor/validators/require-path-validator.sh) ] 
+      -- Validates that the `require()` paths in a target directory are correct.
 
 ### Test-Related Scripts [ `../test/scripts/` ]
 
@@ -50,9 +87,19 @@ This document is a central index for all developer and automation scripts within
   - [ [`ls-matching-tests.js`](../test/scripts/ls-matching-tests.js) ] -- Lists all test files `*.test.js` that correspond to a given test ID from a checklist.
   - [ [`qa-dashboard.js`](../test/scripts/qa-dashboard.js) ] -- Generates the comprehensive QA Dashboard in the main [Test README](../test/README.md) by synthesizing data from all other QA scripts.
 
+  We also support a crude version of **telemetry**, which watches the `src/` for changes
+  and then automatically runs the corresponding integration tests -- **Experimental**
+
+  - [ [`test-watcher.js`](telemetry/test-watcher.js) ]
+
+### Shared Scripts [ `shared/` ]
+
+  - [ [`file-helpers.js`](shared/file-helpers.js) ] -- Makes the rest of the Node.js scripts easier to point and shoot a file(s) and directories.
+
 ### Uncategorized Scripts
 
 New scripts will appear below after running **[`node ./scripts/docs/index-scripts.js`](docs/index-scripts.js),** or after changing paths.
+
 
 <!-- scripts-start -->
 

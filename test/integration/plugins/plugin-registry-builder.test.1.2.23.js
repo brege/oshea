@@ -4,34 +4,46 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 
-// Test suite for Scenario 1.2.23 (Corrected from 1.2.22)
+// Test suite for Scenario 1.2.23
 describe('PluginRegistryBuilder buildRegistry (1.2.23)', () => {
-    it('should only load from factory defaults when useFactoryDefaultsOnly is true', async () => {
+    it('should merge registrations from bundled, CM, and file sources in the correct order', async () => {
         // Arrange
         const mockDependencies = {
-            os: { homedir: () => '', platform: () => 'linux' },
-            path: { join: (a, b) => `${a}/${b}`, dirname: () => '', basename: () => 'config.example.yaml' },
-            fs: { existsSync: sinon.stub().returns(true) },
+            os: { homedir: () => '/fake/home', platform: () => 'linux' },
+            path: { join: (a, b) => `${a}/${b}`, dirname: () => '/fake/dir', basename: () => 'config.yaml', resolve: (p) => p },
+            fs: {
+                existsSync: sinon.stub().returns(true), // Assume all config files exist
+                statSync: sinon.stub().returns({ isDirectory: () => true }),
+                promises: { readdir: sinon.stub().resolves([]) }
+            },
             process: { env: {} },
-            // Add the mandatory collRoot dependency
             collRoot: '/fake/coll-root'
         };
-        const builder = new PluginRegistryBuilder('/fake/project', null, null, true, false, null, null, mockDependencies);
+        const builder = new PluginRegistryBuilder('/fake/project', null, '/fake/project/config.yaml', false, false, null, null, mockDependencies);
 
-        // Stub the internal method to track calls
+        // Stub all sources to return distinct plugins, including an override
+        sinon.stub(builder, '_registerBundledPlugins').resolves({ 'bundled-plugin': { sourceType: 'Bundled' }, 'override-me': { sourceType: 'Bundled' } });
+        sinon.stub(builder, '_getPluginRegistrationsFromCmManifest').resolves({ 'cm-plugin': { sourceType: 'CM' }, 'override-me': { sourceType: 'CM' } });
         const getFromFileStub = sinon.stub(builder, '_getPluginRegistrationsFromFile');
-        getFromFileStub.withArgs(builder.factoryDefaultMainConfigPath).resolves({ 'factory-plugin': {} });
+        getFromFileStub.withArgs(builder.xdgGlobalConfigPath).resolves({ 'xdg-plugin': {} });
+        getFromFileStub.withArgs(builder.projectManifestConfigPath).resolves({ 'project-plugin': {} });
 
         // Act
         const result = await builder.buildRegistry();
 
         // Assert
-        // 1. Verify it was called only once, for the factory default file.
-        expect(getFromFileStub.calledOnce).to.be.true;
-        expect(getFromFileStub.calledWith(builder.factoryDefaultMainConfigPath)).to.be.true;
+        // 1. Verify all sources were called.
+        expect(builder._registerBundledPlugins.calledOnce).to.be.true;
+        expect(builder._getPluginRegistrationsFromCmManifest.calledOnce).to.be.true;
+        expect(getFromFileStub.calledWith(builder.xdgGlobalConfigPath)).to.be.true;
+        expect(getFromFileStub.calledWith(builder.projectManifestConfigPath)).to.be.true;
 
-        // 2. Verify the result is from that single call.
-        expect(result).to.have.property('factory-plugin');
+        // 2. Verify the final registry has all plugins and the override was applied correctly.
+        expect(result).to.have.property('bundled-plugin');
+        expect(result).to.have.property('cm-plugin');
+        expect(result).to.have.property('xdg-plugin');
+        expect(result).to.have.property('project-plugin');
+        expect(result['override-me'].sourceType).to.equal('CM'); // CM overrides Bundled
     });
 
     afterEach(() => {

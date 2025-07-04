@@ -29,11 +29,11 @@ This reorganization will be conducted in a series of stages, beginning with prep
   - [x] [P4 | Step 1 -- Deprecate examples/ and Consolidate Assets](#p4-step-1-deprecate-examples-and-consolidate-assets)
   - [x] [P4 | Step 2 -- Update Test Configurations](#p4-step-2-update-test-configurations)
   - [x] [P4 | Step 3 -- Full System Verification](#p4-step-3-full-system-verification)
-- [ ] [D2 -- Stage 5 | Documentation Content Overhaul](#d2-stage-5-documentation-content-overhaul)
-- [ ] [ai -- Stage 6 | AI Reproducibility & Unified Examples](#ai-stage-6-ai-reproducibility-unified-examples)
-  - [ ] [ai.0 | Step 1 -- Unified Walkthroughs](#ai0-step-1-unified-walkthroughs)
-  - [ ] [ai.1 | Step 2 -- Machine-Readable Spec](#ai1-step-2-machine-readable-spec)
-  - [ ] [ai.2 | Step 3 -- AI Prompting Guide](#ai2-step-3-ai-prompting-guide)
+- [x] [D2 -- Stage 5 | Documentation Content Overhaul](#d2-stage-5-documentation-content-overhaul)
+- [x] [ai -- Stage 6 | AI Reproducibility & Unified Examples](#ai-stage-6-ai-reproducibility-unified-examples)
+  - [x] [ai.0 | Step 1 -- Unified Walkthroughs](#ai0-step-1-unified-walkthroughs)
+  - [x] [ai.1 | Step 2 -- Machine-Readable Spec](#ai1-step-2-machine-readable-spec)
+  - [x] [ai.2 | Step 3 -- AI Prompting Guide](#ai2-step-3-ai-prompting-guide)
 <!-- toc-end -->
 
 
@@ -416,7 +416,7 @@ To create the final assets that allow both an AI and a human developer to reliab
 
 This is the consolidating task. We will create a single set of "walkthrough" documents that serve as the primary example/tutorial resource.
 
-> **Each walkthrough's steps will directly mirror the automated Level 4 E2E tests.**
+> **Each walkthrough's steps will directly mirror the automated Level 4 E2E tests.** [**TODO**]
 
 These walkthroughs will become the new "examples" and "how-to's" for the project.
 

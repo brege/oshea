@@ -8,13 +8,20 @@ These plugins provide out-of-the-box functionality for various document types, d
 
 Here's a list of the plugins included in this bundled collection:
 
-* [**`advanced-card/`**](advanced-card/): A showcase plugin demonstrating custom HTML generation.
-* [**`cv/`**](cv/): Specifically designed for generating professional Curriculum Vitae (CV) documents.
-* [**`cover-letter/`**](cover-letter/): Tailored for creating formatted cover letters.
-* [**`default/`**](default/): A versatile, generic plugin for converting standard Markdown documents to PDF.
-* [**`recipe/`**](recipe/): Optimized for formatting individual recipe documents.
-* [**`recipe-book/`**](recipe-book/): A specialized plugin for compiling multiple recipes into a single, cohesive recipe book, typically invoked using the `generate` command.
-* [**`template-basic/`**](template-basic/): A minimal template plugin, useful as a starting point for creating new plugins via archetyping.
+* [**`advanced-card/`**](advanced-card/) [ [?](advanced-card/README.md) ]
+  -- A showcase plugin demonstrating custom HTML generation.
+* [**`cv/`**](cv/) [ [?](cv/README.md) ]
+  -- Specifically designed for generating professional Curriculum Vitae (CV) documents.
+* [**`cover-letter/`**](cover-letter/) [ [?](cover-letter/README.md) ]
+  -- Tailored for creating formatted cover letters.
+* [**`default/`**](default/) [ [?](default/README.md) ]
+  -- A versatile, generic plugin for converting standard Markdown documents to PDF.
+* [**`recipe/`**](recipe/) [ [?](recipe/README.md) ]
+  -- Optimized for formatting individual recipe documents.
+* [**`recipe-book/`**](recipe-book/) [ [?](recipe-book/README.md) ]
+  -- A specialized plugin for compiling multiple recipes into a single, cohesive recipe book, typically invoked using the `generate` command.
+* [**`template-basic/`**](template-basic/) [ [?](template-basic/README.md) ]
+  -- A minimal template plugin, useful as a starting point for creating new plugins via archetyping.
 
 ## How to Manage and Use These Plugins
 
@@ -82,3 +89,10 @@ You can change the styles (CSS) and PDF settings (page size, margins, etc.) of t
 Want to create a plugin for a document type not covered here, or build your own collection of plugins? `md-to-pdf` is designed for extensibility!
 
 **For a comprehensive guide on building your own plugins from scratch (including directory structure, handler scripts, and registration), please refer to the [Plugin Development Guide](../docs/guides/plugin-development.md).**
+
+
+
+<!-- uncategorized-start -->
+<!-- uncategorized-end -->
+
+

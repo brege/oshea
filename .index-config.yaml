@@ -1,0 +1,56 @@
+# .index-config.yaml
+#
+# Configuration for the unified project librarian. Each top-level key
+# represents an "indexing group". This file drives the behavior of the
+# `scripts/docs/update-project-indices.js` script.
+
+docs:
+  indexFile: "docs/index.md"
+  scanRoot: "docs"
+  fileExtensions:
+    - ".md"
+  excludePatterns:
+    - "docs/dream-board.md"
+    - "docs/images/**"
+  marker: "etc"
+
+plugins:
+  indexFile: "plugins/index.md"
+  scanRoot: "plugins"
+  fileExtensions:
+    - ".md"
+  excludePatterns:
+    - "plugins/**/index.md"
+    - "plugins/**/*-example.md"
+  marker: "plugins"
+
+scripts:
+  indexFile: "scripts/index.md"
+  scanRoot: "scripts"
+  fileExtensions:
+    - ".js"
+    - ".sh"
+    - ".mjs"
+  excludePatterns:
+    - "scripts/refactor/**"
+  marker: "scripts"
+
+refactor-scripts:
+  indexFile: "scripts/refactor/index.md"
+  scanRoot: "scripts/refactor"
+  fileExtensions:
+    - ".js"
+    - ".sh"
+  excludePatterns: []
+  marker: "scripts"
+
+test-scripts:
+  indexFile: "test/index.md"
+  scanRoot: 
+    - "test/docs"
+    - "test/scripts"
+  fileExtensions:
+    - ".js"
+    - ".md"
+  excludePatterns: [] 
+  marker: "test-scripts"

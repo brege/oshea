@@ -18,14 +18,14 @@
 | ✔ | Low     | **`test/README.md`**                    | Modernize                             |
 | ✔ | Low     | **`docs/reorganization-planner.md`**    | Move to `docs/archive/v0.10/`         |
 |   |         | [ **Phase 3** ]                         | **Future-Facing Content**             |
-| ● | **New** | `docs/guides/`+`test/e2e/walkthroughs/` | Rearrange `e2e`, lifecycles           |
+| ‖ | **New** | `docs/guides/`+`test/e2e/walkthroughs/` | Rearrange `e2e`, lifecycles           |
 | ✔ | **New** | `docs/ai/`                              | AI specification documents**          |
 |   |         | [ **Phase 4** ]                         | **Indexing & Navigation**             |
 | ✔ | Later   | `docs/index.md`                         | Organize by section                   |
 | ✔ | Later   | `test/README.md` → `test/index.md`      | Retool for consistency                |
 | ✔ | **New** | `scripts/refactor/index.md`             | Recursive indexing + delegation       |
-| ● | **New** | `plugins/README.md` → `plugins/index.md`| Script and modernize                  |
-| ● | **New** | `scripts/update-project-indices.js`     | Unified Tool 'n Doc Index Script      | 
+| ✔ | **New** | `plugins/README.md` → `plugins/index.md`| Script and modernize                  |
+| ✔ | **New** | `scripts/update-project-indices.js`     | Unified Tool 'n Doc Index Script      | 
 |   |         | [ **Phase 5** ]                         | **Marketability & Concision**         |
 | ○ | Finish  | **`README.md`**                         | **Update for v0.10**                  |
 

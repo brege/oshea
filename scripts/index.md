@@ -20,10 +20,19 @@ This document is a central index for all developer and automation scripts within
 
 ### AI Scripts [ `ai/` ] 
 
-  - [ [ai-context-generator.js](ai/ai-context-generator.js) ]
+  - [ [`ai-context-generator.js`](ai/ai-context-generator.js) ]
     -- Generates AI context from a source plugin as input and a context file as output to provide one big beautiful paste.
 
 ### Documentation [ `docs/` ]
+
+  * [ [`update-project-indices.js`](docs/update-project-indices.js) ]
+    -- The project's librarian of documentation and scripts.
+    * Produces indices for
+      [**`docs/`**](index.md),
+      [**`scripts/`**](../scripts/index.md),
+      [**`plugins/`**](../plugins/index.md), and
+      [**`test/`**](../test/index.md).  
+    * Configured via [`.index-config.yaml`](../.index-config.yaml) at the project root.
 
   - [ [`detect-js-code-references.mjs`](docs/detect-js-code-references.mjs) ]
     -- Audits Markdown files to find and validate relative links to `.js` source files.
@@ -33,7 +42,6 @@ This document is a central index for all developer and automation scripts within
     -- Automatically generates and updates the `help-text-checklist.md` to track CLI help text standardization.
   - [ [`generate-toc.js`](docs/generate-toc.js) ]
     -- A utility to generate a Table of Contents for a Markdown file based on its headings.
-  - [ [`index-docs.js`](docs/index-docs.js) ]
     -- Automatically generates the main documentation index `docs/index.md` by discovering all non-excluded Markdown files.
   - [ [`index-scripts.js`](docs/index-scripts.js) ]
     -- Generates this index file **`scripts/index.md`** by discovering all project scripts.
@@ -59,42 +67,25 @@ This document is a central index for all developer and automation scripts within
     - [ [`@paths/`](refactor/@paths/) ]
       -- A collection of tools to probe and replace brittle `require()` paths with modern `@paths` patterns.
     - [ [`fix-require-paths/`](refactor/fix-require-paths/) ]
-      -- A suite of tools to analyze and repair broken `require()` paths after large-scale file reorganizations.
+      -- A suite of tools to analyze and repair broken `require()` paths in the legacy codebase after the large-scale file reorganization.
     - [ [`validators/`](refactor/validators/) ]
-      -- A collection of tools to validate the paths or various organizers.
+      -- A collection of tools to validate the paths or various organizers like `.mocharc.js` and `paths.js`.
 
 ### Test-Related Scripts [ `../test/scripts/` ]
 
   These scripts are separated from the rest of the project scripts because they are only relevant to the test suite.  
-  The main test runner is managed by `mocha` via `npm test`.  See the [Test README](../test/README.md) for more information.
+  The main test runner is managed by `mocha` via `npm test`.
 
-  - [ [`extract-test-blocks-string.js`](../test/scripts/extract-test-blocks-string.js) ]
-    -- Extracts specific test-case blocks from checklist documents based on a search string.
-  - [ [`find-nonclosed-audits.js`](../test/scripts/find-nonclosed-audits.js) ]
-    -- Finds all entries in the [`audit-log.md`](../test/docs/audit-log.md) that are not marked as `CLOSED`.
-  - [ [`find-skipped-tests.js`](../test/scripts/find-skipped-tests.js) ]
-    -- Finds all tests in the codebase that are disabled with `it.skip()`.
-  - [ [`find-unchecked-tests.js`](../test/scripts/find-unchecked-tests.js) ]
-    -- Finds all tests in the Level 1-4 checklists that are not marked as complete.
-  - [ [`ls-matching-tests.js`](../test/scripts/ls-matching-tests.js) ]
-    -- Lists all test files `*.test.js` that correspond to a given test ID from a checklist.
-  - [ [`qa-dashboard.js`](../test/scripts/qa-dashboard.js) ]
-    -- Generates the comprehensive QA Dashboard in the main [Test README](../test/README.md) by synthesizing data from all other QA scripts.
+  > See the [Test Index](../test/index.md) for more information.
 
-
-  - [ [`test-watcher.js`](../test/scripts/test-watcher.js) ]
-    -- Watches the `src/` directory for changes and then automatically runs the corresponding integration tests. 
-    [**Experimental**]
 
 ### Shared Scripts [ `shared/` ]
 
-  - [ [`file-helpers.js`](shared/file-helpers.js) ] -- Makes the rest of the Node.js scripts easier to point and shoot a file(s) and directories.
+  - [ [`file-helpers.js`](shared/file-helpers.js) ] -- Makes the rest of the Node.js scripts easier to point and shoot at file(s) and directories.
 
 ### Uncategorized Scripts
 
 New scripts will appear below after running **[`node scripts/docs/index-scripts.js`](docs/index-scripts.js),** or after changing paths.
 
-
-<!-- scripts-start -->
-<!-- scripts-end -->
-
+<!-- uncategorized-start -->
+<!-- uncategorized-end -->

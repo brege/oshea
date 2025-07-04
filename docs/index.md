@@ -6,14 +6,28 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 **Active Documents and Checklists** \
 *For convenience, these are symlinks to the latest version of each document below.*
 
-* [**Release Candidate Checklist**](rc-checklist.md): 
-    Updating user docs and internal refactoring of code for ease of use.
-* [**Reoganization Planner**](archive/v0.10/reorganization-planner.md):
-    **Planning strategy** for the final polish, reorganization, and AI integration push.
-* [**Dream Board**](dream-board.md):
-    **Standardization**. Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
+* [**Release Candidate Checklist**](rc-checklist.md): **Hygiene.**
+  Updating user docs and internal refactoring of code for ease of use.
+* [**Reoganization Planner**](archive/v0.10/reorganization-planner.md): **Planning.**
+  Strategy for the final polish, reorganization, and AI integration push.
+* [**Dream Board**](dream-board.md): **Standardization**. 
+  Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
 * [An Argument for adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md).
 
+
+There are also several indexes for the main components of the project.
+
+**Indexes:**
+[ [**Docs**](index.md) ] --
+[ [**Scripts**](../scripts/index.md) ] --
+[ [**Plugins**](../plugins/index.md) ] --
+[ [**Tests**](../test/index.md) ]
+
+These indices are automatically managed by
+[**`scripts/docs/update-project-indices.js`**](../scripts/docs/update-project-indices.js)
+and configure via
+[`.index-config.yaml`](../.index-config.yaml)
+at the project root.
 
 ---
 
@@ -127,8 +141,10 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 * [AI-Assisted Plugin Development Guide](ai/ai-assisted-plugin-development-guide.md):
   A how-to guide for using an AI to create new plugins.
-* [AI Interaction Specification](ai/interaction-spec.md):
   The core technical details of the plugin API, optimized for machine consumption.
+
+* [AI Interaction Specification](ai/interaction-spec.md):
+  The core technical details of the plugin API, optimized for human consumption.
 
 ---
 
@@ -137,12 +153,6 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 *This list is automatically updated by [`scripts/index-docs.js`](../scripts/repo-health/index-docs.js).*
 
 
-<!-- etc-start -->
-
-- [scripts/refactor/@paths/replace-src-paths.md](../scripts/refactor/@paths/replace-src-paths.md)
-- [scripts/refactor/@paths/replace-test-paths.md](../scripts/refactor/@paths/replace-test-paths.md)
-- [scripts/refactor/fix-require-paths/README.md](../scripts/refactor/fix-require-paths/README.md)
-- [scripts/refactor/index.md](../scripts/refactor/index.md)
-
-<!-- etc-end -->
+<!-- uncategorized-start -->
+<!-- uncategorized-end -->
 

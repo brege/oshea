@@ -60,6 +60,5 @@ A collection of tools to validate the paths of various organizers.
 
 New scripts will appear below after running **[`node scripts/docs/index-scripts.js`](docs/index-scripts.js),** or after changing paths.
 
-<!-- scripts-start -->
-<!-- scripts-end -->
-
+<!-- uncategorized-start -->
+<!-- uncategorized-end -->

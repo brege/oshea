@@ -6,33 +6,55 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 **Active Documents and Checklists** \
 *For convenience, these are symlinks to the latest version of each document below.*
 
-* [**Reoganization Planner**](reorganization-planner.md):
+* [**Release Candidate Checklist**](rc-checklist.md): 
+    Updating user docs and internal refactoring of code for ease of use.
+* [**Reoganization Planner**](archive/v0.10/reorganization-planner.md):
     **Planning strategy** for the final polish, reorganization, and AI integration push.
 * [**Dream Board**](dream-board.md):
     **Standardization**. Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
-* [An Argument for adding a Pathing Registry](why-i-should-make-a-pathing-registry.md).
+* [An Argument for adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md).
 
 
 ---
 
 ## 1. Reference Documentation
+
 *Technical descriptions of the project's commands, APIs, and structure.*
 
-* [**Project README**](../README.md): Provides a high-level overview, quick start, and feature summary.
-* [Plugins README](../plugins/README.md): Introduces the bundled plugins and how to use them.
+* [**Project README**](../README.md):
+  Provides a high-level overview, quick start, and feature summary.
+* [Plugins README](../plugins/README.md):
+  Introduces the bundled plugins and how to use them.
 * [Plugin Development Guide](guides/plugin-development.md): 
   Details the plugins development cycle in creating, configuring and managing plugins.
-- [Configuration Hierarchies](guides/configuration-hierarchies.md):
+* [Configuration Hierarchies](guides/configuration-hierarchies.md):
   Nitty-gritty details of the configuration system and the hierarchical structure of plugin and system conf files.
-* [**Cheat Sheet**](refs/cheat-sheet.md): Compactly lists CLI commands, common usage, and config snippets.
-* [Plugin Contract](refs/plugin-contract.md): Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
-* [**Scripts Index**](../scripts/index.md): An index of tools and utilities used by the project, from analysis to guides, documentation, linting, and more.
+* [**Cheat Sheet**](refs/cheat-sheet.md):
+  Compactly lists CLI commands, common usage, and config snippets.
+* [Plugin Contract](refs/plugin-contract.md): 
+  Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
+* [**Scripts Index**](../scripts/index.md):
+  An index of tools and utilities used by the project, from analysis to guides, documentation, linting, and more.
   - [Refactoring Tools](../scripts/refactor/fix-require-paths/index.md):
     Probes, repairs, validators, and other tools used in the reoganization of `md-to-pdf`.
     
 ---
 
-## 2. Architecture & Reasoning (Explanation)
+## 2. Tutorials & How-To Guides
+
+*Practical walkthroughs providing demonstration and step-by-step instructions.*
+
+* [Batch Processing Guide](guides/batch-processing-guide.md):
+  Explains how to convert multiple Markdown files at once using external scripts that leverage the `md-to-pdf` CLI.
+* [Walkthrough: A Plugin's Full Lifecycle](walkthroughs/full-lifecycle.md)
+* [Walkthrough: Customizing a Plugin with Archetyping](walkthroughs/archetyping-a-plugin.md)
+* [Walkthrough: Updating and Syncing Plugins](walkthroughs/updating-plugins.md)
+* [Walkthrough: Creating a Deck of Digital Notecards](walkthroughs/generate-mobile-study-cards.md)
+
+---
+
+## 3. Architecture & Reasoning (Explanation)
+
 *Discussions that explore the context and reasoning behind project decisions.*
 
 ### High-Level Vision & History
@@ -71,36 +93,42 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 * [**Reorganization Planner**](archive/v0.10/reorganization-planner.md):
   Planning strategy for the final polish, reorganization, and AI integration push.
 * [An Argument for adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md).    
-
----
-
-## 3. Tutorials & How-To Guides
-*Practical walkthroughs providing demonstration and step-by-step instructions.*
-
-* [Batch Processing Guide](guides/batch-processing-guide.md):
-  Explains how to convert multiple Markdown files at once using external scripts that leverage the `md-to-pdf` CLI.
-
-**TODO:** Make walkthroughs that replicate Level 4 lifecycle tests--this way there's a robot version and a human version for the same execution.
-
 ---
 
 ## 4. Testing & Quality Assurance
+
 *Documentation that details the project's testing framework, strategy, and metrics that define project quality.*
 
 ### Strategy & Process
-* [Test README](../test/README.md):
-  Details the test harness and adjoins the dynamic QA dashboard.
+* [Test Suite Index](../test/index.md):
+  Main entry point for test-related documentation. Details the test harness and adjoins the dynamic QA dashboard.
 * [Test Generation Priority Order](../test/docs/test-generation-priority-order.md):
   Explains the ranked, multi-level testing strategy and the priority for module test implementation.
 * [Audit Log](../test/docs/audit-log.md): 
   Logs known issues, limitations, and discrepancies discovered during testing and code audits.
 
 ### Technical Reference
-* [Test Suite Checklist Level 1](../test/docs/checklist-level-1.md): Module integration test scenarios.
-* [Test Suite Checklist Level 2](../test/docs/checklist-level-2.md): Subsystem integration test scenarios.
-* [Test Suite Checklist Level 3](../test/docs/checklist-level-3.md): End-to-End CLI test scenarios.
-* [Test Suite Checklist Level 4](../test/docs/checklist-level-4.md): End-to-End lifecycle test scenarios.
-* [Help Text Checklist](../test/docs/help-text-checklist.md): Systematic review of CLI help text.
+* [Test Suite Checklist Level 1](../test/docs/checklist-level-1.md):
+  Module integration test scenarios.
+* [Test Suite Checklist Level 2](../test/docs/checklist-level-2.md):
+  Subsystem integration test scenarios.
+* [Test Suite Checklist Level 3](../test/docs/checklist-level-3.md):
+  End-to-End CLI test scenarios.
+* [Test Suite Checklist Level 4](../test/docs/checklist-level-4.md):
+  End-to-End lifecycle test scenarios.
+* [Help Text Checklist](../test/docs/help-text-checklist.md):
+  Systematic review of CLI help text.
+
+---
+
+## 5. AI & Automation
+
+*Guides and specifications for programmatic interaction with the plugin system.*
+
+* [AI-Assisted Plugin Development Guide](ai/ai-assisted-plugin-development-guide.md):
+  A how-to guide for using an AI to create new plugins.
+* [AI Interaction Specification](ai/interaction-spec.md):
+  The core technical details of the plugin API, optimized for machine consumption.
 
 ---
 
@@ -110,6 +138,11 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 
 <!-- etc-start -->
+
+- [scripts/refactor/@paths/replace-src-paths.md](../scripts/refactor/@paths/replace-src-paths.md)
+- [scripts/refactor/@paths/replace-test-paths.md](../scripts/refactor/@paths/replace-test-paths.md)
+- [scripts/refactor/fix-require-paths/README.md](../scripts/refactor/fix-require-paths/README.md)
+- [scripts/refactor/index.md](../scripts/refactor/index.md)
 
 <!-- etc-end -->
 

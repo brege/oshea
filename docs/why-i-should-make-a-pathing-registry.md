@@ -1,1 +1,0 @@
-archive/v0.10/why-i-should-make-a-pathing-registry.md

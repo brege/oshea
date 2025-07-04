@@ -11,14 +11,14 @@
 | ✔ | Now     | **`guides/plugin-development.md`**      | Rewrite completely                     |
 | ✔ | Now     | **`refs/cheat-sheet.md`**               | Modernize - doubles as *smoketester*   |
 | ✔ | Medium  | **`plugins/README.md`**                 | Modernize                              |
-| ○ | Low     | **`refs/plugin-contract.md`**           | Consistency                            |
+| ✔ | Low     | **`refs/plugin-contract.md`**           | Consistency                            |
 | ✔ | Auto    | **`scripts/index.md`**                  | `node scripts/docs/update-scripts.js`  |
 |   |         | [ **Phase 2** ]                         | **Strategic Synthesis**                |
 | ○ | **New** | **`docs/dream-board-v0.10.md`**         | Retrospect of reorg + new priorities   |
 | ✔ | Low     | **`test/README.md`**                    | Modernize                              |
 | ✔ | Low     | **`docs/reorganization-planner.md`**    | Move to `docs/archive/v0.10/`          |
 |   |         | [ **Phase 3** ]                         | **Future-Facing Content**              |
-| ○ | **New** | `docs/guides/` + `test/e2ewalkthroughs/`| Rearrange `e2e`, lifecycles            |
+| ● | **New** | `docs/guides/`+`test/e2e/walkthroughs/` | Rearrange `e2e`, lifecycles            |
 | ○ | **New** | `docs/robots/`                          | AI specification documents**           |
 
 At the onset of the above task table, all documents were in a v0.9.00 state and need to be updated to v0.10.x state. 
@@ -27,13 +27,13 @@ At the onset of the above task table, all documents were in a v0.9.00 state and 
 
 These are internal, code-hygiene tasks.
 
-| ○ |     | Task Description                                                 |
+| ● |     | Task Description                                                 |
 |:--|:----|:-----------------------------------------------------------------|
-|   | pR  | **Pathing & Dependency Management**                              |
-| ○ | pR1 | Build a centralized pathing registry.                            |
-| ○ | pR2 | Implement module aliases for safer, faster refactoring.          |
-| ○ | pR3 | Strengthen `require()` path robustness with a pathing registry.  |
-| ○ | pR4 | Tie registry to module aliases for resilient dependencies.       |
+| ✔ | pR  | **Pathing & Dependency Management**                              |
+| ✔ | pR1 | Build a centralized pathing registry.                            |
+| ✔ | pR2 | Implement module aliases for safer, faster refactoring.          |
+| ✔ | pR3 | Strengthen `require()` path robustness with a pathing registry.  |
+| ✔ | pR4 | Tie registry to module aliases for resilient dependencies.       |
 |   |     |                                                                  |
 | ○ | Td  | **Debugging & Telemetry**                                        |
 | ○ | Td1 | Enhance test suite with clear, actionable error feedback.        |
@@ -41,13 +41,13 @@ These are internal, code-hygiene tasks.
 | ○ | Td3 | Develop a structured debugging system.                           |
 | ○ | Td4 | Support verbosity levels and context-rich output on failure.     |
 |   |     |                                                                  |
-| ○ | Tb  | **Test Suite Structure**                                         |
+| ● | Tb  | **Test Suite Structure**                                         |
 | ○ | Tb1 | Consolidate atomic test files into manifest-driven harnesses.    |
 | ○ | Tb2 | Reduce boilerplate and improve test suite maintainability.       |
 | ○ | Tb3 | Ensure tests are transparent and immediately reveal problems.    |
 | ○ | Tb4 | Minimize debugging effort required for the test suite itself.    |
 |   |     |                                                                  |
-| ○ | PM  | **Plugin Management**                                            |
+| ● | PM  | **Plugin Management**                                            |
 | ○ | PM1 | Automatically register plugins from the plugins directory.       | 
 | ○ | PM2 | Eliminate need for explicit paths in `config.example.yaml`.      |
 | ○ | PM3 | Restore compatibility with D3.js slide plugin.                   |

@@ -174,16 +174,16 @@ function generateDashboardContent() {
     return outputLines;
 }
 
-function updateReadme(dashboardLines) {
-    const readmePath = path.join(__dirname, '..', 'README.md');
+function updateIndex(dashboardLines) {
+    const indexPath = path.join(__dirname, '..', 'index.md');
     const startMarker = '<!--qa-dashboard-start-->';
     const endMarker = '<!--qa-dashboard-end-->';
 
-    let readmeContent;
+    let indexContent;
     try {
-        readmeContent = fs.readFileSync(readmePath, 'utf8');
+        indexContent = fs.readFileSync(indexPath, 'utf8');
     } catch (error) {
-        console.error(`ERROR: Could not read README.md at ${readmePath}.`, error);
+        console.error(`ERROR: Could not read index.md at ${indexPath}.`, error);
         return;
     }
 
@@ -201,23 +201,23 @@ function updateReadme(dashboardLines) {
         'g'
     );
 
-    if (!regex.test(readmeContent)) {
-        console.error(`ERROR: Could not find dashboard markers in ${readmePath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`);
+    if (!regex.test(indexContent)) {
+        console.error(`ERROR: Could not find dashboard markers in ${indexPath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`);
         return;
     }
 
     // Perform the replacement
-    readmeContent = readmeContent.replace(regex, newContent);
+    indexContent = indexContent.replace(regex, newContent);
 
-    fs.writeFileSync(readmePath, readmeContent, 'utf8');
-    console.log(`Successfully updated dashboard in ${readmePath}`);
+    fs.writeFileSync(indexPath, indexContent, 'utf8');
+    console.log(`Successfully updated dashboard in ${indexPath}`);
 }
 
 
 // --- Check command line arguments to determine action ---
-if (process.argv.includes('--update-readme')) {
+if (process.argv.includes('update')) {
     const dashboardLines = generateDashboardContent();
-    updateReadme(dashboardLines);
+    updateIndex(dashboardLines);
 } else {
     // Default behavior: print to stdout
     const dashboardLines = generateDashboardContent();

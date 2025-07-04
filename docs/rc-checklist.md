@@ -59,9 +59,9 @@ These are internal, code-hygiene tasks.
 | ○ | Tb4 | Minimize debugging effort required for the test suite itself.    |
 |   |     |                                                                  |
 | ● | PM  | **Plugin Management**                                            |
-| ○ | PM1 | Automatically register plugins from the plugins directory.       | 
-| ○ | PM2 | Eliminate need for explicit paths in `config.example.yaml`.      |
-| ○ | PM3 | Restore compatibility with D3.js slide plugin.                   |
+| ✔ | PM1 | Automatically register plugins from the plugins directory.       | 
+| ✔ | PM2 | Eliminate need for explicit paths in `config.example.yaml`.      |
+| ✔ | PM3 | Restore compatibility with D3.js slide plugin.                   |
 | ○ | PM4 | Explore smarter resource loading via dedicated Node package.     |
 | ○ | PM5 | Re-evaluate hardness in `pdf_generator` for flexibility and fun. |
 |   |     |                                                                  |

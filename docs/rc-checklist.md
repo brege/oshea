@@ -28,6 +28,7 @@
 | ✔ | **New** | `scripts/update-project-indices.js`     | Unified Tool 'n Doc Index Script      | 
 |   |         | [ **Phase 5** ]                         | **Marketability & Concision**         |
 | ○ | Finish  | **`README.md`**                         | **Update for v0.10**                  |
+| ○ | Finish  | **`config.example.yaml`**               | **Update for v0.10**                  |
 
 At the onset of the above task table, all documents were in a v0.9.00 state and need to be updated to v0.10.x state. 
 
@@ -52,7 +53,7 @@ These are internal, code-hygiene tasks.
 | ○ | Td4 | Support verbosity levels and context-rich output on failure.     |
 |   |     |                                                                  |
 | ● | Tb  | **Test Suite Structure**                                         |
-| ○ | Tb1 | Consolidate atomic test files into manifest-driven harnesses.    |
+| ○ | Tb1 | Consolidate integration tests into manifest-driven harnesses.    |
 | ○ | Tb2 | Reduce boilerplate and improve test suite maintainability.       |
 | ○ | Tb3 | Ensure tests are transparent and immediately reveal problems.    |
 | ○ | Tb4 | Minimize debugging effort required for the test suite itself.    |

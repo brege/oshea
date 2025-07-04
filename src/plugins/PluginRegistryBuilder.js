@@ -30,8 +30,6 @@ class PluginRegistryBuilder {
             throw new Error("PluginRegistryBuilder: projectRoot must be a valid path string.");
         }
 
-        this.bundledMainConfigPath = defaultConfigPath;
-        this.factoryDefaultMainConfigPath = factoryDefaultConfigPath;
         this.isLazyLoadMode = isLazyLoadMode;
         this.primaryMainConfigLoadReason = primaryMainConfigLoadReason;
 
@@ -55,6 +53,34 @@ class PluginRegistryBuilder {
             throw new Error("PluginRegistryBuilder requires a collections root (collRoot) to be provided.");
         }
         this.cmEnabledManifestPath = this.dependencies.path.join(this.cmCollRoot, CM_ENABLED_MANIFEST_FILENAME);
+    }
+    
+    async _registerBundledPlugins() {
+        const { fs, path } = this.dependencies;
+        const registrations = {};
+        const bundledPluginsPath = path.join(this.projectRoot, 'plugins');
+
+        if (!fs.existsSync(bundledPluginsPath)) {
+            console.warn('WARN (PluginRegistryBuilder): Bundled plugins directory not found at `plugins/`.');
+            return registrations;
+        }
+
+        const pluginDirs = await fs.promises.readdir(bundledPluginsPath);
+        for (const pluginName of pluginDirs) {
+            if (pluginName === 'index.md') continue;
+            const pluginDir = path.join(bundledPluginsPath, pluginName);
+            if (fs.statSync(pluginDir).isDirectory()) {
+                const configPath = path.join(pluginDir, `${pluginName}.config.yaml`);
+                if (fs.existsSync(configPath)) {
+                    registrations[pluginName] = {
+                        configPath: configPath,
+                        definedIn: bundledPluginsPath,
+                        sourceType: 'Bundled (Auto-discovered)'
+                    };
+                }
+            }
+        }
+        return registrations;
     }
 
     _resolveAlias(alias, aliasValue, basePathDefiningAlias) {
@@ -210,69 +236,32 @@ class PluginRegistryBuilder {
     }
 
     async buildRegistry() {
-        let needsRegistryBuild = this._builtRegistry === null ||
-                                 this._builtRegistry.builtWithFactoryDefaults !== this.useFactoryDefaultsOnly ||
-                                 this._builtRegistry.projectManifestPathUsed !== this.projectManifestConfigPath ||
-                                 this._builtRegistry.isLazyLoadMode !== this.isLazyLoadMode ||
-                                 this._builtRegistry.primaryMainConfigLoadReason !== this.primaryMainConfigLoadReason ||
-                                 this._builtRegistry.collectionsManagerInstance !== this.collectionsManager;
-
-        if (!needsRegistryBuild) {
-            return this._builtRegistry.registry;
+        if (this._builtRegistry) {
+             return this._builtRegistry.registry;
         }
 
-        const { fs, path } = this.dependencies;
-        let registry = {};
-        let sourcePathForInitialRegistrations;
-        let initialRegistrationsSourceType;
-        let baseDirForInitialRegistrations = this.projectRoot;
+        const { fs } = this.dependencies;
+        const registry = await this._registerBundledPlugins();
 
-        if (this.useFactoryDefaultsOnly) {
-            sourcePathForInitialRegistrations = this.factoryDefaultMainConfigPath;
-            initialRegistrationsSourceType = `Factory Default (${path.basename(this.factoryDefaultMainConfigPath)})`;
-            if (!fs.existsSync(sourcePathForInitialRegistrations)) {
-                console.error(`CRITICAL (PluginRegistryBuilder): Factory default config '${sourcePathForInitialRegistrations}' not found. Cannot load factory default plugin registrations.`);
-                sourcePathForInitialRegistrations = null;
-            }
-        } else {
-            if (fs.existsSync(this.factoryDefaultMainConfigPath)) {
-                sourcePathForInitialRegistrations = this.factoryDefaultMainConfigPath;
-                initialRegistrationsSourceType = `Bundled Definitions (${path.basename(this.factoryDefaultMainConfigPath)})`;
-                const shouldWarn = !this.isLazyLoadMode && !fs.existsSync(this.bundledMainConfigPath) && (this.primaryMainConfigLoadReason === "bundled main" || this.primaryMainConfigLoadReason === "factory default fallback" || this.primaryMainConfigLoadReason === "none found");
-                if (shouldWarn) {
-                    console.warn(`WARN (PluginRegistryBuilder): Project root config '${this.bundledMainConfigPath}' not found, and no user-level main config (XDG or --config) was primary for global settings. Using '${this.factoryDefaultMainConfigPath}' for bundled plugin definitions.`);
-                }
-            } else {
-                console.error(`CRITICAL (PluginRegistryBuilder): Bundled plugin definition file '${this.factoryDefaultMainConfigPath}' not found. Cannot load initial plugin registrations.`);
-                sourcePathForInitialRegistrations = null;
-            }
-        }
-
-        if (sourcePathForInitialRegistrations) {
-            const initialRegistrations = await this._getPluginRegistrationsFromFile(sourcePathForInitialRegistrations, baseDirForInitialRegistrations, initialRegistrationsSourceType);
-            registry = { ...registry, ...initialRegistrations };
-        }
-
-        if (!this.useFactoryDefaultsOnly && !this.collectionsManager) {
+        if (!this.useFactoryDefaultsOnly) {
             const cmEnabledRegistrations = await this._getPluginRegistrationsFromCmManifest(this.cmEnabledManifestPath, "CollectionsManager");
-            registry = { ...registry, ...cmEnabledRegistrations };
+            Object.assign(registry, cmEnabledRegistrations);
         }
 
         if (!this.useFactoryDefaultsOnly) {
             if (fs.existsSync(this.xdgGlobalConfigPath)) {
                 const xdgRegistrations = await this._getPluginRegistrationsFromFile(this.xdgGlobalConfigPath, this.xdgBaseDir, "XDG Global");
-                registry = { ...registry, ...xdgRegistrations };
+                Object.assign(registry, xdgRegistrations);
             }
         }
 
         if (!this.useFactoryDefaultsOnly) {
             if (this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath)) {
-                if (this.projectManifestConfigPath !== sourcePathForInitialRegistrations || (this.projectManifestConfigPath === sourcePathForInitialRegistrations && !initialRegistrationsSourceType.startsWith('Bundled Definitions') && !initialRegistrationsSourceType.startsWith('Factory Default'))) {
-                    const projectRegistrations = await this._getPluginRegistrationsFromFile(this.projectManifestConfigPath, this.projectManifestBaseDir, "Project Manifest (--config)");
-                    registry = { ...registry, ...projectRegistrations };
-                }
+                 const projectRegistrations = await this._getPluginRegistrationsFromFile(this.projectManifestConfigPath, this.projectManifestBaseDir, "Project Manifest (--config)");
+                 Object.assign(registry, projectRegistrations);
             }
         }
+
 
         this._builtRegistry = {
             registry,

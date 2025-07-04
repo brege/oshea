@@ -11,40 +11,32 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
         });
         const page = await browser.newPage();
 
-        // Combine CSS content with the exact separator the test expects.
         const combinedCss = (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
 
         const { head_html = '', body_html_start = '', body_html_end = '', lang = 'en' } = injectionPoints;
 
         let template = htmlTemplateStr;
         if (!template || typeof template !== 'string') {
-            template = `
-        <!DOCTYPE html>
-        <html lang="en">
+            template = `<!DOCTYPE html>
+        <html lang="${lang}">
         <head>
             <meta charset="utf-8">
             <title>{{{title}}}</title>
-            <style>
-                {{{styles}}}
-            </style>
+            <style>{{{styles}}}</style>
+            ${head_html}
         </head>
-        <body>
-            {{{body}}}
-        </body>
+        <body>${body_html_start}{{{body}}}${body_html_end}</body>
         </html>`;
         }
 
         const documentTitle = (pdfOptions && pdfOptions.title) ? pdfOptions.title : path.basename(outputPdfPath, '.pdf');
 
-        // Perform replacements to build the final HTML.
         const finalHtml = template
             .replace('{{{title}}}', documentTitle)
             .replace('{{{styles}}}', combinedCss)
-            // Handle null content as a literal string, and empty content as an empty string.
             .replace('{{{body}}}', htmlBodyContent === null ? 'null' : (htmlBodyContent || ''));
 
-        // The test assertion uses .trim(), so we will too.
-        await page.setContent(finalHtml.trim(), { waitUntil: 'networkidle0' });
+        await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
 
         const defaultPdfOptions = {
             format: 'A4',
@@ -57,7 +49,6 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
             }
         };
 
-        // If the incoming options specify dimensions, delete the format from our defaults.
         if (pdfOptions && (pdfOptions.width || pdfOptions.height)) {
             delete defaultPdfOptions.format;
         }

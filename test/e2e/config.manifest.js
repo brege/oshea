@@ -18,10 +18,10 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      // Check for a few key values to confirm the correct config was loaded and displayed.
+      // Check for a key value to confirm the correct config was loaded.
+      // The `plugins:` block is no longer present due to auto-discovery.
       expect(stdout).to.match(/pdf_viewer: null/i);
-      expect(stdout).to.match(/plugins:/i);
-      expect(stdout).to.match(/cv:\s*.*\/cv\.config\.yaml/i);
+      expect(stdout).to.match(/author_param: Author From Base Config/i);
     },
   },
   {

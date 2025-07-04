@@ -85,14 +85,6 @@ math:
 # section of THIS specific configuration file. Aliases do not automatically
 # cascade from other configuration tiers (e.g., user-global aliases are not known here unless redefined).
 plugins:
-  # TODO: this is stupid and brittle.  Make this an undeletable collection.
-  default: "./plugins/default/default.config.yaml"
-  advanced-card: "./plugins/advanced-card/advanced-card.config.yaml"
-  cv: "./plugins/cv/cv.config.yaml"
-  cover-letter: "./plugins/cover-letter/cover-letter.config.yaml"
-  recipe: "./plugins/recipe/recipe.config.yaml"
-  recipe-book: "./plugins/recipe-book/recipe-book.config.yaml"
-
   # Examples using aliases (these would require uncommenting and defining them above):
   # default: "core:default/default.config.yaml"
   # advanced-card-red: "community_checkout:advanced-card-red/advanced-card-red.config.yaml"

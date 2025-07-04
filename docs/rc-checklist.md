@@ -5,30 +5,40 @@
 
 **State** is interpreted as *Urgency*, *Difficulty*, or *Completeness*
 
-| ● | State   | Document                                | Notes                                  |
-|:--|:--------|:----------------------------------------|----------------------------------------|
-|   |         | [ **Phase 1** ]                         | **Foundational Update**                |
-| ✔ | Now     | **`guides/plugin-development.md`**      | Rewrite completely                     |
-| ✔ | Now     | **`refs/cheat-sheet.md`**               | Modernize - doubles as *smoketester*   |
-| ✔ | Medium  | **`plugins/README.md`**                 | Modernize                              |
-| ✔ | Low     | **`refs/plugin-contract.md`**           | Consistency                            |
-| ✔ | Auto    | **`scripts/index.md`**                  | `node scripts/docs/update-scripts.js`  |
-|   |         | [ **Phase 2** ]                         | **Strategic Synthesis**                |
-| ‖ | **New** | **`docs/dream-board-v0.10.md`**         | Retrospect of reorg + new priorities   |
-| ✔ | Low     | **`test/README.md`**                    | Modernize                              |
-| ✔ | Low     | **`docs/reorganization-planner.md`**    | Move to `docs/archive/v0.10/`          |
-|   |         | [ **Phase 3** ]                         | **Future-Facing Content**              |
-| ● | **New** | `docs/guides/`+`test/e2e/walkthroughs/` | Rearrange `e2e`, lifecycles            |
-| ● | **New** | `docs/ai/`                              | AI specification documents**           |
+| ● | State   | Document                                | Notes                                 |
+|:-:|:--------|:----------------------------------------|---------------------------------------|
+|   |         | [ **Phase 1** ]                         | **Foundational Update**               |
+| ✔ | Now     | **`guides/plugin-development.md`**      | Rewrite completely                    |
+| ✔ | Now     | **`refs/cheat-sheet.md`**               | Modernize - doubles as *smoketester*  |
+| ✔ | Medium  | **`plugins/README.md`**                 | Modernize                             |
+| ✔ | Low     | **`refs/plugin-contract.md`**           | Consistency                           |
+| ✔ | Auto    | **`scripts/index.md`**                  | `node scripts/docs/update-scripts.js` |
+|   |         | [ **Phase 2** ]                         | **Strategic Synthesis**               |
+| ‖ | **New** | **`docs/dream-board-v0.10.md`**         | Retrospect of reorg + new priorities  |
+| ✔ | Low     | **`test/README.md`**                    | Modernize                             |
+| ✔ | Low     | **`docs/reorganization-planner.md`**    | Move to `docs/archive/v0.10/`         |
+|   |         | [ **Phase 3** ]                         | **Future-Facing Content**             |
+| ● | **New** | `docs/guides/`+`test/e2e/walkthroughs/` | Rearrange `e2e`, lifecycles           |
+| ✔ | **New** | `docs/ai/`                              | AI specification documents**          |
+|   |         | [ **Phase 4** ]                         | **Indexing & Navigation**             |
+| ✔ | Later   | `docs/index.md`                         | Organize by section                   |
+| ✔ | Later   | `test/README.md` → `test/index.md`      | Retool for consistency                |
+| ✔ | **New** | `scripts/refactor/index.md`             | Recursive indexing + delegation       |
+| ● | **New** | `plugins/README.md` → `plugins/index.md`| Script and modernize                  |
+| ● | **New** | `scripts/update-project-indices.js`     | Unified Tool 'n Doc Index Script      | 
+|   |         | [ **Phase 5** ]                         | **Marketability & Concision**         |
+| ○ | Finish  | **`README.md`**                         | **Update for v0.10**                  |
 
 At the onset of the above task table, all documents were in a v0.9.00 state and need to be updated to v0.10.x state. 
+
+Highly recommend this unified script for indexing the project. This would be my **librarian**.
 
 #### Repo Health
 
 These are internal, code-hygiene tasks.
 
 | ● |     | Task Description                                                 |
-|:--|:----|:-----------------------------------------------------------------|
+|:-:|:----|:-----------------------------------------------------------------|
 | ✔ | pR  | **Pathing & Dependency Management**                              |
 | ✔ | pR1 | Build a centralized pathing registry.                            |
 | ✔ | pR2 | Implement module aliases for safer, faster refactoring.          |

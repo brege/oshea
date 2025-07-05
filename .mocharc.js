@@ -50,6 +50,10 @@ const paths = {
 
     // --- In-Situ E2E Tests for Bundled Plugins ---
     insitu_e2e: 'plugins/**/.contract/test/*.test.js',
+    
+    // --- All Tests ---
+    integration: ['test/integration/**/*.js'],
+    e2e: ['test/e2e/**/*.js']
 };
 
 const groups = {
@@ -104,8 +108,8 @@ const groups = {
 
     // --- End-to-End Tests ---
     e2e: ['test/e2e/**/*.js', paths.insitu_e2e],
- 
-    // --- By Toolchain ---
+    
+    // --- By Module ---
     config: [
         paths.ConfigResolver,
         paths.main_config_loader,
@@ -114,13 +118,32 @@ const groups = {
         paths.PluginRegistryBuilder
     ],
     validator: [paths.plugin_validator, paths.plugin_validate],
+
+    // --- By Command Groups ---
+    plugins: [
+        paths.plugin_convert,
+        paths.plugin_generate,
+        paths.plugin_config,
+        paths.plugin_list,
+        paths.plugin_create,
+        paths.plugin_add,
+        paths.plugin_enable,
+        paths.plugin_disable,
+    ],
+    collections: [
+        paths.collection_add,
+        paths.collection_list,
+        paths.collection_remove,
+        paths.collection_update
+    ],
+    
     insitu: [paths.insitu_e2e],
 
     // --- By Specific Study ---
     debug: [paths.main_config_loader],
 
     // --- Default ---
-    all: ['test/integration/**/*.js', 'test/e2e/**/*.js', 'plugins/**/.contract/test/*.test.js']
+    all: [paths.integration, paths.e2e, paths.insitu_e2e]
 };
 
 // If files are specified on the CLI, use them; else use group logic

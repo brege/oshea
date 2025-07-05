@@ -101,11 +101,9 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
         if (fsSync.existsSync(potentialPluginConfigPath) && fsSync.statSync(potentialPluginConfigPath).isFile()) {
             pluginSpec = potentialPluginConfigPath;
             determinationSource += ' (self-activated via dir path)';
-            if (process.env.DEBUG) console.log(`DEBUG (plugin_determiner): Self-activating from plugin directory: ${potentialPluginConfigPath}`);
         } else if (fsSync.existsSync(potentialPluginConfigPathDirect) && fsSync.statSync(potentialPluginConfigPathDirect).isFile()) {
             pluginSpec = potentialPluginConfigPathDirect;
             determinationSource += ' (self-activated via direct path)';
-            if (process.env.DEBUG) console.log(`DEBUG (plugin_determiner): Self-activating from direct path: ${potentialPluginConfigPathDirect}`);
         }
     }
 

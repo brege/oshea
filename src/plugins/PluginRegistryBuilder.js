@@ -199,9 +199,6 @@ class PluginRegistryBuilder {
         const { fs, fsPromises, yaml, process } = this.dependencies;
         const registrations = {};
         if (!fs.existsSync(cmEnabledManifestPath)) {
-            if (process.env.DEBUG_CM_INTEGRATION === 'true') {
-                console.log(`INFO (PluginRegistryBuilder): CollectionsManager manifest '${cmEnabledManifestPath}' not found. No CM plugins loaded this way.`);
-            }
             return registrations;
         }
         try {

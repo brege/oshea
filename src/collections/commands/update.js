@@ -6,7 +6,6 @@ module.exports = async function updateCollection(dependencies, collectionName) {
   const { METADATA_FILENAME } = constants;
 
   // 'this' will be the CollectionsManager instance
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateCollection): Updating collection: ${collectionName}`));
   const collectionPath = path.join(this.collRoot, collectionName);
 
   if (!fss.existsSync(collectionPath)) {
@@ -55,12 +54,8 @@ module.exports = async function updateCollection(dependencies, collectionName) {
 
       if (!defaultBranchName) {
           console.error(chalk.red(`  ERROR: Could not determine default branch for ${collectionName} from remote details. Update aborted.`));
-          if (this.debug) {
-              console.log(chalk.magenta(`DEBUG (CM:updateCollection): Full output from 'git remote show origin' for ${collectionName}:\n${remoteStdout}`));
-          }
           return { success: false, message: `Could not determine default branch for ${collectionName}.` };
       }
-      if (this.debug) console.log(chalk.magenta(`  DEBUG: Default branch for ${collectionName} is '${defaultBranchName}'.`));
 
     } catch (gitError) {
       console.error(chalk.red(`  ERROR: Failed during Git remote show for ${collectionName}. Update aborted.`));
@@ -68,10 +63,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
     }
 
     try {
-      if (this.debug) console.log(chalk.magenta(`  DEBUG: Fetching remote 'origin' for ${collectionName}...`));
       await this._spawnGitProcess(['fetch', 'origin'], collectionPath, `fetching ${collectionName}`);
-      if (this.debug) console.log(chalk.magenta(`  DEBUG: Successfully fetched remote 'origin' for ${collectionName}.`));
-
       const statusResult = await this._spawnGitProcess(['status', '--porcelain'], collectionPath, `checking status of ${collectionName}`);
       if (!statusResult.success) {
           console.error(chalk.red(`  ERROR: Could not get Git status for ${collectionName}. Update aborted.`));
@@ -108,17 +100,12 @@ module.exports = async function updateCollection(dependencies, collectionName) {
 
           console.warn(chalk.yellow(`  WARN: ${abortMessage} Aborting update.`));
           console.warn(chalk.yellow("          Please commit, stash, or revert your changes before updating."));
-          if (this.debug) {
-            if (hasUncommittedChanges) console.log(chalk.magenta(`DEBUG (CM:updateCollection): 'git status --porcelain' output for ${collectionName}:\n${statusResult.stdout}`));
-            if (localCommitsAhead > 0) console.log(chalk.magenta(`DEBUG (CM:updateCollection): Found ${localCommitsAhead} local commits ahead of origin/${defaultBranchName} for ${collectionName}.`));
-          }
           return {
               success: false,
               message: `${abortMessage} Aborting update. Commit, stash, or revert changes.`
           };
       }
 
-      if (this.debug) console.log(chalk.magenta(`  DEBUG: Resetting to 'origin/${defaultBranchName}' for ${collectionName}...`));
       await this._spawnGitProcess(['reset', '--hard', `origin/${defaultBranchName}`], collectionPath, `resetting ${collectionName}`);
       console.log(chalk.green(`\n  Successfully updated collection "${collectionName}" by resetting to origin/${defaultBranchName}.`));
 
@@ -147,14 +134,12 @@ module.exports = async function updateCollection(dependencies, collectionName) {
           await fsExtra.remove(path.join(collectionPath, entry));
         }
       }
-      if (this.debug) console.log(chalk.magenta(`  DEBUG: Cleaned existing content (except metadata) in ${collectionPath}.`));
 
       await fsExtra.copy(originalSourcePath, collectionPath, {
         overwrite: true,
         errorOnExist: false,
         filter: (src) => {
           if (path.basename(src) === '.git') {
-            if(this.debug) console.log(chalk.magenta(`  DEBUG: Skipping .git directory during copy from local source ${originalSourcePath}`));
             return false;
           }
           return true;
@@ -167,7 +152,6 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       return { success: true, message: `Collection "${collectionName}" re-synced from local source.` };
     } catch (error) {
       console.error(chalk.red(`  ERROR: Failed to re-sync collection "${collectionName}" from local source "${originalSourcePath}": ${error.message}`));
-      if (this.debug && error.stack) console.error(chalk.red(error.stack));
       return { success: false, message: `Failed to re-sync from local source: ${error.message}` };
     }
   }

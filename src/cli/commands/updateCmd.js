@@ -52,9 +52,6 @@ module.exports = {
 
     } catch (error) {
       console.error(chalk.red(`\nERROR updating all collections: ${error.message}`));
-      if (process.env.DEBUG_CM === 'true' && error.stack) {
-        console.error(chalk.red(error.stack));
-      }
       commandShouldFailHard = true;
     }
 

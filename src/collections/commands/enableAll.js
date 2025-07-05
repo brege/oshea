@@ -6,7 +6,6 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
   const { fss, path, chalk, constants } = dependencies;
 
   // 'this' will be the CollectionsManager instance
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enableAllPluginsInCollection): Enabling all plugins in: ${collectionName}, options: ${JSON.stringify(options)}`));
   const collectionPath = path.join(this.collRoot, collectionName);
   if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
       console.error(chalk.red(`ERROR: Collection "${collectionName}" not found at ${collectionPath}.`));
@@ -31,11 +30,8 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
           else if (gitHubSshMatch && gitHubSshMatch[1]) defaultPrefixToUse = `${gitHubSshMatch[1]}-`;
           else if (/^(http(s)?:\/\/|git@)/.test(source)) {
               defaultPrefixToUse = `${collectionName}-`;
-              if (this.debug || !options.isCliCall) console.warn(chalk.yellow(`  WARN: Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`));
+              if (!options.isCliCall) console.warn(chalk.yellow(`  WARN: Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`));
           }
-      } else {
-          if (this.debug && !metadata && fss.existsSync(path.join(collectionPath, constants.METADATA_FILENAME))) console.warn(chalk.yellow(`WARN: Metadata for ${collectionName} exists but couldn't be read for prefix.`));
-          else if (this.debug) console.log(chalk.magenta(`DEBUG: Metadata file/source not found for ${collectionName}, defaulting to no prefix.`));
       }
   }
 
@@ -53,7 +49,6 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
 
       // Add validation logic here, conditionally based on options.bypassValidation
       if (!options.bypassValidation) {
-        if (this.debug) console.log(chalk.blue(`  Running validation for plugin '${plugin.plugin_id}' before enabling (batch mode)...`));
         const pluginDirectoryPath = plugin.base_path; // Use base_path for validator
         const validationResult = pluginValidator(pluginDirectoryPath);
 
@@ -67,9 +62,6 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
             validationResult.warnings.forEach(w => console.warn(chalk.yellow(`    - ${w}`)));
             continue; // Continue to the next plugin in the batch
         }
-        if (this.debug) console.log(chalk.green(`  Plugin '${plugin.plugin_id}' passed validation.`));
-      } else {
-        if (this.debug) console.log(chalk.yellow(`  Validation bypassed for plugin '${plugin.plugin_id}' (batch mode --bypass-validation flag detected).`));
       }
 
       try {

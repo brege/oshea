@@ -12,15 +12,13 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
   Strategy for the final polish, reorganization, and AI integration push.
 * [**Dream Board**](dream-board.md): **Standardization**. 
   Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
-* [An Argument for adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md).
-
 
 There are also several indexes for the main components of the project.
 
 **Indexes:**
-[ [**Docs**](index.md) ] --
-[ [**Scripts**](../scripts/index.md) ] --
-[ [**Plugins**](../plugins/index.md) ] --
+[ [**Docs**](index.md) ]
+[ [**Scripts**](../scripts/index.md) ]
+[ [**Plugins**](../plugins/index.md) ]
 [ [**Tests**](../test/index.md) ]
 
 These indices are automatically managed by
@@ -106,7 +104,9 @@ at the project root.
   Breaks down tab-completion schemes into difficulty levels, design pathways, examples, and an optimal approach.
 * [**Reorganization Planner**](archive/v0.10/reorganization-planner.md):
   Planning strategy for the final polish, reorganization, and AI integration push.
-* [An Argument for adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md).    
+* [An Argument for Adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md):
+  How adding a central lookup table makes re-organization of modules far less of a chore.
+
 ---
 
 ## 4. Testing & Quality Assurance
@@ -148,10 +148,9 @@ at the project root.
 
 ---
 
-## 5. Untracked Documents
-*A dynamically generated list of documents that have not yet been categorized.*
-*This list is automatically updated by [`scripts/index-docs.js`](../scripts/repo-health/index-docs.js).*
-
+## Uncategorized Documents
+*A dynamically generated list of documents that have not yet been categorized.* \
+*This list is automatically updated by [`scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js)*
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

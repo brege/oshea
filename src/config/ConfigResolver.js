@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const Ajv = require('ajv');
-const { configUtilsPath, pluginRegistryBuilderPath, mainConfigLoaderPath, pluginConfigLoaderPath, assetResolverPath } = require('@paths');
+const { configUtilsPath, pluginRegistryBuilderPath, mainConfigLoaderPath, pluginConfigLoaderPath, assetResolverPath, validatorsRoot } = require('@paths');
 
 const { loadYamlConfig, deepMerge } = require(configUtilsPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
@@ -44,7 +44,7 @@ class ConfigResolver {
         this.resolvedCollRoot = this.dependencies.collRoot || null;
 
         this.ajv = new Ajv({ allErrors: true });
-        const baseSchemaPath = this.dependencies.path.join(this.projectRoot, 'src', 'validators', 'base-plugin.schema.json');
+        const baseSchemaPath = this.dependencies.path.join(validatorsRoot, 'base-plugin.schema.json');
         if (this.dependencies.fs.existsSync(baseSchemaPath)) {
             const baseSchema = JSON.parse(this.dependencies.fs.readFileSync(baseSchemaPath, 'utf8'));
             this.ajv.addSchema(baseSchema, 'base-plugin.schema.json');
@@ -161,10 +161,6 @@ class ConfigResolver {
         this.mergedPluginRegistry = await registryBuilder.buildRegistry();
 
         this._initialized = true;
-
-        if (process.env.DEBUG) {
-            console.log("DEBUG (ConfigResolver): Initialization complete. Resolved Collections Root:", this.resolvedCollRoot);
-        }
     }
 
     getConfigFileSources() {
@@ -251,9 +247,6 @@ class ConfigResolver {
             } else {
                 throw new Error(`Plugin path specification '${resolvedPathSpec}' is neither a file nor a directory.`);
             }
-            if (!this.isLazyLoadMode || process.env.DEBUG) {
-                console.log(`INFO (ConfigResolver): Loading plugin from path: ${pluginOwnConfigPath}. Nominal name for overrides: '${nominalPluginNameForLookup}'.`);
-            }
         } else {
             nominalPluginNameForLookup = pluginSpec;
             const pluginRegistryEntry = this.mergedPluginRegistry ? this.mergedPluginRegistry[nominalPluginNameForLookup] : null;
@@ -303,9 +296,6 @@ class ConfigResolver {
         let currentCssPaths = cssAfterXLPOlayers;
 
         if (localConfigOverrides && Object.keys(localConfigOverrides).length > 0) {
-            if (process.env.DEBUG) {
-                console.log(`DEBUG (ConfigResolver): Applying localConfigOverrides for ${nominalPluginNameForLookup}:`, JSON.stringify(localConfigOverrides));
-            }
             currentMergedConfig = this.dependencies.deepMerge(currentMergedConfig, localConfigOverrides);
 
             if (localConfigOverrides.css_files && markdownFilePath) {

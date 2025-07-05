@@ -37,12 +37,7 @@ class CollectionsManager {
     // Merge defaults with any injected dependencies for testing
     this.dependencies = { ...defaultDependencies, ...dependencies };
 
-    this.debug = options.debug || false;
     this.collRoot = this.determineCollRoot(options.collRootCliOverride, options.collRootFromMainConfig);
-
-    if (this.debug) {
-      console.log(this.dependencies.chalk.magenta(`DEBUG (CollectionsManager): Initialized. Final COLL_ROOT: ${this.collRoot}`));
-    }
 
     // Bind all commands, passing the 'dependencies' object as the first argument
     this.addCollection = addCollectionCmd.bind(this, this.dependencies);
@@ -60,19 +55,15 @@ class CollectionsManager {
   determineCollRoot(collRootCliOverride = null, collRootFromConfig = null) {
     const { chalk, process, os, path } = this.dependencies;
     if (collRootCliOverride) {
-      if (this.debug) console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using CLI override --coll-root for COLL_ROOT: ${collRootCliOverride}`));
       return collRootCliOverride;
     }
     if (process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE) {
-      if (this.debug) console.log(chalk.yellowBright(`DEBUG (CM.determineCollRoot): Using test override MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE for COLL_ROOT: ${process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE}`));
       return process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE;
     }
     if (process.env.MD_TO_PDF_COLLECTIONS_ROOT) {
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using env var MD_TO_PDF_COLLECTIONS_ROOT for COLL_ROOT: ${process.env.MD_TO_PDF_COLLECTIONS_ROOT}`));
       return process.env.MD_TO_PDF_COLLECTIONS_ROOT;
     }
     if (collRootFromConfig) {
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using collRootFromMainConfig for COLL_ROOT: ${collRootFromConfig}`));
       return collRootFromConfig;
     }
     const xdgDataHome = process.env.XDG_DATA_HOME ||
@@ -80,7 +71,6 @@ class CollectionsManager {
         ? path.join(os.homedir(), 'AppData', 'Local')
         : path.join(os.homedir(), '.local', 'share'));
     const defaultPath = path.join(xdgDataHome, 'md-to-pdf', 'collections');
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM.determineCollRoot): Using XDG/OS default for COLL_ROOT. Base: ${xdgDataHome}, Full Path: ${defaultPath}`));
     return defaultPath;
   }
 
@@ -94,11 +84,7 @@ class CollectionsManager {
         const loadedData = yaml.load(manifestContent);
         if (loadedData && Array.isArray(loadedData.enabled_plugins)) {
           enabledManifest = loadedData;
-        } else {
-          if (this.debug && loadedData) console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Invalid structure in ${constants.ENABLED_MANIFEST_FILENAME}. Re-initializing.`));
         }
-      } else {
-        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_readEnabledManifest): ${constants.ENABLED_MANIFEST_FILENAME} not found. Initializing new one.`));
       }
     } catch (e) {
       console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Could not read or parse ${enabledManifestPath}: ${e.message}. Starting with a new manifest.`));
@@ -113,7 +99,6 @@ class CollectionsManager {
       await fs.mkdir(this.collRoot, { recursive: true });
       const yamlString = yaml.dump(manifestData, { sortKeys: true });
       await fs.writeFile(enabledManifestPath, yamlString);
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_writeEnabledManifest): Successfully wrote to ${enabledManifestPath}`));
     } catch (e) {
       console.error(chalk.red(`ERROR (CM:_writeEnabledManifest): Failed to write to ${enabledManifestPath}: ${e.message}`));
       throw e;
@@ -125,7 +110,6 @@ class CollectionsManager {
     const collectionPath = path.join(this.collRoot, collectionName);
     const metadataPath = path.join(collectionPath, constants.METADATA_FILENAME);
     if (!fss.existsSync(metadataPath)) {
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_readCollMeta): Metadata file not found for ${collectionName} at ${metadataPath}`));
       return null;
     }
     try {
@@ -145,7 +129,6 @@ class CollectionsManager {
       await fs.mkdir(collectionPath, { recursive: true });
       const yamlString = yaml.dump(metadataContent);
       await fs.writeFile(metadataPath, yamlString);
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_writeCollMeta): Wrote metadata to ${metadataPath}`));
     } catch (metaError) {
       console.warn(chalk.yellow(`WARN (CM:_writeCollMeta): Could not write collection metadata for ${collectionName}: ${metaError.message}`));
       throw metaError;
@@ -195,9 +178,6 @@ class CollectionsManager {
       console.log(chalk.green(`  Successfully disabled ${initialCount - pluginsToKeep.length} plugin instance(s) originating from "${userFriendlyName}".`));
       return { success: true, disabledCount: initialCount - pluginsToKeep.length };
     } else {
-      if (this.debug) {
-          console.log(chalk.yellow(`  No active plugins found originating from "${userFriendlyName}" to disable.`));
-      }
       return { success: true, disabledCount: 0 };
     }
   }
@@ -205,8 +185,6 @@ class CollectionsManager {
   _spawnGitProcess(gitArgs, cwd, operationDescription) {
     const { spawn, chalk, process } = this.dependencies;
     return new Promise((resolve, reject) => {
-      if (this.debug) console.log(chalk.magenta(`DEBUG (CM:_spawnGit): Spawning git with args: [${gitArgs.join(' ')}] in ${cwd} for ${operationDescription}`));
-
       const spawnOptions = {
         cwd,
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -218,11 +196,6 @@ class CollectionsManager {
       let stderr = '';
       gitProcess.stdout.on('data', (data) => {
         const dataStr = data.toString();
-        if (!(gitArgs.includes('status') && gitArgs.includes('--porcelain')) &&
-            !(gitArgs.includes('rev-list') && gitArgs.includes('--count')) ||
-            this.debug) {
-            if (this.debug) process.stdout.write(chalk.gray(`  GIT_STDOUT (${operationDescription}): ${dataStr}`));
-        }
         stdout += dataStr;
       });
       gitProcess.stderr.on('data', (data) => {

@@ -74,7 +74,6 @@ you must re-run this command to enable any new plugins.`);
                 }
             }
         } catch (e) {
-            if(process.env.DEBUG_CM === 'true') console.warn(chalk.yellow(`  WARN: Could not read metadata for prefix fallback heuristic: ${e.message}`));
         }
 
         if (args.prefix) {
@@ -123,7 +122,6 @@ you must re-run this command to enable any new plugins.`);
     } catch (error) {
       const commandType = args.all ? 'plugin enable --all' : 'plugin enable';
       console.error(chalk.red(`\nERROR in '${commandType}' command: ${error.message}`));
-      if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
       process.exit(1);
     }
   }

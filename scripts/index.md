@@ -85,7 +85,7 @@ This document is a central index for all developer and automation scripts within
 
 ### Uncategorized Scripts
 
-New scripts will appear below after running **[`node scripts/docs/index-scripts.js`](docs/index-scripts.js),** or after changing paths.
+New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

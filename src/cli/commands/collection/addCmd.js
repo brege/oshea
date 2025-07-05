@@ -28,7 +28,6 @@ module.exports = {
       await manager.addCollection(args.url_or_path, { name: args.name });
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'md-to-pdf collection add' command execution: ${error.message}`));
-      if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
       process.exit(1);
     }
   }

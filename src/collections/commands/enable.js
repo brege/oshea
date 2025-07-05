@@ -6,8 +6,6 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
 
   const { fss, chalk } = dependencies;
 
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:enablePlugin): Enabling ID: ${collectionPluginId}, options: ${JSON.stringify(options)}`));
-
   const parts = collectionPluginId.split('/');
   if (parts.length !== 2) {
     throw new Error(`Invalid format for collectionPluginId: "${collectionPluginId}". Expected "collection_name/plugin_id".`);
@@ -16,7 +14,6 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
   const pluginId = parts[1];
 
   const availablePlugins = await this.listAvailablePlugins(collectionName);
-  if (this.debug) console.log(chalk.blueBright(`[DEBUG_CM_ENABLE] Available plugins in ${collectionName}: ${JSON.stringify(availablePlugins, null, 2)}`));
 
   const pluginToEnable = availablePlugins.find(p => p.plugin_id === pluginId && p.collection === collectionName);
 

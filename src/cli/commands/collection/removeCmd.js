@@ -45,7 +45,6 @@ module.exports = {
 
     } catch (error) {
       console.error(chalk.red(`\nERROR in 'collection remove' command: ${error.message}`));
-      if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
       process.exit(1);
     }
   }

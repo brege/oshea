@@ -5,7 +5,6 @@ module.exports = async function disablePlugin(dependencies, invokeName) {
   const { chalk } = dependencies;
 
   // 'this' will be the CollectionsManager instance
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:disablePlugin): Disabling invoke_name: ${invokeName}`));
   const enabledManifest = await this._readEnabledManifest(); // Uses private method
 
   if (enabledManifest.enabled_plugins.length === 0) {

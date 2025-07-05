@@ -2,7 +2,7 @@
 
 This directory contains a suite of tools to analyze, repair, and validate the codebase, particularly after large-scale file reorganizations.
 
-### Pathing -- [ [`@paths/`](@paths/) ]
+### Modernizing Pathing -- [ [`@paths/`](@paths/) ]
   
 A collection of tools to probe and replace brittle `require()` paths with modern `@paths` patterns.
 
@@ -10,11 +10,11 @@ A collection of tools to probe and replace brittle `require()` paths with modern
     -- A collection of tools to scan for broken `require()` paths and taxonomize them.
   
   - [ [`probe-require-and-path.js`](@paths/probe/probe-require-and-path.js) ]
-      -- For probind the three key pathed functions: `require()`, `path.join()`, and `path.resolve()`.
+      -- For probing the three key pathed functions: `require()`, `path.join()`, and `path.resolve()`.
   - [ [`require-classifier.js`](@paths/probe/require-classifier.js) ]
       -- For classifying `require()` paths as 'pathlike', 'package', or `null`.
   - [ [`scan-path-usage.js`](@paths/probe/scan-path-usage.js) ]
-      -- For scanning everything besides `probe-require-and-path.js`'s three key pathed functions.
+      -- For scanning everything besides `probe-require-and-path.js`'s three key pathy functions.
 
 - [ [`replace/`](@paths/replace/) ]
     -- A collection of tools to replace brittle `require()` paths with modern `@paths` patterns.
@@ -36,7 +36,7 @@ A collection of tools to probe and replace brittle `require()` paths with modern
   - [ [`require-taxonomy-list.js`](@paths/utils/require-taxonomy-list.js) ]
       -- Second layer for bucketing path-types: destructured, dynamic, chained, and static (default).
 
-### Legacy Pathing -- [ [`fix-require-paths/`](fix-require-paths/) ]
+### Fixing Legacy Pathing -- [ [`fix-require-paths/`](fix-require-paths/) ]
     
 A suite of tools to analyze and repair broken `require()` paths after large-scale file reorganizations.
 
@@ -45,20 +45,20 @@ A suite of tools to analyze and repair broken `require()` paths after large-scal
 - [ [`require-catalogue.js`](fix-require-paths/require-catalogue.js) ]
     -- Generates a catalogue of `require()` paths in a target directory.
 
+Status: **Complete**
+
 ### Validators -- [ [`validators/`](refactor/validators/) ]
 
 A collection of tools to validate the paths of various organizers.
 
 - [ [`mocha-path-validator.sh`](validators/mocha-path-validator.sh) ]
-    -- Validates that the test file paths and patterns in `.mocharc.js` are correct.
+    -- Validates that the test file paths and patterns in `.mocharc.js` exist.
 - [ [`paths-js-validator.js`](validators/paths-js-validator.js) ]
-    -- Validates that the paths in `paths.js` are correct.
+    -- Validates that the paths in `paths.js` exist.
 - [ [`require-path-validator.sh`](validators/require-path-validator.sh) ]
-    -- Validates that the `require()` paths in a target directory are correct.
+    -- Validates that the `require()` paths in a target directory exist.
 
 ### Uncategorized Scripts
-
-New scripts will appear below after running **[`node scripts/docs/index-scripts.js`](docs/index-scripts.js),** or after changing paths.
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

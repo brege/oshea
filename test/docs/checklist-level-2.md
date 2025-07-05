@@ -225,7 +225,7 @@
 
 * [x] 2.2.2 Test `handle` correctly removes shortcodes from Markdown content before rendering.
   - **test_id:** 2.2.2
-  - **status:** SKIPPED
+  - **status:** CLOSED
   - **test_target:** default_handler
   - **test_type:** SUBSYSTEM_INTEGRATION
   - **description:** Test `handle` correctly removes shortcodes from Markdown content before rendering.
@@ -390,7 +390,7 @@
 
 * [x] 2.3.9 Verify `generatePdf` ensures the browser and page are properly closed after PDF generation, even if errors occur.
   - **test_id:** 2.3.9
-  - **status:** SKIPPED
+  - **status:** CLOSED
   - **test_target:** pdf_generator
   - **test_type:** SUBSYSTEM_INTEGRATION
   - **description:** Verify `generatePdf` ensures the browser and page are properly closed after PDF generation, even if errors occur.

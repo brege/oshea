@@ -61,4 +61,5 @@ A collection of tools to validate the paths of various organizers.
 ### Uncategorized Scripts
 
 <!-- uncategorized-start -->
+- [probe-logging.js](logging/probe-logging.js)
 <!-- uncategorized-end -->

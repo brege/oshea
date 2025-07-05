@@ -5,103 +5,56 @@
 
 # pdf_viewer: Command to open PDFs after generation (e.g., "xdg-open", "evince", "firefox").
 # Set to null or comment out to disable auto-opening.
-pdf_viewer: xdg-open # null
+pdf_viewer: xdg-open
 
 # global_pdf_options: Default Puppeteer PDF options.
 # See https://pptr.dev/api/puppeteer.pdfoptions for all available options.
 global_pdf_options:
-  format: "Letter" # Common paper sizes: Letter, Legal, A3, A4, A5, etc.
-  printBackground: true # Print background graphics.
-  margin: # Page margins (units: px, in, cm, mm).
+  format: "Letter"
+  printBackground: true
+  margin:
     top: "1in"
     right: "1in"
     bottom: "1in"
     left: "1in"
-  # displayHeaderFooter: false # Set to true to enable header/footer.
-  # headerTemplate: "<div>Header: Page <span class='pageNumber'></span> of <span class='totalPages'></span></div>"
-  # footerTemplate: "<div>Footer: {{ .author }} - {{ .CurrentDateISO }}</div>"
-  # anchor_options: # Options for markdown-it-anchor.
-  #   level: [1, 2, 3, 4, 5, 6]
-  #   permalink: false
 
-# global_remove_shortcodes: Array of regex patterns (strings) to remove content globally.
+# global_remove_shortcodes: Array of regex patterns to remove content globally.
 global_remove_shortcodes:
-  - "" # Example: "" to remove HTML comments.
+  - ""
 
 # --- Math Rendering Settings (KaTeX) ---
 math:
-  enabled: true     # true to enable math rendering, false to disable.
-  engine: "katex"   # Currently only "katex" is supported.
-  # Options for KaTeX: https://katex.org/docs/options.html
+  enabled: true
+  engine: "katex"
   katex_options:
-    throwOnError: false # false: renders errors as LaTeX source; true: throws error.
-    trust: false        # SECURITY: false is recommended. Set to true only if Markdown source is fully trusted.
-    # macros:           # Define custom LaTeX macros.
-    #   "\\RR": "\\mathbb{R}"
-    #   "\\boldvec": "\\mathbf{#1}"
+    throwOnError: false
+    trust: false
+    macros:
+      "\\RR": "\\mathbb{R}"
 
 # --- Global Parameters for Placeholders (`params`) ---
-# Define reusable key-value pairs here. They are merged with document front matter
-# (front matter takes precedence).
+# Reusable key-value pairs merged with document front matter.
 # params:
-#   site:
-#     name: "My Awesome Project"
-#     url: "https://project.example.com"
 #   authorInfo:
 #     name: "Default Author"
 #     email: "contact@example.com"
 
-# --- Collections Root Directory ---
-# Specify the base directory where `md-to-pdf` will store and look for plugin collections.
-# This path can be absolute, tilde-expanded (~), or relative to the main config.yaml file's location.
-# This setting takes precedence over XDG/OS default paths, but is overridden by
-# environment variables MD_TO_PDF_COLLECTIONS_ROOT or MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE.
-# collections_root: "~/my-md-to-pdf-collections" # Example: points to a custom directory
+# --- Collections Root Directory (Optional) ---
+# Overrides the default location for storing managed plugin collections.
+# Precedence: --coll-root > env var > this key > OS default.
+# collections_root: "~/my-md-to-pdf-collections"
 
-# --- Plugin Directory Aliases ---
-# Define shorthand aliases for common plugin directories.
-# These aliases are scoped to the configuration file they are defined in.
-# An alias defined here can be used in 'plugins' within THIS file.
-# Paths for alias targets can be absolute, tilde-expanded (~), or relative (./ or ../)
-# to THIS config file's directory.
+# --- Plugin Management Notes ---
+# Bundled plugins (default, cv, recipe, etc.) are now auto-discovered.
+# Custom plugins should be managed via the CLI:
+#   - md-to-pdf collection add <git-url-or-path>
+#   - md-to-pdf plugin add <local-plugin-path>
 #
-# Example:
-# plugin_directory_aliases:
-#   core: "./plugins"  # Assuming this config.example.yaml is at project root
-#   examples: "./examples/custom_plugin_showcase"
-#   my_local_collection: "~/Documents/my-md-to-pdf-plugins"
-#   community_checkout: "./community_plugins/plugins-from-brege"
-
-# --- Plugin Registrations ---
-# Maps a "plugin name" (used with --plugin) to its configuration file path.
-# Paths can be:
-#  1. Absolute (e.g., /path/to/plugin/plugin.config.yaml)
-#  2. Tilde-expanded (e.g., ~/my_plugins/plugin/plugin.config.yaml)
-#  3. Relative to this main config.yaml file's location (e.g., ./plugins/cv/cv.config.yaml)
-#  4. Using an alias defined in 'plugin_directory_aliases' *within this same file*
-#     (e.g., if 'core:' is aliased to './plugins', then 'core:cv/cv.config.yaml')
-#
-# Note: If using an alias, it must be defined in the 'plugin_directory_aliases'
-# section of THIS specific configuration file. Aliases do not automatically
-# cascade from other configuration tiers (e.g., user-global aliases are not known here unless redefined).
-plugins:
-  # Examples using aliases (these would require uncommenting and defining them above):
-  # default: "core:default/default.config.yaml"
-  # advanced-card-red: "community_checkout:advanced-card-red/advanced-card-red.config.yaml"
-  # my-example-plugin: "my_local_collection:example1/example1.config.yaml"
+# Use `md-to-pdf config --plugin <name>` to see a plugin's final settings.
 
 # --- Inline Plugin Overrides ---
-# For any plugin name defined above in 'plugins' (e.g., 'cv'),
-# you can create a top-level block here with the same name to provide overrides.
-# Settings here will take precedence over the plugin's own default config if this
-# file is loaded as the primary main configuration.
-# If this were a user-global or project-specific config, these overrides would
-# take precedence over bundled or lower-tier settings.
-#
-# cv: # This 'cv' matches a key in 'plugins'
-#   description: "My Custom CV Style (from main config.example.yaml)"
+# Override settings for any registered or bundled plugin.
+# cv: # This 'cv' matches a bundled plugin
+#   description: "My Custom CV Style"
 #   pdf_options:
 #     format: "A5"
-#     margin: { top: "0.75in", right: "0.75in", bottom: "0.75in", left: "0.75in" }
-#   css_files: ["./path/to/my/custom_cv_style.css"] # Path relative to this config.example.yaml
-#   inherit_css: false # false to replace, true to append to cv.config.yaml's css_files

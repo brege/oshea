@@ -83,7 +83,6 @@ module.exports = {
 
       const managerContext = {
         collRoot: args.manager.collRoot,
-        debug: args.manager.debug,
         listAvailablePlugins: args.manager.listAvailablePlugins.bind(args.manager)
       };
 

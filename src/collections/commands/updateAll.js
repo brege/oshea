@@ -5,7 +5,6 @@ module.exports = async function updateAllCollections(dependencies) {
   const { fss, fs, path, chalk, constants } = dependencies;
   const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
 
-  if (this.debug) console.log(chalk.magenta("DEBUG (CM:updateAllCollections): Attempting to update all downloaded collections."));
   let allOverallSuccess = true;
   const updateMessages = [];
 
@@ -22,7 +21,6 @@ module.exports = async function updateAllCollections(dependencies) {
       const collectionName = collectionInfo.name;
 
       if (collectionName === USER_ADDED_PLUGINS_DIR_NAME) {
-        if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Processing singletons in "${USER_ADDED_PLUGINS_DIR_NAME}".`));
         const singletonsBasePath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
         try {
           if (fss.existsSync(singletonsBasePath) && fss.lstatSync(singletonsBasePath).isDirectory()) {
@@ -32,7 +30,6 @@ module.exports = async function updateAllCollections(dependencies) {
                 const singletonPluginId = dirent.name;
                 const singletonCollectionNameForUpdate = path.join(USER_ADDED_PLUGINS_DIR_NAME, singletonPluginId);
 
-                if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Attempting to update singleton: ${singletonCollectionNameForUpdate}`));
                 try {
                   const result = await this.updateCollection(singletonCollectionNameForUpdate);
                   updateMessages.push(result.message);
@@ -47,8 +44,6 @@ module.exports = async function updateAllCollections(dependencies) {
                 }
               }
             }
-          } else {
-            if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Directory "${USER_ADDED_PLUGINS_DIR_NAME}" not found at ${singletonsBasePath}. Skipping singleton processing.`));
           }
         } catch (error) {
           const errMsg = `Error processing directory ${USER_ADDED_PLUGINS_DIR_NAME}: ${error.message}`;
@@ -61,7 +56,6 @@ module.exports = async function updateAllCollections(dependencies) {
 
       // Process regular collections
       try {
-          if (this.debug) console.log(chalk.magenta(`DEBUG (CM:updateAllCollections): Attempting to update regular collection: ${collectionName}`));
           const result = await this.updateCollection(collectionName);
           updateMessages.push(result.message);
           if (!result.success) {

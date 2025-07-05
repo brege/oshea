@@ -11,8 +11,6 @@
 module.exports = async function addSingletonPlugin(dependencies, sourcePluginPath, options = {}) {
   const { fss, path, cmUtils, chalk, fs, fsExtra, constants } = dependencies;
 
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:addSingletonPlugin): Adding singleton plugin from source: ${sourcePluginPath}, options: ${JSON.stringify(options)}`));
-
   // 1. Validate sourcePluginPath
   if (!fss.existsSync(sourcePluginPath)) {
     throw new Error(`Source plugin path does not exist: "${sourcePluginPath}"`);
@@ -34,7 +32,6 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
     if (altConfigs.length === 0) {
       throw new Error(`Source directory "${sourcePluginPath}" does not appear to be a valid plugin: missing a recognized '*.config.yaml' or '*.yaml' file.`);
     }
-    if(this.debug) console.log(chalk.magenta(`DEBUG (CM:addSingletonPlugin): Found config file(s) like ${altConfigs.join(', ')} in source.`));
   }
 
   // 2. Determine invoke_name
@@ -57,12 +54,10 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
   }
   await fs.mkdir(singletonsBaseDir, { recursive: true });
   await fs.mkdir(targetPluginDir, { recursive: true });
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:addSingletonPlugin): Created target directory for singleton: ${targetPluginDir}`));
 
   // 4. Copy plugin contents
   try {
     await fsExtra.copy(sourcePluginPath, targetPluginDir);
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:addSingletonPlugin): Copied plugin from ${sourcePluginPath} to ${targetPluginDir}`));
   } catch (copyError) {
     await fsExtra.rm(targetPluginDir, { recursive: true, force: true }).catch(() => {});
     throw new Error(`Failed to copy plugin from "${sourcePluginPath}" to "${targetPluginDir}": ${copyError.message}`);

@@ -8,7 +8,7 @@ const matter = require('gray-matter');
 
 async function createArchetype(dependencies, managerContext, sourcePluginIdentifier, newArchetypeName, options = {}) {
   const { chalk, cmUtils, constants } = dependencies;
-  const { collRoot, debug, listAvailablePlugins } = managerContext;
+  const { collRoot, listAvailablePlugins } = managerContext;
 
   let sourcePluginInfo = {};
   let sourceIsDirectPath = false;
@@ -51,7 +51,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
         const sourceConfigContent = await fs.readFile(sourcePluginInfo.config_path, 'utf8');
         sourcePluginInfo.description = yaml.load(sourceConfigContent).description || `Plugin from path: ${sourcePluginIdForReplacement}`;
     } catch (e) {
-        if (debug) console.warn(chalk.yellow(`WARN: Could not read description from direct path source config.`));
+        console.warn(chalk.yellow(`WARN: Could not read description from direct path source config.`));
     }
   }
 

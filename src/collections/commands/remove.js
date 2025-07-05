@@ -5,11 +5,10 @@ module.exports = async function removeCollection(dependencies, collectionName, o
   const { fss, path, fsExtra, chalk, constants } = dependencies;
 
   // 'this' is the CollectionsManager instance
-  if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection): Removing collection: ${collectionName}, options: ${JSON.stringify(options)}`));
   const collectionPath = path.join(this.collRoot, collectionName);
 
   if (!fss.existsSync(collectionPath)) {
-    if (this.debug) console.log(chalk.yellow(`WARN (CM:removeCollection): Collection path ${collectionPath} does not exist. Will proceed to check manifest for cleanup if --force is used.`));
+    console.log(chalk.yellow(`WARN (CM:removeCollection): Collection path ${collectionPath} does not exist. Will proceed to check manifest for cleanup if --force is used.`));
   } else if (!fss.lstatSync(collectionPath).isDirectory()) {
     throw new Error(`Target "${collectionName}" at ${collectionPath} is not a directory.`);
   }
@@ -46,10 +45,7 @@ module.exports = async function removeCollection(dependencies, collectionName, o
   }
 
   if (options.force && pluginsFromThisCollectionCount > 0) {
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection --force): Calling disableAllPluginsFromCollection for "${collectionName}"`));
     await this.disableAllPluginsFromCollection(collectionName);
-  } else if (options.force && pluginsFromThisCollectionCount === 0) {
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection --force): No enabled plugins found for "${collectionName}", manifest not changed by disable step.`));
   }
 
   if (fss.existsSync(collectionPath) && fss.lstatSync(collectionPath).isDirectory()) {
@@ -60,8 +56,6 @@ module.exports = async function removeCollection(dependencies, collectionName, o
       console.error(chalk.red(`ERROR (CM:removeCollection): Failed to remove collection directory ${collectionPath}: ${error.message}`));
       throw error;
     }
-  } else {
-    if (this.debug) console.log(chalk.magenta(`DEBUG (CM:removeCollection): Collection directory ${collectionPath} did not exist or was not a directory. No file system removal needed.`));
   }
 
   return { success: true, message: `Collection "${collectionName}" processed for removal.` };

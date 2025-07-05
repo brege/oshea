@@ -76,15 +76,7 @@ async function generateCache() {
         fs.mkdirSync(path.dirname(cachePath), { recursive: true });
         fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
 
-        if (process.env.DEBUG) {
-            console.log(chalk.green(`Dynamic completion cache generated successfully at: ${cachePath}`));
-        }
-
     } catch (error) {
-        // Fail silently in production, but log if debugging
-        if (process.env.DEBUG) {
-            console.error(chalk.red('Error generating dynamic completion cache:'), error);
-        }
         process.exit(1);
     }
 }

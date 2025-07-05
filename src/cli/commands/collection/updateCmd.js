@@ -48,7 +48,6 @@ module.exports = {
     } catch (error) {
       const context = args.collection_name ? `'collection update ${args.collection_name}'` : "'collection update all'";
       console.error(chalk.red(`\nUNEXPECTED ERROR in ${context} command: ${error.message}`));
-      if (process.env.DEBUG_CM === 'true' && error.stack) console.error(chalk.red(error.stack));
       commandShouldFailHard = true;
     }
 

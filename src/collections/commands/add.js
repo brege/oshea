@@ -12,9 +12,6 @@ module.exports = async function addCollection(dependencies, source, options = {}
 
   try {
     await fs.mkdir(this.collRoot, { recursive: true });
-    if (this.debug) {
-      console.log(chalk.magenta(`  DEBUG: Ensured COLL_ROOT exists at: ${this.collRoot}`));
-    }
   } catch (error) {
     console.error(chalk.red(`ERROR: Failed to create COLL_ROOT directory at ${this.collRoot}: ${error.message}`));
     throw error;

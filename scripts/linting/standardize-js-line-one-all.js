@@ -15,23 +15,39 @@ const files = patterns.flatMap(pattern =>
 
 files.forEach(filePath => {
   const relPath = path.relative(process.cwd(), filePath);
-  const lines = fs.readFileSync(filePath, 'utf8').split('\n');
+  const originalContent = fs.readFileSync(filePath, 'utf8');
+  const lines = originalContent.split('\n');
+
+  let changed = false;
 
   if (lines[0].startsWith('#!')) {
     // Shebang present
     if (lines[1]?.startsWith('//')) {
-      lines[1] = `// ${relPath}`;
+      if (lines[1] !== `// ${relPath}`) {
+        lines[1] = `// ${relPath}`;
+        changed = true;
+      }
     } else {
       lines.splice(1, 0, `// ${relPath}`);
+      changed = true;
     }
   } else {
     if (lines[0]?.startsWith('//')) {
-      lines[0] = `// ${relPath}`;
+      if (lines[0] !== `// ${relPath}`) {
+        lines[0] = `// ${relPath}`;
+        changed = true;
+      }
     } else {
       lines.unshift(`// ${relPath}`);
+      changed = true;
     }
   }
-  fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
-  console.log(`Standardized: ${relPath}`);
-});
 
+  if (changed) {
+    const newContent = lines.join('\n');
+    if (newContent !== originalContent) {
+      fs.writeFileSync(filePath, newContent, 'utf8');
+      console.log(`Standardized: ${relPath}`);
+    }
+  }
+});

@@ -1,4 +1,4 @@
-// scripts/refactor/logging/probe-logging.js
+// src/completion/cli-tree-builder.js
 
 const path = require('path');
 const fs = require('fs');

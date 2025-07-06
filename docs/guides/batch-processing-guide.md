@@ -76,7 +76,7 @@ PDFs will be generated in `batch_output/hugo_recipes_bash/`, with each recipe in
         recipe
     ```
 
-      * The first argument is the source directory ([`./examples/hugo-example`](../../examples/hugo-example)).
+      * The first argument is the source directory ([`./test/fixtures/hugo-example`](../../test/fixtures/hugo-example)).
       * The second argument is the base directory where PDFs will be saved.
       * The third argument is the `md-to-pdf` plugin to use for styling.
       * You can also use the (optional) `--md-to-pdf-path` argument if your [`cli.js`](../../cli.js) file is not at the default location relative to the script.

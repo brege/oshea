@@ -2,7 +2,7 @@
 
 Quick examples and syntax for `md-to-pdf` commands and configurations.
 
-**Index of all Documentation: [`./docs/index.md`](./docs/index.md).**
+**Index of all Documentation: [`docs/index.md`](../index.md).**
 
 ## Core Commands
 

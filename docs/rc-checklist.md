@@ -84,7 +84,7 @@ These are internal, code-hygienic tasks.
 | ● | `lg`| Task Description                                                 |
 |:-:|:----|:-----------------------------------------------------------------|
 | ✔ |`lg1`| Add and configure ESLint                                         |
-| ○ |`lg2`| Create unified lint script combining custom and ESLint checks    |
+| ✔ |`lg2`| Create unified lint script combining custom and ESLint checks    |
 | ○ |`lg3`| Set up Husky for local pre-commit, pre-tag/push automation       |
 | ○ |`lg4`| Configure GitHub Actions for CI workflows                        |
 | ○ |`lg5`| Automate version bumping and release tagging                     |

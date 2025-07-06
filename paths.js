@@ -1,7 +1,7 @@
 // paths.js
 const path = require('path');
 
-// Project root [paths.js lives here] 
+// Project root [paths.js lives here]
 const projectRoot = __dirname;
 
 // Top-level source directory

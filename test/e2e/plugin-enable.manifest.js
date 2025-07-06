@@ -5,32 +5,32 @@ const yaml = require('js-yaml'); // Added for checking enabled.yaml content in a
 
 // Helper to create a dummy plugin structure for testing CM commands
 async function createDummyPlugin(pluginDir, pluginName) {
-    await fs.ensureDir(pluginDir);
-    await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+  await fs.ensureDir(pluginDir);
+  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
+  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
 }
 
 // Helper to create a fully compliant v1 plugin (for 3.7.2 happy path)
 async function createWellFormedPlugin(pluginDir, pluginName) {
-    await fs.ensureDir(path.join(pluginDir, '.contract/test'));
-    await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: Well-formed plugin.`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\ncli_help: |\n  Plugin: ${pluginName}\n---\n`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-    // A minimal passing in-situ test (important for validation to be 'VALID')
-    await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
-    await fs.writeFile(path.join(pluginDir, '.contract', `${pluginName}.schema.json`), '{}');
+  await fs.ensureDir(path.join(pluginDir, '.contract/test'));
+  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: Well-formed plugin.`);
+  await fs.writeFile(path.join(pluginDir, 'README.md'), `---\ncli_help: |\n  Plugin: ${pluginName}\n---\n`);
+  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+  // A minimal passing in-situ test (important for validation to be 'VALID')
+  await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
+  await fs.writeFile(path.join(pluginDir, '.contract', `${pluginName}.schema.json`), '{}');
 }
 
 // Helper to create a deliberately malformed plugin (for 3.7.3 sad path)
 async function createMalformedPlugin(pluginDir, pluginName) {
-    // Missing index.js is a critical validation error
-    await fs.ensureDir(pluginDir);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: Malformed plugin.`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-    // No index.js, no contract/test, no schema
+  // Missing index.js is a critical validation error
+  await fs.ensureDir(pluginDir);
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: Malformed plugin.`);
+  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+  // No index.js, no contract/test, no schema
 }
 
 
@@ -109,8 +109,8 @@ module.exports = [
       const enabledManifestPath = path.join(sandboxDir, '.cm-test-root', 'enabled.yaml');
       const enabledManifestExists = await fs.pathExists(enabledManifestPath);
       if (enabledManifestExists) {
-          const enabledManifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
-          expect(enabledManifest.enabled_plugins).to.be.an('array').that.is.empty;
+        const enabledManifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));
+        expect(enabledManifest.enabled_plugins).to.be.an('array').that.is.empty;
       }
     },
   },

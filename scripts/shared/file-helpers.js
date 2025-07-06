@@ -57,7 +57,7 @@ function* findFiles(inputPath, opts = {}) {
   let stat;
   try {
     stat = fs.statSync(inputPath);
-  } catch (err) {
+  } catch {
     console.warn(`Warning: ${inputPath} does not exist or is not accessible.`);
     return;
   }

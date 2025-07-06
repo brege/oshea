@@ -6,7 +6,7 @@ function slugify(text) {
   return text
     .trim()
     .toLowerCase()
-    .replace(/[`~!@#$%^&*()+=\[\]{}\\|;:'",.<>/?]/g, '')
+    .replace(/[`~!@#$%^&*()+=[\]{}\\|;:'",.<>/?]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
 }
@@ -15,7 +15,7 @@ function slugify(text) {
 function parseTocBlock(lines) {
   const toc = {};
   lines.forEach(line => {
-    const match = line.match(/\[([^\]]+)\]\(#([^)]+)\)/);
+    const match = line.match(/\[([^\]]+)]\(#([^)]+)\)/);
     if (match) {
       toc[match[2]] = { text: match[1], raw: line };
     }
@@ -122,7 +122,7 @@ if (tocStart !== -1 && tocEnd !== -1 && tocEnd > tocStart) {
   newLines = [
     `<!-- toc-start level-${maxLevel} -->`,
     ...output,
-    `<!-- toc-end -->`,
+    '<!-- toc-end -->',
     '',
     ...lines
   ];

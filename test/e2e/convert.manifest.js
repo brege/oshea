@@ -5,14 +5,14 @@ const path = require('path');
 // Helper function to check for file existence and minimum size,
 // which will be common in 'convert' command tests.
 async function checkPdf(outputDir, expectedFilename, minSize = 1000) {
-    const pdfPath = path.join(outputDir, expectedFilename);
-    if (!await fs.pathExists(pdfPath)) {
-        throw new Error(`Expected PDF file was not created: ${pdfPath}`);
-    }
-    const stats = await fs.stat(pdfPath);
-    if (stats.size < minSize) {
-        throw new Error(`Generated PDF file is too small (${stats.size} bytes): ${pdfPath}`);
-    }
+  const pdfPath = path.join(outputDir, expectedFilename);
+  if (!await fs.pathExists(pdfPath)) {
+    throw new Error(`Expected PDF file was not created: ${pdfPath}`);
+  }
+  const stats = await fs.stat(pdfPath);
+  if (stats.size < minSize) {
+    throw new Error(`Generated PDF file is too small (${stats.size} bytes): ${pdfPath}`);
+  }
 }
 
 module.exports = [
@@ -86,7 +86,7 @@ module.exports = [
     },
   },
   {
-    describe: "3.1.4: (Config Precedence) A 'md_to_pdf_plugin' key in front matter is correctly used for conversion",
+    describe: '3.1.4: (Config Precedence) A \'md_to_pdf_plugin\' key in front matter is correctly used for conversion',
     setup: async (sandboxDir) => {
       const fixtureSrc = path.resolve(__dirname, '../fixtures/markdown/with-front-matter.md');
       const fixtureDest = path.join(sandboxDir, 'with-front-matter.md');
@@ -109,7 +109,7 @@ module.exports = [
     },
   },
   {
-    describe: "3.1.5: (Config Precedence) A '--plugin' CLI flag correctly overrides a plugin specified in front matter",
+    describe: '3.1.5: (Config Precedence) A \'--plugin\' CLI flag correctly overrides a plugin specified in front matter',
     setup: async (sandboxDir) => {
       const fixtureSrc = path.resolve(__dirname, '../fixtures/markdown/with-front-matter.md');
       const fixtureDest = path.join(sandboxDir, 'with-front-matter.md');
@@ -132,7 +132,7 @@ module.exports = [
       await checkPdf(sandboxDir, 'cli-override.pdf');
     },
   },
-    {
+  {
     describe: '3.1.6: (Sad Path) Fails with a non-zero exit code when the input file does not exist',
     setup: async (sandboxDir) => {
       // No setup needed as the file should not exist

@@ -1,7 +1,6 @@
 // src/cli/commands/plugin/listCmd.js
 const { pluginRegistryBuilderPath } = require('@paths');
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
-const path = require('path');
 const chalk = require('chalk');
 const stripAnsi = require('strip-ansi');
 
@@ -23,10 +22,10 @@ function displayPluginEntry(plugin) {
     const collection = plugin.cmCollection || plugin.cmOriginalCollection;
     const pluginId = plugin.cmPluginId || plugin.cmOriginalPluginId;
     if (collection && pluginId) {
-        console.log(`    CM Origin: ${chalk.magenta(collection)}/${chalk.magenta(pluginId)}`);
+      console.log(`    CM Origin: ${chalk.magenta(collection)}/${chalk.magenta(pluginId)}`);
     }
     if (plugin.cmInvokeName && plugin.cmInvokeName !== plugin.name && plugin.status === 'Enabled (CM)') {
-        console.log(`    CM Invoke Name: ${chalk.yellow(plugin.cmInvokeName)}`);
+      console.log(`    CM Invoke Name: ${chalk.yellow(plugin.cmInvokeName)}`);
     }
   }
 
@@ -35,12 +34,12 @@ function displayPluginEntry(plugin) {
   if (plugin.status === 'Enabled (CM)' && plugin.cmCollection && plugin.cmPluginId) {
     sourceDisplayMessage = `CollectionsManager (CM: ${chalk.magenta(plugin.cmCollection)}/${chalk.magenta(plugin.cmPluginId)})`;
   } else if (plugin.registrationSourceDisplay && plugin.registrationSourceDisplay.includes('(CM:')) {
-      const parts = plugin.registrationSourceDisplay.split('(CM:');
-      // Correctly reconstruct the source display message with colors
-      const cmDetails = parts[1].replace(')','').split('/');
-      const cmCollectionName = cmDetails[0];
-      const cmPluginIdName = cmDetails.slice(1).join('/'); // Handles plugin IDs with slashes if any in future
-      sourceDisplayMessage = `${parts[0].trim()} ${chalk.gray('(CM:')}${chalk.magenta(cmCollectionName)}/${chalk.magenta(cmPluginIdName)}${chalk.gray(')')}`;
+    const parts = plugin.registrationSourceDisplay.split('(CM:');
+    // Correctly reconstruct the source display message with colors
+    const cmDetails = parts[1].replace(')','').split('/');
+    const cmCollectionName = cmDetails[0];
+    const cmPluginIdName = cmDetails.slice(1).join('/'); // Handles plugin IDs with slashes if any in future
+    sourceDisplayMessage = `${parts[0].trim()} ${chalk.gray('(CM:')}${chalk.magenta(cmCollectionName)}/${chalk.magenta(cmPluginIdName)}${chalk.gray(')')}`;
   } else {
     sourceDisplayMessage = chalk.white(plugin.registrationSourceDisplay);
   }
@@ -66,7 +65,7 @@ function displayShortPluginEntry(plugin, statusColWidth, nameColWidth) {
 
   const S_NAME = chalk.yellow(plugin.name);
 
-  let S_CM_ORIGIN = chalk.gray("n/a");
+  let S_CM_ORIGIN = chalk.gray('n/a');
   if (plugin.cmCollection && plugin.cmPluginId) {
     S_CM_ORIGIN = `${chalk.magenta(plugin.cmCollection)}/${chalk.magenta(plugin.cmPluginId)}`;
   }
@@ -115,7 +114,7 @@ module.exports = {
           throw new Error('Error: --available, --enabled, and --disabled flags are mutually exclusive.');
         }
         if (argv.collection_name_filter && statusFlags === 0 && !argv.short) {
-          console.warn(chalk.yellow("Warning: Filter is ignored unless a status flag (--available, --enabled, --disabled) or --short is used."));
+          console.warn(chalk.yellow('Warning: Filter is ignored unless a status flag (--available, --enabled, --disabled) or --short is used.'));
         }
         return true;
       })
@@ -136,7 +135,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
       let results = [];
       const collectionFilter = args.collection_name_filter;
       const inCollectionMsg = collectionFilter ? ` in collection "${chalk.cyan(collectionFilter)}"` : '';
-      let headerMessage = "";
+      let headerMessage = '';
 
       if (args.enabled) {
         headerMessage = chalk.blue(`\nEnabled plugins${collectionFilter ? ` (filtered for CM collection '${collectionFilter}')` : ''}:`);
@@ -169,30 +168,30 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
         results = allPluginDetails.filter(p =>
           (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)' || (args.short && p.status === 'Available (CM)')
         );
-         if (collectionFilter && args.short) {
-            results = results.filter(p => p.cmCollection === collectionFilter || !(p.cmCollection)) ;
+        if (collectionFilter && args.short) {
+          results = results.filter(p => p.cmCollection === collectionFilter || !(p.cmCollection)) ;
         }
 
         if (!args.short) {
-            const usablePluginsCount = results.filter(p => (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)').length;
-            headerMessage = chalk.blue(`\nFound ${usablePluginsCount} plugin(s) usable by md-to-pdf:`);
+          const usablePluginsCount = results.filter(p => (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)').length;
+          headerMessage = chalk.blue(`\nFound ${usablePluginsCount} plugin(s) usable by md-to-pdf:`);
         } else {
-            const collectionContext = collectionFilter ? `CM plugins in collection "${collectionFilter}"` : "all known plugins";
-            headerMessage = chalk.blue(`\nSummary for ${collectionContext}:`);
+          const collectionContext = collectionFilter ? `CM plugins in collection "${collectionFilter}"` : 'all known plugins';
+          headerMessage = chalk.blue(`\nSummary for ${collectionContext}:`);
         }
-        if (results.length === 0) console.log(chalk.yellow("No plugins found or registered as usable."));
+        if (results.length === 0) console.log(chalk.yellow('No plugins found or registered as usable.'));
       }
 
       if (results.length > 0) {
         console.log(headerMessage);
         if (args.short) {
-          let maxStatusWidth = "STATUS".length;
-          let maxNameWidth = "NAME/INVOKE KEY".length;
+          let maxStatusWidth = 'STATUS'.length;
+          let maxNameWidth = 'NAME/INVOKE KEY'.length;
           results.forEach(p => {
             const plainStatus = stripAnsi(
-                p.status === 'Enabled (CM)' ? chalk.blueBright.bold(p.status) :
+              p.status === 'Enabled (CM)' ? chalk.blueBright.bold(p.status) :
                 (p.status && p.status.startsWith('Registered')) ? chalk.cyan.bold(p.status) :
-                p.status === 'Available (CM)' ? chalk.gray.bold(p.status) : p.status || 'N/A'
+                  p.status === 'Available (CM)' ? chalk.gray.bold(p.status) : p.status || 'N/A'
             );
             if (plainStatus.length > maxStatusWidth) maxStatusWidth = plainStatus.length;
             const plainName = stripAnsi(chalk.yellow(p.name));
@@ -209,7 +208,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
     } catch (error) {
       console.error(chalk.red(`ERROR listing plugins: ${error.message}`));
       if (error.stack && !(process.env.NODE_ENV === 'test' && error.message.includes('mutually exclusive'))) {
-          console.error(chalk.red(error.stack));
+        console.error(chalk.red(error.stack));
       }
       process.exit(1);
     }

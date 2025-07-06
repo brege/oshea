@@ -53,7 +53,7 @@ class CollectionsManager {
   }
 
   determineCollRoot(collRootCliOverride = null, collRootFromConfig = null) {
-    const { chalk, process, os, path } = this.dependencies;
+    const { process, os, path } = this.dependencies;
     if (collRootCliOverride) {
       return collRootCliOverride;
     }
@@ -165,8 +165,8 @@ class CollectionsManager {
       }
       if (matchesCriteriaForRemoval) {
         if (!disabledInvokeNames.has(pluginEntry.invoke_name)) {
-             console.log(chalk.gray(`    - Disabling plugin "${pluginEntry.invoke_name}" (from ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`));
-             disabledInvokeNames.add(pluginEntry.invoke_name);
+          console.log(chalk.gray(`    - Disabling plugin "${pluginEntry.invoke_name}" (from ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`));
+          disabledInvokeNames.add(pluginEntry.invoke_name);
         }
       } else {
         pluginsToKeep.push(pluginEntry);

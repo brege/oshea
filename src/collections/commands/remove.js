@@ -35,12 +35,12 @@ module.exports = async function removeCollection(dependencies, collectionName, o
   }).length;
 
   if (pluginsFromThisCollectionCount > 0 && !options.force) {
-     const enabledPluginsDetails = enabledManifest.enabled_plugins.filter(p => {
-        if (specificPluginIdForFilterCheck) {
-          return p.collection_name === actualCollectionNameForFilterCheck && p.plugin_id === specificPluginIdForFilterCheck;
-        }
-        return p.collection_name === actualCollectionNameForFilterCheck;
-      }).map(p => `"${p.invoke_name}" (from ${p.collection_name}/${p.plugin_id})`).join(', ');
+    const enabledPluginsDetails = enabledManifest.enabled_plugins.filter(p => {
+      if (specificPluginIdForFilterCheck) {
+        return p.collection_name === actualCollectionNameForFilterCheck && p.plugin_id === specificPluginIdForFilterCheck;
+      }
+      return p.collection_name === actualCollectionNameForFilterCheck;
+    }).map(p => `"${p.invoke_name}" (from ${p.collection_name}/${p.plugin_id})`).join(', ');
     throw new Error(`Collection "${collectionName}" has enabled plugins: ${enabledPluginsDetails}. Please disable them first or use the --force option.`);
   }
 

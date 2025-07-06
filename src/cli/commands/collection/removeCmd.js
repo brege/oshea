@@ -1,6 +1,5 @@
 // src/cli/commands/collection/removeCmd.js
 const chalk = require('chalk');
-const path = require('path');
 
 module.exports = {
   command: 'remove <collection_name>',
@@ -22,12 +21,12 @@ module.exports = {
   },
   handler: async (args) => {
     if (!args.manager) {
-      console.error(chalk.red("FATAL ERROR: CollectionsManager instance not found in CLI arguments."));
+      console.error(chalk.red('FATAL ERROR: CollectionsManager instance not found in CLI arguments.'));
       process.exit(1);
     }
     const manager = args.manager;
 
-    console.log(chalk.blueBright(`md-to-pdf collection: Attempting to remove collection...`));
+    console.log(chalk.blueBright('md-to-pdf collection: Attempting to remove collection...'));
     console.log(`  Collection Name: ${chalk.cyan(args.collection_name)}`);
     if (args.force) {
       console.log(chalk.yellow('  Force option is enabled. Will attempt to disable plugins from this collection first.'));
@@ -39,8 +38,8 @@ module.exports = {
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
-      } catch (error) {
-        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
+      } catch  {
+        console.error(chalk.yellow('WARN: Failed to regenerate completion cache. This is not a fatal error.'));
       }
 
     } catch (error) {

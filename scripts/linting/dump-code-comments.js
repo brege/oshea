@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 // scripts/linting/dump-code-comments.js
 
-const path = require('path');
 const fs = require('fs');
 const glob = require('glob');
 const { getPatternsFromArgs, getDefaultGlobIgnores } = require('../shared/file-helpers');

@@ -23,7 +23,7 @@ function findInsertIndex(lines) {
   // Shebang?
   if (lines[0] && lines[0].startsWith('#!')) idx++;
   // Head comment? (e.g. // src/foo/bar.js)
-  if (lines[idx] && lines[idx].match(/^\/\/\s*[\w/.\-]+\.js/)) idx++;
+  if (lines[idx] && lines[idx].match(/^\/\/\s*[\w/.-]+\.js/)) idx++;
   return idx;
 }
 

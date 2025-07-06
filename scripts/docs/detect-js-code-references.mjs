@@ -138,7 +138,7 @@ function isKnownJsFile(reference, basenameMap, mdFilePath) {
   try {
     const abs = path.resolve(path.dirname(mdFilePath), reference);
     resolved = path.relative(process.cwd(), abs).split(path.sep).join('/');
-  } catch (e) {
+  } catch {
     resolved = null;
   }
 
@@ -251,7 +251,7 @@ async function scanMarkdownForJsRefs(mdPath, basenameMap) {
         try {
           const abs = path.resolve(path.dirname(mdPath), node.url);
           resolved = path.relative(process.cwd(), abs).split(path.sep).join('/');
-        } catch (e) {
+        } catch {
           resolved = null;
         }
         if (resolved && basenameMap[base].includes(resolved)) {
@@ -359,7 +359,7 @@ async function main() {
         output += `\n  Proposed:       ${hit.proposed}`;
       }
       if (hit.knownJsFile === false) {
-        output += `\n  WARNING: Reference not found in codebase!`;
+        output += '\n  WARNING: Reference not found in codebase!';
       }
       output += '\n';
       console.log(output);
@@ -383,4 +383,3 @@ async function main() {
 }
 
 main();
-

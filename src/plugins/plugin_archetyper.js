@@ -11,7 +11,6 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   const { collRoot, listAvailablePlugins } = managerContext;
 
   let sourcePluginInfo = {};
-  let sourceIsDirectPath = false;
   let sourcePluginIdForReplacement = '';
 
   const idParts = sourcePluginIdentifier.split('/');
@@ -26,12 +25,11 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
     const foundPlugin = availableSourcePlugins.find(p => p.plugin_id === sourcePluginId && p.collection === sourceCollectionName);
 
     if (!foundPlugin) {
-        throw new Error(`Source plugin "${sourcePluginId}" in collection "${sourceCollectionName}" not found via CollectionsManager.`);
+      throw new Error(`Source plugin "${sourcePluginId}" in collection "${sourceCollectionName}" not found via CollectionsManager.`);
     }
     sourcePluginInfo = { ...foundPlugin };
     sourcePluginIdForReplacement = sourcePluginId;
   } else {
-    sourceIsDirectPath = true;
     const resolvedSourcePath = path.resolve(sourcePluginIdentifier);
     if (!fss.existsSync(resolvedSourcePath) || !fss.lstatSync(resolvedSourcePath).isDirectory()) {
       throw new Error(`Source plugin path "${resolvedSourcePath}" not found or is not a directory.`);
@@ -42,16 +40,16 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
       throw new Error(`Config file (.config.yaml or .yaml) not found in source plugin directory "${resolvedSourcePath}".`);
     }
     sourcePluginInfo = {
-        collection: chalk.gray('[direct path source]'),
-        plugin_id: sourcePluginIdForReplacement,
-        base_path: resolvedSourcePath,
-        config_path: path.join(resolvedSourcePath, configFileName)
+      collection: chalk.gray('[direct path source]'),
+      plugin_id: sourcePluginIdForReplacement,
+      base_path: resolvedSourcePath,
+      config_path: path.join(resolvedSourcePath, configFileName)
     };
     try {
-        const sourceConfigContent = await fs.readFile(sourcePluginInfo.config_path, 'utf8');
-        sourcePluginInfo.description = yaml.load(sourceConfigContent).description || `Plugin from path: ${sourcePluginIdForReplacement}`;
-    } catch (e) {
-        console.warn(chalk.yellow(`WARN: Could not read description from direct path source config.`));
+      const sourceConfigContent = await fs.readFile(sourcePluginInfo.config_path, 'utf8');
+      sourcePluginInfo.description = yaml.load(sourceConfigContent).description || `Plugin from path: ${sourcePluginIdForReplacement}`;
+    } catch {
+      console.warn(chalk.yellow('WARN: Could not read description from direct path source config.'));
     }
   }
 
@@ -84,7 +82,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   const originalConfigPathInArchetype = path.join(archetypePath, originalSourceConfigFilename);
   if (fss.existsSync(originalConfigPathInArchetype)) {
     if (originalConfigPathInArchetype.toLowerCase() !== newConfigPathInArchetype.toLowerCase()) {
-        await fs.rename(originalConfigPathInArchetype, newConfigPathInArchetype);
+      await fs.rename(originalConfigPathInArchetype, newConfigPathInArchetype);
     }
     filesToProcessForStringReplacement.push(newConfigPathInArchetype);
     let tempConfigData = yaml.load(await fs.readFile(newConfigPathInArchetype, 'utf8'));
@@ -97,56 +95,56 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
         const oldCssPathInArchetype = path.join(archetypePath, tempConfigData.css_files[cssIndex]);
         const newCssName = `${newArchetypeName}.css`;
         if (fss.existsSync(oldCssPathInArchetype)) {
-            await fs.rename(oldCssPathInArchetype, path.join(archetypePath, newCssName));
-            tempConfigData.css_files[cssIndex] = newCssName;
-            filesToProcessForStringReplacement.push(path.join(archetypePath, newCssName));
+          await fs.rename(oldCssPathInArchetype, path.join(archetypePath, newCssName));
+          tempConfigData.css_files[cssIndex] = newCssName;
+          filesToProcessForStringReplacement.push(path.join(archetypePath, newCssName));
         }
       }
     }
 
     if (tempConfigData.handler_script && fss.existsSync(path.join(archetypePath, tempConfigData.handler_script))) {
-        filesToProcessForStringReplacement.push(path.join(archetypePath, tempConfigData.handler_script));
+      filesToProcessForStringReplacement.push(path.join(archetypePath, tempConfigData.handler_script));
     }
     await fs.writeFile(newConfigPathInArchetype, yaml.dump(tempConfigData));
   }
 
   const contractDirInArchetype = path.join(archetypePath, '.contract');
   if (fss.existsSync(contractDirInArchetype)) {
-      const oldSchemaName = `${sourcePluginIdForReplacement}.schema.json`;
-      const oldSchemaPath = path.join(contractDirInArchetype, oldSchemaName);
-      if (fss.existsSync(oldSchemaPath)) {
-          const newSchemaPath = path.join(contractDirInArchetype, `${newArchetypeName}.schema.json`);
-          await fs.rename(oldSchemaPath, newSchemaPath);
-          filesToProcessForStringReplacement.push(newSchemaPath);
+    const oldSchemaName = `${sourcePluginIdForReplacement}.schema.json`;
+    const oldSchemaPath = path.join(contractDirInArchetype, oldSchemaName);
+    if (fss.existsSync(oldSchemaPath)) {
+      const newSchemaPath = path.join(contractDirInArchetype, `${newArchetypeName}.schema.json`);
+      await fs.rename(oldSchemaPath, newSchemaPath);
+      filesToProcessForStringReplacement.push(newSchemaPath);
+    }
+    const testDirInArchetype = path.join(contractDirInArchetype, 'test');
+    if (fss.existsSync(testDirInArchetype)) {
+      const oldTestName = `${sourcePluginIdForReplacement}-e2e.test.js`;
+      const oldTestPath = path.join(testDirInArchetype, oldTestName);
+      if (fss.existsSync(oldTestPath)) {
+        const newTestPath = path.join(testDirInArchetype, `${newArchetypeName}-e2e.test.js`);
+        await fs.rename(oldTestPath, newTestPath);
+        filesToProcessForStringReplacement.push(newTestPath);
       }
-      const testDirInArchetype = path.join(contractDirInArchetype, 'test');
-      if (fss.existsSync(testDirInArchetype)) {
-          const oldTestName = `${sourcePluginIdForReplacement}-e2e.test.js`;
-          const oldTestPath = path.join(testDirInArchetype, oldTestName);
-          if (fss.existsSync(oldTestPath)) {
-              const newTestPath = path.join(testDirInArchetype, `${newArchetypeName}-e2e.test.js`);
-              await fs.rename(oldTestPath, newTestPath);
-              filesToProcessForStringReplacement.push(newTestPath);
-          }
-      }
+    }
   }
 
   const currentArchetypeFiles = await fs.readdir(archetypePath, { withFileTypes: true });
   for (const dirent of currentArchetypeFiles) {
-      const fullFilePath = path.join(archetypePath, dirent.name);
-      if (dirent.isFile() && processExtensions.includes(path.extname(dirent.name).toLowerCase())) {
-          filesToProcessForStringReplacement.push(fullFilePath);
-      }
+    const fullFilePath = path.join(archetypePath, dirent.name);
+    if (dirent.isFile() && processExtensions.includes(path.extname(dirent.name).toLowerCase())) {
+      filesToProcessForStringReplacement.push(fullFilePath);
+    }
   }
 
   for (const filePath of [...new Set(filesToProcessForStringReplacement)]) {
     if (!fss.existsSync(filePath)) continue;
     let fileContent = await fs.readFile(filePath, 'utf8');
     if (sourcePluginIdForReplacement && sourcePluginIdForReplacement !== newArchetypeName) {
-        fileContent = fileContent.replace(new RegExp(sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newArchetypeName);
+      fileContent = fileContent.replace(new RegExp(sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newArchetypeName);
     }
     if (sourcePluginIdPascal && newArchetypeNamePascal && sourcePluginIdPascal !== newArchetypeNamePascal) {
-        fileContent = fileContent.replace(new RegExp(sourcePluginIdPascal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newArchetypeNamePascal);
+      fileContent = fileContent.replace(new RegExp(sourcePluginIdPascal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newArchetypeNamePascal);
     }
     await fs.writeFile(filePath, fileContent);
   }
@@ -155,9 +153,9 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   if (fss.existsSync(readmePath)) {
     const originalReadmeContent = await fs.readFile(readmePath, 'utf8');
     const { data: fmData, content: mainReadmeContent } = matter(originalReadmeContent);
-    const archetypeNotePattern = /\n\*\*Note:\*\* This is an archetype of the "[^"]+" plugin, created as "[^"]+"\..*?\n/gs;
+    const archetypeNotePattern = /\n\*\*Note:\*\* This is an archetype of the '[^']+' plugin, created as '[^']+'\..*?\n/gs;
     const cleanMainReadmeContent = mainReadmeContent.replace(archetypeNotePattern, '');
-    const archetypeNote = `\n**Note:** This is an archetype of the "${sourcePluginIdentifier}" plugin, created as "${newArchetypeName}". You may need to update its content, registration paths, and internal references if you customize it further.\n`;
+    const archetypeNote = `\n**Note:** This is an archetype of the '${sourcePluginIdentifier}' plugin, created as '${newArchetypeName}'. You may need to update its content, registration paths, and internal references if you customize it further.\n`;
     let newReadmeContent = Object.keys(fmData).length > 0 ? `---\n${yaml.dump(fmData)}---\n` : '';
     newReadmeContent += `${cleanMainReadmeContent}${archetypeNote}`;
     await fs.writeFile(readmePath, newReadmeContent);
@@ -178,5 +176,5 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
 }
 
 module.exports = {
-    createArchetype
+  createArchetype
 };

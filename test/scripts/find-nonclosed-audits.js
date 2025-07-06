@@ -39,7 +39,6 @@ const testIdToPath = buildTestIdToPathMap();
 
 const AUDIT_LOG = path.join(__dirname, '../docs/audit-log.md');
 const lines = fs.readFileSync(AUDIT_LOG, 'utf8').split('\n');
-const results = [];
 
 for (let i = 0; i < lines.length; i++) {
   const line = lines[i];

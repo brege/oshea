@@ -7,73 +7,73 @@ const ConfigResolver = require(configResolverPath);
 // Test suite for Scenario 1.1.2
 describe('ConfigResolver _initializeResolverIfNeeded Registry Caching (1.1.2)', () => {
 
-    let mockDependencies;
-    let MockPluginRegistryBuilder;
-    let mockMainConfigLoaderInstance;
+  let mockDependencies;
+  let MockPluginRegistryBuilder;
+  let mockMainConfigLoaderInstance;
 
-    beforeEach(() => {
-        // Create mock classes for the dependencies
-        mockMainConfigLoaderInstance = {
-            getPrimaryMainConfig: sinon.stub().resolves({ config: {}, path: '/fake/path', reason: 'initial' }),
-            getXdgMainConfig: sinon.stub().resolves({}),
-            getProjectManifestConfig: sinon.stub().resolves({})
-        };
-        const MockMainConfigLoader = sinon.stub().returns(mockMainConfigLoaderInstance);
+  beforeEach(() => {
+    // Create mock classes for the dependencies
+    mockMainConfigLoaderInstance = {
+      getPrimaryMainConfig: sinon.stub().resolves({ config: {}, path: '/fake/path', reason: 'initial' }),
+      getXdgMainConfig: sinon.stub().resolves({}),
+      getProjectManifestConfig: sinon.stub().resolves({})
+    };
+    const MockMainConfigLoader = sinon.stub().returns(mockMainConfigLoaderInstance);
 
-        // We need to spy on the constructor of PluginRegistryBuilder to count calls
-        MockPluginRegistryBuilder = sinon.stub().returns({
-            buildRegistry: sinon.stub().resolves({
-                // Return a mock registry object. The properties are set by ConfigResolver after build.
-            })
-        });
-
-        mockDependencies = {
-            MainConfigLoader: MockMainConfigLoader,
-            PluginConfigLoader: sinon.stub(),
-            PluginRegistryBuilder: MockPluginRegistryBuilder,
-            fs: { existsSync: sinon.stub().returns(true), readFileSync: sinon.stub().returns('{}') }, // For schema loading
-            path: {
-                resolve: sinon.stub().returnsArg(0),
-                join: (...args) => args.join('/'),
-                dirname: sinon.stub().returns('/fake/dir')
-            },
-            os: { homedir: sinon.stub().returns('/fake/home') },
-            loadYamlConfig: sinon.stub().resolves({}),
-            deepMerge: (a, b) => ({...a, ...b}),
-            Ajv: sinon.stub().returns({ addSchema: sinon.stub(), getSchema: sinon.stub().returns({ schema: {} }), compile: sinon.stub().returns(() => true) }),
-        };
+    // We need to spy on the constructor of PluginRegistryBuilder to count calls
+    MockPluginRegistryBuilder = sinon.stub().returns({
+      buildRegistry: sinon.stub().resolves({
+        // Return a mock registry object. The properties are set by ConfigResolver after build.
+      })
     });
 
-    afterEach(() => {
-        sinon.restore();
-    });
+    mockDependencies = {
+      MainConfigLoader: MockMainConfigLoader,
+      PluginConfigLoader: sinon.stub(),
+      PluginRegistryBuilder: MockPluginRegistryBuilder,
+      fs: { existsSync: sinon.stub().returns(true), readFileSync: sinon.stub().returns('{}') }, // For schema loading
+      path: {
+        resolve: sinon.stub().returnsArg(0),
+        join: (...args) => args.join('/'),
+        dirname: sinon.stub().returns('/fake/dir')
+      },
+      os: { homedir: sinon.stub().returns('/fake/home') },
+      loadYamlConfig: sinon.stub().resolves({}),
+      deepMerge: (a, b) => ({...a, ...b}),
+      Ajv: sinon.stub().returns({ addSchema: sinon.stub(), getSchema: sinon.stub().returns({ schema: {} }), compile: sinon.stub().returns(() => true) }),
+    };
+  });
 
-    it('should not rebuild the registry on a second call if conditions are unchanged', async () => {
-        // Arrange
-        const resolver = new ConfigResolver(null, false, false, mockDependencies);
+  afterEach(() => {
+    sinon.restore();
+  });
 
-        await resolver._initializeResolverIfNeeded(); // First call
+  it('should not rebuild the registry on a second call if conditions are unchanged', async () => {
+    // Arrange
+    const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        await resolver._initializeResolverIfNeeded(); // Second call
+    await resolver._initializeResolverIfNeeded(); // First call
 
-        // Assert
-        // The registry builder should only be called once.
-        expect(MockPluginRegistryBuilder.callCount).to.equal(1);
-    });
+    await resolver._initializeResolverIfNeeded(); // Second call
 
-    it('should rebuild the registry if useFactoryDefaultsOnly changes between calls', async () => {
-        // Arrange
-        const resolver = new ConfigResolver(null, false, false, mockDependencies);
+    // Assert
+    // The registry builder should only be called once.
+    expect(MockPluginRegistryBuilder.callCount).to.equal(1);
+  });
 
-        await resolver._initializeResolverIfNeeded(); // First call, builds with useFactoryDefaultsOnly = false
+  it('should rebuild the registry if useFactoryDefaultsOnly changes between calls', async () => {
+    // Arrange
+    const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
-        // Manually change the property on the instance to simulate a different run condition
-        resolver.useFactoryDefaultsOnly = true;
+    await resolver._initializeResolverIfNeeded(); // First call, builds with useFactoryDefaultsOnly = false
 
-        await resolver._initializeResolverIfNeeded(); // Second call
+    // Manually change the property on the instance to simulate a different run condition
+    resolver.useFactoryDefaultsOnly = true;
 
-        // Assert
-        // The registry builder should be called twice.
-        expect(MockPluginRegistryBuilder.callCount).to.equal(2);
-    });
+    await resolver._initializeResolverIfNeeded(); // Second call
+
+    // Assert
+    // The registry builder should be called twice.
+    expect(MockPluginRegistryBuilder.callCount).to.equal(2);
+  });
 });

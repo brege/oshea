@@ -33,28 +33,28 @@ module.exports = async function updateCollection(dependencies, collectionName) {
     let defaultBranchName = null;
     try {
       const remoteDetailsResult = await this._spawnGitProcess(
-          ['remote', 'show', 'origin'],
-          collectionPath,
-          `getting remote details for ${collectionName}`
+        ['remote', 'show', 'origin'],
+        collectionPath,
+        `getting remote details for ${collectionName}`
       );
 
       if (!remoteDetailsResult || !remoteDetailsResult.success || !remoteDetailsResult.stdout) {
-          console.error(chalk.red(`  ERROR: Could not retrieve remote details for ${collectionName}. Update aborted.`));
-          return { success: false, message: `Failed to retrieve remote details for ${collectionName}.` };
+        console.error(chalk.red(`  ERROR: Could not retrieve remote details for ${collectionName}. Update aborted.`));
+        return { success: false, message: `Failed to retrieve remote details for ${collectionName}.` };
       }
 
       const remoteStdout = remoteDetailsResult.stdout;
       const lines = remoteStdout.split('\n');
       for (const line of lines) {
-          if (line.trim().startsWith('HEAD branch:')) {
-              defaultBranchName = line.split(':')[1].trim();
-              break;
-          }
+        if (line.trim().startsWith('HEAD branch:')) {
+          defaultBranchName = line.split(':')[1].trim();
+          break;
+        }
       }
 
       if (!defaultBranchName) {
-          console.error(chalk.red(`  ERROR: Could not determine default branch for ${collectionName} from remote details. Update aborted.`));
-          return { success: false, message: `Could not determine default branch for ${collectionName}.` };
+        console.error(chalk.red(`  ERROR: Could not determine default branch for ${collectionName} from remote details. Update aborted.`));
+        return { success: false, message: `Could not determine default branch for ${collectionName}.` };
       }
 
     } catch (gitError) {
@@ -66,8 +66,8 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       await this._spawnGitProcess(['fetch', 'origin'], collectionPath, `fetching ${collectionName}`);
       const statusResult = await this._spawnGitProcess(['status', '--porcelain'], collectionPath, `checking status of ${collectionName}`);
       if (!statusResult.success) {
-          console.error(chalk.red(`  ERROR: Could not get Git status for ${collectionName}. Update aborted.`));
-          return { success: false, message: `Could not get Git status for ${collectionName}.` };
+        console.error(chalk.red(`  ERROR: Could not get Git status for ${collectionName}. Update aborted.`));
+        return { success: false, message: `Could not get Git status for ${collectionName}.` };
       }
 
       const statusOutput = statusResult.stdout.trim();
@@ -76,34 +76,34 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       let localCommitsAhead = 0;
       if (!hasUncommittedChanges) {
         try {
-            const revListResult = await this._spawnGitProcess(
-                ['rev-list', '--count', `origin/${defaultBranchName}..HEAD`],
-                collectionPath,
-                `checking for local commits on ${collectionName}`
-            );
-            if (revListResult.success && revListResult.stdout) {
-                localCommitsAhead = parseInt(revListResult.stdout.trim(), 10);
-                if (isNaN(localCommitsAhead)) localCommitsAhead = 0;
-            }
+          const revListResult = await this._spawnGitProcess(
+            ['rev-list', '--count', `origin/${defaultBranchName}..HEAD`],
+            collectionPath,
+            `checking for local commits on ${collectionName}`
+          );
+          if (revListResult.success && revListResult.stdout) {
+            localCommitsAhead = parseInt(revListResult.stdout.trim(), 10);
+            if (isNaN(localCommitsAhead)) localCommitsAhead = 0;
+          }
         } catch (revListError) {
-            console.warn(chalk.yellow(`  WARN: Could not execute git rev-list to check for local commits on ${collectionName}: ${revListError.message}`));
+          console.warn(chalk.yellow(`  WARN: Could not execute git rev-list to check for local commits on ${collectionName}: ${revListError.message}`));
         }
       }
 
       if (hasUncommittedChanges || localCommitsAhead > 0) {
-          let abortMessage = `Collection "${collectionName}" has local changes.`;
-          if (hasUncommittedChanges && localCommitsAhead > 0) {
-              abortMessage = `Collection "${collectionName}" has uncommitted changes and local commits not on the remote.`;
-          } else if (localCommitsAhead > 0) {
-              abortMessage = `Collection "${collectionName}" has local commits not present on the remote.`;
-          }
+        let abortMessage = `Collection "${collectionName}" has local changes.`;
+        if (hasUncommittedChanges && localCommitsAhead > 0) {
+          abortMessage = `Collection "${collectionName}" has uncommitted changes and local commits not on the remote.`;
+        } else if (localCommitsAhead > 0) {
+          abortMessage = `Collection "${collectionName}" has local commits not present on the remote.`;
+        }
 
-          console.warn(chalk.yellow(`  WARN: ${abortMessage} Aborting update.`));
-          console.warn(chalk.yellow("          Please commit, stash, or revert your changes before updating."));
-          return {
-              success: false,
-              message: `${abortMessage} Aborting update. Commit, stash, or revert changes.`
-          };
+        console.warn(chalk.yellow(`  WARN: ${abortMessage} Aborting update.`));
+        console.warn(chalk.yellow('          Please commit, stash, or revert your changes before updating.'));
+        return {
+          success: false,
+          message: `${abortMessage} Aborting update. Commit, stash, or revert changes.`
+        };
       }
 
       await this._spawnGitProcess(['reset', '--hard', `origin/${defaultBranchName}`], collectionPath, `resetting ${collectionName}`);

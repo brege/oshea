@@ -8,23 +8,23 @@ const sinon = require('sinon');
 const PluginManager = require(pluginManagerPath);
 
 describe('PluginManager constructor (1.5.1)', () => {
-    let pluginManager;
+  let pluginManager;
 
-    beforeEach(() => {
-        // Instantiate PluginManager without coreUtils as it no longer accepts it
-        pluginManager = new PluginManager();
-    });
+  beforeEach(() => {
+    // Instantiate PluginManager without coreUtils as it no longer accepts it
+    pluginManager = new PluginManager();
+  });
 
-    afterEach(() => {
-        sinon.restore();
-    });
+  afterEach(() => {
+    sinon.restore();
+  });
 
-    it('should initialize without throwing errors', () => {
-        // Assert that no error was thrown implicitly by the successful instantiation
-        expect(pluginManager).to.be.an.instanceOf(PluginManager);
+  it('should initialize without throwing errors', () => {
+    // Assert that no error was thrown implicitly by the successful instantiation
+    expect(pluginManager).to.be.an.instanceOf(PluginManager);
 
-        // Assert that there are no enumerable properties on the instance (coreUtils is now internal to the module)
-        const instanceProperties = Object.keys(pluginManager);
-        expect(instanceProperties).to.have.lengthOf(0);
-    });
+    // Assert that there are no enumerable properties on the instance (coreUtils is now internal to the module)
+    const instanceProperties = Object.keys(pluginManager);
+    expect(instanceProperties).to.have.lengthOf(0);
+  });
 });

@@ -4,9 +4,9 @@ const path = require('path');
 
 // Helper from previous manifests
 async function createDummyPlugin(pluginDir, pluginName) {
-    await fs.ensureDir(pluginDir);
-    await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
+  await fs.ensureDir(pluginDir);
+  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
 }
 
 module.exports = [
@@ -41,8 +41,8 @@ module.exports = [
   {
     describe: '3.10.2: (Input Variation) Successfully adds a collection from a local directory path',
     setup: async (sandboxDir) => {
-        const localCollPath = path.join(sandboxDir, 'my-local-collection-src');
-        await createDummyPlugin(path.join(localCollPath, 'local-plugin'), 'local-plugin');
+      const localCollPath = path.join(sandboxDir, 'my-local-collection-src');
+      await createDummyPlugin(path.join(localCollPath, 'local-plugin'), 'local-plugin');
     },
     args: (sandboxDir) => [
       'collection',

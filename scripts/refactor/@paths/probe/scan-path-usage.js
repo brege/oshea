@@ -3,7 +3,6 @@
 // This script scans a directory for files that use pathing patterns
 // of the type that are NOT in require(), path.join(), or path.resolve().
 
-const path = require('path');
 const fs = require('fs');
 const { findFiles } = require('../../../shared/file-helpers');
 

@@ -1,152 +1,81 @@
-// src/completion/cli-tree-builder.js
+// scripts/refactor/logging/probe-logging.js
 
-const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
+const fs = require('fs');
+const { findFiles } = require('../../shared/file-helpers');
 
-// --- Configuration ---
-const { cliCommandsPath, convertCmdPath } = require('@paths'); // Added convertCmdPath
-const COMMANDS_DIR = cliCommandsPath;
+// Accept the directory to scan as a CLI argument, default to 'src' if not provided
+const targetDir = process.argv[2] || 'src';
+const SRC_ROOT = path.resolve(process.cwd(), targetDir);
 
-// --- Dynamic Proxy Yargs Stub ---
-function createYargsStub() {
-    const stub = new Proxy({
-        options: {},
-        positionals: [],
-        option(key, opt) {
-            this.options[key] = { ...opt, completionKey: opt.completionKey, choices: opt.choices };
-            return stub;
-        },
-        positional(key, opt) {
-            this.positionals.push({ key, ...opt, completionKey: opt.completionKey, choices: opt.choices });
-            return stub;
-        }
-    }, {
-        get(target, prop) {
-            if (prop in target) return target[prop];
-            if (['command', 'demandCommand', 'epilog', 'help', 'version', 'alias', 'strictCommands', 'usage', 'middleware', 'completion', 'fail'].includes(prop)) {
-                 return (...args) => stub;
-            }
-            if (prop === 'argv') return {};
-            if (prop === 'showHelp') return () => {};
-            return (...args) => stub;
-        }
-    });
-    return stub;
+const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
+const CHALK_REGEX = /chalk\.(\w+)/g;
+
+function scanFile(filePath) {
+  let content;
+  try {
+    content = fs.readFileSync(filePath, 'utf8');
+  } catch {
+    console.warn(`Could not read file: ${filePath}`);
+    return null;
+  }
+  const consoleMatches = [...content.matchAll(CONSOLE_REGEX)];
+  const chalkMatches = [...content.matchAll(CHALK_REGEX)];
+
+  const consoleStats = {};
+  for (const match of consoleMatches) {
+    const method = match[1];
+    consoleStats[method] = (consoleStats[method] || 0) + 1;
+  }
+
+  const chalkStats = {};
+  for (const match of chalkMatches) {
+    const method = match[1];
+    chalkStats[method] = (chalkStats[method] || 0) + 1;
+  }
+
+  return {
+    file: filePath,
+    console: consoleStats,
+    chalk: chalkStats,
+  };
 }
 
-// --- Command Tree Discovery ---
-function discoverCommandTree(dir, prefixParts = []) {
-    const nodesMap = new Map();
-    const entries = fs.readdirSync(dir);
-
-    if (prefixParts.length === 0) {
-        let globalOptionsList = [
-            'config', 'factory-defaults', 'coll-root',
-            'help', 'version', 'h', 'v'
-        ];
-        let defaultCommandPositionals = [];
-        let defaultCommandOptions = [];
-
-        try {
-            const convertCmdModule = require(convertCmdPath); // Refactored Line
-            const defaultCmdStub = createYargsStub();
-            if (typeof convertCmdModule.defaultCmd.builder === 'function') {
-                convertCmdModule.defaultCmd.builder(defaultCmdStub);
-            }
-            defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey, choices: p.choices}));
-            defaultCommandOptions = Object.keys(defaultCmdStub.options || {}).map(optKey => ({name: optKey, completionKey: defaultCmdStub.options[optKey].completionKey, choices: defaultCmdStub.options[optKey].choices}));
-        } catch (builderError) {
-            console.warn(chalk.yellow(`WARN: Could not extract default command builder info for $0 node: ${builderError.message}`));
-        }
-
-        const finalOptionsFor$0 = [...new Set([...globalOptionsList.map(name => ({name})), ...defaultCommandOptions])].sort((a,b) => a.name.localeCompare(b.name));
-        const finalPositionalsFor$0 = [...new Set([...defaultCommandPositionals])];
-
-        nodesMap.set('$0', {
-            name: '$0',
-            options: finalOptionsFor$0,
-            positionals: finalPositionalsFor$0,
-            children: []
-        });
-    }
-
-    for (const entry of entries) {
-        const fullPath = path.join(dir, entry);
-        if (fs.statSync(fullPath).isDirectory()) {
-            const groupName = path.basename(fullPath);
-            nodesMap.set(groupName, {
-                name: groupName,
-                children: discoverCommandTree(fullPath, [...prefixParts, groupName]),
-                options: [],
-                positionals: []
-            });
-        } else if (entry.endsWith('Cmd.js')) {
-            const commandModule = require(fullPath);
-
-            const processAndAddCommand = (cmdObj) => {
-                if (!cmdObj || !cmdObj.command) return;
-                const commandDefinition = cmdObj.command;
-
-                const commandName = parseBaseCommand(commandDefinition);
-                const yargsStub = createYargsStub();
-
-                if (typeof cmdObj.builder === 'function') {
-                    try {
-                        cmdObj.builder(yargsStub);
-                    } catch (e) {
-                         // console.error(chalk.yellow(`WARN: Error in builder for ${commandName}: ${e.message}`));
-                    }
-                }
-                const options = Object.keys(yargsStub.options || {}).map(optKey => ({name: optKey, completionKey: yargsStub.options[optKey].completionKey, choices: yargsStub.options[optKey].choices}));
-                const positionals = (yargsStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey, choices: p.choices}));
-
-                let children = [];
-                if (/<subcommand>/.test(commandDefinition) && fs.existsSync(path.join(dir, commandName))) {
-                    children = discoverCommandTree(
-                        path.join(dir, commandName),
-                        [...prefixParts, commandName]
-                    );
-                }
-
-                if (nodesMap.has(commandName)) {
-                    const existingNode = nodesMap.get(commandName);
-                    const mergedOptions = new Map();
-                    [...existingNode.options, ...options].forEach(opt => mergedOptions.set(opt.name, opt));
-                    existingNode.options = Array.from(mergedOptions.values());
-
-                    const mergedPositionals = new Map();
-                    [...existingNode.positionals, ...positionals].forEach(pos => mergedPositionals.set(pos.key, pos));
-                    existingNode.positionals = Array.from(mergedPositionals.values());
-
-                    if (children.length > 0 && existingNode.children.length === 0) {
-                         existingNode.children = children;
-                    }
-                } else {
-                    nodesMap.set(commandName, {
-                        name: commandName,
-                        options,
-                        positionals,
-                        children
-                    });
-                }
-            };
-
-            if (
-                typeof commandModule === 'object' &&
-                !Array.isArray(commandModule) &&
-                Object.keys(commandModule).length > 0 &&
-                Object.values(commandModule).every(v => v && typeof v === 'object' && 'command' in v)
-            ) {
-                for (const cmdObj of Object.values(commandModule)) {
-                    processAndAddCommand(cmdObj);
-                }
-            } else {
-                processAndAddCommand(commandModule);
-            }
-        }
-    }
-    return Array.from(nodesMap.values());
+const results = [];
+for (const file of findFiles(SRC_ROOT, {
+  filter: (name) => name.endsWith('.js') || name.endsWith('.mjs')
+})) {
+  const result = scanFile(file);
+  if (result) results.push(result);
 }
 
-module.exports = { discoverCommandTree };
+const aggregate = {
+  console: {},
+  chalk: {},
+  files: results.length,
+};
+results.forEach(({ console: c, chalk: k }) => {
+  for (const method in c) {
+    aggregate.console[method] = (aggregate.console[method] || 0) + c[method];
+  }
+  for (const method in k) {
+    aggregate.chalk[method] = (aggregate.chalk[method] || 0) + k[method];
+  }
+});
+
+console.log('\n=== Logging Probe Summary ===');
+console.log('Files scanned:', aggregate.files);
+console.log('Console usage:', aggregate.console);
+console.log('Chalk usage:', aggregate.chalk);
+
+console.log('\n--- Per-file breakdown ---');
+results
+  .filter(r => Object.keys(r.console).length || Object.keys(r.chalk).length)
+  .forEach(r => {
+    console.log(`\n${r.file}`);
+    if (Object.keys(r.console).length) console.log('   console:', r.console);
+    if (Object.keys(r.chalk).length)   console.log('   chalk:', r.chalk);
+  });
+
+// Optionally, write JSON for further analysis
+// fs.writeFileSync('logging-probe-report.json', JSON.stringify(results, null, 2));

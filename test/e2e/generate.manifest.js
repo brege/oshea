@@ -5,14 +5,14 @@ const { HUGO_EXAMPLE_SOURCE_IN_EXAMPLES } = require('../shared/test-constants');
 
 // Reusable helper from convert.manifest.js
 async function checkPdf(outputDir, expectedFilename, minSize = 1000) {
-    const pdfPath = path.join(outputDir, expectedFilename);
-    if (!await fs.pathExists(pdfPath)) {
-        throw new Error(`Expected PDF file was not created: ${pdfPath}`);
-    }
-    const stats = await fs.stat(pdfPath);
-    if (stats.size < minSize) {
-        throw new Error(`Generated PDF file is too small (${stats.size} bytes): ${pdfPath}`);
-    }
+  const pdfPath = path.join(outputDir, expectedFilename);
+  if (!await fs.pathExists(pdfPath)) {
+    throw new Error(`Expected PDF file was not created: ${pdfPath}`);
+  }
+  const stats = await fs.stat(pdfPath);
+  if (stats.size < minSize) {
+    throw new Error(`Generated PDF file is too small (${stats.size} bytes): ${pdfPath}`);
+  }
 }
 
 module.exports = [

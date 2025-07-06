@@ -1,5 +1,4 @@
 // scripts/refactor/@paths/utils/require-taxonomy-list.js
-const path = require('path');
 const fs = require('fs');
 const { findFiles } = require('../../../shared/file-helpers');
 const { classifyRequireLine } = require('../probe/require-classifier');
@@ -78,7 +77,7 @@ for (const kind of ['default', 'destructured', 'chained', 'dynamic', 'other']) {
 }
 
 if (showPackageType && taxonomy.package.length) {
-  console.log(`\n=== type: package require ===`);
+  console.log('\n=== type: package require ===');
   for (const { file, line, code, requiredPath } of taxonomy.package) {
     console.log(`${file}:${line}\t"${requiredPath}"\t${code}`);
   }

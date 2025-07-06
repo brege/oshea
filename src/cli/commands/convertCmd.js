@@ -1,43 +1,36 @@
 // src/cli/commands/convertCmd.js
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
-const fsp = require('fs').promises;
-const { pluginDeterminerPath, pluginManagerPath } = require('@paths');
-const { determinePluginToUse } = require(pluginDeterminerPath);
-const PluginManager = require(pluginManagerPath);
 
 const cliOptionsForConvert = (yargs) => {
   yargs
-    .positional("markdownFile", {
-      describe: "path to the input markdown file",
-      type: "string"
+    .positional('markdownFile', {
+      describe: 'path to the input markdown file',
+      type: 'string'
     })
-    .option("plugin", {
-      alias: "p",
-      describe: "plugin to use (name or path)",
-      type: "string",
+    .option('plugin', {
+      alias: 'p',
+      describe: 'plugin to use (name or path)',
+      type: 'string',
       completionKey: 'usablePlugins'
     })
-    .option("outdir", {
-      alias: "o",
-      describe: "output directory (defaults to system temp)",
-      type: "string"
+    .option('outdir', {
+      alias: 'o',
+      describe: 'output directory (defaults to system temp)',
+      type: 'string'
     })
-    .option("filename", {
-      alias: "f",
-      describe: "output pdf filename",
-      type: "string"
+    .option('filename', {
+      alias: 'f',
+      describe: 'output pdf filename',
+      type: 'string'
     })
-    .option("open", {
-      describe: "open pdf after generation",
-      type: "boolean",
+    .option('open', {
+      describe: 'open pdf after generation',
+      type: 'boolean',
       default: true
     })
-    .option("watch", {
-      alias: "w",
-      describe: "watch for changes and re-convert",
-      type: "boolean",
+    .option('watch', {
+      alias: 'w',
+      describe: 'watch for changes and re-convert',
+      type: 'boolean',
       default: false
     })
     .epilogue('Plugin precedence: --plugin flag > front matter > local .config.yaml > default.');
@@ -45,8 +38,8 @@ const cliOptionsForConvert = (yargs) => {
 
 module.exports = {
   explicitConvert: {
-    command: "convert <markdownFile>",
-    describe: "convert a markdown file to PDF",
+    command: 'convert <markdownFile>',
+    describe: 'convert a markdown file to PDF',
     builder: cliOptionsForConvert,
     handler: async (args) => {
       args.isLazyLoad = false;
@@ -54,7 +47,7 @@ module.exports = {
   },
   defaultCmd: {
     command: '$0 [markdownFile]',
-    describe: "convert a markdown file to PDF (default command)",
+    describe: 'convert a markdown file to PDF (default command)',
     builder: cliOptionsForConvert,
     handler: async (args) => {}
   },

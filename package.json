@@ -14,7 +14,8 @@
     "test:watch": "mocha --watch",
     "test:telemetry": "node scripts/telemetry/test-watcher.js",
     "dep-tree": "madge --json src/",
-    "lint": "node scripts/linting/lint.js"
+    "lint": "node scripts/linting/lint.js",
+    "prepare": "husky"
   },
   "_moduleAliases": {
     "@paths": "paths.js"

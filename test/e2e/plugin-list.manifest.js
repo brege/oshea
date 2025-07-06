@@ -4,22 +4,22 @@ const path = require('path');
 
 // Helper to create a dummy plugin structure for testing CM commands
 async function createDummyPlugin(pluginDir, pluginName) {
-    await fs.ensureDir(pluginDir);
-    await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+  await fs.ensureDir(pluginDir);
+  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
+  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
 }
 
 // Helper for setting up a collection with one plugin enabled
 async function setupCollectionWithOneEnabled(sandboxDir, harness) {
-    const collDir = path.join(sandboxDir, 'test-collection');
-    await createDummyPlugin(path.join(collDir, 'plugin-one'), 'plugin-one');
-    await createDummyPlugin(path.join(collDir, 'plugin-two'), 'plugin-two');
+  const collDir = path.join(sandboxDir, 'test-collection');
+  await createDummyPlugin(path.join(collDir, 'plugin-one'), 'plugin-one');
+  await createDummyPlugin(path.join(collDir, 'plugin-two'), 'plugin-two');
 
-    // Use the harness to run the prerequisite setup commands
-    await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection'], { useFactoryDefaults: false });
-    await harness.runCli(['plugin', 'enable', 'test-collection/plugin-one', '--name', 'enabled-one'], { useFactoryDefaults: false });
+  // Use the harness to run the prerequisite setup commands
+  await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection'], { useFactoryDefaults: false });
+  await harness.runCli(['plugin', 'enable', 'test-collection/plugin-one', '--name', 'enabled-one'], { useFactoryDefaults: false });
 }
 
 

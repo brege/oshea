@@ -10,140 +10,140 @@ const group = argv.group || (hasFiles ? 'custom' : 'all');
 console.log(`[Mocha] Running test group: '${group}'`);
 
 const paths = {
-    // --- Subsystem & Module Integration Test Paths ---
-    // Rank 0
-    default_handler: 'test/integration/core/default-handler.*.js',
-    pdf_generator: 'test/integration/core/pdf-generator.*.js',
-    // Rank 1
-    ConfigResolver: 'test/integration/config/config-resolver.*.js',
-    plugin_determiner: 'test/integration/plugins/plugin_determiner.*.js',
-    collections_manager: 'test/integration/collections/collections-manager.*.js',
-    // Rank 2
-    PluginRegistryBuilder: 'test/integration/plugins/plugin-registry-builder.*.js',
-    main_config_loader: 'test/integration/config/main-config-loader.*.js',
-    plugin_config_loader: 'test/integration/config/plugin-config-loader.*.js',
-    PluginManager: 'test/integration/plugins/plugin-manager.*.js',
-    math_integration:'test/integration/math_integration/math_integration.*.js',
-    cm_utils: 'test/integration/collections/cm-utils.*.js',
+  // --- Subsystem & Module Integration Test Paths ---
+  // Rank 0
+  default_handler: 'test/integration/core/default-handler.*.js',
+  pdf_generator: 'test/integration/core/pdf-generator.*.js',
+  // Rank 1
+  ConfigResolver: 'test/integration/config/config-resolver.*.js',
+  plugin_determiner: 'test/integration/plugins/plugin_determiner.*.js',
+  collections_manager: 'test/integration/collections/collections-manager.*.js',
+  // Rank 2
+  PluginRegistryBuilder: 'test/integration/plugins/plugin-registry-builder.*.js',
+  main_config_loader: 'test/integration/config/main-config-loader.*.js',
+  plugin_config_loader: 'test/integration/config/plugin-config-loader.*.js',
+  PluginManager: 'test/integration/plugins/plugin-manager.*.js',
+  math_integration:'test/integration/math_integration/math_integration.*.js',
+  cm_utils: 'test/integration/collections/cm-utils.*.js',
 
-    // --- End-to-End Test Paths ---
-    // Level 2
-    plugin_validator: 'test/e2e/plugin-validator.*.js',
-    // Level 3
-    plugin_convert: 'test/e2e/convert.*.js',
-    plugin_generate: 'test/e2e/generate.*.js',
-    plugin_config: 'test/e2e/config.*.js',
-    plugin_list: 'test/e2e/plugin-list.*.js',
-    plugin_create: 'test/e2e/plugin-create.*.js',
-    plugin_add: 'test/e2e/plugin-add.*.js',
-    plugin_enable: 'test/e2e/plugin-enable.*.js',
-    plugin_disable: 'test/e2e/plugin-disable.*.js',
-    plugin_validate: 'test/e2e/plugin-validate.*.js',
-    collection_add: 'test/e2e/collection-add.*.js',
-    collection_list: 'test/e2e/collection-list.*.js',
-    collection_remove: 'test/e2e/collection-remove.*.js',
-    collection_update: 'test/e2e/collection-update.*.js',
-    global_flags: 'test/e2e/global-flags.*.js',
-    // Level 4
-    workflow_lifecycle: 'test/e2e/workflow-lifecycle.*.js',
-    sad_paths: 'test/e2e/sad-paths.*.js',
+  // --- End-to-End Test Paths ---
+  // Level 2
+  plugin_validator: 'test/e2e/plugin-validator.*.js',
+  // Level 3
+  plugin_convert: 'test/e2e/convert.*.js',
+  plugin_generate: 'test/e2e/generate.*.js',
+  plugin_config: 'test/e2e/config.*.js',
+  plugin_list: 'test/e2e/plugin-list.*.js',
+  plugin_create: 'test/e2e/plugin-create.*.js',
+  plugin_add: 'test/e2e/plugin-add.*.js',
+  plugin_enable: 'test/e2e/plugin-enable.*.js',
+  plugin_disable: 'test/e2e/plugin-disable.*.js',
+  plugin_validate: 'test/e2e/plugin-validate.*.js',
+  collection_add: 'test/e2e/collection-add.*.js',
+  collection_list: 'test/e2e/collection-list.*.js',
+  collection_remove: 'test/e2e/collection-remove.*.js',
+  collection_update: 'test/e2e/collection-update.*.js',
+  global_flags: 'test/e2e/global-flags.*.js',
+  // Level 4
+  workflow_lifecycle: 'test/e2e/workflow-lifecycle.*.js',
+  sad_paths: 'test/e2e/sad-paths.*.js',
 
-    // --- In-Situ E2E Tests for Bundled Plugins ---
-    insitu_e2e: 'plugins/**/.contract/test/*.test.js',
-    
-    // --- All Tests ---
-    integration: ['test/integration/**/*.js'],
-    e2e: ['test/e2e/**/*.js']
+  // --- In-Situ E2E Tests for Bundled Plugins ---
+  insitu_e2e: 'plugins/**/.contract/test/*.test.js',
+
+  // --- All Tests ---
+  integration: ['test/integration/**/*.js'],
+  e2e: ['test/e2e/**/*.js']
 };
 
 const groups = {
-    // --- By Rank ---
-    rank0: [paths.default_handler, paths.pdf_generator],
-    rank1: [paths.ConfigResolver, paths.plugin_determiner, paths.collections_manager],
-    rank2: [
-        paths.PluginRegistryBuilder,
-        paths.main_config_loader,
-        paths.plugin_config_loader,
-        paths.PluginManager,
-        paths.math_integration,
-    ],
-    // --- By Level ---
-    level1: [
-        paths.collections_manager,
-        paths.cm_utils,
-        paths.ConfigResolver,
-        paths.main_config_loader,
-        paths.math_integration,
-        paths.plugin_config_loader,
-        paths.plugin_determiner,
-        paths.PluginManager,
-        paths.PluginRegistryBuilder,
-    ],
-    level2: [
-        paths.default_handler,
-        paths.pdf_generator,
-        paths.collections_manager,
-        paths.plugin_validator
-    ],
-    level3: [
-        paths.plugin_convert,
-        paths.plugin_generate,
-        paths.plugin_config,
-        paths.plugin_list,
-        paths.plugin_create,
-        paths.plugin_add,
-        paths.plugin_enable,
-        paths.plugin_disable,
-        paths.plugin_validate,
-        paths.collection_add,
-        paths.collection_list,
-        paths.collection_remove,
-        paths.collection_update,
-        paths.global_flags,
-    ],
-    level4: [paths.workflow_lifecycle, paths.sad_paths],
+  // --- By Rank ---
+  rank0: [paths.default_handler, paths.pdf_generator],
+  rank1: [paths.ConfigResolver, paths.plugin_determiner, paths.collections_manager],
+  rank2: [
+    paths.PluginRegistryBuilder,
+    paths.main_config_loader,
+    paths.plugin_config_loader,
+    paths.PluginManager,
+    paths.math_integration,
+  ],
+  // --- By Level ---
+  level1: [
+    paths.collections_manager,
+    paths.cm_utils,
+    paths.ConfigResolver,
+    paths.main_config_loader,
+    paths.math_integration,
+    paths.plugin_config_loader,
+    paths.plugin_determiner,
+    paths.PluginManager,
+    paths.PluginRegistryBuilder,
+  ],
+  level2: [
+    paths.default_handler,
+    paths.pdf_generator,
+    paths.collections_manager,
+    paths.plugin_validator
+  ],
+  level3: [
+    paths.plugin_convert,
+    paths.plugin_generate,
+    paths.plugin_config,
+    paths.plugin_list,
+    paths.plugin_create,
+    paths.plugin_add,
+    paths.plugin_enable,
+    paths.plugin_disable,
+    paths.plugin_validate,
+    paths.collection_add,
+    paths.collection_list,
+    paths.collection_remove,
+    paths.collection_update,
+    paths.global_flags,
+  ],
+  level4: [paths.workflow_lifecycle, paths.sad_paths],
 
-    // --- Subsystem & Module Integration Tests ---
-    integration: ['test/integration/**/*.js'],
+  // --- Subsystem & Module Integration Tests ---
+  integration: ['test/integration/**/*.js'],
 
-    // --- End-to-End Tests ---
-    e2e: ['test/e2e/**/*.js', paths.insitu_e2e],
-    
-    // --- By Module ---
-    config: [
-        paths.ConfigResolver,
-        paths.main_config_loader,
-        paths.plugin_config_loader,
-        paths.plugin_determiner,
-        paths.PluginRegistryBuilder
-    ],
-    validator: [paths.plugin_validator, paths.plugin_validate],
+  // --- End-to-End Tests ---
+  e2e: ['test/e2e/**/*.js', paths.insitu_e2e],
 
-    // --- By Command Groups ---
-    plugins: [
-        paths.plugin_convert,
-        paths.plugin_generate,
-        paths.plugin_config,
-        paths.plugin_list,
-        paths.plugin_create,
-        paths.plugin_add,
-        paths.plugin_enable,
-        paths.plugin_disable,
-    ],
-    collections: [
-        paths.collection_add,
-        paths.collection_list,
-        paths.collection_remove,
-        paths.collection_update
-    ],
-    
-    insitu: [paths.insitu_e2e],
+  // --- By Module ---
+  config: [
+    paths.ConfigResolver,
+    paths.main_config_loader,
+    paths.plugin_config_loader,
+    paths.plugin_determiner,
+    paths.PluginRegistryBuilder
+  ],
+  validator: [paths.plugin_validator, paths.plugin_validate],
 
-    // --- By Specific Study ---
-    debug: [paths.main_config_loader],
+  // --- By Command Groups ---
+  plugins: [
+    paths.plugin_convert,
+    paths.plugin_generate,
+    paths.plugin_config,
+    paths.plugin_list,
+    paths.plugin_create,
+    paths.plugin_add,
+    paths.plugin_enable,
+    paths.plugin_disable,
+  ],
+  collections: [
+    paths.collection_add,
+    paths.collection_list,
+    paths.collection_remove,
+    paths.collection_update
+  ],
 
-    // --- Default ---
-    all: [paths.integration, paths.e2e, paths.insitu_e2e]
+  insitu: [paths.insitu_e2e],
+
+  // --- By Specific Study ---
+  debug: [paths.main_config_loader],
+
+  // --- Default ---
+  all: [paths.integration, paths.e2e, paths.insitu_e2e]
 };
 
 // If files are specified on the CLI, use them; else use group logic
@@ -152,11 +152,11 @@ const spec = hasFiles ? argv._ : (groups[group] || groups.all);
 // npm test -- 'test/integration/main-config-loader/**/*.1.4.15.js'
 
 const mochaConfig = {
-    spec: spec,
-    timeout: 20000, // Increased timeout for lifecycle tests
-    exit: true,
-    color: true,
-    require: 'test/setup.js'
+  spec: spec,
+  timeout: 20000, // Increased timeout for lifecycle tests
+  exit: true,
+  color: true,
+  require: 'test/setup.js'
 };
 
 module.exports = mochaConfig;

@@ -1,8 +1,7 @@
 // src/collections/commands/listAvailable.js
-// No longer requires fs, path, chalk, yaml, or constants
 
 async function _findPluginsInCollectionDir(dependencies, collectionPath, collectionName, _readCollectionMetadataFunc) {
-  const { fss, fs, path, chalk, yaml, constants } = dependencies;
+  const { fss, fs, path, yaml, constants } = dependencies;
   const { METADATA_FILENAME, USER_ADDED_PLUGINS_DIR_NAME } = constants;
 
   const availablePlugins = [];
@@ -24,19 +23,19 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
       const alternativeYamlPath = path.join(pluginItselfPath, `${pluginId}.yaml`);
 
       if (fss.existsSync(standardConfigPath) && fss.lstatSync(standardConfigPath).isFile()) {
-          actualConfigPath = standardConfigPath;
-          foundConfig = true;
+        actualConfigPath = standardConfigPath;
+        foundConfig = true;
       } else if (fss.existsSync(alternativeYamlPath) && fss.lstatSync(alternativeYamlPath).isFile()) {
-          actualConfigPath = alternativeYamlPath;
-          foundConfig = true;
+        actualConfigPath = alternativeYamlPath;
+        foundConfig = true;
       }
 
       if (foundConfig && actualConfigPath) {
         const pluginInfoBase = {
-            collection: collectionName,
-            plugin_id: pluginId,
-            config_path: path.resolve(actualConfigPath),
-            base_path: path.resolve(pluginItselfPath)
+          collection: collectionName,
+          plugin_id: pluginId,
+          config_path: path.resolve(actualConfigPath),
+          base_path: path.resolve(pluginItselfPath)
         };
 
         try {
@@ -44,26 +43,26 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
           const pluginConfigData = yaml.load(configFileContent);
           pluginInfoBase.description = pluginConfigData.description || 'Plugin description not available.';
         } catch (e) {
-          pluginInfoBase.description = chalk.red(`Error loading plugin config: ${e.message.substring(0, 50)}...`);
+          pluginInfoBase.description = `Error loading plugin config: ${e.message.substring(0, 50)}...`;
         }
 
         if (collectionName === USER_ADDED_PLUGINS_DIR_NAME && _readCollectionMetadataFunc) {
-            pluginInfoBase.is_singleton = true;
-            try {
-                const metadata = await _readCollectionMetadataFunc(path.join(USER_ADDED_PLUGINS_DIR_NAME, pluginId));
-                if (metadata) {
-                    pluginInfoBase.original_source = metadata.source;
-                    pluginInfoBase.added_on = metadata.added_on;
-                    pluginInfoBase.updated_on = metadata.updated_on;
-                }
-            } catch (metaError) {
-                pluginInfoBase.metadata_error = `Metadata unreadable: ${metaError.message.substring(0,30)}...`;
+          pluginInfoBase.is_singleton = true;
+          try {
+            const metadata = await _readCollectionMetadataFunc(path.join(USER_ADDED_PLUGINS_DIR_NAME, pluginId));
+            if (metadata) {
+              pluginInfoBase.original_source = metadata.source;
+              pluginInfoBase.added_on = metadata.added_on;
+              pluginInfoBase.updated_on = metadata.updated_on;
             }
+          } catch (metaError) {
+            pluginInfoBase.metadata_error = `Metadata unreadable: ${metaError.message.substring(0,30)}...`;
+          }
         }
         if (pluginInfoBase.is_singleton && pluginInfoBase.original_source) {
-            if (!fss.existsSync(pluginInfoBase.original_source)) {
-                pluginInfoBase.is_original_source_missing = true;
-            }
+          if (!fss.existsSync(pluginInfoBase.original_source)) {
+            pluginInfoBase.is_original_source_missing = true;
+          }
         }
         availablePlugins.push(pluginInfoBase);
       }
@@ -73,7 +72,7 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
 }
 
 module.exports = async function listAvailablePlugins(dependencies, collectionNameFilter = null) {
-  const { fss, fs, path, chalk } = dependencies;
+  const { fss, fs, path } = dependencies;
 
   let allAvailablePlugins = [];
   if (!fss.existsSync(this.collRoot)) {
@@ -101,11 +100,11 @@ module.exports = async function listAvailablePlugins(dependencies, collectionNam
   }
 
   allAvailablePlugins.sort((a,b) => {
-      const collA = a.collection.toLowerCase();
-      const collB = b.collection.toLowerCase();
-      if (collA < collB) return -1;
-      if (collA > collB) return 1;
-      return a.plugin_id.toLowerCase().localeCompare(b.plugin_id.toLowerCase());
+    const collA = a.collection.toLowerCase();
+    const collB = b.collection.toLowerCase();
+    if (collA < collB) return -1;
+    if (collA > collB) return 1;
+    return a.plugin_id.toLowerCase().localeCompare(b.plugin_id.toLowerCase());
   });
   return allAvailablePlugins;
 };

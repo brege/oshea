@@ -8,7 +8,7 @@ module.exports = {
   builder: (yargsCmd) => {
     yargsCmd
       .positional('type', {
-        describe: `the type of items to list`,
+        describe: 'the type of items to list',
         type: 'string',
         choices: ['names', 'available', 'enabled', 'all'],
         completionKey: 'listTypes'
@@ -20,7 +20,7 @@ module.exports = {
       })
       .option('short', {
         alias: 's',
-        describe: "display condensed list of downloaded collection 'names'",
+        describe: 'display condensed list of downloaded collection \'names\'',
         type: 'boolean',
         default: false,
       })
@@ -34,7 +34,7 @@ module.exports = {
   },
   handler: async (args) => {
     if (!args.manager) {
-      console.error(chalk.red("FATAL ERROR: CollectionsManager instance not found in CLI arguments."));
+      console.error(chalk.red('FATAL ERROR: CollectionsManager instance not found in CLI arguments.'));
       process.exit(1);
     }
     const manager = args.manager;
@@ -56,47 +56,47 @@ module.exports = {
 
       if (listType === 'downloaded') {
         if (results.length === 0) {
-          console.log(chalk.yellow("No downloaded collections found."));
+          console.log(chalk.yellow('No downloaded collections found.'));
           return;
         }
 
         if (args.short) {
-            console.log(chalk.blueBright("\nDownloaded plugin collections:"));
-            let maxNameWidth = "NAME".length;
-            let maxTypeWidth = "TYPE".length;
-            results.forEach(coll => {
-                if (coll.name.length > maxNameWidth) maxNameWidth = coll.name.length;
-                let typeStr = 'Local Path';
-                if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
-                else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
-                if (typeStr.length > maxTypeWidth) maxTypeWidth = typeStr.length;
-            });
-            console.log(chalk.bold(`  ${'NAME'.padEnd(maxNameWidth)} | ${'TYPE'.padEnd(maxTypeWidth)} | SOURCE`));
-            console.log(chalk.bold(`  ${'-'.repeat(maxNameWidth)} | ${'-'.repeat(maxTypeWidth)} | ${'-'.repeat('SOURCE'.length)}`));
-            results.forEach(coll => {
-                let typeStr = 'Local Path';
-                if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
-                else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
+          console.log(chalk.blueBright('\nDownloaded plugin collections:'));
+          let maxNameWidth = 'NAME'.length;
+          let maxTypeWidth = 'TYPE'.length;
+          results.forEach(coll => {
+            if (coll.name.length > maxNameWidth) maxNameWidth = coll.name.length;
+            let typeStr = 'Local Path';
+            if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
+            else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
+            if (typeStr.length > maxTypeWidth) maxTypeWidth = typeStr.length;
+          });
+          console.log(chalk.bold(`  ${'NAME'.padEnd(maxNameWidth)} | ${'TYPE'.padEnd(maxTypeWidth)} | SOURCE`));
+          console.log(chalk.bold(`  ${'-'.repeat(maxNameWidth)} | ${'-'.repeat(maxTypeWidth)} | ${'-'.repeat('SOURCE'.length)}`));
+          results.forEach(coll => {
+            let typeStr = 'Local Path';
+            if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
+            else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
 
-                const S_NAME = chalk.yellow(coll.name);
-                const S_TYPE = chalk.cyan(typeStr);
-                const S_SOURCE = chalk.gray(coll.source || 'N/A');
-                console.log(`  ${S_NAME.padEnd(maxNameWidth + (S_NAME.length - stripAnsi(S_NAME).length))} | ${S_TYPE.padEnd(maxTypeWidth + (S_TYPE.length - stripAnsi(S_TYPE).length))} | ${S_SOURCE}`);
-            });
+            const S_NAME = chalk.yellow(coll.name);
+            const S_TYPE = chalk.cyan(typeStr);
+            const S_SOURCE = chalk.gray(coll.source || 'N/A');
+            console.log(`  ${S_NAME.padEnd(maxNameWidth + (S_NAME.length - stripAnsi(S_NAME).length))} | ${S_TYPE.padEnd(maxTypeWidth + (S_TYPE.length - stripAnsi(S_TYPE).length))} | ${S_SOURCE}`);
+          });
         } else {
-            console.log(chalk.blueBright("\nDownloaded plugin collections:"));
-            results.forEach(collection => {
-              console.log(chalk.greenBright(`\n  Collection Name: ${chalk.yellow(collection.name)}`));
-              if (collection.special_type === 'singleton_container') {
-                console.log(chalk.gray(`    Type: Managed Directory (for user-added singleton plugins)`));
-                console.log(chalk.gray(`    Managed Path: ${collection.source}`));
-                console.log(chalk.gray(`    (To see individual singletons, run: ${chalk.cyan('md-to-pdf plugin list --available ' + collection.name)})`));
-              } else {
-                console.log(chalk.gray(`    Source: ${collection.source}`));
-                if (collection.added_on && collection.added_on !== 'N/A (Container)') console.log(chalk.gray(`    Added On: ${new Date(collection.added_on).toLocaleString()}`));
-                if (collection.updated_on) console.log(chalk.gray(`    Updated On: ${new Date(collection.updated_on).toLocaleString()}`));
-              }
-            });
+          console.log(chalk.blueBright('\nDownloaded plugin collections:'));
+          results.forEach(collection => {
+            console.log(chalk.greenBright(`\n  Collection Name: ${chalk.yellow(collection.name)}`));
+            if (collection.special_type === 'singleton_container') {
+              console.log(chalk.gray('    Type: Managed Directory (for user-added singleton plugins)'));
+              console.log(chalk.gray(`    Managed Path: ${collection.source}`));
+              console.log(chalk.gray(`    (To see individual singletons, run: ${chalk.cyan('md-to-pdf plugin list --available ' + collection.name)})`));
+            } else {
+              console.log(chalk.gray(`    Source: ${collection.source}`));
+              if (collection.added_on && collection.added_on !== 'N/A (Container)') console.log(chalk.gray(`    Added On: ${new Date(collection.added_on).toLocaleString()}`));
+              if (collection.updated_on) console.log(chalk.gray(`    Updated On: ${new Date(collection.updated_on).toLocaleString()}`));
+            }
+          });
         }
 
       } else if (listType === 'available' || listType === 'all') { // 'all' is an alias for 'available' now

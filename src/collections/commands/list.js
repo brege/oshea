@@ -19,16 +19,16 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
           if (collectionName === USER_ADDED_PLUGINS_DIR_NAME) {
             const singletonPluginsContainerPath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
             if (fss.existsSync(singletonPluginsContainerPath)) {
-                const singletons = await fs.readdir(singletonPluginsContainerPath, { withFileTypes: true });
-                if (singletons.some(sDirent => sDirent.isDirectory())) {
-                    collectionInfos.push({
-                        name: USER_ADDED_PLUGINS_DIR_NAME,
-                        source: singletonPluginsContainerPath,
-                        special_type: 'singleton_container',
-                        added_on: 'N/A (Container)',
-                        updated_on: undefined
-                    });
-                }
+              const singletons = await fs.readdir(singletonPluginsContainerPath, { withFileTypes: true });
+              if (singletons.some(sDirent => sDirent.isDirectory())) {
+                collectionInfos.push({
+                  name: USER_ADDED_PLUGINS_DIR_NAME,
+                  source: singletonPluginsContainerPath,
+                  special_type: 'singleton_container',
+                  added_on: 'N/A (Container)',
+                  updated_on: undefined
+                });
+              }
             }
           } else {
             const metadata = await this._readCollectionMetadata(collectionName);
@@ -48,27 +48,27 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
       throw error;
     }
   } else if (type === 'available') {
-      return await this.listAvailablePlugins(collectionNameFilter);
+    return await this.listAvailablePlugins(collectionNameFilter);
   } else if (type === 'enabled') {
-      const enabledManifest = await this._readEnabledManifest();
-      let pluginsFromManifest = enabledManifest.enabled_plugins;
+    const enabledManifest = await this._readEnabledManifest();
+    let pluginsFromManifest = enabledManifest.enabled_plugins;
 
-      if (collectionNameFilter) {
-          pluginsFromManifest = pluginsFromManifest.filter(p => p.collection_name === collectionNameFilter);
-      }
+    if (collectionNameFilter) {
+      pluginsFromManifest = pluginsFromManifest.filter(p => p.collection_name === collectionNameFilter);
+    }
 
-      const processedEnabledPlugins = [];
-      for (const p of pluginsFromManifest) {
-        const pluginEntry = { ...p }; // Clone
-        if (pluginEntry.original_source && pluginEntry.collection_name === USER_ADDED_PLUGINS_DIR_NAME) {
-          if (!fss.existsSync(pluginEntry.original_source)) {
-            pluginEntry.is_original_source_missing = true;
-          }
+    const processedEnabledPlugins = [];
+    for (const p of pluginsFromManifest) {
+      const pluginEntry = { ...p }; // Clone
+      if (pluginEntry.original_source && pluginEntry.collection_name === USER_ADDED_PLUGINS_DIR_NAME) {
+        if (!fss.existsSync(pluginEntry.original_source)) {
+          pluginEntry.is_original_source_missing = true;
         }
-        processedEnabledPlugins.push(pluginEntry);
       }
-      processedEnabledPlugins.sort((a,b) => (a.invoke_name || '').toLowerCase().localeCompare((b.invoke_name || '').toLowerCase()));
-      return processedEnabledPlugins;
+      processedEnabledPlugins.push(pluginEntry);
+    }
+    processedEnabledPlugins.sort((a,b) => (a.invoke_name || '').toLowerCase().localeCompare((b.invoke_name || '').toLowerCase()));
+    return processedEnabledPlugins;
   } else {
     console.log(chalk.yellow(`  Listing for type '${type}' is not implemented in manager's listCollections method.`));
     return [];

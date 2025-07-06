@@ -1,11 +1,11 @@
 // plugins/cv/index.js
 
 class PluginCvHandler {
-    constructor(coreUtils) {
-        this.handler = new coreUtils.DefaultHandler();
-    }
+  constructor(coreUtils) {
+    this.handler = new coreUtils.DefaultHandler();
+  }
 
-    /**
+  /**
      * The method called by PluginManager.
      * @param {Object} data - Expected to contain `markdownFilePath`.
      * @param {Object} pluginSpecificConfig - Configuration from plugins/cv/cv.config.yaml.
@@ -15,9 +15,9 @@ class PluginCvHandler {
      * @param {string} pluginBasePath - The base path of this plugin (plugins/cv/).
      * @returns {Promise<string>} The absolute path to the generated PDF file.
      */
-    async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
-        return this.handler.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath);
-    }
+  async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
+    return this.handler.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath);
+  }
 }
 
 module.exports = PluginCvHandler;

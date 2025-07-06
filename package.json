@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.10.09",
+  "version": "0.10.10",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -13,7 +13,10 @@
     "test": "mocha",
     "test:watch": "mocha --watch",
     "test:telemetry": "node scripts/telemetry/test-watcher.js",
-    "dep-tree": "madge --json src/"
+    "dep-tree": "madge --json src/",
+    "lint:eslint": "eslint .",
+    "lint:custom": "node scripts/linting/strip-trailing-whitespace.js && node scripts/linting/standardize-js-line-one-all.js",
+    "lint": "npm run lint:custom && npm run lint:eslint"
   },
   "_moduleAliases": {
     "@paths": "paths.js"
@@ -66,6 +69,7 @@
     "acorn": "^8.15.0",
     "acorn-walk": "^8.3.4",
     "chai": "^4.3.4",
+    "eslint": "^8.57.0",
     "jsdom": "^22.1.0",
     "lodash": "^4.17.21",
     "madge": "^8.0.0",

@@ -1,10 +1,9 @@
 // test/e2e/global-flags.manifest.js
-const path = require('path');
 const { version } = require('../../package.json'); // Import version for the test
 
 module.exports = [
   {
-    describe: "3.15.1: The --version flag correctly displays the tool's version",
+    describe: '3.15.1: The --version flag correctly displays the tool\'s version',
     setup: async (sandboxDir) => {},
     args: (sandboxDir) => ['--version'],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
@@ -13,7 +12,7 @@ module.exports = [
     },
   },
   {
-    describe: "3.15.2: The --help flag correctly displays the help text",
+    describe: '3.15.2: The --help flag correctly displays the help text',
     setup: async (sandboxDir) => {},
     args: (sandboxDir) => ['--help'],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {

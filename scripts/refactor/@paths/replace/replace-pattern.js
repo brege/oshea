@@ -2,7 +2,6 @@
 // scripts/refactor/@paths/replace/replace-pattern.js
 
 const fs = require('fs');
-const path = require('path');
 const glob = require('glob');
 
 // --- Argument Parsing ---
@@ -19,8 +18,8 @@ const searchRegex = new RegExp(searchRegexStr);
 const files = glob.sync(filePattern, { nodir: true });
 
 if (files.length === 0) {
-    console.log(`[INFO] No files found matching pattern: "${filePattern}"`);
-    process.exit(0);
+  console.log(`[INFO] No files found matching pattern: "${filePattern}"`);
+  process.exit(0);
 }
 
 console.log(`[INFO] Checking ${files.length} files matching "${filePattern}"...`);

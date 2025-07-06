@@ -9,20 +9,20 @@ const sinon = require('sinon');
 const PluginManager = require(pluginManagerPath);
 
 describe('PluginManager invokeHandler (1.5.4)', () => {
-    let mockDefaultHandler;
-    let mockMarkdownUtils;
-    let mockPdfGenerator;
-    let pluginManagerCoreUtils;
-    let pluginManager;
-    let consoleWarnStub; // Stub for console.warn
+  let mockDefaultHandler;
+  let mockMarkdownUtils;
+  let mockPdfGenerator;
+  let pluginManagerCoreUtils;
+  let pluginManager;
+  let consoleWarnStub; // Stub for console.warn
 
-    const tempPluginDirPath = path.join(__dirname);
-    const tempPluginFileName = 'temp_mock_object_plugin.js';
-    const tempPluginFilePath = path.join(tempPluginDirPath, tempPluginFileName);
+  const tempPluginDirPath = path.join(__dirname);
+  const tempPluginFileName = 'temp_mock_object_plugin.js';
+  const tempPluginFilePath = path.join(tempPluginDirPath, tempPluginFileName);
 
-    // Content for the temporary mock object-based plugin file.
-    // This mock exports a plain object with a 'generate' method.
-    const mockObjectPluginContent = `
+  // Content for the temporary mock object-based plugin file.
+  // This mock exports a plain object with a 'generate' method.
+  const mockObjectPluginContent = `
         const MockObjectPlugin = {
             async generate(data, pluginSpecificConfig, mainConfig, outputDir, outputFilenameOpt, pluginBasePath) {
                 return {
@@ -40,84 +40,84 @@ describe('PluginManager invokeHandler (1.5.4)', () => {
         module.exports = MockObjectPlugin;
     `;
 
-    // Create the temporary mock plugin file once before all tests in this suite
-    before(() => {
-        fs.writeFileSync(tempPluginFilePath, mockObjectPluginContent.trim());
-    });
+  // Create the temporary mock plugin file once before all tests in this suite
+  before(() => {
+    fs.writeFileSync(tempPluginFilePath, mockObjectPluginContent.trim());
+  });
 
-    // Clean up the temporary mock plugin file once after all tests in this suite
-    after(() => {
-        if (fs.existsSync(tempPluginFilePath)) {
-            fs.unlinkSync(tempPluginFilePath);
-        }
-    });
+  // Clean up the temporary mock plugin file once after all tests in this suite
+  after(() => {
+    if (fs.existsSync(tempPluginFilePath)) {
+      fs.unlinkSync(tempPluginFilePath);
+    }
+  });
 
-    beforeEach(() => {
-        // Setup mock core utilities for PluginManager's constructor
-        mockDefaultHandler = sinon.stub();
-        mockMarkdownUtils = sinon.stub();
-        mockPdfGenerator = sinon.stub();
+  beforeEach(() => {
+    // Setup mock core utilities for PluginManager's constructor
+    mockDefaultHandler = sinon.stub();
+    mockMarkdownUtils = sinon.stub();
+    mockPdfGenerator = sinon.stub();
 
-        pluginManagerCoreUtils = {
-            DefaultHandler: mockDefaultHandler,
-            markdownUtils: mockMarkdownUtils,
-            pdfGenerator: mockPdfGenerator
-        };
+    pluginManagerCoreUtils = {
+      DefaultHandler: mockDefaultHandler,
+      markdownUtils: mockMarkdownUtils,
+      pdfGenerator: mockPdfGenerator
+    };
 
-        // Instantiate PluginManager with the mocked core utilities
-        pluginManager = new PluginManager(pluginManagerCoreUtils);
+    // Instantiate PluginManager with the mocked core utilities
+    pluginManager = new PluginManager(pluginManagerCoreUtils);
 
-        // Stub console.warn to capture calls and prevent actual console output during test
-        consoleWarnStub = sinon.stub(console, 'warn');
+    // Stub console.warn to capture calls and prevent actual console output during test
+    consoleWarnStub = sinon.stub(console, 'warn');
 
-        // Clear the require cache for the temporary plugin to ensure a fresh module is loaded for each test
-        delete require.cache[require.resolve(tempPluginFilePath)];
-    });
+    // Clear the require cache for the temporary plugin to ensure a fresh module is loaded for each test
+    delete require.cache[require.resolve(tempPluginFilePath)];
+  });
 
-    afterEach(() => {
-        // Restore all stubs, including console.warn
-        sinon.restore();
-    });
+  afterEach(() => {
+    // Restore all stubs, including console.warn
+    sinon.restore();
+  });
 
-    it('should successfully load and invoke an object-based plugin handler and log a warning about constructor injection', async () => {
-        const pluginName = 'mock-object-plugin';
-        const effectiveConfig = {
-            pluginSpecificConfig: { format: 'A4' },
-            mainConfig: { logLevel: 'info' },
-            pluginBasePath: '/plugins/my-simple-object-plugin',
-            handlerScriptPath: tempPluginFilePath // Point to our mock object plugin
-        };
-        const data = { text: 'A plain object plugin test' };
-        const outputDir = '/generated/docs';
-        const outputFilenameOpt = 'simple-doc.pdf';
+  it('should successfully load and invoke an object-based plugin handler and log a warning about constructor injection', async () => {
+    const pluginName = 'mock-object-plugin';
+    const effectiveConfig = {
+      pluginSpecificConfig: { format: 'A4' },
+      mainConfig: { logLevel: 'info' },
+      pluginBasePath: '/plugins/my-simple-object-plugin',
+      handlerScriptPath: tempPluginFilePath // Point to our mock object plugin
+    };
+    const data = { text: 'A plain object plugin test' };
+    const outputDir = '/generated/docs';
+    const outputFilenameOpt = 'simple-doc.pdf';
 
-        // Invoke the handler
-        const result = await pluginManager.invokeHandler(
-            pluginName,
-            effectiveConfig,
-            data,
-            outputDir,
-            outputFilenameOpt
-        );
+    // Invoke the handler
+    const result = await pluginManager.invokeHandler(
+      pluginName,
+      effectiveConfig,
+      data,
+      outputDir,
+      outputFilenameOpt
+    );
 
-        // 1. Verify console.warn was called exactly once with the specific warning message
-        expect(consoleWarnStub.calledOnce).to.be.true;
-        expect(consoleWarnStub.calledWithExactly(
-            `WARN: Plugin '${pluginName}' is not a class. Core utilities cannot be injected via constructor.`
-        )).to.be.true;
+    // 1. Verify console.warn was called exactly once with the specific warning message
+    expect(consoleWarnStub.calledOnce).to.be.true;
+    expect(consoleWarnStub.calledWithExactly(
+      `WARN: Plugin '${pluginName}' is not a class. Core utilities cannot be injected via constructor.`
+    )).to.be.true;
 
-        // 2. Verify the result returned by the mock plugin (confirming its generate method was called and arguments passed)
-        expect(result).to.be.an('object');
-        expect(result.success).to.be.true;
-        expect(result.message).to.equal('Mock PDF generated by object plugin');
+    // 2. Verify the result returned by the mock plugin (confirming its generate method was called and arguments passed)
+    expect(result).to.be.an('object');
+    expect(result.success).to.be.true;
+    expect(result.message).to.equal('Mock PDF generated by object plugin');
 
-        // Assert that all expected arguments were passed to the plugin's generate method
-        expect(result.data).to.deep.equal(data);
-        expect(result.pluginSpecificConfig).to.deep.equal(effectiveConfig.pluginSpecificConfig);
-        expect(result.mainConfig).to.deep.equal(effectiveConfig.mainConfig);
-        expect(result.outputDir).to.equal(outputDir);
-        expect(result.outputFilenameOpt).to.equal(outputFilenameOpt);
-        expect(result.pluginBasePath).to.equal(effectiveConfig.pluginBasePath);
-    });
+    // Assert that all expected arguments were passed to the plugin's generate method
+    expect(result.data).to.deep.equal(data);
+    expect(result.pluginSpecificConfig).to.deep.equal(effectiveConfig.pluginSpecificConfig);
+    expect(result.mainConfig).to.deep.equal(effectiveConfig.mainConfig);
+    expect(result.outputDir).to.equal(outputDir);
+    expect(result.outputFilenameOpt).to.equal(outputFilenameOpt);
+    expect(result.pluginBasePath).to.equal(effectiveConfig.pluginBasePath);
+  });
 });
 

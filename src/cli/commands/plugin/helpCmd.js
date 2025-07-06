@@ -11,7 +11,7 @@ module.exports = {
         describe: 'name of plugin to display help for',
         type: 'string',
         completionKey: 'usablePlugins'
-      })
+      });
   },
   handler: async (args) => {
     // This guard prevents the handler from running during any completion activity.

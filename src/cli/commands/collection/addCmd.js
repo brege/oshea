@@ -19,7 +19,7 @@ module.exports = {
   },
   handler: async (args) => {
     if (!args.manager) {
-      console.error(chalk.red("FATAL ERROR: CollectionsManager instance not found in CLI arguments."));
+      console.error(chalk.red('FATAL ERROR: CollectionsManager instance not found in CLI arguments.'));
       process.exit(1);
     }
     const manager = args.manager;

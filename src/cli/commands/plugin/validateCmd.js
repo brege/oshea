@@ -11,7 +11,7 @@ module.exports = {
   builder: (yargs) => {
     yargs
       .positional('pluginIdentifier', {
-        describe: "name or path of plugin e.g. 'cv'",
+        describe: 'name or path of plugin e.g. \'cv\'',
         type: 'string',
         demandOption: true,
         completionKey: 'usablePlugins'
@@ -23,34 +23,34 @@ module.exports = {
     let pluginDirectoryPath;
 
     try {
-        const resolvedIdentifier = path.resolve(pluginIdentifier);
-        const isPath = fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory();
+      const resolvedIdentifier = path.resolve(pluginIdentifier);
+      const isPath = fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory();
 
-        if (isPath) {
-            pluginDirectoryPath = resolvedIdentifier;
-        } else {
-            const { projectRoot } = require('@paths');
-            pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
+      if (isPath) {
+        pluginDirectoryPath = resolvedIdentifier;
+      } else {
+        const { projectRoot } = require('@paths');
+        pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
 
-            if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
-                console.error(chalk.red(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`));
-                process.exit(1);
-                return;
-            }
+        if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
+          console.error(chalk.red(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`));
+          process.exit(1);
+          return;
         }
+      }
 
-        const validationResult = pluginValidator(pluginDirectoryPath);
+      const validationResult = pluginValidator(pluginDirectoryPath);
 
-        if (!validationResult.isValid) {
-            process.exit(1);
-        }
+      if (!validationResult.isValid) {
+        process.exit(1);
+      }
 
     } catch (error) {
-        console.error(chalk.red(`An unexpected error occurred during validation: ${error.message}`));
-        if (error.stack) {
-            console.error(chalk.red(error.stack));
-        }
-        process.exit(1);
+      console.error(chalk.red(`An unexpected error occurred during validation: ${error.message}`));
+      if (error.stack) {
+        console.error(chalk.red(error.stack));
+      }
+      process.exit(1);
     }
   },
 };

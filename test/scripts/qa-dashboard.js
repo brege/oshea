@@ -23,13 +23,13 @@ function getChecklistStatuses() {
 
         let checklistStatus = '';
         if (marker === 'x') {
-            checklistStatus = 'CLOSED';
+          checklistStatus = 'CLOSED';
         } else if (marker === 'S') {
-            checklistStatus = 'SKIPPED';
+          checklistStatus = 'SKIPPED';
         } else if (marker === '?') {
-            checklistStatus = 'PENDING';
+          checklistStatus = 'PENDING';
         } else if (marker === '') {
-            checklistStatus = 'OPEN';
+          checklistStatus = 'OPEN';
         }
 
         let testTarget = '';
@@ -122,104 +122,104 @@ function getAuditLogMap() {
 // --- Main execution logic ---
 
 function generateDashboardContent() {
-    const checklistStatuses = getChecklistStatuses();
-    const testIdToFile = getTestIdToFileAndSkipMap();
-    const auditMap = getAuditLogMap();
+  const checklistStatuses = getChecklistStatuses();
+  const testIdToFile = getTestIdToFileAndSkipMap();
+  const auditMap = getAuditLogMap();
 
-    const allTestIds = new Set([
-      ...Object.keys(checklistStatuses),
-      ...Object.keys(testIdToFile),
-      ...Object.keys(auditMap)
-    ]);
+  const allTestIds = new Set([
+    ...Object.keys(checklistStatuses),
+    ...Object.keys(testIdToFile),
+    ...Object.keys(auditMap)
+  ]);
 
-    const sortedIds = Array.from(allTestIds).sort((a, b) => {
-      const aParts = a.split('.').map(Number);
-      const bParts = b.split('.').map(Number);
-      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-        const diff = (aParts[i] || 0) - (bParts[i] || 0);
-        if (diff !== 0) return diff;
-      }
-      return 0;
-    });
-
-    const outputLines = [];
-    outputLines.push('| Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |');
-    outputLines.push('|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|');
-
-    for (const testId of sortedIds) {
-      const checklistEntry = checklistStatuses[testId] || {};
-      const f = testIdToFile[testId] || {};
-      const a = auditMap[testId] || '';
-
-      const checklistStatus = checklistEntry.checklistStatus || '';
-      const testTarget = checklistEntry.testTarget || ''; // Use testTarget from checklist
-
-      // Only include if checklist status is NOT 'CLOSED'
-      // OR if it's an audit entry not found in the checklist
-      // OR if it has skips not found in the checklist
-      if (checklistStatus !== 'CLOSED' && (checklistStatus || f.skips || a)) {
-        const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
-        const testFilePath = f.testFilePath || '';
-        outputLines.push(
-          `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
-        );
-      } else if (!checklistStatus && (f.skips || a)) { // For tests not in checklist but in skips or audit
-         const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
-         const testFilePath = f.testFilePath || '';
-         outputLines.push(
-          `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
-        );
-      }
+  const sortedIds = Array.from(allTestIds).sort((a, b) => {
+    const aParts = a.split('.').map(Number);
+    const bParts = b.split('.').map(Number);
+    for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+      const diff = (aParts[i] || 0) - (bParts[i] || 0);
+      if (diff !== 0) return diff;
     }
-    return outputLines;
+    return 0;
+  });
+
+  const outputLines = [];
+  outputLines.push('| Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |');
+  outputLines.push('|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|');
+
+  for (const testId of sortedIds) {
+    const checklistEntry = checklistStatuses[testId] || {};
+    const f = testIdToFile[testId] || {};
+    const a = auditMap[testId] || '';
+
+    const checklistStatus = checklistEntry.checklistStatus || '';
+    const testTarget = checklistEntry.testTarget || ''; // Use testTarget from checklist
+
+    // Only include if checklist status is NOT 'CLOSED'
+    // OR if it's an audit entry not found in the checklist
+    // OR if it has skips not found in the checklist
+    if (checklistStatus !== 'CLOSED' && (checklistStatus || f.skips || a)) {
+      const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
+      const testFilePath = f.testFilePath || '';
+      outputLines.push(
+        `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
+      );
+    } else if (!checklistStatus && (f.skips || a)) { // For tests not in checklist but in skips or audit
+      const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
+      const testFilePath = f.testFilePath || '';
+      outputLines.push(
+        `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
+      );
+    }
+  }
+  return outputLines;
 }
 
 function updateIndex(dashboardLines) {
-    const indexPath = path.join(__dirname, '..', 'index.md');
-    const startMarker = '<!--qa-dashboard-start-->';
-    const endMarker = '<!--qa-dashboard-end-->';
+  const indexPath = path.join(__dirname, '..', 'index.md');
+  const startMarker = '<!--qa-dashboard-start-->';
+  const endMarker = '<!--qa-dashboard-end-->';
 
-    let indexContent;
-    try {
-        indexContent = fs.readFileSync(indexPath, 'utf8');
-    } catch (error) {
-        console.error(`ERROR: Could not read index.md at ${indexPath}.`, error);
-        return;
-    }
+  let indexContent;
+  try {
+    indexContent = fs.readFileSync(indexPath, 'utf8');
+  } catch (error) {
+    console.error(`ERROR: Could not read index.md at ${indexPath}.`, error);
+    return;
+  }
 
-    const newContent = [
-        startMarker,
-        ...dashboardLines,
-        endMarker
-    ].join('\n');
+  const newContent = [
+    startMarker,
+    ...dashboardLines,
+    endMarker
+  ].join('\n');
 
-    function escapeRegex(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-    const regex = new RegExp(
-        `${escapeRegex(startMarker)}[\\s\\S]*${escapeRegex(endMarker)}`,
-        'g'
-    );
+  function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+  const regex = new RegExp(
+    `${escapeRegex(startMarker)}[\\s\\S]*${escapeRegex(endMarker)}`,
+    'g'
+  );
 
-    if (!regex.test(indexContent)) {
-        console.error(`ERROR: Could not find dashboard markers in ${indexPath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`);
-        return;
-    }
+  if (!regex.test(indexContent)) {
+    console.error(`ERROR: Could not find dashboard markers in ${indexPath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`);
+    return;
+  }
 
-    // Perform the replacement
-    indexContent = indexContent.replace(regex, newContent);
+  // Perform the replacement
+  indexContent = indexContent.replace(regex, newContent);
 
-    fs.writeFileSync(indexPath, indexContent, 'utf8');
-    console.log(`Successfully updated dashboard in ${indexPath}`);
+  fs.writeFileSync(indexPath, indexContent, 'utf8');
+  console.log(`Successfully updated dashboard in ${indexPath}`);
 }
 
 
 // --- Check command line arguments to determine action ---
 if (process.argv.includes('update')) {
-    const dashboardLines = generateDashboardContent();
-    updateIndex(dashboardLines);
+  const dashboardLines = generateDashboardContent();
+  updateIndex(dashboardLines);
 } else {
-    // Default behavior: print to stdout
-    const dashboardLines = generateDashboardContent();
-    console.log(dashboardLines.join('\n'));
+  // Default behavior: print to stdout
+  const dashboardLines = generateDashboardContent();
+  console.log(dashboardLines.join('\n'));
 }

@@ -1,6 +1,5 @@
-// validate-paths.js
+// scripts/refactor/validators/paths-js-validator.js
 const fs = require('fs');
-const path = require('path');
 
 // Adjust the path if needed
 const paths = require('../../../paths.js');

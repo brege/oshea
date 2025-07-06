@@ -1,6 +1,4 @@
 // test/e2e/config.manifest.js
-const fs = require('fs-extra');
-const path = require('path');
 const yaml = require('js-yaml');
 const { TEST_CONFIG_PATH } = require('../shared/test-constants');
 

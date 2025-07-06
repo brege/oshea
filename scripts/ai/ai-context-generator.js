@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+// scripts/ai/ai-context-generator.js
 
 /**
  * scripts/ai/ai-context-generator.js
- * 
+ *
  * Assembles the AI context package for md-to-pdf plugin onboarding.
  * Usage:
  *   node scripts/ai/ai-context-generator.js [--plugin <name-or-path>] [--filename <outputfile>]
@@ -10,7 +11,7 @@
  *   node scripts/ai/ai-context-generator.js --plugin cv --filename context-cv.txt
  *   node scripts/ai/ai-context-generator.js --plugin plugins/cv
  *   node scripts/ai/ai-context-generator.js
- * 
+ *
  * To copy output to clipboard, pipe to xclip or pbcopy, e.g.:
  *   node scripts/ai/ai-context-generator.js --plugin cv | xclip -selection clipboard
  *   node scripts/ai/ai-context-generator.js --plugin cv | pbcopy

@@ -4,8 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const fsp = require('fs').promises;
 const yaml = require('js-yaml');
-const { validatorPath } = require('@paths');
-const { validate: pluginValidator } = require(validatorPath);
 
 module.exports = {
   command: 'enable <target>',
@@ -53,27 +51,28 @@ you must re-run this command to enable any new plugins.`);
   },
   handler: async (args) => {
     if (!args.manager) {
-      console.error(chalk.red("FATAL ERROR: CollectionsManager instance not found in CLI arguments."));
+      console.error(chalk.red('FATAL ERROR: CollectionsManager instance not found in CLI arguments.'));
       process.exit(1);
     }
     const manager = args.manager;
 
     try {
       if (args.all) {
-        console.log(chalk.blueBright(`md-to-pdf plugin: Attempting to enable all plugins in collection...`));
+        console.log(chalk.blueBright('md-to-pdf plugin: Attempting to enable all plugins in collection...'));
         console.log(`  Collection Name: ${chalk.cyan(args.target)}`);
 
-        let originalSourceForPrefixFallback = "";
+        let originalSourceForPrefixFallback = '';
         try {
-            const metadataPath = path.join(manager.collRoot, args.target, '.collection-metadata.yaml');
-            if (fs.existsSync(metadataPath)) {
-                const metaContent = await fsp.readFile(metadataPath, 'utf8');
-                const metadata = yaml.load(metaContent);
-                if (metadata && metadata.source) {
-                    originalSourceForPrefixFallback = metadata.source;
-                }
+          const metadataPath = path.join(manager.collRoot, args.target, '.collection-metadata.yaml');
+          if (fs.existsSync(metadataPath)) {
+            const metaContent = await fsp.readFile(metadataPath, 'utf8');
+            const metadata = yaml.load(metaContent);
+            if (metadata && metadata.source) {
+              originalSourceForPrefixFallback = metadata.source;
             }
-        } catch (e) {
+          }
+        } catch {
+          // empty
         }
 
         if (args.prefix) {
@@ -92,21 +91,21 @@ you must re-run this command to enable any new plugins.`);
           bypassValidation: args.bypassValidation
         });
       } else {
-        console.log(chalk.blueBright(`md-to-pdf plugin: Attempting to enable plugin...`));
+        console.log(chalk.blueBright('md-to-pdf plugin: Attempting to enable plugin...'));
         console.log(`  Plugin Identifier: ${chalk.cyan(args.target)}`);
         if (args.name) {
           console.log(`  Requested invoke name: ${chalk.yellow(args.name)}`);
         }
         if (args.prefix || args.noPrefix){
-            console.warn(chalk.yellow("WARN: --prefix and --no-prefix options are ignored when not using --all."))
+          console.warn(chalk.yellow('WARN: --prefix and --no-prefix options are ignored when not using --all.'));
         }
         const result = await manager.enablePlugin(args.target, {
           name: args.name,
           bypassValidation: args.bypassValidation
         });
         if (result && result.success) {
-            const finalInvokeName = result.invoke_name || args.target.split('/')[1];
-            console.log(chalk.blueBright(`\nTo use this plugin with md-to-pdf, invoke it as: `) + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));
+          const finalInvokeName = result.invoke_name || args.target.split('/')[1];
+          console.log(chalk.blueBright('\nTo use this plugin with md-to-pdf, invoke it as: ') + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));
         }
       }
 
@@ -115,8 +114,8 @@ you must re-run this command to enable any new plugins.`);
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
-      } catch (error) {
-        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
+      } catch {
+        console.error(chalk.yellow('WARN: Failed to regenerate completion cache. This is not a fatal error.'));
       }
 
     } catch (error) {

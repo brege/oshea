@@ -10,36 +10,36 @@ const { TestHarness } = require('./harness');
  * @param {number} [options.timeout=15000] - The timeout for the test suite.
  */
 function createE2eTestRunner(commandName, manifestPath, options = {}) {
-    const { timeout = 15000 } = options;
-    const testManifest = require(manifestPath);
+  const { timeout = 15000 } = options;
+  const testManifest = require(manifestPath);
 
-    describe(`E2E - ${commandName} Command`, function() {
-        this.timeout(timeout);
+  describe(`E2E - ${commandName} Command`, function() {
+    this.timeout(timeout);
 
-        testManifest.forEach(testCase => {
-            const it_ = testCase.skip ? it.skip : it;
+    testManifest.forEach(testCase => {
+      const it_ = testCase.skip ? it.skip : it;
 
-            it_(testCase.describe, async () => {
-                const harness = new TestHarness();
-                try {
-                    const sandboxDir = await harness.createSandbox();
+      it_(testCase.describe, async () => {
+        const harness = new TestHarness();
+        try {
+          const sandboxDir = await harness.createSandbox();
 
-                    if (testCase.setup) {
-                        await testCase.setup(sandboxDir, harness);
-                    }
+          if (testCase.setup) {
+            await testCase.setup(sandboxDir, harness);
+          }
 
-                    const args = testCase.args(sandboxDir);
-                    // Pass options to runCli, allowing test case to override defaults
-                    const cliOptions = { useFactoryDefaults: testCase.useFactoryDefaults !== false };
-                    const result = await harness.runCli(args, cliOptions);
+          const args = testCase.args(sandboxDir);
+          // Pass options to runCli, allowing test case to override defaults
+          const cliOptions = { useFactoryDefaults: testCase.useFactoryDefaults !== false };
+          const result = await harness.runCli(args, cliOptions);
 
-                    await testCase.assert(result, sandboxDir, expect);
-                } finally {
-                    await harness.cleanup();
-                }
-            });
-        });
+          await testCase.assert(result, sandboxDir, expect);
+        } finally {
+          await harness.cleanup();
+        }
+      });
     });
+  });
 }
 
 module.exports = { createE2eTestRunner };

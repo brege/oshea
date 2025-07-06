@@ -88,4 +88,7 @@ This document is a central index for all developer and automation scripts within
 New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
 
 <!-- uncategorized-start -->
+- [lint.js](linting/lint.js)
+- [mocha-path-validator.js](linting/mocha-path-validator.js)
+- [paths-js-validator.js](linting/paths-js-validator.js)
 <!-- uncategorized-end -->

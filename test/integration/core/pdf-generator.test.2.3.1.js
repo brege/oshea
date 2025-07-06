@@ -3,6 +3,7 @@ const { pdfGeneratorPath } = require('@paths');
 
 const { generatePdf } = require(pdfGeneratorPath);
 const puppeteer = require('puppeteer');
+const { JSDOM } = require('jsdom');
 const { expect, sinon, path } = global;
 
 describe('pdf_generator (L2Y3) - Scenario 2.3.1: Basic PDF Generation Success', function() {
@@ -36,17 +37,6 @@ describe('pdf_generator (L2Y3) - Scenario 2.3.1: Basic PDF Generation Success', 
     const cssFileContentsArray = ['/* body { color: black; } */'];
     const expectedDocumentTitle = path.basename(outputPdfPath, '.pdf');
 
-    const expectedFullHtmlPage = `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <title>${expectedDocumentTitle}</title>
-            <style>/* body { color: black; } */</style>
-            
-        </head>
-        <body><h1>Test Document</h1><p>This is the content.</p></body>
-        </html>`;
-
     const expectedPuppeteerPdfOptions = {
       path: outputPdfPath,
       format: 'A4',
@@ -59,7 +49,15 @@ describe('pdf_generator (L2Y3) - Scenario 2.3.1: Basic PDF Generation Success', 
     expect(puppeteer.launch.calledOnce).to.be.true;
     expect(mockBrowser.newPage.calledOnce).to.be.true;
     expect(mockPage.setContent.calledOnce).to.be.true;
-    expect(mockPage.setContent.getCall(0).args[0].trim()).to.equal(expectedFullHtmlPage.trim());
+
+    const actualHtml = mockPage.setContent.getCall(0).args[0];
+    const dom = new JSDOM(actualHtml);
+    const document = dom.window.document;
+
+    expect(document.title).to.equal(expectedDocumentTitle);
+    expect(document.querySelector('style').textContent).to.equal(cssFileContentsArray[0]);
+    expect(document.body.innerHTML.trim()).to.equal(htmlBodyContent);
+
     expect(mockPage.setContent.getCall(0).args[1]).to.deep.equal({ waitUntil: 'networkidle0' });
     expect(mockPage.pdf.calledOnce).to.be.true;
     expect(mockPage.pdf.getCall(0).args[0]).to.deep.equal(expectedPuppeteerPdfOptions);

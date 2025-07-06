@@ -1,2 +1,90 @@
 #!/usr/bin/env sh
-npm test -- --group integration
+
+# Pre-push hook: Smart version bumping and tagging logic for solo developer
+
+set -e
+
+# --- Helper Functions ---
+
+# Print error and exit
+die() {
+  echo "pre-push: $*" >&2
+  exit 1
+}
+
+# Get refs being pushed from stdin (Git passes them to pre-push)
+read pushed_ref_line
+
+# Only care about tags
+if ! echo "$pushed_ref_line" | grep -q 'refs/tags/v'; then
+  # Not a tag push, just exit
+  exit 0
+fi
+
+# Find the tag being pushed
+tag_ref=$(echo "$pushed_ref_line" | awk '{print $3}')
+tag_name=$(echo "$tag_ref" | sed 's|refs/tags/||')
+
+# Get version from tag (assumes tags are like v1.2.3)
+tag_version=$(echo "$tag_name" | sed 's/^v//')
+
+# Get version from package.json
+package_version=$(grep '"version":' package.json | sed 's/.*: *"//; s/".*//')
+
+# Is HEAD on remote? (returns non-empty if pushed)
+remote_heads=$(git branch -r --contains HEAD)
+
+# Does tag point to HEAD?
+tag_points_to_head=false
+if git describe --tags --exact-match HEAD 2>/dev/null | grep -q "^$tag_name$"; then
+  tag_points_to_head=true
+fi
+
+# Was --bump passed to the hook?
+bump_flag=false
+for arg in "$@"; do
+  if [ "$arg" = "--bump" ]; then
+    bump_flag=true
+    break
+  fi
+done
+
+# --- Main Logic ---
+
+# Case 3: Tag drift (tag pushed, then commit amended, so tag doesn't point to HEAD)
+if [ "$tag_points_to_head" = false ] && [ -n "$remote_heads" ]; then
+  die "Tag $tag_name does not point to the latest commit. Please move the tag to HEAD and re-push."
+fi
+
+# Case 2: Commit already on remote, tag being pushed now
+if [ -n "$remote_heads" ]; then
+  if [ "$package_version" != "$tag_version" ]; then
+    if [ "$bump_flag" = true ]; then
+      echo "pre-push: Bumping version to match tag ($tag_version)..."
+      npm version "$tag_version" --no-git-tag-version
+      git add package.json package-lock.json
+      git commit -m "chore(release): version bump to v$tag_version"
+      echo "pre-push: Version bump commit created. Please push again."
+      exit 1
+    else
+      die "Tag $tag_name does not match package.json version ($package_version). Use --bump to create a version bump commit."
+    fi
+  fi
+  # All good, let push proceed
+  exit 0
+fi
+
+# Case 1.b: Commit not on remote, tag points to HEAD, but package.json version mismatch
+if [ "$tag_points_to_head" = true ] && [ "$package_version" != "$tag_version" ]; then
+  echo "pre-push: Amending last commit to bump version to $tag_version..."
+  npm version "$tag_version" --no-git-tag-version
+  git add package.json package-lock.json
+  git commit --amend --no-edit
+  git tag -f "$tag_name"
+  echo "pre-push: Amended commit and moved tag. Please push again."
+  exit 1
+fi
+
+# All other cases: allow push
+exit 0
+

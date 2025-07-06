@@ -4,10 +4,10 @@ const path = require('path');
 const stripAnsi = require('strip-ansi');
 
 async function createDummyPlugin(pluginDir, pluginName) {
-    await fs.ensureDir(pluginDir);
-    await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+  await fs.ensureDir(pluginDir);
+  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
+  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
 }
 
 module.exports = [

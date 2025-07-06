@@ -1,7 +1,6 @@
 // test/e2e/plugin-validator.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
-const os = require('os');
 
 function expectStringsOnSameLine(output, strings, expect) {
   expect(
@@ -13,9 +12,9 @@ function expectStringsOnSameLine(output, strings, expect) {
 
 // Helper to create a dummy plugin that is fully compliant with the v1 contract
 async function createWellFormedPlugin(pluginDir, pluginName) {
-    await fs.ensureDir(path.join(pluginDir, 'test'));
+  await fs.ensureDir(path.join(pluginDir, 'test'));
 
-    const handlerContent = `
+  const handlerContent = `
 class DummyHandler {
     constructor(coreUtils) {}
     async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
@@ -28,15 +27,15 @@ class DummyHandler {
 }
 module.exports = DummyHandler;
 `;
-    await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: A well-formed plugin.`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-    await fs.ensureDir(path.join(pluginDir, '.contract'));
-    await fs.ensureDir(path.join(pluginDir, '.contract/test'));
-    await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
-    await fs.writeFile(path.join(pluginDir, `.contract/${pluginName}.schema.json`), `{}`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);
+  await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent);
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), 'description: A well-formed plugin.');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+  await fs.ensureDir(path.join(pluginDir, '.contract'));
+  await fs.ensureDir(path.join(pluginDir, '.contract/test'));
+  await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
+  await fs.writeFile(path.join(pluginDir, `.contract/${pluginName}.schema.json`), '{}');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
+  await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);
 
 }
 
@@ -73,47 +72,47 @@ module.exports = [
     describe: '2.4.5: Should default to v1 and WARN if protocol is missing',
     args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
-        await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nversion: 1.0.0`);
-        await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-        await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-        await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+      await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nversion: 1.0.0`);
+      await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+      await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+      await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
     },
     assert: ({ exitCode, stdout }, expect) => {
-        expect(exitCode).to.equal(0);
-        expect(/USABLE/.test(stdout)).to.be.true;
-        expect(/protocol not found/i.test(stdout)).to.be.true;
+      expect(exitCode).to.equal(0);
+      expect(/USABLE/.test(stdout)).to.be.true;
+      expect(/protocol not found/i.test(stdout)).to.be.true;
     }
   },
   {
     describe: '2.4.8: Should FAIL if the in-situ E2E test fails',
     args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
-        const testDir = path.join(pluginDir, '.contract/test');
-        await fs.ensureDir(testDir);
-        await fs.writeFile(
-          path.join(testDir, `${pluginName}-e2e.test.js`),
-          'const assert = require("assert"); describe("Failing Test", () => it("should fail", () => assert.strictEqual(1, 0)));'
-        );
-        await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-        await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
-        await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
+      const testDir = path.join(pluginDir, '.contract/test');
+      await fs.ensureDir(testDir);
+      await fs.writeFile(
+        path.join(testDir, `${pluginName}-e2e.test.js`),
+        'const assert = require("assert"); describe("Failing Test", () => it("should fail", () => assert.strictEqual(1, 0)));'
+      );
+      await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
+      await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
+      await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
     },
     assert: ({ exitCode, stdout }, expect) => {
-        expect(exitCode).to.equal(1);
-        expectStringsOnSameLine(stdout, ['In-situ',  'failed'], expect);
+      expect(exitCode).to.equal(1);
+      expectStringsOnSameLine(stdout, ['In-situ',  'failed'], expect);
     }
   },
   {
     describe: '2.4.1: Should report a fully compliant plugin as VALID',
     args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir, pluginName) => {
-        // Use the helper to create a plugin that meets all VALID criteria
-        await createWellFormedPlugin(pluginDir, pluginName);
+      // Use the helper to create a plugin that meets all VALID criteria
+      await createWellFormedPlugin(pluginDir, pluginName);
     },
     assert: ({ exitCode, stdout, stderr }, expect) => {
-        expect(exitCode).to.equal(0);
-        expect(/VALID/.test(stdout)).to.be.true;
-        expect(stderr).to.not.match(/error/i);
+      expect(exitCode).to.equal(0);
+      expect(/VALID/.test(stdout)).to.be.true;
+      expect(stderr).to.not.match(/error/i);
     }
   },
   {
@@ -135,8 +134,8 @@ module.exports = [
     args: (pluginDir) => ['plugin', 'validate', pluginDir],
     setup: async (pluginDir) => {
       await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-      await fs.writeFile(path.join(pluginDir, `e2e-test-plugin.config.yaml`), `plugin_name: mismatched-plugin-name\nprotocol: v1\nversion: 1.0.0`);
-      await fs.writeFile(path.join(pluginDir, 'README.md'), `# mismatched-plugin-name`);
+      await fs.writeFile(path.join(pluginDir, 'e2e-test-plugin.config.yaml'), 'plugin_name: mismatched-plugin-name\nprotocol: v1\nversion: 1.0.0');
+      await fs.writeFile(path.join(pluginDir, 'README.md'), '# mismatched-plugin-name');
     },
     assert: ({ exitCode, stdout, stderr }, expect) => {
       expect(exitCode).to.equal(1);
@@ -154,7 +153,7 @@ module.exports = [
 protocol: v1
 ---`);
       await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
-      await fs.writeFile(path.join(pluginDir, `${pluginName}.schema.json`), `{"protocol": "v99"}`);
+      await fs.writeFile(path.join(pluginDir, `${pluginName}.schema.json`), '{"protocol": "v99"}');
     },
     assert: ({ exitCode, stderr, stdout }, expect) => {
       expect(exitCode).to.equal(1);

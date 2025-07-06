@@ -21,7 +21,7 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
     throw new Error(`Plugin "${pluginId}" in collection "${collectionName}" is not available or does not exist.`);
   }
   if (!pluginToEnable.config_path || !fss.existsSync(pluginToEnable.config_path)) {
-      throw new Error(`Config path for plugin "${pluginId}" in collection "${collectionName}" is invalid or not found: ${pluginToEnable.config_path}`);
+    throw new Error(`Config path for plugin "${pluginId}" in collection "${collectionName}" is invalid or not found: ${pluginToEnable.config_path}`);
   }
   const absolutePluginConfigPath = pluginToEnable.config_path;
 
@@ -31,8 +31,8 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
     const validationResult = pluginValidator(pluginDirectoryPath);
 
     if (!validationResult.isValid) {
-        const errorMessages = validationResult.errors.join('\n  - ');
-        throw new Error(`Plugin validation failed for '${pluginId}'. Errors:\n  - ${errorMessages}`);
+      const errorMessages = validationResult.errors.join('\n  - ');
+      throw new Error(`Plugin validation failed for '${pluginId}'. Errors:\n  - ${errorMessages}`);
     }
     console.log(chalk.green(`  Plugin '${pluginId}' passed validation.`));
   } else {
@@ -42,7 +42,7 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
 
   let invokeName = options.name || pluginId;
   if (!/^[a-zA-Z0-9_.-]+$/.test(invokeName)) {
-      throw new Error(`Invalid invoke_name: "${invokeName}". Must be alphanumeric, underscores, hyphens, or periods.`);
+    throw new Error(`Invalid invoke_name: "${invokeName}". Must be alphanumeric, underscores, hyphens, or periods.`);
   }
 
   const enabledManifest = await this._readEnabledManifest();

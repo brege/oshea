@@ -1,5 +1,4 @@
 // src/cli/commands/collectionCmd.js
-const chalk = require('chalk');
 const { cliCommandsPath } = require('@paths');
 const path = require('path');
 

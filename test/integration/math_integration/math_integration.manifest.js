@@ -1,14 +1,12 @@
 // test/integration/math_integration/math_integration.manifest.js
-// Test manifest for math_integration module.
-const path = require('path');
-const fs = require('fs').promises; // For test setup if needed
-const proxyquire = require('proxyquire'); // Needs to be required here for test 1.7.4 scenarios
+const sinon = require('sinon');
+const createMathIntegration = require('../../../src/core/math_integration');
 
 module.exports = [
   {
     test_id: '1.7.1',
     describe: 'Verify configureMarkdownItForMath successfully applies the @vscode/markdown-it-katex plugin',
-    setup: async (mocks, constants) => {
+    setup: async (mocks) => {
       // Configure the mocks specific to this test case
       mocks.mdInstance = {
         use: sinon.stub(),
@@ -22,24 +20,22 @@ module.exports = [
           trust: false,
         },
       };
-
     },
     assert: async (mocks, constants, expect) => {
       const { configureMarkdownItForMath } = mocks.mathIntegration;
-      const { mdInstance, mathConfig, mockKatexPluginFunction, mockConsoleLog, mockConsoleWarn, mockConsoleError } = mocks;
+      const { mdInstance, mathConfig, mockKatexPluginFunction, mockConsoleError } = mocks;
 
       configureMarkdownItForMath(mdInstance, mathConfig);
 
       expect(mdInstance.use.calledOnce).to.be.true;
       expect(mdInstance.use.calledWith(mockKatexPluginFunction, mathConfig.katex_options)).to.be.true;
       expect(mockConsoleError.called).to.be.false;
-
     },
   },
   {
     test_id: '1.7.2',
     describe: 'Test configureMarkdownItForMath passes mathConfig.katex_options correctly to the KaTeX plugin',
-    setup: async (mocks, constants) => {
+    setup: async (mocks) => {
       mocks.mdInstance = {
         use: sinon.stub(),
         render: sinon.stub().returns(''),
@@ -50,10 +46,9 @@ module.exports = [
         katex_options: {
           throwOnError: true,
           displayMode: true,
-          macros: { "\\myMacro": "macroValue" }
+          macros: { '\\myMacro': 'macroValue' }
         },
       };
-
     },
     assert: async (mocks, constants, expect) => {
       const { configureMarkdownItForMath } = mocks.mathIntegration;
@@ -65,24 +60,22 @@ module.exports = [
       expect(mdInstance.use.calledWith(mockKatexPluginFunction, mathConfig.katex_options)).to.be.true;
       expect(mdInstance.use.getCall(0).args[1]).to.deep.equal(mathConfig.katex_options);
       expect(mockConsoleError.called).to.be.false;
-
     },
   },
   {
     test_id: '1.7.3',
     describe: 'Verify configureMarkdownItForMath does nothing if math is not enabled or the engine is not "katex"',
-    setup: async (mocks, constants) => {
+    setup: async (mocks) => {
       mocks.mdInstance = {
         use: sinon.stub(),
       };
       mocks.mathConfig1 = { enabled: false, engine: 'katex' };
       mocks.mathConfig2 = { enabled: true, engine: 'other_engine' };
       mocks.mathConfig3 = null;
-
     },
     assert: async (mocks, constants, expect) => {
       const { configureMarkdownItForMath } = mocks.mathIntegration;
-      const { mdInstance, mathConfig1, mathConfig2, mathConfig3, mockConsoleLog, mockConsoleWarn, mockConsoleError } = mocks;
+      const { mdInstance, mathConfig1, mathConfig2, mathConfig3, mockConsoleError } = mocks;
 
       configureMarkdownItForMath(mdInstance, mathConfig1);
       expect(mdInstance.use.called).to.be.false;
@@ -97,14 +90,13 @@ module.exports = [
       configureMarkdownItForMath(mdInstance, mathConfig3);
       expect(mdInstance.use.called).to.be.false;
       expect(mockConsoleError.called).to.be.false;
-
     },
   },
   {
     test_id: '1.7.4',
     describe: 'Test configureMarkdownItForMath logs an error and returns if @vscode/markdown-it-katex cannot be required or is not a valid plugin function',
     skip: true, // Revert to skipped status
-    setup: async (mocks, constants) => {
+    setup: async (mocks) => {
       mocks.mdInstance = {
         use: sinon.stub(),
       };
@@ -115,10 +107,9 @@ module.exports = [
     },
     assert: async (mocks, constants, expect) => {
       const { mockConsoleError } = mocks;
-      const mathIntegrationFactoryPath = path.resolve(__dirname, '../../../src/core/math_integration');
 
       expect(true).to.be.true; // Placeholder assertion for skipped test
-      const mathIntegration = mathIntegrationFactory(mocks.mockFsPromises, mocks.mockFsSync, mocks.path, mocks.mockProcess);
+      const mathIntegration = createMathIntegration(mocks.mockFsPromises, mocks.mockFsSync, mocks.path, mocks.mockProcess);
       const result = await mathIntegration.getMathCssContent();
       expect(result).to.be.an('array').that.is.empty;
       expect(mockConsoleError.calledWith(sinon.match.string)).to.be.true;
@@ -136,11 +127,10 @@ module.exports = [
       mocks.mockFsSync.existsSync.withArgs(constants.KATEX_CSS_PATH).returns(true); // File DOES exist
       mocks.mockFsPromises.readFile.resolves(mockCssContent); // Stub readFile universally
       mocks.expectedCssContent = [mockCssContent];
-
     },
     assert: async (mocks, constants, expect) => {
       const { getMathCssContent } = mocks.mathIntegration;
-      const { mathConfig, mockFsSync, mockFsPromises, expectedCssContent, mockConsoleLog, mockConsoleWarn, mockConsoleError } = mocks;
+      const { mathConfig, mockFsSync, mockFsPromises, expectedCssContent, mockConsoleWarn, mockConsoleError } = mocks;
 
       const result = await getMathCssContent(mathConfig);
 
@@ -149,13 +139,12 @@ module.exports = [
       expect(result).to.deep.equal(expectedCssContent);
       expect(mockConsoleWarn.called).to.be.false;
       expect(mockConsoleError.called).to.be.false;
-
     },
   },
   {
     test_id: '1.7.6',
     describe: 'Test getMathCssContent returns an empty array if math is not enabled or the engine is not "katex"',
-    setup: async (mocks, constants) => {
+    setup: async (mocks) => {
       mocks.mathConfig1 = { enabled: false, engine: 'katex' };
       mocks.mathConfig2 = { enabled: true, engine: 'other_engine' };
       mocks.mathConfig3 = null;
@@ -165,7 +154,7 @@ module.exports = [
     },
     assert: async (mocks, constants, expect) => {
       const { getMathCssContent } = mocks.mathIntegration;
-      const { mathConfig1, mathConfig2, mathConfig3, mockFsSync, mockFsPromises, mockConsoleLog, mockConsoleWarn, mockConsoleError } = mocks;
+      const { mathConfig1, mathConfig2, mathConfig3, mockFsSync, mockFsPromises, mockConsoleWarn, mockConsoleError } = mocks;
 
       let result1 = await getMathCssContent(mathConfig1);
       expect(result1).to.deep.equal([]);
@@ -197,8 +186,6 @@ module.exports = [
       expect(mockFsPromises.readFile.called).to.be.false;
       expect(mockConsoleWarn.called).to.be.false;
       expect(mockConsoleError.called).to.be.false;
-
-
     },
   },
   {
@@ -211,21 +198,19 @@ module.exports = [
       };
       mocks.mockFsSync.existsSync.withArgs(constants.KATEX_CSS_PATH).returns(false); // File DOES NOT exist
       mocks.mockFsPromises.readFile.resolves(''); // Stub readFile even if not expected to be called
-
     },
     assert: async (mocks, constants, expect) => {
       const { getMathCssContent } = mocks.mathIntegration;
-      const { mathConfig, mockFsSync, mockFsPromises, mockConsoleLog, mockConsoleWarn, mockConsoleError } = mocks;
+      const { mockFsSync, mockFsPromises, mockConsoleWarn, mockConsoleError } = mocks;
 
-      const result = await getMathCssContent(mathConfig);
+      const result = await getMathCssContent(mocks.mathConfig);
 
       expect(mockFsSync.existsSync.calledWith(constants.KATEX_CSS_PATH)).to.be.true;
       expect(mockFsPromises.readFile.called).to.be.false;
       expect(result).to.deep.equal([]);
       expect(mockConsoleWarn.calledOnce).to.be.true;
-      expect(mockConsoleWarn.getCall(0).args[0]).to.include("KaTeX CSS file not found at expected path");
+      expect(mockConsoleWarn.getCall(0).args[0]).to.include('KaTeX CSS file not found at expected path');
       expect(mockConsoleError.called).to.be.false;
-
     },
   },
   {
@@ -238,21 +223,19 @@ module.exports = [
       };
       mocks.mockFsSync.existsSync.withArgs(constants.KATEX_CSS_PATH).returns(true); // File DOES exist
       mocks.mockFsPromises.readFile.rejects(new Error('Permission denied')); // Stub readFile universally to reject
-
     },
     assert: async (mocks, constants, expect) => {
       const { getMathCssContent } = mocks.mathIntegration;
-      const { mathConfig, mockFsSync, mockFsPromises, mockConsoleLog, mockConsoleWarn, mockConsoleError } = mocks;
+      const { mockFsSync, mockFsPromises, mockConsoleWarn, mockConsoleError } = mocks;
 
-      const result = await getMathCssContent(mathConfig);
+      const result = await getMathCssContent(mocks.mathConfig);
 
       expect(mockFsSync.existsSync.calledWith(constants.KATEX_CSS_PATH)).to.be.true;
       expect(mockFsPromises.readFile.calledWith(constants.KATEX_CSS_PATH, 'utf8')).to.be.true;
       expect(result).to.deep.equal([]);
       expect(mockConsoleWarn.calledOnce).to.be.true;
-      expect(mockConsoleWarn.getCall(0).args[0]).to.include("Could not read KaTeX CSS file from");
+      expect(mockConsoleWarn.getCall(0).args[0]).to.include('Could not read KaTeX CSS file from');
       expect(mockConsoleError.called).to.be.false;
-
     },
   },
 ];

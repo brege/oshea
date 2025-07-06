@@ -22,7 +22,7 @@ const patterns = getPatternsFromArgs(cliArgs.filter(arg => !nonPatternArgs.inclu
 const ignore = getDefaultGlobIgnores();
 
 if (patterns.length === 0) {
-  console.log("Usage: node scripts/refactor/probe-require-and-path.js [--rejects] [--only-basenames] <file_or_directory>");
+  console.log('Usage: node scripts/refactor/probe-require-and-path.js [--rejects] [--only-basenames] <file_or_directory>');
   process.exit(1);
 }
 
@@ -77,18 +77,18 @@ files.forEach(file => {
 
     // --- APPLY BASENAME FILTER (if enabled) ---
     if (filterByBasename && !isPackageRequire) {
-        // Iterate through all known basenames
-        for (const basename of basenameIndex) {
-            // A simple string check is sufficient and matches the goal.
-            if (trimmedLine.includes(basename)) {
-                hasBasename = true;
-                break; // Found a match, no need to check further
-            }
+      // Iterate through all known basenames
+      for (const basename of basenameIndex) {
+        // A simple string check is sufficient and matches the goal.
+        if (trimmedLine.includes(basename)) {
+          hasBasename = true;
+          break; // Found a match, no need to check further
         }
-        // If after checking all basenames, none were found, mark it for rejection.
-        if (!hasBasename) {
-            type = 'REJECTED_NO_BASENAME';
-        }
+      }
+      // If after checking all basenames, none were found, mark it for rejection.
+      if (!hasBasename) {
+        type = 'REJECTED_NO_BASENAME';
+      }
     }
 
     // --- OUTPUT LOGIC ---

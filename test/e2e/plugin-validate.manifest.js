@@ -4,9 +4,9 @@ const path = require('path');
 
 // Helper to create a dummy plugin that is fully compliant with the v1 contract
 async function createWellFormedPlugin(pluginDir, pluginName) {
-    await fs.ensureDir(path.join(pluginDir, 'test'));
+  await fs.ensureDir(path.join(pluginDir, 'test'));
 
-    const handlerContent = `
+  const handlerContent = `
 class DummyHandler {
     constructor(coreUtils) {}
     async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
@@ -19,23 +19,23 @@ class DummyHandler {
 }
 module.exports = DummyHandler;
 `;
-    await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: A well-formed plugin.`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-    await fs.ensureDir(path.join(pluginDir, '.contract'));
-    await fs.ensureDir(path.join(pluginDir, '.contract/test'));
-    await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
-    await fs.writeFile(path.join(pluginDir, `.contract/${pluginName}.schema.json`), `{}`);
-    await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
-    await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);
+  await fs.writeFile(path.join(pluginDir, 'index.js'), handlerContent);
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), 'description: A well-formed plugin.');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+  await fs.ensureDir(path.join(pluginDir, '.contract'));
+  await fs.ensureDir(path.join(pluginDir, '.contract/test'));
+  await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
+  await fs.writeFile(path.join(pluginDir, `.contract/${pluginName}.schema.json`), '{}');
+  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0`);
+  await fs.writeFile(path.join(pluginDir, 'README.md'), `---\nplugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\n---\n# ${pluginName}`);
 }
 
 module.exports = [
   {
     describe: '3.9.1: (Happy Path) Successfully validates a well-formed plugin directory',
     setup: async (sandboxDir) => {
-        const pluginDir = path.join(sandboxDir, 'well-formed-plugin');
-        await createWellFormedPlugin(pluginDir, 'well-formed-plugin');
+      const pluginDir = path.join(sandboxDir, 'well-formed-plugin');
+      await createWellFormedPlugin(pluginDir, 'well-formed-plugin');
     },
     args: (sandboxDir) => [
       'plugin',
@@ -50,10 +50,10 @@ module.exports = [
   {
     describe: '3.9.2: (Sad Path) Fails validation for a poorly-formed plugin directory',
     setup: async (sandboxDir) => {
-        const pluginDir = path.join(sandboxDir, 'poorly-formed-plugin');
-        await fs.ensureDir(pluginDir);
-        await fs.writeFile(path.join(pluginDir, `poorly-formed-plugin.config.yaml`), `description: A poorly-formed plugin.`);
-        await fs.writeFile(path.join(pluginDir, `README.md`), '# Incomplete Plugin');
+      const pluginDir = path.join(sandboxDir, 'poorly-formed-plugin');
+      await fs.ensureDir(pluginDir);
+      await fs.writeFile(path.join(pluginDir, 'poorly-formed-plugin.config.yaml'), 'description: A poorly-formed plugin.');
+      await fs.writeFile(path.join(pluginDir, 'README.md'), '# Incomplete Plugin');
     },
     args: (sandboxDir) => [
       'plugin',

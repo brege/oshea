@@ -1,5 +1,5 @@
 // test/integration/collections/cm-utils.test.1.8.1.js
-const { cmUtilsPath } = require("@paths");
+const { cmUtilsPath } = require('@paths');
 
 const { expect } = require('chai');
 const { deriveCollectionName } = require(cmUtilsPath);

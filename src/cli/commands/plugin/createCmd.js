@@ -24,14 +24,14 @@ module.exports = {
         type: 'string'
       })
       .option('from', {
-        describe: `source to archetype from (registered plugin name, 'collection/id', or path)`,
+        describe: 'source to archetype from (registered plugin name, \'collection/id\', or path)',
         type: 'string',
         alias: 'f',
         completionKey: 'usablePlugins'
       })
       .option('target-dir', {
         alias: 't',
-        describe: `directory to create the new plugin in`,
+        describe: 'directory to create the new plugin in',
         type: 'string',
         normalize: true
       })
@@ -40,7 +40,7 @@ module.exports = {
         type: 'boolean',
         default: false
       })
-      .epilogue(`If --from is omitted, a default template is used.\nIf --target-dir is omitted, defaults to the current directory.`);
+      .epilogue('If --from is omitted, a default template is used.\nIf --target-dir is omitted, defaults to the current directory.');
   },
   handler: async (args) => {
     const newPluginName = args.pluginName;
@@ -91,17 +91,17 @@ module.exports = {
 
       if (result && result.success && result.archetypePath) {
         console.log(chalk.greenBright(`\nPlugin '${chalk.yellow(newPluginName)}' created successfully.`));
-        console.log(chalk.blueBright("Next steps:"));
+        console.log(chalk.blueBright('Next steps:'));
         console.log(chalk.gray(`  1. Customize the generated files in: ${chalk.underline(result.archetypePath)}`));
-        console.log(chalk.gray(`  2. Register your new plugin in a main config file.`));
+        console.log(chalk.gray('  2. Register your new plugin in a main config file.'));
       }
 
       const { cliPath } = require('@paths');
       try {
         const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
-      } catch (error) {
-        console.error(chalk.yellow(`WARN: Failed to regenerate completion cache. This is not a fatal error.`));
+      } catch {
+        console.error(chalk.yellow('WARN: Failed to regenerate completion cache. This is not a fatal error.'));
       }
 
     } catch (error) {

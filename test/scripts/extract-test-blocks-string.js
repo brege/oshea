@@ -1,6 +1,5 @@
 // test/scripts/extract-test-blocks-string.js
 const fs = require('fs');
-const path = require('path');
 
 // --- Argument Parsing ---
 if (process.argv.length < 4) {

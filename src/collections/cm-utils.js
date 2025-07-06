@@ -44,12 +44,12 @@ function toPascalCase(str) {
  * @returns {boolean} True if valid, false otherwise.
  */
 function isValidPluginName(pluginName) {
-    if (!pluginName || typeof pluginName !== 'string') {
-        return false;
-    }
-    // Allows alphanumeric, and hyphens not at start/end. Does not allow underscore.
-    const regex = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/;
-    return regex.test(pluginName);
+  if (!pluginName || typeof pluginName !== 'string') {
+    return false;
+  }
+  // Allows alphanumeric, and hyphens not at start/end. Does not allow underscore.
+  const regex = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/;
+  return regex.test(pluginName);
 }
 
 module.exports = {

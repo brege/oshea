@@ -14,9 +14,7 @@
     "test:watch": "mocha --watch",
     "test:telemetry": "node scripts/telemetry/test-watcher.js",
     "dep-tree": "madge --json src/",
-    "lint:eslint": "eslint .",
-    "lint:custom": "node scripts/linting/strip-trailing-whitespace.js && node scripts/linting/standardize-js-line-one-all.js",
-    "lint": "npm run lint:custom && npm run lint:eslint"
+    "lint": "node scripts/linting/lint.js"
   },
   "_moduleAliases": {
     "@paths": "paths.js"
@@ -70,6 +68,7 @@
     "acorn-walk": "^8.3.4",
     "chai": "^4.3.4",
     "eslint": "^8.57.0",
+    "husky": "^9.1.7",
     "jsdom": "^22.1.0",
     "lodash": "^4.17.21",
     "madge": "^8.0.0",

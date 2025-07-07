@@ -58,6 +58,8 @@ A collection of tools to validate the paths of various organizers.
 - [ [`require-path-validator.sh`](validators/require-path-validator.sh) ]
     -- Validates that the `require()` paths in a target directory exist.
 
+Status: **Complete** -- being incorporated into the linter: [`scripts/linting/lint.js`](../linting/lint.js).
+
 ### Uncategorized Scripts
 
 <!-- uncategorized-start -->

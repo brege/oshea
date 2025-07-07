@@ -67,6 +67,7 @@ const v1ValidatorPath = path.join(validatorsRoot, 'v1.js');
 // Utils
 const utilsRoot = path.join(srcRoot, 'utils');
 const assetResolverPath = path.join(utilsRoot, 'asset_resolver.js');
+const loggerPath = path.join(utilsRoot, 'logger.js');
 
 // Node Modules
 const nodeModulesPath = path.join(projectRoot, 'node_modules');
@@ -136,6 +137,7 @@ module.exports = {
   // Utils
   utilsRoot,
   assetResolverPath,
+  loggerPath,
 
   // Node Modules
   nodeModulesPath,

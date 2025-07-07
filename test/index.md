@@ -57,8 +57,9 @@ To update the table below, run the following command from the **project root**:
 
 ```bash
 node test/scripts/qa-dashboard.js --update-readme
-# TODO: make a post-hook for new librarian
 ```
+
+**Checking for Holes in Test Coverage [beyond CI]**
 
 These items are the kinds that *do not* get picked up by a CI. These tests are of three categories, and each category has its own script
 
@@ -69,20 +70,30 @@ These items are the kinds that *do not* get picked up by a CI. These tests are o
 3. [ [`find-skipped-tests.js`](scripts/find-skipped-tests.js) ]
    -- tests that have been skipped via `it.skip()` in the `*.test.js` files
 
-The **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script synthesizes this information into the table below.
+The **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script synthesizes this information into a table at the end of this document.
 
-Other scripts that can be useful in test-land:
+**Random Utility Scripts**
 
-- [ [extract-test-blocks-string.js](scripts/extract-test-blocks-string.js) ]
+- [ [`extract-test-blocks-string.js`](scripts/extract-test-blocks-string.js) ]
   -- a search utility to find modules by name within a test file:
   ``` bash
   node test/scripts/extract-test-blocks-string.js "default_handler" test/docs/checklist-level-2.md
   ```
-- [ [ls-matching-tests.js](scripts/ls-matching-tests.js)
+- [ [`ls-matching-tests.js`](scripts/ls-matching-tests.js)
   -- a test file locator that finds all test blocks in a checklist, extracting their `test_id`:
   ``` bash
   node test/scripts/ls-matching-tests.js "ConfigResolver" test/docs/checklist-level-1.md
   ```
+
+**Reporter and Logging of Failed Tests**
+
+1. [ [`log-failures-reporter.js`](scripts/log-failures-reporter.js) ]
+   -- a **reporter** that logs tests to a file, usually `~/.cache/md-to-pdf/logs/test-failures.json`
+2. [ [`run-last-fails.js`](scripts/run-last-fails.js) ]
+   -- parses the log `~/.cache/md-to-pdf/logs/test-failures.json` for failed tests, then execute only those that failed
+   ```bash
+   npm run test:last-fails
+   ```
 
 ---
 

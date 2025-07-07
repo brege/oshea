@@ -11,6 +11,7 @@
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
     "test": "mocha",
+    "test:last-fails": "node test/scripts/run-last-fails.js",
     "test:report": "MOCHA_JSON_REPORT_FILE=./test-report.json mocha",
     "test:watch": "node test/scripts/test-watcher.js",
     "dep-tree": "madge --json src/",

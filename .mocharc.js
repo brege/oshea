@@ -2,6 +2,7 @@
 
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
+const path = require('path');
 
 const argv = yargs(hideBin(process.argv)).argv;
 const hasFiles = argv._ && argv._.length > 0;
@@ -156,7 +157,8 @@ const mochaConfig = {
   timeout: 20000, // Increased timeout for lifecycle tests
   exit: true,
   color: true,
-  require: 'test/setup.js'
+  require: 'test/setup.js',
+  reporter: path.join(__dirname, 'test', 'scripts', 'log-failures-reporter.js')
 };
 
 module.exports = mochaConfig;

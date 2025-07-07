@@ -11,8 +11,7 @@
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
     "test": "mocha",
-    "test:watch": "mocha --watch",
-    "test:telemetry": "node scripts/telemetry/test-watcher.js",
+    "test:watch": "node test/scripts/test-watcher.js",
     "dep-tree": "madge --json src/",
     "lint": "node scripts/linting/lint.js",
     "prepare": "husky"

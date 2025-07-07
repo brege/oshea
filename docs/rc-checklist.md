@@ -81,13 +81,13 @@ These are internal, code-hygienic tasks.
 
 [**Linting and Automation Rules**](#linting-and-automation-rules)
 
-| ● | `lg`| Task Description                                                 |
+| ✔ | `lg`| Task Description                                                 |
 |:-:|:----|:-----------------------------------------------------------------|
 | ✔ |`lg1`| Add and configure ESLint                                         |
 | ✔ |`lg2`| Create unified lint script combining custom and ESLint checks    |
 | ✔ |`lg3`| Set up Husky for local pre-commit, pre-tag/push automation       |
 | ✔ |`lg4`| Configure GitHub Actions for CI workflows                        |
-| ○ |`lg5`| Automate version bumping and release tagging                     |
+| ✔ |`lg5`| Automate version bumping and release tagging                     |
 
 *Status: In Progress*
 
@@ -99,11 +99,11 @@ These are internal, code-hygienic tasks.
 |:-:|:----|:-----------------------------------------------------------------|
 | ✔ |`tt1`| Remove all old debugging code                                    |
 | ✔ |`tt2`| Add `test-wacher.js` to exec tests on app code changes           |
-| ○ |`tt3`| Fix `--watch` flag in `mocha` to provide tt2's as CLI option     |
-| ● |`tt4`| Consolidate integration tests into manifest-driven harnesses     |
+| ✔ |`tt3`| Fix `--watch` flag in `mocha` to provide `tt2`'s as CLI option   |
+| ‖ |`tt4`| Consolidate integration tests into manifest-driven harnesses     |
 | ✔ |`tt5`| Organize e2e tests into groups in `.mocharc.js`                  |
 | ○ |`tt6`| Dump all test logs to a convenient machine-readable file         |
-| ○ |`tt7`| Build `--last-fails` mocha flag to re-run last failed from tt6   |
+| ○ |`tt7`| Build `--last-fails` mocha flag to re-run last failed from `tt6` |
 | ○ |`tt8`| Unify app-code console.logs and debugging to shrink line-char    |
 | ○ |`tt9`| Add remainder of walkthroughs as `level4` tests.                 | 
 
@@ -256,9 +256,9 @@ scripts/
    ```json
    // package.json
    {
-      "scripts": {
-         "bump-version": "npm version patch -m 'Release v%s'"
-      }
+     "scripts": {
+       "bump-version": "npm version patch -m 'Release v%s'"
+     }
    }
    ```
 
@@ -311,13 +311,13 @@ Define e2e test groups in `.mocharc.js` for targeted runs.
 // .mocharc.js
 module.exports = {
   groups: {
-     'l4-all':       'test/e2e/**/*.test.js',
-     'l4-workflow':  'test/e2e/workflow-*.test.js',
-     'l4-sadpath':   'test/e2e/sad-path-*.test.js',
-     ...
-     'l3-all':       'test/e2e/**/*.test.js',
-     'l3-cm':        'test/e2e/collection-manager/*.test.js'
-     ...
+    'l4-all':       'test/e2e/**/*.test.js',
+    'l4-workflow':  'test/e2e/workflow-*.test.js',
+    'l4-sadpath':   'test/e2e/sad-path-*.test.js',
+    ...
+    'l3-all':       'test/e2e/**/*.test.js',
+    'l3-cm':        'test/e2e/collection-manager/*.test.js'
+    ...
   }
 }
 ```
@@ -333,13 +333,13 @@ const { EVENT_RUN_END, EVENT_TEST_FAIL } = Mocha.Runner.constants;
 
 class LogFailuresReporter {
   constructor(runner) {
-     const failures = [];
-     runner.on(EVENT_TEST_FAIL, (test) => {
-        failures.push({ title: test.fullTitle(), file: test.file });
-     });
-     runner.on(EVENT_RUN_END, () => {
-        fs.writeFileSync('.test-failures.json', JSON.stringify(failures, null, 2));
-     });
+    const failures = [];
+    runner.on(EVENT_TEST_FAIL, (test) => {
+      failures.push({ title: test.fullTitle(), file: test.file });
+    });
+    runner.on(EVENT_RUN_END, () => {
+      fs.writeFileSync('.test-failures.json', JSON.stringify(failures, null, 2));
+    });
   }
 }
 module.exports = LogFailuresReporter;
@@ -395,26 +395,26 @@ const fs = require('fs');
 const levels = { info: 1, warn: 2, error: 3, debug: 0 };
 
 function log(level, message, meta = {}) {
-   // Colorize based on level
-   let output = message;
-   if (level === 'error') output = chalk.red(message);
-   else if (level === 'warn') output = chalk.yellow(message);
-   else if (level === 'info') output = chalk.green(message);
+  // Colorize based on level
+  let output = message;
+  if (level === 'error') output = chalk.red(message);
+  else if (level === 'warn') output = chalk.yellow(message);
+  else if (level === 'info') output = chalk.green(message);
 
-   // Optionally add metadata or write to file/telemetry
-   if (process.env.LOG_MODE === 'json') {
-      const entry = { level, message, ...meta, timestamp: new Date().toISOString() };
-      fs.appendFileSync('logs/app.log', JSON.stringify(entry) + '\n');
-   } else {g
-      console.log(output);
-   }
+  // Optionally add metadata or write to file/telemetry
+  if (process.env.LOG_MODE === 'json') {
+    const entry = { level, message, ...meta, timestamp: new Date().toISOString() };
+    fs.appendFileSync('logs/app.log', JSON.stringify(entry) + '\n');
+  } else {g
+    console.log(output);
+  }
 }
 
 module.exports = {
-   info: (msg, meta) => log('info', msg, meta),
-   warn: (msg, meta) => log('warn', msg, meta),
-   error: (msg, meta) => log('error', msg, meta),
-   debug: (msg, meta) => log('debug', msg, meta),
+  info: (msg, meta) => log('info', msg, meta),
+  warn: (msg, meta) => log('warn', msg, meta),
+  error: (msg, meta) => log('error', msg, meta),
+  debug: (msg, meta) => log('debug', msg, meta),
 };
 ```
 

@@ -4,9 +4,12 @@ const path = require('path');
 const fs = require('fs');
 const { findFiles } = require('../../shared/file-helpers');
 
-// Accept the directory to scan as a CLI argument, default to 'src' if not provided
-const targetDir = process.argv[2] || 'src';
-const SRC_ROOT = path.resolve(process.cwd(), targetDir);
+// Use centralized path management
+require('module-alias/register');
+const { srcRoot } = require('@paths');
+
+// Accept the directory to scan as a CLI argument, default to srcRoot if not provided
+const targetDir = process.argv[2] ? path.resolve(process.cwd(), process.argv[2]) : srcRoot;
 
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
@@ -42,7 +45,7 @@ function scanFile(filePath) {
 }
 
 const results = [];
-for (const file of findFiles(SRC_ROOT, {
+for (const file of findFiles(targetDir, {
   filter: (name) => name.endsWith('.js') || name.endsWith('.mjs')
 })) {
   const result = scanFile(file);
@@ -79,3 +82,4 @@ results
 
 // Optionally, write JSON for further analysis
 // fs.writeFileSync('logging-probe-report.json', JSON.stringify(results, null, 2));
+

@@ -1,5 +1,5 @@
 // src/plugins/PluginManager.js
-const { defaultHandlerPath, markdownUtilsPath, pdfGeneratorPath } = require('@paths');
+const { defaultHandlerPath, markdownUtilsPath, pdfGeneratorPath, logger } = require('@paths');
 const DefaultHandler = require(defaultHandlerPath);
 const markdownUtils = require(markdownUtilsPath);
 const pdfGenerator = require(pdfGeneratorPath);
@@ -55,7 +55,7 @@ class PluginManager {
         // The generate signature would need to change or plugins adopt the class pattern.
         // For now, we assume if it's not a class, it doesn't need coreUtils injected this way.
         // Or, it might have its own way of getting them (not ideal).
-        console.warn(`WARN: Plugin '${pluginName}' is not a class. Core utilities cannot be injected via constructor.`);
+        logger.warn(`Plugin '${pluginName}' is not a class. Core utilities cannot be injected via constructor.`, { module: 'plugins/PluginManager' });
         handlerInstance = HandlerModule;
       } else {
         throw new Error(`Handler module '${handlerScriptPath}' for plugin '${pluginName}' does not export a class or a 'generate' function.`);
@@ -75,8 +75,8 @@ class PluginManager {
         pluginBasePath
       );
     } catch (error) {
-      console.error(`ERROR invoking handler for plugin '${pluginName}' from '${handlerScriptPath}': ${error.message}`);
-      console.error(error.stack);
+      logger.error(`ERROR invoking handler for plugin '${pluginName}' from '${handlerScriptPath}': ${error.message}`, { module: 'plugins/PluginManager', error, pluginName, handlerScriptPath });
+      logger.error(error.stack, { module: 'plugins/PluginManager' });
       return null;
     }
   }

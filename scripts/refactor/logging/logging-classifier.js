@@ -1,121 +1,99 @@
+#!/usr/bin/env node
 // scripts/refactor/logging/logging-classifier.js
 
 const fs = require('fs');
 const path = require('path');
-const babelParser = require('@babel/parser');
-const traverse = require('@babel/traverse').default;
-const { findFiles } = require('../../shared/file-helpers');
 
+// Use centralized path management
 require('module-alias/register');
 const { srcRoot } = require('@paths');
-const targetDir = process.argv[2] ? path.resolve(process.cwd(), process.argv[2]) : srcRoot;
 
-// Helper: describe a single argument
-function describeArg(arg) {
-  // Is it a chalk call?
-  if (
-    arg.type === 'CallExpression' &&
-    arg.callee.type === 'MemberExpression'
-  ) {
-    // Detect chained styles: chalk.green.bold(...)
-    let chain = [];
-    let curr = arg.callee;
-    while (curr.type === 'MemberExpression') {
-      if (curr.property && curr.property.name) chain.unshift(curr.property.name);
-      curr = curr.object;
-      if (curr.type === 'Identifier' && curr.name === 'chalk') {
-        chain.unshift('chalk');
-        break;
-      }
+/**
+ * Classifies logging "species" from probe results.
+ * @param {Array} report - Array of per-file results from probe-logging.js
+ * @returns {Object} speciesMap
+ */
+function classifyLogging(report) {
+  const speciesMap = {};
+
+  function getSpecies(hit) {
+    // For console: e.g. console.log
+    // For chalk: e.g. console.log(chalk.red)
+    if (hit.type === 'console' && /chalk\.\w+/.test(hit.code)) {
+      const chalkMatch = hit.code.match(/chalk\.(\w+)/);
+      return `${hit.method}(chalk.${chalkMatch ? chalkMatch[1] : '???'})`;
     }
-    if (chain[0] === 'chalk') return `chalk.${chain.slice(1).join('.')}`;
+    return hit.method;
   }
-  // Is it a string literal?
-  if (arg.type === 'StringLiteral' || arg.type === 'Literal') return 'string';
-  // Is it a template literal?
-  if (arg.type === 'TemplateLiteral') return 'template';
-  // Otherwise, generic
-  return arg.type;
-}
 
-// Main classifier
-const species = {}; // { pattern: count }
-const speciesFiles = {}; // { pattern: [ {file, line, code} ] }
-
-for (const file of findFiles(targetDir, {
-  filter: name => name.endsWith('.js') || name.endsWith('.mjs')
-})) {
-  let code;
-  try {
-    code = fs.readFileSync(file, 'utf8');
-  } catch (e) {
-    console.warn(`Could not read file: ${file}`);
-    continue;
-  }
-  let ast;
-  try {
-    ast = babelParser.parse(code, {
-      sourceType: 'module',
-      plugins: ['estree'],
-    });
-  } catch (e) {
-    console.warn(`Failed to parse ${file}: ${e.message}`);
-    continue;
-  }
-  const lines = code.split('\n');
-
-  traverse(ast, {
-    CallExpression(nodePath) {
-      const node = nodePath.node;
-      // Only consider console.* calls
-      if (
-        node.callee.type === 'MemberExpression' &&
-        node.callee.object.name === 'console'
-      ) {
-        const logType = node.callee.property.name;
-        // Describe all arguments
-        const argDescriptions = node.arguments.map(describeArg);
-        // Compose species string
-        let pattern = `console.${logType}(`;
-        if (argDescriptions.length === 0) {
-          pattern += 'no args';
-        } else {
-          pattern += argDescriptions.join(', ');
-        }
-        pattern += `) [${argDescriptions.length} arg${argDescriptions.length === 1 ? '' : 's'}]`;
-        // Record
-        species[pattern] = (species[pattern] || 0) + 1;
-        if (!speciesFiles[pattern]) speciesFiles[pattern] = [];
-        const loc = node.loc ? node.loc.start.line : null;
-        speciesFiles[pattern].push({
-          file: path.relative(process.cwd(), file),
-          line: loc,
-          code: loc ? lines[loc - 1].trim() : '[line unknown]',
+  for (const fileReport of report) {
+    for (const hit of fileReport.hits || []) {
+      const species = getSpecies(hit);
+      if (!speciesMap[species]) {
+        speciesMap[species] = { count: 0, examples: [] };
+      }
+      speciesMap[species].count += 1;
+      if (speciesMap[species].examples.length < 3) {
+        speciesMap[species].examples.push({
+          file: fileReport.file,
+          line: hit.line,
+          code: hit.code
         });
       }
-    },
-  });
+    }
+  }
+  return speciesMap;
 }
 
-// Print summary table
-console.log('--- Logging Species Table ---');
-Object.entries(species)
-  .sort((a, b) => b[1] - a[1])
-  .forEach(([pattern, count]) => {
-    console.log(`${pattern.padEnd(50)} : ${count}`);
-  });
+// Suggest canonical logger mapping for each species
+function suggestLogger(species) {
+  if (/console\.error/.test(species)) return 'logger.error';
+  if (/console\.warn/.test(species)) return 'logger.warn';
+  if (/chalk\.red/.test(species)) return 'logger.error';
+  if (/chalk\.yellow/.test(species)) return 'logger.warn';
+  if (/chalk\.gray/.test(species)) return 'logger.detail';
+  if (/chalk\.blueBright/.test(species)) return 'logger.info';
+  if (/chalk\.bold/.test(species)) return 'logger.info';
+  return 'logger.info';
+}
 
-// Optionally, print details for rare species
-const threshold = 10; // show details for species with ≤ this many occurrences
-console.log('\n--- Rare/Weird Species (≤', threshold, ') ---');
-Object.entries(species)
-  .filter(([pattern, count]) => count <= threshold)
-  .forEach(([pattern, count]) => {
-    console.log(`\n${pattern} : ${count}`);
-    speciesFiles[pattern].forEach(({ file, line, code }) => {
-      console.log(`  ${file}:${line || '?'}: ${code}`);
+// CLI usage
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  const reportPath = args[0]
+    ? path.resolve(process.cwd(), args[0])
+    : path.join(srcRoot, '..', 'logging-probe-report.json');
+  let report;
+  try {
+    report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+  } catch (e) {
+    console.error('Could not read probe report:', reportPath);
+    process.exit(1);
+  }
+  const speciesMap = classifyLogging(report);
+
+  console.log('\n=== Logging Species Classifier ===\n');
+  Object.entries(speciesMap)
+    .sort((a, b) => b[1].count - a[1].count)
+    .forEach(([species, { count, examples }]) => {
+      console.log(`Species: ${species}`);
+      console.log(`  Count: ${count}`);
+      console.log(`  Suggested mapping: ${suggestLogger(species)}`);
+      examples.forEach(ex =>
+        console.log(`    Example: ${ex.file}:${ex.line}  ${ex.code}`)
+      );
+      console.log('');
     });
-  });
 
-console.log('\n-----------------------------');
+  // Write mapping JSON for batch replacement
+  const mapping = {};
+  for (const species in speciesMap) {
+    mapping[species] = suggestLogger(species);
+  }
+  const mappingPath = path.join(path.dirname(reportPath), 'logging-species-mapping.json');
+  fs.writeFileSync(mappingPath, JSON.stringify(mapping, null, 2));
+  console.log(`Wrote: ${mappingPath}`);
+}
+
+module.exports = { classifyLogging, suggestLogger };
 

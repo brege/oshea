@@ -1,22 +1,45 @@
 // src/utils/logger.js
-// A centralized logger module to standardize console output.
-// This is the initial scaffolding and will be expanded upon.
-
 const chalk = require('chalk');
+const fs = require('fs');
+const path = require('path');
 
-function log(level, message) {
-  // This will be expanded to handle different log levels and formats.
-  console.log(message);
+// Ensure log directory exists
+const logDir = path.join(process.cwd(), 'logs');
+if (process.env.LOG_MODE === 'json' && !fs.existsSync(logDir)) {
+  fs.mkdirSync(logDir, { recursive: true });
+}
+const logFilePath = path.join(logDir, 'app.log');
+
+function log(level, message, meta = {}) {
+  if (process.env.LOG_MODE === 'json') {
+    const entry = {
+      level,
+      message,
+      ...meta,
+      timestamp: new Date().toISOString()
+    };
+    fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+  } else {
+    let output = message;
+    if (level === 'error' || level === 'fatal') output = chalk.red(message);
+    else if (level === 'warn') output = chalk.yellow(message);
+    else if (level === 'success') output = chalk.green(message);
+    else if (level === 'info') output = chalk.blueBright(message);
+    else if (level === 'detail') output = chalk.gray(message);
+
+    console.log(output);
+  }
+
+  if (level === 'fatal') {
+    process.exit(1);
+  }
 }
 
 module.exports = {
-  info: (msg) => log('info', msg),
-  warn: (msg) => log('warn', chalk.yellow(msg)),
-  error: (msg) => log('error', chalk.red(msg)),
-  success: (msg) => log('success', chalk.green(msg)),
-  detail: (msg) => log('detail', chalk.gray(msg)),
-  fatal: (msg) => {
-    log('fatal', chalk.red.bold(msg));
-    process.exit(1);
-  },
+  info: (msg, meta) => log('info', msg, meta),
+  warn: (msg, meta) => log('warn', msg, meta),
+  error: (msg, meta) => log('error', msg, meta),
+  success: (msg, meta) => log('success', msg, meta),
+  detail: (msg, meta) => log('detail', msg, meta),
+  fatal: (msg, meta) => log('fatal', msg, meta),
 };

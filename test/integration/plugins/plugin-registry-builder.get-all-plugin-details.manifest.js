@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-const { makeGetAllPluginDetailsScenario } = require('../../shared/case-factories');
+const { makeGetAllPluginDetailsScenario } = require('./plugin-registry-builder.factory');
 
 module.exports = [
   {

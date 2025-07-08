@@ -1,17 +1,7 @@
-// test/shared/case-factories.js
+// test/integration/plugins/plugin-registry-builder.factory.js
 const path = require('path');
 const sinon = require('sinon');
 
-/**
- * Creates a test case for the _getPluginRegistrationsFromCmManifest method.
- *
- * @param {object} config - The configuration for the test scenario.
- * @param {Array} config.enabled_plugins - The list of plugins to be parsed from the manifest.
- * @param {object} [config.configPathsExist={}] - A map of plugin config paths to their existence status (true/false).
- * @param {object} config.expectResult - The expected registration object.
- * @param {Array<string|RegExp>} config.expectLogs - An array of strings or regexes to match against captured log messages.
- * @returns {{setup: Function, assert: Function}} An object containing the setup and assert functions for a test case.
- */
 function makeCmManifestScenario({ enabled_plugins, configPathsExist = {}, expectResult, expectLogs }) {
   return {
     setup: async ({ mockDependencies }) => {
@@ -28,13 +18,11 @@ function makeCmManifestScenario({ enabled_plugins, configPathsExist = {}, expect
       mockDependencies.yaml.load.withArgs('').returns(fakeParsedData);
     },
     assert: async (result, mocks, constants, expect, logs) => {
-      // FIX: The assertion now correctly checks the structure of the result,
-      // accounting for the properties added by the application logic.
       const finalResult = {};
       for(const key in result) {
         finalResult[key] = {
           configPath: result[key].configPath,
-          sourceType: result[key].sourceType.split(' ')[0], // Compare only the base source type
+          sourceType: result[key].sourceType.split(' ')[0],
           definedIn: result[key].definedIn,
         };
       }
@@ -52,19 +40,6 @@ function makeCmManifestScenario({ enabled_plugins, configPathsExist = {}, expect
   };
 }
 
-/**
- * Creates a test case for the _getPluginRegistrationsFromFile method.
- *
- * @param {object} config - The configuration for the test scenario.
- * @param {string} config.mainConfigPath - The path to the main configuration file being tested.
- * @param {object|null} config.yamlContent - The YAML content to be returned by the loader. If null, the file is considered non-existent.
- * @param {Error} [config.yamlError] - An error to be thrown by the YAML loader.
- * @param {object} [config.resolvedPaths={}] - A map of raw plugin paths to their resolved absolute paths.
- * @param {object} [config.fileSystem={}] - A map defining the state of the filesystem (path -> {isFile, isDir, exists, readdir}).
- * @param {object} config.expectResult - The expected final registration object.
- * @param {Array<string|RegExp>} [config.expectLogs=[]] - An array of strings or regexes to match against captured log messages.
- * @returns {{setup: Function, assert: Function}} An object containing the setup and assert functions for a test case.
- */
 function makeFileRegistrationScenario({ mainConfigPath, yamlContent, yamlError, resolvedPaths = {}, fileSystem = {}, expectResult, expectLogs = [] }) {
   return {
     setup: async ({ mockDependencies }) => {
@@ -111,14 +86,6 @@ function makeFileRegistrationScenario({ mainConfigPath, yamlContent, yamlError, 
   };
 }
 
-/**
- * Creates a test case for the buildRegistry method.
- *
- * @param {object} config - The configuration for the test scenario.
- * @param {object} [config.registryStubs={}] - Stubs for the internal registry methods.
- * @param {Function} config.assertion - The final assertion function to run.
- * @returns {{setup: Function, assert: Function}}
- */
 function makeBuildRegistryScenario({ registryStubs = {}, assertion }) {
   return {
     setup: async ({ builderInstance }) => {
@@ -138,22 +105,11 @@ function makeBuildRegistryScenario({ registryStubs = {}, assertion }) {
   };
 }
 
-/**
- * Creates a test case for the getAllPluginDetails method.
- *
- * @param {object} config - The configuration for the test scenario.
- * @param {object} config.buildRegistryResult - The mocked result from buildRegistry.
- * @param {Array} [config.cmAvailablePlugins=[]] - Mocked list of available CM plugins.
- * @param {Array} [config.cmEnabledPlugins=[]] - Mocked list of enabled CM plugins.
- * @param {Function} [config.setup=async () => {}] - An optional, test-specific setup function.
- * @param {Function} config.assertion - The final assertion function.
- * @returns {{constructorArgs: Array, setup: Function, assert: Function}}
- */
 function makeGetAllPluginDetailsScenario({ buildRegistryResult, cmAvailablePlugins = [], cmEnabledPlugins = [], setup = async () => {}, assertion }) {
   return {
     constructorArgs: [
       '/fake/project', null, null, false, false, null,
-      { // mockCollectionsManager
+      {
         listAvailablePlugins: sinon.stub().resolves(cmAvailablePlugins),
         listCollections: sinon.stub().withArgs('enabled').resolves(cmEnabledPlugins)
       },
@@ -162,7 +118,6 @@ function makeGetAllPluginDetailsScenario({ buildRegistryResult, cmAvailablePlugi
       sinon.stub(mocks.builderInstance, 'buildRegistry').resolves(buildRegistryResult);
       mocks.mockDependencies.fs.existsSync.returns(true);
       mocks.mockDependencies.fs.statSync.returns({ isFile: () => true });
-      // Allow specific mocks to be set by the test case itself
       await setup(mocks);
     },
     assert: async (result, mocks, constants, expect, logs) => {
@@ -171,22 +126,14 @@ function makeGetAllPluginDetailsScenario({ buildRegistryResult, cmAvailablePlugi
   };
 }
 
-/**
- * Creates a test case for cache invalidation scenarios in buildRegistry.
- *
- * @param {object} config - The configuration for the test scenario.
- * @param {string} config.description - The test description.
- * @param {Array} config.changedConstructorArgs - The constructor args for the second instance.
- * @returns {object} A complete test case object.
- */
 function makeCacheInvalidationScenario({ description, changedConstructorArgs }) {
   return {
     description,
     methodName: 'buildRegistry',
-    constructorArgs: ['/fake/project', null, null, false, false, 'initial', null], // Baseline
+    constructorArgs: ['/fake/project', null, null, false, false, 'initial', null],
     setup: async ({ builderInstance, mockDependencies }) => {
       builderInstance.buildRegistrySpy = sinon.spy(builderInstance, '_registerBundledPlugins');
-      await builderInstance.buildRegistry(); // First call
+      await builderInstance.buildRegistry();
       const BuilderClass = builderInstance.constructor;
       builderInstance.newInstance = new BuilderClass(...changedConstructorArgs, mockDependencies);
       builderInstance.newSpy = sinon.spy(builderInstance.newInstance, '_registerBundledPlugins');
@@ -194,22 +141,11 @@ function makeCacheInvalidationScenario({ description, changedConstructorArgs }) 
     assert: async (result, { builderInstance }, constants, expect) => {
       await builderInstance.newInstance.buildRegistry();
       expect(builderInstance.buildRegistrySpy.callCount).to.equal(1);
-      expect(builderInstance.newSpy.callCount).to.equal(1); // Should have been called again
+      expect(builderInstance.newSpy.callCount).to.equal(1);
     }
   };
 }
 
-/**
- * Creates a test case for the _resolveAlias method.
- *
- * @param {object} config - The configuration for the test scenario.
- * @param {Array} config.methodArgs - The arguments to pass to the method.
- * @param {object} [config.pathMocks={}] - Mocks for the `path` module.
- * @param {string|null} config.expectResult - The expected path string or null.
- * @param {Array<string|RegExp>} [config.expectLogs=[]] - Expected log messages.
- * @param {boolean} [config.expectHomedirCall=false] - Whether to assert that os.homedir was called.
- * @returns {{setup: Function, assert: Function}}
- */
 function makeResolveAliasScenario({ methodArgs, pathMocks = {}, expectResult, expectLogs = [], expectHomedirCall = false }) {
   return {
     methodArgs,
@@ -231,22 +167,11 @@ function makeResolveAliasScenario({ methodArgs, pathMocks = {}, expectResult, ex
   };
 }
 
-/**
- * Creates a test case for the _resolvePluginConfigPath method.
- *
- * @param {object} config - The configuration for the test scenario.
- * @param {Array} config.methodArgs - The arguments to pass to the method.
- * @param {object} [config.fileSystem={}] - A map defining the state of the filesystem.
- * @param {string|null} config.expectResult - The expected path string or null.
- * @param {boolean} [config.expectHomedirCall=false] - Whether os.homedir should be called.
- * @returns {{setup: Function, assert: Function}}
- */
 function makeResolveConfigPathScenario({ methodArgs, fileSystem = {}, expectResult, expectHomedirCall = false }) {
   return {
     methodArgs,
     setup: async ({ mockDependencies }, { FAKE_HOME_DIR }) => {
       for (const [filePath, stat] of Object.entries(fileSystem)) {
-        // Ensure the path join/resolve works as expected for tilde expansion
         const resolvedPath = filePath.startsWith('~')
           ? path.join(FAKE_HOME_DIR, filePath.slice(1))
           : filePath;

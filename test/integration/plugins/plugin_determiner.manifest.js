@@ -1,88 +1,8 @@
 // test/integration/plugins/plugin_determiner.manifest.js
 const path = require('path');
-
-// --- Test Helper Functions (simplified to focus on essential mock setup) ---
-
-/**
- * Sets up basic file system mocks for a markdown file and its local config file.
- * @param {object} mocks - The Sinon mocks object (mockFsPromises, mockFsSync, mockMarkdownUtils, mockYaml).
- * @param {object} constants - Common test constants (DUMMY_MARKDOWN_FILE_PATH, etc.).
- * @param {object} fileContents - Object with markdown: string, localConfig: string.
- * @param {object} parsedContents - Object with fmData: object, parsedLocalConfig: object.
- */
-function setupTestFiles(mocks, constants, fileContents = {}, parsedContents = {}) {
-  const { mockFsPromises, mockFsSync, mockMarkdownUtils, mockYaml } = mocks;
-  const { DUMMY_MARKDOWN_FILE_PATH, DUMMY_LOCAL_CONFIG_FILE_PATH } = constants;
-
-  // Markdown file setup
-  if (fileContents.markdown !== undefined) { // Check for undefined to allow explicit null/empty string for testing
-    mockFsSync.existsSync.withArgs(DUMMY_MARKDOWN_FILE_PATH).returns(true);
-    mockFsPromises.readFile.withArgs(DUMMY_MARKDOWN_FILE_PATH, 'utf8').resolves(fileContents.markdown);
-    if (parsedContents.fmData !== undefined) {
-      mockMarkdownUtils.extractFrontMatter.withArgs(fileContents.markdown).returns({
-        data: parsedContents.fmData,
-        content: parsedContents.markdownContent || ''
-      });
-    }
-  } else {
-    mockFsSync.existsSync.withArgs(DUMMY_MARKDOWN_FILE_PATH).returns(false);
-  }
-
-  // Local config file setup
-  if (fileContents.localConfig !== undefined) { // Check for undefined to allow explicit null/empty string for testing
-    mockFsSync.existsSync.withArgs(DUMMY_LOCAL_CONFIG_FILE_PATH).returns(true);
-    mockFsPromises.readFile.withArgs(DUMMY_LOCAL_CONFIG_FILE_PATH, 'utf8').resolves(fileContents.localConfig);
-    if (parsedContents.parsedLocalConfig !== undefined) {
-      mockYaml.load.returns(parsedContents.parsedLocalConfig); // Use returns() for simpler mocking, as yaml.load typically only called once per file
-    }
-  } else {
-    mockFsSync.existsSync.withArgs(DUMMY_LOCAL_CONFIG_FILE_PATH).returns(false);
-  }
-}
-
-/**
- * Asserts common file system and parsing interactions.
- *
- * @param {object} mocks - The Sinon mocks object.
- * @param {object} constants - Common test constants.
- * @param {object} args - The args object passed to determinePluginToUse.
- * @param {boolean} markdownFileExpectedToBeProcessed - True if markdown file content was valid and processed.
- * @param {boolean} localConfigFileExpectedToBeProcessed - True if local config file content was valid and processed.
- */
-function assertCommonFileAndParsingInteractions(mocks, constants, args, markdownFileExpectedToBeProcessed, localConfigFileExpectedToBeProcessed) {
-  const { mockFsSync, mockFsPromises, mockMarkdownUtils, mockYaml } = mocks;
-  const { DUMMY_MARKDOWN_FILE_PATH, DUMMY_LOCAL_CONFIG_FILE_PATH } = constants;
-
-  if (args.markdownFile) {
-    expect(mockFsSync.existsSync.calledWith(DUMMY_MARKDOWN_FILE_PATH)).to.be.true;
-    expect(mockFsSync.existsSync.calledWith(DUMMY_LOCAL_CONFIG_FILE_PATH)).to.be.true;
-
-    if (markdownFileExpectedToBeProcessed) {
-      expect(mockFsPromises.readFile.calledWith(DUMMY_MARKDOWN_FILE_PATH, 'utf8')).to.be.true;
-      expect(mockMarkdownUtils.extractFrontMatter.calledOnce).to.be.true;
-    } else {
-      expect(mockFsPromises.readFile.calledWith(DUMMY_MARKDOWN_FILE_PATH, 'utf8')).to.be.false;
-      expect(mockMarkdownUtils.extractFrontMatter.called).to.be.false;
-    }
-
-    if (localConfigFileExpectedToBeProcessed) {
-      expect(mockFsPromises.readFile.calledWith(DUMMY_LOCAL_CONFIG_FILE_PATH, 'utf8')).to.be.true;
-      expect(mockYaml.load.calledOnce).to.be.true;
-    } else {
-      expect(mockFsPromises.readFile.calledWith(DUMMY_LOCAL_CONFIG_FILE_PATH, 'utf8')).to.be.false;
-      expect(mockYaml.load.called).to.be.false;
-    }
-  } else {
-    expect(mockFsSync.existsSync.called).to.be.false;
-    expect(mockFsPromises.readFile.called).to.be.false;
-    expect(mockMarkdownUtils.extractFrontMatter.called).to.be.false;
-    expect(mockYaml.load.called).to.be.false;
-  }
-}
-
+const { setupTestFiles, assertCommonFileAndParsingInteractions } = require('./plugin_determiner.factory');
 
 module.exports = [
-  // Scenario 1.3.1: Should prioritize CLI plugin over front matter and local config.
   {
     describe: '1.3.1: Should prioritize CLI plugin over front matter and local config',
     args: {
@@ -125,8 +45,6 @@ md_to_pdf_plugin: ${fmPluginName}
       expect(logs[1].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.2: Prioritize front matter plugin when no CLI arg is present.
   {
     describe: '1.3.2: Should prioritize front matter plugin over local config when no CLI arg',
     args: {
@@ -172,8 +90,6 @@ md_to_pdf_plugin: ${fmPluginName}
       expect(logs[1].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.3: Prioritize local config plugin when no CLI or front matter plugin is present.
   {
     describe: '1.3.3: Should prioritize local config plugin when no CLI or front matter plugin is present',
     args: {
@@ -208,8 +124,6 @@ md_to_pdf_plugin: ${fmPluginName}
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.4: Should return the default plugin when no plugin is specified anywhere.
   {
     describe: '1.3.4: Should return the default plugin when no plugin is specified anywhere',
     args: {
@@ -245,8 +159,6 @@ some_other_key: some_value
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.5: Should extract localConfigOverrides from local config file, excluding the plugin field.
   {
     describe: '1.3.5: Should extract localConfigOverrides from local config file, excluding the plugin field',
     args: {
@@ -288,8 +200,6 @@ some_other_fm_key: fm_value
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.6: Should default to defaultPluginName when markdown file does not exist.
   {
     describe: '1.3.6: Should default to defaultPluginName when markdown file does not exist',
     args: {
@@ -325,8 +235,6 @@ some_other_fm_key: fm_value
       expect(logs[1].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.7: Should handle malformed front matter gracefully and default.
   {
     describe: '1.3.7: Should handle malformed front matter gracefully and default to defaultPluginName',
     args: {
@@ -376,8 +284,6 @@ some_other_fm_key: fm_value
       expect(logs[1].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.8: Should handle malformed local config gracefully and default.
   {
     describe: '1.3.8: Should handle malformed local config gracefully and default to defaultPluginName',
     args: {
@@ -427,8 +333,6 @@ some_other_key: some_value
       expect(logs[1].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.9: Self-activate a plugin name from front matter to a path within its subdirectory.
   {
     describe: '1.3.9: Should self-activate a plugin name from front matter to a path within its subdirectory',
     args: {
@@ -475,8 +379,6 @@ md_to_pdf_plugin: ${pluginName}
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.10: Self-activate a plugin name from front matter to a path directly in the markdown directory.
   {
     describe: '1.3.10: Should self-activate a plugin name from front matter to a path directly in the markdown directory',
     args: {
@@ -527,8 +429,6 @@ md_to_pdf_plugin: ${pluginName}
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.11: Retain original plugin name from front matter if self-activation paths are not found.
   {
     describe: '1.3.11: Should retain original plugin name from front matter if self-activation paths are not found',
     args: {
@@ -576,8 +476,6 @@ md_to_pdf_plugin: ${pluginName}
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.12: Resolve a relative pluginSpec from front matter against the markdown file path.
   {
     describe: '1.3.12: Should resolve a relative pluginSpec from front matter against the markdown file path',
     args: {
@@ -616,8 +514,6 @@ md_to_pdf_plugin: ${relativePluginPath}
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.13: Should resolve a relative pluginSpec from CLI against process.cwd() when markdownFile is not present.
   {
     describe: '1.3.13: Should resolve a relative pluginSpec from CLI against process.cwd() when markdownFile is not present',
     args: {
@@ -645,13 +541,10 @@ md_to_pdf_plugin: ${relativePluginPath}
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // Scenario 1.3.14: Test the logging mechanism correctly reports the determination source and avoids redundant log messages when an override occurs.
-  // 1.3.14.1: Should log both override message and final determination when CLI overrides front matter.
   {
     describe: '1.3.14.1: Should log both override message and final determination when CLI overrides front matter',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
       plugin: 'cli-test-plugin'
     },
     defaultPluginName: 'default',
@@ -690,8 +583,6 @@ md_to_pdf_plugin: ${fmPluginName}
       expect(logs[1].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },
-
-  // 1.3.14.2: Should not log final determination if isLazyLoad and determinationSource is default (redundant).
   {
     describe: '1.3.14.2: Should not log final determination if isLazyLoad and determinationSource is default (redundant)',
     args: {
@@ -713,8 +604,6 @@ md_to_pdf_plugin: ${fmPluginName}
       assertCommonFileAndParsingInteractions(mocks, constants, args, false, false);
     },
   },
-
-  // 1.3.14.3: Should log final determination once when not lazy load and not default.
   {
     describe: '1.3.14.3: Should log final determination once when not lazy load and not default',
     args: {

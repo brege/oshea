@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
-const { makeResolveAliasScenario } = require('../../shared/case-factories');
+const { makeResolveAliasScenario } = require('./plugin-registry-builder.factory');
 const path = require('path');
 
 module.exports = [

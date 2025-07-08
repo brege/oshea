@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-const { makeResolveConfigPathScenario } = require('../../shared/case-factories');
+const { makeResolveConfigPathScenario } = require('./plugin-registry-builder.factory');
 const path = require('path');
 
 module.exports = [

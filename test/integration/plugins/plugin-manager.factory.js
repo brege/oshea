@@ -38,8 +38,8 @@ function makePluginManagerScenario({
     const mockPluginFilePath = path.join(tempDir, mockPluginFileName);
 
     switch (pluginType) {
-      case 'class':
-        content = `
+    case 'class':
+      content = `
           const { defaultHandlerPath, markdownUtilsPath, pdfGeneratorPath } = require('@paths');
           class MockClassPlugin {
             constructor(coreUtils) {
@@ -54,38 +54,38 @@ function makePluginManagerScenario({
           }
           module.exports = MockClassPlugin;
         `;
-        break;
-      case 'object':
-        content = `
+      break;
+    case 'object':
+      content = `
           module.exports = {
             async generate(data, pluginSpecificConfig, mainConfig, outputDir, outputFilenameOpt, pluginBasePath) {
               return ${JSON.stringify(expectedResult || { success: true })};
             }
           };
         `;
-        break;
-      case 'throwing':
-        content = `
+      break;
+    case 'throwing':
+      content = `
           class MockThrowingPlugin {
             async generate() { throw new Error('Simulated error from plugin'); }
           }
           module.exports = MockThrowingPlugin;
         `;
-        break;
-      case 'function':
-        content = `module.exports = function() {};`;
-        break;
-      case 'object-no-generate':
-        content = `module.exports = { someProp: 'value' };`;
-        break;
-      case 'class-no-generate':
-        content = `class MockClassNoGenerate { constructor() {} } module.exports = MockClassNoGenerate;`;
-        break;
+      break;
+    case 'function':
+      content = 'module.exports = function() {};';
+      break;
+    case 'object-no-generate':
+      content = 'module.exports = { someProp: \'value\' };';
+      break;
+    case 'class-no-generate':
+      content = 'class MockClassNoGenerate { constructor() {} } module.exports = MockClassNoGenerate;';
+      break;
     }
 
     if (content) {
-        fs.writeFileSync(mockPluginFilePath, content.trim());
-        mocks.handlerScriptPath = mockPluginFilePath;
+      fs.writeFileSync(mockPluginFilePath, content.trim());
+      mocks.handlerScriptPath = mockPluginFilePath;
     }
   };
 
@@ -108,15 +108,15 @@ function makePluginManagerScenario({
     }
 
     if (expectedResult) {
-        if (expectedResult.coreUtilsReceived) {
-            expect(result.success).to.be.true;
-            expect(result.coreUtilsReceived).to.be.an('object');
-            expect(result.coreUtilsReceived).to.have.keys(['DefaultHandler', 'markdownUtils', 'pdfGenerator']);
-        } else {
-            // Remove the coreUtilsReceived from the actual result before comparison if it wasn't expected
-            delete result.coreUtilsReceived;
-            expect(result).to.deep.equal(expectedResult);
-        }
+      if (expectedResult.coreUtilsReceived) {
+        expect(result.success).to.be.true;
+        expect(result.coreUtilsReceived).to.be.an('object');
+        expect(result.coreUtilsReceived).to.have.keys(['DefaultHandler', 'markdownUtils', 'pdfGenerator']);
+      } else {
+        // Remove the coreUtilsReceived from the actual result before comparison if it wasn't expected
+        delete result.coreUtilsReceived;
+        expect(result).to.deep.equal(expectedResult);
+      }
     }
   };
 

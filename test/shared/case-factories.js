@@ -269,7 +269,6 @@ function makeResolveConfigPathScenario({ methodArgs, fileSystem = {}, expectResu
   };
 }
 
-
 module.exports = {
   makeCmManifestScenario,
   makeFileRegistrationScenario,
@@ -277,5 +276,5 @@ module.exports = {
   makeGetAllPluginDetailsScenario,
   makeCacheInvalidationScenario,
   makeResolveAliasScenario,
-  makeResolveConfigPathScenario
+  makeResolveConfigPathScenario,
 };

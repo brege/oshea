@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { markdownUtilsPath } = require('@paths');
+const { markdownUtilsPath, logger } = require('@paths'); // Added logger import
 const { loadConfig: loadYamlConfig } = require(markdownUtilsPath);
 const yaml = require('js-yaml');
 
@@ -60,7 +60,7 @@ class PluginRegistryBuilder {
     const bundledPluginsPath = path.join(this.projectRoot, 'plugins');
 
     if (!fs.existsSync(bundledPluginsPath)) {
-      console.warn('WARN (PluginRegistryBuilder): Bundled plugins directory not found at `plugins/`.');
+      logger.warn('Bundled plugins directory not found at `plugins/`.', { module: 'plugins/PluginRegistryBuilder' });
       return registrations;
     }
 
@@ -91,7 +91,7 @@ class PluginRegistryBuilder {
     }
     if (!path.isAbsolute(resolvedAliasPath)) {
       if (!basePathDefiningAlias) {
-        console.warn(`WARN (PluginRegistryBuilder): Cannot resolve relative alias target '${aliasValue}' for alias '${alias}' because the base path of the config file defining it is unknown.`);
+        logger.warn(`Cannot resolve relative alias target '${aliasValue}' for alias '${alias}' because the base path of the config file defining it is unknown.`, { module: 'plugins/PluginRegistryBuilder', alias, aliasValue, basePathDefiningAlias });
         return null;
       }
       resolvedAliasPath = path.resolve(basePathDefiningAlias, resolvedAliasPath);
@@ -112,7 +112,7 @@ class PluginRegistryBuilder {
       if (resolvedAliasBasePath) {
         resolvedPath = path.join(resolvedAliasBasePath, pathWithinAlias);
       } else {
-        console.warn(`WARN (PluginRegistryBuilder): Alias '${aliasName}' used in plugin path '${rawPath}' could not be resolved to a base path. Skipping registration.`);
+        logger.warn(`Alias '${aliasName}' used in plugin path '${rawPath}' could not be resolved to a base path. Skipping registration.`, { module: 'plugins/PluginRegistryBuilder', aliasName, rawPath, resolvedAliasBasePath });
         return null;
       }
     }
@@ -122,7 +122,7 @@ class PluginRegistryBuilder {
 
     if (!path.isAbsolute(resolvedPath)) {
       if (!basePathForMainConfig) {
-        console.warn(`WARN (PluginRegistryBuilder): Cannot resolve relative plugin config path '${rawPath}' because its base path (basePathForMainConfig) could not be determined. Skipping registration for this entry.`);
+        logger.warn(`Cannot resolve relative plugin config path '${rawPath}' because its base path (basePathForMainConfig) could not be determined. Skipping registration for this entry.`, { module: 'plugins/PluginRegistryBuilder', rawPath, basePathForMainConfig });
         return null;
       }
       resolvedPath = path.resolve(basePathForMainConfig, resolvedPath);
@@ -141,17 +141,17 @@ class PluginRegistryBuilder {
         const alternativeConfig = filesInDir.find(f => f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX));
         if (alternativeConfig) {
           const altPath = path.join(resolvedPath, alternativeConfig);
-          console.log(`INFO (PluginRegistryBuilder): Using '${alternativeConfig}' as config for plugin directory specified by '${rawPath}' (resolved to '${resolvedPath}').`);
+          logger.info(`Using '${alternativeConfig}' as config for plugin directory specified by '${rawPath}' (resolved to '${resolvedPath}').`, { module: 'plugins/PluginRegistryBuilder', alternativeConfig, rawPath, resolvedPath });
           return altPath;
         }
-        console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to directory '${resolvedPath}') does not contain a suitable *.config.yaml file. Skipping registration.`);
+        logger.warn(`Plugin configuration path '${rawPath}' (resolved to directory '${resolvedPath}') does not contain a suitable *.config.yaml file. Skipping registration.`, { module: 'plugins/PluginRegistryBuilder', rawPath, resolvedPath });
         return null;
       } else {
-        console.warn(`WARN (PluginRegistryBuilder): Plugin configuration path '${rawPath}' (resolved to '${resolvedPath}') does not exist. Skipping registration for this entry.`);
+        logger.warn(`Plugin configuration path '${rawPath}' (resolved to '${resolvedPath}') does not exist. Skipping registration for this entry.`, { module: 'plugins/PluginRegistryBuilder', rawPath, resolvedPath });
         return null;
       }
     } catch (e) {
-      console.warn(`WARN (PluginRegistryBuilder): Error accessing resolved plugin configuration path '${resolvedPath}' for raw path '${rawPath}': ${e.message}. Skipping registration for this entry.`);
+      logger.warn(`Error accessing resolved plugin configuration path '${resolvedPath}' for raw path '${rawPath}': ${e.message}. Skipping registration for this entry.`, { module: 'plugins/PluginRegistryBuilder', rawPath, resolvedPath, error: e });
       return null;
     }
   }
@@ -189,7 +189,7 @@ class PluginRegistryBuilder {
       }
       return registrations;
     } catch (error) {
-      console.error(`ERROR (PluginRegistryBuilder) reading plugin registrations from '${mainConfigFilePath}': ${error.message}`);
+      logger.error(`Error reading plugin registrations from '${mainConfigFilePath}': ${error.message}`, { module: 'plugins/PluginRegistryBuilder', mainConfigFilePath, error });
       return {};
     }
   }
@@ -218,15 +218,15 @@ class PluginRegistryBuilder {
                 cmStatus: 'Enabled (CM)'
               };
             } else {
-              console.warn(`WARN (PluginRegistryBuilder): Config path '${pluginEntry.config_path}' for CM-enabled plugin '${pluginEntry.invoke_name}' does not exist. Skipping.`);
+              logger.warn(`Config path '${pluginEntry.config_path}' for CM-enabled plugin '${pluginEntry.invoke_name}' does not exist. Skipping.`, { module: 'plugins/PluginRegistryBuilder', pluginEntry });
             }
           } else {
-            console.warn(`WARN (PluginRegistryBuilder): Invalid entry in CM manifest: ${JSON.stringify(pluginEntry)}. Skipping.`);
+            logger.warn(`Invalid entry in CM manifest: ${JSON.stringify(pluginEntry)}. Skipping.`, { module: 'plugins/PluginRegistryBuilder', pluginEntry });
           }
         }
       }
     } catch (error) {
-      console.error(`ERROR (PluginRegistryBuilder) reading or parsing CM manifest '${cmEnabledManifestPath}': ${error.message}`);
+      logger.error(`Error reading or parsing CM manifest '${cmEnabledManifestPath}': ${error.message}`, { module: 'plugins/PluginRegistryBuilder', cmEnabledManifestPath, error });
     }
     return registrations;
   }

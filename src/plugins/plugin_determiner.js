@@ -1,6 +1,7 @@
 // src/plugins/plugin_determiner.js
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
+const { logger } = require('@paths'); // Import the centralized logger
 
 /**
  * Determines the plugin to use based on CLI arguments, front matter, local config, or default.
@@ -38,7 +39,7 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
           fmPlugin = frontMatter.md_to_pdf_plugin;
         }
       } catch (error) {
-        console.warn(`WARN (plugin_determiner): Could not read or parse front matter from ${args.markdownFile}: ${error.message}`);
+        logger.warn(`Could not read or parse front matter from ${args.markdownFile}: ${error.message}`, { module: 'plugin_determiner' });
       }
 
       const localConfigPath = path.resolve(path.dirname(markdownFilePathAbsolute), `${path.basename(markdownFilePathAbsolute, path.extname(markdownFilePathAbsolute))}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
@@ -58,11 +59,11 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
             }
           }
         } catch (error) {
-          console.warn(`WARN (plugin_determiner): Could not read or parse local config file ${localConfigPath}: ${error.message}`);
+          logger.warn(`Could not read or parse local config file ${localConfigPath}: ${error.message}`, { module: 'plugin_determiner' });
         }
       }
     } else {
-      console.warn(`WARN (plugin_determiner): Markdown file not found at ${markdownFilePathAbsolute}. Cannot check front matter or local config.`);
+      logger.warn(`Markdown file not found at ${markdownFilePathAbsolute}. Cannot check front matter or local config.`, { module: 'plugin_determiner' });
     }
   }
 
@@ -71,15 +72,15 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
     pluginSpec = cliPluginArg;
     determinationSource = 'CLI option';
     if (fmPlugin && cliPluginArg !== fmPlugin) {
-      console.log(`INFO: Plugin '${cliPluginArg}' specified via CLI, overriding front matter plugin '${fmPlugin}'.`);
+      logger.info(`Plugin '${cliPluginArg}' specified via CLI, overriding front matter plugin '${fmPlugin}'.`, { module: 'plugin_determiner' });
     } else if (!fmPlugin && localCfgPlugin && cliPluginArg !== localCfgPlugin) {
-      console.log(`INFO: Plugin '${cliPluginArg}' specified via CLI, overriding local config plugin '${localCfgPlugin}'.`);
+      logger.info(`Plugin '${cliPluginArg}' specified via CLI, overriding local config plugin '${localCfgPlugin}'.`, { module: 'plugin_determiner' });
     }
   } else if (fmPlugin) {
     pluginSpec = fmPlugin;
     determinationSource = `front matter in '${path.basename(args.markdownFile)}'`;
     if (localCfgPlugin && fmPlugin !== localCfgPlugin) {
-      console.log(`INFO: Plugin '${fmPlugin}' from front matter, overriding local config plugin '${localCfgPlugin}'.`);
+      logger.info(`Plugin '${fmPlugin}' from front matter, overriding local config plugin '${localCfgPlugin}'.`, { module: 'plugin_determiner' });
     }
   } else if (localCfgPlugin) {
     pluginSpec = localCfgPlugin;
@@ -120,21 +121,17 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
   }
 
   // This line is not used.
-  let logMessage = `INFO: Using plugin '${pluginSpec}' (determined via ${determinationSource})`;
+  let logMessage = `Using plugin '${pluginSpec}' (determined via ${determinationSource})`; // Removed "INFO:" prefix as logger handles levels
 
   // Only log the final determination if it's not a redundant message following an override log.
+  // The 'console.lastLog' hack is removed as logging responsibility is now with the centralized logger.
   if (!args.isLazyLoad || determinationSource !== 'default' || (cliPluginArg && fmPlugin && cliPluginArg !== fmPlugin)) {
-    if (logMessage !== console.lastLog) {
-      console.log(logMessage);
-    }
+    logger.info(logMessage, { module: 'plugin_determiner' });
   }
-  console.lastLog = logMessage;
 
   return { pluginSpec, source: determinationSource, localConfigOverrides };
 }
 
-// Temp hack to avoid duplicate logs, ideally manage state better or make logs more distinct
-// This remains outside the function as it's a global console state
-console.lastLog = '';
+// console.lastLog hack removed.
 
 module.exports = { determinePluginToUse };

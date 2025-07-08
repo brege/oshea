@@ -4,6 +4,8 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 
+const { logs, testLogger, clearLogs } = require('../../shared/capture-logs'); // Import testLogger and logs array
+
 // Import the manifest containing test cases
 const testManifest = require('./plugin_determiner.manifest');
 
@@ -16,8 +18,9 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
   let mockMarkdownUtils;
   let mockProcessCwd; // This will now refer to the stubbed process.cwd
   let dependencies; // This object will be passed to determinePluginToUse
-  let consoleLogStub;
-  let consoleWarnStub;
+
+  // Store original `@paths` module to restore after tests
+  let originalPathsModule;
 
   const commonTestConstants = {
     DUMMY_MARKDOWN_FILE_PATH: '/test/path/to/my-document.md',
@@ -26,10 +29,27 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
   };
 
   beforeEach(function() {
-    // Clear module cache for plugin_determiner *before* stubbing globals.
-    delete require.cache[require.resolve('../../../src/plugins/plugin_determiner')];
+    // Clear the captured logs before each test
+    clearLogs();
 
-    // Setup all mocks *before* re-requiring the module under test
+    // Capture the original @paths module to restore it later
+    originalPathsModule = require.cache[require.resolve('@paths')];
+
+    // Delete the module cache for `plugin_determiner` and `@paths` to ensure fresh imports
+    delete require.cache[require.resolve('../../../src/plugins/plugin_determiner')];
+    delete require.cache[require.resolve('@paths')];
+
+
+    // Manually modify the `@paths` module export to inject `testLogger`
+    // This must happen BEFORE `plugin_determiner` is required, as it uses `@paths`.
+    require.cache[require.resolve('@paths')] = {
+      exports: {
+        ...require(originalPathsModule.filename), // Copy existing exports
+        logger: testLogger // Override the logger export
+      }
+    };
+
+    // Setup all mocks
     mockFsPromises = { readFile: sinon.stub(), };
     mockFsSync = { existsSync: sinon.stub().returns(false), statSync: sinon.stub(), };
 
@@ -54,18 +74,15 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
       yaml: mockYaml, markdownUtils: mockMarkdownUtils, processCwd: mockProcessCwd,
     };
 
-    // Re-require determinePluginToUse *after* mocks (especially global ones) are set up.
+    // Re-require determinePluginToUse *after* mocks (especially global ones and @paths) are set up.
     determinePluginToUse = require(pluginDeterminerPath).determinePluginToUse;
-
-    // Setup console stubs after all other setup.
-    consoleLogStub = sinon.stub(console, 'log');
-    consoleWarnStub = sinon.stub(console, 'warn');
-    console.lastLog = '';
   });
 
   afterEach(function() {
-    consoleLogStub.restore();
-    consoleWarnStub.restore();
+    // Restore the original @paths module in the cache
+    if (originalPathsModule) {
+      require.cache[require.resolve('@paths')] = originalPathsModule;
+    }
     mockProcessCwd.restore(); // Restore global process.cwd stub
     delete process.env.DEBUG_PLUGIN_DETERMINER; // Clean up environment variable
   });
@@ -76,7 +93,6 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
     it_(`${testCase.describe}`, async function() {
       const currentMocks = {
         mockFsPromises, mockFsSync, mockPath, mockYaml, mockMarkdownUtils, mockProcessCwd,
-        consoleLogStub, consoleWarnStub,
       };
 
       if (testCase.setup) {
@@ -85,7 +101,8 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
 
       const result = await determinePluginToUse(testCase.args, dependencies, testCase.defaultPluginName || 'default');
 
-      await testCase.assert(result, testCase.args, currentMocks, commonTestConstants, expect);
+      // Pass the captured logs array to the assert function
+      await testCase.assert(result, testCase.args, currentMocks, commonTestConstants, expect, logs);
     });
   });
 });

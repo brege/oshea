@@ -241,7 +241,7 @@ some_other_key: some_value
       // Assertions for logging
       expect(logs).to.have.lengthOf(1);
       expect(logs[0].level).to.equal('info');
-      expect(logs[0].msg).to.match(new RegExp(`Using plugin 'default' \\(determined via default\\)`));
+      expect(logs[0].msg).to.match(new RegExp('Using plugin \'default\' \\(determined via default\\)'));
       expect(logs[0].meta).to.deep.equal({ module: 'plugin_determiner' });
     },
   },

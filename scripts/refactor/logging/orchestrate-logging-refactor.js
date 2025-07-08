@@ -93,12 +93,12 @@ for (const species in mapping) {
 }
 
 if (write) {
-  console.log(`\n[WRITE MODE]`);
+  console.log('\n[WRITE MODE]');
   console.log(`Files changed: ${filesChanged.size}`);
   console.log(`Total replacements: ${totalReplacements}`);
   filesChanged.forEach(f => console.log('  ', f));
 } else {
-  console.log(`\n[DRY RUN]`);
+  console.log('\n[DRY RUN]');
   console.log(`Files that would change: ${filesChanged.size}`);
   console.log(`Total replacements: ${totalReplacements}`);
   filesChanged.forEach(f => console.log('  ', f));
@@ -111,11 +111,11 @@ const changedFilesArr = Array.from(filesChanged);
 const { filesChanged: importChanged } = injectLoggerImport(changedFilesArr, write);
 
 if (write) {
-  console.log(`\n[WRITE MODE]`);
+  console.log('\n[WRITE MODE]');
   console.log(`Files changed (import): ${importChanged.length}`);
   importChanged.forEach(f => console.log('  ', f));
 } else {
-  console.log(`\n[DRY RUN]`);
+  console.log('\n[DRY RUN]');
   console.log(`Files that would change (import): ${importChanged.length}`);
   importChanged.forEach(f => console.log('  ', f));
   console.log('\nAdd --write to perform import injection.');

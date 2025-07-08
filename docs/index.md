@@ -153,5 +153,6 @@ at the project root.
 *This list is automatically updated by [`scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js)*
 
 <!-- uncategorized-start -->
+- [roadmap-v1.0.md](roadmap-v1.0.md)
 <!-- uncategorized-end -->
 

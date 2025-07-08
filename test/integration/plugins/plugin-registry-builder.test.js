@@ -15,13 +15,13 @@ const buildRegistryManifest = require('./plugin-registry-builder.build-registry.
 const getAllPluginDetailsManifest = require('./plugin-registry-builder.get-all-plugin-details.manifest');
 
 const getTestCases = (manifest) => {
-    if (Array.isArray(manifest)) {
-        return manifest;
-    }
-    if (manifest && Array.isArray(manifest.tests)) {
-        return manifest.tests;
-    }
-    throw new Error(`Invalid manifest format: ${JSON.stringify(manifest)}`);
+  if (Array.isArray(manifest)) {
+    return manifest;
+  }
+  if (manifest && Array.isArray(manifest.tests)) {
+    return manifest.tests;
+  }
+  throw new Error(`Invalid manifest format: ${JSON.stringify(manifest)}`);
 };
 
 // Combine all test cases from different manifests
@@ -129,19 +129,19 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
       } else {
 
         if (testCase.setup && !testCase.methodName) {
-            await testCase.setup(currentMocks, commonTestConstants);
+          await testCase.setup(currentMocks, commonTestConstants);
         }
 
         const constructorArgsForCurrentTest = testCase.constructorArgs || [
-            commonTestConstants.FAKE_PROJECT_ROOT, null, null, false, false, null, null
+          commonTestConstants.FAKE_PROJECT_ROOT, null, null, false, false, null, null
         ];
         builderInstance = new PluginRegistryBuilder(...constructorArgsForCurrentTest, currentMocks.mockDependencies);
         currentMocks.builderInstance = builderInstance;
 
         if (testCase.setup && testCase.methodName) {
-            await testCase.setup(currentMocks, commonTestConstants);
+          await testCase.setup(currentMocks, commonTestConstants);
         }
-        
+
         if (testCase.methodName && typeof testCase.methodName === 'string') {
           if (currentMocks.mockDependencies.os.homedir.resetHistory) {
             currentMocks.mockDependencies.os.homedir.resetHistory();
@@ -149,11 +149,11 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
         }
 
         if (testCase.methodName && typeof testCase.methodName === 'string') {
-            const argsToPass = Array.isArray(testCase.methodArgs) ? testCase.methodArgs : [];
-            const methodResult = await builderInstance[testCase.methodName](...argsToPass);
-            await testCase.assert(methodResult, currentMocks, commonTestConstants, expect, logs);
+          const argsToPass = Array.isArray(testCase.methodArgs) ? testCase.methodArgs : [];
+          const methodResult = await builderInstance[testCase.methodName](...argsToPass);
+          await testCase.assert(methodResult, currentMocks, commonTestConstants, expect, logs);
         } else {
-            await testCase.assert(builderInstance, currentMocks, commonTestConstants, expect, logs);
+          await testCase.assert(builderInstance, currentMocks, commonTestConstants, expect, logs);
         }
       }
     });

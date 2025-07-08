@@ -55,25 +55,25 @@ describe('PluginManager Tests (1.5.x)', function() {
       const pluginManager = new PluginManager();
 
       if (isNegativeTest) {
-          try {
-              await pluginManager.invokeHandler(
-                  'test-plugin',
-                  { ...scenarioConfig.effectiveConfig, handlerScriptPath: mocks.handlerScriptPath },
-                  scenarioConfig.data,
-                  scenarioConfig.outputDir,
-                  scenarioConfig.outputFilenameOpt
-              );
-              // If it reaches here, the expected error was not thrown.
-              throw new Error('Expected an error to be thrown, but it was not.');
-          } catch (error) {
-              expect(error).to.be.an.instanceOf(Error);
-              expect(error.message).to.match(expectedErrorMessage);
-          }
-          return;
+        try {
+          await pluginManager.invokeHandler(
+            'test-plugin',
+            { ...scenarioConfig.effectiveConfig, handlerScriptPath: mocks.handlerScriptPath },
+            scenarioConfig.data,
+            scenarioConfig.outputDir,
+            scenarioConfig.outputFilenameOpt
+          );
+          // If it reaches here, the expected error was not thrown.
+          throw new Error('Expected an error to be thrown, but it was not.');
+        } catch (error) {
+          expect(error).to.be.an.instanceOf(Error);
+          expect(error.message).to.match(expectedErrorMessage);
+        }
+        return;
       }
-      
+
       await setup(mocks, constants);
-      
+
       const result = await pluginManager.invokeHandler(
         'test-plugin',
         { ...scenarioConfig.effectiveConfig, handlerScriptPath: mocks.handlerScriptPath },

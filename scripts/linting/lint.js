@@ -8,6 +8,15 @@ const chalk = require('chalk');
 const projectRoot = path.resolve(__dirname, '..', '..');
 const scriptsDir = path.join(projectRoot, 'scripts', 'linting');
 
+// Parse CLI args
+const cliArgs = process.argv.slice(2);
+// Separate out --fix and paths/globs
+const extraArgs = cliArgs.filter(arg => arg === '--fix');
+const userPaths = cliArgs.filter(arg => arg !== '--fix');
+
+// Default globs for custom scripts
+const defaultGlobs = ['*.js', 'src/**/*.js', 'scripts/**/*.js', 'plugins/**/*.js', 'test/**/*.js'];
+
 const lintSteps = [
   // code formatting
   {
@@ -48,13 +57,14 @@ const lintSteps = [
     label: 'Validator: paths-js-validator.js',
     command: 'node',
     args: [path.join(scriptsDir, 'paths-js-validator.js'), '--quiet'],
-    ignoreFailure: true, // it might be better if this breaks linting
+    ignoreFailure: true,
   },
   // code
   {
     label: 'ESLint',
     command: path.join(projectRoot, 'node_modules', '.bin', 'eslint'),
-    args: ['.'],
+    // args will be set below!
+    args: [], // placeholder
   },
 ];
 
@@ -84,18 +94,28 @@ function runStep({ label, command, args, ignoreFailure = false, skip = false }) 
 function main() {
   console.log(chalk.bold.yellow('Starting unified linting process...'));
 
-  // Optionally, define globs for custom scripts
-  const globs = ['*.js', 'src/**/*.js', 'scripts/**/*.js', 'plugins/**/*.js', 'test/**/*.js'];
+  // Use user-supplied globs/paths for custom scripts if provided
+  const globs = userPaths.length ? userPaths : defaultGlobs;
 
-  // Run each lint step in order
+  // Update custom steps to accept globs
   for (const step of lintSteps) {
-    // If it's a custom script, pass globs as args
     if (
       step.label.startsWith('Custom:') &&
       step.args.length === 1 // Only script path, no globs yet
     ) {
       step.args = [step.args[0], ...globs];
     }
+  }
+
+  // Set ESLint args: user-supplied paths or '.', plus --fix if present
+  const eslintStep = lintSteps.find(s => s.label === 'ESLint');
+  eslintStep.args = [
+    ...(userPaths.length ? userPaths : ['.']),
+    ...extraArgs,
+  ];
+
+  // Run each lint step in order
+  for (const step of lintSteps) {
     if (!runStep(step)) {
       process.exit(1);
     }

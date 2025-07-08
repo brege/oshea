@@ -1,5 +1,4 @@
 // test/integration/plugins/plugin-registry-builder.constructor.manifest.js
-const path = require('path');
 
 const commonTestConstants = {
   FAKE_PROJECT_ROOT: '/fake/project',

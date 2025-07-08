@@ -155,10 +155,9 @@ function replaceLoggingSpeciesInFile(filePath, { species, loggerMethod, write })
  * If no species/loggerMethod provided, will only handle template literal cases.
  * @param {string} targetDir
  * @param {object} opts
- * @returns {object} { totalFiles, totalReplaced, filesChanged }
+ * @returns {object} { totalReplaced, filesChanged }
  */
 function replaceLoggingSpecies(targetDir, opts) {
-  let totalFiles = 0;
   let totalReplaced = 0;
   let filesChanged = [];
   for (const file of findFiles(targetDir, {
@@ -169,9 +168,8 @@ function replaceLoggingSpecies(targetDir, opts) {
       filesChanged.push(file);
       totalReplaced += replaced;
     }
-    totalFiles++;
   }
-  return { totalFiles, totalReplaced, filesChanged };
+  return { totalReplaced, filesChanged };
 }
 
 // CLI usage
@@ -190,15 +188,15 @@ if (require.main === module) {
   }
 
   console.log(`Scanning for: ${species ? `${species} → ${loggerMethod}` : 'all template literal console.* calls'} in ${targetDir}`);
-  const { totalFiles, totalReplaced, filesChanged } = replaceLoggingSpecies(targetDir, { species, loggerMethod, write });
+  const { totalReplaced, filesChanged } = replaceLoggingSpecies(targetDir, { species, loggerMethod, write });
 
   if (write) {
-    console.log(`\n[WRITE MODE]`);
+    console.log('\n[WRITE MODE]');
     console.log(`Files changed: ${filesChanged.length}`);
     console.log(`Total replacements: ${totalReplaced}`);
     filesChanged.forEach(f => console.log('  ', f));
   } else {
-    console.log(`\n[DRY RUN]`);
+    console.log('\n[DRY RUN]');
     console.log(`Files that would change: ${filesChanged.length}`);
     console.log(`Total replacements: ${totalReplaced}`);
     filesChanged.forEach(f => console.log('  ', f));

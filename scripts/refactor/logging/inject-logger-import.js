@@ -51,7 +51,7 @@ function injectLoggerImportInFile(filePath, write = false) {
     changed = true;
   } else if (!foundPathsImport) {
     // Insert logger import
-    lines.splice(insertLine, 0, `const { logger } = require('@paths');`);
+    lines.splice(insertLine, 0, 'const { logger } = require(\'@paths\');');
     changed = true;
   }
 
@@ -115,11 +115,11 @@ if (require.main === module) {
   const { filesChanged } = injectLoggerImport(files, write);
 
   if (write) {
-    console.log(`\n[WRITE MODE]`);
+    console.log('\n[WRITE MODE]');
     console.log(`Files changed: ${filesChanged.length}`);
     filesChanged.forEach(f => console.log('  ', f));
   } else {
-    console.log(`\n[DRY RUN]`);
+    console.log('\n[DRY RUN]');
     console.log(`Files that would change: ${filesChanged.length}`);
     filesChanged.forEach(f => console.log('  ', f));
     console.log('\nAdd --write to perform import injection.');

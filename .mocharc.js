@@ -20,7 +20,7 @@ const paths = {
   plugin_determiner: 'test/integration/plugins/plugin_determiner.*.js',
   collections_manager: 'test/integration/collections/collections-manager.*.js',
   // Rank 2
-  PluginRegistryBuilder: 'test/integration/plugins/plugin-registry-builder.*.js',
+  PluginRegistryBuilder: 'test/integration/plugins/plugin-registry-builder.*.js', 
   main_config_loader: 'test/integration/config/main-config-loader.*.js',
   plugin_config_loader: 'test/integration/config/plugin-config-loader.*.js',
   PluginManager: 'test/integration/plugins/plugin-manager.*.js',

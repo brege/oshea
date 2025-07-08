@@ -36,7 +36,7 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
     originalPathsModule = require.cache[require.resolve('@paths')];
 
     // Delete the module cache for `plugin_determiner` and `@paths` to ensure fresh imports
-    delete require.cache[require.resolve('../../../src/plugins/plugin_determiner')];
+    delete require.cache[pluginDeterminerPath];
     delete require.cache[require.resolve('@paths')];
 
 
@@ -79,11 +79,10 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
   });
 
   afterEach(function() {
-    // Restore the original @paths module in the cache
     if (originalPathsModule) {
       require.cache[require.resolve('@paths')] = originalPathsModule;
     }
-    mockProcessCwd.restore(); // Restore global process.cwd stub
+    sinon.restore();
     delete process.env.DEBUG_PLUGIN_DETERMINER; // Clean up environment variable
   });
 

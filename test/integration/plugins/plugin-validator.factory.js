@@ -1,7 +1,61 @@
 // test/integration/plugins/plugin-validator.factory.js
 const path = require('path');
+const sinon = require('sinon');
 
-// Helper function moved from the old manifest to the factory
+/**
+ * Declarative helper for setting up plugin scenarios with file existence, yaml content, and exec stubbing.
+ * Usage:
+ *   setup: setupPluginScenario({
+ *     files: { 'index.js': true, 'README.md': false, ... },
+ *     yaml: { 'foo.config.yaml': { plugin_name: 'foo', protocol: 'v1' } },
+ *     exec: { throws: 'fail message' } // or { returns: '' }
+ *   })
+ */
+function setupPluginScenario({
+  files = {},
+  yaml = {},
+  exec = {},
+}) {
+  return (pluginDir, pluginName, { mockFs, mockYaml, mockExecSync }) => {
+    // Setup file existence and contents
+    Object.entries(files).forEach(([file, value]) => {
+      const fullPath = path.join(pluginDir, file);
+      if (typeof value === 'object' && value !== null) {
+        // { exists: true, content: "..." }
+        mockFs.existsSync.withArgs(fullPath).returns(value.exists);
+        if (value.exists && value.content !== undefined) {
+          mockFs.readFileSync.withArgs(fullPath, 'utf8').returns(value.content);
+        }
+      } else {
+        // true/false for existence, dummy content if true
+        mockFs.existsSync.withArgs(fullPath).returns(!!value);
+        if (value) {
+          mockFs.readFileSync.withArgs(fullPath, 'utf8').returns('dummy content');
+        }
+      }
+    });
+
+    // Setup YAML loads
+    Object.entries(yaml).forEach(([file, value]) => {
+      if (value instanceof Error) {
+        mockYaml.load.withArgs(sinon.match.any).throws(value);
+      } else {
+        mockYaml.load.withArgs(sinon.match.any).returns(value);
+      }
+    });
+
+    // Setup execSync
+    if (exec.throws) {
+      mockExecSync.throws(new Error(exec.throws));
+    } else if (exec.returns !== undefined) {
+      mockExecSync.returns(exec.returns);
+    }
+  };
+}
+
+/**
+ * Helper for a well-formed plugin (for the happy path).
+ */
 function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mockYaml }) {
   const files = {
     'index.js': 'module.exports = class {};',
@@ -34,6 +88,9 @@ function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mo
   mockExecSync.returns('');
 }
 
+/**
+ * Factory for validator scenarios.
+ */
 function makeValidatorScenario({
   description,
   pluginName = 'test-plugin',
@@ -94,7 +151,6 @@ function makeValidatorScenario({
     }
   };
 
-
   return {
     description,
     pluginName,
@@ -103,4 +159,9 @@ function makeValidatorScenario({
   };
 }
 
-module.exports = { makeValidatorScenario, setupWellFormedPlugin };
+module.exports = {
+  makeValidatorScenario,
+  setupWellFormedPlugin,
+  setupPluginScenario
+};
+

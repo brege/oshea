@@ -1,16 +1,17 @@
 // scripts/completion/generate-completion-cache.js
-
 // This script generates a completion cache for the md-to-pdf CLI. This script is for development use only.
+require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const chalk = require('chalk');
 
-// Import the tree discovery logic from its new location
-const { discoverCommandTree } = require('../../src/completion/cli-tree-builder');
+// Use your path registry for all internal modules
+const { cliTreeBuilderPath, cliCommandsPath } = require('@paths');
+const { discoverCommandTree } = require(cliTreeBuilderPath);
 
-const COMMANDS_DIR = path.resolve(__dirname, '../../src/cli/commands');
+const COMMANDS_DIR = cliCommandsPath;
 
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
@@ -40,3 +41,4 @@ function main() {
 if (require.main === module) {
   main();
 }
+

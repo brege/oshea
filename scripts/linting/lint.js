@@ -24,11 +24,6 @@ const lintSteps = [
     command: 'node',
     args: [path.join(scriptsDir, 'strip-trailing-whitespace.js')],
   },
-  {
-    label: 'Custom: standardize-js-line-one-all.js',
-    command: 'node',
-    args: [path.join(scriptsDir, 'standardize-js-line-one-all.js')],
-  },
   // docs
   {
     label: 'Docs: docs-link-checker.mjs',
@@ -58,6 +53,11 @@ const lintSteps = [
     command: 'node',
     args: [path.join(scriptsDir, 'paths-js-validator.js'), '--quiet'],
     ignoreFailure: true,
+  },
+  {
+    label: 'Custom: standardize-js-line-one-all.js',
+    command: 'node',
+    args: [path.join(scriptsDir, 'standardize-js-line-one-all.js')],
   },
   // code
   {

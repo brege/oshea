@@ -24,12 +24,11 @@ const paths = {
   main_config_loader: 'test/integration/config/main-config-loader.*.js',
   plugin_config_loader: 'test/integration/config/plugin-config-loader.*.js',
   PluginManager: 'test/integration/plugins/plugin-manager.*.js',
+  plugin_validator: 'test/integration/plugins/plugin-validator.*.js',
   math_integration:'test/integration/math_integration/math_integration.*.js',
   cm_utils: 'test/integration/collections/cm-utils.*.js',
 
   // --- End-to-End Test Paths ---
-  // Level 2
-  plugin_validator: 'test/e2e/plugin-validator.*.js',
   // Level 3
   plugin_convert: 'test/e2e/convert.*.js',
   plugin_generate: 'test/e2e/generate.*.js',
@@ -118,7 +117,6 @@ const groups = {
     paths.plugin_determiner,
     paths.PluginRegistryBuilder
   ],
-  validator: [paths.plugin_validator, paths.plugin_validate],
 
   // --- By Command Groups ---
   plugins: [

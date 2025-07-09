@@ -1,9 +1,9 @@
 // src/plugins/validator.js
-const { v1ValidatorPath } = require('@paths');
+const { v1ValidatorPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
 const yaml = require('js-yaml');
 
 // Load versioned validators
@@ -46,13 +46,13 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     protocol: { value: undefined, source: undefined },
   };
 
-  console.log(chalk.cyan(`Resolving plugin metadata for '${pluginName}'...`));
+  logger.info(`Resolving plugin metadata for '${pluginName}'...`, { module: 'src/plugins/validator.js' });
 
   const readYamlFile = (filePath) => {
     if (fs.existsSync(filePath)) {
       try {
         const content = yaml.load(fs.readFileSync(filePath, 'utf8'));
-        console.log(chalk.gray(`    (Read YAML from: ${path.basename(filePath)})`));
+        logger.detail(`    (Read YAML from: ${path.basename(filePath)})`, { module: 'src/plugins/validator.js' });
         return content;
       } catch (e) {
         warnings.push(`Could not parse YAML from '${path.basename(filePath)}': ${e.message}`);
@@ -98,9 +98,10 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
   // Ensure protocol is a string
   metadata.protocol.value = String(metadata.protocol.value);
 
-  console.log(chalk.gray(`    Plugin Name: ${metadata.plugin_name.value} (from ${metadata.plugin_name.source})`));
-  console.log(chalk.gray(`    Version: ${metadata.version.value || 'N/A (Warning)'} (from ${metadata.version.source})`));
-  console.log(chalk.gray(`    Protocol: ${metadata.protocol.value} (from ${metadata.protocol.source})`));
+  logger.detail(`    Plugin Name: ${metadata.plugin_name.value} (from ${metadata.plugin_name.source})`, { module: 'src/plugins/validator.js' });
+  logger.detail(`    Version: ${metadata.version.value || 'N/A (Warning)'} (from ${metadata.version.source})`, { module: 'src/plugins/validator.js' });
+  logger.detail(`    Protocol: ${metadata.protocol.value} (from ${metadata.protocol.source})`, { module: 'src/plugins/validator.js' });
+
 
   return metadata;
 }
@@ -121,7 +122,7 @@ function validate(pluginIdentifier) {
   try {
     ({ pluginDirectoryPath, pluginName } = resolvePluginPath(pluginIdentifier));
   } catch (error) {
-    console.error(chalk.red(error.message));
+    logger.error(error.message, { module: 'src/plugins/validator.js' });
     return { isValid: false, errors: [error.message], warnings: [] };
   }
 
@@ -130,7 +131,7 @@ function validate(pluginIdentifier) {
   // Ensure plugin_name derived from metadata matches the directory name for core consistency
   if (pluginMetadata.plugin_name.value !== pluginName) {
     const nameMismatchError = `Resolved 'plugin_name' ('${pluginMetadata.plugin_name.value}') does not match plugin directory name ('${pluginName}'). This is a critical mismatch.`;
-    console.error(chalk.red(`\n[✖] Plugin is INVALID: ${nameMismatchError}`));
+    logger.error(`\n[✖] Plugin is INVALID: ${nameMismatchError}`, { module: 'src/plugins/validator.js' });
     errors.push(nameMismatchError);
     return {
       isValid: false,
@@ -147,7 +148,7 @@ function validate(pluginIdentifier) {
   default:
   {
     const errorMsg = `Unsupported plugin protocol '${pluginMetadata.protocol.value}' for plugin '${pluginName}'.`;
-    console.error(chalk.red(`\n[✖] Plugin is INVALID: ${errorMsg}`));
+    logger.error(`\n[✖] Plugin is INVALID: ${errorMsg}`, { module: 'src/plugins/validator.js' });
     errors.push(errorMsg);
     validationResult = { isValid: false, errors: [errorMsg], warnings: [] };
     break;
@@ -157,35 +158,34 @@ function validate(pluginIdentifier) {
   validationResult.warnings = [...warnings, ...validationResult.warnings];
   validationResult.isValid = validationResult.isValid && (errors.length === 0);
 
-  console.log(chalk.bold(`\n--- Summary for ${pluginName} ---`));
+  logger.info(`\n--- Summary for ${pluginName} ---`, { module: 'src/plugins/validator.js' });
   if (validationResult.isValid) {
     if (validationResult.warnings.length === 0) {
-      console.log(chalk.green(`[✔] Plugin '${pluginName}' is VALID.`));
+      logger.success(`[✔] Plugin '${pluginName}' is VALID.`, { module: 'src/plugins/validator.js' });
     } else {
-      console.log(chalk.rgb(255, 165, 0)(`[!] Plugin '${pluginName}' is USABLE (with warnings).`));
+      logger.warn(`[!] Plugin '${pluginName}' is USABLE (with warnings).`, { module: 'src/plugins/validator.js' });
     }
   } else {
-    console.log(chalk.red(`[✖] Plugin '${pluginName}' is INVALID.`));
+    logger.error(`[✖] Plugin '${pluginName}' is INVALID.`, { module: 'src/plugins/validator.js' });
   }
 
   if (validationResult.errors.length > 0) {
-    console.error(chalk.red('\nErrors:'));
+    logger.error('\nErrors:', { module: 'src/plugins/validator.js' });
     validationResult.errors.forEach((error) => {
-      console.error(chalk.red(`  - ${error}`));
+      logger.error(`  - ${error}`, { module: 'src/plugins/validator.js' });
     });
   }
 
   if (validationResult.warnings.length > 0) {
-    console.log(chalk.yellow('\nWarnings:'));
+    logger.warn('\nWarnings:', { module: 'src/plugins/validator.js' });
     validationResult.warnings.forEach((warning) => {
-      console.log(chalk.yellow(`  - ${warning}`));
+      logger.warn(`  - ${warning}`, { module: 'src/plugins/validator.js' });
     });
   } else if (validationResult.isValid) {
-    console.log(chalk.green('No warnings found.'));
+    logger.success('No warnings found.', { module: 'src/plugins/validator.js' });
   }
 
   return validationResult;
 }
 
 module.exports = { validate };
-

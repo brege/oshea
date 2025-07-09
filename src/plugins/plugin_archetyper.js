@@ -1,10 +1,15 @@
 // src/plugins/plugin_archetyper.js
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
+
 const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
+
+
 
 async function createArchetype(dependencies, managerContext, sourcePluginIdentifier, newArchetypeName, options = {}) {
   const { chalk, cmUtils, constants } = dependencies;
@@ -49,7 +54,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
       const sourceConfigContent = await fs.readFile(sourcePluginInfo.config_path, 'utf8');
       sourcePluginInfo.description = yaml.load(sourceConfigContent).description || `Plugin from path: ${sourcePluginIdForReplacement}`;
     } catch {
-      console.warn(chalk.yellow('WARN: Could not read description from direct path source config.'));
+      logger.warn('WARN: Could not read description from direct path source config.');
     }
   }
 
@@ -171,7 +176,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
     }
   }
 
-  console.log(chalk.green(`Archetype '${newArchetypeName}' created successfully from '${sourcePluginIdentifier}'.`));
+  logger.success(`Archetype '${newArchetypeName}' created successfully from '${sourcePluginIdentifier}'.`, { module: 'src/plugins/plugin_archetyper.js' });
   return { success: true, message: `Archetype '${newArchetypeName}' created successfully.`, archetypePath };
 }
 

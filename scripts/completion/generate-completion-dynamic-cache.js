@@ -1,5 +1,7 @@
 // scripts/completion/generate-completion-dynamic-cache.js
 
+require('module-alias/register'); // Enable path aliases
+
 // This script generates a dynamic completion cache for the md-to-pdf CLI.
 // It is a runtime tool for the user's machine.
 
@@ -7,12 +9,17 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-// --- Dynamically require necessary application modules ---
-// This script is allowed to be "heavy" as it runs in the background.
-const projectRoot = path.resolve(__dirname, '../..');
-const PluginRegistryBuilder = require(path.join(projectRoot, 'src', 'plugins', 'PluginRegistryBuilder.js'));
-const CollectionsManager = require(path.join(projectRoot, 'src', 'collections', 'index.js'));
-const MainConfigLoader = require(path.join(projectRoot, 'src', 'config', 'main_config_loader.js'));
+// --- Use path registry for all internal modules ---
+const {
+  projectRoot,
+  pluginRegistryBuilderPath,
+  collectionsIndexPath,
+  mainConfigLoaderPath,
+} = require('@paths');
+
+const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
+const CollectionsManager = require(collectionsIndexPath);
+const MainConfigLoader = require(mainConfigLoaderPath);
 
 /**
  * Determines the path for the dynamic completion cache file.
@@ -74,11 +81,13 @@ async function generateCache() {
     const cachePath = getCachePath();
     fs.mkdirSync(path.dirname(cachePath), { recursive: true });
     fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
-
-  } catch {
+  } catch (err) {
+    // Optional: log the error for debugging
+    // console.error('Failed to generate dynamic completion cache:', err);
     process.exit(1);
   }
 }
 
 // Execute the cache generation
 generateCache();
+

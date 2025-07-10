@@ -1,18 +1,19 @@
 // src/config/main_config_loader.js
 const os = require('os');
-const { defaultConfigPath, factoryDefaultConfigPath, configUtilsPath } = require('@paths');
+const { defaultConfigPath, factoryDefaultConfigPath, configUtilsPath, logger } = require('@paths');
 
 class MainConfigLoader {
   constructor(projectRoot, mainConfigPathFromCli, useFactoryDefaultsOnly = false, xdgBaseDir = null, dependencies = {}) {
     this.fs = dependencies.fs || require('fs');
     this.path = dependencies.path || require('path');
+    this.process = dependencies.process || process;
     this.loadYamlConfig = dependencies.loadYamlConfig || require(configUtilsPath).loadYamlConfig;
 
     this.projectRoot = projectRoot;
     this.defaultMainConfigPath = defaultConfigPath;
     this.factoryDefaultMainConfigPath = factoryDefaultConfigPath;
 
-    this.xdgBaseDir = xdgBaseDir || this.path.join(process.env.XDG_CONFIG_HOME || this.path.join(os.homedir(), '.config'), 'md-to-pdf');
+    this.xdgBaseDir = xdgBaseDir || this.path.join(this.process.env.XDG_CONFIG_HOME || this.path.join(os.homedir(), '.config'), 'md-to-pdf');
     this.xdgGlobalConfigPath = this.path.join(this.xdgBaseDir, 'config.yaml');
 
     this.projectManifestConfigPath = mainConfigPathFromCli;
@@ -58,14 +59,14 @@ class MainConfigLoader {
       try {
         this.primaryConfig = await this.loadYamlConfig(configPathToLoad);
       } catch (error) {
-        console.error(`ERROR (MainConfigLoader): loading primary main configuration from '${configPathToLoad}': ${error.message}`);
+        logger.error(`ERROR (MainConfigLoader): loading primary main configuration from '${configPathToLoad}': ${error.message}`);
         this.primaryConfig = {};
       }
     } else {
       this.primaryConfig = {};
       this.primaryConfigLoadReason = 'none found';
       this.primaryConfigPath = null;
-      console.warn('WARN (MainConfigLoader): Primary main configuration file could not be identified or loaded. Using empty global settings.');
+      logger.warn('WARN (MainConfigLoader): Primary main configuration file could not be identified or loaded. Using empty global settings.');
     }
     this.primaryConfig = this.primaryConfig || {};
 
@@ -78,7 +79,7 @@ class MainConfigLoader {
             this.xdgConfigContents = await this.loadYamlConfig(this.xdgGlobalConfigPath);
           }
         } catch (e) {
-          console.warn(`WARN (MainConfigLoader): Could not load XDG main config from ${this.xdgGlobalConfigPath}: ${e.message}`);
+          logger.warn(`WARN (MainConfigLoader): Could not load XDG main config from ${this.xdgGlobalConfigPath}: ${e.message}`);
           this.xdgConfigContents = {};
         }
       } else {
@@ -93,11 +94,11 @@ class MainConfigLoader {
             this.projectConfigContents = await this.loadYamlConfig(this.projectManifestConfigPath);
           }
         } catch (e) {
-          console.warn(`WARN (MainConfigLoader): Could not load project manifest from ${this.projectManifestConfigPath}: ${e.message}`);
+          logger.warn(`WARN (MainConfigLoader): Could not load project manifest from ${this.projectManifestConfigPath}: ${e.message}`);
           this.projectConfigContents = {};
         }
       } else if (this.projectManifestConfigPath) {
-        console.warn(`WARN (MainConfigLoader): Project manifest config path provided but file does not exist: ${this.projectManifestConfigPath}`);
+        logger.warn(`WARN (MainConfigLoader): Project manifest config path provided but file does not exist: ${this.projectManifestConfigPath}`);
         this.projectConfigContents = {};
       }
       else {

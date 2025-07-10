@@ -2,10 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
-
-// --- Configuration ---
-const { convertCmdPath } = require('@paths');
+const { convertCmdPath, logger } = require('@paths');
 
 // --- Dynamic Proxy Yargs Stub ---
 function createYargsStub() {
@@ -63,7 +60,7 @@ function discoverCommandTree(dir, prefixParts = []) {
       defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey, choices: p.choices}));
       defaultCommandOptions = Object.keys(defaultCmdStub.options || {}).map(optKey => ({name: optKey, completionKey: defaultCmdStub.options[optKey].completionKey, choices: defaultCmdStub.options[optKey].choices}));
     } catch (builderError) {
-      console.warn(chalk.yellow(`WARN: Could not extract default command builder info for $0 node: ${builderError.message}`));
+      logger.warn(`Could not extract default command builder info for $0 node: ${builderError.message}`, { module: 'src/completion/cli-tree-builder.js' });
     }
 
     const finalOptionsFor$0 = [...new Set([...globalOptionsList.map(name => ({name})), ...defaultCommandOptions])].sort((a,b) => a.name.localeCompare(b.name));
@@ -101,7 +98,7 @@ function discoverCommandTree(dir, prefixParts = []) {
           try {
             cmdObj.builder(yargsStub);
           } catch (e) {
-            // console.error(chalk.yellow(`WARN: Error in builder for ${commandName}: ${e.message}`));
+          // logger.warn(`Could not extract command builder info for ${commandName} node: ${e.message}`, { module: 'src/completion/cli-tree-builder.js' });
           }
         }
         const options = Object.keys(yargsStub.options || {}).map(optKey => ({name: optKey, completionKey: yargsStub.options[optKey].completionKey, choices: yargsStub.options[optKey].choices}));

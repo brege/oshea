@@ -12,6 +12,9 @@ const markdownUtils = require('../src/core/markdown_utils');
 const pdfGenerator = require('../src/core/pdf_generator');
 const createMathIntegration = require('../src/core/math_integration'); // The factory
 
+// Import the test logger for capturing logs
+const { testLogger } = require('./shared/capture-logs');
+
 // Make these globally available in the test context
 global.expect = expect;
 global.sinon = sinon;
@@ -46,6 +49,14 @@ module.exports = {
       this.mkdirStub = this.sandbox.stub(fs, 'mkdir');
       this.existsSyncStub = this.sandbox.stub(fss, 'existsSync');
 
+      // Inject testLogger as '@paths'.logger before requiring DefaultHandler
+      require.cache[require.resolve('@paths')] = {
+        exports: {
+          ...require('@paths'),
+          logger: testLogger
+        }
+      };
+
       // Re-require DefaultHandler to ensure it picks up all stubbed dependencies
       delete require.cache[require.resolve('../src/core/default_handler')];
       const DefaultHandler = require('../src/core/default_handler');
@@ -60,7 +71,10 @@ module.exports = {
       // Clean up the require cache to prevent test pollution
       delete require.cache[require.resolve('../src/core/math_integration')];
       delete require.cache[require.resolve('../src/core/default_handler')];
+      // Clean up the logger injection
+      delete require.cache[require.resolve('@paths')];
       if (done) done();
     }
   }
 };
+

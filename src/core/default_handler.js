@@ -7,7 +7,8 @@ const path = require('path');
 const {
   markdownUtilsPath,
   pdfGeneratorPath,
-  mathIntegrationPath
+  mathIntegrationPath,
+  logger
 } = require('@paths');
 
 // --- Original requires, now using path anchors ---
@@ -113,7 +114,7 @@ class DefaultHandler {
         } else if (path.isAbsolute(cssFile) && fss.existsSync(cssFile)) {
           cssFileContentsArray.push(await fs.readFile(cssFile, 'utf8'));
         } else {
-          console.warn(`WARN: CSS file not found: ${cssFilePath}`);
+          logger.warn(`WARN: CSS file not found: ${cssFilePath}`, { module: 'src/core/default_handler.js' });
         }
       }
 
@@ -138,7 +139,7 @@ class DefaultHandler {
 
       return outputPdfPath;
     } catch (error) {
-      console.error(`Error during document generation: ${error.message}`, error.stack || '');
+      logger.error(`Error during document generation: ${error.message}`, { module: 'src/core/default_handler.js', error });
       return null;
     }
   }

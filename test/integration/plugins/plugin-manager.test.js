@@ -13,19 +13,16 @@ describe('PluginManager Tests (1.5.x)', function() {
   let originalPathsModule;
   let PluginManager;
 
-  before(function() {
-    originalPathsModule = require.cache[require.resolve('@paths')];
-  });
-
   beforeEach(function() {
     clearLogs();
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-manager-test-'));
 
-    // Inject test logger
+    const pathsPath = require.resolve('@paths');
+    originalPathsModule = require.cache[pathsPath];
     delete require.cache[pluginManagerPath];
-    delete require.cache[require.resolve('@paths')];
-    require.cache[require.resolve('@paths')] = {
-      exports: { ...originalPathsModule.exports, logger: testLogger }
+    delete require.cache[pathsPath];
+    require.cache[pathsPath] = {
+      exports: { ...require(pathsPath), logger: testLogger }
     };
     PluginManager = require(pluginManagerPath);
   });
@@ -33,8 +30,9 @@ describe('PluginManager Tests (1.5.x)', function() {
   afterEach(function() {
     fs.rmSync(tempDir, { recursive: true, force: true });
     sinon.restore();
-    // Restore original @paths module
-    require.cache[require.resolve('@paths')] = originalPathsModule;
+    if (originalPathsModule) {
+      require.cache[require.resolve('@paths')] = originalPathsModule;
+    }
     delete require.cache[pluginManagerPath];
   });
 
@@ -63,7 +61,6 @@ describe('PluginManager Tests (1.5.x)', function() {
             scenarioConfig.outputDir,
             scenarioConfig.outputFilenameOpt
           );
-          // If it reaches here, the expected error was not thrown.
           throw new Error('Expected an error to be thrown, but it was not.');
         } catch (error) {
           expect(error).to.be.an.instanceOf(Error);

@@ -5,7 +5,6 @@ const sinon = require('sinon');
 
 const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
 
-// Import all manifests for PluginRegistryBuilder
 const constructorManifest = require('./plugin-registry-builder.constructor.manifest');
 const resolveAliasManifest = require('./plugin-registry-builder.resolve-alias.manifest');
 const resolvePluginConfigPathManifest = require('./plugin-registry-builder.resolve-plugin-config-path.manifest');
@@ -24,7 +23,6 @@ const getTestCases = (manifest) => {
   throw new Error(`Invalid manifest format: ${JSON.stringify(manifest)}`);
 };
 
-// Combine all test cases from different manifests
 const allTestCases = [
   ...getTestCases(constructorManifest),
   ...getTestCases(resolveAliasManifest),
@@ -35,7 +33,6 @@ const allTestCases = [
   ...getTestCases(getAllPluginDetailsManifest),
 ];
 
-// Common test constants for the runner
 const commonTestConstants = {
   FAKE_PROJECT_ROOT: '/fake/project',
   FAKE_HOME_DIR: '/fake/home',
@@ -54,13 +51,14 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
   beforeEach(function() {
     clearLogs();
 
-    originalPathsModule = require.cache[require.resolve('@paths')];
+    const pathsPath = require.resolve('@paths');
+    originalPathsModule = require.cache[pathsPath];
     delete require.cache[pluginRegistryBuilderPath];
-    delete require.cache[require.resolve('@paths')];
+    delete require.cache[pathsPath];
 
-    require.cache[require.resolve('@paths')] = {
+    require.cache[pathsPath] = {
       exports: {
-        ...require(originalPathsModule.filename),
+        ...require(pathsPath),
         logger: testLogger
       }
     };
@@ -159,4 +157,3 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
     });
   });
 });
-

@@ -1,7 +1,7 @@
 // src/plugins/plugin_determiner.js
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
-const { logger } = require('@paths'); // Import the centralized logger
+const { logger } = require('@paths');
 
 /**
  * Determines the plugin to use based on CLI arguments, front matter, local config, or default.
@@ -121,17 +121,14 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
   }
 
   // This line is not used.
-  let logMessage = `Using plugin '${pluginSpec}' (determined via ${determinationSource})`; // Removed "INFO:" prefix as logger handles levels
+  let logMessage = `Using plugin '${pluginSpec}' (determined via ${determinationSource})`;
 
   // Only log the final determination if it's not a redundant message following an override log.
-  // The 'console.lastLog' hack is removed as logging responsibility is now with the centralized logger.
   if (!args.isLazyLoad || determinationSource !== 'default' || (cliPluginArg && fmPlugin && cliPluginArg !== fmPlugin)) {
     logger.info(logMessage, { module: 'plugin_determiner' });
   }
 
   return { pluginSpec, source: determinationSource, localConfigOverrides };
 }
-
-// console.lastLog hack removed.
 
 module.exports = { determinePluginToUse };

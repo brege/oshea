@@ -1,15 +1,17 @@
 // src/core/pdf_generator.js
 const puppeteer = require('puppeteer');
 const path = require('path');
+const { logger } = require('@paths');
 
 async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileContentsArray, htmlTemplateStr = null, injectionPoints = {}) {
   let browser = null;
+  let page = null;
   try {
     browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-    const page = await browser.newPage();
+    page = await browser.newPage();
 
     const combinedCss = (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
 
@@ -68,13 +70,22 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
   } catch (error) {
     const descriptiveError = new Error(`Error during PDF generation for "${outputPdfPath}": ${error.message}`);
     descriptiveError.stack = error.stack;
-    console.error(descriptiveError.message);
+    logger.error(descriptiveError.message, { module: 'src/core/pdf_generator.js', error: descriptiveError });
     throw descriptiveError;
   } finally {
+    // Always close the page first, then the browser
+    if (page) {
+      try { await page.close(); } catch (e) {
+        // logger.error(e.message, { module: 'src/core/pdf_generator.js', error: e });
+      }
+    }
     if (browser) {
-      await browser.close();
+      try { await browser.close(); } catch (e) {
+        // logger.error(e.message, { module: 'src/core/pdf_generator.js', error: e });
+      }
     }
   }
 }
+
 
 module.exports = { generatePdf };

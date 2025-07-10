@@ -1,5 +1,5 @@
 // src/config/plugin_config_loader.js
-const { configUtilsPath, assetResolverPath } = require('@paths');
+const { configUtilsPath, assetResolverPath, logger: defaultLogger } = require('@paths');
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
@@ -29,6 +29,7 @@ class PluginConfigLoader {
     this.os = dependencies.os || require('os');
     this.configUtils = dependencies.configUtils || require(configUtilsPath);
     this.AssetResolver = dependencies.AssetResolver || require(assetResolverPath);
+    this.logger = dependencies.logger || defaultLogger;
   }
 
   async _loadSingleConfigLayer(configFilePath, assetsBasePath, pluginName) {
@@ -38,7 +39,7 @@ class PluginConfigLoader {
     }
 
     if (!configFilePath || !this.fs.existsSync(configFilePath)) {
-      console.warn(`WARN (PluginConfigLoader): Config file path not provided or does not exist: ${configFilePath} for plugin ${pluginName}.`);
+      this.logger.warn(`Config file path not provided or does not exist: ${configFilePath} for plugin ${pluginName}.`, { module: 'plugin_config_loader'});
       return null;
     }
     try {
@@ -57,7 +58,7 @@ class PluginConfigLoader {
       this._rawPluginYamlCache[cacheKey] = result;
       return result;
     } catch (error) {
-      console.error(`ERROR (PluginConfigLoader): loading plugin configuration layer from '${configFilePath}' for ${pluginName}: ${error.message}`);
+      this.logger.error(`loading plugin configuration layer from '${configFilePath}' for ${pluginName}: ${error.message}`, { module: 'plugin_config_loader'});
       return { rawConfig: {}, resolvedCssPaths: [], inherit_css: false, actualPath: null };
     }
   }
@@ -139,7 +140,7 @@ class PluginConfigLoader {
             contributingPaths.push(`${projectOverrideAbsPath} (empty or no effective overrides)`);
           }
         } else if (projectOverrideRelPath && projectOverrideAbsPath !== layer0ConfigData.actualPath) {
-          console.warn(`WARN (PluginConfigLoader): Project-specific settings override for plugin '${pluginName}' in project main config points to non-existent file: '${projectOverrideRelPath}' (resolved to '${projectOverrideAbsPath || projectOverrideRelPath}')`);
+          this.logger.warn(`Project-specific settings override for plugin '${pluginName}' in project main config points to non-existent file: '${projectOverrideRelPath}' (resolved to '${projectOverrideAbsPath || projectOverrideRelPath}')`, { module: 'plugin_config_loader'});
         }
       }
 

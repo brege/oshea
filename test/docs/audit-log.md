@@ -193,9 +193,9 @@ This document summarizes key limitations and discrepancies in the `md-to-pdf` co
 - **title:** Redundant Test Scenario for Browser/Page Closure
 - **component:** pdf_generator
 - **status:** CLOSED
-- **description:** The test scenario to verify browser closure is already comprehensively covered by assertions in other error-handling and success-path tests (2.3.1, 2.3.6, 2.3.7, 2.3.8).
-- **impact:** None. Functionality is already verified.
-- **suggested_action:** None needed. Test is skipped to avoid redundancy.
+- **description:** The test scenario to verify browser closure is already comprehensively covered by assertions in other error-handling and success-path test (2.3.1, 2.3.6, 2.3.7, 2.3.8) **revisited:** [2025-0710] The scenario to verify both browser and page closure after PDF generation is not redundant. While other tests cover success and error behavior, they do not explicitly assert that both `page.close()` and `browser.close()` are always called, even if errors occur. This test is necessary to guarantee proper resource cleanup and prevent leaks or zombie processes, as recommended in Puppeteer best practices.
+- **impact:** Ensures robust resource management and prevents subtle bugs in long-running or batch processes.  
+- **suggested_action:** Keep this test to explicitly verify resource cleanup in all code paths.
 
 ---
 

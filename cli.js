@@ -6,10 +6,15 @@ require('module-alias')(__dirname);
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs');
+const { loggerPath } = require('@paths'); // Import loggerPath
+
+const logger = require(loggerPath); // Correctly require the logger
 
 const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
 
+// This block is a special case for shell completion.
+// It must write directly to stdout without any formatting from the logger.
 if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
   const { getSuggestions } = require('./src/completion/engine');
 
@@ -41,6 +46,7 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
   }
 
   const suggestions = getSuggestions(completionArgv, currentWord);
+  // lint-disable-next-line logging
   console.log(suggestions.join('\n'));
   process.exit(0);
 }
@@ -48,7 +54,6 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
 
 const os = require('os');
 const fsp = require('fs').promises;
-const chalk = require('chalk');
 const { spawn, execSync } = require('child_process');
 
 const ConfigResolver = require('./src/config/ConfigResolver');
@@ -72,10 +77,10 @@ const updateCmd = require('./src/cli/commands/updateCmd.js');
 
 function openPdf(pdfPath, viewerCommand) {
   if (!viewerCommand) {
-    console.log(`PDF viewer not configured. PDF generated at: ${pdfPath}`);
+    logger.warn(`PDF viewer not configured. PDF generated at: ${pdfPath}`);
     return;
   }
-  console.log(`Attempting to open PDF "${pdfPath}" with: ${viewerCommand}`);
+  logger.info(`Attempting to open PDF "${pdfPath}" with: ${viewerCommand}`);
   try {
     const [command, ...args] = viewerCommand.split(' ');
     const viewerProcess = spawn(command, [...args, pdfPath], {
@@ -83,13 +88,13 @@ function openPdf(pdfPath, viewerCommand) {
       stdio: 'ignore',
     });
     viewerProcess.on('error', (err) => {
-      console.warn(`WARN: Failed to start PDF viewer '${viewerCommand}': ${err.message}.`);
-      console.warn(`Please open "${pdfPath}" manually.`);
+      logger.warn(`WARN: Failed to start PDF viewer '${viewerCommand}': ${err.message}.`);
+      logger.warn(`Please open "${pdfPath}" manually.`);
     });
     viewerProcess.unref();
   } catch (e) {
-    console.warn(`WARN: Error trying to open PDF with '${viewerCommand}': ${e.message}.`);
-    console.warn(`Please open "${pdfPath}" manually.`);
+    logger.warn(`WARN: Error trying to open PDF with '${viewerCommand}': ${e.message}.`);
+    logger.warn(`Please open "${pdfPath}" manually.`);
   }
 }
 
@@ -107,8 +112,8 @@ async function commonCommandHandler(args, executorFunction, commandType) {
     }
   } catch (error) {
     const pluginNameForError = args.pluginSpec || args.plugin || args.pluginName || 'N/A';
-    console.error(chalk.red(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`));
-    if (error.stack && !args.watch) console.error(chalk.red(error.stack));
+    logger.error(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`);
+    if (error.stack && !args.watch) logger.error(error.stack);
     if (!args.watch) process.exit(1);
   }
 }
@@ -126,7 +131,7 @@ async function executeConversion(args, configResolver) {
   const { pluginSpec, source: pluginSource, localConfigOverrides } = await determinePluginToUse(args, dependenciesForPluginDeterminer, 'default');
   args.pluginSpec = pluginSpec;
 
-  console.log(`Processing 'convert' for: ${args.markdownFile}`);
+  logger.info(`Processing 'convert' for: ${args.markdownFile}`);
 
   const resolvedMarkdownPath = path.resolve(args.markdownFile);
 
@@ -139,14 +144,14 @@ async function executeConversion(args, configResolver) {
   } else {
     outputDir = path.join(os.tmpdir(), 'md-to-pdf-output');
     if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
-      console.log(`INFO: No output directory specified. Defaulting to temporary directory: ${outputDir}`);
+      logger.info(`No output directory specified. Defaulting to temporary directory: ${outputDir}`);
     }
   }
 
   if (!fs.existsSync(outputDir)) {
     await fsp.mkdir(outputDir, { recursive: true });
     if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
-      console.log(`INFO: Created output directory: ${outputDir}`);
+      logger.info(`Created output directory: ${outputDir}`);
     }
   }
 
@@ -162,25 +167,25 @@ async function executeConversion(args, configResolver) {
   );
 
   if (generatedPdfPath) {
-    console.log(`Successfully generated PDF with plugin '${pluginSpec}': ${generatedPdfPath}`);
+    logger.success(`Successfully generated PDF with plugin '${pluginSpec}': ${generatedPdfPath}`);
     const viewer = mainLoadedConfig.pdf_viewer;
     if (args.open && viewer) {
       openPdf(generatedPdfPath, viewer);
     } else if (args.open && !viewer) {
-      console.log(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
+      logger.warn(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
     } else if (!args.open && !args.outdir) {
-      console.log(`PDF saved to temporary directory: ${generatedPdfPath}`);
+      logger.info(`PDF saved to temporary directory: ${generatedPdfPath}`);
     }
   } else {
     if (!args.watch) throw new Error(`PDF generation failed for plugin '${pluginSpec}' (determined via ${pluginSource}).`);
   }
-  console.log('convert command finished.');
+  logger.detail('convert command finished.');
 }
 
 async function executeGeneration(args, configResolver) {
   const pluginToUse = args.pluginName;
   args.pluginSpec = pluginToUse;
-  console.log(`Processing 'generate' command for plugin: ${pluginToUse}`);
+  logger.info(`Processing 'generate' command for plugin: ${pluginToUse}`);
 
   const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse, null, null);
   const mainLoadedConfig = effectiveConfig.mainConfig;
@@ -202,7 +207,7 @@ async function executeGeneration(args, configResolver) {
 
   if (!fs.existsSync(outputDir)) {
     await fsp.mkdir(outputDir, { recursive: true });
-    console.log(`INFO: Created output directory: ${outputDir}`);
+    logger.info(`Created output directory: ${outputDir}`);
   }
 
   const pluginManager = new PluginManager();
@@ -215,17 +220,17 @@ async function executeGeneration(args, configResolver) {
   );
 
   if (generatedPdfPath) {
-    console.log(`Successfully generated PDF via plugin '${pluginToUse}': ${generatedPdfPath}`);
+    logger.success(`Successfully generated PDF via plugin '${pluginToUse}': ${generatedPdfPath}`);
     const viewer = mainLoadedConfig.pdf_viewer;
     if (args.open && viewer) {
       openPdf(generatedPdfPath, viewer);
     } else if (args.open && !viewer) {
-      console.log(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
+      logger.warn(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
     }
   } else {
     if (!args.watch) throw new Error(`PDF generation failed for plugin '${pluginToUse}'.`);
   }
-  console.log('generate command finished.');
+  logger.detail('generate command finished.');
 }
 
 async function main() {
@@ -284,14 +289,11 @@ async function main() {
         .option('coll-root', { type: 'string' });
     },
     handler: (args) => {
-      const staticCacheScript = path.resolve(__dirname, 'scripts', 'completion', 'generate-completion-cache.js');
-      const dynamicCacheScript = path.resolve(__dirname, 'scripts', 'completion', 'generate-completion-dynamic-cache.js');
-
+      const { dynamicCompletionScriptPath } = require('@paths');
       try {
-        execSync(`node "${staticCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
-        execSync(`node "${dynamicCacheScript}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+        execSync(`node "${dynamicCompletionScriptPath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
       } catch (error) {
-        console.error(chalk.red(`ERROR: Cache generation failed: ${error.message}`));
+        logger.error(`ERROR: Cache generation failed: ${error.message}`);
         process.exit(1);
       }
     }
@@ -304,8 +306,8 @@ async function main() {
         const potentialFile = args.markdownFile;
         if (potentialFile) {
           if (!fs.existsSync(potentialFile) && !potentialFile.endsWith('.md') && !potentialFile.endsWith('.mdx')) {
-            console.error(chalk.red(`Error: Unknown command: '${potentialFile}'`));
-            console.error(chalk.yellow('\nTo convert a file, provide a valid path. For other commands, see --help.'));
+            logger.error(`Error: Unknown command: '${potentialFile}'`);
+            logger.warn('\nTo convert a file, provide a valid path. For other commands, see --help.');
             process.exit(1);
           }
           args.isLazyLoad = true;
@@ -338,8 +340,8 @@ async function main() {
     .strictCommands()
     .fail((msg, err, yargsInstance) => {
       if (err) {
-        console.error(chalk.red(msg || err.message));
-        if (process.env.DEBUG_CM === 'true' && err.stack) console.error(chalk.red(err.stack));
+        logger.error(msg || err.message);
+        if (process.env.DEBUG_CM === 'true' && err.stack) logger.error(err.stack);
         yargsInstance.showHelp();
         process.exit(1);
         return;
@@ -347,39 +349,39 @@ async function main() {
       if (msg && msg.includes('Unknown argument')) {
         const firstArg = process.argv[2];
         if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--coll-root'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
-          console.error(chalk.red(`ERROR: ${msg}`));
-          console.error(chalk.yellow(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`));
+          logger.error(`ERROR: ${msg}`);
+          logger.warn(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`);
           yargsInstance.showHelp();
           process.exit(1);
           return;
         }
       }
-      console.error(chalk.red(msg || 'An error occurred.'));
-      if (msg) console.error(chalk.yellow('For usage details, run with --help.'));
+      logger.error(msg || 'An error occurred.');
+      if (msg) logger.warn('For usage details, run with --help.');
       process.exit(1);
     })
-    .epilogue(chalk.gray(
+    .epilogue(
       'For more information, refer to the README.md file.\n' +
             'Tab-completion Tip:\n' +
             '   echo \'source <(md-to-pdf completion)\' >> ~/.bashrc\n' +
             '   echo \'source <(md-to-pdf completion)\' >> ~/.zshrc\n' +
             'then run `source ~/.bashrc` or `source ~/.zshrc`'
-    ));
+    );
 
   await argvBuilder.argv;
 }
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error(chalk.red('Unhandled Rejection at:'), promise, chalk.red('reason:'), reason);
+  logger.error('Unhandled Rejection at:', { promise, reason });
   if (reason instanceof Error && reason.stack) {
-    console.error(chalk.red(reason.stack));
+    logger.error(reason.stack);
   }
   process.exit(1);
 });
 process.on('uncaughtException', (error) => {
-  console.error(chalk.red('Uncaught Exception:'), error);
+  logger.error('Uncaught Exception:', { error });
   if (error.stack) {
-    console.error(chalk.red(error.stack));
+    logger.error(error.stack);
   }
   process.exit(1);
 });

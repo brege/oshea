@@ -62,6 +62,10 @@ This document is a central index for all developer and automation scripts within
     -- A shell script to enforce a consistent header comment in all project `.js` files.
   - [ [`strip-trailing-whitespace.js`](linting/strip-trailing-whitespace.js) ]
     -- A shell script to strip trailing whitespace from all project `.js` files.
+  - [ [logging-lint.js](linting/logging-lint.js) ]
+    -- A utility to check for `console.*` statements in a post `logger` world.
+  - [ [comment-surfacer.js](shared/comment-surfacer.js) ]
+    -- A utility to surface code comment-ditritus in `.js` files.
 
 ### Refactoring & Auditing [ `refactor/` ]
 

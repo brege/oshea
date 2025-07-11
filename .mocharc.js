@@ -18,7 +18,7 @@ const paths = {
   // --- Subsystem & Module Integration Test Paths ---
   default_handler:        'test/integration/core/default-handler.*.js',               // Rank 0
   pdf_generator:          'test/integration/core/pdf-generator.*.js',                 // Rank 0
-  math_integration:       'test/integration/math_integration/math_integration.*.js',  // Rank 2
+  math_integration:       'test/integration/core/math_integration.*.js',              // Rank 2
 
   ConfigResolver:         'test/integration/config/config-resolver.*.js',             // Rank 1
   main_config_loader:     'test/integration/config/main-config-loader.*.js',          // Rank 2

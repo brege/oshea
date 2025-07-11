@@ -1,5 +1,5 @@
 // src/core/watch_handler.js
-const { configResolverPath } = require('@paths');
+const { configResolverPath, logger } = require('@paths');
 const path = require('path');
 const fs = require('fs');
 const chokidar = require('chokidar');
@@ -28,7 +28,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
       if (pluginSpecificConfig && Array.isArray(pluginSpecificConfig.watch_sources)) {
         for (const sourceEntry of pluginSpecificConfig.watch_sources) {
           if (!sourceEntry || typeof sourceEntry !== 'object') {
-            console.warn(`WARN (watcher): Invalid entry in watch_sources for plugin '${currentArgs.plugin || currentArgs.pluginName}'. Skipping.`);
+            logger.warn(`Invalid entry in watch_sources for plugin '${currentArgs.plugin || currentArgs.pluginName}'. Skipping.`, { module: 'src/core/watch_handler.js' });
             continue;
           }
 
@@ -39,7 +39,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
             if (cliValue && typeof cliValue === 'string') {
               resolvedPathToAdd = path.resolve(cliValue);
             } else {
-              console.warn(`WARN (watcher): CLI argument '${sourceEntry.path_from_cli_arg}' not found or invalid for watch_sources in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`);
+              logger.warn(`CLI argument '${sourceEntry.path_from_cli_arg}' not found or invalid for watch_sources in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`, { module: 'src/core/watch_handler.js' });
             }
           } else if (sourceEntry.path && typeof sourceEntry.path === 'string') {
             // Placeholder substitution for paths like "{{ cliArgs.someDir }}/data.json"
@@ -51,7 +51,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
               if (currentArgs[argName] !== undefined) {
                 pathValue = pathValue.replace(match[0], currentArgs[argName]);
               } else {
-                console.warn(`WARN (watcher): CLI argument '${argName}' in placeholder not found for watch_sources path '${sourceEntry.path}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`);
+                logger.warn(`CLI argument '${argName}' in placeholder not found for watch_sources path '${sourceEntry.path}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`, { module: 'src/core/watch_handler.js' });
               }
             }
             resolvedPathToAdd = path.resolve(pluginBasePath, pathValue);
@@ -71,7 +71,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
               if (currentArgs[argName] !== undefined) {
                 globPattern = globPattern.replace(match[0], currentArgs[argName]);
               } else {
-                console.warn(`WARN (watcher): CLI argument '${argName}' in placeholder not found for watch_sources glob pattern '${sourceEntry.pattern}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`);
+                logger.warn(`CLI argument '${argName}' in placeholder not found for watch_sources glob pattern '${sourceEntry.pattern}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`, { module: 'src/core/watch_handler.js' });
               }
             }
             // Note: globBase itself could also contain placeholders if we decide to support that,
@@ -87,13 +87,13 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
 
           if (resolvedPathToAdd) {
             if (sourceEntry.type !== 'glob' && !fs.existsSync(resolvedPathToAdd)) {
-              console.warn(`WARN (watcher): Declared watch path does not exist: ${resolvedPathToAdd} (from plugin '${currentArgs.plugin || currentArgs.pluginName}')`);
+              logger.warn(`Declared watch path does not exist: ${resolvedPathToAdd} (from plugin '${currentArgs.plugin || currentArgs.pluginName}')`, { module: 'src/core/watch_handler.js' });
             } else {
               files.add(resolvedPathToAdd);
-              console.log(`INFO (watcher): Added to watch list from plugin '${currentArgs.plugin || currentArgs.pluginName}': ${resolvedPathToAdd}`);
+              logger.info(`Added to watch list from plugin '${currentArgs.plugin || currentArgs.pluginName}': ${resolvedPathToAdd}`, { module: 'src/core/watch_handler.js' });
             }
           } else if (sourceEntry.type !== 'glob') {
-            console.warn(`WARN (watcher): Could not resolve path for a watch_sources entry in plugin '${currentArgs.plugin || currentArgs.pluginName}': ${JSON.stringify(sourceEntry)}`);
+            logger.warn(`Could not resolve path for a watch_sources entry in plugin '${currentArgs.plugin || currentArgs.pluginName}': ${JSON.stringify(sourceEntry)}`, { module: 'src/core/watch_handler.js' });
           }
         }
       }
@@ -115,7 +115,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
       }
 
     } catch (error) {
-      console.warn(`WARN (watcher): Could not determine all paths to watch for plugin '${currentArgs.plugin || currentArgs.pluginName}': ${error.message}`);
+      logger.warn(`Could not determine all paths to watch for plugin '${currentArgs.plugin || currentArgs.pluginName}': ${error.message}`, { module: 'src/core/watch_handler.js' });
       if (currentArgs.markdownFile && fs.existsSync(currentArgs.markdownFile)) {
         files.add(path.resolve(currentArgs.markdownFile));
       }
@@ -141,7 +141,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
     }
     isProcessing = true;
     needsRebuild = false;
-    console.log(`\nDetected ${event} in: ${filePathTrigger}. Rebuilding...`);
+    logger.info(`\nDetected ${event} in: ${filePathTrigger}. Rebuilding...`, { module: 'src/core/watch_handler.js' });
 
     try {
       await commandExecutor(args);
@@ -168,12 +168,12 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
         }
       }
     } catch (error) {
-      console.error(`ERROR during rebuild triggered by ${filePathTrigger} (${event}): ${error.message}`);
-      if (error.stack) console.error(error.stack);
+      logger.error(`ERROR during rebuild triggered by ${filePathTrigger} (${event}): ${error.message}`, { module: 'src/core/watch_handler.js', error });
+      if (error.stack) logger.error(error.stack, { module: 'src/core/watch_handler.js' });
     } finally {
       isProcessing = false;
       if (needsRebuild) {
-        console.log('Executing queued rebuild...');
+        logger.info('Executing queued rebuild...', { module: 'src/core/watch_handler.js' });
         setTimeout(() => {
           if (!isProcessing) {
             rebuild('queued', 'queued changes');
@@ -182,7 +182,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
           }
         }, 250);
       } else {
-        console.log('Watching for further changes...');
+        logger.info('Watching for further changes...', { module: 'src/core/watch_handler.js' });
       }
     }
   };
@@ -191,7 +191,7 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
     const initialConfigResolver = new ConfigResolver(args.config, args.factoryDefaults);
     watchedPaths = await collectWatchablePaths(initialConfigResolver, args);
   } catch (e) {
-    console.error(`ERROR: Failed to collect initial paths for watcher: ${e.message}`);
+    logger.error(`Failed to collect initial paths for watcher: ${e.message}`, { module: 'src/core/watch_handler.js' });
     watchedPaths = [];
     if (args.markdownFile && fs.existsSync(args.markdownFile)) {
       watchedPaths.push(path.resolve(args.markdownFile));
@@ -199,18 +199,18 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
   }
 
   if (watchedPaths.length === 0) {
-    console.warn('WARN: Watch mode activated, but no files could be identified to watch. Executing command once.');
+    logger.warn('Watch mode activated, but no files could be identified to watch. Executing command once.', { module: 'src/core/watch_handler.js' });
     try {
       await commandExecutor(args);
     } catch(e) {
-      console.error(`ERROR during single execution in watch mode (no files watched): ${e.message}`);
+      logger.error(`ERROR during single execution in watch mode (no files watched): ${e.message}`, { module: 'src/core/watch_handler.js' });
     }
     return;
   }
 
-  console.log('\nWatch mode active. Initially monitoring:');
-  watchedPaths.forEach(f => console.log(`  - ${f}`));
-  console.log('Press Ctrl+C to exit.');
+  logger.info('\nWatch mode active. Initially monitoring:', { module: 'src/core/watch_handler.js' });
+  watchedPaths.forEach(f => logger.detail(`  - ${f}`, { module: 'src/core/watch_handler.js' }));
+  logger.info('Press Ctrl+C to exit.', { module: 'src/core/watch_handler.js' });
 
   watcher = chokidar.watch(watchedPaths, {
     persistent: true,
@@ -227,13 +227,13 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
         rebuild(event, filePath);
       }
     })
-    .on('error', error => console.error(`Watcher error: ${error}`));
+    .on('error', error => logger.error(`Watcher error: ${error}`, { module: 'src/core/watch_handler.js' }));
 
   try {
-    console.log('Performing initial build for watch mode...');
+    logger.info('Performing initial build for watch mode...', { module: 'src/core/watch_handler.js' });
     await commandExecutor(args);
   } catch (e) {
-    console.error(`ERROR during initial build in watch mode: ${e.message}`);
+    logger.error(`ERROR during initial build in watch mode: ${e.message}`, { module: 'src/core/watch_handler.js' });
   }
 }
 

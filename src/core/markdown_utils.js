@@ -1,5 +1,5 @@
 // src/core/markdown_utils.js
-const { mathIntegrationPath } = require('@paths');
+const { mathIntegrationPath, logger } = require('@paths');
 
 /**
  * @fileoverview Provides utility functions for Markdown processing, including
@@ -81,7 +81,7 @@ function getTypeConfig(fullConfig, docType) {
     cssFiles = fullConfig.document_types?.default?.css_files || [];
   }
   if (!Array.isArray(cssFiles) || cssFiles.length === 0) {
-    console.warn(`WARN: No CSS files defined for document type '${docType}' or for 'default' type. Consider adding 'default.css' or type-specific CSS.`);
+    logger.warn(`No CSS files defined for document type '${docType}' or for 'default' type. Consider adding 'default.css' or type-specific CSS.`, { module: 'src/core/markdown_utils.js' });
     cssFiles = ['default.css']; // Fallback to a conventional default name
   }
 
@@ -118,7 +118,7 @@ function extractFrontMatter(markdownContent) {
     const result = matter(markdownContent);
     return { data: result.data || {}, content: result.content || markdownContent };
   } catch (e) {
-    console.warn(`WARN: Could not parse front matter: ${e.message}. Proceeding with full content as body.`);
+    logger.warn(`Could not parse front matter: ${e.message}. Proceeding with full content as body.`, { module: 'src/core/markdown_utils.js' });
     return { data: {}, content: markdownContent };
   }
 }
@@ -149,7 +149,7 @@ function removeShortcodes(content, patterns) {
         processedContent = processedContent.replace(regex, '');
 
       } catch (e) {
-        console.warn(`WARN: Invalid regex pattern for shortcode removal: '${patternStr}'. Skipping. Error: ${e.message}`);
+        logger.warn(`Invalid regex pattern for shortcode removal: '${patternStr}'. Skipping. Error: ${e.message}`, { module: 'src/core/markdown_utils.js' });
       }
     });
   }
@@ -194,10 +194,10 @@ function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, 
         } else if (typeof pluginConfig === 'string') {
           md.use(require(pluginConfig));
         } else {
-          console.warn('Invalid markdown-it plugin configuration found:', pluginConfig);
+          logger.warn('Invalid markdown-it plugin configuration found:', { module: 'src/core/markdown_utils.js', pluginConfig });
         }
       } catch (e) {
-        console.error(`Error applying custom markdown-it plugin '${pluginConfig}': ${e.message}`);
+        logger.error(`Error applying custom markdown-it plugin '${pluginConfig}': ${e.message}`, { module: 'src/core/markdown_utils.js' });
       }
     });
   }
@@ -266,7 +266,7 @@ function ensureAndPreprocessHeading(markdownContent, title, aggressiveCleanup = 
     return processedContent;
   } else {
     if (!processedContent.match(/^#\s+/m) && !aggressiveCleanup) {
-      console.warn('WARN: Markdown content does not start with an H1 heading, and no title was provided to prepend.');
+      logger.warn('Markdown content does not start with an H1 heading, and no title was provided to prepend.', { module: 'src/core/markdown_utils.js' });
     }
     return processedContent;
   }
@@ -328,7 +328,7 @@ function substitutePlaceholdersInString(content, context, warningContext = 'valu
     }
     // Only warn if the placeholder wasn't an empty string (which could be an intentional removal)
     if (match.trim() !== '{{}}' && match.trim() !== '{{ . }}') {
-      console.warn(`WARN: Placeholder '{{ ${fullPath} }}' not found during ${warningContext} substitution.`);
+      logger.warn(`Placeholder '{{ ${fullPath} }}' not found during ${warningContext} substitution.`, { module: 'src/core/markdown_utils.js' });
     }
     return match; // Return original match if placeholder not found
   });
@@ -387,7 +387,7 @@ function substituteAllPlaceholders(mainContent, initialContextData) {
   }
 
   if (loopCount === maxFmSubstLoops && fmChangedInLoop) {
-    console.warn('WARN: Max substitution loops reached for context data. Check for circular placeholder references.');
+    logger.warn('Max substitution loops reached for context data. Check for circular placeholder references.', { module: 'src/core/markdown_utils.js' });
   }
 
   // Substitute placeholders in the main Markdown content using the fully processed context

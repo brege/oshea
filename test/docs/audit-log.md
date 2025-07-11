@@ -153,13 +153,20 @@ This document summarizes key limitations and discrepancies in the `md-to-pdf` co
 
 ## Entry: 1.7.4
 
+
 - **test_id:** 1.7.4
-- **title:** Stubborn Mocking Issue in `math_integration` Test for `require` Failure
+- **title:** Robust Error Handling Test for KaTeX Plugin Loading in `math_integration`
 - **component:** math_integration
-- **status:** SKIPPED
-- **description:** The challenge lies in reliably mocking this internal `require` behavior across different test scenarios using `proxyquire`
-- **impact:** The test scenario, while important for complete error handling coverage, is currently unverified by automated tests.
-- **suggested_action:** Revisit this test with a deeper investigation into advanced `proxyquire` patterns for dynamic `require` mocking.
+- **status:** CLOSED
+- **description:**  
+  This test verifies that `configureMarkdownItForMath` logs an error and returns early if `@vscode/markdown-it-katex` cannot be required or does not export a valid plugin function. The test ensures that no attempt is made to call `.use()` on the MarkdownIt instance in this scenario, and that error logging occurs as expected.
+- **resolution:** The test was successfully implemented using declarative scenario-driven mocking and precise dependency injection. The key breakthrough was ensuring the injected plugin module was passed as `katexPluginModule` in the factory's dependency object, aligning with the app code's expectations. This allowed for reliable simulation of invalid or missing plugins using `proxyquire`.
+- **impact:** Full error-path coverage for plugin loading in math integration. Prevents silent failures and ensures robust, predictable behavior when misconfiguration or dependency issues occur.
+- **lessons_learned:**  
+  - Declarative test manifests and centralized factories dramatically improve test reliability and maintainability.
+  - Correctly matching dependency injection keys between the app code and test factory is critical for effective mocking.
+  - Advanced use of `proxyquire` enables thorough coverage of dynamic `require` scenarios, even for error paths.
+- **suggested_action:** No further action needed. This test now serves as a model for error-path testing and dependency injection in other modules.
 
 ---
 

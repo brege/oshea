@@ -127,14 +127,14 @@ The **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script synthesizes this i
 
 **QA Dashboard** -- Current (automatically generated)
 
-<!-- qa-dashboard-start -->
+<!--qa-dashboard-start-->
 | Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |
 |-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|
-| 1.7.4    | math_integration    | OPEN     |            | audit-log:154|                                                       |
+| 4.1.3    | Custom Plugin Workflow| OPEN     |            |              |                                                       |
+| 4.1.4    | Local Plugin Update & Sync| OPEN     |            |              |                                                       |
 | 4.2.1    | convert --watch     | OPEN     |            |              |                                                       |
 | 4.2.2    | convert --watch     | OPEN     |            |              |                                                       |
-<!-- qa-dashboard-end -->
-
+<!--qa-dashboard-end-->
 ---
 
 <details>

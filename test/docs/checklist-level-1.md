@@ -831,9 +831,9 @@
   - **test_type:** MODULE_INTEGRATION
   - **description:** Verify `configureMarkdownItForMath` does nothing if math is not enabled or the engine is not 'katex'.
 
-* [ ] 1.7.4 Test `configureMarkdownItForMath` logs an error and returns if `@vscode/markdown-it-katex` cannot be `require`d or is not a valid plugin function.
+* [x] 1.7.4 Test `configureMarkdownItForMath` logs an error and returns if `@vscode/markdown-it-katex` cannot be `require`d or is not a valid plugin function.
   - **test_id:** 1.7.4
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** math_integration
   - **test_type:** MODULE_INTEGRATION
   - **description:** Test `configureMarkdownItForMath` logs an error and returns if `@vscode/markdown-it-katex` cannot be `require`d or is not a valid plugin function.

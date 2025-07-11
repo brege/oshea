@@ -3,6 +3,7 @@
 /**
  * @fileoverview Module for math rendering integration, initially supporting KaTeX.
  */
+const { logger } = require('@paths');
 
 // Factory function to create the math integration module, allowing dependency injection
 function createMathIntegration(dependencies = {}) {
@@ -23,13 +24,13 @@ function createMathIntegration(dependencies = {}) {
     if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
       let currentKatexPluginModule = katexPluginModule;
 
-      let pluginFunction = currentKatexPluginModule;
-
-      if (currentKatexPluginModule && typeof currentKatexPluginModule.default === 'function') {
+      let pluginFunction = null;
+      if (typeof currentKatexPluginModule === 'function') {
+        pluginFunction = currentKatexPluginModule;
+      } else if (currentKatexPluginModule && typeof currentKatexPluginModule.default === 'function') {
         pluginFunction = currentKatexPluginModule.default;
-      } else if (typeof currentKatexPluginModule !== 'function') {
-        console.error('ERROR: The resolved KaTeX plugin (or its .default) is not a function. Cannot apply to markdown-it.');
-        console.error('ERROR: Actual loaded module was:', currentKatexPluginModule);
+      } else {
+        logger.error('The resolved KaTeX plugin (or its .default) is not a function. Cannot apply to markdown-it.', { module: 'src/core/math_integration.js', actualModule: currentKatexPluginModule });
         return;
       }
 
@@ -37,15 +38,16 @@ function createMathIntegration(dependencies = {}) {
 
       try {
         mdInstance.use(pluginFunction, currentKatexOptions);
-        console.log('INFO: KaTeX math rendering enabled for markdown-it (md.use successful).');
+        logger.info('KaTeX math rendering enabled for markdown-it (md.use successful).', { module: 'src/core/math_integration.js' });
       } catch (useError) {
-        console.error('ERROR: mdInstance.use(katexPlugin) failed directly:', useError);
+        logger.error('mdInstance.use(katexPlugin) failed directly:', { module: 'src/core/math_integration.js', error: useError });
         if (useError.stack) {
-          console.error(useError.stack);
+          logger.error(useError.stack, { module: 'src/core/math_integration.js' });
         }
       }
     }
   }
+
 
   /**
      * Retrieves the content of the KaTeX CSS file if math rendering is enabled.
@@ -55,19 +57,19 @@ function createMathIntegration(dependencies = {}) {
      */
   async function getMathCssContent(mathConfig) {
     if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
-      console.log(`[math_integration.js] getMathCssContent: Checking for KaTeX CSS at ${KATEX_CSS_PATH}`);
+      logger.detail(`[math_integration.js] getMathCssContent: Checking for KaTeX CSS at ${KATEX_CSS_PATH}`, { module: 'src/core/math_integration.js' });
 
       if (fss.existsSync(KATEX_CSS_PATH)) {
         try {
           const cssContent = await fs_promises.readFile(KATEX_CSS_PATH, 'utf8');
-          console.log('INFO: KaTeX CSS loaded.');
+          logger.info('KaTeX CSS loaded.', { module: 'src/core/math_integration.js' });
           return [cssContent];
         } catch (error) {
-          console.warn(`WARN: Could not read KaTeX CSS file from ${KATEX_CSS_PATH}: ${error.message}`);
+          logger.warn(`Could not read KaTeX CSS file from ${KATEX_CSS_PATH}: ${error.message}`, { module: 'src/core/math_integration.js' });
           return [];
         }
       } else {
-        console.warn(`WARN: KaTeX CSS file not found at expected path: ${KATEX_CSS_PATH}. Math rendering might not be styled correctly.`);
+        logger.warn(`KaTeX CSS file not found at expected path: ${KATEX_CSS_PATH}. Math rendering might not be styled correctly.`, { module: 'src/core/math_integration.js' });
         return [];
       }
     }

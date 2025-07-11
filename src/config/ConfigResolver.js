@@ -3,8 +3,17 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const Ajv = require('ajv');
-const { configUtilsPath, pluginRegistryBuilderPath, mainConfigLoaderPath, pluginConfigLoaderPath, assetResolverPath, validatorsRoot, logger } = require('@paths');
+const {
+  configUtilsPath,
+  pluginRegistryBuilderPath,
+  mainConfigLoaderPath,
+  pluginConfigLoaderPath,
+  assetResolverPath,
+  validatorsRoot,
+  loggerPath
+} = require('@paths');
 
+const logger = require(loggerPath);
 const { loadYamlConfig, deepMerge } = require(configUtilsPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 const MainConfigLoader = require(mainConfigLoaderPath);

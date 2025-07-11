@@ -2,7 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { markdownUtilsPath, logger } = require('@paths'); // Added logger import
+const { markdownUtilsPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 const { loadConfig: loadYamlConfig } = require(markdownUtilsPath);
 const yaml = require('js-yaml');
 

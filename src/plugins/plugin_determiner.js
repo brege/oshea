@@ -1,7 +1,8 @@
 // src/plugins/plugin_determiner.js
 
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
-const { logger } = require('@paths');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 /**
  * Determines the plugin to use based on CLI arguments, front matter, local config, or default.

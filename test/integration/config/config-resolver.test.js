@@ -5,7 +5,7 @@
  *
  * - All application code references must use @paths (never relative paths).
  * - Only test-to-test, test-to-factory, or test-to-manifest imports may be relative.
- * - Proxyquire is used to inject testLogger and preserve all other @paths exports.
+ * - Proxyquire is used to inject testLoggerPath and preserve all other @paths exports.
  * - All test case logic is defined in manifests and factories.
  * - This runner supports both imperative and manifest-driven setup via a flag.
  */
@@ -13,13 +13,16 @@
 const { configResolverPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require('../../shared/capture-logs');
 const proxyquire = require('proxyquire');
 const nodePath = require('path');
 const _ = require('lodash');
 
 // Use the @paths alias for proxyquire stubbing
 const allPaths = require('@paths');
+
+// Add this: path to your test logger module
+const testLoggerPath = nodePath.resolve(__dirname, '../../shared/testLogger.js');
 
 // Load manifests and factories (test code only, so relative is fine)
 const constructorManifest = require('./config-resolver.constructor.manifest');
@@ -80,7 +83,7 @@ describe('ConfigResolver (Integration Tests)', function () {
     };
 
     ConfigResolver = proxyquire(configResolverPath, {
-      '@paths': { ...allPaths, logger: testLogger },
+      '@paths': { ...allPaths, loggerPath: testLoggerPath },
     });
   });
 
@@ -187,3 +190,4 @@ describe('ConfigResolver (Integration Tests)', function () {
     });
   });
 });
+

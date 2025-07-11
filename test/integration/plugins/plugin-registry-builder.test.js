@@ -2,8 +2,9 @@
 const { pluginRegistryBuilderPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const path = require('path');
 
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require('../../shared/capture-logs');
 
 const constructorManifest = require('./plugin-registry-builder.constructor.manifest');
 const resolveAliasManifest = require('./plugin-registry-builder.resolve-alias.manifest');
@@ -56,10 +57,12 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
     delete require.cache[pluginRegistryBuilderPath];
     delete require.cache[pathsPath];
 
+    // Inject loggerPath for log capturing
+    const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
     require.cache[pathsPath] = {
       exports: {
         ...require(pathsPath),
-        logger: testLogger
+        loggerPath: testLoggerPath
       }
     };
 
@@ -87,7 +90,7 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
       loadYamlConfig: sinon.stub(),
       yaml: { load: sinon.stub() },
       collRoot: commonTestConstants.FAKE_COLL_ROOT,
-      logger: testLogger
+      // logger: testLogger // REMOVE this line, use loggerPath above
     };
 
     mockDependencies.fsPromises = {
@@ -157,3 +160,4 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
     });
   });
 });
+

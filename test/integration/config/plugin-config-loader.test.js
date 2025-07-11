@@ -3,10 +3,12 @@ const { pluginConfigLoaderPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const path = require('path');
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require('../../shared/capture-logs');
 const proxyquire = require('proxyquire');
 
 const allPaths = require('@paths');
+const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+
 const constructorManifest = require('./plugin-config-loader.constructor.manifest.js');
 const loadSingleLayerManifest = require('./plugin-config-loader.loadSingleLayer.manifest.js');
 const applyOverridesManifest = require('./plugin-config-loader.applyOverrides.manifest.js');
@@ -41,11 +43,11 @@ describe('PluginConfigLoader (Integration Tests)', function() {
         isObject: sinon.stub(),
       },
       AssetResolver: { resolveAndMergeCss: sinon.stub() },
-      logger: testLogger,
+      logger: require('../../shared/capture-logs.js'), // <-- CRITICAL: provide logger for this.logger
     };
 
     PluginConfigLoader = proxyquire(pluginConfigLoaderPath, {
-      '@paths': { ...allPaths, logger: testLogger },
+      '@paths': { ...allPaths, loggerPath: testLoggerPath },
     });
   });
 
@@ -77,3 +79,4 @@ describe('PluginConfigLoader (Integration Tests)', function() {
     });
   });
 });
+

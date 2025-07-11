@@ -1,10 +1,15 @@
 // test/integration/plugins/plugin_determiner.test.js
+
 const { pluginDeterminerPath } = require('@paths');
 const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require('../../shared/capture-logs');
 const testManifest = require('./plugin_determiner.manifest');
+const path = require('path');
+
+// Use capture-logs.js as the logger module for loggerPath
+const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
 
 describe('determinePluginToUse (Module Integration Tests)', function() {
   let determinePluginToUse;
@@ -31,11 +36,10 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
     delete require.cache[pluginDeterminerPath];
     delete require.cache[pathsPath];
 
-
     require.cache[pathsPath] = {
       exports: {
-        ...require(pathsPath), // Use the stored path string
-        logger: testLogger
+        ...require(pathsPath),
+        loggerPath: testLoggerPath
       }
     };
 
@@ -89,3 +93,4 @@ describe('determinePluginToUse (Module Integration Tests)', function() {
     });
   });
 });
+

@@ -3,10 +3,12 @@ const { mainConfigLoaderPath, defaultConfigPath, factoryDefaultConfigPath } = re
 const { expect } = require('chai');
 const sinon = require('sinon');
 const path = require('path');
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require('../../shared/capture-logs');
 const proxyquire = require('proxyquire');
 
 const allPaths = require('@paths');
+const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+
 const constructorManifest = require('./main-config-loader.constructor.manifest.js');
 const initializeManifest = require('./main-config-loader.initialize.manifest.js');
 const gettersManifest = require('./main-config-loader.getters.manifest.js');
@@ -46,7 +48,7 @@ describe('MainConfigLoader (Integration Tests)', function() {
     };
 
     MainConfigLoader = proxyquire(mainConfigLoaderPath, {
-      '@paths': { ...allPaths, logger: testLogger },
+      '@paths': { ...allPaths, loggerPath: testLoggerPath },
       os: mockDependencies.os,
     });
   });
@@ -87,3 +89,4 @@ describe('MainConfigLoader (Integration Tests)', function() {
     });
   });
 });
+

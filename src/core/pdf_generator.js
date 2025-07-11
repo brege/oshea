@@ -1,7 +1,9 @@
 // src/core/pdf_generator.js
 const puppeteer = require('puppeteer');
 const path = require('path');
-const { logger } = require('@paths');
+
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileContentsArray, htmlTemplateStr = null, injectionPoints = {}) {
   let browser = null;

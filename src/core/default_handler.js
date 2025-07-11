@@ -8,10 +8,10 @@ const {
   markdownUtilsPath,
   pdfGeneratorPath,
   mathIntegrationPath,
-  logger
+  loggerPath
 } = require('@paths');
 
-// --- Original requires, now using path anchors ---
+const logger = require(loggerPath);
 const {
   extractFrontMatter,
   removeShortcodes,

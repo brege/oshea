@@ -1,9 +1,7 @@
 // src/core/math_integration.js
 
-/**
- * @fileoverview Module for math rendering integration, initially supporting KaTeX.
- */
-const { logger } = require('@paths');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 // Factory function to create the math integration module, allowing dependency injection
 function createMathIntegration(dependencies = {}) {

@@ -1,7 +1,9 @@
 // src/utils/asset_resolver.js
 const fs = require('fs');
 const path = require('path');
-const { logger } = require('@paths');
+
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 class AssetResolver {
   static resolveAndMergeCss(newCssFilePathsRaw, definingConfigDir, existingCssPaths, inheritCssFlag, contextPluginName = 'plugin', contextConfigFilePath = 'config') {
@@ -44,3 +46,4 @@ class AssetResolver {
 }
 
 module.exports = AssetResolver;
+

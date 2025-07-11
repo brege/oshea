@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { pluginManagerPath } = require('@paths');
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require('../../shared/capture-logs');
 const testManifest = require('./plugin-manager.manifest.js');
 
 describe('PluginManager Tests (1.5.x)', function() {
@@ -21,9 +21,13 @@ describe('PluginManager Tests (1.5.x)', function() {
     originalPathsModule = require.cache[pathsPath];
     delete require.cache[pluginManagerPath];
     delete require.cache[pathsPath];
+
+    // Inject loggerPath for log capturing
+    const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
     require.cache[pathsPath] = {
-      exports: { ...require(pathsPath), logger: testLogger }
+      exports: { ...require(pathsPath), loggerPath: testLoggerPath }
     };
+
     PluginManager = require(pluginManagerPath);
   });
 
@@ -85,3 +89,4 @@ describe('PluginManager Tests (1.5.x)', function() {
     });
   });
 });
+

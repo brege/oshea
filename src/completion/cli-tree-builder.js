@@ -2,7 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { convertCmdPath, logger } = require('@paths');
+const { convertCmdPath, loggerPath  } = require('@paths');
+const logger = require(loggerPath);
 
 // --- Dynamic Proxy Yargs Stub ---
 function createYargsStub() {

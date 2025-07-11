@@ -1,5 +1,6 @@
 // src/core/markdown_utils.js
-const { mathIntegrationPath, logger } = require('@paths');
+const { mathIntegrationPath, loggerPath  } = require('@paths');
+const logger = require(loggerPath);
 
 /**
  * @fileoverview Provides utility functions for Markdown processing, including

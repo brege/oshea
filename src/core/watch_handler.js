@@ -1,5 +1,6 @@
 // src/core/watch_handler.js
-const { configResolverPath, logger } = require('@paths');
+const { configResolverPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 const path = require('path');
 const fs = require('fs');
 const chokidar = require('chokidar');

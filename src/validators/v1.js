@@ -96,23 +96,33 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
   try {
     logger.info('    Running in-situ E2E test...', { module: 'src/validators/v1.js' });
     const command = `node "${mochaPath}" "${e2eTestPath}" --no-config --no-opts`;
-    execSync(command, {
+    const result = execSync(command, {
       cwd: projectRoot,
       stdio: 'pipe',
       env: {
-        ...process.env, // Inherit existing environment variables
+        ...process.env,
         NODE_PATH: nodeModulesPath
       }
     });
     logger.success('    [✔] In-situ test passes.', { module: 'src/validators/v1.js' });
+    // Always print test output, even on success
+    if (result && result.length > 0) {
+      logger.info('\n--- Begin In-Situ Test Output ---', { module: 'src/validators/v1.js' });
+      logger.info(result.toString(), { module: 'src/validators/v1.js' });
+      logger.info('--- End In-Situ Test Output ---\n', { module: 'src/validators/v1.js' });
+    }
   } catch (e) {
     errors.push('In-situ E2E test failed');
     logger.error('    [✖] In-situ test failed.', { module: 'src/validators/v1.js' });
     logger.error('\n--- Begin In-Situ Test Error Output ---', { module: 'src/validators/v1.js' });
-    if (e.stderr) {
-      logger.error(e.stderr.toString(), { module: 'src/validators/v1.js' });
-    } else {
-      logger.error('No STDERR captured. Full error object:', { module: 'src/validators/v1.js', error: e });
+    if (e.stdout && e.stdout.length > 0) {
+      logger.error('[stdout]\n' + e.stdout.toString(), { module: 'src/validators/v1.js' });
+    }
+    if (e.stderr && e.stderr.length > 0) {
+      logger.error('[stderr]\n' + e.stderr.toString(), { module: 'src/validators/v1.js' });
+    }
+    if ((!e.stdout || e.stdout.length === 0) && (!e.stderr || e.stderr.length === 0)) {
+      logger.error('No output captured from test process.', { module: 'src/validators/v1.js' });
     }
     logger.error('--- End In-Situ Test Error Output ---\n', { module: 'src/validators/v1.js' });
   }
@@ -139,9 +149,14 @@ const runSelfActivation = (pluginDirectoryPath, pluginName, errors) => {
     const command = `node "${cliPath}" convert "${exampleMdPath}" --outdir "${tempOutputDir}" --no-open`;
     execSync(command, { cwd: projectRoot, stdio: 'pipe' });
     logger.success('    [✔] Self-activation successful.', { module: 'src/validators/v1.js' });
-  } catch {
+  } catch (e) {
     errors.push('Self-activation failed: The plugin was unable to convert its own example file.');
     logger.error('    [✖] Self-activation check failed.', { module: 'src/validators/v1.js' });
+    if (e.stderr) {
+      logger.error('\n--- Begin Self-Activation Error Output ---', { module: 'src/validators/v1.js' });
+      logger.error(e.stderr.toString(), { module: 'src/validators/v1.js' });
+      logger.error('--- End Self-Activation Error Output ---\n', { module: 'src/validators/v1.js' });
+    }
   } finally {
     fs.rmSync(tempOutputDir, { recursive: true, force: true });
   }
@@ -181,3 +196,4 @@ module.exports = {
   runSelfActivation,
   checkReadmeFrontMatterV1
 };
+

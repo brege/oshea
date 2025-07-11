@@ -1,8 +1,7 @@
 // src/collections/commands/list.js
-// No longer requires fs, path, or chalk
 
 module.exports = async function listCollections(dependencies, type = 'downloaded', collectionNameFilter = null) {
-  const { fss, fs, path, chalk, constants } = dependencies;
+  const { fss, fs, path, constants, logger } = dependencies;
   const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
 
   if (type === 'downloaded' || type === 'collections') {
@@ -44,7 +43,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
       collectionInfos.sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
       return collectionInfos;
     } catch (error) {
-      console.error(chalk.red(`  ERROR listing downloaded collections: ${error.message}`));
+      logger.error(`Error listing downloaded collections: ${error.message}`, { module: 'src/collections/commands/list.js' });
       throw error;
     }
   } else if (type === 'available') {
@@ -70,7 +69,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
     processedEnabledPlugins.sort((a,b) => (a.invoke_name || '').toLowerCase().localeCompare((b.invoke_name || '').toLowerCase()));
     return processedEnabledPlugins;
   } else {
-    console.log(chalk.yellow(`  Listing for type '${type}' is not implemented in manager's listCollections method.`));
+    logger.warn(`Listing for type '${type}' is not implemented in manager's listCollections method.`, { module: 'src/collections/commands/list.js' });
     return [];
   }
 };

@@ -179,4 +179,5 @@ The **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script synthesizes this i
 
 ## Uncategorized Test Scripts
 <!-- uncategorized-start -->
+- [refactor-checklist.md](docs/refactor-checklist.md)
 <!-- uncategorized-end -->

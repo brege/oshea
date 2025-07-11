@@ -1,12 +1,11 @@
 // src/collections/commands/add.js
 
 module.exports = async function addCollection(dependencies, source, options = {}) {
-  const { fs, fss, path, fsExtra, chalk, cmUtils } = dependencies;
+  const { fs, fss, path, fsExtra, cmUtils, logger } = dependencies;
 
-  // 'this' is still the CollectionsManager instance
-  console.log(chalk.blue(`CollectionsManager: Adding collection from source: ${chalk.underline(source)}`));
+  logger.info(`CollectionsManager: Adding collection from source: ${source}`, { module: 'src/collections/commands/add.js' });
   if (options.name) {
-    console.log(chalk.blue(`  Requested local name: ${chalk.yellow(options.name)}`));
+    logger.info(`  Requested local name: ${options.name}`, { module: 'src/collections/commands/add.js' });
   }
 
   await fs.mkdir(this.collRoot, { recursive: true });
@@ -17,8 +16,8 @@ module.exports = async function addCollection(dependencies, source, options = {}
   }
   const targetPath = path.join(this.collRoot, collectionName);
 
-  console.log(chalk.blue(`  Target collection name: ${chalk.yellow(collectionName)}`));
-  console.log(chalk.blue(`  Target path: ${chalk.underline(targetPath)}`));
+  logger.info(`  Target collection name: ${collectionName}`, { module: 'src/collections/commands/add.js' });
+  logger.info(`  Target path: ${targetPath}`, { module: 'src/collections/commands/add.js' });
 
   if (fss.existsSync(targetPath)) {
     throw new Error(`Error: Target directory '${targetPath}' already exists. Please remove it or choose a different name.`);
@@ -33,28 +32,27 @@ module.exports = async function addCollection(dependencies, source, options = {}
 
   if (/^(http(s)?:\/\/|git@)/.test(source) || (typeof source === 'string' && source.endsWith('.git') && fss.existsSync(path.resolve(source)))) {
     const sourceToClone = /^(http(s)?:\/\/|git@)/.test(source) ? source : path.resolve(source);
-    console.log(chalk.blue(`  Source is a Git repository. Attempting to clone with git from '${sourceToClone}'...`));
+    logger.info(`  Source is a Git repository. Attempting to clone with git from '${sourceToClone}'...`, { module: 'src/collections/commands/add.js' });
     await this._spawnGitProcess(['clone', sourceToClone, targetPath], this.collRoot, `cloning ${collectionName}`);
-    console.log(chalk.green(`\n  Successfully cloned '${sourceToClone}' to '${targetPath}'.`));
+    logger.success(`\n  Successfully cloned '${sourceToClone}' to '${targetPath}'.`, { module: 'src/collections/commands/add.js' });
     await this._writeCollectionMetadata(collectionName, createInitialMetadata());
     return targetPath;
   } else {
     const absoluteSourcePath = path.resolve(source);
-    console.log(chalk.blue(`  Source is a non-Git local path: ${chalk.underline(absoluteSourcePath)}. Attempting to copy...`));
+    logger.info(`  Source is a non-Git local path: ${absoluteSourcePath}. Attempting to copy...`, { module: 'src/collections/commands/add.js' });
     if (!fss.existsSync(absoluteSourcePath)) {
       const errMsg = `Local source path does not exist: ${absoluteSourcePath}`;
-      console.error(chalk.red(`  ERROR: ${errMsg}`));
+      logger.error(`  ERROR: ${errMsg}`, { module: 'src/collections/commands/add.js' });
       throw new Error(errMsg);
     }
     try {
       await fsExtra.copy(absoluteSourcePath, targetPath);
-      console.log(chalk.green(`  Successfully copied local source '${absoluteSourcePath}' to '${targetPath}'.`));
+      logger.success(`  Successfully copied local source '${absoluteSourcePath}' to '${targetPath}'.`, { module: 'src/collections/commands/add.js' });
       await this._writeCollectionMetadata(collectionName, createInitialMetadata());
       return targetPath;
     } catch (error) {
-      console.error(chalk.red(`  ERROR: Failed to copy local source '${absoluteSourcePath}' to '${targetPath}': ${error.message}`));
+      logger.error(`  ERROR: Failed to copy local source '${absoluteSourcePath}' to '${targetPath}': ${error.message}`, { module: 'src/collections/commands/add.js' });
       throw error;
     }
   }
 };
-

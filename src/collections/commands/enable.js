@@ -4,7 +4,7 @@ const { validate: pluginValidator } = require(validatorPath);
 
 module.exports = async function enablePlugin(dependencies, collectionPluginId, options = {}) {
 
-  const { fss, chalk } = dependencies;
+  const { fss, logger } = dependencies;
 
   const parts = collectionPluginId.split('/');
   if (parts.length !== 2) {
@@ -26,7 +26,7 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
   const absolutePluginConfigPath = pluginToEnable.config_path;
 
   if (!options.bypassValidation) {
-    console.log(chalk.blue(`  Running validation for plugin '${pluginId}' before enabling...`));
+    logger.info(`  Running validation for plugin '${pluginId}' before enabling...`, { module: 'src/collections/commands/enable.js' });
     const pluginDirectoryPath = pluginToEnable.base_path;
     const validationResult = pluginValidator(pluginDirectoryPath);
 
@@ -34,9 +34,9 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
       const errorMessages = validationResult.errors.join('\n  - ');
       throw new Error(`Plugin validation failed for '${pluginId}'. Errors:\n  - ${errorMessages}`);
     }
-    console.log(chalk.green(`  Plugin '${pluginId}' passed validation.`));
+    logger.success(`  Plugin '${pluginId}' passed validation.`, { module: 'src/collections/commands/enable.js' });
   } else {
-    console.log(chalk.yellow(`  Validation bypassed for plugin '${pluginId}' (--bypass-validation flag detected).`));
+    logger.warn(`  Validation bypassed for plugin '${pluginId}' (--bypass-validation flag detected).`, { module: 'src/collections/commands/enable.js' });
   }
 
 
@@ -63,6 +63,6 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
   enabledManifest.enabled_plugins.sort((a, b) => a.invoke_name.localeCompare(b.invoke_name));
 
   await this._writeEnabledManifest(enabledManifest);
-  console.log(chalk.green(`Plugin "${collectionName}/${pluginId}" enabled successfully as "${invokeName}".`));
+  logger.success(`Plugin "${collectionName}/${pluginId}" enabled successfully as "${invokeName}".`, { module: 'src/collections/commands/enable.js' });
   return { success: true, message: `Plugin "${collectionName}/${pluginId}" enabled as "${invokeName}".`, invoke_name: invokeName };
 };

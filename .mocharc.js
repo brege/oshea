@@ -175,7 +175,7 @@ const commands = {
   ],
 };
 
-// --- By Group ---
+// --- By Group ---  [ npm run -- --group <group> ]
 const groups = {
 
   // Ranks -- Integration Tests

@@ -11,7 +11,6 @@ const FAKE_RESOLVED_HANDLER_PATH = '/fake/plugins/my-plugin/handler.js';
 module.exports = [
   makeConfigResolverScenario({
     description: '1.1.4: should resolve plugin paths from the mergedPluginRegistry for a registered plugin name',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     mainConfigStubs: { getPrimaryMainConfig: { config: { global_pdf_options: {}, math: {} } } },
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
@@ -22,7 +21,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.5: should correctly identify the conventional config file from an absolute directory path',
-    useImperativeSetup: false,
     pluginSpec: FAKE_BASE_PATH,
     fileSystemStubs: {
       [FAKE_BASE_PATH]: { isDirectory: false, isFile: false },
@@ -34,7 +32,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.6: should correctly handle a plugin specified by an absolute file path',
-    useImperativeSetup: false,
     pluginSpec: FAKE_CONFIG_PATH,
     fileSystemStubs: { [FAKE_CONFIG_PATH]: { isFile: false } },
     pathStubs: { dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH } },
@@ -43,7 +40,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.7: should throw an error if a path-specified plugin is neither a file nor a directory',
-    useImperativeSetup: false,
     pluginSpec: '/fake/path/to/a-socket-or-something',
     isNegativeTest: false,
     fileSystemStubs: { '/fake/path/to/a-socket-or-something': { exists: false, isDirectory: false, isFile: false } },
@@ -52,7 +48,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.8: should throw an error if a registered plugin\'s config file does not exist',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     isNegativeTest: false,
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: '/path/to/a/missing/config.yaml' } },
@@ -62,7 +57,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.9: should apply XDG, Local, and Project overrides via pluginConfigLoader',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
     pathStubs: { dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH } },
@@ -81,7 +75,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.10: should correctly apply localConfigOverrides, including CSS resolution',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     localConfigOverrides: { pdf_options: { scale: 0.9 }, css_files: ['../styles/override.css'], inherit_css: false },
     markdownFilePath: '/path/to/markdown/file.md',
@@ -94,7 +87,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.11: should correctly merge global and plugin-specific pdf_options',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
     pathStubs: { dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH } },
@@ -106,7 +98,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.12: should correctly merge global and plugin-specific math configurations',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
     pathStubs: { dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH } },
@@ -118,7 +109,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.13: should consolidate and filter css_files to be unique and existing',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
     pathStubs: { dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH }, resolve: { [FAKE_BASE_PATH + ',handler.js']: FAKE_RESOLVED_HANDLER_PATH } },
@@ -129,7 +119,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.14: should throw an error if the resolved handler_script path does not exist',
-    useImperativeSetup: false,
     pluginSpec: FAKE_PLUGIN_NAME,
     isNegativeTest: false,
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
@@ -141,7 +130,6 @@ module.exports = [
 
   makeConfigResolverScenario({
     description: '1.1.15: should return a cached configuration on a second call with identical arguments',
-    useImperativeSetup:false,
     pluginSpec: FAKE_PLUGIN_NAME,
     localConfigOverrides: { some: 'override' },
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },

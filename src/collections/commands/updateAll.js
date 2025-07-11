@@ -1,8 +1,7 @@
 // src/collections/commands/updateAll.js
-// No longer requires fs, path, or chalk
 
 module.exports = async function updateAllCollections(dependencies) {
-  const { fss, fs, path, chalk, constants } = dependencies;
+  const { fss, fs, path, constants, logger } = dependencies;
   const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
 
   let allOverallSuccess = true;
@@ -11,11 +10,11 @@ module.exports = async function updateAllCollections(dependencies) {
   const downloadedCollectionInfos = await this.listCollections('downloaded');
 
   if (!downloadedCollectionInfos || downloadedCollectionInfos.length === 0) {
-    console.log(chalk.yellow('No collections are currently downloaded. Nothing to update.'));
+    logger.warn('No collections are currently downloaded. Nothing to update.', { module: 'src/collections/commands/updateAll.js' });
     return { success: true, messages: ['No collections downloaded.']};
   }
 
-  console.log(chalk.blue('Processing updates for downloaded collections:'));
+  logger.info('Processing updates for downloaded collections:', { module: 'src/collections/commands/updateAll.js' });
 
   for (const collectionInfo of downloadedCollectionInfos) {
     const collectionName = collectionInfo.name;
@@ -38,7 +37,7 @@ module.exports = async function updateAllCollections(dependencies) {
                 }
               } catch (singletonError) {
                 const errMsg = `Failed to process update for singleton ${singletonCollectionNameForUpdate}: ${singletonError.message}`;
-                console.error(chalk.red(`  ${errMsg}`));
+                logger.error(`  ${errMsg}`, { module: 'src/collections/commands/updateAll.js' });
                 updateMessages.push(errMsg);
                 allOverallSuccess = false;
               }
@@ -47,7 +46,7 @@ module.exports = async function updateAllCollections(dependencies) {
         }
       } catch (error) {
         const errMsg = `Error processing directory ${USER_ADDED_PLUGINS_DIR_NAME}: ${error.message}`;
-        console.error(chalk.red(`  ${errMsg}`));
+        logger.error(`  ${errMsg}`, { module: 'src/collections/commands/updateAll.js' });
         updateMessages.push(errMsg);
         allOverallSuccess = false;
       }
@@ -63,11 +62,11 @@ module.exports = async function updateAllCollections(dependencies) {
       }
     } catch (error) {
       const errMsg = `Failed to process update for ${collectionName}: ${error.message}`;
-      console.error(chalk.red(`  ${errMsg}`));
+      logger.error(`  ${errMsg}`, { module: 'src/collections/commands/updateAll.js' });
       updateMessages.push(errMsg);
       allOverallSuccess = false;
     }
   }
-  console.log(chalk.blueBright('\nFinished attempting to update all collections.'));
+  logger.info('\nFinished attempting to update all collections.', { module: 'src/collections/commands/updateAll.js' });
   return { success: allOverallSuccess, messages: updateMessages };
 };

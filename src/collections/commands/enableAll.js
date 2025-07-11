@@ -3,18 +3,17 @@ const { validatorPath } = require('@paths');
 const { validate: pluginValidator } = require(validatorPath);
 
 module.exports = async function enableAllPluginsInCollection(dependencies, collectionName, options = {}) {
-  const { fss, path, chalk } = dependencies;
+  const { fss, path, logger } = dependencies;
 
-  // 'this' will be the CollectionsManager instance
   const collectionPath = path.join(this.collRoot, collectionName);
   if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
-    console.error(chalk.red(`ERROR: Collection "${collectionName}" not found at ${collectionPath}.`));
+    logger.error(`Collection "${collectionName}" not found at ${collectionPath}.`, { module: 'src/collections/commands/enableAll.js' });
     return { success: false, messages: [`Collection "${collectionName}" not found.`] };
   }
 
   const availablePlugins = await this.listAvailablePlugins(collectionName); // Uses bound method
   if (!availablePlugins || availablePlugins.length === 0) {
-    console.log(chalk.yellow(`No available plugins found in collection "${collectionName}".`));
+    logger.warn(`No available plugins found in collection "${collectionName}".`, { module: 'src/collections/commands/enableAll.js' });
     return { success: true, messages: [`No available plugins found in "${collectionName}".`] };
   }
 
@@ -33,7 +32,7 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
       } else if (/^(http(s)?:\/\/|git@)/.test(source)) {
         defaultPrefixToUse = `${collectionName}-`;
         if (!options.isCliCall) {
-          console.warn(chalk.yellow(`  WARN: Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`));
+          logger.warn(`Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`, { module: 'src/collections/commands/enableAll.js' });
         }
       }
     }
@@ -55,7 +54,6 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
       invokeName = `${defaultPrefixToUse}${plugin.plugin_id}`;
     }
 
-    // Add validation logic here, conditionally based on options.bypassValidation
     if (!options.bypassValidation) {
       const pluginDirectoryPath = plugin.base_path; // Use base_path for validator
       const validationResult = pluginValidator(pluginDirectoryPath);
@@ -64,10 +62,10 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
         allSucceeded = false;
         const errorMessages = validationResult.errors.join('\n  - ');
         results.push({ plugin: collectionPluginId, invoke_name: invokeName, status: 'failed', message: `Validation failed: ${errorMessages}` });
-        console.warn(chalk.yellow(`  Failed to enable ${collectionPluginId} as ${invokeName}: Validation failed.`));
+        logger.warn(`Failed to enable ${collectionPluginId} as ${invokeName}: Validation failed.`, { module: 'src/collections/commands/enableAll.js' });
         // Log validator's output as it's typically more detailed
-        validationResult.errors.forEach(e => console.warn(chalk.red(`    - ${e}`)));
-        validationResult.warnings.forEach(w => console.warn(chalk.yellow(`    - ${w}`)));
+        validationResult.errors.forEach(e => logger.error(`    - ${e}`, { module: 'src/collections/commands/enableAll.js' }));
+        validationResult.warnings.forEach(w => logger.warn(`    - ${w}`, { module: 'src/collections/commands/enableAll.js' }));
         continue; // Continue to the next plugin in the batch
       }
     }
@@ -80,17 +78,17 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
     } catch (error) {
       allSucceeded = false;
       results.push({ plugin: collectionPluginId, invoke_name: invokeName, status: 'failed', message: error.message });
-      console.warn(chalk.yellow(`  Failed to enable ${collectionPluginId} as ${invokeName}: ${error.message}`));
+      logger.warn(`Failed to enable ${collectionPluginId} as ${invokeName}: ${error.message}`, { module: 'src/collections/commands/enableAll.js' });
     }
   }
 
   const summaryMessage = `Batch enablement for collection "${collectionName}": ${countEnabled} of ${availablePlugins.length} plugins enabled.`;
-  console.log(chalk.blueBright(summaryMessage));
+  logger.info(summaryMessage, { module: 'src/collections/commands/enableAll.js' });
   results.forEach(r => {
     if (r.status === 'enabled') {
-      console.log(chalk.green(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status}`));
+      logger.success(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status}`, { module: 'src/collections/commands/enableAll.js' });
     } else {
-      console.log(chalk.yellow(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status} - ${r.message}`));
+      logger.warn(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status} - ${r.message}`, { module: 'src/collections/commands/enableAll.js' });
     }
   });
 

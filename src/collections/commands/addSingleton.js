@@ -1,15 +1,7 @@
 // src/collections/commands/addSingleton.js
-// No longer requires fs, path, fs-extra, chalk, yaml, constants, or cm-utils
 
-/**
- * Adds a single plugin directory to CollectionsManager management.
- * @param {Object} dependencies - Injected dependencies from CollectionsManager.
- * @param {string} sourcePluginPath - Absolute path to the user's plugin directory.
- * @param {Object} options - Options, may contain 'name' for the desired invoke_name.
- * @returns {Promise<Object>} - { success: boolean, message: string, invoke_name?: string, collectionPluginId?: string }
- */
 module.exports = async function addSingletonPlugin(dependencies, sourcePluginPath, options = {}) {
-  const { fss, path, cmUtils, chalk, fs, fsExtra, constants } = dependencies;
+  const { fss, path, cmUtils, fs, fsExtra, constants, logger } = dependencies;
 
   // 1. Validate sourcePluginPath
   if (!fss.existsSync(sourcePluginPath)) {
@@ -78,7 +70,7 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
 
   try {
     await this.enablePlugin(collectionPluginIdForEnable, { name: invokeName });
-    console.log(chalk.green(`Singleton plugin "${pluginId}" from "${sourcePluginPath}" added and enabled as "${invokeName}".`));
+    logger.success(`Singleton plugin "${pluginId}" from "${sourcePluginPath}" added and enabled as "${invokeName}".`, { module: 'src/collections/commands/addSingleton.js' });
     return {
       success: true,
       message: `Singleton plugin "${pluginId}" added and enabled as "${invokeName}".`,
@@ -87,8 +79,8 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
       path: targetPluginDir
     };
   } catch (enableError) {
-    console.error(chalk.red(`ERROR: Plugin "${pluginId}" was copied to "${targetPluginDir}" but failed to enable as "${invokeName}": ${enableError.message}`));
-    console.warn(chalk.yellow(`  The plugin files remain at "${targetPluginDir}". You may need to remove them manually or try enabling again with a different invoke name.`));
+    logger.error(`Plugin "${pluginId}" was copied to "${targetPluginDir}" but failed to enable as "${invokeName}": ${enableError.message}`, { module: 'src/collections/commands/addSingleton.js' });
+    logger.warn(`The plugin files remain at "${targetPluginDir}". You may need to remove them manually or try enabling again with a different invoke name.`, { module: 'src/collections/commands/addSingleton.js' });
     throw new Error(`Plugin copied but failed to enable: ${enableError.message}`);
   }
 };

@@ -5,10 +5,10 @@ const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
 const fsExtra = require('fs-extra');
-const chalk = require('chalk');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
-const { cmUtilsPath, collectionsConstantsPath, collectionsCommandsRoot } = require('@paths');
+const { cmUtilsPath, collectionsConstantsPath, collectionsCommandsRoot, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 // Internal Utilities
 const cmUtils = require(cmUtilsPath);
@@ -30,8 +30,8 @@ class CollectionsManager {
   constructor(options = {}, dependencies = {}) {
     // Define all default dependencies needed by any command module
     const defaultDependencies = {
-      fs, fss, path, os, spawn, fsExtra, chalk, yaml, matter,
-      cmUtils, constants, process,
+      fs, fss, path, os, spawn, fsExtra, yaml, matter,
+      cmUtils, constants, process, logger,
     };
 
     // Merge defaults with any injected dependencies for testing
@@ -75,7 +75,7 @@ class CollectionsManager {
   }
 
   async _readEnabledManifest() {
-    const { path, fss, fs, yaml, chalk, constants } = this.dependencies;
+    const { path, fss, fs, yaml, constants } = this.dependencies;
     const enabledManifestPath = path.join(this.collRoot, constants.ENABLED_MANIFEST_FILENAME);
     let enabledManifest = { enabled_plugins: [] };
     try {
@@ -87,26 +87,26 @@ class CollectionsManager {
         }
       }
     } catch (e) {
-      console.warn(chalk.yellow(`WARN (CM:_readEnabledManifest): Could not read or parse ${enabledManifestPath}: ${e.message}. Starting with a new manifest.`));
+      logger.warn(`Could not read or parse ${enabledManifestPath}: ${e.message}. Starting with a new manifest.`, { module: 'src/collections/index.js' });
     }
     return enabledManifest;
   }
 
   async _writeEnabledManifest(manifestData) {
-    const { path, fs, yaml, chalk, constants } = this.dependencies;
+    const { path, fs, yaml, constants } = this.dependencies;
     const enabledManifestPath = path.join(this.collRoot, constants.ENABLED_MANIFEST_FILENAME);
     try {
       await fs.mkdir(this.collRoot, { recursive: true });
       const yamlString = yaml.dump(manifestData, { sortKeys: true });
       await fs.writeFile(enabledManifestPath, yamlString);
     } catch (e) {
-      console.error(chalk.red(`ERROR (CM:_writeEnabledManifest): Failed to write to ${enabledManifestPath}: ${e.message}`));
+      logger.error(`Failed to write to ${enabledManifestPath}: ${e.message}`, { module: 'src/collections/index.js' });
       throw e;
     }
   }
 
   async _readCollectionMetadata(collectionName) {
-    const { path, fss, fs, yaml, chalk, constants } = this.dependencies;
+    const { path, fss, fs, yaml, constants } = this.dependencies;
     const collectionPath = path.join(this.collRoot, collectionName);
     const metadataPath = path.join(collectionPath, constants.METADATA_FILENAME);
     if (!fss.existsSync(metadataPath)) {
@@ -116,13 +116,13 @@ class CollectionsManager {
       const metaContent = await fs.readFile(metadataPath, 'utf8');
       return yaml.load(metaContent);
     } catch (e) {
-      console.error(chalk.red(`ERROR (CM:_readCollMeta): Could not read or parse metadata for "${collectionName}": ${e.message}`));
+      logger.error(`Could not read or parse metadata for "${collectionName}": ${e.message}`, { module: 'src/collections/index.js' });
       throw e;
     }
   }
 
   async _writeCollectionMetadata(collectionName, metadataContent) {
-    const { path, fs, yaml, chalk, constants } = this.dependencies;
+    const { path, fs, yaml, constants } = this.dependencies;
     const collectionPath = path.join(this.collRoot, collectionName);
     const metadataPath = path.join(collectionPath, constants.METADATA_FILENAME);
     try {
@@ -130,13 +130,13 @@ class CollectionsManager {
       const yamlString = yaml.dump(metadataContent);
       await fs.writeFile(metadataPath, yamlString);
     } catch (metaError) {
-      console.warn(chalk.yellow(`WARN (CM:_writeCollMeta): Could not write collection metadata for ${collectionName}: ${metaError.message}`));
+      logger.warn(`Could not write collection metadata for ${collectionName}: ${metaError.message}`, { module: 'src/collections/index.js' });
       throw metaError;
     }
   }
 
   async disableAllPluginsFromCollection(collectionIdentifier) {
-    const { path, chalk, constants } = this.dependencies;
+    const { path,  constants } = this.dependencies;
     const manifest = await this._readEnabledManifest();
     const initialCount = manifest.enabled_plugins.length;
     let userFriendlyName = collectionIdentifier;
@@ -165,7 +165,7 @@ class CollectionsManager {
       }
       if (matchesCriteriaForRemoval) {
         if (!disabledInvokeNames.has(pluginEntry.invoke_name)) {
-          console.log(chalk.gray(`    - Disabling plugin "${pluginEntry.invoke_name}" (from ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`));
+          logger.detail(`    - Disabling plugin "${pluginEntry.invoke_name}" (from ${pluginEntry.collection_name}/${pluginEntry.plugin_id})`, { module: 'src/collections/index.js' });
           disabledInvokeNames.add(pluginEntry.invoke_name);
         }
       } else {
@@ -175,7 +175,7 @@ class CollectionsManager {
     if (pluginsToKeep.length < initialCount) {
       manifest.enabled_plugins = pluginsToKeep;
       await this._writeEnabledManifest(manifest);
-      console.log(chalk.green(`  Successfully disabled ${initialCount - pluginsToKeep.length} plugin instance(s) originating from "${userFriendlyName}".`));
+      logger.success(`  Successfully disabled ${initialCount - pluginsToKeep.length} plugin instance(s) originating from "${userFriendlyName}".`, { module: 'src/collections/index.js' });
       return { success: true, disabledCount: initialCount - pluginsToKeep.length };
     } else {
       return { success: true, disabledCount: 0 };
@@ -183,7 +183,7 @@ class CollectionsManager {
   }
 
   _spawnGitProcess(gitArgs, cwd, operationDescription) {
-    const { spawn, chalk, process } = this.dependencies;
+    const { spawn, process } = this.dependencies;
     return new Promise((resolve, reject) => {
       const spawnOptions = {
         cwd,
@@ -200,14 +200,15 @@ class CollectionsManager {
       });
       gitProcess.stderr.on('data', (data) => {
         const dataStr = data.toString();
-        process.stderr.write(chalk.yellowBright(`  GIT_STDERR (${operationDescription}): ${dataStr}`));
+        // This is debug-level info, using detail.
+        logger.detail(`GIT_STDERR (${operationDescription}): ${dataStr}`, { module: 'src/collections/index.js' });
         stderr += dataStr;
       });
       gitProcess.on('close', (code) => {
         if (code === 0) {
           resolve({ success: true, code, stdout, stderr });
         } else {
-          console.error(chalk.red(`\n  ERROR: Git operation '${gitArgs.join(' ')}' for ${operationDescription} failed with exit code ${code}.`));
+          logger.error(`Git operation '${gitArgs.join(' ')}' for ${operationDescription} failed with exit code ${code}.`, { module: 'src/collections/index.js' });
           const error = new Error(`Git ${gitArgs.join(' ')} failed for ${operationDescription} with exit code ${code}.`);
           error.stdout = stdout;
           error.stderr = stderr;
@@ -215,7 +216,7 @@ class CollectionsManager {
         }
       });
       gitProcess.on('error', (err) => {
-        console.error(chalk.red(`\n  ERROR: Failed to start git process for ${operationDescription}: ${err.message}`));
+        logger.error(`Failed to start git process for ${operationDescription}: ${err.message}`, { module: 'src/collections/index.js' });
         reject(err);
       });
     });

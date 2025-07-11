@@ -91,4 +91,10 @@ New scripts or new script locations will appear below after running **[`node scr
 - [lint.js](linting/lint.js)
 - [mocha-path-validator.js](linting/mocha-path-validator.js)
 - [paths-js-validator.js](linting/paths-js-validator.js)
+- [condensed-tree.js](trees.old.bak/condensed-tree.js)
+- [pretty-tree.js](trees.old.bak/pretty-tree.js)
+- [tree-explorer.js](trees.old.bak/tree-explorer.js)
+- [condenser.js](trees/condenser.js)
+- [tree-explorer.js](trees/tree-explorer.js)
+- [tree-renderer.js](trees/tree-renderer.js)
 <!-- uncategorized-end -->

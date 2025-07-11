@@ -1,14 +1,12 @@
 // src/collections/commands/remove.js
-// No longer requires fs, path, fs-extra, chalk, or constants
 
 module.exports = async function removeCollection(dependencies, collectionName, options = {}) {
-  const { fss, path, fsExtra, chalk, constants } = dependencies;
+  const { fss, path, fsExtra, constants, logger } = dependencies;
 
-  // 'this' is the CollectionsManager instance
   const collectionPath = path.join(this.collRoot, collectionName);
 
   if (!fss.existsSync(collectionPath)) {
-    console.log(chalk.yellow(`WARN (CM:removeCollection): Collection path ${collectionPath} does not exist. Will proceed to check manifest for cleanup if --force is used.`));
+    logger.warn(`Collection path ${collectionPath} does not exist. Will proceed to check manifest for cleanup if --force is used.`, { module: 'src/collections/commands/remove.js' });
   } else if (!fss.lstatSync(collectionPath).isDirectory()) {
     throw new Error(`Target "${collectionName}" at ${collectionPath} is not a directory.`);
   }
@@ -51,9 +49,9 @@ module.exports = async function removeCollection(dependencies, collectionName, o
   if (fss.existsSync(collectionPath) && fss.lstatSync(collectionPath).isDirectory()) {
     try {
       await fsExtra.rm(collectionPath, { recursive: true, force: true });
-      console.log(chalk.green(`Collection directory "${collectionName}" removed successfully from ${this.collRoot}.`));
+      logger.success(`Collection directory "${collectionName}" removed successfully from ${this.collRoot}.`, { module: 'src/collections/commands/remove.js' });
     } catch (error) {
-      console.error(chalk.red(`ERROR (CM:removeCollection): Failed to remove collection directory ${collectionPath}: ${error.message}`));
+      logger.error(`Failed to remove collection directory ${collectionPath}: ${error.message}`, { module: 'src/collections/commands/remove.js' });
       throw error;
     }
   }

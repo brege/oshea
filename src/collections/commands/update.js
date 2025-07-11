@@ -1,34 +1,32 @@
 // src/collections/commands/update.js
-// No longer requires fs, path, chalk, or fs-extra
 
 module.exports = async function updateCollection(dependencies, collectionName) {
-  const { fss, fs, path, chalk, fsExtra, constants } = dependencies;
+  const { fss, fs, path, fsExtra, constants, logger } = dependencies;
   const { METADATA_FILENAME } = constants;
 
-  // 'this' will be the CollectionsManager instance
   const collectionPath = path.join(this.collRoot, collectionName);
 
   if (!fss.existsSync(collectionPath)) {
-    console.error(chalk.red(`ERROR: Collection "${collectionName}" not found at ${collectionPath}. Cannot update.`));
+    logger.error(`Collection "${collectionName}" not found at ${collectionPath}. Cannot update.`, { module: 'src/collections/commands/update.js' });
     return { success: false, message: `Collection "${collectionName}" not found.` };
   }
 
   const metadata = await this._readCollectionMetadata(collectionName);
   if (!metadata) {
-    console.warn(chalk.yellow(`WARN: Metadata file not found or unreadable for collection "${collectionName}". Cannot determine source for update.`));
+    logger.warn(`Metadata file not found or unreadable for collection "${collectionName}". Cannot determine source for update.`, { module: 'src/collections/commands/update.js' });
     return { success: false, message: `Metadata not found or unreadable for "${collectionName}".` };
   }
 
   const originalSourcePath = metadata.source;
 
   if (!originalSourcePath) {
-    console.warn(chalk.yellow(`WARN: Source path not defined in metadata for collection "${collectionName}". Cannot update.`));
+    logger.warn(`Source path not defined in metadata for collection "${collectionName}". Cannot update.`, { module: 'src/collections/commands/update.js' });
     return { success: false, message: `Source path not defined in metadata for "${collectionName}".` };
   }
 
   // Check if it's a Git source
   if (/^(http(s)?:\/\/|git@)/.test(originalSourcePath) || (typeof originalSourcePath === 'string' && originalSourcePath.endsWith('.git'))) {
-    console.log(chalk.blue(`Updating collection "${collectionName}" from Git source: ${chalk.underline(originalSourcePath)}...`));
+    logger.info(`Updating collection "${collectionName}" from Git source: ${originalSourcePath}...`, { module: 'src/collections/commands/update.js' });
 
     let defaultBranchName = null;
     try {
@@ -39,7 +37,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       );
 
       if (!remoteDetailsResult || !remoteDetailsResult.success || !remoteDetailsResult.stdout) {
-        console.error(chalk.red(`  ERROR: Could not retrieve remote details for ${collectionName}. Update aborted.`));
+        logger.error(`Could not retrieve remote details for ${collectionName}. Update aborted.`, { module: 'src/collections/commands/update.js' });
         return { success: false, message: `Failed to retrieve remote details for ${collectionName}.` };
       }
 
@@ -53,12 +51,12 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       }
 
       if (!defaultBranchName) {
-        console.error(chalk.red(`  ERROR: Could not determine default branch for ${collectionName} from remote details. Update aborted.`));
+        logger.error(`Could not determine default branch for ${collectionName} from remote details. Update aborted.`, { module: 'src/collections/commands/update.js' });
         return { success: false, message: `Could not determine default branch for ${collectionName}.` };
       }
 
     } catch (gitError) {
-      console.error(chalk.red(`  ERROR: Failed during Git remote show for ${collectionName}. Update aborted.`));
+      logger.error(`Failed during Git remote show for ${collectionName}. Update aborted.`, { module: 'src/collections/commands/update.js' });
       return { success: false, message: `Failed during Git remote show for ${collectionName}: ${gitError.message}` };
     }
 
@@ -66,7 +64,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       await this._spawnGitProcess(['fetch', 'origin'], collectionPath, `fetching ${collectionName}`);
       const statusResult = await this._spawnGitProcess(['status', '--porcelain'], collectionPath, `checking status of ${collectionName}`);
       if (!statusResult.success) {
-        console.error(chalk.red(`  ERROR: Could not get Git status for ${collectionName}. Update aborted.`));
+        logger.error(`Could not get Git status for ${collectionName}. Update aborted.`, { module: 'src/collections/commands/update.js' });
         return { success: false, message: `Could not get Git status for ${collectionName}.` };
       }
 
@@ -86,7 +84,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
             if (isNaN(localCommitsAhead)) localCommitsAhead = 0;
           }
         } catch (revListError) {
-          console.warn(chalk.yellow(`  WARN: Could not execute git rev-list to check for local commits on ${collectionName}: ${revListError.message}`));
+          logger.warn(`Could not execute git rev-list to check for local commits on ${collectionName}: ${revListError.message}`, { module: 'src/collections/commands/update.js' });
         }
       }
 
@@ -98,8 +96,8 @@ module.exports = async function updateCollection(dependencies, collectionName) {
           abortMessage = `Collection "${collectionName}" has local commits not present on the remote.`;
         }
 
-        console.warn(chalk.yellow(`  WARN: ${abortMessage} Aborting update.`));
-        console.warn(chalk.yellow('          Please commit, stash, or revert your changes before updating.'));
+        logger.warn(`${abortMessage} Aborting update.`, { module: 'src/collections/commands/update.js' });
+        logger.warn('Please commit, stash, or revert your changes before updating.', { module: 'src/collections/commands/update.js' });
         return {
           success: false,
           message: `${abortMessage} Aborting update. Commit, stash, or revert changes.`
@@ -107,23 +105,23 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       }
 
       await this._spawnGitProcess(['reset', '--hard', `origin/${defaultBranchName}`], collectionPath, `resetting ${collectionName}`);
-      console.log(chalk.green(`\n  Successfully updated collection "${collectionName}" by resetting to origin/${defaultBranchName}.`));
+      logger.success(`Successfully updated collection "${collectionName}" by resetting to origin/${defaultBranchName}.`, { module: 'src/collections/commands/update.js' });
 
       metadata.updated_on = new Date().toISOString();
       await this._writeCollectionMetadata(collectionName, metadata);
       return { success: true, message: `Collection "${collectionName}" updated.` };
     } catch (error) {
-      console.error(chalk.red(`  ERROR: Git update process failed for ${collectionName}: ${error.message}`));
+      logger.error(`Git update process failed for ${collectionName}: ${error.message}`, { module: 'src/collections/commands/update.js' });
       return { success: false, message: `Git update failed for ${collectionName}: ${error.message}` };
     }
   } else { // Handle local path source
-    console.log(chalk.blue(`Attempting to re-sync collection "${collectionName}" from local source: ${chalk.underline(originalSourcePath)}...`));
+    logger.info(`Attempting to re-sync collection "${collectionName}" from local source: ${originalSourcePath}...`, { module: 'src/collections/commands/update.js' });
     if (!fss.existsSync(originalSourcePath)) {
-      console.error(chalk.red(`  ERROR: Original local source path "${originalSourcePath}" for collection "${collectionName}" no longer exists. Cannot update.`));
+      logger.error(`Original local source path "${originalSourcePath}" for collection "${collectionName}" no longer exists. Cannot update.`, { module: 'src/collections/commands/update.js' });
       return { success: false, message: `Original local source path "${originalSourcePath}" not found.` };
     }
     if (!fss.lstatSync(originalSourcePath).isDirectory()) {
-      console.error(chalk.red(`  ERROR: Original local source path "${originalSourcePath}" for collection "${collectionName}" is not a directory. Cannot update.`));
+      logger.error(`Original local source path "${originalSourcePath}" for collection "${collectionName}" is not a directory. Cannot update.`, { module: 'src/collections/commands/update.js' });
       return { success: false, message: `Original local source path "${originalSourcePath}" is not a directory.` };
     }
 
@@ -145,13 +143,13 @@ module.exports = async function updateCollection(dependencies, collectionName) {
           return true;
         }
       });
-      console.log(chalk.green(`  Successfully re-synced collection "${collectionName}" from local source "${originalSourcePath}".`));
+      logger.success(`Successfully re-synced collection "${collectionName}" from local source "${originalSourcePath}".`, { module: 'src/collections/commands/update.js' });
 
       metadata.updated_on = new Date().toISOString();
       await this._writeCollectionMetadata(collectionName, metadata);
       return { success: true, message: `Collection "${collectionName}" re-synced from local source.` };
     } catch (error) {
-      console.error(chalk.red(`  ERROR: Failed to re-sync collection "${collectionName}" from local source "${originalSourcePath}": ${error.message}`));
+      logger.error(`Failed to re-sync collection "${collectionName}" from local source "${originalSourcePath}": ${error.message}`, { module: 'src/collections/commands/update.js' });
       return { success: false, message: `Failed to re-sync from local source: ${error.message}` };
     }
   }

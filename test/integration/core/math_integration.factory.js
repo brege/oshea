@@ -75,7 +75,7 @@ function buildMocks(scenario, testLogger, constants) {
     fsPromises: mockFsPromises,
     fsSync: mockFsSync,
     path: mockPath,
-    katexPluginModule: mockKatexPluginModule, // <-- FIXED KEY!
+    katexPluginModule: mockKatexPluginModule,
   });
 
   // Markdown-it instance (always stubbed for use assertions)

@@ -141,7 +141,6 @@ describe('ConfigResolver (Integration Tests)', function () {
         if (scenarioConfig.primaryMainConfig) {
           resolver.primaryMainConfig = scenarioConfig.primaryMainConfig;
         }
-        // Add more direct mutations as needed for your imperative tests
       } else {
         // Manifest/factory-driven: do normal setup/init
         if (!isNegativeTest) {

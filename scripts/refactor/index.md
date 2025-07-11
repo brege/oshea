@@ -63,11 +63,5 @@ Status: **Complete** -- being incorporated into the linter: [`scripts/linting/li
 ### Uncategorized Scripts
 
 <!-- uncategorized-start -->
-- [inject-logger-import.js](logging/inject-logger-import.js)
-- [list-nested-species.js](logging/list-nested-species.js)
-- [logging-classifier.js](logging/logging-classifier.js)
-- [orchestrate-logging-refactor.js](logging/orchestrate-logging-refactor.js)
-- [probe-logging.js](logging/probe-logging.js)
-- [replace-logging-species.js](logging/replace-logging-species.js)
 - [mocha-path-validator.sh](validators/mocha-path-validator.sh)
 <!-- uncategorized-end -->

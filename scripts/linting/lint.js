@@ -24,6 +24,11 @@ const lintSteps = [
     command: 'node',
     args: [path.join(scriptsDir, 'strip-trailing-whitespace.js')],
   },
+  {
+    label: 'Custom: logging-lint.js',
+    command: 'node',
+    args: [path.join(scriptsDir, 'logging-lint.js')],
+  },
   // docs
   {
     label: 'Docs: docs-link-checker.mjs',
@@ -31,7 +36,7 @@ const lintSteps = [
     args: [path.join(projectRoot, 'scripts', 'docs', 'docs-link-checker.mjs'), '--quiet'],
     ignoreFailure: true,
   },
-  { // skip this for now
+  {
     skip: true,
     label: 'Docs: detect-js-reference-contexts.mjs',
     command: 'node',
@@ -103,7 +108,7 @@ function main() {
       step.label.startsWith('Custom:') &&
       step.args.length === 1 // Only script path, no globs yet
     ) {
-      step.args = [step.args[0], ...globs];
+      step.args = [step.args[0], ...globs, ...extraArgs];
     }
   }
 

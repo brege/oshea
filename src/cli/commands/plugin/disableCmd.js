@@ -1,5 +1,8 @@
 // src/cli/commands/plugin/disableCmd.js
-const chalk = require('chalk');
+const { loggerPath, cliPath } = require('@paths');
+const { execSync } = require('child_process');
+
+const logger = require(loggerPath);
 
 module.exports = {
   command: 'disable <invoke_name>',
@@ -15,25 +18,23 @@ module.exports = {
   },
   handler: async (args) => {
     if (!args.manager) {
-      console.error(chalk.red('FATAL ERROR: CollectionsManager instance not found in CLI arguments.'));
+      logger.fatal('FATAL ERROR: CollectionsManager instance not found in CLI arguments.');
       process.exit(1);
     }
     const manager = args.manager;
 
-    console.log(chalk.blueBright('md-to-pdf plugin: Attempting to disable plugin...'));
-    console.log(`  Plugin Invoke Name: ${chalk.cyan(args.invoke_name)}`);
+    logger.info('md-to-pdf plugin: Attempting to disable plugin...');
+    logger.detail(`  Plugin Invoke Name: ${args.invoke_name}`);
     try {
       await manager.disablePlugin(args.invoke_name);
 
-      const { cliPath } = require('@paths');
       try {
-        const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
       } catch {
-        console.error(chalk.yellow('WARN: Failed to regenerate completion cache. This is not a fatal error.'));
+        logger.warn('WARN: Failed to regenerate completion cache. This is not a fatal error.');
       }
     } catch (error) {
-      console.error(chalk.red(`\nERROR in 'plugin disable' command: ${error.message}`));
+      logger.error(`\nERROR in 'plugin disable' command: ${error.message}`);
       process.exit(1);
     }
   }

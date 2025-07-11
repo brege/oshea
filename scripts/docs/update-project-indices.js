@@ -8,6 +8,29 @@ const CONFIG_PATH = path.resolve(process.cwd(), '.index-config.yaml');
 const START_MARKER = '<!-- uncategorized-start -->';
 const END_MARKER = '<!-- uncategorized-end -->';
 
+function getDocignoreDirs(root) {
+  let ignoredDirs = [];
+  function walk(dir) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (e) {
+      return;
+    }
+    if (entries.some(e => e.isFile() && e.name === '.docignore')) {
+      ignoredDirs.push(path.resolve(dir));
+      return; // Don't descend further
+    }
+    for (const entry of entries) {
+      if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.git') {
+        walk(path.join(dir, entry.name));
+      }
+    }
+  }
+  walk(root);
+  return ignoredDirs.map(absDir => path.relative(process.cwd(), absDir).replace(/\\/g, '/') + '/**');
+}
+
 function getExistingLinks(content, baseDir) {
   const linkRegex = /\[.*?\]\((.*?)\)/g;
   const links = new Set();
@@ -62,10 +85,21 @@ function updateIndexFile(groupName, groupConfig) {
     const extPattern = fileExtensions.length > 1 ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}` : fileExtensions[0].replace(/^\./, '');
     const globPattern = `${root}/**/*.${extPattern}`;
 
+    // Find all directories under this root that contain a .docignore file
+    const docignorePatterns = getDocignoreDirs(root);
+
     console.log(`  Scanning with glob pattern: ${globPattern}`);
+    if (docignorePatterns.length > 0) {
+      console.log(`  Skipping directories with .docignore:`, docignorePatterns);
+    }
 
     const found = glob.sync(globPattern, {
-      ignore: [...(excludePatterns || []), '**/node_modules/**', '**/.git/**'],
+      ignore: [
+        ...(excludePatterns || []),
+        '**/node_modules/**',
+        '**/.git/**',
+        ...docignorePatterns, // Add .docignore directories to ignore list
+      ],
       nodir: true,
     });
     allFiles = allFiles.concat(found);

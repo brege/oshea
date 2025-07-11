@@ -7,11 +7,11 @@ docs-devel/
 # Node dependencies
 node_modules/
 
-# Community plugins
-community_plugins/*
-!community_plugins/README.md
 # PDF outputs and other build artifacts
 *.pdf
+
+# .docignore files
+*.docignore
 
 # Logs and temp files
 *.log

@@ -48,6 +48,12 @@ This document is a central index for all developer and automation scripts within
 
 ### Linting & Code Style [ `linting/` ]
 
+  - [ [lint.js](linting/lint.js) ]
+    -- The main linting orchestrator. This is where you organize linting order.
+  - [ [mocha-path-validator.js](linting/mocha-path-validator.js) ]
+    -- A utility to validate paths in `.mocharc.js` files.
+  - [ [paths-js-validator.js](linting/paths-js-validator.js) ]
+    -- A utility to validate paths in `paths.js` files.
   - [ [`dump-code-comments.js`](linting/dump-code-comments.js) ]
     -- Dumps all code comments from a target directory for review and cleanup.
   - [ [`find-to-include-assertions.js`](linting/find-to-include-assertions.js) ]
@@ -88,13 +94,4 @@ This document is a central index for all developer and automation scripts within
 New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
 
 <!-- uncategorized-start -->
-- [lint.js](linting/lint.js)
-- [mocha-path-validator.js](linting/mocha-path-validator.js)
-- [paths-js-validator.js](linting/paths-js-validator.js)
-- [condensed-tree.js](trees.old.bak/condensed-tree.js)
-- [pretty-tree.js](trees.old.bak/pretty-tree.js)
-- [tree-explorer.js](trees.old.bak/tree-explorer.js)
-- [condenser.js](trees/condenser.js)
-- [tree-explorer.js](trees/tree-explorer.js)
-- [tree-renderer.js](trees/tree-renderer.js)
 <!-- uncategorized-end -->

@@ -51,10 +51,10 @@ Status: **Complete**
 
 A collection of tools to validate the paths of various organizers.
 
-- [ [`mocha-path-validator.sh`](validators/mocha-path-validator.sh) ]
-    -- Validates that the test file paths and patterns in `.mocharc.js` exist.
-- [ [`paths-js-validator.js`](validators/paths-js-validator.js) ]
-    -- Validates that the paths in `paths.js` exist.
+- [ [`mocha-path-validator.sh`] ] 
+    -- Recoded and repurposed as a [linter](../linting/mocha-path-validator.js).
+- [ [`paths-js-validator.js`] ]
+    -- Repurposed as a [linter](../linting/paths-js-validator.js).
 - [ [`require-path-validator.sh`](validators/require-path-validator.sh) ]
     -- Validates that the `require()` paths in a target directory exist.
 
@@ -69,4 +69,5 @@ Status: **Complete** -- being incorporated into the linter: [`scripts/linting/li
 - [orchestrate-logging-refactor.js](logging/orchestrate-logging-refactor.js)
 - [probe-logging.js](logging/probe-logging.js)
 - [replace-logging-species.js](logging/replace-logging-species.js)
+- [mocha-path-validator.sh](validators/mocha-path-validator.sh)
 <!-- uncategorized-end -->

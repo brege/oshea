@@ -70,9 +70,6 @@ describe('pdf_generator (Integration Tests)', function () {
         cssFileContentsArray: ['body { color: blue; }'],
       };
 
-      // Debug: show what is being passed for htmlBodyContent
-      // console.log('Running', testCase.description, 'with htmlBodyContent:', JSON.stringify(constants.htmlBodyContent));
-
       testCase.setup({ mockPuppeteer, mockPage: mockPuppeteer.mockPage }, constants);
 
       let result = null;

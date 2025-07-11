@@ -47,7 +47,7 @@ at the project root.
   Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
 * [**Scripts Index**](../scripts/index.md):
   An index of tools and utilities used by the project, from analysis to guides, documentation, linting, and more.
-  - [Refactoring Tools](../scripts/refactor/fix-require-paths/README.md):
+  - [Refactoring Tools](../scripts/refactor/fix-require-paths/progress.md):
     Probes, repairs, validators, and other tools used in the reoganization of `md-to-pdf`.
     
 ---

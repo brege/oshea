@@ -28,7 +28,7 @@ const lintSteps = [
   {
     label: 'Docs: docs-link-checker.mjs',
     command: 'node',
-    args: [path.join(projectRoot, 'scripts', 'docs', 'docs-link-checker.mjs')],
+    args: [path.join(projectRoot, 'scripts', 'docs', 'docs-link-checker.mjs'), '--quiet'],
     ignoreFailure: true,
   },
   { // skip this for now

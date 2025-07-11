@@ -90,7 +90,7 @@ function updateIndexFile(groupName, groupConfig) {
 
     console.log(`  Scanning with glob pattern: ${globPattern}`);
     if (docignorePatterns.length > 0) {
-      console.log(`  Skipping directories with .docignore:`, docignorePatterns);
+      console.log('  Skipping directories with .docignore:', docignorePatterns);
     }
 
     const found = glob.sync(globPattern, {

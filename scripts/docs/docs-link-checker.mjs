@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // scripts/docs/docs-link-checker.mjs
 
 import fs from 'fs';
@@ -14,7 +15,7 @@ const EXCLUDE_PATTERNS = [
   'node_modules/**',
   '.git/**',
   '**/test/fixtures/**',
-  'docs/archive/**',   // Example: exclude all of docs/archive
+  'docs/archive/**',
   // Add more as needed
 ];
 
@@ -23,6 +24,7 @@ const args = process.argv.slice(2);
 const verbose = args.includes('--verbose');
 const fixMode = args.includes('--fix');
 const dryRun = args.includes('--dry-run');
+const quiet = args.includes('--quiet');
 
 // --- Setup ---
 function findProjectRoot() {
@@ -167,11 +169,11 @@ async function auditAndFixMarkdownLinks(filePath, fileIndex, fixMode = false, dr
           const before = contentLines[lineIdx];
           const after = updateLinkInLine(before, node.url, newRelativePath);
 
-          if (dryRun) {
+          if (dryRun && !quiet) {
             console.log(`\n[DRY-RUN] Would fix in ${filePath} (line ${node.position.start.line}):`);
             console.log(`  - BEFORE: ${before}`);
             console.log(`  - AFTER : ${after}`);
-          } else if (fixMode) {
+          } else if (fixMode && !quiet) {
             const updated = updateLinkInFile(
               filePath, node.url, newRelativePath, node.position.start.line
             );
@@ -200,41 +202,51 @@ async function auditAndFixMarkdownLinks(filePath, fileIndex, fixMode = false, dr
 }
 
 async function main() {
-  console.log(`Auditing Markdown links in '${ROOT_DIR_TO_SCAN}' from project root: ${process.cwd()}`);
+  if (!quiet) {
+    console.log(`Auditing Markdown links in '${ROOT_DIR_TO_SCAN}' from project root: ${process.cwd()}`);
+  }
   const mdFiles = getMarkdownFiles(ROOT_DIR_TO_SCAN);
   const fileIndex = buildFileIndex(projectRoot);
 
   let totalBrokenLinks = 0;
+  let errorOutput = [];
 
   for (const file of mdFiles) {
-    if (verbose) {
+    if (verbose && !quiet) {
       console.log(`- Scanning: ${file}`);
     }
     const brokenLinks = await auditAndFixMarkdownLinks(file, fileIndex, fixMode, dryRun);
     if (brokenLinks.length > 0) {
-      console.log(`\n[✖] Found ${brokenLinks.length} broken link(s) in ${file}:`);
+      let lines = [];
+      lines.push(`\n[✖] Found ${brokenLinks.length} broken link(s) in ${file}:`);
       brokenLinks.forEach(item => {
         if (item.newLink) {
           if (!fixMode && !dryRun) {
-            console.log(`  - Line ${item.line}: [link](${item.oldLink}) → [should fix](${item.newLink})`);
+            lines.push(`  - Line ${item.line}: [link](${item.oldLink}) → [should fix](${item.newLink})`);
           }
         } else if (item.ambiguous) {
-          console.log(`  - Line ${item.line}: [link](${item.oldLink}) is ambiguous. Candidates:`);
-          item.candidates.forEach(c => console.log(`    • ${c}`));
+          lines.push(`  - Line ${item.line}: [link](${item.oldLink}) is ambiguous. Candidates:`);
+          item.candidates.forEach(c => lines.push(`    • ${c}`));
         } else {
-          console.log(`  - Line ${item.line}: [link](${item.oldLink}) - no matching file found`);
+          lines.push(`  - Line ${item.line}: [link](${item.oldLink}) - no matching file found`);
         }
       });
+      errorOutput.push(lines.join('\n'));
       totalBrokenLinks += brokenLinks.length;
     }
   }
 
-  console.log('\n---');
   if (totalBrokenLinks === 0) {
-    console.log('Success: No broken relative links found.');
+    if (!quiet) {
+      console.log('\n---');
+      console.log('Success: No broken relative links found.');
+    }
   } else {
+    // Always print errors, even in quiet mode
+    errorOutput.forEach(block => console.log(block));
+    console.log('\n---');
     console.log(`Audit Complete: Found a total of ${totalBrokenLinks} broken link(s).`);
-    if (fixMode || dryRun) {
+    if ((fixMode || dryRun) && !quiet) {
       console.log(`\n${dryRun ? '[DRY-RUN] ' : ''}Auto-fix attempted for unambiguous links.`);
     }
     process.exit(1);

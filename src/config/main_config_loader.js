@@ -1,7 +1,13 @@
 // src/config/main_config_loader.js
 const os = require('os');
-const { defaultConfigPath, factoryDefaultConfigPath, configUtilsPath, logger } = require('@paths');
+const {
+  defaultConfigPath,
+  factoryDefaultConfigPath,
+  configUtilsPath,
+  loggerPath
+} = require('@paths');
 
+const logger = require(loggerPath);
 class MainConfigLoader {
   constructor(projectRoot, mainConfigPathFromCli, useFactoryDefaultsOnly = false, xdgBaseDir = null, dependencies = {}) {
     this.fs = dependencies.fs || require('fs');

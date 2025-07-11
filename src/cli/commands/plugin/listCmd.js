@@ -1,9 +1,8 @@
 // src/cli/commands/plugin/listCmd.js
-const { pluginRegistryBuilderPath, loggerPath } = require('@paths');
+const { pluginRegistryBuilderPath, projectRoot, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 const stripAnsi = require('strip-ansi');
-
-const logger = require(loggerPath);
 
 // Helper function for detailed display
 function displayPluginEntry(plugin) {
@@ -114,7 +113,6 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
   },
   handler: async (args) => {
     try {
-      const { projectRoot } = require('@paths');
       const builderInstance = new PluginRegistryBuilder(
         projectRoot, null, args.config, args.factoryDefaults,
         args.isLazyLoadMode || false, null, args.manager,

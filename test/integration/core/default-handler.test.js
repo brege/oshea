@@ -2,8 +2,14 @@
 
 const { expect } = require('chai');
 const { logs, clearLogs } = require('../../shared/capture-logs');
+const path = require('path');
+const proxyquire = require('proxyquire');
 const testManifest = require('./default-handler.manifest.js');
 const defaultHandlerPath = require('@paths').defaultHandlerPath;
+const allPaths = require('@paths');
+
+// Point loggerPath to capture-logs.js
+const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
 
 function collectStubs(ctx) {
   // List all stub names as set up in test/setup.js
@@ -30,7 +36,10 @@ describe('DefaultHandler (Integration Tests)', function () {
     clearLogs();
     // Clear the require cache for the handler so it picks up fresh stubs
     delete require.cache[require.resolve(defaultHandlerPath)];
-    DefaultHandler = require(defaultHandlerPath);
+    // Use proxyquire to inject loggerPath for log capturing
+    DefaultHandler = proxyquire(defaultHandlerPath, {
+      '@paths': { ...allPaths, loggerPath: testLoggerPath }
+    });
   });
 
   testManifest.forEach(testCase => {

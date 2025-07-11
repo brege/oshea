@@ -1,25 +1,26 @@
 // test/shared/capture-logs.js
 const logs = [];
 
-const testLogger = {
-  info:    (msg, meta) => logs.push({ level: 'info',    msg, meta: meta || null }),
-  warn:    (msg, meta) => logs.push({ level: 'warn',    msg, meta: meta || null }),
-  error:   (msg, meta) => logs.push({ level: 'error',   msg, meta: meta || null }),
-  success: (msg, meta) => logs.push({ level: 'success', msg, meta: meta || null }),
-  detail:  (msg, meta) => logs.push({ level: 'detail',  msg, meta: meta || null }),
-  fatal:   (msg, meta) => logs.push({ level: 'fatal',   msg, meta: meta || null }),
+function logMethod(level) {
+  return (msg, meta) => logs.push({ level, msg, meta: meta || null });
+}
+
+const logger = {
+  info:    logMethod('info'),
+  warn:    logMethod('warn'),
+  error:   logMethod('error'),
+  success: logMethod('success'),
+  detail:  logMethod('detail'),
+  fatal:   logMethod('fatal'),
 };
 
-/**
- * Clears the logs array. To be used in a `beforeEach` hook.
- */
 function clearLogs() {
   logs.length = 0;
 }
 
 module.exports = {
   logs,
-  testLogger,
   clearLogs,
+  ...logger, // exports info, warn, error, etc. at top level
 };
 

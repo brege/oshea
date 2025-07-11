@@ -2,7 +2,9 @@
 const fs = require('fs');
 const yaml = require('js-yaml');
 const path = 'path';
-const { logger } = require('@paths');
+
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 async function displayGlobalConfig(configResolver, isPure) {
   // Ensure ConfigResolver is initialized to get primaryMainConfigLoadReason
@@ -115,3 +117,4 @@ async function displayConfig(args) {
 }
 
 module.exports = { displayConfig };
+

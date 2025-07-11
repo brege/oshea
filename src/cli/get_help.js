@@ -2,8 +2,9 @@
 const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');
-const { markdownUtilsPath, pluginRegistryBuilderPath, logger } = require('@paths');
+const { markdownUtilsPath, pluginRegistryBuilderPath, loggerPath  } = require('@paths');
 const { extractFrontMatter } = require(markdownUtilsPath);
+const logger = require(loggerPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 const yaml = require('js-yaml');
 

@@ -7,8 +7,11 @@ const {
 const { expect } = require('chai');
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
+const path = require('path');
 
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+// Use capture-logs.js as the logger module for loggerPath
+const { logs, clearLogs } = require('../../shared/capture-logs');
+const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
 
 // Import manifests
 const addManifest = require('./collections-manager.add.manifest.js');
@@ -60,7 +63,7 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       },
       yaml: { load: sinon.stub() },
       constants: require(collectionsConstantsPath),
-      logger: testLogger,
+      // logger: testLogger, // REMOVE this line, use loggerPath below
       chalk: {
         blue: str => str, yellow: str => str, red: str => str,
         magenta: str => str, green: str => str, underline: str => str,
@@ -76,7 +79,7 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       'path': mockDependencies.path,
       '@paths': {
         ...require('@paths'),
-        logger: testLogger,
+        loggerPath: testLoggerPath, // <-- THIS IS THE KEY LINE
         cmUtilsPath,
         collectionsConstantsPath,
         collectionsCommandsRoot: require('@paths').collectionsCommandsRoot,
@@ -112,12 +115,12 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       const mocks = { mockDependencies };
       // --- Imperative setup phase: stub dependencies before manager creation ---
       if (useImperativeSetup && typeof imperativeSetup === 'function') {
-        imperativeSetup(null, mocks, sinon, expect, testLogger);
+        imperativeSetup(null, mocks, sinon, expect, require('../../shared/capture-logs'));
       }
       const manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT, ...managerOptions }, mockDependencies);
       // --- Imperative setup phase: stub internal methods after manager creation ---
       if (useImperativeSetup && typeof imperativeSetup === 'function') {
-        imperativeSetup(manager, mocks, sinon, expect, testLogger);
+        imperativeSetup(manager, mocks, sinon, expect, require('../../shared/capture-logs'));
       } else {
         // Factory/manifest-driven setup
         if (stubs && stubs.internal) {
@@ -153,3 +156,4 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
     });
   });
 });
+

@@ -22,7 +22,7 @@ function makeMathIntegrationScenario({
  * - Handles KaTeX plugin injection (valid, missing, or invalid)
  * - Handles mathConfig, CSS existence/content, and error simulation
  */
-function buildMocks(scenario, testLogger, constants) {
+function buildMocks(scenario, constants) {
   // FS and path stubs
   const mockFsPromises = { readFile: sinon.stub() };
   const mockFsSync = { existsSync: sinon.stub(), statSync: sinon.stub() };
@@ -65,10 +65,10 @@ function buildMocks(scenario, testLogger, constants) {
     mockKatexPluginModule = { default: mockKatexPluginFunction };
   }
 
-  // Proxyquire mathIntegration with logger and plugin
+  // Proxyquire mathIntegration with loggerPath for log capturing
   const mathIntegrationFactory = proxyquire('../../../src/core/math_integration', {
     '@vscode/markdown-it-katex': mockKatexPluginModule,
-    '@paths': { logger: testLogger },
+    '@paths': { loggerPath: constants.TEST_LOGGER_PATH },
   });
 
   const mathIntegration = mathIntegrationFactory({

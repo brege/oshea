@@ -2,9 +2,10 @@
 const { pdfGeneratorPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require('../../shared/capture-logs');
 const testManifest = require('./pdf-generator.manifest');
 const proxyquire = require('proxyquire');
+const path = require('path');
 
 describe('pdf_generator (Integration Tests)', function () {
   let generatePdf;
@@ -35,12 +36,13 @@ describe('pdf_generator (Integration Tests)', function () {
       mockPage
     };
 
-    // Use proxyquire to inject the mocked puppeteer module
+    // Use proxyquire to inject the mocked puppeteer module and loggerPath
+    const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
     const { generatePdf: proxiedGeneratePdf } = proxyquire(pdfGeneratorPath, {
       'puppeteer': mockPuppeteer,
       '@paths': {
         ...require('@paths'), // Ensure other paths are preserved
-        logger: testLogger
+        loggerPath: testLoggerPath
       }
     });
     generatePdf = proxiedGeneratePdf;

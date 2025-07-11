@@ -69,10 +69,13 @@ const utilsRoot = path.join(srcRoot, 'utils');
 const assetResolverPath = path.join(utilsRoot, 'asset_resolver.js');
 const loggerPath = path.join(utilsRoot, 'logger.js');
 
-// Scripts
+// Helpers
 const scriptsRoot = path.join(projectRoot, 'scripts');
 const scriptsSharedRoot = path.join(projectRoot, 'scripts', 'shared');
 const fileHelpersPath = path.join(scriptsSharedRoot, 'file-helpers.js');
+
+const testSharedRoot = path.join(projectRoot, 'test', 'shared');
+const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
 
 // Node Modules
 const nodeModulesPath = path.join(projectRoot, 'node_modules');
@@ -144,10 +147,13 @@ module.exports = {
   assetResolverPath,
   loggerPath,
 
-  // Scripts
+  // Helpers
   scriptsRoot,
   scriptsSharedRoot,
   fileHelpersPath,
+  testSharedRoot,
+  testFileHelpersPath,
+
   // Node Modules
   nodeModulesPath,
   mochaPath,

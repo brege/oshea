@@ -1,5 +1,6 @@
 // src/plugins/PluginManager.js
-const { defaultHandlerPath, markdownUtilsPath, pdfGeneratorPath, logger } = require('@paths');
+const { defaultHandlerPath, markdownUtilsPath, pdfGeneratorPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 const DefaultHandler = require(defaultHandlerPath);
 const markdownUtils = require(markdownUtilsPath);
 const pdfGenerator = require(pdfGeneratorPath);

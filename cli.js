@@ -6,9 +6,9 @@ require('module-alias')(__dirname);
 const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs');
-const { loggerPath } = require('@paths'); // Import loggerPath
 
-const logger = require(loggerPath); // Correctly require the logger
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');

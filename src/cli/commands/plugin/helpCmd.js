@@ -1,6 +1,8 @@
 // src/cli/commands/plugin/helpCmd.js
-const { getHelpPath } = require('@paths');
+const { getHelpPath, loggerPath } = require('@paths');
 const { displayPluginHelp } = require(getHelpPath);
+
+const logger = require(loggerPath);
 
 module.exports = {
   command: 'help <pluginName>',
@@ -23,8 +25,8 @@ module.exports = {
       args.isLazyLoad = false;
       await displayPluginHelp(args.pluginName, args.manager, args);
     } catch (error) {
-      console.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
-      if (error.stack) console.error(error.stack);
+      logger.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
+      if (error.stack) logger.error(error.stack);
       process.exit(1);
     }
   }

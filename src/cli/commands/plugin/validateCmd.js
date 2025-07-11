@@ -1,9 +1,10 @@
 // src/cli/commands/plugin/validateCmd.js
 const path = require('path');
 const fs = require('fs');
-const { validatorPath } = require('@paths');
+const { validatorPath, loggerPath, projectRoot } = require('@paths');
 const { validate: pluginValidator } = require(validatorPath);
-const chalk = require('chalk');
+
+const logger = require(loggerPath);
 
 module.exports = {
   command: 'validate <pluginIdentifier>',
@@ -29,11 +30,10 @@ module.exports = {
       if (isPath) {
         pluginDirectoryPath = resolvedIdentifier;
       } else {
-        const { projectRoot } = require('@paths');
         pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
 
         if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
-          console.error(chalk.red(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`));
+          logger.error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`);
           process.exit(1);
           return;
         }
@@ -46,9 +46,9 @@ module.exports = {
       }
 
     } catch (error) {
-      console.error(chalk.red(`An unexpected error occurred during validation: ${error.message}`));
+      logger.error(`An unexpected error occurred during validation: ${error.message}`);
       if (error.stack) {
-        console.error(chalk.red(error.stack));
+        logger.error(error.stack);
       }
       process.exit(1);
     }

@@ -1,11 +1,12 @@
 // src/cli/commands/plugin/createCmd.js
 const path = require('path');
-const chalk = require('chalk');
-const { cmUtilsPath, pluginArchetyperPath, collectionsConstantsPath } = require('@paths');
+const { cmUtilsPath, pluginArchetyperPath, collectionsConstantsPath, loggerPath, templateBasicPlugin, cliPath } = require('@paths');
+const { execSync } = require('child_process');
+
+const logger = require(loggerPath);
 const { isValidPluginName } = require(cmUtilsPath);
 const { createArchetype } = require(pluginArchetyperPath);
 
-// Dependencies required by the archetyper logic
 const fs = require('fs').promises;
 const fss = require('fs');
 const fsExtra = require('fs-extra');
@@ -46,12 +47,12 @@ module.exports = {
     const newPluginName = args.pluginName;
 
     if (!isValidPluginName(newPluginName)) {
-      console.error(chalk.red(`ERROR: Invalid plugin name: "${newPluginName}".`));
+      logger.error(`ERROR: Invalid plugin name: "${newPluginName}".`);
       process.exit(1);
     }
 
     if (!args.manager || !args.configResolver) {
-      console.error(chalk.red('ERROR: Manager or ConfigResolver not available. This is an internal setup issue.'));
+      logger.error('ERROR: Manager or ConfigResolver not available. This is an internal setup issue.');
       process.exit(1);
     }
 
@@ -69,7 +70,6 @@ module.exports = {
           sourceIdentifier = args.from;
         }
       } else {
-        const { templateBasicPlugin } = require('@paths');
         sourceIdentifier = templateBasicPlugin;
       }
 
@@ -78,34 +78,29 @@ module.exports = {
         force: args.force
       };
 
-      // Assemble the dependencies and context for the new archetyper function
-      const dependencies = { chalk, cmUtils, constants, fs, fss, fsExtra, yaml, matter, path };
-
+      const dependencies = { chalk: null, cmUtils, constants, fs, fss, fsExtra, yaml, matter, path }; // Pass null for chalk
       const managerContext = {
         collRoot: args.manager.collRoot,
         listAvailablePlugins: args.manager.listAvailablePlugins.bind(args.manager)
       };
 
-      // This is the single logical change: calling the new decoupled function.
       const result = await createArchetype(dependencies, managerContext, sourceIdentifier, newPluginName, options);
 
       if (result && result.success && result.archetypePath) {
-        console.log(chalk.greenBright(`\nPlugin '${chalk.yellow(newPluginName)}' created successfully.`));
-        console.log(chalk.blueBright('Next steps:'));
-        console.log(chalk.gray(`  1. Customize the generated files in: ${chalk.underline(result.archetypePath)}`));
-        console.log(chalk.gray('  2. Register your new plugin in a main config file.'));
+        logger.success(`\nPlugin '${newPluginName}' created successfully.`);
+        logger.info('Next steps:');
+        logger.detail(`  1. Customize the generated files in: ${result.archetypePath}`);
+        logger.detail('  2. Register your new plugin in a main config file.');
       }
 
-      const { cliPath } = require('@paths');
       try {
-        const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
       } catch {
-        console.error(chalk.yellow('WARN: Failed to regenerate completion cache. This is not a fatal error.'));
+        logger.warn('WARN: Failed to regenerate completion cache. This is not a fatal error.');
       }
 
     } catch (error) {
-      console.error(chalk.red(`\nERROR during 'plugin create ${newPluginName}': ${error.message}`));
+      logger.error(`\nERROR during 'plugin create ${newPluginName}': ${error.message}`);
       process.exit(1);
     }
   }

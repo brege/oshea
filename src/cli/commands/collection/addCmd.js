@@ -1,5 +1,8 @@
 // src/cli/commands/collection/addCmd.js
-const chalk = require('chalk');
+const { loggerPath, cliPath } = require('@paths');
+const { execSync } = require('child_process');
+
+const logger = require(loggerPath);
 
 module.exports = {
   command: 'add <url_or_path>',
@@ -19,15 +22,20 @@ module.exports = {
   },
   handler: async (args) => {
     if (!args.manager) {
-      console.error(chalk.red('FATAL ERROR: CollectionsManager instance not found in CLI arguments.'));
+      logger.fatal('FATAL ERROR: CollectionsManager instance not found in CLI arguments.');
       process.exit(1);
     }
     const manager = args.manager;
 
     try {
       await manager.addCollection(args.url_or_path, { name: args.name });
+      try {
+        execSync(`node "${cliPath}" _tab_cache`);
+      } catch {
+        logger.warn('WARN: Failed to regenerate completion cache. This is not a fatal error.');
+      }
     } catch (error) {
-      console.error(chalk.red(`\nERROR in 'md-to-pdf collection add' command execution: ${error.message}`));
+      logger.error(`\nERROR in 'md-to-pdf collection add' command execution: ${error.message}`);
       process.exit(1);
     }
   }

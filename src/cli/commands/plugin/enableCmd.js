@@ -1,9 +1,12 @@
 // src/cli/commands/plugin/enableCmd.js
-const chalk = require('chalk');
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs').promises;
 const yaml = require('js-yaml');
+const { loggerPath, cliPath } = require('@paths');
+const { execSync } = require('child_process');
+
+const logger = require(loggerPath);
 
 module.exports = {
   command: 'enable <target>',
@@ -51,15 +54,15 @@ you must re-run this command to enable any new plugins.`);
   },
   handler: async (args) => {
     if (!args.manager) {
-      console.error(chalk.red('FATAL ERROR: CollectionsManager instance not found in CLI arguments.'));
+      logger.fatal('FATAL ERROR: CollectionsManager instance not found in CLI arguments.');
       process.exit(1);
     }
     const manager = args.manager;
 
     try {
       if (args.all) {
-        console.log(chalk.blueBright('md-to-pdf plugin: Attempting to enable all plugins in collection...'));
-        console.log(`  Collection Name: ${chalk.cyan(args.target)}`);
+        logger.info('md-to-pdf plugin: Attempting to enable all plugins in collection...');
+        logger.detail(`  Collection Name: ${args.target}`);
 
         let originalSourceForPrefixFallback = '';
         try {
@@ -76,11 +79,11 @@ you must re-run this command to enable any new plugins.`);
         }
 
         if (args.prefix) {
-          console.log(`  Using custom prefix for invoke names: ${chalk.yellow(args.prefix)}`);
+          logger.detail(`  Using custom prefix for invoke names: ${args.prefix}`);
         } else if (args.noPrefix) {
-          console.log(chalk.yellow('  --no-prefix specified: Attempting to enable plugins with their original IDs as invoke names.'));
+          logger.warn('  --no-prefix specified: Attempting to enable plugins with their original IDs as invoke names.');
         } else {
-          console.log(chalk.blue('  Using default prefixing strategy for invoke names (see help for details).'));
+          logger.info('  Using default prefixing strategy for invoke names (see help for details).');
         }
 
         await manager.enableAllPluginsInCollection(args.target, {
@@ -91,13 +94,13 @@ you must re-run this command to enable any new plugins.`);
           bypassValidation: args.bypassValidation
         });
       } else {
-        console.log(chalk.blueBright('md-to-pdf plugin: Attempting to enable plugin...'));
-        console.log(`  Plugin Identifier: ${chalk.cyan(args.target)}`);
+        logger.info('md-to-pdf plugin: Attempting to enable plugin...');
+        logger.detail(`  Plugin Identifier: ${args.target}`);
         if (args.name) {
-          console.log(`  Requested invoke name: ${chalk.yellow(args.name)}`);
+          logger.detail(`  Requested invoke name: ${args.name}`);
         }
         if (args.prefix || args.noPrefix){
-          console.warn(chalk.yellow('WARN: --prefix and --no-prefix options are ignored when not using --all.'));
+          logger.warn('WARN: --prefix and --no-prefix options are ignored when not using --all.');
         }
         const result = await manager.enablePlugin(args.target, {
           name: args.name,
@@ -105,22 +108,19 @@ you must re-run this command to enable any new plugins.`);
         });
         if (result && result.success) {
           const finalInvokeName = result.invoke_name || args.target.split('/')[1];
-          console.log(chalk.blueBright('\nTo use this plugin with md-to-pdf, invoke it as: ') + chalk.gray(`md-to-pdf convert ... --plugin ${finalInvokeName}`));
+          logger.info(`\nTo use this plugin with md-to-pdf, invoke it as: md-to-pdf convert ... --plugin ${finalInvokeName}`);
         }
       }
 
-      // Trigger tab-completion cache regeneration after successful update operation
-      const { cliPath } = require('@paths');
       try {
-        const { execSync } = require('child_process');
         execSync(`node "${cliPath}" _tab_cache`);
       } catch {
-        console.error(chalk.yellow('WARN: Failed to regenerate completion cache. This is not a fatal error.'));
+        logger.warn('WARN: Failed to regenerate completion cache. This is not a fatal error.');
       }
 
     } catch (error) {
       const commandType = args.all ? 'plugin enable --all' : 'plugin enable';
-      console.error(chalk.red(`\nERROR in '${commandType}' command: ${error.message}`));
+      logger.error(`\nERROR in '${commandType}' command: ${error.message}`);
       process.exit(1);
     }
   }

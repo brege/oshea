@@ -82,6 +82,13 @@ let filesChanged = new Set();
 let totalReplacements = 0;
 
 for (const species in mapping) {
+  // Only process species that look like actual logging calls
+  // e.g., console.log(...), console.error(chalk.red(...)), etc.
+  if (!/^console\.\w+\(.*\)$/.test(species)) {
+    // Optionally, you can log what you're skipping for transparency:
+    // console.log(`Skipping non-console species: ${species}`);
+    continue;
+  }
   const loggerMethod = mapping[species];
   const { totalReplaced, filesChanged: changed } = replaceLoggingSpecies(targetDir, {
     species,

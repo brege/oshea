@@ -1,35 +1,35 @@
 // src/cli/get_help.js
 const fs = require('fs').promises;
-const fss = require('fs'); // Synchronous
+const fss = require('fs');
 const path = require('path');
-const { markdownUtilsPath, pluginRegistryBuilderPath } = require('@paths');
+const { markdownUtilsPath, pluginRegistryBuilderPath, logger } = require('@paths');
 const { extractFrontMatter } = require(markdownUtilsPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 const yaml = require('js-yaml');
 
 async function displayPluginHelp(pluginName, manager, cliArgs) {
-  // cliArgs might contain --config, --factory-defaults which are needed for PluginRegistryBuilder
-  console.log(`INFO: Attempting to display help for plugin: ${pluginName}`);
+
+  logger.info(`Attempting to display help for plugin: ${pluginName}`);
 
   try {
     const { projectRoot } = require('@paths');
     const registryBuilder = new PluginRegistryBuilder(
       projectRoot,
-      null, // xdgBaseDir (let builder determine)
-      cliArgs.config, // projectManifestConfigPath from CLI
-      cliArgs.factoryDefaults, // useFactoryDefaultsOnly from CLI
+      null,
+      cliArgs.config,
+      cliArgs.factoryDefaults,
       false,
       null,
-      manager, // Pass the manager instance
-      { collRoot: manager.collRoot } // Explicitly pass collRoot
+      manager,
+      { collRoot: manager.collRoot }
     );
 
     const pluginRegistry = await registryBuilder.buildRegistry();
     const pluginRegistration = pluginRegistry[pluginName];
 
     if (!pluginRegistration || !pluginRegistration.configPath) {
-      console.error(`ERROR: Plugin "${pluginName}" not found or not properly registered.`);
-      console.log('You can list available plugins using: md-to-pdf plugin list');
+      logger.error(`Plugin "${pluginName}" not found or not properly registered.`);
+      logger.info('You can list available plugins using: md-to-pdf plugin list');
       return;
     }
 
@@ -37,18 +37,18 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
     const readmePath = path.join(pluginBasePath, 'README.md');
 
     if (!fss.existsSync(readmePath)) {
-      console.warn(`WARN: README.md not found for plugin "${pluginName}" at ${readmePath}.`);
-      console.log('No specific help available. Description from config:');
+      logger.warn(`WARN: README.md not found for plugin "${pluginName}" at ${readmePath}.`);
+      logger.info('No specific help available. Description from config:');
       try {
         const pluginConfigContent = await fs.readFile(pluginRegistration.configPath, 'utf8');
         const pluginConfig = yaml.load(pluginConfigContent);
         if (pluginConfig && pluginConfig.description) {
-          console.log(`  ${pluginConfig.description}`);
+          logger.info(`  ${pluginConfig.description}`);
         } else {
-          console.log('  No description found in plugin\'s config file either.');
+          logger.info('  No description found in plugin\'s config file either.');
         }
       } catch {
-        console.log('  Could not load plugin description.');
+        logger.info('  Could not load plugin description.');
       }
       return;
     }
@@ -57,28 +57,28 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
     const { data: frontMatter } = extractFrontMatter(readmeContent);
 
     if (frontMatter && frontMatter.cli_help) {
-      console.log('\n--- Plugin Help ---\n');
-      console.log(frontMatter.cli_help.trim());
-      console.log('\n-------------------\n');
+      logger.info('\n--- Plugin Help ---\n');
+      logger.info(frontMatter.cli_help.trim());
+      logger.info('\n-------------------\n');
     } else {
-      console.warn(`WARN: No 'cli_help' section found in the front matter of README.md for plugin "${pluginName}".`);
-      console.log('Displaying plugin description from its configuration file as fallback:');
+      logger.warn(`WARN: No 'cli_help' section found in the front matter of README.md for plugin "${pluginName}".`);
+      logger.info('Displaying plugin description from its configuration file as fallback:');
       try {
         const pluginConfigContent = await fs.readFile(pluginRegistration.configPath, 'utf8');
         const pluginConfig = yaml.load(pluginConfigContent);
         if (pluginConfig && pluginConfig.description) {
-          console.log(`  ${pluginConfig.description}`);
+          logger.info(`  ${pluginConfig.description}`);
         } else {
-          console.log('  No description found in plugin\'s config file.');
+          logger.info('  No description found in plugin\'s config file.');
         }
       } catch {
-        console.log('  Could not load plugin description.');
+        logger.info('  Could not load plugin description.');
       }
     }
 
   } catch (error) {
-    console.error(`ERROR: Could not retrieve help for plugin "${pluginName}": ${error.message}`);
-    if (error.stack && !(cliArgs.watch)) console.error(error.stack); // Avoid stack trace in watch mode for this error
+    logger.error(`Could not retrieve help for plugin "${pluginName}": ${error.message}`);
+    if (error.stack && !(cliArgs.watch)) logger.error(error.stack);
   }
 }
 

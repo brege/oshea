@@ -9,10 +9,8 @@ const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
 
-
-
 async function createArchetype(dependencies, managerContext, sourcePluginIdentifier, newArchetypeName, options = {}) {
-  const { chalk, cmUtils, constants } = dependencies;
+  const { cmUtils, constants } = dependencies;
   const { collRoot, listAvailablePlugins } = managerContext;
 
   let sourcePluginInfo = {};
@@ -45,7 +43,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
       throw new Error(`Config file (.config.yaml or .yaml) not found in source plugin directory "${resolvedSourcePath}".`);
     }
     sourcePluginInfo = {
-      collection: chalk.gray('[direct path source]'),
+      collection: '[direct path source]',
       plugin_id: sourcePluginIdForReplacement,
       base_path: resolvedSourcePath,
       config_path: path.join(resolvedSourcePath, configFileName)

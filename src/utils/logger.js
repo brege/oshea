@@ -11,6 +11,7 @@ if (process.env.LOG_MODE === 'json' && !fs.existsSync(logDir)) {
 const logFilePath = path.join(logDir, 'app.log');
 
 function log(level, message, meta = {}) {
+  if (level === 'debug' && !process.env.MD2PDF_DEBUG) return;
   if (process.env.LOG_MODE === 'json') {
     const entry = {
       level,
@@ -26,7 +27,7 @@ function log(level, message, meta = {}) {
     else if (level === 'success') output = chalk.green(message);
     else if (level === 'info') output = chalk.blueBright(message);
     else if (level === 'detail') output = chalk.gray(message);
-
+    else if (level === 'debug') output = chalk.magenta(message);
     console.log(output);
   }
 
@@ -42,4 +43,5 @@ module.exports = {
   success: (msg, meta) => log('success', msg, meta),
   detail: (msg, meta) => log('detail', msg, meta),
   fatal: (msg, meta) => log('fatal', msg, meta),
+  debug: (msg, meta) => log('debug', msg, meta)
 };

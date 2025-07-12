@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cover Letter Plugin Configuration Schema",
+  "description": "Schema for the cover-letter md-to-pdf plugin's configuration, ensuring it adheres to the v1 plugin contract.",
+  "type": "object",
+  "properties": {
+    "plugin_name": {
+      "type": "string",
+      "description": "The name of the plugin, matching its directory name.",
+      "pattern": "^[a-zA-Z0-9_.-]+$",
+      "minLength": 1
+    },
+    "protocol": {
+      "type": "string",
+      "description": "The version of the plugin contract this plugin adheres to (e.g., 'v1').",
+      "enum": ["v1"]
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the plugin itself (e.g., '1.0.0').",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "description": {
+      "type": "string",
+      "description": "A brief description of the plugin's functionality."
+    },
+    "css_files": {
+      "type": "array",
+      "description": "List of CSS files to include with this plugin.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "plugin_name",
+    "protocol",
+    "version"
+  ],
+  "additionalProperties": true
+}

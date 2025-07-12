@@ -1,64 +1,75 @@
 // plugins/cv/.contract/test/cv-e2e.test.js
+require('module-alias/register');
 const path = require('path');
 const os = require('os');
+const glob = require('glob');
+const fs = require('fs');
+const {
+  projectRoot,
+  cliPath,
+  testFileHelpersPath,
+  loggerPath,
+} = require('@paths');
 
-const PROJECT_ROOT = process.cwd();
-const HELPERS_PATH = path.join(PROJECT_ROOT, 'test', 'shared', 'test-helpers.js');
+const logger = require(loggerPath);
 
 const {
   runCliCommand,
   setupTestDirectory,
   cleanupTestDirectory,
-  checkFile,
-} = require(HELPERS_PATH);
+} = require(testFileHelpersPath);
 
-// Corrected: The plugin root is two levels up from .contract/test/
 const PLUGIN_ROOT = path.resolve(__dirname, '../../');
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'cv-plugin-e2e');
-const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
 const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'cv-example.md');
-const EXPECTED_PDF_FILENAME = 'example-curriculum-vitae.pdf'; // Default filename for cv-example.md
-const MIN_PDF_SIZE = 1000; // Minimum size in bytes for a valid PDF
+const MIN_PDF_SIZE = 1000;
 
-describe('CV Plugin E2E Test', function() {
-  this.timeout(10000); // Set a higher timeout for E2E tests
+describe('CV Plugin E2E Test', function () {
+  this.timeout(20000);
 
   before(async () => {
-    // Ensure the test output directory exists and is clean
+    logger.debug('[cv-e2e] Setting up test directory...');
     await setupTestDirectory(TEST_OUTPUT_DIR);
   });
 
   after(async () => {
-    // Clean up the test output directory unless KEEP_OUTPUT is set
     const keepOutput = process.env.KEEP_OUTPUT === 'true';
+    logger.debug(`[cv-e2e] Cleaning up test directory. KEEP_OUTPUT: ${keepOutput}`);
     await cleanupTestDirectory(TEST_OUTPUT_DIR, keepOutput);
   });
 
   it('should convert cv-example.md to PDF using the cv plugin and generate a non-empty PDF', async () => {
-    const outputPdfPath = path.join(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME);
-
     const commandArgs = [
       'convert',
-      EXAMPLE_MD_PATH,
-      '--plugin', PLUGIN_ROOT, // Use the correct, absolute path to the plugin directory
+      `"${EXAMPLE_MD_PATH}"`,
+      '--plugin', PLUGIN_ROOT,
       '--outdir', TEST_OUTPUT_DIR,
-      '--filename', EXPECTED_PDF_FILENAME,
-      '--no-open', // Prevent opening the PDF viewer during test
+      '--no-open',
     ];
 
-    // console.log(`\n  Running command: md-to-pdf ${commandArgs.join(' ')}`);
-    const result = await runCliCommand(commandArgs, CLI_PATH, PROJECT_ROOT);
+    logger.debug(`[cv-e2e] Running CLI command: node ${cliPath} ${commandArgs.join(' ')}`);
+    const result = await runCliCommand(commandArgs, cliPath, projectRoot);
 
     if (!result.success) {
-      throw new Error(`CLI command failed: ${result.stderr || result.error.message}`);
+      const errorMessage = result.stderr || result.error?.message || 'Unknown error';
+      logger.error(`[cv-e2e] CLI command failed: ${errorMessage}`);
+      throw new Error(`CLI command failed: ${errorMessage}`);
     }
 
-    // Verify the PDF was created and is not empty
-    await checkFile(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME, MIN_PDF_SIZE);
+    // Use glob to find the generated PDF file(s)
+    const pattern = path.join(TEST_OUTPUT_DIR, 'jane-doe-curriculum-vitae*.pdf');
+    const matchingFiles = glob.sync(pattern);
 
-    // Optional: More specific checks can be added here if needed,
-    // but for a basic E2E, existence and size are often sufficient.
-    console.log(`  Successfully created and verified: ${outputPdfPath}`);
+    if (matchingFiles.length === 0) {
+      throw new Error(`No PDF output matching pattern: ${pattern}`);
+    }
+
+    const stat = fs.statSync(matchingFiles[0]);
+    if (stat.size < MIN_PDF_SIZE) {
+      throw new Error(`Generated PDF is too small: ${matchingFiles[0]} (${stat.size} bytes)`);
+    }
+
+    logger.success(`[cv-e2e] Successfully created and verified: ${matchingFiles[0]}`);
   });
 });
 

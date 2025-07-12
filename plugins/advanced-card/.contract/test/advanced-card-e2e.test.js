@@ -1,4 +1,4 @@
-// plugins/template-basic/.contract/test/template-basic-e2e.test.js
+// plugins/advanced-card/.contract/test/advanced-card-e2e.test.js
 
 require('module-alias/register');
 const path = require('path');
@@ -30,7 +30,7 @@ const {
 } = require(testFileHelpersPath);
 
 describe(`E2E Test for ${PLUGIN_NAME} Plugin`, function() {
-  this.timeout(15000); // Set a higher timeout for E2E tests
+  this.timeout(15000);
 
   before(async () => {
     logger.debug(`[${PLUGIN_NAME}-e2e] Setting up test directory...`);

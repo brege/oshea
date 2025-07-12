@@ -1,4 +1,5 @@
 // test/integration/collections/collections-manager.test.js
+
 const {
   collectionsIndexPath,
   cmUtilsPath,
@@ -9,23 +10,25 @@ const sinon = require('sinon');
 const proxyquire = require('proxyquire');
 const path = require('path');
 
-// Use capture-logs.js as the logger module for loggerPath
 const { logs, clearLogs } = require('../../shared/capture-logs');
 const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
 
-// Import manifests
 const addManifest = require('./collections-manager.add.manifest.js');
 const removeManifest = require('./collections-manager.remove.manifest.js');
 const updateManifest = require('./collections-manager.update.manifest.js');
 const listManifest = require('./collections-manager.list.manifest.js');
 const enableDisableManifest = require('./collections-manager.enable-disable.manifest.js');
+const constructorManifest = require('./collections-manager.constructor.manifest.js');
+const disableManifest = require('./collections-manager.disable.manifest.js');
 
 const allTestCases = [
   ...addManifest,
   ...removeManifest,
   ...updateManifest,
   ...listManifest,
-  ...enableDisableManifest
+  ...enableDisableManifest,
+  ...constructorManifest,
+  ...disableManifest,
 ];
 
 const FAKE_COLL_ROOT = '/fake/collRoot';
@@ -43,13 +46,13 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
         lstatSync: sinon.stub(),
       },
       fs: {
-        mkdir: sinon.stub(),
-        readdir: sinon.stub(),
-        readFile: sinon.stub(),
+        mkdir: sinon.stub().resolves(),
+        readdir: sinon.stub().resolves([]),
+        readFile: sinon.stub().resolves(''),
       },
       fsExtra: {
-        rm: sinon.stub(),
-        copy: sinon.stub(),
+        rm: sinon.stub().resolves(),
+        copy: sinon.stub().resolves(),
       },
       path: {
         join: (...args) => args.join('/'),
@@ -57,13 +60,19 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
         basename: p => p.split('/').pop(),
         sep: '/',
       },
+      os: {
+        platform: sinon.stub().returns('linux'),
+        homedir: sinon.stub().returns('/home/user'),
+      },
+      process: {
+        env: {}
+      },
       cmUtils: {
         deriveCollectionName: sinon.stub(),
         isValidPluginName: sinon.stub().returns(true),
       },
-      yaml: { load: sinon.stub() },
+      yaml: { load: sinon.stub().returns({}) },
       constants: require(collectionsConstantsPath),
-      // logger: testLogger, // REMOVE this line, use loggerPath below
       chalk: {
         blue: str => str, yellow: str => str, red: str => str,
         magenta: str => str, green: str => str, underline: str => str,
@@ -71,15 +80,16 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       }
     };
 
-    // Use absolute paths from @paths for all source dependencies
     const collectionsManagerModule = proxyquire(collectionsIndexPath, {
       'fs': mockDependencies.fss,
       'fs/promises': mockDependencies.fs,
       'fs-extra': mockDependencies.fsExtra,
       'path': mockDependencies.path,
+      'os': mockDependencies.os,
+      'process': mockDependencies.process,
       '@paths': {
         ...require('@paths'),
-        loggerPath: testLoggerPath, // <-- THIS IS THE KEY LINE
+        loggerPath: testLoggerPath,
         cmUtilsPath,
         collectionsConstantsPath,
         collectionsCommandsRoot: require('@paths').collectionsCommandsRoot,
@@ -100,58 +110,84 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
     const {
       description,
       methodName,
-      methodArgs,
-      managerOptions,
-      isNegativeTest,
-      expectedErrorMessage,
-      stubs,
-      setup,
-      assert,
-      useImperativeSetup,
-      imperativeSetup,
+      methodArgs = [],
+      managerOptions = {},
+      isNegativeTest = false,
+      expectedErrorMessage = null,
+      stubs = {},
+      assertion,
     } = testCase;
 
     it_(description, async function() {
       const mocks = { mockDependencies };
-      // --- Imperative setup phase: stub dependencies before manager creation ---
-      if (useImperativeSetup && typeof imperativeSetup === 'function') {
-        imperativeSetup(null, mocks, sinon, expect, require('../../shared/capture-logs'));
-      }
-      const manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT, ...managerOptions }, mockDependencies);
-      // --- Imperative setup phase: stub internal methods after manager creation ---
-      if (useImperativeSetup && typeof imperativeSetup === 'function') {
-        imperativeSetup(manager, mocks, sinon, expect, require('../../shared/capture-logs'));
-      } else {
-        // Factory/manifest-driven setup
-        if (stubs && stubs.internal) {
-          for (const method of Object.keys(stubs.internal)) {
-            mocks[method] = sinon.stub(manager, method);
+
+      if (stubs.fss) {
+        if (stubs.fss.existsSync && stubs.fss.existsSync.returns !== undefined)
+          mockDependencies.fss.existsSync.returns(stubs.fss.existsSync.returns);
+
+        if (stubs.fss.lstatSync) {
+          if (stubs.fss.lstatSync.returns !== undefined) {
+            mockDependencies.fss.lstatSync.returns(stubs.fss.lstatSync.returns);
+          } else if (stubs.fss.lstatSync.throws) {
+            mockDependencies.fss.lstatSync.throws(stubs.fss.lstatSync.throws);
           }
         }
-        setup(mocks);
-        if (stubs && stubs.internal) {
-          for (const [method, behavior] of Object.entries(stubs.internal)) {
-            if (behavior.resolves) mocks[method].resolves(behavior.resolves);
-            if (behavior.rejects) mocks[method].rejects(new Error(behavior.rejects));
-          }
+      }
+      if (stubs.fs) {
+        if(stubs.fs.readdir && stubs.fs.readdir.resolves)
+          mockDependencies.fs.readdir.resolves(stubs.fs.readdir.resolves);
+        if(stubs.fs.readdir && stubs.fs.readdir.rejects)
+          mockDependencies.fs.readdir.rejects(new Error(stubs.fs.readdir.rejects));
+      }
+      if (stubs.fsExtra && stubs.fsExtra.rm && stubs.fsExtra.rm.rejects) {
+        mockDependencies.fsExtra.rm.rejects(new Error(stubs.fsExtra.rm.rejects));
+      }
+      if (stubs.cmUtils && stubs.cmUtils.deriveCollectionName) {
+        mockDependencies.cmUtils.deriveCollectionName.returns(stubs.cmUtils.deriveCollectionName);
+      }
+      if (stubs.process && stubs.process.env) {
+        Object.assign(mockDependencies.process.env, stubs.process.env);
+      }
+      if (stubs.os) {
+        if (stubs.os.platform) mockDependencies.os.platform.returns(stubs.os.platform.returns);
+        if (stubs.os.homedir) mockDependencies.os.homedir.returns(stubs.os.homedir.returns);
+      }
+
+      const manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT, ...managerOptions }, mockDependencies);
+
+      if (stubs.internal) {
+        for (const method of Object.keys(stubs.internal)) {
+          mocks[method] = sinon.stub(manager, method);
+          if (stubs.internal[method].resolves !== undefined) mocks[method].resolves(stubs.internal[method].resolves);
+          if (stubs.internal[method].rejects) mocks[method].rejects(new Error(stubs.internal[method].rejects));
         }
       }
 
-      if (isNegativeTest) {
-        try {
-          await manager[methodName](...methodArgs);
-          expect.fail('Expected method to throw, but it did not.');
-        } catch (error) {
-          expect(error).to.be.an.instanceOf(Error);
-          if (expectedErrorMessage instanceof RegExp) {
-            expect(error.message).to.match(expectedErrorMessage);
-          } else {
-            expect(error.message).to.equal(expectedErrorMessage);
-          }
+      try {
+        let result;
+        if (methodName) {
+          result = await manager[methodName](...methodArgs);
+        } else {
+          result = manager;
         }
-      } else {
-        const result = await manager[methodName](...methodArgs);
-        await assert(result, mocks, { FAKE_COLL_ROOT }, expect, logs);
+
+        if(isNegativeTest) {
+          throw new Error('Expected method to throw, but it did not.');
+        }
+
+        if (assertion) {
+          await assertion(result, mocks, { FAKE_COLL_ROOT }, expect, logs);
+        }
+      } catch (error) {
+        if (!isNegativeTest) {
+          throw error;
+        }
+        expect(error).to.be.an.instanceOf(Error);
+        if (expectedErrorMessage instanceof RegExp) {
+          expect(error.message).to.match(expectedErrorMessage);
+        } else {
+          expect(error.message).to.equal(expectedErrorMessage);
+        }
       }
     });
   });

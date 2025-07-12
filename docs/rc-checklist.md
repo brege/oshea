@@ -100,12 +100,14 @@ These are internal, code-hygienic tasks.
 | ✔ |`tt1`| Remove all old debugging code                                    |
 | ✔ |`tt2`| Add `test-wacher.js` to exec tests on app code changes           |
 | ✔ |`tt3`| Fix `--watch` flag in `mocha` to provide `tt2`'s as CLI option   |
-| ‖ |`tt4`| Consolidate integration tests into manifest-driven harnesses     |
+| ✔ |`tt4`| Consolidate integration tests into manifest-driven harnesses     |
 | ✔ |`tt5`| Organize e2e tests into groups in `.mocharc.js`                  |
-| ○ |`tt6`| Dump all test logs to a convenient machine-readable file         |
-| ○ |`tt7`| Build `--last-fails` mocha flag to re-run last failed from `tt6` |
-| ○ |`tt8`| Unify app-code console.logs and debugging to shrink line-char    |
+| ✔ |`tt6`| Dump all test logs to a convenient machine-readable file         |
+| ✔ |`tt7`| Build `--last-fails` mocha flag to re-run last failed from `tt6` |
+| ✔ |`tt8`| Unify app-code console.logs and debugging to shrink line-char    |
 | ○ |`tt9`| Add remainder of walkthroughs as `level4` tests.                 | 
+
+cf. [Test Suite Refactor Impact Report](../test/docs/refactor-impact.md)
 
 *Status: In Progress*
 <!--

@@ -7,12 +7,7 @@ const os = require('os');
 const { projectRoot, cliPath, mochaPath, nodeModulesPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-/**
- * Helper function to check README.md front matter for v1 protocol.
- * @param {string} readmePath - Path to the README.md file.
- * @param {string} pluginName - The name of the plugin.
- * @param {Array<string>} warnings - Array to push warnings into.
- */
+
 function checkReadmeFrontMatterV1(readmePath, pluginName, warnings) {
   logger.info('  Checking README.md front matter...', { module: 'src/validators/v1.js' });
   if (!fs.existsSync(readmePath)) {
@@ -40,13 +35,7 @@ function checkReadmeFrontMatterV1(readmePath, pluginName, warnings) {
   }
 }
 
-/**
- * Checks for the presence of required plugin files and directories.
- * @param {string} pluginDirectoryPath - Absolute path to the plugin's root directory.
- * @param {string} pluginName - The name of the plugin being checked.
- * @param {Array<string>} errors - An array to push error messages into.
- * @param {Array<string>} warnings - An array to push warning messages into.
- */
+
 const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) => {
   logger.info('  Checking plugin file structure...', { module: 'src/validators/v1.js' });
   const requiredFiles = ['index.js', `${pluginName}.config.yaml`, `${pluginName}-example.md`, 'README.md'];
@@ -77,13 +66,7 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
   }
 };
 
-/**
- * Runs the co-located E2E test file for a given plugin.
- * @param {string} pluginDirectoryPath - Absolute path to the plugin's root directory.
- * @param {string} pluginName - The name of the plugin being tested.
- * @param {Array<string>} errors - An array to push error messages into.
- * @param {Array<string>} warnings - An array to push warning messages into.
- */
+
 const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
   logger.info('  Checking plugin\'s test setup...', { module: 'src/validators/v1.js' });
   const e2eTestPath = path.join(pluginDirectoryPath, '.contract', 'test', `${pluginName}-e2e.test.js`);
@@ -128,13 +111,7 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
   }
 };
 
-/**
- * Performs a self-activation sanity check by attempting to run the plugin's example.
- * @param {string} pluginDirectoryPath - Absolute path to the plugin's root directory.
- * @param {string} pluginName - The name of the plugin being checked.
- * @param {Array<string>} errors - An array to push error messages into.
- * @param {Array<string>} warnings - An array to push warning messages into.
- */
+
 const runSelfActivation = (pluginDirectoryPath, pluginName, errors) => {
   logger.info('  Performing self-activation sanity check...', { module: 'src/validators/v1.js' });
   const exampleMdPath = path.join(pluginDirectoryPath, `${pluginName}-example.md`);
@@ -162,12 +139,7 @@ const runSelfActivation = (pluginDirectoryPath, pluginName, errors) => {
   }
 };
 
-/**
- * Validates a plugin based on the v1 contract.
- * @param {string} pluginDirectoryPath - The absolute path to the plugin's root directory.
- * @param {object} pluginMetadata - Pre-resolved metadata for the plugin.
- * @returns {{isValid: boolean, errors: string[], warnings: string[]}} - The complete validation result.
- */
+
 function validateV1(pluginDirectoryPath, pluginMetadata) {
   const errors = [];
   const warnings = [];

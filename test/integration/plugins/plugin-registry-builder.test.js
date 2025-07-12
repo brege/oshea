@@ -90,7 +90,6 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
       loadYamlConfig: sinon.stub(),
       yaml: { load: sinon.stub() },
       collRoot: commonTestConstants.FAKE_COLL_ROOT,
-      // logger: testLogger // REMOVE this line, use loggerPath above
     };
 
     mockDependencies.fsPromises = {

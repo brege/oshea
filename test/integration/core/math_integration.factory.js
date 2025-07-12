@@ -3,9 +3,7 @@ const sinon = require('sinon');
 const path = require('path');
 const proxyquire = require('proxyquire');
 
-/**
- * Declarative scenario factory for math_integration tests.
- */
+
 function makeMathIntegrationScenario({
   test_id,
   description,
@@ -17,11 +15,7 @@ function makeMathIntegrationScenario({
   return { test_id, description, scenario, assertion, only, skip };
 }
 
-/**
- * Builds all mocks and the mathIntegration instance for a scenario.
- * - Handles KaTeX plugin injection (valid, missing, or invalid)
- * - Handles mathConfig, CSS existence/content, and error simulation
- */
+
 function buildMocks(scenario, constants) {
   // FS and path stubs
   const mockFsPromises = { readFile: sinon.stub() };

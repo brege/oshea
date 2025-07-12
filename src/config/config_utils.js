@@ -2,24 +2,12 @@
 const fs = require('fs'); // Used by _loadYamlConfig (moved from ConfigResolver for broader use if needed)
 const yaml = require('js-yaml'); // Used by _loadYamlConfig
 
-/**
- * Checks if an item is a plain object.
- * @param {*} item - The item to check.
- * @returns {boolean} True if the item is a plain object, false otherwise.
- */
+
 function isObject(item) {
   return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
-/**
- * Deeply merges properties of a source object into a target object.
- * Special handling for 'css_files' and 'inherit_css' to ensure they are directly replaced or handled by AssetResolver.
- * For 'handler_script', it's typically not merged from overrides in the same way other properties are;
- * it's usually taken from the base plugin config.
- * @param {Object} target - The target object.
- * @param {Object} source - The source object.
- * @returns {Object} The merged object.
- */
+
 function deepMerge(target, source) {
   const output = { ...target };
   if (isObject(target) && isObject(source)) {
@@ -42,15 +30,7 @@ function deepMerge(target, source) {
   return output;
 }
 
-/**
- * Loads and parses a YAML configuration file.
- * (Moved from markdown_utils to here if it's primarily for config system, or keep in markdown_utils if widely used)
- * For now, keeping a version here for clarity of config system.
- * @async
- * @param {string} configPath - Absolute path to the YAML configuration file.
- * @returns {Promise<Object>} The parsed configuration object.
- * @throws {Error} If the file is not found, is empty, or cannot be parsed.
- */
+
 async function loadYamlConfig(configPath) {
   if (!fs.existsSync(configPath)) { // Note: Changed to synchronous fs.existsSync for this initial check
     throw new Error(`Configuration file '${configPath}' not found.`);

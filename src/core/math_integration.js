@@ -13,11 +13,7 @@ function createMathIntegration(dependencies = {}) {
 
   const KATEX_CSS_PATH = path_module.resolve(__dirname, '../../assets/css/katex.min.css');
 
-  /**
-     * Configures a MarkdownIt instance for math rendering using KaTeX.
-     * @param {Object} mdInstance - The MarkdownIt instance.
-     * @param {Object} mathConfig - The math rendering configuration object.
-     */
+
   function configureMarkdownItForMath(mdInstance, mathConfig) {
     if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
       let currentKatexPluginModule = katexPluginModule;
@@ -47,12 +43,7 @@ function createMathIntegration(dependencies = {}) {
   }
 
 
-  /**
-     * Retrieves the content of the KaTeX CSS file if math rendering is enabled.
-     * @param {Object} mathConfig - The math rendering configuration object.
-     * @returns {Promise<Array<string>>} A promise that resolves to an array containing KaTeX CSS content as a string,
-     * or an empty array if not applicable or file not found.
-     */
+
   async function getMathCssContent(mathConfig) {
     if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
       logger.detail(`[math_integration.js] getMathCssContent: Checking for KaTeX CSS at ${KATEX_CSS_PATH}`, { module: 'src/core/math_integration.js' });

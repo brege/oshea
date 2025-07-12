@@ -4,20 +4,7 @@ const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-/**
- * Determines the plugin to use based on CLI arguments, front matter, local config, or default.
- *
- * @param {object} args - Command line arguments, potentially containing `plugin` and `markdownFile`.
- * @param {object} dependencies - Injected dependencies.
- * @param {object} dependencies.fsPromises - Node's `fs.promises` module.
- * @param {object} dependencies.fsSync - Node's synchronous `fs` module (e.g., `fs.existsSync`, `fs.statSync`).
- * @param {object} dependencies.path - Node's `path` module.
- * @param {object} dependencies.yaml - The `js-yaml` library.
- * @param {object} dependencies.markdownUtils - The local `markdown_utils` module.
- * @param {function} dependencies.processCwd - A function that returns the current working directory (e.g., `process.cwd`).
- * @param {string} defaultPluginName - The name of the default plugin to use if no other is determined.
- * @returns {Promise<object>} An object containing `pluginSpec`, `source`, and `localConfigOverrides`.
- */
+
 async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, markdownUtils, processCwd }, defaultPluginName = 'default') {
   let pluginSpec = defaultPluginName;
   let determinationSource = 'default';

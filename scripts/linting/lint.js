@@ -29,6 +29,11 @@ const lintSteps = [
     command: 'node',
     args: [path.join(scriptsDir, 'logging-lint.js')],
   },
+  {
+    label: 'Custom: auto-doc-lint.js',
+    command: 'node',
+    args: [path.join(scriptsDir, 'auto-doc-lint.js')],
+  },
   // docs
   {
     label: 'Docs: docs-link-checker.mjs',
@@ -45,7 +50,7 @@ const lintSteps = [
   {
     label: 'Docs: update-project-indices.js',
     command: 'node',
-    args: [path.join(projectRoot, 'scripts', 'docs', 'update-project-indices.js')],
+    args: [path.join(projectRoot, 'scripts', 'docs', 'update-project-indices.js'), '--quiet'],
   },
   // validators
   {

@@ -1,4 +1,6 @@
+#!/usr/bin/env node
 // scripts/docs/update-project-indices.js
+
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
@@ -7,6 +9,8 @@ const yaml = require('js-yaml');
 const CONFIG_PATH = path.resolve(process.cwd(), '.index-config.yaml');
 const START_MARKER = '<!-- uncategorized-start -->';
 const END_MARKER = '<!-- uncategorized-end -->';
+const LINT_SKIP_TAG = 'lint-skip-index';
+const THIS_SCRIPT = path.resolve(__filename);
 
 function getDocignoreDirs(root) {
   let ignoredDirs = [];
@@ -59,17 +63,26 @@ function getExistingLinks(content, baseDir) {
   return links;
 }
 
-function updateIndexFile(groupName, groupConfig) {
+function fileHasLintSkip(file) {
+  if (path.resolve(file) === THIS_SCRIPT) return false; // never skip this script itself
+  try {
+    const content = fs.readFileSync(file, 'utf8');
+    return content.includes(LINT_SKIP_TAG);
+  } catch {
+    return false;
+  }
+}
+
+function updateIndexFile(groupName, groupConfig, opts = {}) {
   const { indexFile, scanRoot, fileExtensions, excludePatterns } = groupConfig;
+  const { quiet = false } = opts;
 
   const INDEX_FILE_PATH = path.resolve(process.cwd(), indexFile);
   if (!fs.existsSync(INDEX_FILE_PATH)) {
     console.error(`ERROR: Index file for group '${groupName}' not found at ${INDEX_FILE_PATH}`);
+    process.exitCode = 1;
     return;
   }
-
-  console.log(`\n--- Processing Group: ${groupName} ---`);
-  console.log(`Index File: ${indexFile}`);
 
   const INDEX_DIR = path.dirname(INDEX_FILE_PATH);
   const content = fs.readFileSync(INDEX_FILE_PATH, 'utf8');
@@ -81,16 +94,18 @@ function updateIndexFile(groupName, groupConfig) {
   const scanRoots = Array.isArray(scanRoot) ? scanRoot : [scanRoot];
   let allFiles = [];
   for (const root of scanRoots) {
-    // Correctly handle multiple extensions by creating a proper glob pattern.
-    const extPattern = fileExtensions.length > 1 ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}` : fileExtensions[0].replace(/^\./, '');
+    const extPattern = fileExtensions.length > 1
+      ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}`
+      : fileExtensions[0].replace(/^\./, '');
     const globPattern = `${root}/**/*.${extPattern}`;
-
-    // Find all directories under this root that contain a .docignore file
     const docignorePatterns = getDocignoreDirs(root);
 
-    console.log(`  Scanning with glob pattern: ${globPattern}`);
-    if (docignorePatterns.length > 0) {
-      console.log('  Skipping directories with .docignore:', docignorePatterns);
+    if (!quiet) {
+      console.log(`[librarian] ${groupName}: ${indexFile}`);
+      console.log(`  Scanning with glob pattern: ${globPattern}`);
+      if (docignorePatterns.length > 0) {
+        console.log('  Skipping directories with .docignore:', docignorePatterns);
+      }
     }
 
     const found = glob.sync(globPattern, {
@@ -98,34 +113,43 @@ function updateIndexFile(groupName, groupConfig) {
         ...(excludePatterns || []),
         '**/node_modules/**',
         '**/.git/**',
-        ...docignorePatterns, // Add .docignore directories to ignore list
+        ...docignorePatterns,
       ],
       nodir: true,
     });
     allFiles = allFiles.concat(found);
+
+    if (!quiet) {
+      console.log(`  Found ${found.length} total files in scan root(s).`);
+    }
   }
-  console.log(`  Found ${allFiles.length} total files in scan root(s).`);
-  // Optional: Uncomment to see all files found
-  // console.log('  Files Found:', allFiles);
+
+  // Filter out files that contain the lint-skip flag (quietly, no warning)
+  const filesToIndex = allFiles.filter(file => !fileHasLintSkip(file));
 
   const existingLinks = getExistingLinks(content, INDEX_DIR);
-  console.log(`  Found ${existingLinks.size} existing links in ${indexFile}`);
-  // Optional: Uncomment to see all links parsed
-  // console.log('  Existing Links:', existingLinks);
+  if (!quiet) {
+    console.log(`  Found ${existingLinks.size} existing links in ${indexFile}`);
+  }
 
-  const untrackedFiles = allFiles.filter(file => {
+  const untrackedFiles = filesToIndex.filter(file => {
     const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
     return !existingLinks.has(relPath);
   });
 
   if (untrackedFiles.length === 0) {
-    console.log(`✔ Skipped ${indexFile} (no new uncategorized files).`);
+    if (!quiet) {
+      console.log(`[librarian] ${groupName}: ${indexFile} ✔ No new uncategorized files.`);
+    }
     return;
   }
 
-  console.log(`  Found ${untrackedFiles.length} untracked files to add.`);
-  // Optional: Uncomment to see untracked files
-  // console.log('  Untracked Files:', untrackedFiles);
+  // Always print this block if files are added (even in quiet)
+  console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Adding ${untrackedFiles.length} untracked file(s):`);
+  untrackedFiles.forEach(file => {
+    const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
+    console.warn(`    - ${relPath}`);
+  });
 
   const newUncatLines = untrackedFiles.map(file => {
     const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
@@ -138,12 +162,14 @@ function updateIndexFile(groupName, groupConfig) {
     const after = lines.slice(endIdx).join('\n');
     finalContent = `${before}\n${newUncatLines.join('\n')}\n${after}`;
   } else {
-    console.warn(`WARN: Markers not found in ${indexFile}. Appending list to the end.`);
+    if (!quiet) {
+      console.warn(`WARN: Markers not found in ${indexFile}. Appending list to the end.`);
+    }
     finalContent = `${content}\n\n${START_MARKER}\n${newUncatLines.join('\n')}\n${END_MARKER}\n`;
   }
 
   fs.writeFileSync(INDEX_FILE_PATH, finalContent, 'utf8');
-  console.log(`✔ Updated ${indexFile} with ${newUncatLines.length} untracked file(s).`);
+  console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Updated with ${newUncatLines.length} untracked file(s).`);
 }
 
 function main() {
@@ -156,23 +182,32 @@ function main() {
   const args = process.argv.slice(2);
   const groupArg = args.find(arg => arg.startsWith('--group='));
   const specificGroup = groupArg ? groupArg.split('=')[1] : null;
+  const quiet = args.includes('--quiet') || args.includes('--warn-only');
+
+  let hadError = false;
 
   if (specificGroup) {
     const groupConfig = configs[specificGroup];
     if (groupConfig) {
-      updateIndexFile(specificGroup, groupConfig);
+      updateIndexFile(specificGroup, groupConfig, { quiet });
     } else {
       console.error(`ERROR: Group '${specificGroup}' not found in configuration.`);
+      hadError = true;
     }
   } else {
     for (const groupName in configs) {
       if (Object.hasOwnProperty.call(configs, groupName)) {
-        updateIndexFile(groupName, configs[groupName]);
+        updateIndexFile(groupName, configs[groupName], { quiet });
       }
     }
+  }
+
+  if (hadError || process.exitCode === 1) {
+    process.exit(1);
   }
 }
 
 if (require.main === module) {
   main();
 }
+

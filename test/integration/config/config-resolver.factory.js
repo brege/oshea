@@ -1,11 +1,6 @@
 // test/integration/config/config-resolver.factory.js
 
-/**
- * Factory for ConfigResolver test scenarios.
- * - Reads stubs and expectations from the manifest entry.
- * - Handles all setup and assertions.
- * - Only allows custom assertion functions in rare, explicitly justified cases.
- */
+
 function makeConfigResolverScenario({
   description,
   constructorArgs,

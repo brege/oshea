@@ -2,15 +2,7 @@
 const path = require('path');
 const sinon = require('sinon');
 
-/**
- * Declarative helper for setting up plugin scenarios with file existence, yaml content, and exec stubbing.
- * Usage:
- *   setup: setupPluginScenario({
- *     files: { 'index.js': true, 'README.md': false, ... },
- *     yaml: { 'foo.config.yaml': { plugin_name: 'foo', protocol: 'v1' } },
- *     exec: { throws: 'fail message' } // or { returns: '' }
- *   })
- */
+
 function setupPluginScenario({
   files = {},
   yaml = {},
@@ -53,9 +45,7 @@ function setupPluginScenario({
   };
 }
 
-/**
- * Helper for a well-formed plugin (for the happy path).
- */
+
 function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mockYaml }) {
   const files = {
     'index.js': 'module.exports = class {};',
@@ -88,9 +78,7 @@ function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mo
   mockExecSync.returns('');
 }
 
-/**
- * Factory for validator scenarios.
- */
+
 function makeValidatorScenario({
   description,
   pluginName = 'test-plugin',

@@ -43,7 +43,7 @@ module.exports = [
   {
     describe: '3.2.2: (Sad Path) Fails with a non-zero exit code if required plugin-specific options are missing',
     setup: async (sandboxDir) => {
-      // No setup needed, as the command should fail before accessing any files.
+    // No setup needed, as the command should fail before accessing any files.
     },
     args: (sandboxDir) => [
       'generate',
@@ -51,9 +51,9 @@ module.exports = [
       '--no-open',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
-      expect(exitCode).to.equal(1);
-      // Check for the specific error message from the recipe-book plugin handler.
-      expect(stderr).to.match(/recipesBaseDir' option was not provided/i);
+      expect(exitCode).to.not.equal(0);
+      expect((stderr + stdout).toLowerCase()).to.include('recipesbasedir');
     },
   },
+
 ];

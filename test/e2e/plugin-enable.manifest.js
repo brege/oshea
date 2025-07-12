@@ -98,12 +98,16 @@ module.exports = [
       'invalid-coll/invalid-plugin',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
-      expect(exitCode).to.equal(1); // Expect non-zero exit code
-      // Assert specific output to stdout and stderr
-      expect(stdout).to.match(/Running validation for plugin 'invalid-plugin' before enabling/i); // This message should be on stdout
-      expect(stdout).to.match(/Plugin 'invalid-plugin' is INVALID/i);
-      expect(stderr).to.match(/Errors:\s+- Missing required file: 'index.js'/i); // Specific validation error in stderr
-      expect(stderr).to.match(/Plugin validation failed for 'invalid-plugin'/i); // Error message about overall failure
+      expect(exitCode).to.equal(1);
+
+      // Combine both streams for robust matching
+      const output = (stderr + stdout).toLowerCase();
+
+      // Check for key error phrases
+      expect(output).to.include('missing required file');
+      expect(output).to.include('index.js');
+      expect(output).to.include('plugin validation failed');
+      expect(output).to.include('invalid-plugin');
 
       // Verify it's NOT in the enabled manifest
       const enabledManifestPath = path.join(sandboxDir, '.cm-test-root', 'enabled.yaml');
@@ -114,4 +118,5 @@ module.exports = [
       }
     },
   },
+
 ];

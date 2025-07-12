@@ -1,4 +1,4 @@
-> **Historical Note:** These items are paused until the repos is in a more stable state of refactoring towards a central logger.
+> **Historical Note:** These items are paused until the repo is in a more stable state of refactoring towards a central logger.
 
 ### **Integration Tests**
 

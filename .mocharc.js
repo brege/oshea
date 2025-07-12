@@ -12,9 +12,8 @@ const group = argv.group || (hasFiles ? 'custom' : 'all');
 console.log(`[Mocha] Running test group: '${group}'`);
 
 const paths = {
-  // --- Top-Level Test Paths ---
+  // --- Integration Test Paths ---
   integration:            'test/integration/**/*.js',
-  e2e:                    'test/e2e/**/*.js',
 
   // --- Subsystem & Module Integration Test Paths ---
   default_handler:        'test/integration/core/default-handler.*.js',               // Rank 0
@@ -34,49 +33,31 @@ const paths = {
   cm_utils:               'test/integration/collections/cm-utils.*.js',               // Rank 2
 
   // --- End-to-End Test Paths ---
-  plugin_add:             'test/e2e/plugin-add.*.js',
-  plugin_config:          'test/e2e/config.*.js',
-  plugin_create:          'test/e2e/plugin-create.*.js',
-  plugin_disable:         'test/e2e/plugin-disable.*.js',
-  plugin_enable:          'test/e2e/plugin-enable.*.js',
-  plugin_list:            'test/e2e/plugin-list.*.js',
-  plugin_validate:        'test/e2e/plugin-validate.*.js',
-
-  plugin_convert:         'test/e2e/convert.*.js',
-  plugin_generate:        'test/e2e/generate.*.js',
-
-  collection_add:         'test/e2e/collection-add.*.js',
-  collection_list:        'test/e2e/collection-list.*.js',
-  collection_remove:      'test/e2e/collection-remove.*.js',
-  collection_update:      'test/e2e/collection-update.*.js',
-
-  global_flags:           'test/e2e/global-flags.*.js',
+  e2e: [
+    'test/e2e/all-e2e.test.js',
+    'test/e2e/workflow-lifecycle.test.js'
+  ],
 
   // --- Workflow / Lifecycle E2E Test Paths ---
-  workflow_lifecycle:     'test/e2e/workflow-lifecycle.*.js',
-  sad_paths:              'test/e2e/sad-paths.*.js',
+  workflow_lifecycle:     'test/e2e/workflow-lifecycle.test.js',
 
   // --- Bundled Plugin In-Situ Test Paths ---
   insitu:                 'plugins/**/.contract/test/*.test.js',
-
 };
 
 // --- By Rank -- Integration Tests ---
-// test/docs/test-generation-priority-order.md
 const ranks = {
-  // Core Operations
-  rank0: [
+  // test/docs/test-generation-priority-order.md
+  rank0: [ // core operations
     paths.default_handler,
     paths.pdf_generator,
   ],
-  // Essential Operations
-  rank1: [
+  rank1: [ // essential operations
     paths.ConfigResolver,
     paths.plugin_determiner,
     paths.collections_manager,
   ],
-  // Supportive Operations
-  rank2: [
+  rank2: [ // supportive operations
     paths.PluginRegistryBuilder,
     paths.main_config_loader,
     paths.plugin_config_loader,
@@ -87,9 +68,8 @@ const ranks = {
 
 // --- By Level ---
 const levels = {
-  // Module Integration Tests
   // test/docs/checklist-level-1.md
-  level1: [
+  level1: [ // module integration tests
     paths.collections_manager,
     paths.cm_utils,
     paths.ConfigResolver,
@@ -100,41 +80,25 @@ const levels = {
     paths.PluginManager,
     paths.PluginRegistryBuilder,
   ],
-  // Subsystem Integration Tests
   // test/docs/checklist-level-2.md
-  level2: [
+  level2: [ // subsystem integration tests
     paths.default_handler,
     paths.pdf_generator,
     paths.collections_manager,
     paths.plugin_validator,
   ],
-  // End-to-End Tests
   // test/docs/checklist-level-3.md
-  level3: [
-    paths.plugin_convert,
-    paths.plugin_generate,
-    paths.plugin_config,
-    paths.plugin_list,
-    paths.plugin_create,
-    paths.plugin_add,
-    paths.plugin_enable,
-    paths.plugin_disable,
-    paths.plugin_validate,
-    paths.collection_add,
-    paths.collection_list,
-    paths.collection_remove,
-    paths.collection_update,
-    paths.global_flags,
+  level3: [ // atomic E2E tests
+    paths.e2e[0], // all-e2e.test.js
   ],
-  // Heavy Duty E2E Tests
   // test/docs/checklist-level-4.md
-  level4: [
-    paths.workflow_lifecycle,
-    paths.sad_paths
+  level4: [ // workflow E2E tests
+    paths.e2e[1],
   ],
 };
 
 // --- By Command ---
+// (Integration tests only; E2E is now handled via grep/group below)
 const commands = {
   // By Modules (Integration)
   config: [
@@ -157,38 +121,21 @@ const commands = {
     paths.pdf_generator,
     paths.math_integration
   ],
-  // By Groups (End-to-End)
-  pluginsCmd: [
-    paths.plugin_convert,
-    paths.plugin_generate,
-    paths.plugin_config,
-    paths.plugin_list,
-    paths.plugin_create,
-    paths.plugin_add,
-    paths.plugin_enable,
-    paths.plugin_disable,
-  ],
-  collectionCmd: [
-    paths.collection_add,
-    paths.collection_list,
-    paths.collection_remove,
-    paths.collection_update
-  ],
 };
 
 // --- By Group ---  [ npm run -- --group <group> ]
 const groups = {
 
   // Ranks -- Integration Tests
-  rank0:           ranks.rank0,
-  rank1:           ranks.rank1,
-  rank2:           ranks.rank2,
+  rank0:           ranks.rank0,     // core
+  rank1:           ranks.rank1,     // essential
+  rank2:           ranks.rank2,     // supportive
 
   // Levels -- Integration Tests
-  level1:          levels.level1,
-  level2:          levels.level2,
-  level3:          levels.level3,
-  level4:          levels.level4,
+  level1:          levels.level1,   // module
+  level2:          levels.level2,   // subsystem
+  level3:          levels.level3,   // atomic e2e
+  level4:          levels.level4,   // workflow e2e
 
   // Commands -- Integration Tests
   config:          commands.config,
@@ -196,9 +143,9 @@ const groups = {
   collections:     commands.collections,
   core:            commands.core,
 
-  // Commands -- E2E Tests
-  pluginCmds:      commands.pluginsCmd,
-  collectionCmds:  commands.collectionCmd,
+  // E2E Groups (via grep)
+  pluginCmds:      paths.e2e,       // use grep to filter
+  collectionCmds:  paths.e2e,       // use grep to filter
 
   // All In-Situ Tests for Bundled Plugins
   insitu:          paths.insitu,
@@ -213,12 +160,21 @@ const groups = {
   all: [paths.integration, paths.e2e, paths.insitu]
 };
 
+// --- E2E Grep Patterns for Group Slicing ---
+const groupGreps = {
+  pluginCmds: 'plugin ',
+  collectionCmds: 'collection ',
+  // more as needed
+};
+
+const grep = groupGreps[group] || argv.grep;
 
 // If files are specified on the CLI, use them; else use group logic
 const spec = hasFiles ? argv._ : (groups[group] || groups.all);
 
 const mochaConfig = {
   spec: spec,
+  grep: grep,
   timeout: 20000, // Increased timeout for lifecycle tests
   exit: true,
   color: true,
@@ -227,3 +183,4 @@ const mochaConfig = {
 };
 
 module.exports = mochaConfig;
+

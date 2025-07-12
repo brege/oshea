@@ -1,4 +1,8 @@
 # plugins/advanced-card/advanced-card.config.yaml
+plugin_name: "advanced-card"
+version: "1.0.0"
+protocol: "v1"
+
 description: "An advanced card plugin demonstrating custom HTML generation and dynamic content from Markdown." 
 handler_script: "index.js"
 css_files:

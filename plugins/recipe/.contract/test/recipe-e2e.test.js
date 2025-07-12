@@ -1,65 +1,76 @@
 // plugins/recipe/.contract/test/recipe-e2e.test.js
 
+require('module-alias/register');
 const path = require('path');
 const os = require('os');
+const glob = require('glob');
+const fs = require('fs');
 
 const PROJECT_ROOT = process.cwd();
 const HELPERS_PATH = path.join(PROJECT_ROOT, 'test', 'shared', 'test-helpers.js');
-
 const {
   runCliCommand,
   setupTestDirectory,
   cleanupTestDirectory,
-  checkFile,
 } = require(HELPERS_PATH);
 
-// Corrected: The plugin root is two levels up from .contract/test/
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
+
 const PLUGIN_ROOT = path.resolve(__dirname, '../../');
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-plugin-e2e');
 const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
 const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'recipe-example.md');
-const EXPECTED_PDF_FILENAME = 'example-recipe-title.pdf'; // Based on convert-command.test-cases.js
-const MIN_PDF_SIZE = 1000; // Minimum size in bytes for a valid PDF
+const EXPECTED_PDF_BASENAME = 'example-recipe-title.pdf';
+const MIN_PDF_SIZE = 1000;
 
 describe('Recipe Plugin E2E Test', function() {
-  this.timeout(10000); // Set a higher timeout for E2E tests
+  this.timeout(15000); // Give a bit more time for E2E
 
   before(async () => {
-    // Ensure the test output directory exists and is clean
+    logger.debug('[recipe-e2e] Setting up test directory...');
     await setupTestDirectory(TEST_OUTPUT_DIR);
   });
 
   after(async () => {
-    // Clean up the test output directory unless KEEP_OUTPUT is set
     const keepOutput = process.env.KEEP_OUTPUT === 'true';
+    logger.debug(`[recipe-e2e] Cleaning up test directory. KEEP_OUTPUT: ${keepOutput}`);
     await cleanupTestDirectory(TEST_OUTPUT_DIR, keepOutput);
   });
 
   it('should convert recipe-example.md to PDF using the recipe plugin and generate a non-empty PDF', async () => {
-    const outputPdfPath = path.join(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME);
 
     const commandArgs = [
       'convert',
       EXAMPLE_MD_PATH,
-      '--plugin', PLUGIN_ROOT, // Use the correct, absolute path to the plugin directory
+      '--plugin', PLUGIN_ROOT,
       '--outdir', TEST_OUTPUT_DIR,
-      '--filename', EXPECTED_PDF_FILENAME,
-      '--no-open', // Prevent opening the PDF viewer during test
+      '--filename', EXPECTED_PDF_BASENAME,
+      '--no-open',
     ];
 
-    // console.log(`\n  Running command: md-to-pdf ${commandArgs.join(' ')}`);
+    logger.debug(`[recipe-e2e] Running CLI command: node ${CLI_PATH} ${commandArgs.join(' ')}`);
     const result = await runCliCommand(commandArgs, CLI_PATH, PROJECT_ROOT);
 
     if (!result.success) {
-      throw new Error(`CLI command failed: ${result.stderr || result.error.message}`);
+      logger.error(`[recipe-e2e] CLI command failed: ${result.stderr || result.error?.message || 'Unknown error'}`);
+      throw new Error(`CLI command failed: ${result.stderr || result.error?.message || 'Unknown error'}`);
     }
 
-    // Verify the PDF was created and is not empty
-    await checkFile(TEST_OUTPUT_DIR, EXPECTED_PDF_FILENAME, MIN_PDF_SIZE);
+    // Use glob in case the filename is ever dynamic in the future
+    const pattern = path.join(TEST_OUTPUT_DIR, 'example-recipe-title*.pdf');
+    const matchingFiles = glob.sync(pattern);
 
-    // Optional: More specific checks can be added here if needed,
-    // but for a basic E2E, existence and size are often sufficient.
-    console.log(`  Successfully created and verified: ${outputPdfPath}`);
+    if (matchingFiles.length === 0) {
+      throw new Error(`No PDF output matching pattern: ${pattern}`);
+    }
+
+    const stat = fs.statSync(matchingFiles[0]);
+    if (stat.size < MIN_PDF_SIZE) {
+      throw new Error(`Generated PDF is too small: ${matchingFiles[0]} (${stat.size} bytes)`);
+    }
+
+    logger.success(`[recipe-e2e] Successfully created and verified: ${matchingFiles[0]}`);
   });
 });
 

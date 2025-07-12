@@ -8,10 +8,10 @@ const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 const execAsync = util.promisify(exec);
 
-logger.detail(`[test-helpers] Loaded from: ${__filename}`);
+logger.debug(`[test-helpers] Loaded from: ${__filename}`);
 
 async function readFileContent(filePath) {
-  logger.detail(`[readFileContent] Called with: ${filePath}`);
+  logger.debug(`[readFileContent] Called with: ${filePath}`);
   if (!fss.existsSync(filePath)) {
     throw new Error(`File not found for content check: ${filePath}`);
   }
@@ -19,7 +19,7 @@ async function readFileContent(filePath) {
 }
 
 async function checkFile(baseDir, relativeFilePath, minSize) {
-  logger.detail(`[checkFile] baseDir: ${baseDir}, relativeFilePath: ${relativeFilePath}, minSize: ${minSize}`);
+  logger.debug(`[checkFile] baseDir: ${baseDir}, relativeFilePath: ${relativeFilePath}, minSize: ${minSize}`);
   const fullPath = path.join(baseDir, relativeFilePath);
   try {
     await fs_promises.access(fullPath, fss.constants.F_OK);
@@ -30,12 +30,12 @@ async function checkFile(baseDir, relativeFilePath, minSize) {
   if (stats.size < minSize) {
     throw new Error(`File ${fullPath} is too small (${stats.size} bytes, expected >= ${minSize} bytes).`);
   }
-  logger.detail(`  OK: File ${relativeFilePath} (at ${fullPath}) exists and size (${stats.size} bytes) is sufficient.`);
+  logger.debug(`  OK: File ${relativeFilePath} (at ${fullPath}) exists and size (${stats.size} bytes) is sufficient.`);
   return true;
 }
 
 async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPath) {
-  logger.detail(`[runCliCommand] argsArray: ${JSON.stringify(argsArray)}, cliScriptPath: ${cliScriptPath}, projectRoot: ${projectRoot}, testConfigPath: ${testConfigPath}`);
+  logger.debug(`[runCliCommand] argsArray: ${JSON.stringify(argsArray)}, cliScriptPath: ${cliScriptPath}, projectRoot: ${projectRoot}, testConfigPath: ${testConfigPath}`);
   const cliArgs = [...argsArray];
   const hasCustomConfig = cliArgs.some(arg => arg === '--config' || arg.startsWith('--config='));
 
@@ -55,10 +55,10 @@ async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPa
     command += ` --config "${testConfigPath}"`;
   }
 
-  logger.detail(`  Executing: ${command}`);
+  logger.debug(`  Executing: ${command}`);
   try {
     const { stdout, stderr } = await execAsync(command, { cwd: projectRoot });
-    if (stdout) logger.detail('  stdout:\n', stdout);
+    if (stdout) logger.debug('  stdout:\n', stdout);
     const stderrContent = stderr && stderr.trim();
     if (stderrContent) {
       logger.warn('  stderr:\n', stderr);
@@ -73,21 +73,21 @@ async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPa
 }
 
 async function setupTestDirectory(testOutputBaseDir, createdPluginsDir) {
-  logger.detail(`[setupTestDirectory] Called with: ${testOutputBaseDir}, ${createdPluginsDir}`);
-  logger.detail(`[setupTestDirectory] __filename: ${__filename}`);
+  logger.debug(`[setupTestDirectory] Called with: ${testOutputBaseDir}, ${createdPluginsDir}`);
+  logger.debug(`[setupTestDirectory] __filename: ${__filename}`);
   if (!testOutputBaseDir) {
     logger.error('[setupTestDirectory] testOutputBaseDir is undefined!');
     throw new Error('setupTestDirectory: testOutputBaseDir is required');
   }
   try {
     if (fss.existsSync(testOutputBaseDir)) {
-      logger.detail(`Removing existing test output directory: ${testOutputBaseDir}`);
+      logger.debug(`Removing existing test output directory: ${testOutputBaseDir}`);
       await fs_promises.rm(testOutputBaseDir, { recursive: true, force: true });
     }
-    logger.detail(`Creating test output directory: ${testOutputBaseDir}`);
+    logger.debug(`Creating test output directory: ${testOutputBaseDir}`);
     await fs_promises.mkdir(testOutputBaseDir, { recursive: true });
     if (createdPluginsDir && !fss.existsSync(createdPluginsDir)) {
-      logger.detail(`Creating plugins directory: ${createdPluginsDir}`);
+      logger.debug(`Creating plugins directory: ${createdPluginsDir}`);
       await fs_promises.mkdir(createdPluginsDir, { recursive: true });
     }
   } catch (error) {
@@ -97,14 +97,14 @@ async function setupTestDirectory(testOutputBaseDir, createdPluginsDir) {
 }
 
 async function cleanupTestDirectory(testOutputBaseDir, keepOutput = false) {
-  logger.detail(`[cleanupTestDirectory] Called with: ${testOutputBaseDir}, keepOutput: ${keepOutput}`);
+  logger.debug(`[cleanupTestDirectory] Called with: ${testOutputBaseDir}, keepOutput: ${keepOutput}`);
   if (keepOutput) {
     logger.info(`KEEP_OUTPUT is true. Skipping cleanup of ${testOutputBaseDir}.`);
     return;
   }
   try {
     if (fss.existsSync(testOutputBaseDir)) {
-      logger.detail(`Cleaning up test output directory: ${testOutputBaseDir}`);
+      logger.debug(`Cleaning up test output directory: ${testOutputBaseDir}`);
       await fs_promises.rm(testOutputBaseDir, { recursive: true, force: true });
     }
   } catch (error) {
@@ -113,16 +113,16 @@ async function cleanupTestDirectory(testOutputBaseDir, keepOutput = false) {
 }
 
 async function checkFileExists(filePath) {
-  logger.detail(`[checkFileExists] Called with: ${filePath}`);
+  logger.debug(`[checkFileExists] Called with: ${filePath}`);
   if (!fss.existsSync(filePath)) {
     throw new Error(`File not found: ${filePath}`);
   }
-  logger.detail(`  OK: File exists: ${path.basename(filePath)}`);
+  logger.debug(`  OK: File exists: ${path.basename(filePath)}`);
   return true;
 }
 
 async function cleanupDir(dirPath) {
-  logger.detail(`[cleanupDir] Called with: ${dirPath}`);
+  logger.debug(`[cleanupDir] Called with: ${dirPath}`);
   if (fss.existsSync(dirPath)) {
     try {
       await fs_promises.rm(dirPath, { recursive: true, force: true });

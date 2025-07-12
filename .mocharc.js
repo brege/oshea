@@ -11,6 +11,11 @@ const group = argv.group || (hasFiles ? 'custom' : 'all');
 // lint-disable-next-line logging
 console.log(`[Mocha] Running test group: '${group}'`);
 
+function flattenSpecs(spec) {
+  if (Array.isArray(spec)) return spec.flat(Infinity);
+  return [spec];
+}
+
 const paths = {
   // --- Integration Test Paths ---
   integration:            'test/integration/**/*.js',
@@ -170,7 +175,7 @@ const groupGreps = {
 const grep = groupGreps[group] || argv.grep;
 
 // If files are specified on the CLI, use them; else use group logic
-const spec = hasFiles ? argv._ : (groups[group] || groups.all);
+const spec = hasFiles ? argv._ : flattenSpecs(groups[group] || groups.all);
 
 const mochaConfig = {
   spec: spec,

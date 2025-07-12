@@ -17,7 +17,14 @@ module.exports = [
       const collDir = path.join(sandboxDir, 'test-collection-for-disable');
       await createDummyPlugin(path.join(collDir, 'plugin-to-disable'), 'plugin-to-disable');
       await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection-for-disable']);
-      await harness.runCli(['plugin', 'enable', 'test-collection-for-disable/plugin-to-disable', '--name', 'my-enabled-plugin', '--bypass-validation']);
+      await harness.runCli([
+        'plugin',
+        'enable',
+        'test-collection-for-disable/plugin-to-disable',
+        '--name',
+        'my-enabled-plugin',
+        '--bypass-validation'
+      ]);
     },
     args: (sandboxDir) => [
       'plugin',
@@ -27,6 +34,14 @@ module.exports = [
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
       expect(stripAnsi(stdout)).to.match(/Plugin "my-enabled-plugin" disabled successfully/i);
+
+      // Optionally, check that the plugin is no longer in the enabled manifest
+      const enabledManifestPath = path.join(sandboxDir, '.cm-test-root', 'enabled.yaml');
+      if (await fs.pathExists(enabledManifestPath)) {
+        const enabledManifest = await fs.readFile(enabledManifestPath, 'utf8');
+        expect(enabledManifest).to.not.include('my-enabled-plugin');
+      }
     },
   },
 ];
+

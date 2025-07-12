@@ -114,7 +114,6 @@ describe('ConfigResolver (Integration Tests)', function () {
       }
 
       if (useImperativeSetup) {
-        // Imperative: do direct instance mutation after init
         if (scenarioConfig.mainConfigStubs) {
           if (scenarioConfig.mainConfigStubs.getPrimaryMainConfig) {
             mocks.mockMainConfigLoaderInstance.getPrimaryMainConfig.resolves(scenarioConfig.mainConfigStubs.getPrimaryMainConfig);

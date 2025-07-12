@@ -15,16 +15,7 @@ class TemplateBasicHandler {
     // this.pdfGenerator = coreUtils.pdfGenerator;
   }
 
-  /**
-     * The main generation method called by md-to-pdf.
-     * @param {Object} data - Input data for the plugin (e.g., { markdownFilePath: 'path/to/file.md' }).
-     * @param {Object} pluginSpecificConfig - Configuration from this plugin's .config.yaml.
-     * @param {Object} globalConfig - The main global configuration object.
-     * @param {string} outputDir - Absolute path to the output directory.
-     * @param {string} [outputFilenameOpt] - Optional. Desired filename for the PDF.
-     * @param {string} pluginBasePath - The base path of this plugin.
-     * @returns {Promise<string>} The absolute path to the generated PDF file.
-     */
+
   async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
     // Example of logging specific to this plugin.
     // The 'template-basic' string here will be replaced with the new plugin's name during creation.

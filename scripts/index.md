@@ -56,8 +56,6 @@ This document is a central index for all developer and automation scripts within
     -- A utility to validate paths in `paths.js` files.
   - [ [`dump-code-comments.js`](linting/dump-code-comments.js) ]
     -- Dumps all code comments from a target directory for review and cleanup.
-  - [ [`find-to-include-assertions.js`](linting/find-to-include-assertions.js) ]
-    -- A utility to find potentially brittle `to.include` assertions within the test suite.
   - [ [`standardize-js-line-one-all.js`](linting/standardize-js-line-one-all.js) ]
     -- A shell script to enforce a consistent header comment in all project `.js` files.
   - [ [`strip-trailing-whitespace.js`](linting/strip-trailing-whitespace.js) ]
@@ -66,6 +64,8 @@ This document is a central index for all developer and automation scripts within
     -- A utility to check for `console.*` statements in a post `logger` world.
   - [ [comment-surfacer.js](shared/comment-surfacer.js) ]
     -- A utility to surface code comment-ditritus in `.js` files.
+  - [ [auto-doc-lint.js](linting/auto-doc-lint.js) ]
+    -- Find and remove `auto-doc` comments from `.js` files.
 
 ### Refactoring & Auditing [ `refactor/` ]
 
@@ -98,5 +98,4 @@ This document is a central index for all developer and automation scripts within
 New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
 
 <!-- uncategorized-start -->
-- [validate-paths-imports.js](linting/validate-paths-imports.js)
 <!-- uncategorized-end -->

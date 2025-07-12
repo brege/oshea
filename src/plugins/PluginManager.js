@@ -17,20 +17,7 @@ class PluginManager {
     // No setup needed here as ConfigResolver handles config.
   }
 
-  /**
-     * Invokes the handler for a given plugin using a pre-resolved effective configuration.
-     * @param {string} pluginName - The name of the plugin (for logging/error context).
-     * @param {Object} effectiveConfig - The fully resolved configuration object from ConfigResolver.
-     * Expected to contain:
-     * - pluginSpecificConfig: Object
-     * - mainConfig: Object
-     * - pluginBasePath: string (Base path of the original plugin, for its handler to resolve other assets)
-     * - handlerScriptPath: string (Absolute path to the handler script)
-     * @param {Object} data - Input data for the plugin (e.g., { markdownFilePath: 'path/to/file.md' }).
-     * @param {string} outputDir - The directory to output generated files.
-     * @param {string} [outputFilenameOpt] - Optional. Desired filename for the PDF.
-     * @returns {Promise<string|null>} Path to the generated PDF, or null if an error occurs.
-     */
+
   async invokeHandler(pluginName, effectiveConfig, data, outputDir, outputFilenameOpt) {
     const {
       pluginSpecificConfig,

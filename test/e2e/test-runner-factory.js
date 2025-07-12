@@ -2,13 +2,7 @@
 const { expect } = require('chai');
 const { TestHarness } = require('./harness');
 
-/**
- * Creates a full E2E test suite for a given command.
- * @param {string} commandName - The name of the command being tested (e.g., 'convert', 'generate').
- * @param {string} manifestPath - The relative path to the test manifest file for this command.
- * @param {object} [options={}] - Optional settings for the test suite.
- * @param {number} [options.timeout=15000] - The timeout for the test suite.
- */
+
 function createE2eTestRunner(commandName, manifestPath, options = {}) {
   const { timeout = 15000 } = options;
   const testManifest = require(manifestPath);

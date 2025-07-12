@@ -43,7 +43,7 @@ describe('PluginConfigLoader (Integration Tests)', function() {
         isObject: sinon.stub(),
       },
       AssetResolver: { resolveAndMergeCss: sinon.stub() },
-      logger: require('../../shared/capture-logs.js'), // <-- CRITICAL: provide logger for this.logger
+      logger: require('../../shared/capture-logs.js'),
     };
 
     PluginConfigLoader = proxyquire(pluginConfigLoaderPath, {

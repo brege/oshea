@@ -2,14 +2,7 @@
 const { mathIntegrationPath, loggerPath  } = require('@paths');
 const logger = require(loggerPath);
 
-/**
- * @fileoverview Provides utility functions for Markdown processing, including
- * configuration loading, front matter extraction, shortcode removal,
- * Markdown-to-HTML rendering, slug generation, heading preprocessing,
- * and placeholder substitution.
- * @version 1.2.4
- * @date 2025-06-08
- */
+
 
 const fs = require('fs').promises;
 const fss = require('fs'); // Synchronous for operations like existsSync
@@ -22,14 +15,7 @@ const createMathIntegration = require(mathIntegrationPath);
 const mathIntegration = createMathIntegration();
 
 
-/**
- * Loads and parses a YAML configuration file.
- *
- * @async
- * @param {string} configPath - Absolute path to the YAML configuration file.
- * @returns {Promise<Object>} The parsed configuration object.
- * @throws {Error} If the file is not found, is empty, or cannot be parsed.
- */
+
 async function loadConfig(configPath) {
   if (!fss.existsSync(configPath)) {
     throw new Error(`Configuration file '${configPath}' not found.`);
@@ -47,16 +33,7 @@ async function loadConfig(configPath) {
   }
 }
 
-/**
- * Resolves the specific configuration for a given document type.
- * Merges global PDF options with type-specific overrides and determines
- * CSS files, TOC settings, cover page details, and shortcode removal patterns.
- *
- * @param {Object} fullConfig - The entire configuration object from config.yaml.
- * @param {string} docType - The document type (e.g., 'cv', 'recipe', 'default').
- * @returns {Object} The resolved configuration for the document type.
- * @throws {Error} If no configuration is found for the specified docType or for 'default'.
- */
+
 function getTypeConfig(fullConfig, docType) {
   const typeSettings = fullConfig.document_types?.[docType] || fullConfig.document_types?.default;
   if (!typeSettings) {
@@ -106,14 +83,7 @@ function getTypeConfig(fullConfig, docType) {
   };
 }
 
-/**
- * Extracts front matter and main content from a Markdown string.
- *
- * @param {string} markdownContent - The Markdown content string.
- * @returns {{data: Object, content: string}} An object with `data` (the parsed front matter object)
- * and `content` (the Markdown string without front matter). Returns an empty data object
- * and the original content if no front matter is found or if parsing fails.
- */
+
 function extractFrontMatter(markdownContent) {
   try {
     const result = matter(markdownContent);
@@ -124,13 +94,7 @@ function extractFrontMatter(markdownContent) {
   }
 }
 
-/**
- * Removes content matching an array of regex patterns from a string.
- *
- * @param {string} content - The input string.
- * @param {Array<string>} patterns - An array of regular expression patterns (as strings).
- * @returns {string} The content with matched patterns removed.
- */
+
 function removeShortcodes(content, patterns) {
   let processedContent = content;
   if (patterns && Array.isArray(patterns)) {
@@ -157,18 +121,7 @@ function removeShortcodes(content, patterns) {
   return processedContent;
 }
 
-/**
- * Renders a Markdown string to an HTML string using markdown-it with plugins.
- *
- * @param {string} markdownContent - The Markdown content to render.
- * @param {Object} [tocOptions={enabled: false}] - Configuration for the Table of Contents plugin.
- * @param {Object} [anchorOptions={}] - Configuration for the anchor plugin (markdown-it-anchor).
- * @param {Object} [mathConfig=null] - Configuration for math rendering.
- * @param {MarkdownIt} [mdInstance] - Optional. A pre-configured instance of MarkdownIt.
- * @param {Object} [markdownItOptions={}] - Optional. Additional options for the MarkdownIt instance.
- * @param {Array} [customPlugins=[]] - Optional. An array of custom markdown-it plugins to use.
- * @returns {string} The rendered HTML string (body content).
- */
+
 function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, anchorOptions = {}, mathConfig = null, mdInstance, markdownItOptions = {}, customPlugins = []) {
   const baseOptions = {
     html: true,
@@ -223,12 +176,7 @@ function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, 
   return md.render(markdownContent);
 }
 
-/**
- * Generates a URL-friendly slug from a given string.
- *
- * @param {string} text - The text to be slugified.
- * @returns {string} The generated slug. Returns an empty string if input is invalid.
- */
+
 function generateSlug(text) {
   if (typeof text !== 'string' || text.trim() === '') {
     return '';
@@ -244,14 +192,7 @@ function generateSlug(text) {
     .replace(/-+$/, '');
 }
 
-/**
- * Ensures Markdown content starts with an H1 heading.
- *
- * @param {string} markdownContent - The original Markdown content.
- * @param {string} [title] - Optional title to be used as the H1 heading.
- * @param {boolean} [aggressiveCleanup=false] - If true, enables more aggressive removal of existing H1/H2 headings.
- * @returns {string} The processed Markdown content.
- */
+
 function ensureAndPreprocessHeading(markdownContent, title, aggressiveCleanup = false) {
   let processedContent = markdownContent.trim();
 
@@ -275,10 +216,7 @@ function ensureAndPreprocessHeading(markdownContent, title, aggressiveCleanup = 
 
 // --- Placeholder Substitution Functions ---
 
-/**
- * Resolves a dot-separated path string against an object.
- * Case-insensitive for the first key, case-sensitive for subsequent keys.
- */
+
 function resolvePath(object, pathStr) {
   if (typeof pathStr !== 'string' || !object || typeof object !== 'object') {
     return undefined;
@@ -308,13 +246,7 @@ function resolvePath(object, pathStr) {
   return current;
 }
 
-/**
- * Replaces placeholders in a content string using a given context.
- * @param {string} content - The string containing placeholders (e.g., "{{ .myKey }}").
- * @param {Object} context - The data object to resolve placeholders against.
- * @param {string} [warningContext="value"] - A string to add context to warning messages.
- * @returns {{changed: boolean, newContent: string}} - An object indicating if changes were made and the new content string.
- */
+
 function substitutePlaceholdersInString(content, context, warningContext = 'value') {
   const placeholderRegex = /\{\{\s*\.?([\w.-]+)\s*\}\}/g;
   let changed = false;
@@ -336,19 +268,7 @@ function substitutePlaceholdersInString(content, context, warningContext = 'valu
   return { changed, newContent };
 }
 
-/**
- * Iteratively replaces placeholders in context data (like front matter) and then in the main content.
- * It first resolves placeholders within the context data itself (e.g., a front matter key referencing another),
- * then uses this fully resolved context to substitute placeholders in the main Markdown content.
- * Also adds dynamic date placeholders to the context.
- *
- * @param {string} mainContent - The main Markdown content (after initial front matter extraction).
- * @param {Object} initialContextData - The initial data context, typically a merge of global `params` and
- * document-specific front matter. Front matter should take precedence.
- * @returns {{processedFmData: Object, processedContent: string}} An object containing:
- * `processedFmData`: The context data after all internal substitutions and addition of date placeholders.
- * `processedContent`: The main content string with all placeholders substituted.
- */
+
 function substituteAllPlaceholders(mainContent, initialContextData) {
   const today = new Date();
   const formattedDate = today.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });

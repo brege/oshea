@@ -9,13 +9,7 @@ const yaml = require('js-yaml');
 // Load versioned validators
 const v1Validator = require(v1ValidatorPath);
 
-/**
- * Resolves the absolute path and name of a plugin.
- * (Moved from src/plugin-contract/index.js and path resolution corrected)
- * @param {string} pluginIdentifier - The identifier of the plugin (path or name).
- * @returns {{pluginDirectoryPath: string, pluginName: string}} - Resolved paths.
- * @throws {Error} If the plugin directory is not found.
- */
+
 function resolvePluginPath(pluginIdentifier) {
   const resolvedIdentifier = path.resolve(pluginIdentifier);
   if (fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory()) {
@@ -30,15 +24,7 @@ function resolvePluginPath(pluginIdentifier) {
 }
 
 
-/**
- * Universal metadata lookup function.
- * Looks for 'plugin_name', 'version', and 'protocol' in the plugin's config file.
- *
- * @param {string} pluginDirectoryPath - The absolute path to the plugin's root directory.
- * @param {string} pluginName - The name of the plugin (directory name).
- * @param {Array<string>} warnings - Array to push warnings into.
- * @returns {object} - An object containing the resolved metadata.
- */
+
 function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
   const metadata = {
     plugin_name: { value: undefined, source: undefined },
@@ -107,13 +93,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
 }
 
 
-/**
- * Main dispatcher for plugin validation. Determines the contract version
- * and routes to the appropriate validator module.
- *
- * @param {string} pluginIdentifier - The identifier of the plugin (path or name).
- * @returns {{isValid: boolean, errors: string[], warnings: string[]}} - Validation result.
- */
+
 function validate(pluginIdentifier) {
   const errors = [];
   const warnings = [];

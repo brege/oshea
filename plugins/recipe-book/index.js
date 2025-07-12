@@ -11,16 +11,7 @@ class RecipeBookHandler {
     this.pdfGenerator = coreUtils.pdfGenerator;
   }
 
-  /**
-     * Builds a recipe book PDF.
-     * @param {Object} data - Expected to contain `cliArgs.recipesBaseDir` when invoked via 'generate' command.
-     * @param {Object} pluginSpecificConfig - Configuration from plugins/recipe-book/recipe-book.config.yaml.
-     * @param {Object} globalConfig - The main global configuration object.
-     * @param {string} outputDir - Absolute path to the output directory.
-     * @param {string} [outputFilenameOpt = "recipe-book.pdf"] - Optional. Desired filename for the PDF.
-     * @param {string} pluginBasePath - The base path of this plugin (plugins/recipe-book/).
-     * @returns {Promise<string>} The absolute path to the generated PDF file.
-     */
+
   async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt = 'recipe-book.pdf', pluginBasePath) {
     const { extractFrontMatter, removeShortcodes, renderMarkdownToHtml, ensureAndPreprocessHeading } = this.markdownUtils;
     const { generatePdf } = this.pdfGenerator;

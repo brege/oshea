@@ -7,12 +7,14 @@ const glob = require('glob');
 const chalk = require('chalk');
 const { findFiles, getDefaultGlobIgnores } = require('./file-helpers');
 
-// === CONFIGURE YOUR COMMENT SURFACING PATTERNS HERE ===
+// Patterns to match in comments
 const COMMENT_PATTERNS = [
   /MODIFIED/i,
+  /REMOVE/i,
   /Correct/i,
   /\bYour\b/i,
   /FIX.*/i,
+  /<--/i,
   // Add more patterns here as needed
 ];
 

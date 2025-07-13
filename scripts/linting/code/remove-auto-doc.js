@@ -1,41 +1,39 @@
 #!/usr/bin/env node
-// scripts/linting/auto-doc-lint.js
+// scripts/linting/code/remove-auto-doc.js
+
+require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const glob = require('glob');
-const { findFiles } = require('../shared/file-helpers');
+const { minimatch } = require('minimatch');
+const { fileHelpersPath, lintingConfigPath, lintConfigLoaderPath } = require('@paths');
+const { findFiles } = require(fileHelpersPath);
+const { loadLintSection } = require(lintConfigLoaderPath);
 
-// Default targets if none specified
-const DEFAULT_TARGETS = [
+// Load config for this linter
+const autoDocConfig = loadLintSection('autoDoc', lintingConfigPath) || {};
+const CONFIG_TARGETS = autoDocConfig.targets || [
   'cli.js',
   'index.js',
   'src',
   'test/e2e',
   'test/integration'
 ];
-
-// Exclude patterns (glob-style, relative to project root)
-const EXCLUDE_PATTERNS = [
+const EXCLUDE_PATTERNS = autoDocConfig.excludes || [
   '.mocharc.js',
   'test/scripts/**',
-  'scripts/**',
+  'scripts/**'
 ];
-
-// Directory names to ignore for findFiles (non-glob, top-level only)
-const EXCLUDE_DIRS = [
+const EXCLUDE_DIRS = autoDocConfig.excludeDirs || [
   'test/scripts',
-  'scripts',
+  'scripts'
 ];
 
+// Helper: check if file matches any exclude pattern (glob)
 function isExcluded(filePath) {
   const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
-  // Exclude if matches any glob pattern
-  return EXCLUDE_PATTERNS.some(pattern => glob.hasMagic(pattern)
-    ? glob.sync(pattern, { cwd: process.cwd(), matchBase: true }).includes(relPath)
-    : relPath === pattern
-  );
+  return EXCLUDE_PATTERNS.some(pattern => minimatch(relPath, pattern));
 }
 
 // Regex to match /** ... */ block comments (greedy, multiline)
@@ -82,25 +80,22 @@ function printBlockInfo(file, startLine, endLine, blockText) {
 function main() {
   const fix = process.argv.includes('--fix');
   const quiet = process.argv.includes('--quiet');
+  const outputJson = process.argv.includes('--json');
   // Only treat non-flag arguments as targets
   const userArgs = process.argv.slice(2).filter(arg => !arg.startsWith('--'));
-  const targets = userArgs.length ? userArgs : DEFAULT_TARGETS;
+  const targets = userArgs.length ? userArgs : CONFIG_TARGETS;
 
   // Gather all files to check (files, dirs, globs)
   let files = new Set();
   for (const target of targets) {
     // If the target looks like a glob, expand it
     if (target.includes('*')) {
-      const matches = glob.sync(target, {
-        cwd: process.cwd(),
-        absolute: true,
-        nodir: true,
-        ignore: EXCLUDE_PATTERNS,
-      });
-      for (const file of matches) {
-        if ((file.endsWith('.js') || file.endsWith('.mjs'))) {
-          files.add(file);
-        }
+      // Use findFiles for consistency with registry pattern
+      for (const file of findFiles(process.cwd(), {
+        filter: name => minimatch(name, target) && (name.endsWith('.js') || name.endsWith('.mjs')),
+        ignores: EXCLUDE_DIRS,
+      })) {
+        files.add(file);
       }
       continue;
     }
@@ -130,6 +125,7 @@ function main() {
   }
 
   let found = 0;
+  const allBlocks = [];
 
   for (const file of files) {
     if (isExcluded(file)) continue;
@@ -138,8 +134,14 @@ function main() {
 
     for (const match of result.matches) {
       found++;
-      // Only print if not fixing, or if not quiet
-      if (!fix && !quiet) {
+      allBlocks.push({
+        file,
+        startLine: match.startLine,
+        endLine: match.endLine,
+        block: match.text
+      });
+      // Only print if not fixing, or if not quiet, and not JSON
+      if (!fix && !quiet && !outputJson) {
         printBlockInfo(file, match.startLine, match.endLine, match.text);
       }
     }
@@ -152,7 +154,7 @@ function main() {
         newContent = newContent.slice(0, start) + newContent.slice(end);
       }
       fs.writeFileSync(file, newContent, 'utf8');
-      if (!quiet) {
+      if (!quiet && !outputJson) {
         console.log(
           chalk.gray('[') +
           chalk.yellow('auto-doc') +
@@ -164,13 +166,17 @@ function main() {
     }
   }
 
+  if (outputJson) {
+    process.stdout.write(JSON.stringify(allBlocks, null, 2) + '\n');
+  }
+
   // For orchestrator: only print if a block was found and not fixing
-  if (quiet && !fix && found) {
+  if (quiet && !fix && found && !outputJson) {
     console.warn('auto-doc block(s) found');
   }
 
   // Print warning summary if any found and not fixing
-  if (found && !fix) {
+  if (found && !fix && !outputJson) {
     console.log(
       chalk.red.bold('✖ ') +
       chalk.yellow.bold(`  ${found} warning(s) found (auto-doc blocks)`)

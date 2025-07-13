@@ -22,7 +22,7 @@ There are also several indexes for the main components of the project.
 [ [**Tests**](../test/index.md) ]
 
 These indices are automatically managed by
-[**`scripts/docs/update-project-indices.js`**](../scripts/docs/update-project-indices.js)
+[**`scripts/linting/docs/update-project-indices.js`**](../scripts/linting/docs/update-project-indices.js)
 and configure via
 [`.index-config.yaml`](../.index-config.yaml)
 at the project root.
@@ -150,9 +150,8 @@ at the project root.
 
 ## Uncategorized Documents
 *A dynamically generated list of documents that have not yet been categorized.* \
-*This list is automatically updated by [`scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js)*
+*This list is automatically updated by [`scripts/linting/docs/update-project-indices.js`](../scripts/linting/docs/update-project-indices.js)*
 
 <!-- uncategorized-start -->
-- [roadmap-v1.0.md](roadmap-v1.0.md)
 <!-- uncategorized-end -->
 

@@ -1,11 +1,44 @@
 # scripts/linting/config.yaml
 
+autoDoc:
+  targets:
+    - cli.js
+    - index.js
+    - src
+    - test/e2e
+    - test/integration
+  excludes:
+    - .mocharc.js
+    - "test/scripts/**"
+    - "scripts/**"
+  excludeDirs:
+    - assets
+    - node_modules
+    - test/scripts
+    - scripts
+
+logging:
+  targets:
+    - src
+    - "*.js"
+    - test/e2e
+    - test/integration
+  excludes:
+    - "node_modules/**"
+    - ".git/**"
+    - src/utils/logger.js
+    - "scripts/**"
+    - "test/scripts/**"
+    - "plugins/**"
+    # Add more excludes as needed
+
+
 postman:
   excludes:
-    - node_modules/**
-    - .git/**
-    - assets/**
-    - docs/archive/**
+    - "node_modules/**"
+    - ".git/**"
+    - "assets/**"
+    - "docs/archive/**"
     - '**/test/fixtures/**'
 
   allowed_extensions:

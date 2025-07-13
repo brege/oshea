@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/docs/update-project-indices.js
+// scripts/linting/docs/update-project-indices.js
 
 const fs = require('fs');
 const path = require('path');

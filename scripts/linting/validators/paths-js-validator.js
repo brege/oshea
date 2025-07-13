@@ -1,31 +1,46 @@
 #!/usr/bin/env node
-// scripts/linting/paths-js-validator.js
+// scripts/linting/validators/paths-js-validator.js
+
+require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const paths = require('../../paths.js');
+const paths = require('@paths');
 
-// === Configurable ignore list ===
-// You can add absolute paths, relative paths, or just file names.
 const IGNORED_PATHS = [
-  'config.yaml', // Add more as needed
+  'config.yaml',
 ];
 
 const args = process.argv.slice(2);
 const isQuiet = args.includes('--quiet');
+const outputJson = args.includes('--json');
 
 let missingCount = 0;
 const results = [];
 
+/**
+ * Recursively walk a registry, yielding [fullKey, value] pairs.
+ * Handles nested registries/objects.
+ */
+function* walkRegistry(obj, prefix = '') {
+  for (const [k, v] of Object.entries(obj)) {
+    const key = prefix ? `${prefix}.${k}` : k;
+    if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
+      yield* walkRegistry(v, key);
+    } else {
+      yield [key, v];
+    }
+  }
+}
+
 function isIgnored(filePath) {
-  // Check if the filePath matches any ignored path or file name
   return IGNORED_PATHS.some(ignored =>
     filePath === ignored ||
     path.basename(filePath) === ignored
   );
 }
 
-for (const [name, filePath] of Object.entries(paths)) {
+for (const [name, filePath] of walkRegistry(paths)) {
   if (typeof filePath !== 'string') continue;
   if (isIgnored(filePath)) {
     results.push({ type: 'ignored', name, filePath });
@@ -39,9 +54,18 @@ for (const [name, filePath] of Object.entries(paths)) {
   }
 }
 
-if (isQuiet) {
+if (outputJson) {
+  process.stdout.write(JSON.stringify({
+    summary: {
+      found: results.filter(r => r.type === 'found').length,
+      missing: results.filter(r => r.type === 'missing').length,
+      ignored: results.filter(r => r.type === 'ignored').length
+    },
+    results
+  }, null, 2) + '\n');
+} else if (isQuiet) {
   if (missingCount > 0) {
-    console.log('Validating paths in paths.js');
+    console.log('Validating paths in @paths');
     console.log('-------------------------------------');
     for (const res of results) {
       if (res.type === 'missing') {
@@ -52,7 +76,7 @@ if (isQuiet) {
     console.log(`Validation complete: ${missingCount} missing path(s)`);
   }
 } else {
-  console.log('Validating paths in paths.js');
+  console.log('Validating paths in @paths');
   console.log('-------------------------------------');
   for (const res of results) {
     if (res.type === 'found') {

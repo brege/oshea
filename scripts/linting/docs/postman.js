@@ -1,13 +1,15 @@
 #!/usr/bin/env node
-// scripts/docs/postman.mjs
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import process from 'process';
-import { remark } from 'remark';
-import { visitParents } from 'unist-util-visit-parents';
-import chalk from 'chalk';
-import {
+// scripts/linting/docs/postman.js
+require('module-alias/register');
+
+const fs = require('fs');
+const path = require('path');
+const process = require('process');
+const { remark } = require('remark');
+const { visitParents } = require('unist-util-visit-parents');
+const chalk = require('chalk');
+
+const {
   loadPostmanRules,
   getMarkdownFiles,
   isReferenceExcluded,
@@ -15,7 +17,7 @@ import {
   isSkipLink,
   resolveReference,
   findCandidates
-} from './postman-helpers.mjs';
+} = require('./postman-helpers.js');
 
 function buildLinksEnabledMap(lines) {
   let enabled = true;
@@ -27,12 +29,6 @@ function buildLinksEnabledMap(lines) {
     map[i] = enabled;
   }
   return map;
-}
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-if (path.basename(__dirname) === 'scripts') {
-  process.chdir(path.resolve(__dirname, '../..'));
 }
 
 const args = process.argv.slice(2);
@@ -70,7 +66,6 @@ async function probeMarkdownFile(mdFile, rules) {
     const lineNum = node.position?.start.line - 1;
     if (lineNum >= 0 && !linksEnabled[lineNum]) return;
 
-    // Markdown links: [text](file.md)
     if (node.type === 'link') {
       const url = node.url.split('#')[0];
       if (isReferenceExcluded(url, rules)) return;
@@ -88,12 +83,11 @@ async function probeMarkdownFile(mdFile, rules) {
       }
     }
 
-    // Inline code: `file.md` or `file.js` (but NOT if inside a link!)
     if (node.type === 'inlineCode') {
       const isInLink = ancestors.some(a => a.type === 'link');
-      if (isInLink) return; // Don't double-link!
+      if (isInLink) return;
       const val = node.value;
-      if (val.includes(' ')) return; // Skip code ticks with spaces!
+      if (val.includes(' ')) return;
       if (isReferenceExcluded(val, rules)) return;
       if (isAllowedExtension(val, rules)) {
         if (isSkipLink(val, rules)) return;
@@ -247,3 +241,4 @@ async function main() {
 }
 
 main();
+

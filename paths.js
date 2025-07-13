@@ -1,8 +1,12 @@
 // paths.js
 const path = require('path');
+const scriptsPaths = require('./scripts/scriptsPaths');
 
 // Project root [paths.js lives here]
 const projectRoot = __dirname;
+
+// dot files / config files
+const mocharcPath = path.join(projectRoot, '.mocharc.js');
 
 // Top-level source directory
 const srcRoot = path.join(projectRoot, 'src');
@@ -70,7 +74,6 @@ const assetResolverPath = path.join(utilsRoot, 'asset_resolver.js');
 const loggerPath = path.join(utilsRoot, 'logger.js');
 
 // Helpers
-const scriptsRoot = path.join(projectRoot, 'scripts');
 const scriptsSharedRoot = path.join(projectRoot, 'scripts', 'shared');
 const fileHelpersPath = path.join(scriptsSharedRoot, 'file-helpers.js');
 
@@ -80,11 +83,13 @@ const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
 // Node Modules
 const nodeModulesPath = path.join(projectRoot, 'node_modules');
 const mochaPath = path.join(nodeModulesPath, '.bin', 'mocha');
-
-// Export all anchors
+// Export all anchors, including scripts registry
 module.exports = {
   projectRoot,
   srcRoot,
+
+  // dot files / config files
+  mocharcPath,
 
   // CLI
   cliRoot,
@@ -148,7 +153,6 @@ module.exports = {
   loggerPath,
 
   // Helpers
-  scriptsRoot,
   scriptsSharedRoot,
   fileHelpersPath,
   testSharedRoot,
@@ -157,4 +161,8 @@ module.exports = {
   // Node Modules
   nodeModulesPath,
   mochaPath,
+
+  // Scripts Registry (spread in all script paths)
+  ...scriptsPaths,
 };
+

@@ -1,20 +1,24 @@
 #!/usr/bin/env node
-// scripts/linting/logging-lint.js
+// scripts/linting/code/logging-lint.js
+
+require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const { findFiles } = require('../shared/file-helpers');
+const { minimatch } = require('minimatch');
+const { fileHelpersPath, lintingConfigPath, lintConfigLoaderPath } = require('@paths');
+const { findFiles } = require(fileHelpersPath);
+const { loadLintSection } = require(lintConfigLoaderPath);
 
-// === Exclude patterns (relative to project root) ===
-const EXCLUDE_PATTERNS = [
-  'src/utils/logger.js',
-  // Add more patterns here as needed
-];
+// Load linter config from YAML
+const loggingConfig = loadLintSection('logging', lintingConfigPath);
+const CONFIG_TARGETS = loggingConfig.targets || [];
+const EXCLUDE_PATTERNS = loggingConfig.excludes || [];
 
 // Helper: check if file matches any exclude pattern
 function isExcluded(filePath) {
   const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
-  return EXCLUDE_PATTERNS.some(pattern => relPath === pattern);
+  return EXCLUDE_PATTERNS.some(pattern => minimatch(relPath, pattern));
 }
 
 // Regexes for logging patterns
@@ -67,25 +71,20 @@ function scanFile(filePath) {
 // Main lint logic
 function main() {
   const fix = process.argv.includes('--fix');
+  const outputJson = process.argv.includes('--json');
   const rootDir = process.cwd();
 
-  // The directories/files you want to check
-  const TARGETS = [
-    'src',
-    '*.js',
-    'test/e2e',
-    'test/integration'
-  ];
+  // CLI targets override config targets
+  const cliTargets = process.argv.slice(2).filter(a => !a.startsWith('--'));
+  const TARGETS = cliTargets.length ? cliTargets : CONFIG_TARGETS;
 
-  // Gather all files to check
   let files = new Set();
   for (const target of TARGETS) {
-    // If it's a glob pattern (e.g. '*.js'), expand in root dir
     if (target.includes('*')) {
       for (const file of findFiles(rootDir, {
         filter: name => name.endsWith('.js') || name.endsWith('.mjs')
       })) {
-        if (path.basename(file).match(/\.js$/) && path.dirname(file) === rootDir) {
+        if (minimatch(path.relative(rootDir, file), target)) {
           files.add(file);
         }
       }
@@ -99,6 +98,7 @@ function main() {
   }
 
   let found = false;
+  const allHits = [];
 
   for (const file of files) {
     if (isExcluded(file)) continue;
@@ -106,32 +106,43 @@ function main() {
     if (!result) continue;
 
     for (const hit of result.hits) {
-      if (hit.ignore) continue; // Skip ignored lines
+      if (hit.ignore) continue;
 
-      if (hit.type === 'console') {
-        if (hit.method === 'console.log') {
-          found = true;
-          console.warn(`[lint:console] ${file}:${hit.line}  ${hit.code}`);
-          if (fix) {
-            // Remove the line from the file (very basic, line-based)
-            const lines = fs.readFileSync(file, 'utf8').split('\n');
-            lines.splice(hit.line - 1, 1);
-            fs.writeFileSync(file, lines.join('\n'), 'utf8');
-            console.log(`[lint:console] Stripped console.log from ${file}:${hit.line}`);
+      allHits.push({
+        type: hit.type,
+        method: hit.method,
+        file,
+        line: hit.line,
+        code: hit.code
+      });
+
+      if (!outputJson) {
+        if (hit.type === 'console') {
+          if (hit.method === 'console.log') {
+            found = true;
+            console.warn(`[lint:console] ${file}:${hit.line}  ${hit.code}`);
+            if (fix) {
+              const lines = fs.readFileSync(file, 'utf8').split('\n');
+              lines.splice(hit.line - 1, 1);
+              fs.writeFileSync(file, lines.join('\n'), 'utf8');
+              console.log(`[lint:console] Stripped console.log from ${file}:${hit.line}`);
+            }
+          } else {
+            console.warn(`[lint:console] ${file}:${hit.line}  ${hit.code}`);
           }
-        } else {
-          // Warn for other console methods
-          console.warn(`[lint:console] ${file}:${hit.line}  ${hit.code}`);
+        } else if (hit.type === 'chalk') {
+          console.warn(`[lint:chalk] ${file}:${hit.line}  ${hit.code}`);
         }
-      } else if (hit.type === 'chalk') {
-        // Only warn if not inside a console call (could be improved with AST)
-        console.warn(`[lint:chalk] ${file}:${hit.line}  ${hit.code}`);
       }
     }
   }
 
-  if (found && !fix) {
-    process.exitCode = 1; // Fail lint if any found and not fixing
+  if (outputJson) {
+    process.stdout.write(JSON.stringify(allHits, null, 2) + '\n');
+  }
+
+  if (found && !fix && !outputJson) {
+    process.exitCode = 1;
   }
 }
 

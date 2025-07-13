@@ -1,22 +1,35 @@
 #!/usr/bin/env node
-// scripts/linting/standardize-js-line-one-all.js
+// scripts/linting/code/standardize-js-line-one-all.js
 
-const path = require('path');
+require('module-alias/register');
+
 const fs = require('fs');
-const glob = require('glob');
+const path = require('path');
 const chalk = require('chalk');
-const { getPatternsFromArgs, getDefaultGlobIgnores } = require('../shared/file-helpers');
+const { fileHelpersPath } = require('@paths');
+const { getPatternsFromArgs, getDefaultGlobIgnores } = require(fileHelpersPath);
 
 const patterns = getPatternsFromArgs(process.argv.slice(2));
 const ignore = getDefaultGlobIgnores();
+
+/**
+ * Recursively find all files matching the given glob patterns, honoring ignore patterns.
+ * (This replaces the direct use of glob.sync for consistency with your helpers.)
+ */
+function findMatchingFiles(patterns, ignore) {
+  const glob = require('glob');
+  const files = new Set();
+  for (const pattern of patterns) {
+    glob.sync(pattern, { ignore, dot: true }).forEach(f => files.add(f));
+  }
+  return Array.from(files);
+}
 
 function getFirstDir(filepath) {
   return filepath.replace(/^\.?\//, '').split(path.sep)[0];
 }
 
-const files = patterns.flatMap(pattern =>
-  glob.sync(pattern, { ignore, dot: true })
-);
+const files = findMatchingFiles(patterns, ignore);
 
 let warnings = 0;
 

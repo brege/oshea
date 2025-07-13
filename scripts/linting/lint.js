@@ -1,12 +1,23 @@
 #!/usr/bin/env node
 // scripts/linting/lint.js
 
+require('module-alias/register');
+
 const { spawnSync } = require('child_process');
 const path = require('path');
 const chalk = require('chalk');
-
-const projectRoot = path.resolve(__dirname, '..', '..');
-const scriptsDir = path.join(projectRoot, 'scripts', 'linting');
+const {
+  projectRoot,
+  loggingLintPath,
+  removeAutoDocPath,
+  stripTrailingWhitespacePath,
+  standardizeJsLineOneAllPath,
+  postmanPath,
+  updateProjectIndicesPath,
+  mochaPathValidatorPath,
+  pathsJsValidatorPath,
+  nodeModulesPath,
+} = require('@paths');
 
 // Parse CLI args
 const cliArgs = process.argv.slice(2);
@@ -22,52 +33,51 @@ const lintSteps = [
   {
     label: 'Custom: strip-trailing-whitespace.js',
     command: 'node',
-    args: [path.join(scriptsDir, 'strip-trailing-whitespace.js')],
+    args: [stripTrailingWhitespacePath],
   },
   {
     label: 'Custom: logging-lint.js',
     command: 'node',
-    args: [path.join(scriptsDir, 'logging-lint.js')],
+    args: [loggingLintPath],
   },
   {
     label: 'Custom: auto-doc-lint.js',
     command: 'node',
-    args: [path.join(scriptsDir, 'auto-doc-lint.js')],
+    args: [removeAutoDocPath],
   },
   // docs
   {
-    label: 'Docs: postman.mjs',
+    label: 'Docs: postman.js',
     command: 'node',
-    args: [path.join(projectRoot, 'scripts', 'docs', 'postman.mjs'), '--quiet', ...extraArgs],
+    args: [postmanPath, '--quiet', ...extraArgs],
     ignoreFailure: true,
   },
   {
     label: 'Docs: update-project-indices.js',
     command: 'node',
-    args: [path.join(projectRoot, 'scripts', 'docs', 'update-project-indices.js'), '--quiet'],
+    args: [updateProjectIndicesPath, '--quiet'],
   },
   // validators
   {
     label: 'Validator: mocha-path-validator.js',
     command: 'node',
-    args: [path.join(scriptsDir, 'mocha-path-validator.js'), '--quiet'],
+    args: [mochaPathValidatorPath, '--quiet'],
   },
   {
     label: 'Validator: paths-js-validator.js',
     command: 'node',
-    args: [path.join(scriptsDir, 'paths-js-validator.js'), '--quiet'],
+    args: [pathsJsValidatorPath, '--quiet'],
     ignoreFailure: true,
   },
   {
     label: 'Custom: standardize-js-line-one-all.js',
     command: 'node',
-    args: [path.join(scriptsDir, 'standardize-js-line-one-all.js')],
+    args: [standardizeJsLineOneAllPath],
   },
   // code
   {
     label: 'ESLint',
-    command: path.join(projectRoot, 'node_modules', '.bin', 'eslint'),
-    // args will be set below!
+    command: path.join(nodeModulesPath, '.bin', 'eslint'),
     args: [], // placeholder
   },
 ];

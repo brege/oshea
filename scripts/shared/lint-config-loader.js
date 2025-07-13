@@ -1,8 +1,9 @@
 // scripts/shared/lint-config-loader.js
-import fs from 'fs';
-import yaml from 'js-yaml';
+const fs = require('fs');
+const yaml = require('js-yaml');
+const { lintingConfigPath } = require('@paths');
 
-export function loadLintSection(section, configPath = 'scripts/linting/config.yaml') {
+function loadLintSection(section, configPath = lintingConfigPath) {
   const raw = fs.readFileSync(configPath, 'utf8');
   const config = yaml.load(raw);
   if (!config[section]) {
@@ -10,4 +11,8 @@ export function loadLintSection(section, configPath = 'scripts/linting/config.ya
   }
   return config[section];
 }
+
+module.exports = {
+  loadLintSection
+};
 

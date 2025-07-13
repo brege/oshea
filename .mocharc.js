@@ -8,9 +8,10 @@ const argv = yargs(hideBin(process.argv)).argv;
 const hasFiles = argv._ && argv._.length > 0;
 const group = argv.group || (hasFiles ? 'custom' : 'all');
 
-// lint-disable-next-line logging
-console.log(`[Mocha] Running test group: '${group}'`);
-
+if (require.main === module) {
+  // lint-disable-next-line logging
+  console.log(`[Mocha] Running test group: '${group}'`);
+}
 function flattenSpecs(spec) {
   if (Array.isArray(spec)) return spec.flat(Infinity);
   return [spec];

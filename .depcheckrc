@@ -1,0 +1,9 @@
+{
+  "ignores": [
+    "eslint",
+    "markdown-it-toc-done-right",
+    "globals",
+    "@eslint/js"
+  ]
+}
+

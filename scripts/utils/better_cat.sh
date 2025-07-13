@@ -74,5 +74,5 @@ tail -n $tail_count "$tmpfile"
 rm "$tmpfile"
 
 echo
-echo "better-cat: Shows the first $head_count lines, $middle_count evenly spaced lines from the middle, and the last $tail_count lines of a stream or file."
+echo "better-cat: Shows the first $head_count lines, $middle_count evenly spaced lines from the middle, and the last $tail_count lines of a stream or file. (Total lines: $total)"
 

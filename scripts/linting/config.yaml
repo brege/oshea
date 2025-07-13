@@ -1,0 +1,22 @@
+# scripts/linting/config.yaml
+
+postman:
+  excludes:
+    - node_modules/**
+    - .git/**
+    - assets/**
+    - docs/archive/**
+    - '**/test/fixtures/**'
+
+  allowed_extensions:
+    - ".md"
+    - ".js"
+    - ".mjs"
+
+  # Patterns for filenames to skip auto-linking (tick or link)
+  skip_link_patterns:
+    - "**/my[-_]*"
+    - "**/my[-_]*/**"
+    - "**/sample.md"
+    - "**/index.js"
+

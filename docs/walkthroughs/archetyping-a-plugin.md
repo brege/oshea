@@ -7,7 +7,7 @@ We will create a custom CV plugin with a different color scheme.
 ### Prerequisites
 
   * `md-to-pdf` installed.
-  * A sample CV document. You can use the one from the bundled `cv` plugin located at `plugins/cv/cv-example.md`. Copy it to your current directory and rename it to `my-cv.md`.
+  * A sample CV document. You can use the one from the bundled `cv` plugin located at [`plugins/cv/cv-example.md`](../../plugins/cv/cv-example.md). Copy it to your current directory and rename it to `my-cv.md`.
 
 ---
 

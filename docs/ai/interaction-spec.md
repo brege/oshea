@@ -1,4 +1,4 @@
-> ## Draft: `docs/ai/interaction-spec.md`
+> ## Draft: [`docs/ai/interaction-spec.md`](interaction-spec.md)
 
 # AI Interaction Specification for `md-to-pdf` Plugins
 
@@ -50,7 +50,7 @@ This is the main entry point for the plugin.
 To correctly orient an AI assistant, provide it with the following three components in a single prompt:
 
 1.  **This Interaction Specification (`interaction-spec.md`)**: To define the technical rules.
-2.  **The Plugin Contract (`docs/refs/plugin-contract.md`)**: To define the required file structure and metadata.
+2.  **The Plugin Contract ([`docs/refs/plugin-contract.md`](../refs/plugin-contract.md))**: To define the required file structure and metadata.
 3.  **The `template-basic` Source Code**: Provide the full contents of `template-basic.config.yaml` and `index.js` as a minimal, working example to be modified.
 
 This three-part package forms the complete context necessary for an AI to begin development. A script to automate the concatenation of these files would be the logical next step after this specification is finalized.

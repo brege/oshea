@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 // scripts/docs/postman.mjs
-
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -13,11 +12,11 @@ import {
   getMarkdownFiles,
   isReferenceExcluded,
   isAllowedExtension,
+  isSkipLink,
   resolveReference,
   findCandidates
 } from './postman-helpers.mjs';
 
-// --- Region disabling helpers ---
 function buildLinksEnabledMap(lines) {
   let enabled = true;
   const map = [];
@@ -30,7 +29,6 @@ function buildLinksEnabledMap(lines) {
   return map;
 }
 
-// --- CLI args and config ---
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 if (path.basename(__dirname) === 'scripts') {
@@ -42,11 +40,9 @@ const userGlobs = args.filter(a => !a.startsWith('--'));
 const root = userGlobs[0] || 'docs';
 const fix = args.includes('--fix');
 const quiet = args.includes('--quiet');
-
-// --- Linting logic ---
+const verbose = args.includes('--verbose');
 
 function isLineAlreadyLinked(oldLine, rel) {
-  // Returns true if there's a markdown link to the rel path on this line
   const linkRegex = /\[[^\]]*\]\(([^)]+)\)/g;
   const matches = [...oldLine.matchAll(linkRegex)];
   return matches.some(m => {
@@ -65,23 +61,22 @@ async function probeMarkdownFile(mdFile, rules) {
 
   const results = [];
   visitParents(tree, (node, ancestors) => {
-    // Skip if inside a table or code block (AST-based)
     const inTable = ancestors.some(a =>
       a.type === 'table' || a.type === 'tableRow' || a.type === 'tableCell'
     );
     const inCodeBlock = ancestors.some(a => a.type === 'code');
     if (inTable || inCodeBlock) return;
 
-    // Skip if links are disabled for this line
     const lineNum = node.position?.start.line - 1;
     if (lineNum >= 0 && !linksEnabled[lineNum]) return;
 
-    // Markdown links
+    // Markdown links: [text](file.md)
     if (node.type === 'link') {
       const url = node.url.split('#')[0];
-      if (isReferenceExcluded(url, 'md', rules)) return;
-      if (isAllowedExtension(url, 'md', rules)) {
-        const resolved = resolveReference(mdFile, url, rules.link_types.md.allow_extensions);
+      if (isReferenceExcluded(url, rules)) return;
+      if (isAllowedExtension(url, rules)) {
+        if (isSkipLink(url, rules)) return;
+        const resolved = resolveReference(mdFile, url, rules.allowed_extensions);
         results.push({
           file: mdFile,
           line: node.position?.start.line,
@@ -92,12 +87,17 @@ async function probeMarkdownFile(mdFile, rules) {
         });
       }
     }
-    // Inline code references for JS
+
+    // Inline code: `file.md` or `file.js` (but NOT if inside a link!)
     if (node.type === 'inlineCode') {
+      const isInLink = ancestors.some(a => a.type === 'link');
+      if (isInLink) return; // Don't double-link!
       const val = node.value;
-      if (isReferenceExcluded(val, 'js', rules)) return;
-      if (isAllowedExtension(val, 'js', rules)) {
-        const resolved = resolveReference(mdFile, val, rules.link_types.js.allow_extensions);
+      if (val.includes(' ')) return; // Skip code ticks with spaces!
+      if (isReferenceExcluded(val, rules)) return;
+      if (isAllowedExtension(val, rules)) {
+        if (isSkipLink(val, rules)) return;
+        const resolved = resolveReference(mdFile, val, rules.allowed_extensions);
         results.push({
           file: mdFile,
           line: node.position?.start.line,
@@ -158,8 +158,17 @@ function printContext(context, target) {
 
 async function main() {
   const rules = loadPostmanRules();
+  if (verbose) {
+    console.log(chalk.blue(`[postman] Loaded config: ${JSON.stringify(rules, null, 2)}`));
+    console.log(chalk.blue(`[postman] Scanning root: ${root}`));
+  }
+
   const excludeDirs = ['assets', 'docs/archive', 'node_modules', '.git'];
   const mdFiles = getMarkdownFiles(root, rules, userGlobs, excludeDirs);
+
+  if (verbose) {
+    console.log(chalk.blue(`[postman] Found ${mdFiles.length} Markdown files to scan.`));
+  }
 
   let allResults = [];
   for (const mdFile of mdFiles) {
@@ -169,30 +178,32 @@ async function main() {
 
   let problems = 0, fixes = 0;
 
-  // --- DRY RUN or --fix loop ---
   for (const r of allResults) {
     if (r.resolved) continue;
-    let exts = ['.js', '.mjs', '.md'];
-    if (r.type === 'link' && r.target.endsWith('.md')) exts = ['.md'];
-    if (r.type === 'inlineCode' && (r.target.endsWith('.js') || r.target.endsWith('.mjs'))) exts = ['.js', '.mjs'];
-    const candidates = findCandidates(r.target, exts, ['.', 'src', 'plugins', 'scripts', 'test']);
+
+    const candidates = findCandidates(r.target, rules.allowed_extensions, ['.', 'src', 'plugins', 'scripts', 'test']);
 
     if (candidates.length === 1) {
       const rel = path.relative(path.dirname(r.file), candidates[0]).replace(/\\/g, '/');
-      const replacement = '[`' + r.target + '`]' + `(${rel})`;
       const lines = fs.readFileSync(r.file, 'utf8').split('\n');
       const oldLine = lines[r.line - 1];
 
-      // Prevent double-linking: skip if already inside a Markdown link
       if (isLineAlreadyLinked(oldLine, rel)) continue;
-
-      // Prevent replacing if links are disabled for this line (again, for safety)
       const linksEnabled = buildLinksEnabledMap(lines);
       if (r.line - 1 >= 0 && !linksEnabled[r.line - 1]) continue;
 
-      if (fix) {
-        const newLine = oldLine.replace(r.target, replacement);
-        lines[r.line - 1] = newLine;
+      let replacement = null;
+      if (r.type === 'inlineCode') {
+        replacement = oldLine.replace(
+          new RegExp('`' + r.target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '`'),
+          '[`' + r.target + '`](' + rel + ')'
+        );
+      } else if (r.type === 'link') {
+        replacement = oldLine.replace(/\(([^)]+)\)/, `(${rel})`);
+      }
+
+      if (fix && replacement && replacement !== oldLine) {
+        lines[r.line - 1] = replacement;
         fs.writeFileSync(r.file, lines.join('\n'), 'utf8');
         fixes++;
         if (!quiet) printProblem(r, 'replace', candidates, replacement);
@@ -209,7 +220,6 @@ async function main() {
     }
   }
 
-  // --- Summary (only print once) ---
   if (!quiet) {
     if (problems && !fix) {
       console.log(
@@ -233,8 +243,7 @@ async function main() {
     }
   }
 
-  process.exit(0);
+  process.exit(problems && !fix ? 1 : 0);
 }
 
 main();
-

@@ -1,18 +1,17 @@
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
 import { minimatch } from 'minimatch';
 import { createRequire } from 'module';
+import { loadLintSection } from '../shared/lint-config-loader.mjs';
 const require = createRequire(import.meta.url);
 const { findFiles } = require('../shared/file-helpers.js');
 
-export function loadPostmanRules(yamlPath = './scripts/docs/postman-rules.yaml') {
-  const raw = fs.readFileSync(yamlPath, 'utf8');
-  return yaml.load(raw);
+export function loadPostmanRules(yamlPath = 'scripts/linting/config.yaml') {
+  return loadLintSection('postman', yamlPath);
 }
 
 export function getMarkdownFiles(rootDir, rules, userGlobs = [], excludeDirs = []) {
-  const excludes = rules.global_excludes || [];
+  const excludes = rules.excludes || [];
   let files = [];
   if (userGlobs.length) {
     const glob = require('glob');
@@ -35,7 +34,6 @@ export function getMarkdownFiles(rootDir, rules, userGlobs = [], excludeDirs = [
       files.push(file);
     }
   }
-  // Exclude by global_excludes and lint-skip-index
   files = files.filter(file => {
     const rel = path.relative(process.cwd(), file).replace(/\\/g, '/');
     if (excludes.some(pattern => minimatch(rel, pattern))) return false;
@@ -43,29 +41,34 @@ export function getMarkdownFiles(rootDir, rules, userGlobs = [], excludeDirs = [
       const content = fs.readFileSync(file, 'utf8');
       if (content.includes('lint-skip-index')) return false;
     } catch (e) {
-      // Ignore
+    // ignore
     }
     return true;
   });
   return files;
 }
 
-export function isReferenceExcluded(ref, linkType, rules) {
+export function isReferenceExcluded(ref, rules) {
   const rel = ref.replace(/\\/g, '/');
-  const patterns = (rules.link_types?.[linkType]?.exclude) || [];
+  const patterns = rules.excludes || [];
   return patterns.some(pattern => minimatch(rel, pattern));
 }
 
-export function isAllowedExtension(ref, linkType, rules) {
-  const allowed = (rules.link_types?.[linkType]?.allow_extensions) || [];
+export function isAllowedExtension(ref, rules) {
+  const allowed = rules.allowed_extensions || [];
   return allowed.some(ext => ref.endsWith(ext));
 }
 
-export function resolveReference(mdFile, ref, extensions = ['.md', '.js', '.mjs']) {
+export function isSkipLink(ref, rules) {
+  const patterns = rules.skip_link_patterns || [];
+  return patterns.some(pattern => minimatch(ref, pattern));
+}
+
+export function resolveReference(mdFile, ref, allowedExts) {
   const mdDir = path.dirname(mdFile);
   let targetPath = path.resolve(mdDir, ref);
-  if (!extensions.some(ext => ref.endsWith(ext))) {
-    for (const ext of extensions) {
+  if (!allowedExts.some(ext => ref.endsWith(ext))) {
+    for (const ext of allowedExts) {
       if (fs.existsSync(targetPath + ext)) return targetPath + ext;
     }
   }
@@ -73,25 +76,15 @@ export function resolveReference(mdFile, ref, extensions = ['.md', '.js', '.mjs'
   return null;
 }
 
-/**
- * Finds all possible candidate files for a reference.
- * @param {string} ref - The unresolved reference (e.g. "index.js" or "test/e2e/workflow-lifecycle.test.js")
- * @param {string[]} exts - Allowed extensions (e.g. [".js", ".mjs", ".md"])
- * @param {string[]} rootDirs - Directories to search (default: ['.'])
- * @returns {string[]} absolute paths to candidates
- */
-export function findCandidates(ref, exts, rootDirs = ['.']) {
-  // Normalize ref for matching (always use forward slashes)
+export function findCandidates(ref, allowedExts, rootDirs = ['.']) {
   const normRef = ref.replace(/\\/g, '/');
   const candidates = new Set();
   for (const root of rootDirs) {
     for (const file of findFiles(root, {
-      filter: name => exts.some(ext => name.endsWith(ext)),
+      filter: name => allowedExts.some(ext => name.endsWith(ext)),
     })) {
-      // Normalize file path for matching
       const relFile = path.relative(process.cwd(), file).replace(/\\/g, '/');
       const base = path.basename(relFile);
-
       if (relFile.endsWith(normRef) || base === normRef) {
         candidates.add(file);
       }

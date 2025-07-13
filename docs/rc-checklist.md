@@ -186,8 +186,9 @@ scripts/
    npm install --save-dev eslint
    npx eslint --init
    ```
+   
+   `package.json`
    ```json
-   // package.json
    {
      "scripts": {
        "lint:eslint": "eslint ."
@@ -196,8 +197,9 @@ scripts/
    ```
 
 **`lg2` - Create unified lint script combining custom scripts and ESLint**
+   
+   `package.json`
    ```json
-   // package.json
    {
      "scripts": {
        "lint:custom": "node scripts/linting/strip-trailing-whitespace.js && node scripts/linting/standardize-js-line-one-all.js",
@@ -256,8 +258,8 @@ scripts/
 
 **`lg5` - Automate version bumping and release tagging**
 
+   `package.json`
    ```json
-   // package.json
    {
      "scripts": {
        "bump-version": "npm version patch -m 'Release v%s'"
@@ -300,8 +302,9 @@ Treating these areas as complementary creates a feedback loop: linting normaliza
 **`tt3` - Fix `--watch` flag in `mocha` to provide tt2's as CLI option**
 
 Use Mocha's native watch mode with explicit watch paths.  
+
+`package.json`
 ```json
-// package.json
 "scripts": {
   "test:watch": "mocha --watch --watch-files 'src/**/*.js,plugins/**/*.js,config.example.yaml'"
 }
@@ -351,8 +354,9 @@ module.exports = LogFailuresReporter;
 **`tt7` - Build `--last-fails` mocha flag to re-run last failed from tt6**
 
 Add a script to re-run only the last failed tests.  
+
+`package.json`
 ```json
-// package.json
 "scripts": {
   "test:last-fails": "mocha --grep \"$(node -p \\\"require('./.test-failures.json').map(f => f.title.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')).join('|')\\\")\""
 }

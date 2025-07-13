@@ -48,7 +48,7 @@ When you run `md-to-pdf convert <file>`, the tool determines which plugin to use
 2. **`md_to_pdf_plugin` Front Matter** \
    A key in the Markdown file's YAML front matter.
 3. **Local `<filename>.config.yaml`** \
-   An accompanying config file (e.g., `mydoc.config.yaml` for `mydoc.md`) with a `plugin:` key.
+   An accompanying config file (e.g., `my-doc.config.yaml` for `my-doc.md`) with a `plugin:` key.
 4. **`default` Plugin** \
    The fallback if no other method is used.
 

@@ -1,4 +1,4 @@
-> ## Draft: `docs/ai/ai-assisted-plugin-development-guide.md`
+> ## Draft: [`docs/ai/ai-assisted-plugin-development-guide.md`](ai-assisted-plugin-development-guide.md)
 
 # AI-Assisted Plugin Development: A How-To Guide
 

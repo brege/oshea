@@ -79,7 +79,7 @@ const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
 
 // Node Modules
 const nodeModulesPath = path.join(projectRoot, 'node_modules');
-const mochaPath = path.join(nodeModulesPath, 'mocha', 'bin', 'mocha');
+const mochaPath = path.join(nodeModulesPath, '.bin', 'mocha');
 
 // Export all anchors
 module.exports = {

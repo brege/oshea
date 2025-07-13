@@ -14,13 +14,13 @@ Instead of trying to explain the entire `md-to-pdf` project to an AI, we provide
 2. **The Plugin Contract**: The required file structure and metadata.
 3. **A Base Plugin Example**: The full source code of a simple, working plugin (like `default` or `cv`) to use as a starting point.
 
-A helper script, `scripts/ai/ai-context-generator.js`, gathers all this information and combines it into a single text file for you.
+A helper script, `[`scripts/ai/ai-context-generator.js`](../../scripts/ai/ai-context-generator.js)`, gathers all this information and combines it into a single text file for you.
 
 ---
 
 ### Step 1: Generate the Context Package
 
-Run the `ai-context-generator.js` script from the project root to create your context package. It's best to use an existing, simple plugin as the base for the AI to modify.
+Run the `[`ai-context-generator.js`](../../scripts/ai/ai-context-generator.js)` script from the project root to create your context package. It's best to use an existing, simple plugin as the base for the AI to modify.
 
 **Command:**
 

@@ -1,0 +1,24 @@
+# scripts/docs/postman-rules.yaml
+
+global_excludes:
+  - node_modules/**
+  - .git/**
+  - assets/**
+  - docs/archive/**
+  - '**/test/fixtures/**'
+
+link_types:
+  md:
+    exclude:
+      - '**/archive/**'
+      - '**/drafts/**'
+    allow_extensions: [".md"]
+  js:
+    exclude:
+      - '**/archive/**'
+      - '**/devel/**'
+      - '**/index.js'
+    allow_extensions: [".js", ".mjs"]
+  image:
+    allow_extensions: [".png", ".jpg", ".jpeg", ".gif", ".svg"]
+

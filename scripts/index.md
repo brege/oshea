@@ -66,6 +66,8 @@ This document is a central index for all developer and automation scripts within
     -- A utility to surface code comment-ditritus in `.js` files.
   - [ [auto-doc-lint.js](linting/auto-doc-lint.js) ]
     -- Find and remove `auto-doc` comments from `.js` files.
+  - [ [postman.mjs](docs/postman.mjs) ]
+    -- Detects and can correct Markdown links to other files in the repo.  Configure with `postman.yaml`.
 
 ### Refactoring & Auditing [ `refactor/` ]
 

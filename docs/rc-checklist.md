@@ -5,6 +5,8 @@
 
 **State** is interpreted as *Urgency*, *Difficulty*, or *Completeness*
 
+<!-- lint-disable-links -->
+
 | ● | State   | Document                                | Notes                                 |
 |:-:|:--------|:----------------------------------------|---------------------------------------|
 |   |         | **Phase 1**                             | **Foundational Update**               |
@@ -27,9 +29,10 @@
 | ✔ | New     | `scripts/update-project-indices.js`     | Unified Tool 'n Doc Index Script      | 
 |   |         | **Phase 5**                             | **Marketability & Concision**         |
 | ✔ | Finish  | `config.example.yaml`                   | Modernize - needs PM2                 |
-| ‖ | Finish  | `scripts/docs/docs-link-checker.mjs`    | Ensure link-ticks are valid           |
+| ✔ | Finish  | `scripts/docs/postman.mjs`              | Ensure link-ticks are valid           |
 | ‖ | Finish  | **`README.md`**                         | **Update for v0.10**                  |
 
+<!-- lint-enable-links -->
 At the onset of the above task table, all documents were in a v0.9.00 state, needing huge rewrites to v0.10.x feature state. The main README should wait until v0.10 has stabilized.
 
 ---
@@ -94,6 +97,7 @@ These are internal, code-hygienic tasks.
 ---
 
 [**Testing, Debugging, and Telemetry**](#testing-debugging-and-telemetry)
+<!-- lint-disable-links -->
 
 | ● | `tt`| Task Description                                                 |
 |:-:|:----|:-----------------------------------------------------------------|
@@ -107,6 +111,7 @@ These are internal, code-hygienic tasks.
 | ✔ |`tt8`| Unify app-code console.logs and debugging to shrink line-char    |
 | ○ |`tt9`| Add remainder of walkthroughs as `level4` tests.                 | 
 
+<!-- lint-enable-links -->
 cf. [Test Suite Refactor Impact Report](../test/docs/refactor-impact.md)
 
 *Status: In Progress*
@@ -134,8 +139,6 @@ scripts/
 │   └── update-project-indices.js          # Updates unified tool and documentation indices
 │
 ├── linting/
-│   ├── dump-code-comments.js              # Extracts and analyzes code comments
-│   ├── find-to-include-assertions.js      # Ensures assertions are present in tests
 │   ├── standardize-js-line-one-all.js     # Standardizes first line (shebang, copyright)
 │   └── strip-trailing-whitespace.js       # Removes trailing whitespace
 │
@@ -148,10 +151,8 @@ scripts/
 
 **Redundancy with ESLint**
 
-- `dump-code-comments.js`: Not covered by ESLint.
-- `find-to-include-assertions.js`: Not covered by ESLint.
-- `standardize-js-line-one-all.js`: Partial overlap; ESLint can enforce some header rules.
-- `strip-trailing-whitespace.js`: ESLint can enforce, but this script actively fixes them.
+- `[`standardize-js-line-one-all.js`](../scripts/linting/standardize-js-line-one-all.js)`: Partial overlap; ESLint can enforce some header rules.
+- `[`strip-trailing-whitespace.js`](../scripts/linting/strip-trailing-whitespace.js)`: ESLint can enforce, but this script actively fixes them.
 
 **Probable approach**
 
@@ -199,7 +200,7 @@ scripts/
    // package.json
    {
      "scripts": {
-       "lint:custom": "node scripts/linting/strip-trailing-whitespace.js && node scripts/linting/standardize-js-line-one-all.js && node scripts/linting/dump-code-comments.js && node scripts/linting/find-to-include-assertions.js",
+       "lint:custom": "node scripts/linting/strip-trailing-whitespace.js && node scripts/linting/standardize-js-line-one-all.js",
        "lint": "npm run lint:custom && npm run lint:eslint"
      }
    }
@@ -306,9 +307,9 @@ Use Mocha's native watch mode with explicit watch paths.
 }
 ```
 
-**`tt5` - Organize e2e tests into groups in `.mocharc.js`**  
+**`tt5` - Organize e2e tests into groups in `[`.mocharc.js`](../.mocharc.js)`**  
    
-Define e2e test groups in `.mocharc.js` for targeted runs.  
+Define e2e test groups in `[`.mocharc.js`](../.mocharc.js)` for targeted runs.  
 ```js
 // .mocharc.js
 module.exports = {

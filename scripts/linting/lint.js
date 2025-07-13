@@ -36,16 +36,10 @@ const lintSteps = [
   },
   // docs
   {
-    label: 'Docs: docs-link-checker.mjs',
+    label: 'Docs: postman.mjs',
     command: 'node',
-    args: [path.join(projectRoot, 'scripts', 'docs', 'docs-link-checker.mjs'), '--quiet'],
+    args: [path.join(projectRoot, 'scripts', 'docs', 'postman.mjs'), '--quiet', ...extraArgs],
     ignoreFailure: true,
-  },
-  {
-    skip: true,
-    label: 'Docs: detect-js-reference-contexts.mjs',
-    command: 'node',
-    args: [path.join(projectRoot, 'scripts', 'docs', 'detect-js-reference-contexts.mjs'), '--rewrite'],
   },
   {
     label: 'Docs: update-project-indices.js',

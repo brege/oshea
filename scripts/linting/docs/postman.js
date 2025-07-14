@@ -9,6 +9,8 @@ const process = require('process');
 const { remark } = require('remark');
 const { visitParents } = require('unist-util-visit-parents');
 const chalk = require('chalk');
+const { lintHelpersPath, lintingConfigPath } = require('@paths');
+const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const {
   loadPostmanRules,
   getMarkdownFiles,
@@ -30,13 +32,6 @@ function buildLinksEnabledMap(lines) {
   }
   return map;
 }
-
-const args = process.argv.slice(2);
-const userGlobs = args.filter(a => !a.startsWith('--'));
-const root = userGlobs[0] || 'docs';
-const fix = args.includes('--fix');
-const quiet = args.includes('--quiet');
-const verbose = args.includes('--verbose');
 
 function isLineAlreadyLinked(oldLine, rel) {
   const linkRegex = /\[[^\]]*\]\(([^)]+)\)/g;
@@ -150,18 +145,26 @@ function printContext(context, target) {
   console.log(chalk.dim('    ...' + snippet + '...'));
 }
 
-async function main() {
-  const rules = loadPostmanRules();
-  if (verbose) {
-    console.log(chalk.blue(`[postman] Loaded config: ${JSON.stringify(rules, null, 2)}`));
-    console.log(chalk.blue(`[postman] Scanning root: ${root}`));
+async function runLinter({
+  targets = [],
+  fix = false,
+  quiet = false,
+  json = false,
+  debug = false,
+  force = false, // stub, not used
+  config = {}
+} = {}) {
+  if (debug) {
+    console.log('[DEBUG] Loaded config:', config);
+    console.log('[DEBUG] Targets:', targets);
   }
 
+  const rules = config;
   const excludeDirs = ['assets', 'docs/archive', 'node_modules', '.git'];
-  const mdFiles = getMarkdownFiles(root, rules, userGlobs, excludeDirs);
+  const mdFiles = getMarkdownFiles(targets[0] || 'docs', rules, targets, excludeDirs);
 
-  if (verbose) {
-    console.log(chalk.blue(`[postman] Found ${mdFiles.length} Markdown files to scan.`));
+  if (debug) {
+    console.log('[DEBUG] Found Markdown files:', mdFiles);
   }
 
   let allResults = [];
@@ -171,6 +174,13 @@ async function main() {
   }
 
   let problems = 0, fixes = 0;
+  const summary = {
+    orphan: 0,
+    degenerate: 0,
+    replace: 0,
+    fixed: 0
+  };
+  const details = [];
 
   for (const r of allResults) {
     if (r.resolved) continue;
@@ -200,21 +210,31 @@ async function main() {
         lines[r.line - 1] = replacement;
         fs.writeFileSync(r.file, lines.join('\n'), 'utf8');
         fixes++;
-        if (!quiet) printProblem(r, 'replace', candidates, replacement);
+        summary.fixed++;
+        details.push({ ...r, status: 'fixed', replacement });
+        if (!quiet && !json) printProblem(r, 'replace', candidates, replacement);
       } else {
         problems++;
-        if (!quiet) printProblem(r, 'replace', candidates, replacement);
+        summary.replace++;
+        details.push({ ...r, status: 'replace', candidates, suggestion: replacement });
+        if (!quiet && !json) printProblem(r, 'replace', candidates, replacement);
       }
     } else if (candidates.length > 1) {
       problems++;
-      if (!quiet) printProblem(r, 'degenerate', candidates);
+      summary.degenerate++;
+      details.push({ ...r, status: 'degenerate', candidates });
+      if (!quiet && !json) printProblem(r, 'degenerate', candidates);
     } else {
       problems++;
-      if (!quiet) printProblem(r, 'orphan');
+      summary.orphan++;
+      details.push({ ...r, status: 'orphan' });
+      if (!quiet && !json) printProblem(r, 'orphan');
     }
   }
 
-  if (!quiet) {
+  if (json) {
+    process.stdout.write(JSON.stringify({ summary, details }, null, 2) + '\n');
+  } else if (!quiet) {
     if (problems && !fix) {
       console.log(
         chalk.red.bold('\n✖ ') +
@@ -237,8 +257,26 @@ async function main() {
     }
   }
 
-  process.exit(problems && !fix ? 1 : 0);
+  process.exitCode = problems && !fix ? 1 : 0;
+  return { summary, details };
 }
 
-main();
+// CLI entry
+if (require.main === module) {
+  (async () => {
+    const { flags, targets } = parseCliArgs(process.argv.slice(2));
+    const config = loadLintSection('postman', lintingConfigPath) || {};
+    await runLinter({
+      targets,
+      fix: !!flags.fix,
+      quiet: !!flags.quiet,
+      json: !!flags.json,
+      debug: !!flags.debug,
+      force: !!flags.force,
+      config
+    });
+  })();
+}
+
+module.exports = { runLinter };
 

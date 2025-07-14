@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 // scripts/linting/docs/update-project-indices.js
 
+require('module-alias/register');
+
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const yaml = require('js-yaml');
+const { lintHelpersPath, lintingConfigPath } = require('@paths');
+const { parseCliArgs } = require(lintHelpersPath);
 
-const CONFIG_PATH = path.resolve(process.cwd(), '.index-config.yaml');
+const CONFIG_PATH = lintingConfigPath; 
+
 const START_MARKER = '<!-- uncategorized-start -->';
 const END_MARKER = '<!-- uncategorized-end -->';
 const LINT_SKIP_TAG = 'lint-skip-index';
@@ -75,13 +80,13 @@ function fileHasLintSkip(file) {
 
 function updateIndexFile(groupName, groupConfig, opts = {}) {
   const { indexFile, scanRoot, fileExtensions, excludePatterns } = groupConfig;
-  const { quiet = false } = opts;
+  const { quiet = false, fix = false, json = false, debug = false } = opts;
 
   const INDEX_FILE_PATH = path.resolve(process.cwd(), indexFile);
   if (!fs.existsSync(INDEX_FILE_PATH)) {
-    console.error(`ERROR: Index file for group '${groupName}' not found at ${INDEX_FILE_PATH}`);
-    process.exitCode = 1;
-    return;
+    const msg = `ERROR: Index file for group '${groupName}' not found at ${INDEX_FILE_PATH}`;
+    if (!quiet && !json) console.error(msg);
+    return { group: groupName, error: msg, updated: false, added: 0, files: [] };
   }
 
   const INDEX_DIR = path.dirname(INDEX_FILE_PATH);
@@ -100,7 +105,7 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
     const globPattern = `${root}/**/*.${extPattern}`;
     const docignorePatterns = getDocignoreDirs(root);
 
-    if (!quiet) {
+    if (debug && !json) {
       console.log(`[librarian] ${groupName}: ${indexFile}`);
       console.log(`  Scanning with glob pattern: ${globPattern}`);
       if (docignorePatterns.length > 0) {
@@ -119,7 +124,7 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
     });
     allFiles = allFiles.concat(found);
 
-    if (!quiet) {
+    if (debug && !json) {
       console.log(`  Found ${found.length} total files in scan root(s).`);
     }
   }
@@ -128,7 +133,7 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
   const filesToIndex = allFiles.filter(file => !fileHasLintSkip(file));
 
   const existingLinks = getExistingLinks(content, INDEX_DIR);
-  if (!quiet) {
+  if (debug && !json) {
     console.log(`  Found ${existingLinks.size} existing links in ${indexFile}`);
   }
 
@@ -138,18 +143,20 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
   });
 
   if (untrackedFiles.length === 0) {
-    if (!quiet) {
+    if (!quiet && !json) {
       console.log(`[librarian] ${groupName}: ${indexFile} ✔ No new uncategorized files.`);
     }
-    return;
+    return { group: groupName, updated: false, added: 0, files: [] };
   }
 
-  // Always print this block if files are added (even in quiet)
-  console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Adding ${untrackedFiles.length} untracked file(s):`);
-  untrackedFiles.forEach(file => {
-    const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
-    console.warn(`    - ${relPath}`);
-  });
+  if (!quiet && !json) {
+    // Always print this block if files are added (even in quiet)
+    console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Adding ${untrackedFiles.length} untracked file(s):`);
+    untrackedFiles.forEach(file => {
+      const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
+      console.warn(`    - ${relPath}`);
+    });
+  }
 
   const newUncatLines = untrackedFiles.map(file => {
     const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
@@ -162,52 +169,96 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
     const after = lines.slice(endIdx).join('\n');
     finalContent = `${before}\n${newUncatLines.join('\n')}\n${after}`;
   } else {
-    if (!quiet) {
+    if (!quiet && !json) {
       console.warn(`WARN: Markers not found in ${indexFile}. Appending list to the end.`);
     }
     finalContent = `${content}\n\n${START_MARKER}\n${newUncatLines.join('\n')}\n${END_MARKER}\n`;
   }
 
-  fs.writeFileSync(INDEX_FILE_PATH, finalContent, 'utf8');
-  console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Updated with ${newUncatLines.length} untracked file(s).`);
-}
-
-function main() {
-  if (!fs.existsSync(CONFIG_PATH)) {
-    console.error(`ERROR: Configuration file not found at ${CONFIG_PATH}`);
-    process.exit(1);
+  if (fix) {
+    fs.writeFileSync(INDEX_FILE_PATH, finalContent, 'utf8');
+    if (!quiet && !json) {
+      console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Updated with ${newUncatLines.length} untracked file(s).`);
+    }
   }
 
-  const configs = yaml.load(fs.readFileSync(CONFIG_PATH, 'utf8'));
-  const args = process.argv.slice(2);
-  const groupArg = args.find(arg => arg.startsWith('--group='));
-  const specificGroup = groupArg ? groupArg.split('=')[1] : null;
-  const quiet = args.includes('--quiet') || args.includes('--warn-only');
+  return {
+    group: groupName,
+    updated: !!fix,
+    added: untrackedFiles.length,
+    files: untrackedFiles.map(f => path.relative(INDEX_DIR, f).replace(/\\/g, '/'))
+  };
+}
 
+async function runLibrarian({
+  group = null,
+  fix = false,
+  quiet = false,
+  json = false,
+  debug = false,
+  force = false // stub, not used
+} = {}) {
+  if (!fs.existsSync(CONFIG_PATH)) {
+    const msg = `ERROR: Configuration file not found at ${CONFIG_PATH}`;
+    if (!quiet && !json) console.error(msg);
+    if (json) process.stdout.write(JSON.stringify({ error: msg }, null, 2) + '\n');
+    process.exitCode = 1;
+    return { error: msg };
+  }
+
+  const allConfigs = yaml.load(fs.readFileSync(CONFIG_PATH, 'utf8'));
+  const configs =allConfigs.librarian || {};
   let hadError = false;
+  const results = [];
 
-  if (specificGroup) {
-    const groupConfig = configs[specificGroup];
+  if (group) {
+    const groupConfig = configs[group];
     if (groupConfig) {
-      updateIndexFile(specificGroup, groupConfig, { quiet });
+      const res = updateIndexFile(group, groupConfig, { fix, quiet, json, debug });
+      results.push(res);
     } else {
-      console.error(`ERROR: Group '${specificGroup}' not found in configuration.`);
+      const msg = `ERROR: Group '${group}' not found in configuration.`;
+      if (!quiet && !json) console.error(msg);
+      if (json) process.stdout.write(JSON.stringify({ error: msg }, null, 2) + '\n');
       hadError = true;
     }
   } else {
     for (const groupName in configs) {
       if (Object.hasOwnProperty.call(configs, groupName)) {
-        updateIndexFile(groupName, configs[groupName], { quiet });
+        const res = updateIndexFile(groupName, configs[groupName], { fix, quiet, json, debug });
+        results.push(res);
       }
     }
   }
 
-  if (hadError || process.exitCode === 1) {
-    process.exit(1);
+  const anyAdded = results.some(r => r && r.added > 0);
+  const anyError = results.some(r => r && r.error);
+
+  if (json) {
+    process.stdout.write(JSON.stringify({ results }, null, 2) + '\n');
   }
+
+  process.exitCode = anyError ? 1 : 0;
+  return { results };
 }
 
+// CLI entry
 if (require.main === module) {
-  main();
+  (async () => {
+    const { flags } = parseCliArgs(process.argv.slice(2));
+    // --group=GROUP
+    const groupFlag = Object.keys(flags).find(f => f.startsWith('group='));
+    const group = groupFlag ? flags[groupFlag] || groupFlag.split('=')[1] : null;
+    await runLibrarian({
+      group,
+      fix: !!flags.fix,
+      quiet: !!flags.quiet,
+      json: !!flags.json,
+      debug: !!flags.debug,
+      force: !!flags.force
+    });
+  })();
 }
+
+module.exports = { runLibrarian };
 

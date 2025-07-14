@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // scripts/linting/docs/postman.js
+
 require('module-alias/register');
 
 const fs = require('fs');
@@ -8,7 +9,6 @@ const process = require('process');
 const { remark } = require('remark');
 const { visitParents } = require('unist-util-visit-parents');
 const chalk = require('chalk');
-
 const {
   loadPostmanRules,
   getMarkdownFiles,

@@ -3,34 +3,94 @@
 
 require('module-alias/register');
 
-const path = require('path');
 const fs = require('fs');
-const { fileHelpersPath } = require('@paths');
-const { getPatternsFromArgs, getDefaultGlobIgnores } = require(fileHelpersPath);
+const path = require('path');
+const chalk = require('chalk');
+const { lintHelpersPath } = require('@paths');
+const {
+  findFilesArray,
+  parseCliArgs,
+  getPatternsFromArgs,
+  getDefaultGlobIgnores,
+} = require(lintHelpersPath);
 
-/**
- * Recursively find all files matching the given glob patterns, honoring ignore patterns.
- */
-function findMatchingFiles(patterns, ignore) {
-  const glob = require('glob');
-  const files = new Set();
-  for (const pattern of patterns) {
-    glob.sync(pattern, { ignore, dot: true }).forEach(f => files.add(f));
+function runLinter({
+  patterns = [],
+  ignores = [],
+  fix = false,
+  quiet = false,
+  json = false,
+  debug = false,
+} = {}) {
+  // Find all files matching patterns and ignores
+  const { minimatch } = require('minimatch');
+  let files = new Set();
+  for (const file of findFilesArray('.', {
+    filter: () => true, // All files, filter by pattern below
+    ignores,
+  })) {
+    if (patterns.some(pattern => minimatch(file, pattern))) {
+      files.add(file);
+    }
   }
-  return Array.from(files);
+
+  let changedFiles = [];
+  let checkedFiles = [];
+
+  files.forEach(filePath => {
+    const relPath = path.relative(process.cwd(), filePath);
+    const content = fs.readFileSync(filePath, 'utf8');
+    const cleaned = content.replace(/[ \t]+$/gm, '');
+    checkedFiles.push(relPath);
+    if (content !== cleaned) {
+      if (fix) {
+        fs.writeFileSync(filePath, cleaned, 'utf8');
+        changedFiles.push(relPath);
+        if (!quiet && !json) {
+          console.log(`Stripped: ${relPath}`);
+        }
+      } else if (!quiet && !json) {
+        console.log(chalk.yellow(`Would strip: ${relPath}`));
+      }
+    }
+  });
+
+  if (json) {
+    process.stdout.write(
+      JSON.stringify(
+        {
+          checked: checkedFiles,
+          changed: changedFiles,
+        },
+        null,
+        2
+      ) + '\n'
+    );
+  }
+
+  if (debug) {
+    console.log('[DEBUG] Files checked:', checkedFiles);
+    console.log('[DEBUG] Files changed:', changedFiles);
+  }
+
+  return { checked: checkedFiles, changed: changedFiles };
 }
 
-const patterns = getPatternsFromArgs(process.argv.slice(2));
-const ignore = getDefaultGlobIgnores();
+// CLI entry point
+if (require.main === module) {
+  const { flags, targets } = parseCliArgs(process.argv.slice(2));
+  const patterns = getPatternsFromArgs(targets);
+  const ignores = getDefaultGlobIgnores();
 
-const files = findMatchingFiles(patterns, ignore);
+  runLinter({
+    patterns,
+    ignores,
+    fix: !!flags.fix,
+    quiet: !!flags.quiet,
+    json: !!flags.json,
+    debug: !!flags.debug,
+  });
+}
 
-files.forEach(filePath => {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const cleaned = content.replace(/[ \t]+$/gm, '');
-  if (content !== cleaned) {
-    fs.writeFileSync(filePath, cleaned, 'utf8');
-    console.log(`Stripped: ${path.relative(process.cwd(), filePath)}`);
-  }
-});
+module.exports = { runLinter };
 

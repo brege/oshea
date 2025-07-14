@@ -4,22 +4,14 @@
 require('module-alias/register');
 
 const fs = require('fs');
-const path = require('path');
-const { minimatch } = require('minimatch');
-const { fileHelpersPath, lintingConfigPath, lintConfigLoaderPath } = require('@paths');
-const { findFiles } = require(fileHelpersPath);
-const { loadLintSection } = require(lintConfigLoaderPath);
-
-// Load linter config from YAML
-const loggingConfig = loadLintSection('logging', lintingConfigPath);
-const CONFIG_TARGETS = loggingConfig.targets || [];
-const EXCLUDE_PATTERNS = loggingConfig.excludes || [];
-
-// Helper: check if file matches any exclude pattern
-function isExcluded(filePath) {
-  const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
-  return EXCLUDE_PATTERNS.some(pattern => minimatch(relPath, pattern));
-}
+const chalk = require('chalk');
+const { lintHelpersPath, lintingConfigPath } = require('@paths');
+const {
+  loadLintSection,
+  findFilesArray,
+  isExcluded,
+  parseCliArgs,
+} = require(lintHelpersPath);
 
 // Regexes for logging patterns
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
@@ -68,32 +60,24 @@ function scanFile(filePath) {
   return hits.length ? { file: filePath, hits } : null;
 }
 
-// Main lint logic
-function main() {
-  const fix = process.argv.includes('--fix');
-  const outputJson = process.argv.includes('--json');
-  const rootDir = process.cwd();
+function runLinter({
+  targets = [],
+  excludes = [],
+  fix = false,
+  quiet = false,
+  json = false,
+  debug = false,
+  config = {},
+} = {}) {
+  const files = new Set();
 
-  // CLI targets override config targets
-  const cliTargets = process.argv.slice(2).filter(a => !a.startsWith('--'));
-  const TARGETS = cliTargets.length ? cliTargets : CONFIG_TARGETS;
-
-  let files = new Set();
-  for (const target of TARGETS) {
-    if (target.includes('*')) {
-      for (const file of findFiles(rootDir, {
-        filter: name => name.endsWith('.js') || name.endsWith('.mjs')
-      })) {
-        if (minimatch(path.relative(rootDir, file), target)) {
-          files.add(file);
-        }
-      }
-    } else {
-      for (const file of findFiles(path.join(rootDir, target), {
-        filter: name => name.endsWith('.js') || name.endsWith('.mjs')
-      })) {
-        files.add(file);
-      }
+  // Gather files
+  for (const target of targets) {
+    for (const file of findFilesArray(target, {
+      filter: name => name.endsWith('.js') || name.endsWith('.mjs'),
+      ignores: [],
+    })) {
+      files.add(file);
     }
   }
 
@@ -101,7 +85,7 @@ function main() {
   const allHits = [];
 
   for (const file of files) {
-    if (isExcluded(file)) continue;
+    if (isExcluded(file, excludes)) continue;
     const result = scanFile(file);
     if (!result) continue;
 
@@ -116,37 +100,77 @@ function main() {
         code: hit.code
       });
 
-      if (!outputJson) {
+      if (!json && !quiet) {
         if (hit.type === 'console') {
           if (hit.method === 'console.log') {
             found = true;
-            console.warn(`[lint:console] ${file}:${hit.line}  ${hit.code}`);
+            console.warn(
+              chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
+            );
             if (fix) {
-              const lines = fs.readFileSync(file, 'utf8').split('\n');
-              lines.splice(hit.line - 1, 1);
-              fs.writeFileSync(file, lines.join('\n'), 'utf8');
-              console.log(`[lint:console] Stripped console.log from ${file}:${hit.line}`);
+              console.warn(
+                chalk.red('[lint:console]'),
+                'Auto-fix is not implemented for logging-lint. Please review and fix manually.'
+              );
+              // Optionally: break or return early, or just continue as a dry-run.
             }
+
           } else {
-            console.warn(`[lint:console] ${file}:${hit.line}  ${hit.code}`);
+            console.warn(
+              chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
+            );
           }
         } else if (hit.type === 'chalk') {
-          console.warn(`[lint:chalk] ${file}:${hit.line}  ${hit.code}`);
+          console.warn(
+            chalk.cyan(`[lint:chalk] ${file}:${hit.line}  ${hit.code}`)
+          );
         }
       }
     }
   }
 
-  if (outputJson) {
+  if (json) {
     process.stdout.write(JSON.stringify(allHits, null, 2) + '\n');
   }
 
-  if (found && !fix && !outputJson) {
+  if (debug) {
+    console.log('[DEBUG] Files checked:', Array.from(files));
+    console.log('[DEBUG] Hits found:', allHits.length);
+  }
+
+  if (found && !fix && !json && !quiet) {
     process.exitCode = 1;
   }
+
+  return allHits;
 }
 
+// CLI entry point
 if (require.main === module) {
-  main();
+  const { flags, targets } = parseCliArgs(process.argv.slice(2));
+  const loggingConfig = loadLintSection('logging', lintingConfigPath) || {};
+  const configTargets = loggingConfig.targets || [];
+  const configExcludes = loggingConfig.excludes || [];
+
+  const finalTargets = targets.length ? targets : configTargets;
+  const excludes = flags.force ? [] : configExcludes;
+
+  if (flags.debug) {
+    console.log('[DEBUG] Targets:', finalTargets);
+    console.log('[DEBUG] Excludes:', excludes);
+    console.log('[DEBUG] Flags:', flags);
+  }
+
+  runLinter({
+    targets: finalTargets,
+    excludes,
+    fix: !!flags.fix,
+    quiet: !!flags.quiet,
+    json: !!flags.json,
+    debug: !!flags.debug,
+    config: loggingConfig,
+  });
 }
+
+module.exports = { runLinter };
 

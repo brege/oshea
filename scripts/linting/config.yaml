@@ -53,3 +53,10 @@ postman:
     - "**/sample.md"
     - "**/index.js"
 
+mochaPathValidator:
+  excludes: []
+
+pathsJsValidator:
+  ignores:
+    - config.yaml
+

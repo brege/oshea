@@ -3,15 +3,9 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const { minimatch } = require('minimatch');
-
-const {
-  lintingConfigPath,
-  fileHelpersPath,
-  lintConfigLoaderPath
-} = require('@paths');
-
-const { loadLintSection } = require(lintConfigLoaderPath);
-const { findFiles } = require(fileHelpersPath);
+const { lintingConfigPath, lintHelpersPath } = require('@paths');
+const { findFilesArray } = require(lintHelpersPath);
+const { loadLintSection } = require(lintHelpersPath);
 
 function loadPostmanRules(yamlPath = lintingConfigPath) {
   return loadLintSection('postman', yamlPath);
@@ -34,7 +28,7 @@ function getMarkdownFiles(rootDir, rules, userGlobs = [], excludeDirs = []) {
       }
     }
   } else {
-    for (const file of findFiles(rootDir, {
+    for (const file of findFilesArray(rootDir, {
       filter: name => name.endsWith('.md'),
       ignores: excludeDirs,
     })) {
@@ -87,7 +81,7 @@ function findCandidates(ref, allowedExts, rootDirs = ['.']) {
   const normRef = ref.replace(/\\/g, '/');
   const candidates = new Set();
   for (const root of rootDirs) {
-    for (const file of findFiles(root, {
+    for (const file of findFilesArray(root, {
       filter: name => allowedExts.some(ext => name.endsWith(ext)),
     })) {
       const relFile = path.relative(process.cwd(), file).replace(/\\/g, '/');

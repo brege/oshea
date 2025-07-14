@@ -23,7 +23,7 @@ const updateProjectIndicesPath = path.join(lintingDocsRoot, 'update-project-indi
 
 // Linting: Shared
 const sharedRoot = path.join(scriptsRoot, 'shared');
-const lintConfigLoaderPath = path.join(sharedRoot, 'lint-config-loader.js');
+const lintHelpersPath = path.join(sharedRoot, 'lint-helpers.js');
 
 // Linting: Validators
 const lintingValidatorsRoot = path.join(lintingRoot, 'validators');
@@ -53,7 +53,7 @@ module.exports = {
 
   // Linting: Shared
   sharedRoot,
-  lintConfigLoaderPath,
+  lintHelpersPath,
 
   // Linting: Validators
   lintingValidatorsRoot,

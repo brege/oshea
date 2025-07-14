@@ -10,7 +10,7 @@ const yaml = require('js-yaml');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const { parseCliArgs } = require(lintHelpersPath);
 
-const CONFIG_PATH = lintingConfigPath; 
+const CONFIG_PATH = lintingConfigPath;
 
 const START_MARKER = '<!-- uncategorized-start -->';
 const END_MARKER = '<!-- uncategorized-end -->';
@@ -23,7 +23,7 @@ function getDocignoreDirs(root) {
     let entries;
     try {
       entries = fs.readdirSync(dir, { withFileTypes: true });
-    } catch (e) {
+    } catch (_e) {
       return;
     }
     if (entries.some(e => e.isFile() && e.name === '.docignore')) {
@@ -208,7 +208,6 @@ async function runLibrarian({
 
   const allConfigs = yaml.load(fs.readFileSync(CONFIG_PATH, 'utf8'));
   const configs =allConfigs.librarian || {};
-  let hadError = false;
   const results = [];
 
   if (group) {
@@ -220,7 +219,6 @@ async function runLibrarian({
       const msg = `ERROR: Group '${group}' not found in configuration.`;
       if (!quiet && !json) console.error(msg);
       if (json) process.stdout.write(JSON.stringify({ error: msg }, null, 2) + '\n');
-      hadError = true;
     }
   } else {
     for (const groupName in configs) {
@@ -231,7 +229,6 @@ async function runLibrarian({
     }
   }
 
-  const anyAdded = results.some(r => r && r.added > 0);
   const anyError = results.some(r => r && r.error);
 
   if (json) {

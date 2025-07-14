@@ -113,7 +113,10 @@ function runLinter({
   }
 
   if (json) {
-    process.stdout.write(JSON.stringify(allBlocks, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({
+      blocks: allBlocks,
+      summary: { count: found }
+    }, null, 2) + '\n');
   }
 
   if (debug) {

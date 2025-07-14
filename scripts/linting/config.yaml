@@ -40,6 +40,33 @@ logging:
     - "plugins/**"
     # Add more excludes as needed
 
+standardizeJsLineOneAll:
+  targets:
+    - "src/**/*.js"
+    - "test/**/*.js"
+    - "scripts/**/*.js"
+  excludes:
+    - "node_modules/**"
+    - "scripts/shared/**"
+    - "plugins/**"
+    - "test/fixtures/**"
+
+stripTrailingWhitespace:
+  targets:
+    - "src/**/*.js"
+    - "test/**/*.js"
+    - "scripts/**/*.js"
+    - "plugins/**/*.js"
+    - "*.js"
+    - "*.sh"
+  excludes:
+    - "node_modules/**"
+    - "scripts/shared/**"
+    - "plugins/**/.contract/**"
+    - "test/fixtures/**"
+
+# --- Validators ---
+
 mochaPathValidator:
   excludes: []
 

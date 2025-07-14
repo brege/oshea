@@ -6,13 +6,14 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { lintHelpersPath } = require('@paths');
+const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const {
   findFilesArray,
   parseCliArgs,
   getFirstDir,
   getPatternsFromArgs,
   getDefaultGlobIgnores,
+  loadLintSection,
 } = require(lintHelpersPath);
 
 function runLinter({
@@ -23,7 +24,6 @@ function runLinter({
   json = false,
   debug = false,
 } = {}) {
-  // Use patterns and ignores to find all JS/MJS files
   const { minimatch } = require('minimatch');
   let files = new Set();
   for (const file of findFilesArray('.', {
@@ -102,18 +102,14 @@ function runLinter({
     }
   });
 
+  const summary = {
+    changed: changedFiles,
+    mismatches,
+    warnings,
+  };
+
   if (json) {
-    process.stdout.write(
-      JSON.stringify(
-        {
-          changed: changedFiles,
-          mismatches,
-          warnings,
-        },
-        null,
-        2
-      ) + '\n'
-    );
+    process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
   } else if (!quiet && warnings > 0) {
     console.warn(chalk.yellow(`\n${warnings} file(s) had top-level directory mismatches.`));
   }
@@ -124,14 +120,17 @@ function runLinter({
     console.log('[DEBUG] Mismatches:', mismatches);
   }
 
-  return { changed: changedFiles, mismatches, warnings };
+  process.exitCode = warnings > 0 ? 1 : 0;
+  return summary;
 }
 
 // CLI entry point
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
-  const patterns = getPatternsFromArgs(targets);
-  const ignores = getDefaultGlobIgnores();
+  const config = loadLintSection('standardizeJsLineOneAll', lintingConfigPath) || {};
+  // Use CLI targets if provided, else config
+  const patterns = targets.length ? getPatternsFromArgs(targets) : (config.targets || []);
+  const ignores = config.excludes || getDefaultGlobIgnores();
 
   runLinter({
     patterns,

@@ -108,5 +108,6 @@ This document is a central index for all developer and automation scripts within
 New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
 
 <!-- uncategorized-start -->
+- [lint-harness.js](linting/lint-harness.js)
 - [scriptsPaths.js](scriptsPaths.js)
 <!-- uncategorized-end -->

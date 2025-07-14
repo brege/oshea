@@ -16,9 +16,12 @@ const cliPath = path.join(projectRoot, 'cli.js');
 const cliRoot = path.join(srcRoot, 'cli');
 const cliCommandsPath = path.join(cliRoot, 'commands');
 const convertCmdPath = path.join(cliCommandsPath, 'convertCmd.js');
-
 const getHelpPath = path.join(cliRoot, 'get_help.js');
 const configDisplayPath = path.join(cliRoot, 'config_display.js');
+
+// Assets
+const assetsRoot = path.join(projectRoot, 'assets');
+const katexPath = path.join(assetsRoot, 'katex.min.css');
 
 // Templates
 const templateBasicPlugin = path.join(projectRoot, 'plugins', 'template-basic');
@@ -76,13 +79,14 @@ const loggerPath = path.join(utilsRoot, 'logger.js');
 // Helpers
 const scriptsSharedRoot = path.join(projectRoot, 'scripts', 'shared');
 const fileHelpersPath = path.join(scriptsSharedRoot, 'file-helpers.js');
-
 const testSharedRoot = path.join(projectRoot, 'test', 'shared');
 const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
 
 // Node Modules
 const nodeModulesPath = path.join(projectRoot, 'node_modules');
+const eslintPath = path.join(nodeModulesPath, '.bin', 'eslint');
 const mochaPath = path.join(nodeModulesPath, '.bin', 'mocha');
+
 // Export all anchors, including scripts registry
 module.exports = {
   projectRoot,
@@ -99,6 +103,9 @@ module.exports = {
   getHelpPath,
   configDisplayPath,
 
+  // Assets
+  assetsRoot,
+  katexPath,
   // Templates
   templateBasicPlugin,
   configExamplePath,
@@ -160,9 +167,9 @@ module.exports = {
 
   // Node Modules
   nodeModulesPath,
+  eslintPath,
   mochaPath,
 
   // Scripts Registry (spread in all script paths)
   ...scriptsPaths,
 };
-

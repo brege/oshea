@@ -1,5 +1,4 @@
 // scripts/shared/lint-helpers.js
-
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
@@ -7,9 +6,6 @@ const { minimatch } = require('minimatch');
 const { findFiles, getPatternsFromArgs, getDefaultGlobIgnores } = require('./file-helpers');
 const { lintingConfigPath } = require('@paths');
 
-/**
- * Load a specific section from a YAML config file. Throws if section not found.
- */
 function loadLintSection(section, configPath = lintingConfigPath) {
   const raw = fs.readFileSync(configPath, 'utf8');
   const config = yaml.load(raw);
@@ -19,46 +15,60 @@ function loadLintSection(section, configPath = lintingConfigPath) {
   return config[section];
 }
 
-/**
- * Convert generator to array for convenience.
- */
+function loadLintConfig(configPath = lintingConfigPath) {
+  try {
+    const configContent = fs.readFileSync(configPath, 'utf8');
+    return yaml.load(configContent);
+  } catch (error) {
+    console.error('Error loading lint config:', error.message);
+    process.exit(1);
+  }
+}
+
 function findFilesArray(...args) {
   return Array.from(findFiles(...args));
 }
 
-/**
- * Check if a file path matches any exclude pattern.
- */
 function isExcluded(filePath, patterns) {
   const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
   return patterns.some(pattern => minimatch(relPath, pattern));
 }
 
-/**
- * Parse CLI arguments into flags and targets.
- */
 function parseCliArgs(args) {
-  const flags = {};
+  const flags = {
+    fix: false,
+    quiet: false,
+    json: false,
+    debug: false,
+    force: false,
+  };
+
   const targets = [];
-  args.forEach(arg => {
-    if (arg.startsWith('--')) {
-      flags[arg.replace(/^--/, '')] = true;
+
+  for (const arg of args) {
+    if (arg === '--fix') flags.fix = true;
+    else if (arg === '--quiet') flags.quiet = true;
+    else if (arg === '--json') flags.json = true;
+    else if (arg === '--debug') flags.debug = true;
+    else if (arg === '--force') flags.force = true;
+    else if (arg.startsWith('--')) {
+      const flagName = arg.replace(/^--/, '');
+      flags[flagName] = true;
     } else {
       targets.push(arg);
     }
-  });
+  }
+
   return { flags, targets };
 }
 
-/**
- * Utility: Get the first directory segment from a relative path.
- */
 function getFirstDir(filepath) {
   return filepath.replace(/^\.?\//, '').split(path.sep)[0];
 }
 
 module.exports = {
   loadLintSection,
+  loadLintConfig,
   findFilesArray,
   isExcluded,
   parseCliArgs,

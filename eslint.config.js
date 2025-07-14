@@ -1,10 +1,26 @@
 // eslint.config.js
+const fs = require('fs');
 const js = require('@eslint/js');
 const globals = require('globals');
 
+// Helper to read and parse .eslintignore
+function readIgnoreFile(filePath) {
+  try {
+    return fs
+      .readFileSync(filePath, 'utf-8')
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line && !line.startsWith('#'));
+  } catch {
+    return [];
+  }
+}
+
+const eslintIgnore = readIgnoreFile('.eslintignore');
+
 module.exports = [
   {
-    ignores: ['**/*-devel/**'],
+    ignores: [...eslintIgnore],
   },
   js.configs.recommended,
   {
@@ -15,9 +31,9 @@ module.exports = [
       globals: {
         ...globals.node,
         ...globals.mocha,
-        'expect': 'readonly',
-        'sinon': 'readonly',
-        'path': 'readonly',
+        expect: 'readonly',
+        sinon: 'readonly',
+        path: 'readonly',
       },
     },
     rules: {
@@ -29,9 +45,9 @@ module.exports = [
         },
       ],
       'no-trailing-spaces': 'warn',
-      'indent': ['warn', 2],
-      'semi': ['warn', 'always'],
-      'quotes': ['warn', 'single'],
+      indent: ['warn', 2],
+      semi: ['warn', 'always'],
+      quotes: ['warn', 'single'],
       'no-prototype-builtins': 'off',
     },
   },
@@ -53,9 +69,9 @@ module.exports = [
         },
       ],
       'no-trailing-spaces': 'warn',
-      'indent': ['warn', 2],
-      'semi': ['warn', 'always'],
-      'quotes': ['warn', 'single'],
+      indent: ['warn', 2],
+      semi: ['warn', 'always'],
+      quotes: ['warn', 'single'],
     },
   },
 ];

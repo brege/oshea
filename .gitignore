@@ -1,11 +1,8 @@
-# development files
-dev/
-
-# devlopment/interaction documents
-docs-devel/
-
 # Node dependencies
 node_modules/
+
+# ESLint ignore file
+.eslintignore
 
 # PDF outputs and other build artifacts
 *.pdf
@@ -44,4 +41,3 @@ yarn-error.log*
 # Optional: ignore output directories (if you add one later)
 # dist/
 # build/
-

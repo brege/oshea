@@ -6,12 +6,13 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { lintHelpersPath } = require('@paths');
+const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const {
   findFilesArray,
   parseCliArgs,
   getPatternsFromArgs,
   getDefaultGlobIgnores,
+  loadLintSection,
 } = require(lintHelpersPath);
 
 function runLinter({
@@ -22,7 +23,6 @@ function runLinter({
   json = false,
   debug = false,
 } = {}) {
-  // Find all files matching patterns and ignores
   const { minimatch } = require('minimatch');
   let files = new Set();
   for (const file of findFilesArray('.', {
@@ -55,17 +55,13 @@ function runLinter({
     }
   });
 
+  const summary = {
+    checked: checkedFiles,
+    changed: changedFiles,
+  };
+
   if (json) {
-    process.stdout.write(
-      JSON.stringify(
-        {
-          checked: checkedFiles,
-          changed: changedFiles,
-        },
-        null,
-        2
-      ) + '\n'
-    );
+    process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
   }
 
   if (debug) {
@@ -73,14 +69,17 @@ function runLinter({
     console.log('[DEBUG] Files changed:', changedFiles);
   }
 
-  return { checked: checkedFiles, changed: changedFiles };
+  process.exitCode = changedFiles.length > 0 ? 1 : 0;
+  return summary;
 }
 
 // CLI entry point
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
-  const patterns = getPatternsFromArgs(targets);
-  const ignores = getDefaultGlobIgnores();
+  const config = loadLintSection('stripTrailingWhitespace', lintingConfigPath) || {};
+  // Use CLI targets if provided, else config
+  const patterns = targets.length ? getPatternsFromArgs(targets) : (config.targets || []);
+  const ignores = config.excludes || getDefaultGlobIgnores();
 
   runLinter({
     patterns,

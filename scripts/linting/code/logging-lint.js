@@ -81,7 +81,6 @@ function runLinter({
     }
   }
 
-  let found = false;
   const allHits = [];
 
   for (const file of files) {
@@ -103,7 +102,6 @@ function runLinter({
       if (!json && !quiet) {
         if (hit.type === 'console') {
           if (hit.method === 'console.log') {
-            found = true;
             console.warn(
               chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
             );
@@ -112,9 +110,7 @@ function runLinter({
                 chalk.red('[lint:console]'),
                 'Auto-fix is not implemented for logging-lint. Please review and fix manually.'
               );
-              // Optionally: break or return early, or just continue as a dry-run.
             }
-
           } else {
             console.warn(
               chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
@@ -130,7 +126,10 @@ function runLinter({
   }
 
   if (json) {
-    process.stdout.write(JSON.stringify(allHits, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({
+      hits: allHits,
+      summary: { count: allHits.length }
+    }, null, 2) + '\n');
   }
 
   if (debug) {
@@ -138,7 +137,7 @@ function runLinter({
     console.log('[DEBUG] Hits found:', allHits.length);
   }
 
-  if (found && !fix && !json && !quiet) {
+  if (allHits.length > 0) {
     process.exitCode = 1;
   }
 

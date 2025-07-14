@@ -1,12 +1,12 @@
 // eslint.config.js
-const globals = require('globals');
 const js = require('@eslint/js');
+const globals = require('globals');
 
 module.exports = [
-  // Apply ESLint's recommended default rules to all files
+  {
+    ignores: ['**/*-devel/**'],
+  },
   js.configs.recommended,
-
-  // Configuration for CommonJS files (.js)
   {
     files: ['**/*.js'],
     languageOptions: {
@@ -15,14 +15,19 @@ module.exports = [
       globals: {
         ...globals.node,
         ...globals.mocha,
-        // Add globals used in your test setup
         'expect': 'readonly',
         'sinon': 'readonly',
         'path': 'readonly',
       },
     },
     rules: {
-      'no-unused-vars': ['warn', { 'args': 'none' }],
+      'no-unused-vars': [
+        'warn',
+        {
+          args: 'none',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'no-trailing-spaces': 'warn',
       'indent': ['warn', 2],
       'semi': ['warn', 'always'],
@@ -30,19 +35,23 @@ module.exports = [
       'no-prototype-builtins': 'off',
     },
   },
-
-  // Configuration for ES Module files (.mjs)
   {
     files: ['**/*.mjs'],
     languageOptions: {
       ecmaVersion: 'latest',
-      sourceType: 'module', // Specify this is an ES Module
+      sourceType: 'module',
       globals: {
         ...globals.node,
       },
     },
     rules: {
-      'no-unused-vars': ['warn', { 'args': 'none' }],
+      'no-unused-vars': [
+        'warn',
+        {
+          args: 'none',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'no-trailing-spaces': 'warn',
       'indent': ['warn', 2],
       'semi': ['warn', 'always'],
@@ -50,3 +59,4 @@ module.exports = [
     },
   },
 ];
+

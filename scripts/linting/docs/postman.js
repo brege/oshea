@@ -12,7 +12,6 @@ const chalk = require('chalk');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const {
-  loadPostmanRules,
   getMarkdownFiles,
   isReferenceExcluded,
   isAllowedExtension,

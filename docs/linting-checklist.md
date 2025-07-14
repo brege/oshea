@@ -45,14 +45,14 @@ notroot@fedora:~/Build/md-to-pdf$ node scripts/trees/tree-explorer.js scripts/li
 
 | Lints [ `scripts/linting/` ]   | La | Lb | Lc | Ld | Le | Lf | Lg | Lh | Li | Lj | Lk | Ll |  
 |--------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|  
-| `code/logging-lint.js`         | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
-| `code/remove-auto-doc.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
-| `code/standardize-js-l..`      | ✔  | ✔  | ✔  | ●  | ●  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
-| `code/strip-trailing-w..`      | ✔  | ✔  | ✔  | ●  | ●  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
+| `code/logging-lint.js`         | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
+| `code/remove-auto-doc.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
+| `code/standardize-js-l..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
+| `code/strip-trailing-w..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
 | `docs/postman-helpers.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | N/A| N/A| N/A| ✔  | N/A| N/A| N/A|  
 | `docs/postman.js`              | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
 | `docs/update-project-i..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
-| `lint.js`                      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ●  | ●  | ✔  | ✔  | ●  | N/A|  
+| `lint.js`                      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | N/A|  
 | `validators/mocha-path..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
 | `validators/paths-js-v..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
 
@@ -60,16 +60,16 @@ notroot@fedora:~/Build/md-to-pdf$ node scripts/trees/tree-explorer.js scripts/li
 
 ### Notes
 
-1. **`code/logging-lint.js`**:                  No autofix (by design)
-2. **`code/remove-auto-doc.js`**:               Fully modern
-3. **`code/standardize-js-line-one-all.js`**:   Patterns/ignores not in config
-4. **`code/strip-trailing-whitespace.js`**:     Patterns/ignores not in config
-5. **`docs/postman-helpers.js`**:               Helpers only
-6. **`docs/postman.js`**:                       Now fully modern, JSON, config, helpers, CLI
-7. **`docs/update-project-indices.js`**:        Now fully modern, JSON, config, helpers, CLI
-8. **`lint.js`**:                               Orchestrator, not a linter
-9. **`validators/mocha-path-validator.js`**:    Fully modern
-10. **`validators/paths-js-validator.js`**:     Fully modern
+1.  **`code/logging-lint.js`**:                  No autofix (by design)
+2.  **`code/remove-auto-doc.js`**:               Fully modern
+3.  **`code/standardize-js-line-one-all.js`**:   Patterns/ignores not in config
+4.  **`code/strip-trailing-whitespace.js`**:     Patterns/ignores not in config
+5.  **`docs/postman-helpers.js`**:               Helpers only
+6.  **`docs/postman.js`**:                       Now fully modern, JSON, config, helpers, CLI
+7.  **`docs/update-project-indices.js`**:        Now fully modern, JSON, config, helpers, CLI
+8.  **`lint.js`**:                               Orchestrator, not a linter
+9.  **`validators/mocha-path-validator.js`**:    Fully modern
+10. **`validators/paths-js-validator.js`**:      Fully modern
 
 ### 1.2 Linter Commonalities
 
@@ -79,14 +79,14 @@ When all eight atomic lints satisfy a **L?**, we may check that item off.
 - [x] **La** Internal pathing modernized to registry `@paths` model
 - [x] **Lb** Documents purpose and usage in (respective) `index.md`
 - [x] **Lc** Clear domain separation (code, docs, validators)
-- [ ] **Ld** ★ Uses **unified linter config** `lint.yaml`
-- [ ] **Le** Hardcoded variables removed and declared in the linter config.
+- [x] **Ld** ★ Uses **unified linter config** `lint.yaml`
+- [x] **Le** Hardcoded variables removed and declared in the linter config.
 - [ ] **Lf** Human-readable (`--pretty`) *implicitly*
-- [ ] **Lg** Machine-readable (`--json`) *explicitly*
-- [ ] **Lh** Universal CLI options: `--fix`, `--quiet`, `--debug`, `--force`
+- [x] **Lg** Machine-readable (`--json`) *explicitly*
+- [x] **Lh** Universal CLI options: `--fix`, `--quiet`, `--debug`, `--force`
 - [x] **Li** Common boilerplate moved to `scripts/shared/lint-helpers.js`
-- [ ] **Lj** Aggregates results/exit codes for harness
-- [ ] **Lk** Serialized output is API-friendly
+- [x] **Lj** Aggregates results/exit codes for harness
+- [x] **Lk** Serialized output is API-friendly
 - [x] **Ll** Batchable, state-preserving, `md-to-pdf` CLI smoke-test harness 
 
 ---
@@ -108,9 +108,8 @@ Obsolescence of refactor scripts and birth of new lints. Can be done in parallel
   - [ ] `test/smoke/validate-listing.js` ( `md-to-pdf collection list <options>`)
 - [ ] **Evolve pathing linters into first-class validators.**
   - [ ] ★ `paths-js-validator.js`: validate `const { fooPath } = require('@paths');` for all `src/**/*.js`.
-  - [ ] Prototype oath registry generator
-  - [ ] `mocha-path-validator.js`: may feature-complete.
-
+  - [ ] Prototype path registry generator
+  - [ ] `mocha-path-validator.js`: may be feature-complete.
 
 ### 3. Centralized Linter Suite
 

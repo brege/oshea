@@ -25,9 +25,16 @@ const cliArgs = process.argv.slice(2);
 const extraArgs = cliArgs.filter(arg => arg === '--fix');
 const userPaths = cliArgs.filter(arg => arg !== '--fix');
 
-// Default globs for custom scripts
-const defaultGlobs = ['*.js', 'src/**/*.js', 'scripts/**/*.js', 'plugins/**/*.js', 'test/**/*.js'];
+// Default globs for custom scripts (these are patterns, not files!)
+const defaultGlobs = [
+  '*.js',
+  'src/**/*.js',
+  'scripts/**/*.js',
+  'plugins/**/*.js',
+  'test/**/*.js'
+];
 
+// Lint steps
 const lintSteps = [
   // code formatting
   {

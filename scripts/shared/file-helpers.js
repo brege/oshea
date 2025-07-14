@@ -1,6 +1,8 @@
 // scripts/shared/file-helpers.js
+
 const fs = require('fs');
 const path = require('path');
+const glob = require('glob');
 
 // Centralized glob ignore patterns (for glob)
 const DEFAULT_GLOB_IGNORES = [
@@ -43,8 +45,19 @@ function getDefaultGlobIgnores() {
 }
 
 /**
+ * Checks if a string is a glob pattern.
+ * @param {string} str
+ * @returns {boolean}
+ */
+function isGlobPattern(str) {
+  // Matches *, ?, [, ], {, }, (, ), !
+  return /[*?[\]{}()!]/.test(str);
+}
+
+/**
  * Recursively yields all files matching the filter, skipping ignored directories.
  * If the input is a file, yields just that file if it matches the filter.
+ * If the input is missing, warns (for real files/dirs only).
  * @param {string} inputPath - File or directory path
  * @param {Object} [opts]
  * @param {string[]} [opts.ignores] - Directory names to ignore (non-glob)
@@ -58,7 +71,10 @@ function* findFiles(inputPath, opts = {}) {
   try {
     stat = fs.statSync(inputPath);
   } catch {
-    console.warn(`Warning: ${inputPath} does not exist or is not accessible.`);
+    // Only warn for actual files/dirs, not glob patterns!
+    if (!isGlobPattern(inputPath)) {
+      console.warn(`Warning: ${inputPath} does not exist or is not accessible.`);
+    }
     return;
   }
 
@@ -83,9 +99,31 @@ function* findFiles(inputPath, opts = {}) {
   }
 }
 
+/**
+ * Accepts an array of inputs (globs, files, dirs) and returns a flat array of files.
+ * Expands glob patterns to files; only calls findFiles on real files/dirs.
+ * @param {string[]|string} inputs
+ * @param {Object} [opts]
+ * @returns {string[]} files
+ */
+function findFilesArray(inputs, opts = {}) {
+  let files = [];
+  for (const input of Array.isArray(inputs) ? inputs : [inputs]) {
+    if (isGlobPattern(input)) {
+      // Expand glob pattern to files
+      files.push(...glob.sync(input, { nodir: true, ignore: opts.ignores || [] }));
+    } else {
+      // Only call findFiles on real files/dirs
+      files.push(...Array.from(findFiles(input, opts)));
+    }
+  }
+  return files;
+}
+
 module.exports = {
   findFiles,
   getPatternsFromArgs,
   getDefaultGlobIgnores,
+  findFilesArray,
 };
 

@@ -1,5 +1,13 @@
 # scripts/linting/config.yaml
 
+# --- Global ---
+
+# Add more excludes as needed
+# excludes:
+#   - "node_modules/**"
+
+# --- Code ---
+
 autoDoc:
   targets:
     - cli.js
@@ -32,6 +40,66 @@ logging:
     - "plugins/**"
     # Add more excludes as needed
 
+mochaPathValidator:
+  excludes: []
+
+pathsJsValidator:
+  ignores:
+    - config.yaml
+
+# --- Docs ---
+
+librarian:
+  docs:
+    indexFile: "docs/index.md"
+    scanRoot: "docs"
+    fileExtensions:
+      - ".md"
+    excludePatterns:
+      - "docs/dream-board.md"
+      - "docs/images/**"
+    marker: "etc"
+
+  plugins:
+    indexFile: "plugins/index.md"
+    scanRoot: "plugins"
+    fileExtensions:
+      - ".md"
+    excludePatterns:
+      - "plugins/**/index.md"
+      - "plugins/**/*-example.md"
+    marker: "plugins"
+
+  scripts:
+    indexFile: "scripts/index.md"
+    scanRoot: "scripts"
+    fileExtensions:
+      - ".js"
+      - ".sh"
+      - ".mjs"
+    excludePatterns:
+      - "scripts/refactor/**"
+    marker: "scripts"
+
+  refactor-scripts:
+    indexFile: "scripts/refactor/index.md"
+    scanRoot: "scripts/refactor"
+    fileExtensions:
+      - ".js"
+      - ".sh"
+    excludePatterns: []
+    marker: "scripts"
+
+  test-scripts:
+    indexFile: "test/index.md"
+    scanRoot: 
+      - "test/docs"
+      - "test/scripts"
+    fileExtensions:
+      - ".js"
+      - ".md"
+    excludePatterns: [] 
+    marker: "test-scripts"
 
 postman:
   excludes:
@@ -52,11 +120,4 @@ postman:
     - "**/my[-_]*/**"
     - "**/sample.md"
     - "**/index.js"
-
-mochaPathValidator:
-  excludes: []
-
-pathsJsValidator:
-  ignores:
-    - config.yaml
 

@@ -47,11 +47,11 @@ This document is a central index for all developer and automation scripts within
     -- Generates this index file **`scripts/index.md`** by discovering all project scripts.
 
 ### Linting & Code Style [ `linting/` ]
-- [scriptsPaths.js](scriptsPaths.js)
-- [lint-config-loader.js](shared/lint-config-loader.js)
 
   - [ [`lint.js`](linting/lint.js) ]
     -- The main linting orchestrator. This is where you organize linting order.
+  - [ [lint-helpers.js](shared/lint-helpers.js) ]
+    -- Common patterns used by most be-spoke lints.
 
   **Validators** [ [`validators/`](linting/validators/) ]
   - [ [`mocha-path-validator.js`](linting/validators/mocha-path-validator.js) ]
@@ -108,5 +108,5 @@ This document is a central index for all developer and automation scripts within
 New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
 
 <!-- uncategorized-start -->
-- [lint-helpers.js](shared/lint-helpers.js)
+- [scriptsPaths.js](scriptsPaths.js)
 <!-- uncategorized-end -->

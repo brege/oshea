@@ -38,47 +38,56 @@ notroot@fedora:~/Build/md-to-pdf$ node scripts/trees/tree-explorer.js scripts/li
 ```
 
 <!--
-**Legends**
-✔ = Complete
-● = In Progress
-○ = Open
-× = Wontfix
-‖ = Paused
 ★ = High-value
 -->
 
-### 1.1 Audit all linters with checklist
+### 1.1 Audit and Parity Task Matrix
 
-| Lints [ `scripts/linting/` ]  | La| Lb| Lc| Ld| Le| Lf| Lg| Lh| Lj| Lk| Ll| notes |
-|-------------------------------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:------|
-| `code/logging-lint.js`        | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `code/remove-auto-doc.js`     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `code/standardize-js-l..`     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `code/strip-trailing-w..`     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `config.yaml`                 | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `docs/postman-helpers.js`     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `docs/postman.js`             | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `docs/update-project-i..`     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `lint.js`                     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `validators/mocha-path..`     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
-| `validators/paths-js-v..`     | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | ○ | .. |
+| Lints [ `scripts/linting/` ]   | La | Lb | Lc | Ld | Le | Lf | Lg | Lh | Li | Lj | Lk | Ll |  
+|--------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|  
+| `code/logging-lint.js`         | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
+| `code/remove-auto-doc.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
+| `code/standardize-js-l..`      | ✔  | ✔  | ✔  | ●  | ●  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
+| `code/strip-trailing-w..`      | ✔  | ✔  | ✔  | ●  | ●  | ●  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  |  
+| `docs/postman-helpers.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | N/A| N/A| N/A| ✔  | N/A| N/A| N/A|  
+| `docs/postman.js`              | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
+| `docs/update-project-i..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
+| `lint.js`                      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ●  | ●  | ✔  | ✔  | ●  | N/A|  
+| `validators/mocha-path..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
+| `validators/paths-js-v..`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |  
+
+**Legend:**  ✔ = complete | ● = partial | × = missing | N/A = not applicable
+
+### Notes
+
+1. **`code/logging-lint.js`**:                  No autofix (by design)
+2. **`code/remove-auto-doc.js`**:               Fully modern
+3. **`code/standardize-js-line-one-all.js`**:   Patterns/ignores not in config
+4. **`code/strip-trailing-whitespace.js`**:     Patterns/ignores not in config
+5. **`docs/postman-helpers.js`**:               Helpers only
+6. **`docs/postman.js`**:                       Now fully modern, JSON, config, helpers, CLI
+7. **`docs/update-project-indices.js`**:        Now fully modern, JSON, config, helpers, CLI
+8. **`lint.js`**:                               Orchestrator, not a linter
+9. **`validators/mocha-path-validator.js`**:    Fully modern
+10. **`validators/paths-js-validator.js`**:     Fully modern
 
 ### 1.2 Linter Commonalities
 
 These are requirements that each "official" linter should ideally satisfy.
+When all eight atomic lints satisfy a **L?**, we may check that item off.
 
-- [ ] **La** Internal pathing modernized to registry `@paths` model
-- [ ] **Lb** Documents purpose and usage in (respective) `index.md`
-- [ ] **Lc** Clear domain separation (code, docs, validators)
+- [x] **La** Internal pathing modernized to registry `@paths` model
+- [x] **Lb** Documents purpose and usage in (respective) `index.md`
+- [x] **Lc** Clear domain separation (code, docs, validators)
 - [ ] **Ld** ★ Uses **unified linter config** `lint.yaml`
 - [ ] **Le** Hardcoded variables removed and declared in the linter config.
 - [ ] **Lf** Human-readable (`--pretty`) *implicitly*
 - [ ] **Lg** Machine-readable (`--json`) *explicitly*
 - [ ] **Lh** Universal CLI options: `--fix`, `--quiet`, `--debug`, `--force`
-- [ ] **Li** Common boilerplate moved to `scripts/shared/lint-helpers.js`
+- [x] **Li** Common boilerplate moved to `scripts/shared/lint-helpers.js`
 - [ ] **Lj** Aggregates results/exit codes for harness
 - [ ] **Lk** Serialized output is API-friendly
-- [ ] **Ll** Batchable, state-preserving, `md-to-pdf` CLI smoke-test harness 
+- [x] **Ll** Batchable, state-preserving, `md-to-pdf` CLI smoke-test harness 
 
 ---
 
@@ -123,37 +132,4 @@ Tasks that improve the health of the project and linting.  The "human" lints.
 - [ ] Lay groundwork for an API layer on top of the CLI.
 - [ ] Prototype engine features using the harness as a foundation.
 - [ ] Explore exposing engine APIs for integration, automation, or external toolchains.
-
-
-
----
-
-disposable checklist:
-
-
-## **Linter Modernization Pass: Step 1**
-
-### 1. **Validators**
-
-- [x] Move patterns/ignores and IGNORED\_PATHS to `config.yaml` (unified config section for each validator)
-- [x] Refactor CLI parsing and file finding to use shared helpers
-- [x] Ensure all validators support `--json` output (if not already)
-- [x] Add/expand CLI options: `--fix` (stub if N/A), `--quiet`, `--json`, `--debug`, `--force`
-- [x] Return/print a summary object for harness aggregation
-
-### 2. **Docs Linters**
-
-- [ ] Move all patterns/ignores to `config.yaml`
-- [ ] Refactor repetitive logic to helpers where possible
-- [ ] Add `--json` output (summary object) for harness/CI integration
-- [ ] Add/expand CLI options: `--fix`, `--quiet`, `--json`, `--debug`, `--force`
-- [ ] Return/print a summary object for harness aggregation
-
-### 3. **General**
-
-- [ ] Update or add config sections in `config.yaml` for any new patterns/ignores/ignores
-- [ ] Update index/librarian docs to reflect config changes
-- [ ] Commit as a single, focused PR:  
-  _“Modernize validators and docs linters: config-driven, helpers, JSON output, CLI options”_
-
 

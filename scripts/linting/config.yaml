@@ -7,7 +7,6 @@
 #   - "node_modules/**"
 
 # --- Code ---
-
 autoDoc:
   targets:
     - cli.js
@@ -24,7 +23,6 @@ autoDoc:
     - node_modules
     - test/scripts
     - scripts
-
 logging:
   targets:
     - src
@@ -38,8 +36,6 @@ logging:
     - "scripts/**"
     - "test/scripts/**"
     - "plugins/**"
-    # Add more excludes as needed
-
 standardizeJsLineOneAll:
   targets:
     - "src/**/*.js"
@@ -50,7 +46,6 @@ standardizeJsLineOneAll:
     - "scripts/shared/**"
     - "plugins/**"
     - "test/fixtures/**"
-
 stripTrailingWhitespace:
   targets:
     - "src/**/*.js"
@@ -66,29 +61,25 @@ stripTrailingWhitespace:
     - "test/fixtures/**"
 
 # --- Validators ---
-
 mochaPathValidator:
   excludes: []
-
 pathsJsValidator:
   ignores:
     - config.yaml
 
 # --- Docs ---
-
 librarian:
   docs:
-    indexFile: "docs/index.md"
+    indexFile: docs/index.md
     scanRoot: "docs"
     fileExtensions:
       - ".md"
     excludePatterns:
-      - "docs/dream-board.md"
+      - docs/dream-board.md
       - "docs/images/**"
     marker: "etc"
-
   plugins:
-    indexFile: "plugins/index.md"
+    indexFile: plugins/index.md
     scanRoot: "plugins"
     fileExtensions:
       - ".md"
@@ -96,9 +87,8 @@ librarian:
       - "plugins/**/index.md"
       - "plugins/**/*-example.md"
     marker: "plugins"
-
   scripts:
-    indexFile: "scripts/index.md"
+    indexFile: scripts/index.md
     scanRoot: "scripts"
     fileExtensions:
       - ".js"
@@ -107,27 +97,24 @@ librarian:
     excludePatterns:
       - "scripts/refactor/**"
     marker: "scripts"
-
   refactor-scripts:
-    indexFile: "scripts/refactor/index.md"
-    scanRoot: "scripts/refactor"
+    indexFile: scripts/refactor/index.md
+    scanRoot: scripts/refactor
     fileExtensions:
       - ".js"
       - ".sh"
     excludePatterns: []
     marker: "scripts"
-
   test-scripts:
-    indexFile: "test/index.md"
+    indexFile: test/index.md
     scanRoot: 
-      - "test/docs"
-      - "test/scripts"
+      - test/docs
+      - test/scripts
     fileExtensions:
-      - ".js"
-      - ".md"
+      - .js
+      - .md
     excludePatterns: [] 
     marker: "test-scripts"
-
 postman:
   excludes:
     - "node_modules/**"
@@ -135,16 +122,44 @@ postman:
     - "assets/**"
     - "docs/archive/**"
     - '**/test/fixtures/**'
-
   allowed_extensions:
     - ".md"
     - ".js"
     - ".mjs"
-
-  # Patterns for filenames to skip auto-linking (tick or link)
   skip_link_patterns:
     - "**/my[-_]*"
     - "**/my[-_]*/**"
     - "**/sample.md"
     - "**/index.js"
 
+# --- Harness Configuration ---
+harness:
+  continueOnError: false
+  quiet: true
+  steps:
+    - label: 'Code: Strip Trailing Whitespace'
+      scriptPath: scripts/linting/code/strip-trailing-whitespace.js
+    - label: 'Code: Standardize File Headers'
+      scriptPath: scripts/linting/code/standardize-js-line-one-all.js
+      ignoreFailure: true
+    - label: 'Code: Check for console/chalk usage'
+      scriptPath: scripts/linting/code/logging-lint.js
+    - label: 'Code: Check for auto-doc comments'
+      scriptPath: scripts/linting/code/remove-auto-doc.js
+    - label: 'Validator: Check .mocharc.js paths'
+      scriptPath: scripts/linting/validators/mocha-path-validator.js
+    - label: 'Validator: Check paths.js'
+      scriptPath: scripts/linting/validators/paths-js-validator.js
+    - label: 'Docs: Update Project Indices'
+      scriptPath: scripts/linting/docs/update-project-indices.js
+    - label: 'Docs: Check Markdown Links (Postman)'
+      scriptPath: scripts/linting/docs/postman.js
+    - label: 'ESLint'
+      quiet: false
+      command: 'eslint'
+      defaultTargets: ['.']
+
+# for harness features later: add flags for
+# --only
+# --ignore
+# --config

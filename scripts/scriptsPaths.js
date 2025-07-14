@@ -6,6 +6,7 @@ const scriptsRoot = path.join(__dirname);
 
 // Linting
 const lintingRoot = path.join(scriptsRoot, 'linting');
+const lintingHarnessPath = path.join(lintingRoot, 'lint-harness.js');
 const lintingConfigPath = path.join(lintingRoot, 'config.yaml');
 
 // Linting: Code Linters
@@ -36,6 +37,7 @@ module.exports = {
 
   // Linting
   lintingRoot,
+  lintingHarnessPath,
   lintingConfigPath,
 
   // Linting: Code
@@ -60,4 +62,3 @@ module.exports = {
   mochaPathValidatorPath,
   pathsJsValidatorPath,
 };
-

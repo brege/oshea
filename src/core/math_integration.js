@@ -1,18 +1,16 @@
 // src/core/math_integration.js
 
-const { loggerPath } = require('@paths');
+const { loggerPath, katexPath } = require('@paths');
 const logger = require(loggerPath);
+
+const KATEX_CSS_PATH = katexPath;
 
 // Factory function to create the math integration module, allowing dependency injection
 function createMathIntegration(dependencies = {}) {
   const fs_promises = dependencies.fsPromises || require('fs').promises;
   const fss = dependencies.fsSync || require('fs'); // For existsSync
-  const path_module = dependencies.path || require('path');
 
   const katexPluginModule = dependencies.katexPluginModule || require('@vscode/markdown-it-katex');
-
-  const KATEX_CSS_PATH = path_module.resolve(__dirname, '../../assets/css/katex.min.css');
-
 
   function configureMarkdownItForMath(mdInstance, mathConfig) {
     if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {

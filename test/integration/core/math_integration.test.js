@@ -7,7 +7,7 @@ const testManifest = require('./math_integration.manifest');
 
 const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
 const commonTestConstants = {
-  KATEX_CSS_PATH: path.resolve(__dirname, '../../../assets/css/katex.min.css'),
+  KATEX_CSS_PATH: path.resolve(__dirname, '../../../assets/katex.min.css'),
   TEST_LOGGER_PATH: testLoggerPath
 };
 

@@ -27,6 +27,8 @@ function runLinter({
   dryRun = false,
 } = {}) {
   const files = new Set();
+  const issues = [];
+  const changedFiles = [];
 
   for (const file of findFilesArray('.', {
     filter: name => name.endsWith('.js') || name.endsWith('.mjs'),
@@ -37,106 +39,117 @@ function runLinter({
     }
   }
 
-  const changedFiles = [];
-  const mismatches = [];
-  let warnings = 0;
-
   for (const filePath of files) {
     const relPath = path.relative(process.cwd(), filePath);
     const originalContent = fs.readFileSync(filePath, 'utf8');
-    const lines = originalContent.split('\n');
-
+    let lines = originalContent.split('\n');
     let changed = false;
+
+    const expectedHeader = `// ${relPath}`;
     let headerLineIndex = 0;
 
-    // Shebang handling
-    if (lines[0].startsWith('#!')) {
+    if (lines[0]?.startsWith('#!')) {
       headerLineIndex = 1;
-      if (!lines[1]?.startsWith('//')) {
-        if (fix && !dryRun) {
-          lines.splice(1, 0, `// ${relPath}`);
-          changed = true;
-        } else if (!quiet && !json) {
-          console.log(chalk.yellow(`Would standardize: ${relPath}`));
-        }
-      }
-    } else {
-      if (!lines[0]?.startsWith('//')) {
-        if (fix && !dryRun) {
-          lines.unshift(`// ${relPath}`);
-          changed = true;
-        } else if (!quiet && !json) {
-          console.log(chalk.yellow(`Would standardize: ${relPath}`));
-        }
-      }
     }
 
-    // After possible insertion, get current header line
-    const headerLine = lines[headerLineIndex];
-    const headerMatch = headerLine && headerLine.match(/^\/\/\s*(.+)$/);
+    const currentHeader = lines[headerLineIndex];
+    const headerMatch = currentHeader?.match(/^\/\/\s*(.+)$/);
+    const actualHeaderPath = headerMatch?.[1]?.trim() ?? '';
+    const reportLine = headerLineIndex + 1;
 
-    if (headerMatch) {
-      const headerPath = headerMatch[1].trim();
-      const fileFirstDir = getFirstDir(relPath);
-      const headerFirstDir = getFirstDir(headerPath);
+    // Check if the header is missing
+    if (!currentHeader || !currentHeader.startsWith('//')) {
+      issues.push({
+        file: relPath,
+        line: reportLine,
+        column: 1,
+        message: 'Missing file header comment.',
+        rule: 'file-header',
+        severity: 2,
+      });
 
-      if (fileFirstDir !== headerFirstDir) {
-        warnings++;
-        mismatches.push({ file: relPath, header: headerPath });
-        if (!quiet && !json) {
-          console.warn(
-            chalk.yellow(
-              `WARNING: Top-level directory mismatch for ${relPath} (header: ${headerPath})`
-            )
-          );
+      if (fix && !dryRun) {
+        if (headerLineIndex === 1) {
+          lines.splice(1, 0, expectedHeader);
+        } else {
+          lines.unshift(expectedHeader);
+        }
+        changed = true;
+      }
+
+    } else {
+      // Header exists — check path mismatch
+      if (actualHeaderPath !== relPath) {
+        issues.push({
+          file: relPath,
+          line: reportLine,
+          column: 1,
+          message: `Incorrect header path. Expected: "${relPath}", Found: "${actualHeaderPath}"`,
+          rule: 'file-header',
+          severity: 2,
+        });
+
+        if (fix && !dryRun) {
+          lines[headerLineIndex] = expectedHeader;
+          changed = true;
         }
       }
 
-      if (headerPath !== relPath && fix && !dryRun) {
-        lines[headerLineIndex] = `// ${relPath}`;
-        changed = true;
-      } else if (headerPath !== relPath && (!quiet && !json) && (!fix || dryRun)) {
-        console.log(chalk.yellow(`Would standardize: ${relPath}`));
+      // Top-level dir mismatch
+      const fileDir = getFirstDir(relPath);
+      const headerDir = getFirstDir(actualHeaderPath);
+
+      if (fileDir !== headerDir) {
+        issues.push({
+          file: relPath,
+          line: reportLine,
+          column: 1,
+          message: `Top-level folder mismatch. File is in "${fileDir}" but header says "${headerDir}".`,
+          rule: 'file-header',
+          severity: 1,
+        });
       }
     }
 
     if (changed) {
       const newContent = lines.join('\n');
-      if (newContent !== originalContent) {
+      fs.writeFileSync(filePath, newContent, 'utf8');
+      changedFiles.push(relPath);
+    }
+  }
+
+  if (!quiet) {
+    if (json) {
+      process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
+    } else {
+      if (issues.length > 0) {
+        issues.forEach(issue => {
+          const { file, line, column, message, rule, severity } = issue;
+          const color = severity === 2 ? chalk.red : chalk.yellow;
+          console.log(color(`  × ${file}:${line}:${column}  ${message} (${rule})`));
+        });
+
+        console.log(`\nFound ${issues.length} issue(s) in ${new Set(issues.map(i => i.file)).size} file(s).`);
         if (fix && !dryRun) {
-          fs.writeFileSync(filePath, newContent, 'utf8');
-          changedFiles.push(relPath);
-          if (!quiet && !json) {
-            console.log(`Standardized: ${relPath}`);
-          }
+          console.log(chalk.green(`✔ Fixed ${changedFiles.length} file(s).`));
+        } else if (fix && dryRun) {
+          console.log(chalk.gray(`[dry-run] Would have fixed ${changedFiles.length} file(s).`));
+        } else {
+          console.log(chalk.cyan('Run with --fix to automatically correct these issues.'));
         }
+      } else {
+        console.log(chalk.green('✔ All file headers are standardized.'));
       }
     }
   }
 
-  const summary = {
-    changed: changedFiles,
-    mismatches,
-    warnings,
-  };
-
-  if (json) {
-    process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
-  } else if (!quiet && warnings > 0) {
-    console.warn(chalk.yellow(`\n${warnings} file(s) had top-level directory mismatches.`));
-  }
-
   if (debug) {
-    console.log('[DEBUG] Files checked:', Array.from(files));
-    console.log('[DEBUG] Changed:', changedFiles);
-    console.log('[DEBUG] Mismatches:', mismatches);
-    if (dryRun) {
-      console.log('[DEBUG] Dry-run mode enabled — no files were written.');
-    }
+    console.log(`[DEBUG] Scanned ${files.size} files.`);
+    if (dryRun) console.log('[DEBUG] Dry-run mode enabled — no files were written.');
   }
 
-  process.exitCode = warnings > 0 ? 1 : 0;
-  return summary;
+  process.exitCode = issues.length > 0 ? 1 : 0;
+  return { issueCount: issues.length, fixedCount: changedFiles.length };
 }
 
 // CLI entry point

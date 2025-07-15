@@ -4,12 +4,9 @@
 require('module-alias/register');
 
 const yaml = require('js-yaml');
-const { lintingConfigPath, lintHelpersPath, lintingHarnessPath, formattersPath } = require('@paths');
+const { lintingConfigPath, lintHelpersPath, lintingHarnessPath } = require('@paths');
 const { loadLintConfig, parseCliArgs } = require(lintHelpersPath);
 const { runHarness } = require(lintingHarnessPath);
-
-// Retaining for potential future use (not used directly here)
-const { formatLintResults, createLintResult } = require(formattersPath);
 
 function main() {
   const { flags, targets, only } = parseCliArgs(process.argv.slice(2));

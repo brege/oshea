@@ -13,7 +13,6 @@ const {
   parseCliArgs,
 } = require(lintHelpersPath);
 
-// Regexes for logging patterns
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
 
@@ -41,7 +40,7 @@ function scanFile(filePath) {
     while ((match = CHALK_REGEX.exec(line))) {
       hits.push({
         type: 'chalk',
-        method: match[1],
+        method: `chalk.${match[1]}`,
         line: idx + 1,
         code: line.trim(),
       });
@@ -62,7 +61,7 @@ function scanFile(filePath) {
 function runLinter({
   targets = [],
   excludes = [],
-  fix = false,
+  fix = false, // logging-lint is informational only
   quiet = false,
   json = false,
   debug = false,
@@ -70,6 +69,7 @@ function runLinter({
   config = {},
 } = {}) {
   const files = new Set();
+  const issues = [];
 
   for (const target of targets) {
     for (const file of findFilesArray(target, {
@@ -80,8 +80,6 @@ function runLinter({
     }
   }
 
-  const allHits = [];
-
   for (const file of files) {
     if (isExcluded(file, excludes)) continue;
     const result = scanFile(file);
@@ -90,57 +88,57 @@ function runLinter({
     for (const hit of result.hits) {
       if (hit.ignore) continue;
 
-      allHits.push({
-        type: hit.type,
-        method: hit.method,
+      const severity = hit.type === 'console' ? 2 : 1;
+
+      issues.push({
         file,
         line: hit.line,
+        column: 1,
+        message: `Disallowed '${hit.method}' call found.`,
+        rule: hit.type === 'console' ? 'no-console' : 'no-chalk',
+        severity,
+        method: hit.method,
         code: hit.code,
       });
+    }
+  }
 
-      if (!json && !quiet) {
-        if (hit.type === 'console') {
-          console.warn(
-            chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
-          );
-          if (fix) {
-            console.warn(
-              chalk.red('[lint:console]'),
-              'Auto-fix is not implemented for logging-lint. Please review and fix manually.'
-            );
-          }
-        } else if (hit.type === 'chalk') {
-          console.warn(
-            chalk.cyan(`[lint:chalk] ${file}:${hit.line}  ${hit.code}`)
-          );
+  if (!quiet) {
+    if (json) {
+      process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
+    } else {
+      if (issues.length > 0) {
+        issues.forEach(issue => {
+          const color = issue.severity === 2 ? chalk.red : chalk.yellow;
+          console.log(color(`  ${issue.file}:${issue.line}:${issue.column}  ${issue.message} (${issue.rule})`));
+        });
+
+        console.log(`\nFound ${issues.length} logging issue(s) in ${new Set(issues.map(i => i.file)).size} file(s).`);
+
+        if (fix) {
+          console.log('');
+          console.log('Note: --fix was passed, but logging-lint does not support automatic fixing. Please review these manually.');
         }
+      } else {
+        console.log('No disallowed logging statements found.');
       }
     }
   }
 
-  if (json) {
-    process.stdout.write(JSON.stringify({
-      hits: allHits,
-      summary: { count: allHits.length }
-    }, null, 2) + '\n');
-  }
-
   if (debug) {
     console.log('[DEBUG] Files checked:', Array.from(files));
-    console.log('[DEBUG] Hits found:', allHits.length);
+    console.log('[DEBUG] Issues found:', issues.length);
     if (dryRun) {
       console.log('[DEBUG] Dry-run mode enabled — no files were written.');
     }
   }
 
-  if (allHits.length > 0) {
-    process.exitCode = 1;
-  }
+  process.exitCode = issues.length > 0 ? 1 : 0;
 
-  return allHits;
+  return { issueCount: issues.length };
 }
 
-// CLI entry point
+// CLI entry
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const loggingConfig = loadLintSection('logging', lintingConfigPath) || {};
@@ -149,12 +147,6 @@ if (require.main === module) {
 
   const finalTargets = targets.length ? targets : configTargets;
   const excludes = flags.force ? [] : configExcludes;
-
-  if (flags.debug) {
-    console.log('[DEBUG] Targets:', finalTargets);
-    console.log('[DEBUG] Excludes:', excludes);
-    console.log('[DEBUG] Flags:', flags);
-  }
 
   runLinter({
     targets: finalTargets,

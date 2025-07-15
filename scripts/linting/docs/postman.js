@@ -2,13 +2,11 @@
 // scripts/linting/docs/postman.js
 
 require('module-alias/register');
-
 const fs = require('fs');
 const path = require('path');
-const process = require('process');
+const chalk = require('chalk');
 const { remark } = require('remark');
 const { visitParents } = require('unist-util-visit-parents');
-const chalk = require('chalk');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const {
@@ -20,128 +18,80 @@ const {
   findCandidates
 } = require('./postman-helpers.js');
 
+const ENABLE_MARKER = '<!-- lint-enable-links -->';
+const DISABLE_MARKER = '<!-- lint-disable-links -->';
+
 function buildLinksEnabledMap(lines) {
   let enabled = true;
-  const map = [];
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    if (line.includes('<!-- lint-disable-links')) enabled = false;
-    if (line.includes('<!-- lint-enable-links')) enabled = true;
-    map[i] = enabled;
-  }
-  return map;
+  return lines.map(line => {
+    if (line.includes(DISABLE_MARKER)) enabled = false;
+    if (line.includes(ENABLE_MARKER)) enabled = true;
+    return enabled;
+  });
 }
 
-function isLineAlreadyLinked(oldLine, rel) {
-  const linkRegex = /\[[^\]]*\]\(([^)]+)\)/g;
-  const matches = [...oldLine.matchAll(linkRegex)];
-  return matches.some(m => {
-    const linkTarget = m[1].replace(/\\/g, '/');
-    const relTarget = rel.replace(/\\/g, '/');
-    return linkTarget === relTarget || linkTarget.endsWith('/' + path.basename(relTarget));
+function isLineAlreadyLinked(line, rel) {
+  const linkRegex = /\[[^\]]*]\(([^)]+)\)/g;
+  return [...line.matchAll(linkRegex)].some(m => {
+    const target = m[1].replace(/\\/g, '/');
+    return (
+      target === rel || target.endsWith('/' + path.basename(rel))
+    );
   });
 }
 
 async function probeMarkdownFile(mdFile, rules) {
   const content = fs.readFileSync(mdFile, 'utf8');
   const lines = content.split('\n');
-  const linksEnabled = buildLinksEnabledMap(lines);
-
+  const linkStatus = buildLinksEnabledMap(lines);
   const tree = await remark().parse(content);
 
   const results = [];
-  visitParents(tree, (node, ancestors) => {
-    const inTable = ancestors.some(a =>
-      a.type === 'table' || a.type === 'tableRow' || a.type === 'tableCell'
-    );
-    const inCodeBlock = ancestors.some(a => a.type === 'code');
-    if (inTable || inCodeBlock) return;
 
-    const lineNum = node.position?.start.line - 1;
-    if (lineNum >= 0 && !linksEnabled[lineNum]) return;
+  visitParents(tree, (node, ancestors) => {
+    const lineNum = node.position?.start.line;
+    const ctx = lines[lineNum - 1] || '';
+    const skip = !linkStatus[lineNum - 1];
+    const inTable = ancestors.some(a => a.type?.startsWith('table'));
+    const inCode = ancestors.some(a => a.type === 'code');
+
+    if (skip || inTable || inCode) return;
 
     if (node.type === 'link') {
       const url = node.url.split('#')[0];
-      if (isReferenceExcluded(url, rules)) return;
-      if (isAllowedExtension(url, rules)) {
-        if (isSkipLink(url, rules)) return;
-        const resolved = resolveReference(mdFile, url, rules.allowed_extensions);
-        results.push({
-          file: mdFile,
-          line: node.position?.start.line,
-          type: 'link',
-          target: url,
-          resolved: Boolean(resolved),
-          context: lines[node.position?.start.line - 1] || '',
-        });
-      }
+      if (
+        isReferenceExcluded(url, rules) ||
+        !isAllowedExtension(url, rules) ||
+        isSkipLink(url, rules)
+      ) return;
+
+      const resolved = resolveReference(mdFile, url, rules.allowed_extensions);
+      results.push({
+        file: mdFile, line: lineNum,
+        type: 'link', target: url,
+        resolved: !!resolved, context: ctx
+      });
     }
 
     if (node.type === 'inlineCode') {
-      const isInLink = ancestors.some(a => a.type === 'link');
-      if (isInLink) return;
-      const val = node.value;
-      if (val.includes(' ')) return;
-      if (isReferenceExcluded(val, rules)) return;
-      if (isAllowedExtension(val, rules)) {
-        if (isSkipLink(val, rules)) return;
-        const resolved = resolveReference(mdFile, val, rules.allowed_extensions);
-        results.push({
-          file: mdFile,
-          line: node.position?.start.line,
-          type: 'inlineCode',
-          target: val,
-          resolved: Boolean(resolved),
-          context: lines[node.position?.start.line - 1] || '',
-        });
-      }
+      if (
+        ancestors.some(a => a.type === 'link') ||
+        node.value.includes(' ') ||
+        isReferenceExcluded(node.value, rules) ||
+        !isAllowedExtension(node.value, rules) ||
+        isSkipLink(node.value, rules)
+      ) return;
+
+      const resolved = resolveReference(mdFile, node.value, rules.allowed_extensions);
+      results.push({
+        file: mdFile, line: lineNum,
+        type: 'inlineCode', target: node.value,
+        resolved: !!resolved, context: ctx
+      });
     }
   });
+
   return results;
-}
-
-function printLintHeader(file, line) {
-  process.stdout.write(
-    chalk.gray('[') +
-    chalk.yellow('postman') +
-    chalk.gray('] ') +
-    chalk.cyan(file) +
-    chalk.gray(':') +
-    chalk.green(line)
-  );
-}
-
-function printProblem({ file, line, target, context }, status, candidates = [], replacement = null) {
-  printLintHeader(file, line);
-  process.stdout.write('  ');
-  if (status === 'orphan') {
-    console.log(chalk.red.bold('✖ Orphan: ') + chalk.red(target));
-    printContext(context, target);
-  } else if (status === 'degenerate') {
-    console.log(chalk.red.bold('✖ Degeneracy: ') + chalk.red(target));
-    printContext(context, target);
-    for (const cand of candidates) {
-      const rel = path.relative(path.dirname(file), cand).replace(/\\/g, '/');
-      console.log(chalk.gray('    - ') + chalk.yellow(rel));
-    }
-    console.log(chalk.yellow('    Suggestion: Choose the correct one manually.'));
-  } else if (status === 'replace') {
-    console.log(chalk.yellow('→ Replace: ') + chalk.yellow(target));
-    printContext(context, target);
-    console.log(chalk.green('    Suggestion: ') + replacement);
-    console.log(chalk.green('    ✔ One candidate found.'));
-  }
-}
-
-function printContext(context, target) {
-  const idx = context.indexOf(target);
-  let snippet = context;
-  if (idx >= 0) {
-    const start = Math.max(0, idx - 8);
-    const end = Math.min(context.length, idx + target.length + 8);
-    snippet = context.slice(start, idx) + target + context.slice(idx + target.length, end);
-  }
-  console.log(chalk.dim('    ...' + snippet + '...'));
 }
 
 async function runLinter({
@@ -151,7 +101,7 @@ async function runLinter({
   json = false,
   debug = false,
   dryRun = false,
-  force = false, // stub, not used
+  force = false,
   config = {}
 } = {}) {
   if (debug) {
@@ -160,115 +110,128 @@ async function runLinter({
   }
 
   const rules = config;
-  const excludeDirs = ['assets', 'docs/archive', 'node_modules', '.git'];
-  const mdFiles = getMarkdownFiles(targets[0] || 'docs', rules, targets, excludeDirs);
+  const allowedExt = rules.allowed_extensions || [];
+  const mdFiles = getMarkdownFiles(targets[0] || 'docs', rules, targets, [
+    'assets', 'docs/archive', 'node_modules', '.git'
+  ]);
 
   if (debug) {
     console.log('[DEBUG] Found Markdown files:', mdFiles);
   }
 
-  let allResults = [];
-  for (const mdFile of mdFiles) {
-    const results = await probeMarkdownFile(mdFile, rules);
-    allResults.push(...results);
-  }
+  const diagnostics = [];
+  let fixedCount = 0;
 
-  let problems = 0, fixes = 0;
-  const summary = {
-    orphan: 0,
-    degenerate: 0,
-    replace: 0,
-    fixed: 0
-  };
-  const details = [];
+  for (const file of mdFiles) {
+    const results = await probeMarkdownFile(file, rules);
 
-  for (const r of allResults) {
-    if (r.resolved) continue;
+    for (const r of results) {
+      if (r.resolved) continue;
 
-    const candidates = findCandidates(r.target, rules.allowed_extensions, ['.', 'src', 'plugins', 'scripts', 'test']);
+      const candidates = findCandidates(
+        r.target, allowedExt, ['.', 'src', 'plugins', 'scripts', 'test']
+      );
+      const relCandidates = candidates.map(c =>
+        path.relative(path.dirname(r.file), c).replace(/\\/g, '/')
+      );
 
-    if (candidates.length === 1) {
-      const rel = path.relative(path.dirname(r.file), candidates[0]).replace(/\\/g, '/');
-      const lines = fs.readFileSync(r.file, 'utf8').split('\n');
-      const oldLine = lines[r.line - 1];
+      // Fixable
+      if (candidates.length === 1 && r.type === 'inlineCode') {
+        const rel = relCandidates[0];
+        const lines = fs.readFileSync(r.file, 'utf8').split('\n');
+        const oldLine = lines[r.line - 1] || '';
+        if (isLineAlreadyLinked(oldLine, rel)) continue;
 
-      if (isLineAlreadyLinked(oldLine, rel)) continue;
-      const linksEnabled = buildLinksEnabledMap(lines);
-      if (r.line - 1 >= 0 && !linksEnabled[r.line - 1]) continue;
-
-      let replacement = null;
-      if (r.type === 'inlineCode') {
-        replacement = oldLine.replace(
-          new RegExp('`' + r.target.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '`'),
+        const replacement = oldLine.replace(
+          '`' + r.target + '`',
           '[`' + r.target + '`](' + rel + ')'
         );
-      } else if (r.type === 'link') {
-        replacement = oldLine.replace(/\(([^)]+)\)/, `(${rel})`);
+
+        if (fix) {
+          if (!dryRun) {
+            lines[r.line - 1] = replacement;
+            fs.writeFileSync(r.file, lines.join('\n'), 'utf8');
+          }
+          fixedCount++;
+        } else {
+          diagnostics.push({
+            file: r.file,
+            line: r.line,
+            rule: 'fixable-link',
+            severity: 1,
+            message: `Resolvable reference: '${r.target}' → '${rel}'`
+          });
+        }
+        continue;
       }
 
-      if (fix && replacement && replacement !== oldLine) {
-        lines[r.line - 1] = replacement;
-        if (!dryRun) {
-          fs.writeFileSync(r.file, lines.join('\n'), 'utf8');
-        }
-        fixes++;
-        summary.fixed++;
-        details.push({ ...r, status: 'fixed', replacement });
-        if (!quiet && !json) printProblem(r, 'replace', candidates, replacement);
-        if (dryRun && !quiet && !json) {
-          console.log(chalk.gray('    [dry-run] No file written.'));
-        }
-      } else {
-        problems++;
-        summary.replace++;
-        details.push({ ...r, status: 'replace', candidates, suggestion: replacement });
-        if (!quiet && !json) printProblem(r, 'replace', candidates, replacement);
+      // Degenerate
+      if (candidates.length > 1) {
+        diagnostics.push({
+          file: r.file,
+          line: r.line,
+          rule: 'degenerate-link',
+          severity: 2,
+          message: `Degenerate match: '${r.target}' resolves to multiple files.`,
+          candidates: relCandidates
+        });
+        continue;
       }
-    } else if (candidates.length > 1) {
-      problems++;
-      summary.degenerate++;
-      details.push({ ...r, status: 'degenerate', candidates });
-      if (!quiet && !json) printProblem(r, 'degenerate', candidates);
-    } else {
-      problems++;
-      summary.orphan++;
-      details.push({ ...r, status: 'orphan' });
-      if (!quiet && !json) printProblem(r, 'orphan');
+
+      // Orphan
+      diagnostics.push({
+        file: r.file,
+        line: r.line,
+        rule: 'orphan-link',
+        severity: 2,
+        message: `Orphan reference: '${r.target}' not found.`
+      });
     }
   }
 
+  // Output
   if (json) {
-    process.stdout.write(JSON.stringify({ summary, details }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ issues: diagnostics }, null, 2) + '\n');
   } else if (!quiet) {
-    if (problems && !fix) {
-      console.log(
-        chalk.red.bold('\n✖ ') +
-        chalk.yellow.bold(` ${problems} problem(s) found (unresolved references)`)
-      );
-      console.log(
-        chalk.gray('  Run with ') +
-        chalk.cyan('--fix') +
-        chalk.gray(' to auto-fix unique matches.')
-      );
-    } else if (fix && fixes) {
-      console.log(
-        chalk.green.bold('\n✔ ') +
-        chalk.green.bold(` ${fixes} reference(s) fixed.`)
-      );
-    } else if (!problems) {
-      console.log(
-        chalk.green.bold('\n✔ No unresolved references found.')
-      );
+    if (diagnostics.length === 0 && fixedCount === 0) {
+      console.log(chalk.green('✔ No unresolved references found.'));
+    } else {
+      for (const issue of diagnostics) {
+        const location = chalk.yellow(`${issue.file}:${issue.line}`);
+        const ruleTag = chalk.magenta(issue.rule);
+        const msg = issue.message;
+        const extra =
+          debug && issue.candidates
+            ? issue.candidates.map(c => chalk.gray('    candidate: ' + c)).join('\n')
+            : '';
+
+        console.log(`${location} - ${ruleTag}: ${msg}`);
+        if (extra) console.log(extra);
+      }
+
+      if (fix && fixedCount > 0 && !dryRun) {
+        console.log(chalk.green(`✔ Fixed ${fixedCount} unambiguous reference(s).`));
+      } else if (fix && dryRun && fixedCount > 0) {
+        console.log(chalk.gray(`[dry-run] Would have fixed ${fixedCount} reference(s).`));
+      } else if (!fix) {
+        console.log(chalk.cyan('\nRun with --fix to automatically link unambiguous references.'));
+      }
+
+      if (diagnostics.length > 0) {
+        console.log(`\nFound ${diagnostics.length} unresolved or ambiguous reference(s).`);
+      }
     }
   }
+
   if (debug && dryRun) {
-    console.log(chalk.gray('[DEBUG] Dry-run mode enabled -- No files written.'));
+    console.log('[DEBUG] Dry-run mode enabled — no files written.');
   }
-  process.exitCode = problems && !fix ? 1 : 0;
-  return { summary, details };
+
+  process.exitCode = diagnostics.length > 0 && !fix ? 1 : 0;
+  return { issueCount: diagnostics.length, fixedCount };
 }
 
-// CLI entry
+// CLI entry point
 if (require.main === module) {
   (async () => {
     const { flags, targets } = parseCliArgs(process.argv.slice(2));

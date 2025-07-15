@@ -10,9 +10,9 @@ class OutputAdapter {
   async run(command, args = [], options = {}) {
     return new Promise((resolve, reject) => {
       const childArgs = [...args, '--json'];
-      const child = spawn(command, childArgs, { 
+      const child = spawn(command, childArgs, {
         stdio: ['pipe', 'pipe', 'pipe'],
-        ...options 
+        ...options
       });
 
       let stdout = '';
@@ -30,22 +30,22 @@ class OutputAdapter {
         try {
           const jsonOutput = JSON.parse(stdout);
           const rawIssues = jsonOutput.issues || [];
-          
+
           const eslintResults = adaptRawIssuesToEslintFormat(rawIssues);
-          
+
           if (eslintResults.length > 0) {
             console.log(formatLintResults(eslintResults, this.formatter));
           } else {
             console.log('✔ No issues found.');
           }
-          
+
           resolve({ exitCode: code, results: eslintResults });
         } catch (error) {
           console.error('Error processing linter output. Raw stdout:');
           console.log(stdout);
           if (stderr) {
-              console.error('Stderr:');
-              console.error(stderr);
+            console.error('Stderr:');
+            console.error(stderr);
           }
           reject(error);
         }

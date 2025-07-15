@@ -54,7 +54,7 @@ function runLinter({
           });
         }
       });
-      
+
       if (fix && !dryRun) {
         fs.writeFileSync(filePath, cleaned, 'utf8');
         changedFiles.push(relPath);
@@ -72,30 +72,43 @@ function runLinter({
         });
         console.log(`\nFound ${issues.length} issue(s) in ${new Set(issues.map(i => i.file)).size} file(s).`);
         if (fix && !dryRun) {
-            console.log(chalk.green(`✔ Fixed ${changedFiles.length} file(s).`));
+          console.log(chalk.green(`✔ Fixed ${changedFiles.length} file(s).`));
         } else if (fix && dryRun) {
-            console.log(chalk.gray(`[dry-run] Would have fixed ${new Set(issues.map(i => i.file)).size} file(s).`));
+          console.log(chalk.gray(`[dry-run] Would have fixed ${new Set(issues.map(i => i.file)).size} file(s).`));
         } else {
-            console.log(chalk.cyan('Run with --fix to automatically correct these issues.'));
+          console.log(chalk.cyan('Run with --fix to automatically correct these issues.'));
         }
       } else {
         console.log(chalk.green('✔ No trailing whitespace found.'));
       }
     }
   }
-  
+
   if (debug) {
     console.log(`[DEBUG] Scanned ${files.size} files.`);
   }
 
-  process.exitCode = changedFiles.length > 0 ? 1 : 0;
+  //process.exitCode = changedFiles.length > 0 ? 1 : 0;
+  if (issues.length > 0) {
+    if (fix && !dryRun) {
+      process.exitCode = 0;
+    } else {
+      process.exitCode = 1;
+    }
+  } else {
+    process.exitCode = 0;
+  }
+
+
+
+
   return { issueCount: issues.length, fixedCount: changedFiles.length };
 }
 
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('remove-ws', lintingConfigPath) || {};
-  
+
   const patterns = targets.length > 0
     ? getPatternsFromArgs(targets)
     : (config.targets || []);

@@ -4,6 +4,7 @@
 require('module-alias/register');
 
 const fs = require('fs');
+const path = require('path');
 const chalk = require('chalk');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const {
@@ -13,7 +14,6 @@ const {
   parseCliArgs,
 } = require(lintHelpersPath);
 
-//const BLOCK_COMMENT_REGEX = /\/\*\*\s*(?:\*(?!\/)[\s\S]*?@[\s\S]*?)?\*\//g;
 const BLOCK_COMMENT_REGEX = /\/\*\*[\r\n][\s\S]*?\*\//g;
 
 function scanFile(filePath) {
@@ -32,6 +32,7 @@ function scanFile(filePath) {
     const startLine = before.split('\n').length;
     const blockLines = match[0].split('\n').length;
     const endLine = startLine + blockLines - 1;
+
     matches.push({
       startLine,
       endLine,
@@ -42,16 +43,6 @@ function scanFile(filePath) {
   }
 
   return matches.length ? { file: filePath, matches, content } : null;
-}
-
-function printBlockInfo(file, startLine, endLine, blockText, dryRun = false) {
-  const label = dryRun ? 'Would remove' : 'auto-doc';
-  const header = `${chalk.gray('[')}${chalk.yellow(label)}${chalk.gray(']')} ${chalk.cyan(file)}:${chalk.green(`${startLine}-${endLine}`)}`;
-  console.log(header);
-  blockText.split('\n').forEach(line => {
-    console.log(chalk.dim('  ' + line));
-  });
-  console.log();
 }
 
 function runLinter({
@@ -67,6 +58,8 @@ function runLinter({
   config = {}
 } = {}) {
   const files = new Set();
+  const issues = [];
+  let fixedFilesCount = 0;
 
   for (const target of targets) {
     for (const file of findFilesArray(target, {
@@ -77,29 +70,44 @@ function runLinter({
     }
   }
 
-  let found = 0;
-  const allBlocks = [];
-
   for (const file of files) {
     if (!force && isExcluded(file, excludes)) continue;
     const result = scanFile(file);
     if (!result) continue;
 
     for (const match of result.matches) {
-      found++;
-      allBlocks.push({
-        file,
-        startLine: match.startLine,
-        endLine: match.endLine,
-        block: match.text
+      const relPath = path.relative(process.cwd(), file);
+
+      issues.push({
+        file: relPath,
+        line: match.startLine,
+        column: 1,
+        message: `Found auto-doc block comment spanning lines ${match.startLine}-${match.endLine}.`,
+        rule: 'no-auto-doc',
+        snippet: match.text
       });
 
       if (!quiet && !json) {
-        printBlockInfo(file, match.startLine, match.endLine, match.text, fix && dryRun);
+        const header = `[lint] ${relPath}:${match.startLine}-${match.endLine}`;
+        console.log(chalk.yellow(header));
+
+        const previewLines = match.text.split('\n');
+        const preview = previewLines.slice(0, 5).map(line => chalk.dim('  ' + line));
+        preview.forEach(line => console.log(line));
+
+        if (previewLines.length > 5) {
+          console.log(chalk.dim('  ...'));
+        }
+
+        if (fix && dryRun) {
+          console.log(chalk.gray(`  [dry-run] Would remove block from ${relPath}`));
+        }
+
+        console.log('');
       }
     }
 
-    if (fix && result.matches.length) {
+    if (fix && result.matches.length > 0) {
       let newContent = result.content;
       for (let i = result.matches.length - 1; i >= 0; i--) {
         const { start, end } = result.matches[i];
@@ -108,58 +116,44 @@ function runLinter({
 
       if (!dryRun) {
         fs.writeFileSync(file, newContent, 'utf8');
-        if (!quiet && !json) {
-          console.log(
-            chalk.gray('[') +
-            chalk.yellow('auto-doc') +
-            chalk.gray('] ') +
-            chalk.cyan(file) +
-            chalk.green(`  removed ${result.matches.length} block comment(s)`)
-          );
-        }
-      } else if (!quiet && !json) {
-        console.log(
-          chalk.gray('[') +
-          chalk.yellow('Would remove') +
-          chalk.gray('] ') +
-          chalk.cyan(file) +
-          chalk.green(`  would remove ${result.matches.length} block comment(s)`)
-        );
+        fixedFilesCount++;
       }
     }
   }
 
-  if (json) {
-    process.stdout.write(JSON.stringify({
-      blocks: allBlocks,
-      summary: { count: found }
-    }, null, 2) + '\n');
+  if (!quiet) {
+    if (json) {
+      process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
+    } else {
+      if (issues.length > 0) {
+        console.log(`Found ${issues.length} auto-doc block(s) in ${new Set(issues.map(i => i.file)).size} file(s).`);
+
+        if (fix && !dryRun) {
+          console.log(`Fixed ${fixedFilesCount} file(s) by removing blocks.`);
+        } else if (fix && dryRun) {
+          console.log(`[dry-run] Would have fixed ${fixedFilesCount} file(s).`);
+        } else {
+          console.log('Run with --fix to automatically remove these blocks.');
+        }
+
+        console.log('');
+      } else {
+        console.log('No auto-doc blocks found.');
+      }
+    }
   }
 
   if (debug) {
     console.log('[DEBUG] Files checked:', Array.from(files));
-    console.log('[DEBUG] Blocks found:', found);
+    console.log('[DEBUG] Issues found:', issues.length);
     if (dryRun) {
       console.log('[DEBUG] Dry-run mode enabled — no files were written.');
     }
   }
 
-  if (found && !fix && !json) {
-    if (!quiet) {
-      console.log(
-        chalk.red.bold('✖ ') +
-        chalk.yellow.bold(`  ${found} warning(s) found (auto-doc blocks)`)
-      );
-      console.log(
-        chalk.gray('  Run with ') +
-        chalk.cyan('--fix') +
-        chalk.gray(' to remove all auto-doc blocks.')
-      );
-    }
-    process.exitCode = 1;
-  }
+  process.exitCode = issues.length > 0 && !fix ? 1 : 0;
 
-  return allBlocks;
+  return { issueCount: issues.length, fixedCount: fixedFilesCount };
 }
 
 // CLI entry point
@@ -173,13 +167,6 @@ if (require.main === module) {
   const finalTargets = targets.length ? targets : configTargets;
   const excludes = flags.force ? [] : configExcludes;
   const excludeDirs = flags.force ? [] : configExcludeDirs;
-
-  if (flags.debug) {
-    console.log('[DEBUG] Targets:', finalTargets);
-    console.log('[DEBUG] Excludes:', excludes);
-    console.log('[DEBUG] ExcludeDirs:', excludeDirs);
-    console.log('[DEBUG] Flags:', flags);
-  }
 
   runLinter({
     targets: finalTargets,

@@ -6,6 +6,7 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
+const { minimatch } = require('minimatch');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const {
   findFilesArray,
@@ -22,11 +23,12 @@ function runLinter({
   quiet = false,
   json = false,
   debug = false,
+  dryRun = false,
 } = {}) {
-  const { minimatch } = require('minimatch');
-  let files = new Set();
+  const files = new Set();
+
   for (const file of findFilesArray('.', {
-    filter: () => true, // All files, filter by pattern below
+    filter: () => true,
     ignores,
   })) {
     if (patterns.some(pattern => minimatch(file, pattern))) {
@@ -34,16 +36,17 @@ function runLinter({
     }
   }
 
-  let changedFiles = [];
-  let checkedFiles = [];
+  const changedFiles = [];
+  const checkedFiles = [];
 
-  files.forEach(filePath => {
+  for (const filePath of files) {
     const relPath = path.relative(process.cwd(), filePath);
-    const content = fs.readFileSync(filePath, 'utf8');
-    const cleaned = content.replace(/[ \t]+$/gm, '');
+    const original = fs.readFileSync(filePath, 'utf8');
+    const cleaned = original.replace(/[ \t]+$/gm, '');
     checkedFiles.push(relPath);
-    if (content !== cleaned) {
-      if (fix) {
+
+    if (original !== cleaned) {
+      if (fix && !dryRun) {
         fs.writeFileSync(filePath, cleaned, 'utf8');
         changedFiles.push(relPath);
         if (!quiet && !json) {
@@ -53,7 +56,7 @@ function runLinter({
         console.log(chalk.yellow(`Would strip: ${relPath}`));
       }
     }
-  });
+  }
 
   const summary = {
     checked: checkedFiles,
@@ -67,18 +70,23 @@ function runLinter({
   if (debug) {
     console.log('[DEBUG] Files checked:', checkedFiles);
     console.log('[DEBUG] Files changed:', changedFiles);
+    if (dryRun) {
+      console.log('[DEBUG] Dry-run mode enabled — no files were written.');
+    }
   }
 
   process.exitCode = changedFiles.length > 0 ? 1 : 0;
   return summary;
 }
 
-// CLI entry point
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
-  const config = loadLintSection('stripTrailingWhitespace', lintingConfigPath) || {};
-  // Use CLI targets if provided, else config
-  const patterns = targets.length ? getPatternsFromArgs(targets) : (config.targets || []);
+  const config = loadLintSection('remove-ws', lintingConfigPath) || {};
+
+  const patterns = targets.length > 0
+    ? getPatternsFromArgs(targets)
+    : (config.targets || []);
+
   const ignores = config.excludes || getDefaultGlobIgnores();
 
   runLinter({
@@ -88,6 +96,7 @@ if (require.main === module) {
     quiet: !!flags.quiet,
     json: !!flags.json,
     debug: !!flags.debug,
+    dryRun: !!flags.dryRun,
   });
 }
 

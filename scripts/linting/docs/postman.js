@@ -5,8 +5,6 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
-const { remark } = require('remark');
-const { visitParents } = require('unist-util-visit-parents');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const {
@@ -41,6 +39,12 @@ function isLineAlreadyLinked(line, rel) {
 }
 
 async function probeMarkdownFile(mdFile, rules) {
+  // Dynamically import all ESM modules at once.
+  const [{ remark }, { visitParents }] = await Promise.all([
+    import('remark'),
+    import('unist-util-visit-parents')
+  ]);
+
   const content = fs.readFileSync(mdFile, 'utf8');
   const lines = content.split('\n');
   const linkStatus = buildLinksEnabledMap(lines);
@@ -250,4 +254,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

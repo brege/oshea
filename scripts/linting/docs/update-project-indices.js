@@ -60,7 +60,9 @@ function getExistingLinks(content, baseDir) {
       const abs = path.resolve(baseDir, rawLink);
       const rel = path.relative(baseDir, abs).replace(/\\/g, '/');
       links.add(rel);
-    } catch (_e) {}
+    } catch (_e) {
+      // ignore
+    }
   }
   return links;
 }

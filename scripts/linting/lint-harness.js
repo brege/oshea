@@ -48,16 +48,26 @@ function runHarness(config, globalFlags, targets, only) {
   const flagList = ['fix', 'quiet', 'json', 'debug', 'force', 'dryRun'];
 
   for (const step of lintSteps) {
-    const stepLabel = step.label.toLowerCase();
+    const stepLabel = step.label ? step.label.toLowerCase() : '';
     const stepKey = step.key || '';
-    const labelMatch = step.label.toLowerCase().includes(only.toLowerCase());
-    const keyMatch = stepKey.toLowerCase() === only.toLowerCase();
+    
+    let labelMatch = false;
+    let keyMatch = false;
+    
+    if (only) {
+      const onlyLower = only.toLowerCase();
+      labelMatch = stepLabel.includes(onlyLower);
+      keyMatch = stepKey.toLowerCase() === onlyLower;
+    }
+    
     const skipByOnly = only && !(labelMatch || keyMatch);
     const skipByConfig = step.skip !== undefined
       ? step.skip
       : (harnessDefaults.skip !== undefined ? harnessDefaults.skip : false);
+    
     const skipByFlag = globalFlags.skip &&
       stepLabel.includes(globalFlags.skip.toLowerCase());
+    
     const shouldSkip = skipByOnly || skipByConfig || skipByFlag;
 
     if (shouldSkip) {
@@ -144,4 +154,3 @@ function runHarness(config, globalFlags, targets, only) {
 }
 
 module.exports = { runHarness };
-

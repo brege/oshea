@@ -7,12 +7,6 @@ const { minimatch } = require('minimatch');
 const { findFiles, getPatternsFromArgs, getDefaultGlobIgnores } = require('./file-helpers');
 const { lintingConfigPath } = require('@paths');
 
-/**
- * Load a specific top-level section from the lint config YAML.
- * @param {string} section - Canonical key (e.g., 'remove-auto-doc')
- * @param {string} configPath - Optional override path to config file
- * @returns {object} - The section config
- */
 function loadLintSection(section, configPath = lintingConfigPath) {
   const raw = fs.readFileSync(configPath, 'utf8');
   const config = yaml.load(raw);
@@ -22,11 +16,6 @@ function loadLintSection(section, configPath = lintingConfigPath) {
   return config[section];
 }
 
-/**
- * Load the full lint config YAML.
- * @param {string} configPath - Optional override path
- * @returns {object} - Full parsed config
- */
 function loadLintConfig(configPath = lintingConfigPath) {
   try {
     const configContent = fs.readFileSync(configPath, 'utf8');
@@ -37,35 +26,15 @@ function loadLintConfig(configPath = lintingConfigPath) {
   }
 }
 
-/**
- * Wrapper around findFiles that returns an array.
- */
 function findFilesArray(...args) {
   return Array.from(findFiles(...args));
 }
 
-/**
- * Check if a file path matches any of the given exclusion patterns.
- */
 function isExcluded(filePath, patterns) {
   const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
   return patterns.some(pattern => minimatch(relPath, pattern));
 }
 
-/**
- * Parse CLI arguments into flags, targets, and optional step filter.
- * Supports:
- *   --fix
- *   --quiet
- *   --json
- *   --debug
- *   --force
- *   --dry-run
- *   --config
- *   --list
- *   --only
- *   --skip
- */
 function parseCliArgs(args) {
   const flags = {
     fix: false,
@@ -91,6 +60,12 @@ function parseCliArgs(args) {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
+
+    // Add null safety check
+    if (!arg) {
+      console.error('Warning: Encountered null/undefined argument at index', i);
+      continue;
+    }
 
     if (stepAliases[arg]) {
       only = stepAliases[arg];
@@ -134,14 +109,51 @@ function parseCliArgs(args) {
     }
   }
 
+  // Debug output
+  if (flags.debug) {
+    console.log('Parsed CLI args:', { flags, targets, only });
+  }
+
   return { flags, targets, only };
 }
 
-/**
- * Get the first directory segment of a file path.
- */
 function getFirstDir(filepath) {
+  if (!filepath) return '';
   return filepath.replace(/^\.?\//, '').split(path.sep)[0];
+}
+
+function filterSteps(steps, searchTerm) {
+  if (!steps || !Array.isArray(steps)) {
+    return [];
+  }
+
+  if (!searchTerm) {
+    return steps;
+  }
+
+  return steps.filter(step => {
+    if (!step) return false;
+    
+    const key = (step.key || '').toString();
+    const label = (step.label || '').toString();
+    const search = searchTerm.toString().toLowerCase();
+    
+    return key.toLowerCase().includes(search) || 
+           label.toLowerCase().includes(search);
+  });
+}
+
+function getStepInfo(step) {
+  if (!step) {
+    return { key: '', label: '', valid: false };
+  }
+
+  return {
+    key: step.key || '',
+    label: step.label || '',
+    valid: true,
+    ...step
+  };
 }
 
 module.exports = {
@@ -153,5 +165,6 @@ module.exports = {
   getFirstDir,
   getPatternsFromArgs,
   getDefaultGlobIgnores,
+  filterSteps,
+  getStepInfo,
 };
-

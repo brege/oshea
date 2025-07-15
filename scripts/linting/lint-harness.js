@@ -77,6 +77,7 @@ function runHarness(config, globalFlags, targets, only) {
 
     let command, commandArgs;
 
+    // Fixed flag resolution logic for runHarness function
     const resolvedFlags = {};
     for (const flag of flagList) {
       if (flag === 'json' && step.command === 'eslint') {
@@ -84,12 +85,16 @@ function runHarness(config, globalFlags, targets, only) {
       } else if (flag === 'dryRun') {
         resolvedFlags.dryRun = globalFlags.dryRun === true;
       } else {
-        resolvedFlags[flag] =
-          globalFlags[flag] !== undefined
-            ? globalFlags[flag]
-            : (step[flag] !== undefined
-              ? step[flag]
-              : (harnessDefaults[flag] !== undefined ? harnessDefaults[flag] : false));
+        // Fixed logic: Only use globalFlags if they are explicitly set to true
+        // Otherwise, fall back to step config, then harness defaults
+        if (globalFlags[flag] === true) {
+          resolvedFlags[flag] = true;
+        } else {
+          resolvedFlags[flag] =
+        step[flag] !== undefined
+          ? step[flag]
+          : (harnessDefaults[flag] !== undefined ? harnessDefaults[flag] : false);
+        }
       }
     }
 

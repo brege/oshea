@@ -9,11 +9,9 @@ const paths = require('@paths');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
 
-// Config section: pathsJsValidator.ignores
 function isIgnored(filePath, ignores) {
   return (ignores || []).some(ignored =>
-    filePath === ignored ||
-    path.basename(filePath) === ignored
+    filePath === ignored || path.basename(filePath) === ignored
   );
 }
 
@@ -32,8 +30,9 @@ function runValidator({
   quiet = false,
   json = false,
   debug = false,
-  fix = false,      // stub, not used
-  force = false,    // stub, not used
+  dryRun = false,
+  fix = false,     // stub
+  force = false,   // stub
   config = {}
 } = {}) {
   const ignores = config.ignores || [];
@@ -61,10 +60,7 @@ function runValidator({
   };
 
   if (json) {
-    process.stdout.write(JSON.stringify({
-      summary,
-      results
-    }, null, 2) + '\n');
+    process.stdout.write(JSON.stringify({ summary, results }, null, 2) + '\n');
   } else if (quiet) {
     if (missingCount > 0) {
       console.log('Validating paths in @paths');
@@ -97,6 +93,10 @@ function runValidator({
     }
   }
 
+  if (debug && dryRun) {
+    console.log('[DEBUG] Dry-run mode enabled — no files were written.');
+  }
+
   process.exitCode = missingCount === 0 ? 0 : 1;
   return { summary, results };
 }
@@ -104,13 +104,14 @@ function runValidator({
 // CLI entry
 if (require.main === module) {
   const { flags } = parseCliArgs(process.argv.slice(2));
-  const config = loadLintSection('pathsJsValidator', lintingConfigPath) || {};
+  const config = loadLintSection('validate-paths', lintingConfigPath) || {};
   runValidator({
     quiet: !!flags.quiet,
     json: !!flags.json,
     debug: !!flags.debug,
-    fix: !!flags.fix,      // stub, not used
-    force: !!flags.force,  // stub, not used
+    dryRun: !!flags.dryRun,
+    fix: !!flags.fix,
+    force: !!flags.force,
     config
   });
 }

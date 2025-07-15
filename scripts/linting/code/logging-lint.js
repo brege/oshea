@@ -17,7 +17,6 @@ const {
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
 
-// Scan a file for logging callsites and return detailed hits.
 function scanFile(filePath) {
   let content;
   try {
@@ -25,6 +24,7 @@ function scanFile(filePath) {
   } catch {
     return null;
   }
+
   const lines = content.split('\n');
   const hits = [];
 
@@ -48,7 +48,6 @@ function scanFile(filePath) {
     }
   });
 
-  // Mark hits to ignore based on inline comments
   hits.forEach(hit => {
     const lineContent = lines[hit.line - 1];
     const prevLine = lines[hit.line - 2] || '';
@@ -67,11 +66,11 @@ function runLinter({
   quiet = false,
   json = false,
   debug = false,
+  dryRun = false,
   config = {},
 } = {}) {
   const files = new Set();
 
-  // Gather files
   for (const target of targets) {
     for (const file of findFilesArray(target, {
       filter: name => name.endsWith('.js') || name.endsWith('.mjs'),
@@ -96,24 +95,18 @@ function runLinter({
         method: hit.method,
         file,
         line: hit.line,
-        code: hit.code
+        code: hit.code,
       });
 
       if (!json && !quiet) {
         if (hit.type === 'console') {
-          if (hit.method === 'console.log') {
+          console.warn(
+            chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
+          );
+          if (fix) {
             console.warn(
-              chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
-            );
-            if (fix) {
-              console.warn(
-                chalk.red('[lint:console]'),
-                'Auto-fix is not implemented for logging-lint. Please review and fix manually.'
-              );
-            }
-          } else {
-            console.warn(
-              chalk.yellow(`[lint:console] ${file}:${hit.line}  ${hit.code}`)
+              chalk.red('[lint:console]'),
+              'Auto-fix is not implemented for logging-lint. Please review and fix manually.'
             );
           }
         } else if (hit.type === 'chalk') {
@@ -135,6 +128,9 @@ function runLinter({
   if (debug) {
     console.log('[DEBUG] Files checked:', Array.from(files));
     console.log('[DEBUG] Hits found:', allHits.length);
+    if (dryRun) {
+      console.log('[DEBUG] Dry-run mode enabled — no files were written.');
+    }
   }
 
   if (allHits.length > 0) {
@@ -167,6 +163,7 @@ if (require.main === module) {
     quiet: !!flags.quiet,
     json: !!flags.json,
     debug: !!flags.debug,
+    dryRun: !!flags.dryRun,
     config: loggingConfig,
   });
 }

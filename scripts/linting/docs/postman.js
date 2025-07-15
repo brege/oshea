@@ -150,6 +150,7 @@ async function runLinter({
   quiet = false,
   json = false,
   debug = false,
+  dryRun = false,
   force = false, // stub, not used
   config = {}
 } = {}) {
@@ -207,11 +208,16 @@ async function runLinter({
 
       if (fix && replacement && replacement !== oldLine) {
         lines[r.line - 1] = replacement;
-        fs.writeFileSync(r.file, lines.join('\n'), 'utf8');
+        if (!dryRun) {
+          fs.writeFileSync(r.file, lines.join('\n'), 'utf8');
+        }
         fixes++;
         summary.fixed++;
         details.push({ ...r, status: 'fixed', replacement });
         if (!quiet && !json) printProblem(r, 'replace', candidates, replacement);
+        if (dryRun && !quiet && !json) {
+          console.log(chalk.gray('    [dry-run] No file written.'));
+        }
       } else {
         problems++;
         summary.replace++;
@@ -255,7 +261,9 @@ async function runLinter({
       );
     }
   }
-
+  if (debug && dryRun) {
+    console.log(chalk.gray('[DEBUG] Dry-run mode enabled -- No files written.'));
+  }
   process.exitCode = problems && !fix ? 1 : 0;
   return { summary, details };
 }
@@ -264,13 +272,14 @@ async function runLinter({
 if (require.main === module) {
   (async () => {
     const { flags, targets } = parseCliArgs(process.argv.slice(2));
-    const config = loadLintSection('postman', lintingConfigPath) || {};
+    const config = loadLintSection('doc-links', lintingConfigPath) || {};
     await runLinter({
       targets,
       fix: !!flags.fix,
       quiet: !!flags.quiet,
       json: !!flags.json,
       debug: !!flags.debug,
+      dryRun: !!flags.dryRun,
       force: !!flags.force,
       config
     });

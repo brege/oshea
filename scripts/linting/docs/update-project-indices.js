@@ -24,11 +24,12 @@ function getDocignoreDirs(root) {
     try {
       entries = fs.readdirSync(dir, { withFileTypes: true });
     } catch (_e) {
+      // ignore
       return;
     }
     if (entries.some(e => e.isFile() && e.name === '.docignore')) {
       ignoredDirs.push(path.resolve(dir));
-      return; // Don't descend further
+      return;
     }
     for (const entry of entries) {
       if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.git') {
@@ -51,25 +52,21 @@ function getExistingLinks(content, baseDir) {
 
   while ((match = linkRegex.exec(content)) !== null) {
     if (hasUncatBlock && match.index > startIdx && match.index < endIdx) {
-      continue; // Ignore links inside the uncategorized block
+      continue;
     }
-
     const rawLink = match[1];
     if (!rawLink || rawLink.startsWith('http')) continue;
-
     try {
       const abs = path.resolve(baseDir, rawLink);
       const rel = path.relative(baseDir, abs).replace(/\\/g, '/');
       links.add(rel);
-    } catch {
-      // Ignore errors from invalid links
-    }
+    } catch (_e) {}
   }
   return links;
 }
 
 function fileHasLintSkip(file) {
-  if (path.resolve(file) === THIS_SCRIPT) return false; // never skip this script itself
+  if (path.resolve(file) === THIS_SCRIPT) return false;
   try {
     const content = fs.readFileSync(file, 'utf8');
     return content.includes(LINT_SKIP_TAG);
@@ -80,7 +77,7 @@ function fileHasLintSkip(file) {
 
 function updateIndexFile(groupName, groupConfig, opts = {}) {
   const { indexFile, scanRoot, fileExtensions, excludePatterns } = groupConfig;
-  const { quiet = false, fix = false, json = false, debug = false } = opts;
+  const { quiet = false, fix = false, json = false, debug = false, dryRun = false } = opts;
 
   const INDEX_FILE_PATH = path.resolve(process.cwd(), indexFile);
   if (!fs.existsSync(INDEX_FILE_PATH)) {
@@ -129,13 +126,8 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
     }
   }
 
-  // Filter out files that contain the lint-skip flag (quietly, no warning)
   const filesToIndex = allFiles.filter(file => !fileHasLintSkip(file));
-
   const existingLinks = getExistingLinks(content, INDEX_DIR);
-  if (debug && !json) {
-    console.log(`  Found ${existingLinks.size} existing links in ${indexFile}`);
-  }
 
   const untrackedFiles = filesToIndex.filter(file => {
     const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
@@ -150,8 +142,7 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
   }
 
   if (!quiet && !json) {
-    // Always print this block if files are added (even in quiet)
-    console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Adding ${untrackedFiles.length} untracked file(s):`);
+    console.warn(`[librarian] ${groupName}: ${indexFile} ✚ ${dryRun ? 'Would add' : 'Adding'} ${untrackedFiles.length} untracked file(s):`);
     untrackedFiles.forEach(file => {
       const relPath = path.relative(INDEX_DIR, file).replace(/\\/g, '/');
       console.warn(`    - ${relPath}`);
@@ -175,16 +166,18 @@ function updateIndexFile(groupName, groupConfig, opts = {}) {
     finalContent = `${content}\n\n${START_MARKER}\n${newUncatLines.join('\n')}\n${END_MARKER}\n`;
   }
 
-  if (fix) {
+  if (fix && !dryRun) {
     fs.writeFileSync(INDEX_FILE_PATH, finalContent, 'utf8');
     if (!quiet && !json) {
       console.warn(`[librarian] ${groupName}: ${indexFile} ✚ Updated with ${newUncatLines.length} untracked file(s).`);
     }
+  } else if (dryRun && !quiet && !json) {
+    console.warn(`[librarian] ${groupName}: ${indexFile} ✎ Would update index (dry-run mode).`);
   }
 
   return {
     group: groupName,
-    updated: !!fix,
+    updated: fix && !dryRun,
     added: untrackedFiles.length,
     files: untrackedFiles.map(f => path.relative(INDEX_DIR, f).replace(/\\/g, '/'))
   };
@@ -196,7 +189,8 @@ async function runLibrarian({
   quiet = false,
   json = false,
   debug = false,
-  force = false // stub, not used
+  dryRun = false,
+  force = false
 } = {}) {
   if (!fs.existsSync(CONFIG_PATH)) {
     const msg = `ERROR: Configuration file not found at ${CONFIG_PATH}`;
@@ -207,13 +201,15 @@ async function runLibrarian({
   }
 
   const allConfigs = yaml.load(fs.readFileSync(CONFIG_PATH, 'utf8'));
-  const configs =allConfigs.librarian || {};
+  //const configs = allConfigs.update-indices || {};
+  // can't use hyphens with js dots
+  const configs = allConfigs['update-indices'] || {};
   const results = [];
 
   if (group) {
     const groupConfig = configs[group];
     if (groupConfig) {
-      const res = updateIndexFile(group, groupConfig, { fix, quiet, json, debug });
+      const res = updateIndexFile(group, groupConfig, { fix, quiet, json, debug, dryRun });
       results.push(res);
     } else {
       const msg = `ERROR: Group '${group}' not found in configuration.`;
@@ -223,7 +219,7 @@ async function runLibrarian({
   } else {
     for (const groupName in configs) {
       if (Object.hasOwnProperty.call(configs, groupName)) {
-        const res = updateIndexFile(groupName, configs[groupName], { fix, quiet, json, debug });
+        const res = updateIndexFile(groupName, configs[groupName], { fix, quiet, json, debug, dryRun });
         results.push(res);
       }
     }
@@ -235,6 +231,10 @@ async function runLibrarian({
     process.stdout.write(JSON.stringify({ results }, null, 2) + '\n');
   }
 
+  if (debug && dryRun) {
+    console.log('[DEBUG] Dry-run mode enabled — no files were written.');
+  }
+
   process.exitCode = anyError ? 1 : 0;
   return { results };
 }
@@ -243,16 +243,17 @@ async function runLibrarian({
 if (require.main === module) {
   (async () => {
     const { flags } = parseCliArgs(process.argv.slice(2));
-    // --group=GROUP
     const groupFlag = Object.keys(flags).find(f => f.startsWith('group='));
     const group = groupFlag ? flags[groupFlag] || groupFlag.split('=')[1] : null;
+
     await runLibrarian({
       group,
       fix: !!flags.fix,
       quiet: !!flags.quiet,
       json: !!flags.json,
       debug: !!flags.debug,
-      force: !!flags.force
+      dryRun: !!flags.dryRun,
+      force: !!flags.force,
     });
   })();
 }

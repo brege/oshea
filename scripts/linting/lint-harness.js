@@ -12,7 +12,7 @@ function runStep({ label, command, args, ignoreFailure = false, dryRun = false }
   console.log(chalk.gray(`> ${command} ${args.join(' ')}`));
 
   if (dryRun) {
-    console.log(chalk.gray(`[dry-run] Executing with dry-run flag (writes disabled)`));
+    console.log(chalk.gray('[dry-run] Executing with dry-run flag (writes disabled)'));
   }
 
   const result = spawnSync(command, args, {
@@ -50,24 +50,24 @@ function runHarness(config, globalFlags, targets, only) {
   for (const step of lintSteps) {
     const stepLabel = step.label ? step.label.toLowerCase() : '';
     const stepKey = step.key || '';
-    
+
     let labelMatch = false;
     let keyMatch = false;
-    
+
     if (only) {
       const onlyLower = only.toLowerCase();
       labelMatch = stepLabel.includes(onlyLower);
       keyMatch = stepKey.toLowerCase() === onlyLower;
     }
-    
+
     const skipByOnly = only && !(labelMatch || keyMatch);
     const skipByConfig = step.skip !== undefined
       ? step.skip
       : (harnessDefaults.skip !== undefined ? harnessDefaults.skip : false);
-    
+
     const skipByFlag = globalFlags.skip &&
       stepLabel.includes(globalFlags.skip.toLowerCase());
-    
+
     const shouldSkip = skipByOnly || skipByConfig || skipByFlag;
 
     if (shouldSkip) {

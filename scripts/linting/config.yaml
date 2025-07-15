@@ -141,6 +141,7 @@ harness:
   continueOnError: false
   quiet: true
   steps:
+    # --- Code ---
     - key: 'remove-ws'
       label: 'Code: Strip Trailing Whitespace'
       scriptPath: scripts/linting/code/strip-trailing-whitespace.js
@@ -154,18 +155,24 @@ harness:
     - key: 'remove-auto-doc' 
       label: 'Code: Check for auto-doc comments'
       scriptPath: scripts/linting/code/remove-auto-doc.js
+
+    # --- Validators ---
     - key: 'validate-mocha' 
       label: 'Validator: Check .mocharc.js paths'
       scriptPath: scripts/linting/validators/mocha-path-validator.js
     - key: 'validate-paths' 
       label: 'Validator: Check paths.js'
       scriptPath: scripts/linting/validators/paths-js-validator.js
+
+    # --- Docs ---
     - key: 'update-indices' 
       label: 'Docs: Update Project Indices'
       scriptPath: scripts/linting/docs/update-project-indices.js
     - key: 'doc-links' 
       label: 'Docs: Check Markdown Links (Postman)'
       scriptPath: scripts/linting/docs/postman.js
+
+    # --- Harness ---
     - key: 'eslint' 
       label: 'ESLint'
       quiet: false

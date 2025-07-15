@@ -5,6 +5,7 @@ require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
+const chalk = require('chalk');
 const paths = require('@paths');
 const { lintHelpersPath, lintingConfigPath } = require('@paths');
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
@@ -16,12 +17,12 @@ function isIgnored(filePath, ignores) {
 }
 
 function* walkRegistry(obj, prefix = '') {
-  for (const [k, v] of Object.entries(obj)) {
-    const key = prefix ? `${prefix}.${k}` : k;
-    if (typeof v === 'object' && v !== null && !Array.isArray(v)) {
-      yield* walkRegistry(v, key);
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      yield* walkRegistry(value, fullKey);
     } else {
-      yield [key, v];
+      yield [fullKey, value];
     }
   }
 }
@@ -31,25 +32,32 @@ function runValidator({
   json = false,
   debug = false,
   dryRun = false,
-  fix = false,     // stub
-  force = false,   // stub
+  fix = false,     // stubbed by policy
+  force = false,   // stubbed by policy
   config = {}
 } = {}) {
   const ignores = config.ignores || [];
-  let missingCount = 0;
+  const issues = [];
   const results = [];
 
   for (const [name, filePath] of walkRegistry(paths)) {
     if (typeof filePath !== 'string') continue;
+
     if (isIgnored(filePath, ignores)) {
       results.push({ type: 'ignored', name, filePath });
       continue;
     }
+
     if (fs.existsSync(filePath)) {
       results.push({ type: 'found', name, filePath });
     } else {
-      missingCount++;
       results.push({ type: 'missing', name, filePath });
+      issues.push({
+        file: 'paths.js',
+        message: `Entry '${name}' expected file at path: ${filePath}. File not found.`,
+        rule: 'missing-path-entry',
+        severity: 2
+      });
     }
   }
 
@@ -59,37 +67,29 @@ function runValidator({
     ignored: results.filter(r => r.type === 'ignored').length
   };
 
-  if (json) {
-    process.stdout.write(JSON.stringify({ summary, results }, null, 2) + '\n');
-  } else if (quiet) {
-    if (missingCount > 0) {
-      console.log('Validating paths in @paths');
+  if (!quiet) {
+    if (json) {
+      process.stdout.write(JSON.stringify({ summary, results, issues }, null, 2) + '\n');
+    } else {
+      console.log('Validating entries in @paths:');
       console.log('-------------------------------------');
+
       for (const res of results) {
-        if (res.type === 'missing') {
-          console.log(`MISSING: ${res.name} -> ${res.filePath}`);
+        if (res.type === 'found') {
+          console.log(chalk.green(`  FOUND   : ${res.name} -> ${res.filePath}`));
+        } else if (res.type === 'missing') {
+          console.log(chalk.red(`  MISSING : ${res.name} -> ${res.filePath}`));
+        } else if (res.type === 'ignored') {
+          console.log(chalk.gray(`  IGNORED : ${res.name} -> ${res.filePath}`));
         }
       }
+
       console.log('-------------------------------------');
-      console.log(`Validation complete: ${missingCount} missing path(s)`);
-    }
-  } else {
-    console.log('Validating paths in @paths');
-    console.log('-------------------------------------');
-    for (const res of results) {
-      if (res.type === 'found') {
-        console.log(`FOUND: ${res.name} -> ${res.filePath}`);
-      } else if (res.type === 'missing') {
-        console.log(`MISSING: ${res.name} -> ${res.filePath}`);
-      } else if (res.type === 'ignored') {
-        console.log(`IGNORED: ${res.name} -> ${res.filePath}`);
+      if (summary.missing === 0) {
+        console.log(chalk.green('Validation complete. All paths are valid.'));
+      } else {
+        console.log(chalk.yellow(`Validation complete: ${summary.missing} missing path(s).`));
       }
-    }
-    console.log('-------------------------------------');
-    if (missingCount === 0) {
-      console.log('Validation complete');
-    } else {
-      console.log(`Validation complete: ${missingCount} missing path(s)`);
     }
   }
 
@@ -97,14 +97,16 @@ function runValidator({
     console.log('[DEBUG] Dry-run mode enabled — no files were written.');
   }
 
-  process.exitCode = missingCount === 0 ? 0 : 1;
-  return { summary, results };
+  process.exitCode = summary.missing === 0 ? 0 : 1;
+
+  return { summary, results, issues };
 }
 
-// CLI entry
+// CLI entry point
 if (require.main === module) {
   const { flags } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('validate-paths', lintingConfigPath) || {};
+
   runValidator({
     quiet: !!flags.quiet,
     json: !!flags.json,

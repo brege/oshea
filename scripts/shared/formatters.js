@@ -15,7 +15,7 @@ function formatProblem({ file, line = 1, column = 1, message, rule, severity = '
 function createLintResult(filePath, messages = []) {
   const errorCount = messages.filter(msg => msg.severity === 2).length;
   const warningCount = messages.filter(msg => msg.severity === 1).length;
-  
+
   return {
     filePath: path.resolve(filePath),
     messages: messages.map(msg => ({
@@ -42,7 +42,7 @@ const formatters = {
 
     results.forEach(result => {
       const { filePath, messages, errorCount, warningCount } = result;
-      
+
       if (messages.length === 0) return;
 
       totalErrors += errorCount;
@@ -54,7 +54,7 @@ const formatters = {
         const { line, column, severity, message: msg, ruleId } = message;
         const levelColor = severity === 2 ? chalk.red : chalk.yellow;
         const levelText = severity === 2 ? 'error' : 'warning';
-        
+
         output += `  ${chalk.dim(`${line}:${column}`)}  `;
         output += `${levelColor(levelText)}  `;
         output += `${msg}  `;
@@ -78,11 +78,11 @@ function formatLintResults(results, formatter = 'stylish') {
     }
     return formatters[formatter](results);
   }
-  
+
   if (typeof formatter === 'function') {
     return formatter(results);
   }
-  
+
   throw new Error('Formatter must be a string or function');
 }
 
@@ -92,13 +92,13 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
   }
 
   const resultsByFile = {};
-  
+
   rawIssues.forEach(issue => {
     const filePath = issue.file || 'unknown-file';
     if (!resultsByFile[filePath]) {
       resultsByFile[filePath] = [];
     }
-    
+
     resultsByFile[filePath].push({
       ruleId: issue.rule || 'unknown-rule',
       severity: 2,
@@ -107,8 +107,8 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
       column: issue.column || 1,
     });
   });
-  
-  return Object.keys(resultsByFile).map(filePath => 
+
+  return Object.keys(resultsByFile).map(filePath =>
     createLintResult(filePath, resultsByFile[filePath])
   );
 }

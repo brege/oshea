@@ -5,6 +5,7 @@ require('module-alias/register');
 
 const fs = require('fs');
 const glob = require('glob');
+const chalk = require('chalk');
 const { mocharcPath, lintHelpersPath, lintingConfigPath } = require('@paths');
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
 
@@ -27,9 +28,9 @@ function runValidator({
   quiet = false,
   json = false,
   debug = false,
-  fix = false,    // stub for interface
-  force = false,  // stub for interface
-  dryRun = false, // new stub
+  fix = false,
+  force = false,
+  dryRun = false,
   config = {}
 } = {}) {
   if (debug || (!quiet && !json)) {
@@ -38,18 +39,30 @@ function runValidator({
 
   if (!fs.existsSync(mocharcPath)) {
     const msg = `.mocharc.js not found at: ${mocharcPath}`;
-    if (!quiet && !json) console.error(msg);
-    if (json) {
-      process.stdout.write(JSON.stringify({ error: msg, missing: true, path: mocharcPath }, null, 2) + '\n');
-    }
-    process.exitCode = 1;
-    return {
+    const result = {
       error: msg,
       missing: true,
       path: mocharcPath,
       summary: { found: 0, missing: 1 },
-      results: []
+      results: [],
+      issues: [
+        {
+          file: '.mocharc.js',
+          message: msg,
+          rule: 'missing-config-file',
+          severity: 2,
+        },
+      ]
     };
+
+    if (json) {
+      process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+    } else if (!quiet) {
+      console.error(msg);
+    }
+
+    process.exitCode = 1;
+    return result;
   }
 
   let mochaConfig;
@@ -64,20 +77,24 @@ function runValidator({
     }
   }
 
-  // Optionally filter patterns using config.excludes
   const excludes = config.excludes || [];
   const patterns = Array.from(extractJsPatterns(mochaConfig)).filter(
     pattern => !excludes.some(ex => pattern.includes(ex))
   );
 
-  let missingCount = 0;
   const results = [];
+  const issues = [];
 
   patterns.forEach(pattern => {
     if (pattern.includes('*')) {
       const matches = glob.sync(pattern);
       if (matches.length === 0) {
-        missingCount++;
+        issues.push({
+          file: '.mocharc.js',
+          message: `No files matched pattern: "${pattern}"`,
+          rule: 'missing-test-path',
+          severity: 2
+        });
         results.push({ type: 'missing', pattern });
       } else {
         results.push({ type: 'found', pattern, count: matches.length });
@@ -86,7 +103,12 @@ function runValidator({
       if (fs.existsSync(pattern)) {
         results.push({ type: 'found', pattern });
       } else {
-        missingCount++;
+        issues.push({
+          file: '.mocharc.js',
+          message: `Missing test file: "${pattern}"`,
+          rule: 'missing-test-path',
+          severity: 2
+        });
         results.push({ type: 'missing', pattern });
       }
     }
@@ -97,60 +119,44 @@ function runValidator({
     missing: results.filter(r => r.type === 'missing').length
   };
 
-  if (json) {
-    process.stdout.write(JSON.stringify({
-      path: mocharcPath,
-      summary,
-      results
-    }, null, 2) + '\n');
-  } else if (quiet) {
-    if (missingCount > 0) {
+  if (!quiet) {
+    if (json) {
+      process.stdout.write(JSON.stringify({ summary, results, issues }, null, 2) + '\n');
+    } else {
       console.log('Validating test paths in .mocharc.js:');
       console.log('-------------------------------------');
-      for (const res of results) {
-        if (res.type === 'missing') {
-          console.log(`✗ MISSING: ${res.pattern}`);
+      results.forEach(r => {
+        if (r.type === 'found') {
+          const context = r.count ? ` (${r.count} files)` : '';
+          console.log(chalk.green(`  FOUND:    ${r.pattern}${context}`));
+        } else {
+          console.log(chalk.red(`  MISSING:  ${r.pattern}`));
         }
-      }
+      });
       console.log('-------------------------------------');
-      console.log(`Validation complete: ${missingCount} missing pattern(s)`);
-    }
-  } else {
-    console.log('Validating test paths in .mocharc.js:');
-    console.log('-------------------------------------');
-    for (const res of results) {
-      if (res.type === 'found' && res.count !== undefined) {
-        console.log(`✓ FOUND (${res.count} files): ${res.pattern}`);
-      } else if (res.type === 'found') {
-        console.log(`✓ FOUND: ${res.pattern}`);
-      } else if (res.type === 'missing') {
-        console.log(`✗ MISSING: ${res.pattern}`);
+      if (summary.missing > 0) {
+        console.log(`Validation complete: ${summary.missing} missing pattern(s)`);
+      } else {
+        console.log('Validation complete. All patterns are valid.');
       }
-    }
-    console.log('-------------------------------------');
-    if (missingCount === 0) {
-      console.log('Validation complete');
-    } else {
-      console.log(`Validation complete: ${missingCount} missing pattern(s)`);
     }
   }
 
-  process.exitCode = missingCount === 0 ? 0 : 1;
-  return { path: mocharcPath, summary, results };
+  process.exitCode = summary.missing > 0 ? 1 : 0;
+  return { summary, results, issues };
 }
 
-// CLI entry
+// CLI entry point
 if (require.main === module) {
   const { flags } = parseCliArgs(process.argv.slice(2));
-
   const config = loadLintSection('validate-mocha', lintingConfigPath) || {};
 
   runValidator({
     quiet: !!flags.quiet,
     json: !!flags.json,
     debug: !!flags.debug,
-    fix: !!flags.fix,      // stub
-    force: !!flags.force,  // stub
+    fix: !!flags.fix,
+    force: !!flags.force,
     dryRun: !!flags.dryRun,
     config
   });

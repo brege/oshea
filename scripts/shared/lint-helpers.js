@@ -1,10 +1,13 @@
 // scripts/shared/lint-helpers.js
 
+require('module-alias/register');
+
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
 const { minimatch } = require('minimatch');
-const { findFiles, getPatternsFromArgs, getDefaultGlobIgnores } = require('./file-helpers');
+const { fileHelpersPath } = require('@paths');
+const { findFiles, getPatternsFromArgs, getDefaultGlobIgnores } = require(fileHelpersPath);
 const { lintingConfigPath } = require('@paths');
 
 function loadLintSection(section, configPath = lintingConfigPath) {
@@ -133,12 +136,12 @@ function filterSteps(steps, searchTerm) {
 
   return steps.filter(step => {
     if (!step) return false;
-    
+
     const key = (step.key || '').toString();
     const label = (step.label || '').toString();
     const search = searchTerm.toString().toLowerCase();
-    
-    return key.toLowerCase().includes(search) || 
+
+    return key.toLowerCase().includes(search) ||
            label.toLowerCase().includes(search);
   });
 }

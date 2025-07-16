@@ -4,14 +4,14 @@
 require('module-alias/register');
 
 const fs = require('fs');
-const chalk = require('chalk');
-const { lintHelpersPath, lintingConfigPath } = require('@paths');
+const { lintHelpersPath, lintingConfigPath, formattersPath } = require('@paths');
 const {
   loadLintSection,
   findFilesArray,
   isExcluded,
   parseCliArgs,
 } = require(lintHelpersPath);
+const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
 
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
@@ -104,26 +104,26 @@ function runLinter({
   }
 
   if (!quiet) {
-    if (json) {
-      process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
+    const eslintResults = adaptRawIssuesToEslintFormat(issues);
+    const formattedOutput = formatLintResults(eslintResults, 'stylish');
+
+    if (formattedOutput) {
+      console.log(formattedOutput);
     } else {
-      if (issues.length > 0) {
-        issues.forEach(issue => {
-          const color = issue.severity === 2 ? chalk.red : chalk.yellow;
-          console.log(color(`  ${issue.file}:${issue.line}:${issue.column}  ${issue.message} (${issue.rule})`));
-        });
+      console.log('✔ No disallowed logging statements found.');
+    }
 
-        console.log(`\nFound ${issues.length} logging issue(s) in ${new Set(issues.map(i => i.file)).size} file(s).`);
-
-        if (fix) {
-          console.log('');
-          console.log('Note: --fix was passed, but logging-lint does not support automatic fixing. Please review these manually.');
-        }
-      } else {
-        console.log('No disallowed logging statements found.');
+    if (issues.length > 0) {
+      if (fix) {
+        console.log('\nNote: --fix was passed, but logging-lint does not support automatic fixing. Please review these manually.');
       }
     }
   }
+
+  if (json) {
+    process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
+  }
+
 
   if (debug) {
     console.log('[DEBUG] Files checked:', Array.from(files));
@@ -161,4 +161,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

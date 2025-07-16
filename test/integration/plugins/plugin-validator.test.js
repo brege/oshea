@@ -7,7 +7,7 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-const { validatorPath, v1ValidatorPath } = require('@paths');
+const { validatorPath, v1Path } = require('@paths');
 const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
 const testManifest = require('./plugin-validator.manifest.js');
 const proxyquire = require('proxyquire');
@@ -54,7 +54,7 @@ describe('Plugin Validator (Integration Tests)', function() {
     } = testCase;
 
     it_(description, async function() {
-      const v1Validator = proxyquire(v1ValidatorPath, {
+      const v1Validator = proxyquire(v1Path, {
         fs: mockFs,
         path,
         'child_process': { execSync: mockExecSync },
@@ -73,10 +73,10 @@ describe('Plugin Validator (Integration Tests)', function() {
         fs: mockFs,
         path,
         yaml: mockYaml,
-        [v1ValidatorPath]: v1Validator,
+        [v1Path]: v1Validator,
         '@paths': {
           projectRoot: '/fake/root',
-          v1ValidatorPath: v1ValidatorPath,
+          v1Path: v1Path,
           logger: testLogger
         }
       });

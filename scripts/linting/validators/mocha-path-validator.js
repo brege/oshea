@@ -4,14 +4,18 @@
 require('module-alias/register');
 
 const fs = require('fs');
-const path = require('path');
 const glob = require('glob');
-const chalk = require('chalk'); // ← FIXED: chalk was missing
-const { mocharcPath, lintHelpersPath, lintingConfigPath, formattersPath, projectRoot } = require('@paths');
-const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
-const { adaptRawIssuesToEslintFormat, formatLintResults } = require(formattersPath);
 
-// Extract all .js patterns from a Mocha config object
+const {
+  mocharcPath,
+  lintHelpersPath,
+  lintingConfigPath,
+  formattersPath
+} = require('@paths');
+
+const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
+const { renderLintOutput } = require(formattersPath);
+
 function* extractJsPatterns(obj) {
   if (typeof obj === 'string' && obj.endsWith('.js')) {
     yield obj;
@@ -26,45 +30,19 @@ function* extractJsPatterns(obj) {
   }
 }
 
-function runValidator({
-  quiet = false,
-  json = false,
-  debug = false,
-  fix = false,
-  force = false,
-  dryRun = false,
-  config = {}
-} = {}) {
-  if (debug) {
-    console.log(`[DEBUG] Calculated .mocharc.js path: ${mocharcPath}`);
-  }
+function runValidator(options = {}) {
+  const { config = {} } = options;
+  const issues = [];
+  const results = [];
 
   if (!fs.existsSync(mocharcPath)) {
-    const msg = `.mocharc.js not found at: ${mocharcPath}`;
-    const result = {
-      error: msg,
-      missing: true,
-      path: mocharcPath,
-      summary: { found: 0, missing: 1 },
-      results: [],
-      issues: [
-        {
-          file: '.mocharc.js',
-          message: msg,
-          rule: 'missing-config-file',
-          severity: 2,
-        },
-      ]
-    };
-
-    if (json) {
-      process.stdout.write(JSON.stringify(result, null, 2) + '\n');
-    } else if (!quiet) {
-      console.error(msg);
-    }
-
-    process.exitCode = 1;
-    return result;
+    issues.push({
+      file: '.mocharc.js',
+      message: `.mocharc.js not found at: ${mocharcPath}`,
+      rule: 'missing-config-file',
+      severity: 2
+    });
+    return { summary: { errorCount: 1, warningCount: 0, fixedCount: 0 }, results, issues };
   }
 
   let mochaConfig;
@@ -83,9 +61,6 @@ function runValidator({
   const patterns = Array.from(extractJsPatterns(mochaConfig)).filter(
     pattern => !excludes.some(ex => pattern.includes(ex))
   );
-
-  const results = [];
-  const issues = [];
 
   for (const pattern of patterns) {
     if (pattern.includes('*')) {
@@ -117,73 +92,23 @@ function runValidator({
   }
 
   const summary = {
-    found: results.filter(r => r.type === 'found').length,
-    missing: results.filter(r => r.type === 'missing').length,
+    errorCount: issues.filter(i => i.severity === 2).length,
+    warningCount: issues.filter(i => i.severity === 1).length,
+    fixedCount: 0
   };
 
-  if (!quiet) {
-    const eslintResults = adaptRawIssuesToEslintFormat(issues);
-    const formattedOutput = formatLintResults(eslintResults, 'stylish');
-
-    if (formattedOutput) {
-      console.log(formattedOutput);
-    }
-
-    if (issues.length === 0 && !json) {
-      console.log('✔ No problems');
-      console.log('✔ All test patterns in .mocharc.js are valid.');
-    }
-  }
-
-  // Verbose debug: print all resolved and matched patterns
-  if (debug && results.length > 0) {
-    console.log('\n[DEBUG] Validated patterns extracted from .mocharc.js:');
-    results.forEach(r => {
-      const label = r.type === 'found'
-        ? chalk.green('[✓]')
-        : chalk.red('[✗]');
-      const trail = r.type === 'found' && r.count
-        ? chalk.gray(`→ ${r.count} file${r.count === 1 ? '' : 's'} matched`)
-        : r.type === 'missing'
-          ? chalk.gray('→ NOT FOUND')
-          : '';
-
-      const rel = path.isAbsolute(r.pattern)
-        ? path.relative(projectRoot, r.pattern)
-        : r.pattern;
-
-      console.log(`  ${label} ${rel} ${trail}`);
-    });
-  }
-
-  if (json) {
-    process.stdout.write(JSON.stringify({ summary, results, issues }, null, 2) + '\n');
-  }
-
-  if (debug) {
-    console.log('[DEBUG] Patterns scanned:', patterns);
-    console.log('[DEBUG] Total issues:', issues.length);
-  }
-
-  process.exitCode = summary.missing > 0 ? 1 : 0;
   return { summary, results, issues };
 }
 
-// CLI entry point
 if (require.main === module) {
   const { flags } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('validate-mocha', lintingConfigPath) || {};
 
-  runValidator({
-    quiet: !!flags.quiet,
-    json: !!flags.json,
-    debug: !!flags.debug,
-    fix: !!flags.fix,
-    force: !!flags.force,
-    dryRun: !!flags.dryRun,
-    config
-  });
+  const { summary, results, issues } = runValidator({ config });
+
+  renderLintOutput({ issues, summary, results, flags });
+
+  process.exitCode = summary.errorCount > 0 ? 1 : 0;
 }
 
 module.exports = { runValidator };
-

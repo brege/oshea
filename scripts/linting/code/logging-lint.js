@@ -11,7 +11,7 @@ const {
   isExcluded,
   parseCliArgs,
 } = require(lintHelpersPath);
-const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
+const { renderLintOutput } = require(formattersPath);
 
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
@@ -58,16 +58,12 @@ function scanFile(filePath) {
   return hits.length ? { file: filePath, hits } : null;
 }
 
-function runLinter({
-  targets = [],
-  excludes = [],
-  fix = false, // logging-lint is informational only
-  quiet = false,
-  json = false,
-  debug = false,
-  dryRun = false,
-  config = {},
-} = {}) {
+function runLinter(options = {}) {
+  const {
+    targets = [],
+    excludes = [],
+  } = options;
+
   const files = new Set();
   const issues = [];
 
@@ -103,39 +99,13 @@ function runLinter({
     }
   }
 
-  if (!quiet) {
-    const eslintResults = adaptRawIssuesToEslintFormat(issues);
-    const formattedOutput = formatLintResults(eslintResults, 'stylish');
+  const summary = {
+    errorCount: issues.filter(i => i.severity === 2).length,
+    warningCount: issues.filter(i => i.severity === 1).length,
+    fixedCount: 0 // This linter doesn't fix anything
+  };
 
-    if (formattedOutput) {
-      console.log(formattedOutput);
-    } else {
-      console.log('✔ No disallowed logging statements found.');
-    }
-
-    if (issues.length > 0) {
-      if (fix) {
-        console.log('\nNote: --fix was passed, but logging-lint does not support automatic fixing. Please review these manually.');
-      }
-    }
-  }
-
-  if (json) {
-    process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
-  }
-
-
-  if (debug) {
-    console.log('[DEBUG] Files checked:', Array.from(files));
-    console.log('[DEBUG] Issues found:', issues.length);
-    if (dryRun) {
-      console.log('[DEBUG] Dry-run mode enabled — no files were written.');
-    }
-  }
-
-  process.exitCode = issues.length > 0 ? 1 : 0;
-
-  return { issueCount: issues.length };
+  return { issues, summary, results: [] }; // No detailed 'results' for this linter
 }
 
 // CLI entry
@@ -148,16 +118,15 @@ if (require.main === module) {
   const finalTargets = targets.length ? targets : configTargets;
   const excludes = flags.force ? [] : configExcludes;
 
-  runLinter({
+  const { issues, summary } = runLinter({
     targets: finalTargets,
     excludes,
-    fix: !!flags.fix,
-    quiet: !!flags.quiet,
-    json: !!flags.json,
-    debug: !!flags.debug,
-    dryRun: !!flags.dryRun,
     config: loggingConfig,
   });
+
+  renderLintOutput({ issues, summary, flags });
+
+  process.exitCode = summary.errorCount > 0 ? 1 : 0;
 }
 
 module.exports = { runLinter };

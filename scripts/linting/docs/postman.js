@@ -4,12 +4,15 @@
 require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
-const { lintHelpersPath, lintingConfigPath, formattersPath, projectRoot } = require('@paths');
+const {
+  lintHelpersPath,
+  lintingConfigPath,
+  formattersPath,
+  projectRoot
+} = require('@paths');
 
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
-const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
-
+const { renderLintOutput } = require(formattersPath);
 const {
   getMarkdownFiles,
   isReferenceExcluded,
@@ -100,30 +103,19 @@ async function probeMarkdownFile(mdFile, rules) {
   return results;
 }
 
-async function runLinter({
-  targets = [],
-  fix = false,
-  quiet = false,
-  json = false,
-  debug = false,
-  dryRun = false,
-  force = false,
-  config = {}
-} = {}) {
-  if (debug) {
-    console.log('[DEBUG] Loaded config:', config);
-    console.log('[DEBUG] Targets:', targets);
-  }
+async function runLinter(options = {}) {
+  const {
+    targets = [],
+    fix = false,
+    dryRun = false,
+    config = {}
+  } = options;
 
   const rules = config;
   const allowedExt = rules.allowed_extensions || [];
   const mdFiles = getMarkdownFiles(targets[0] || 'docs', rules, targets, [
     'assets', 'docs/archive', 'node_modules', '.git'
   ]);
-
-  if (debug) {
-    console.log('[DEBUG] Found Markdown files:', mdFiles);
-  }
 
   const issues = [];
   let fixedCount = 0;
@@ -166,7 +158,6 @@ async function runLinter({
             message: `Resolvable reference: '${r.target}' → '${rel}'`,
           });
         }
-
         continue;
       }
 
@@ -179,7 +170,6 @@ async function runLinter({
           message: `Degenerate match: '${r.target}' resolves to multiple files.`,
           candidates: relCandidates,
         });
-
         continue;
       }
 
@@ -193,49 +183,13 @@ async function runLinter({
     }
   }
 
-  if (!quiet) {
-    const formatted = formatLintResults(adaptRawIssuesToEslintFormat(issues));
-    if (formatted) {
-      console.log(formatted);
-    }
+  const summary = {
+    errorCount: issues.filter(i => i.severity === 2).length,
+    warningCount: issues.filter(i => i.severity === 1).length,
+    fixedCount: fixedCount
+  };
 
-    if (!formatted) {
-      console.log(chalk.green('✔ No unresolved references found.'));
-    }
-
-    if (debug && issues.length > 0) {
-      for (const i of issues) {
-        if (i.candidates && i.candidates.length > 0) {
-          for (const c of i.candidates) {
-            console.log(chalk.gray(`    candidate: ${c}`));
-          }
-        }
-      }
-    }
-
-    if (fix && fixedCount > 0 && !dryRun) {
-      console.log(`✔ Fixed ${fixedCount} unambiguous reference(s).`);
-    } else if (fix && dryRun && fixedCount > 0) {
-      console.log(`[dry-run] Would have fixed ${fixedCount} reference(s).`);
-    } else if (!fix && fixedCount > 0) {
-      console.log('\nRun with --fix to automatically link unambiguous references.');
-    }
-
-    if (issues.length > 0) {
-      console.log(`\nFound ${issues.length} unresolved or ambiguous reference(s).`);
-    }
-  }
-
-  if (json) {
-    process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
-  }
-
-  if (debug && dryRun) {
-    console.log('[DEBUG] Dry-run mode enabled — no files written.');
-  }
-
-  process.exitCode = issues.length > 0 && !fix ? 1 : 0;
-  return { issueCount: issues.length, fixedCount };
+  return { issues, summary, results: [] };
 }
 
 if (require.main === module) {
@@ -243,18 +197,18 @@ if (require.main === module) {
     const { flags, targets } = parseCliArgs(process.argv.slice(2));
     const config = loadLintSection('doc-links', lintingConfigPath) || {};
 
-    await runLinter({
+    const { issues, summary } = await runLinter({
       targets,
       fix: !!flags.fix,
-      quiet: !!flags.quiet,
-      json: !!flags.json,
-      debug: !!flags.debug,
       dryRun: !!flags.dryRun,
       force: !!flags.force,
       config,
     });
+
+    renderLintOutput({ issues, summary, flags });
+
+    process.exitCode = summary.errorCount > 0 ? 1 : 0;
   })();
 }
 
 module.exports = { runLinter };
-

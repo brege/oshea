@@ -12,7 +12,7 @@ const {
   isExcluded,
   parseCliArgs,
 } = require(lintHelpersPath);
-const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
+const { renderLintOutput } = require(formattersPath);
 
 const BLOCK_COMMENT_REGEX = /\/\*\*[\r\n][\s\S]*?\*\//g;
 
@@ -30,12 +30,8 @@ function scanFile(filePath) {
   while ((match = BLOCK_COMMENT_REGEX.exec(content)) !== null) {
     const before = content.slice(0, match.index);
     const startLine = before.split('\n').length;
-    const blockLines = match[0].split('\n').length;
-    const endLine = startLine + blockLines - 1;
-
     matches.push({
       startLine,
-      endLine,
       text: match[0],
       start: match.index,
       end: match.index + match[0].length,
@@ -45,21 +41,19 @@ function scanFile(filePath) {
   return matches.length ? { file: filePath, matches, content } : null;
 }
 
-function runLinter({
-  targets = [],
-  excludes = [],
-  excludeDirs = [],
-  fix = false,
-  quiet = false,
-  json = false,
-  force = false,
-  debug = false,
-  dryRun = false,
-  config = {}
-} = {}) {
+function runLinter(options = {}) {
+  const {
+    targets = [],
+    excludes = [],
+    excludeDirs = [],
+    fix = false,
+    force = false,
+    dryRun = false,
+  } = options;
+
   const files = new Set();
   const issues = [];
-  let fixedFilesCount = 0;
+  let fixedCount = 0;
 
   for (const target of targets) {
     for (const file of findFilesArray(target, {
@@ -77,72 +71,40 @@ function runLinter({
 
     for (const match of result.matches) {
       const relPath = path.relative(process.cwd(), file);
-
       issues.push({
         file: relPath,
         line: match.startLine,
         column: 1,
-        message: `Found auto-doc block comment spanning lines ${match.startLine}-${match.endLine}.`,
+        message: `Found auto-doc block comment starting on line ${match.startLine}.`,
         rule: 'no-auto-doc',
         severity: 1, // Warning
-        snippet: match.text
       });
     }
 
     if (fix && result.matches.length > 0) {
-      let newContent = result.content;
-      for (let i = result.matches.length - 1; i >= 0; i--) {
-        const { start, end } = result.matches[i];
-        newContent = newContent.slice(0, start) + newContent.slice(end);
-      }
-
       if (!dryRun) {
+        let newContent = result.content;
+        // Iterate backwards to avoid index shifting
+        for (let i = result.matches.length - 1; i >= 0; i--) {
+          const { start, end } = result.matches[i];
+          newContent = newContent.slice(0, start) + newContent.slice(end);
+        }
         fs.writeFileSync(file, newContent, 'utf8');
-        fixedFilesCount++;
       }
+      // Increment fixedCount regardless of dryRun to report what *would* be fixed
+      fixedCount++;
     }
   }
 
-  if (!quiet) {
-    const eslintResults = adaptRawIssuesToEslintFormat(issues);
-    const formattedOutput = formatLintResults(eslintResults, 'stylish');
+  const summary = {
+    errorCount: issues.filter(i => i.severity === 2).length,
+    warningCount: issues.filter(i => i.severity === 1).length,
+    fixedCount: fixedCount
+  };
 
-    if (formattedOutput) {
-      console.log(formattedOutput);
-    }
-
-    if (issues.length > 0) {
-      if (fix && !dryRun) {
-        console.log(`✔ Fixed ${fixedFilesCount} file(s) by removing blocks.`);
-      } else if (fix && dryRun) {
-        console.log(`[dry-run] Would have fixed ${fixedFilesCount} file(s).`);
-      } else {
-        console.log('\nRun with --fix to automatically remove these blocks.');
-      }
-    } else {
-      console.log('✔ No auto-doc blocks found.');
-    }
-  }
-
-  if (json) {
-    process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
-  }
-
-  if (debug) {
-    console.log('[DEBUG] Files checked:', Array.from(files));
-    console.log('[DEBUG] Issues found:', issues.length);
-    if (dryRun) {
-      console.log('[DEBUG] Dry-run mode enabled — no files were written.');
-    }
-  }
-
-  const errorCount = issues.filter(issue => issue.severity === 2).length;
-  process.exitCode = errorCount > 0 ? 1 : 0;
-
-  return { issueCount: issues.length, fixedCount: fixedFilesCount };
+  return { issues, summary, results: [] };
 }
 
-// CLI entry point
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('remove-auto-doc', lintingConfigPath) || {};
@@ -151,21 +113,19 @@ if (require.main === module) {
   const configExcludeDirs = config.excludeDirs || [];
 
   const finalTargets = targets.length ? targets : configTargets;
-  const excludes = flags.force ? [] : configExcludes;
-  const excludeDirs = flags.force ? [] : configExcludeDirs;
+  const excludes = flags.force ? [] : configExcludeDirs.concat(configExcludes);
 
-  runLinter({
+  const { issues, summary } = runLinter({
     targets: finalTargets,
     excludes,
-    excludeDirs,
     fix: !!flags.fix,
-    quiet: !!flags.quiet,
-    json: !!flags.json,
-    force: !!flags.force,
-    debug: !!flags.debug,
     dryRun: !!flags.dryRun,
-    config,
+    force: !!flags.force,
   });
+
+  renderLintOutput({ issues, summary, flags });
+
+  process.exitCode = summary.errorCount > 0 ? 1 : 0;
 }
 
 module.exports = { runLinter };

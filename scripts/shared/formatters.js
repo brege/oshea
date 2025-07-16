@@ -43,7 +43,7 @@ const formatters = {
       totalWarnings += warningCount;
 
       const relPath = path.relative(process.cwd(), filePath);
-      output += `\n${relPath}\n`;
+      output += `\n${chalk.underline(relPath)}\n`;
 
       for (const msg of messages) {
         const location = `${msg.line}:${msg.column}`;
@@ -65,8 +65,6 @@ const formatters = {
       output += '\n';
       const x = totalErrors > 0 ? chalk.red('✖') : chalk.yellow('✖');
       output += `${x} ${totalProblems} problem${totalProblems !== 1 ? 's' : ''} (${totalErrors} error${totalErrors !== 1 ? 's' : ''}, ${totalWarnings} warning${totalWarnings !== 1 ? 's' : ''})`;
-    } else {
-      output += chalk.green('\n✔ No problems');
     }
 
     return output.trim();
@@ -74,19 +72,21 @@ const formatters = {
 };
 
 function formatLintResults(results, formatter = 'stylish') {
+  if (results.length === 0) {
+    return '';
+  }
   if (typeof formatter === 'string') {
     if (!formatters[formatter]) {
       throw new Error(`Unknown formatter: ${formatter}`);
     }
     return formatters[formatter](results);
   }
-
   if (typeof formatter === 'function') {
     return formatter(results);
   }
-
   throw new Error('Formatter must be a string or function');
 }
+
 
 function adaptRawIssuesToEslintFormat(rawIssues) {
   if (!rawIssues || rawIssues.length === 0) {
@@ -115,10 +115,63 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
   );
 }
 
+function printDebugResults(results = [], options = {}) {
+  if (!options.debug || results.length === 0) return;
+
+  const isMochaPattern = 'pattern' in results[0];
+
+  if (isMochaPattern) {
+    console.log('\n[DEBUG] Validated patterns extracted from .mocharc.js:\n');
+    for (const r of results) {
+      const symbol = r.type === 'found' ? chalk.green('[✓]') : chalk.red('[✗]');
+      const trail = r.count ? chalk.gray(`→ ${r.count} file(s) matched`) : (r.type === 'missing' ? chalk.gray('→ NOT FOUND') : '');
+      console.log(`  ${symbol} ${r.pattern} ${trail}`);
+    }
+    return;
+  }
+
+  // Default output for paths-js-validator results
+  console.log('\n[DEBUG] Validated registry entries:\n');
+  const maxKeyLength = Math.max(...results.map(r => r.name.length));
+  for (const entry of results) {
+    const symbol = entry.type === 'found' ? chalk.green('[✓]') : entry.type === 'missing' ? chalk.red('[✗]') : chalk.gray('[–]');
+    const trail = entry.type === 'missing' ? chalk.gray('→ NOT FOUND') : (entry.type === 'ignored' ? chalk.gray('→ IGNORED') : '');
+    console.log(`  ${symbol} ${entry.name.padEnd(maxKeyLength)} → ${entry.filePath} ${trail}`);
+  }
+  console.log('');
+}
+
+function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} }, formatter = 'stylish') {
+  if (flags.json) {
+    process.stdout.write(JSON.stringify({ issues, summary, results }, null, 2) + '\n');
+    return;
+  }
+
+  if (flags.quiet) return;
+
+  const formattedIssues = formatLintResults(adaptRawIssuesToEslintFormat(issues), formatter);
+  if (formattedIssues) {
+    console.log(formattedIssues);
+  }
+
+  const { fixedCount = 0 } = summary;
+  if (fixedCount > 0) {
+    console.log(chalk.green(`✔ ${fixedCount} issue${fixedCount > 1 ? 's' : ''} auto-fixed.`));
+  }
+
+  if (!formattedIssues && fixedCount === 0) {
+    console.log(chalk.green('✔ No problems found.'));
+  }
+
+  printDebugResults(results, flags);
+}
+
+
+
 module.exports = {
   formatters,
   createLintResult,
   formatLintResults,
-  adaptRawIssuesToEslintFormat,
+  renderLintOutput,
+  adaptRawIssuesToEslintFormat
 };
-

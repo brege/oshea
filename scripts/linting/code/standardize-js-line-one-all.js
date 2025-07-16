@@ -6,7 +6,11 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const { minimatch } = require('minimatch');
-const { lintHelpersPath, lintingConfigPath, formattersPath } = require('@paths');
+const {
+  lintHelpersPath,
+  lintingConfigPath,
+  formattersPath
+} = require('@paths');
 const {
   findFilesArray,
   parseCliArgs,
@@ -14,20 +18,20 @@ const {
   getDefaultGlobIgnores,
   loadLintSection,
 } = require(lintHelpersPath);
-const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
+const { renderLintOutput } = require(formattersPath);
 
-function runLinter({
-  patterns = [],
-  ignores = [],
-  fix = false,
-  quiet = false,
-  json = false,
-  debug = false,
-  dryRun = false,
-} = {}) {
+
+function runLinter(options = {}) {
+  const {
+    patterns = [],
+    ignores = [],
+    fix = false,
+    dryRun = false,
+  } = options;
+
   const files = new Set();
   const issues = [];
-  const changedFiles = [];
+  const changedFiles = new Set();
 
   for (const file of findFilesArray('.', {
     filter: name => name.endsWith('.js') || name.endsWith('.mjs'),
@@ -66,73 +70,44 @@ function runLinter({
         severity: 1, // Warning
       });
 
-      if (fix && !dryRun) {
+      if (fix) {
         lines.splice(headerLineIndex, 0, expectedHeader);
         changed = true;
       }
 
-    } else {
-      if (actualHeaderPath !== relPath) {
-        issues.push({
-          file: relPath,
-          line: reportLine,
-          column: 1,
-          message: `Incorrect header path. Expected: "${relPath}", Found: "${actualHeaderPath}"`,
-          rule: 'file-header',
-          severity: 1, // Warning
-        });
+    } else if (actualHeaderPath !== relPath) {
+      issues.push({
+        file: relPath,
+        line: reportLine,
+        column: 1,
+        message: `Incorrect header path. Expected: "${relPath}", Found: "${actualHeaderPath}"`,
+        rule: 'file-header',
+        severity: 1, // Warning
+      });
 
-        if (fix && !dryRun) {
-          lines[headerLineIndex] = expectedHeader;
-          changed = true;
-        }
+      if (fix) {
+        lines[headerLineIndex] = expectedHeader;
+        changed = true;
       }
     }
 
     if (changed) {
-      const newContent = lines.join('\n');
-      fs.writeFileSync(filePath, newContent, 'utf8');
-      changedFiles.push(relPath);
-    }
-  }
-
-  if (!quiet) {
-    const eslintResults = adaptRawIssuesToEslintFormat(issues);
-    const formattedOutput = formatLintResults(eslintResults, 'stylish');
-
-    if (formattedOutput) {
-      console.log(formattedOutput);
-    }
-
-    if (issues.length > 0) {
-      if (fix && !dryRun) {
-        console.log(`✔ Fixed ${changedFiles.length} file(s).`);
-      } else if (fix && dryRun) {
-        console.log(`[dry-run] Would have fixed ${changedFiles.length} file(s).`);
-      } else if (!fix){
-        console.log('\nRun with --fix to automatically correct these issues.');
+      if (!dryRun) {
+        fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
       }
-    } else {
-      console.log('✔ All file headers are standardized.');
+      changedFiles.add(relPath);
     }
   }
 
-  if (json) {
-    process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
-  }
+  const summary = {
+    errorCount: issues.filter(i => i.severity === 2).length,
+    warningCount: issues.filter(i => i.severity === 1).length,
+    fixedCount: changedFiles.size,
+  };
 
-  if (debug) {
-    console.log(`[DEBUG] Scanned ${files.size} files.`);
-    if (dryRun) console.log('[DEBUG] Dry-run mode enabled — no files were written.');
-  }
-
-  const errorCount = issues.filter(issue => issue.severity === 2).length;
-  process.exitCode = errorCount > 0 ? 1 : 0;
-
-  return { issueCount: issues.length, fixedCount: changedFiles.length };
+  return { issues, summary };
 }
 
-// CLI entry point
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('standardize-line-one', lintingConfigPath) || {};
@@ -143,15 +118,16 @@ if (require.main === module) {
 
   const ignores = config.excludes || getDefaultGlobIgnores();
 
-  runLinter({
+  const { issues, summary } = runLinter({
     patterns,
     ignores,
     fix: !!flags.fix,
-    quiet: !!flags.quiet,
-    json: !!flags.json,
-    debug: !!flags.debug,
     dryRun: !!flags.dryRun,
   });
+
+  renderLintOutput({ issues, summary, flags });
+
+  process.exitCode = summary.errorCount > 0 ? 1 : 0;
 }
 
 module.exports = { runLinter };

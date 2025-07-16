@@ -5,10 +5,21 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
-const { minimatch } = require('minimatch');
-const { fileHelpersPath } = require('@paths');
-const { findFiles, getPatternsFromArgs, getDefaultGlobIgnores } = require(fileHelpersPath);
-const { lintingConfigPath } = require('@paths');
+const {
+  minimatch
+} = require('minimatch');
+const {
+  fileHelpersPath,
+  projectRoot
+} = require('@paths');
+const {
+  findFiles,
+  getPatternsFromArgs,
+  getDefaultGlobIgnores
+} = require(fileHelpersPath);
+const {
+  lintingConfigPath
+} = require('@paths');
 
 function loadLintSection(section, configPath = lintingConfigPath) {
   const raw = fs.readFileSync(configPath, 'utf8');
@@ -29,9 +40,33 @@ function loadLintConfig(configPath = lintingConfigPath) {
   }
 }
 
-function findFilesArray(...args) {
-  return Array.from(findFiles(...args));
+function findFilesArray(inputs, opts = {}) {
+  const { debug = false } = opts;
+  if (debug) console.log(`[DEBUG] findFilesArray received inputs: ${JSON.stringify(inputs)}`);
+
+  const files = new Set();
+  const inputsArray = Array.isArray(inputs) ? inputs : [inputs];
+
+  for (const input of inputsArray) {
+    if (debug) console.log(`[DEBUG] Processing input: '${input}'`);
+    if (fs.existsSync(input) && fs.statSync(input).isDirectory()) {
+      if (debug) console.log(`[DEBUG] Input '${input}' is a directory, walking it recursively...`);
+      for (const file of findFiles(input, opts)) {
+        files.add(file);
+      }
+    } else {
+      if (debug) console.log(`[DEBUG] Input '${input}' is being treated as a glob pattern.`);
+      const { glob } = require('glob');
+      const matches = glob.sync(input, { nodir: true, ignore: opts.ignores || [], dot: true, absolute: true, cwd: projectRoot });
+      if (debug) console.log(`[DEBUG] Glob '${input}' matched ${matches.length} files.`);
+      matches.forEach(file => files.add(file));
+    }
+  }
+  const finalFiles = Array.from(files);
+  if (debug) console.log(`[DEBUG] findFilesArray finished, returning ${finalFiles.length} unique files.`);
+  return finalFiles;
 }
+
 
 function isExcluded(filePath, patterns) {
   const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
@@ -64,7 +99,6 @@ function parseCliArgs(args) {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 
-    // Add null safety check
     if (!arg) {
       console.error('Warning: Encountered null/undefined argument at index', i);
       continue;
@@ -114,10 +148,18 @@ function parseCliArgs(args) {
 
   // Debug output
   if (flags.debug) {
-    console.log('Parsed CLI args:', { flags, targets, only });
+    console.log('Parsed CLI args:', {
+      flags,
+      targets,
+      only
+    });
   }
 
-  return { flags, targets, only };
+  return {
+    flags,
+    targets,
+    only
+  };
 }
 
 function getFirstDir(filepath) {
@@ -142,13 +184,17 @@ function filterSteps(steps, searchTerm) {
     const search = searchTerm.toString().toLowerCase();
 
     return key.toLowerCase().includes(search) ||
-           label.toLowerCase().includes(search);
+      label.toLowerCase().includes(search);
   });
 }
 
 function getStepInfo(step) {
   if (!step) {
-    return { key: '', label: '', valid: false };
+    return {
+      key: '',
+      label: '',
+      valid: false
+    };
   }
 
   return {

@@ -1,9 +1,9 @@
 // test/integration/collections/collections-manager.test.js
 
 const {
-  collectionsIndexPath,
+  indexPath,
   cmUtilsPath,
-  collectionsConstantsPath
+  constantsPath
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -72,7 +72,7 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
         isValidPluginName: sinon.stub().returns(true),
       },
       yaml: { load: sinon.stub().returns({}) },
-      constants: require(collectionsConstantsPath),
+      constants: require(constantsPath),
       chalk: {
         blue: str => str, yellow: str => str, red: str => str,
         magenta: str => str, green: str => str, underline: str => str,
@@ -80,7 +80,7 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       }
     };
 
-    const collectionsManagerModule = proxyquire(collectionsIndexPath, {
+    const collectionsManagerModule = proxyquire(indexPath, {
       'fs': mockDependencies.fss,
       'fs/promises': mockDependencies.fs,
       'fs-extra': mockDependencies.fsExtra,
@@ -91,12 +91,12 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
         ...require('@paths'),
         loggerPath: testLoggerPath,
         cmUtilsPath,
-        collectionsConstantsPath,
+        constantsPath,
         collectionsCommandsRoot: require('@paths').collectionsCommandsRoot,
         validatorPath: require('@paths').validatorPath,
       },
       [cmUtilsPath]: mockDependencies.cmUtils,
-      [collectionsConstantsPath]: mockDependencies.constants
+      [constantsPath]: mockDependencies.constants
     });
     CollectionsManager = collectionsManagerModule;
   });

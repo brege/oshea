@@ -33,8 +33,8 @@ const factoryDefaultConfigPath = path.join(projectRoot, 'config.example.yaml');
 const collectionsRoot = path.join(srcRoot, 'collections');
 const cmUtilsPath = path.join(collectionsRoot, 'cm-utils.js');
 const collectionsCommandsRoot = path.join(collectionsRoot, 'commands');
-const collectionsConstantsPath = path.join(collectionsRoot, 'constants.js');
-const collectionsIndexPath = path.join(collectionsRoot, 'index.js');
+const constantsPath = path.join(collectionsRoot, 'constants.js');
+const indexPath = path.join(collectionsRoot, 'index.js');
 
 // Plugins
 const pluginsRoot = path.join(srcRoot, 'plugins');
@@ -47,8 +47,8 @@ const validatorPath = path.join(pluginsRoot, 'validator.js');
 // Completion
 const completionRoot = path.join(srcRoot, 'completion');
 const cliTreeBuilderPath = path.join(completionRoot, 'cli-tree-builder.js');
-const completionEnginePath = path.join(completionRoot, 'engine.js');
-const completionTrackerPath = path.join(completionRoot, 'tracker.js');
+const enginePath = path.join(completionRoot, 'engine.js');
+const trackerPath = path.join(completionRoot, 'tracker.js');
 const dynamicCompletionScriptPath = path.join(projectRoot, 'scripts', 'completion', 'generate-completion-dynamic-cache.js');
 
 // Config
@@ -69,7 +69,7 @@ const watchHandlerPath = path.join(coreRoot, 'watch_handler.js');
 // Validators
 const validatorsRoot = path.join(srcRoot, 'validators');
 const basePluginSchemaPath = path.join(validatorsRoot, 'base-plugin.schema.json');
-const v1ValidatorPath = path.join(validatorsRoot, 'v1.js');
+const v1Path = path.join(validatorsRoot, 'v1.js');
 
 // Utils
 const utilsRoot = path.join(srcRoot, 'utils');
@@ -116,8 +116,8 @@ module.exports = {
   collectionsRoot,
   cmUtilsPath,
   collectionsCommandsRoot,
-  collectionsConstantsPath,
-  collectionsIndexPath,
+  constantsPath,
+  indexPath,
 
   // Plugins
   pluginsRoot,
@@ -130,8 +130,8 @@ module.exports = {
   // Completion
   completionRoot,
   cliTreeBuilderPath,
-  completionEnginePath,
-  completionTrackerPath,
+  enginePath,
+  trackerPath,
   dynamicCompletionScriptPath,
 
   // Config
@@ -152,7 +152,7 @@ module.exports = {
   // Validators
   validatorsRoot,
   basePluginSchemaPath,
-  v1ValidatorPath,
+  v1Path,
 
   // Utils
   utilsRoot,

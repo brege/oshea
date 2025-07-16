@@ -1,6 +1,6 @@
 // src/cli/commands/plugin/createCmd.js
 const path = require('path');
-const { cmUtilsPath, pluginArchetyperPath, collectionsConstantsPath, loggerPath, templateBasicPlugin, cliPath } = require('@paths');
+const { cmUtilsPath, pluginArchetyperPath, constantsPath, loggerPath, templateBasicPlugin, cliPath } = require('@paths');
 const { execSync } = require('child_process');
 
 const logger = require(loggerPath);
@@ -13,7 +13,7 @@ const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
 const cmUtils = require(cmUtilsPath);
-const constants = require(collectionsConstantsPath);
+const constants = require(constantsPath);
 
 module.exports = {
   command: 'create <pluginName>',

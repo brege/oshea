@@ -1,9 +1,9 @@
 // src/completion/engine.js
-const { completionTrackerPath } = require('@paths');
+const { trackerPath } = require('@paths');
 
 const fs = require('fs');
 const path = require('path');
-const completionTracker = require(completionTrackerPath);
+const completionTracker = require(trackerPath);
 
 const CACHE_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.cache/md-to-pdf/cli-tree.json');
 

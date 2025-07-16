@@ -13,12 +13,12 @@ const os = require('os');
 const {
   projectRoot,
   pluginRegistryBuilderPath,
-  collectionsIndexPath,
+  indexPath,
   mainConfigLoaderPath,
 } = require('@paths');
 
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
-const CollectionsManager = require(collectionsIndexPath);
+const CollectionsManager = require(indexPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
 
 /**

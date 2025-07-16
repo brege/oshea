@@ -1,5 +1,5 @@
 // src/plugins/validator.js
-const { v1ValidatorPath, loggerPath } = require('@paths');
+const { v1Path, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
 const fs = require('fs');
@@ -7,7 +7,7 @@ const path = require('path');
 const yaml = require('js-yaml');
 
 // Load versioned validators
-const v1Validator = require(v1ValidatorPath);
+const v1Validator = require(v1Path);
 
 
 function resolvePluginPath(pluginIdentifier) {

@@ -7,12 +7,12 @@ const { spawn } = require('child_process');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
-const { cmUtilsPath, collectionsConstantsPath, collectionsCommandsRoot, loggerPath } = require('@paths');
+const { cmUtilsPath, constantsPath, collectionsCommandsRoot, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
 // Internal Utilities
 const cmUtils = require(cmUtilsPath);
-const constants = require(collectionsConstantsPath);
+const constants = require(constantsPath);
 
 // Command Modules
 const addCollectionCmd = require(path.join(collectionsCommandsRoot, 'add.js'));

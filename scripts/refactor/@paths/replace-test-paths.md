@@ -23,7 +23,7 @@ Replace all default pathlike requires (e.g. `const X = require('../../../src/foo
 
    - This script:
      - Rewrites default requires to use anchor variables (e.g. `const { pdfGeneratorPath } = require('@paths'); const X = require(pdfGeneratorPath);`)
-     - Handles directory imports (e.g. `require('../../../src/collections')` → `collectionsIndexPath`)
+     - Handles directory imports (e.g. `require('../../../src/collections')` → `indexPath`)
      - Skips package/builtin requires
      - Leaves unmatched requires unchanged and prints a `[NO ANCHOR]` warning
 

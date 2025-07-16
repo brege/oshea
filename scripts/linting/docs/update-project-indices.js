@@ -151,7 +151,7 @@ function scanGroup(name, config, opts = {}) {
       issues.push({
         file: indexRelPath,
         line: 1,
-        severity: 2,
+        severity: 1,
         rule: 'missing-index-entry',
         message: `Untracked file: '${rel}'`
       });

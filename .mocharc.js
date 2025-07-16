@@ -94,7 +94,7 @@ const levels = {
     paths.plugin_validator,
   ],
   // test/docs/checklist-level-3.md
-  level3: [ // atomic E2E tests
+  level3: [ // module E2E tests
     paths.e2e[0], // all-e2e.test.js
   ],
   // test/docs/checklist-level-4.md
@@ -140,7 +140,7 @@ const groups = {
   // Levels -- Integration Tests
   level1:          levels.level1,   // module
   level2:          levels.level2,   // subsystem
-  level3:          levels.level3,   // atomic e2e
+  level3:          levels.level3,   // module e2e
   level4:          levels.level4,   // workflow e2e
 
   // Commands -- Integration Tests

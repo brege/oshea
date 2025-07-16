@@ -62,6 +62,22 @@ remove-ws:
     - "plugins/**/.contract/**"
     - "test/fixtures/**"
 
+no-relative-paths:
+  targets:
+    - "src/**/*.js"
+    #- "test/**/*.js"
+    #- "plugins/**/*.js"
+    #- "scripts/**/*.js"
+    # fix these in batches
+    - "scripts/linting/**/*.js"
+    - "*.js"
+  excludes:
+    - "node_modules/**"
+    - ".git/**"
+    - "scripts/shared/**"
+    - "plugins/**"
+    - "test/fixtures/**"
+
 # --- Validators ---
 validate-mocha:
   excludes: []
@@ -69,6 +85,18 @@ validate-mocha:
 validate-paths:
   ignores:
     - config.yaml
+
+validate-paths-usage:
+  targets:
+    - "src"
+    - "scripts"
+    - "*.js"
+  ignores:
+    - "node_modules/**"
+    - ".git/**"
+    - "scripts/shared/**"
+    - "plugins/**"
+    - "test/fixtures/**"
 
 # --- Docs ---
 update-indices:
@@ -156,6 +184,9 @@ harness:
     - key: 'remove-auto-doc' 
       label: 'Code: Check for auto-doc comments'
       scriptPath: scripts/linting/code/remove-auto-doc.js
+    - key: no-relative-paths
+      label: 'Code: Check for relative paths'
+      scriptPath: scripts/linting/code/no-relative-paths.js
 
     # --- Validators ---
     - key: 'validate-mocha' 
@@ -164,6 +195,9 @@ harness:
     - key: 'validate-paths' 
       label: 'Validator: Check paths.js'
       scriptPath: scripts/linting/validators/paths-js-validator.js
+    - key: 'validate-paths-usage' 
+      label: 'Validator: Check paths usage'
+      scriptPath: scripts/linting/validators/paths-usage-validator.js
 
     # --- Docs ---
     - key: 'update-indices' 

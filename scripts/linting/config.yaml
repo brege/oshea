@@ -139,13 +139,13 @@ doc-links:
 # --- Harness Configuration ---
 harness:
   continueOnError: false
-  quiet: true
+  #quiet: true
   steps:
     # --- Code ---
     - key: 'remove-ws'
       label: 'Code: Strip Trailing Whitespace'
       scriptPath: scripts/linting/code/strip-trailing-whitespace.js
-      fix: true
+      #fix: true
     - key: 'standardize-line-one'
       label: 'Code: Standardize File Headers'
       scriptPath: scripts/linting/code/standardize-js-line-one-all.js

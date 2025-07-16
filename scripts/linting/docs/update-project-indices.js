@@ -8,16 +8,28 @@ const path = require('path');
 const glob = require('glob');
 const yaml = require('js-yaml');
 const chalk = require('chalk');
-const { lintingConfigPath, lintHelpersPath } = require('@paths');
+const {
+  lintingConfigPath,
+  lintHelpersPath,
+  formattersPath,
+  projectRoot
+} = require('@paths');
+
 const { parseCliArgs } = require(lintHelpersPath);
+const { adaptRawIssuesToEslintFormat, formatLintResults } = require(formattersPath);
 
 const START_MARKER = '<!-- uncategorized-start -->';
 const END_MARKER = '<!-- uncategorized-end -->';
 const LINT_SKIP_TAG = 'lint-skip-index';
 const THIS_SCRIPT = path.resolve(__filename);
 
+function padRight(str = '', len = 20) {
+  return str + ' '.repeat(Math.max(0, len - str.length));
+}
+
 function getDocignoreDirs(root) {
-  let ignoredDirs = [];
+  const ignoredDirs = [];
+
   function walk(dir) {
     let entries;
     try {
@@ -30,11 +42,12 @@ function getDocignoreDirs(root) {
       return;
     }
     for (const entry of entries) {
-      if (entry.isDirectory() && entry.name !== 'node_modules' && entry.name !== '.git') {
+      if (entry.isDirectory() && !['node_modules', '.git'].includes(entry.name)) {
         walk(path.join(dir, entry.name));
       }
     }
   }
+
   walk(root);
   return ignoredDirs.map(absDir => path.relative(process.cwd(), absDir).replace(/\\/g, '/') + '/**');
 }
@@ -56,12 +69,11 @@ function getExistingLinks(content, baseDir) {
       const abs = path.resolve(baseDir, rawLink);
       const rel = path.relative(baseDir, abs).replace(/\\/g, '/');
       links.add(rel);
-
       if (hasBlock && match.index > startIdx && match.index < endIdx) {
         uncatLinks.add(rel);
       }
-    } catch (_e) {
-      // ignore
+    } catch {
+      void 0;
     }
   }
 
@@ -77,7 +89,7 @@ function fileHasLintSkip(file) {
   }
 }
 
-function scanGroup(groupName, groupConfig, opts = {}) {
+function scanGroup(name, config, opts = {}) {
   const {
     fix = false,
     dryRun = false,
@@ -90,39 +102,40 @@ function scanGroup(groupName, groupConfig, opts = {}) {
     fileExtensions,
     excludePatterns = [],
     fix: configFix = false
-  } = groupConfig;
+  } = config;
 
   const allowFix = fix || configFix;
   const indexAbsPath = path.resolve(indexFile);
   const indexDir = path.dirname(indexAbsPath);
 
+  let issues = [];
+
   if (!fs.existsSync(indexAbsPath)) {
-    return [
-      {
-        file: indexFile,
-        line: 1,
-        message: `Index file not found for group: '${groupName}'`,
-        rule: 'missing-index-file',
-        severity: 2
-      }
-    ];
+    issues.push({
+      file: path.relative(process.cwd(), indexFile),
+      line: 1,
+      message: `Index file not found for group: '${name}'`,
+      rule: 'missing-index-file',
+      severity: 1
+    });
+    return issues;
   }
 
   const content = fs.readFileSync(indexAbsPath, 'utf8');
   const lines = content.split('\n');
   const { allLinks, uncatLinks } = getExistingLinks(content, indexDir);
 
-  const scanRoots = Array.isArray(scanRoot) ? scanRoot : [scanRoot];
-  let allFiles = [];
+  const roots = Array.isArray(scanRoot) ? scanRoot : [scanRoot];
+  let collected = [];
 
   if (debug) {
-    console.log(`[DEBUG] Group: ${groupName}`);
-    console.log(`  indexFile: ${indexFile}`);
-    console.log(`  scanRoots: ${scanRoots.join(', ')}`);
-    console.log(`  extension(s): ${fileExtensions.join(', ')}`);
+    console.log(`\n[DEBUG] Group: ${name}`);
+    console.log(`  ${padRight('Index file')}: ${indexFile}`);
+    console.log(`  ${padRight('Scan roots')}: ${roots.join(', ')}`);
+    console.log(`  ${padRight('Extensions')}: ${fileExtensions.join(', ')}`);
   }
 
-  for (const root of scanRoots) {
+  for (const root of roots) {
     const extPattern = fileExtensions.length > 1
       ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}`
       : fileExtensions[0].replace(/^\./, '');
@@ -130,93 +143,79 @@ function scanGroup(groupName, groupConfig, opts = {}) {
     const docignore = getDocignoreDirs(root);
     const ignoreGlobs = [...excludePatterns, '**/node_modules/**', '**/.git/**', ...docignore];
 
-    if (debug) {
-      console.log(`  globPattern: ${globPattern}`);
-      if (docignore.length) console.log(`  docignore: ${JSON.stringify(docignore)}`);
-    }
+    const files = glob.sync(globPattern, { ignore: ignoreGlobs, nodir: true });
+    collected = [...collected, ...files];
 
-    const matches = glob.sync(globPattern, {
-      ignore: ignoreGlobs,
-      nodir: true
-    });
-
-    allFiles = allFiles.concat(matches);
     if (debug) {
-      console.log(`  matched files: ${matches.length}`);
+      const entryPad = '    - ';
+      console.log(`${entryPad}${globPattern.padEnd(48)} → ${files.length} file(s)`);
+      if (docignore.length) {
+        console.log(`  ${padRight('  .docignore')}: [${docignore.join(', ')}]`);
+      }
     }
   }
 
-  const filesToIndex = allFiles.filter(f => !fileHasLintSkip(f));
-  const issues = [];
+  const filesToIndex = collected.filter(f => !fileHasLintSkip(f));
+
+  const indexRelPath = path.relative(projectRoot, indexAbsPath);
+  const missingEntries = [];
 
   for (const file of filesToIndex) {
     const rel = path.relative(indexDir, file).replace(/\\/g, '/');
 
     if (allLinks.has(rel)) {
-      // fully tracked — nothing to report
+      continue;
     } else if (uncatLinks.has(rel)) {
       issues.push({
-        file: path.relative(process.cwd(), indexAbsPath),
+        file: indexRelPath,
         line: 1,
-        message: `File found under <!-- uncategorized --> but not formally grouped: '${rel}'`,
+        severity: 1, // warning
         rule: 'uncategorized-index-entry',
-        severity: 1
+        message: `Uncategorized index entry: '${rel}'`
       });
     } else {
-      // missing from any form of index
       issues.push({
-        file: path.relative(process.cwd(), indexAbsPath),
+        file: indexRelPath,
         line: 1,
-        message: `Untracked file: '${rel}'`,
+        severity: 2, // error
         rule: 'missing-index-entry',
-        severity: 2
+        message: `Untracked file: '${rel}'`
       });
+      missingEntries.push(rel);
     }
   }
 
-  // fix logic only for full missing (both types)
-  const missingRel = issues.filter(i => i.rule === 'missing-index-entry').map(i => {
-    const match = /Untracked file: '(.*?)'/.exec(i.message);
-    return match?.[1];
-  }).filter(Boolean);
+  // Around line 100-140 in scanGroup function, replace the end of the function with:
 
-  if (allowFix && missingRel.length > 0) {
+  if (allowFix && missingEntries.length > 0) {
     const startIdx = lines.findIndex(l => l.trim() === START_MARKER);
     const endIdx = lines.findIndex(l => l.trim() === END_MARKER);
 
-    let existingEntries = new Set();
+    const additions = missingEntries.map(p => `- [${path.basename(p)}](${p})`);
+    const before = lines.slice(0, startIdx + 1);
+    const after = lines.slice(endIdx);
+    const block = [...new Set([...lines.slice(startIdx + 1, endIdx), ...additions])];
 
-    if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-      for (let i = startIdx + 1; i < endIdx; i++) {
-        const match = /^\s*-\s*\[.*\]\((.*?)\)/.exec(lines[i]);
-        if (match) {
-          existingEntries.add(match[1]);
+    const newContent = startIdx !== -1 && endIdx !== -1
+      ? [...before, ...block, ...after].join('\n')
+      : `${content}\n\n${START_MARKER}\n${additions.join('\n')}\n${END_MARKER}`;
+
+    if (!dryRun) {
+      fs.writeFileSync(indexAbsPath, newContent, 'utf8');
+      // After successfully fixing, remove the missing-index-entry errors from issues
+      const fixedFiles = new Set(missingEntries);
+      issues = issues.filter(issue => {
+        if (issue.rule === 'missing-index-entry') {
+          const fileName = issue.message.match(/'([^']+)'/)?.[1];
+          return !fixedFiles.has(fileName);
         }
-      }
-    }
-
-    const additions = new Set(missingRel.filter(p => !existingEntries.has(p)));
-    if (additions.size > 0) {
-      const newLines = Array.from(additions).map(p => `- [${path.basename(p)}](${p})`);
-
-      let newContent;
-      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
-        const before = lines.slice(0, startIdx + 1);
-        const middle = lines.slice(startIdx + 1, endIdx);
-        const after = lines.slice(endIdx);
-        const updatedBlock = [...new Set([...middle, ...newLines])];
-        newContent = [...before, ...updatedBlock, ...after].join('\n');
-      } else {
-        newContent = `${content}\n\n${START_MARKER}\n${newLines.join('\n')}\n${END_MARKER}`;
-      }
-
-      if (!dryRun) {
-        fs.writeFileSync(indexAbsPath, newContent, 'utf8');
-      }
+        return true;
+      });
     }
   }
 
   return issues;
+
 }
 
 async function runLibrarian({
@@ -225,58 +224,64 @@ async function runLibrarian({
   quiet = false,
   json = false,
   debug = false,
-  dryRun = false,
-  force = false
+  dryRun = false
 } = {}) {
   const configYaml = fs.readFileSync(lintingConfigPath, 'utf8');
   const parsedConfig = yaml.load(configYaml);
   const groups = parsedConfig['update-indices'] || {};
-  const targetGroups = group ? [group] : Object.keys(groups);
+  const groupList = group ? [group] : Object.keys(groups);
   const allIssues = [];
 
-  for (const g of targetGroups) {
+  for (const g of groupList) {
     const cfg = groups[g];
-    if (!cfg) continue;
-    const issues = scanGroup(g, cfg, { fix, dryRun, quiet, json, debug });
-    allIssues.push(...issues);
+    if (cfg) {
+      const groupIssues = scanGroup(g, cfg, { fix, dryRun, debug });
+      allIssues.push(...groupIssues);
+    }
   }
+
+  const formatted = formatLintResults(adaptRawIssuesToEslintFormat(allIssues));
 
   if (json) {
     process.stdout.write(JSON.stringify({ issues: allIssues }, null, 2) + '\n');
   } else if (!quiet) {
-    const missing = allIssues.filter(i => i.rule === 'missing-index-entry');
-    const uncategorized = allIssues.filter(i => i.rule === 'uncategorized-index-entry');
-
-    for (const issue of [...missing, ...uncategorized]) {
-      const file = chalk.yellow(`${issue.file}:${issue.line}`);
-      const rule = chalk.magenta(issue.rule);
-      console.log(`${file} - ${rule}: ${issue.message}`);
+    if (formatted) {
+      console.log('\n' + formatted);
+    } else {
+      console.log(chalk.green('\n✔ All index files are up to date.'));
     }
 
-    if (missing.length === 0 && uncategorized.length > 0) {
-      console.log(chalk.gray(`\nFound ${uncategorized.length} uncategorized but discoverable entry(ies).`));
-      console.log(chalk.gray('\n  Tip: To suppress indexing:'));
-      console.log(chalk.gray('    - Add \'lint-skip-index\' to the file'));
-      console.log(chalk.gray('    - Use \'excludePatterns\' in config'));
-      console.log(chalk.gray('    - Create a .docignore file in the directory'));
+    const uncategorized = allIssues.filter(i => i.rule === 'uncategorized-index-entry');
+    const missing = allIssues.filter(i => i.rule === 'missing-index-entry');
+
+    if (uncategorized.length > 0 && missing.length === 0) {
+      console.log(chalk.gray('\nℹ Uncategorized but discoverable files:'));
+      uncategorized.forEach(i => {
+        console.log(`  • ${i.message.match(/'([^']+)'/)?.[1] || '?'}`);
+      });
+
+      console.log('\nTo suppress indexing warnings, you may:');
+      console.log('  • Add `lint-skip-index` to the file');
+      console.log('  • Use `excludePatterns` in your config');
+      console.log('  • Create a `.docignore` file in the directory');
     }
 
     if (missing.length > 0 && !fix) {
-      console.log(chalk.cyan('\nRun with --fix or set fix: true in config to insert missing entries.'));
+      console.log('\nRun with --fix or set fix: true in config to insert missing entries.');
     }
   }
 
-  const blocking = allIssues.filter(i => i.rule === 'missing-index-entry').length;
-  process.exitCode = blocking > 0 && !fix ? 1 : 0;
+  const exitCode = allIssues.some(i => i.severity === 2) ? 1 : 0;
+  process.exitCode = exitCode;
 
   return { issueCount: allIssues.length };
 }
 
-// Entry
+// CLI Entry
 if (require.main === module) {
   const { flags } = parseCliArgs(process.argv.slice(2));
-  const groupFlag = Object.keys(flags).find(f => f.startsWith('group='));
-  const group = groupFlag ? flags[groupFlag].split('=')[1] || groupFlag.split('=')[1] : null;
+  const groupFlagKey = Object.keys(flags).find(k => k.startsWith('group='));
+  const group = groupFlagKey ? groupFlagKey.split('=')[1] : null;
 
   runLibrarian({
     group,
@@ -284,8 +289,7 @@ if (require.main === module) {
     quiet: !!flags.quiet,
     json: !!flags.json,
     debug: !!flags.debug,
-    dryRun: !!flags.dryRun,
-    force: !!flags.force
+    dryRun: !!flags.dryRun
   });
 }
 

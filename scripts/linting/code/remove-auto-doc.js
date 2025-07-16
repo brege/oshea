@@ -5,14 +5,14 @@ require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
-const { lintHelpersPath, lintingConfigPath } = require('@paths');
+const { lintHelpersPath, lintingConfigPath, formattersPath } = require('@paths');
 const {
   loadLintSection,
   findFilesArray,
   isExcluded,
   parseCliArgs,
 } = require(lintHelpersPath);
+const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
 
 const BLOCK_COMMENT_REGEX = /\/\*\*[\r\n][\s\S]*?\*\//g;
 
@@ -84,27 +84,9 @@ function runLinter({
         column: 1,
         message: `Found auto-doc block comment spanning lines ${match.startLine}-${match.endLine}.`,
         rule: 'no-auto-doc',
+        severity: 1, // Warning
         snippet: match.text
       });
-
-      if (!quiet && !json) {
-        const header = `[lint] ${relPath}:${match.startLine}-${match.endLine}`;
-        console.log(chalk.yellow(header));
-
-        const previewLines = match.text.split('\n');
-        const preview = previewLines.slice(0, 5).map(line => chalk.dim('  ' + line));
-        preview.forEach(line => console.log(line));
-
-        if (previewLines.length > 5) {
-          console.log(chalk.dim('  ...'));
-        }
-
-        if (fix && dryRun) {
-          console.log(chalk.gray(`  [dry-run] Would remove block from ${relPath}`));
-        }
-
-        console.log('');
-      }
     }
 
     if (fix && result.matches.length > 0) {
@@ -122,25 +104,28 @@ function runLinter({
   }
 
   if (!quiet) {
-    if (json) {
-      process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
-    } else {
-      if (issues.length > 0) {
-        console.log(`Found ${issues.length} auto-doc block(s) in ${new Set(issues.map(i => i.file)).size} file(s).`);
+    const eslintResults = adaptRawIssuesToEslintFormat(issues);
+    const formattedOutput = formatLintResults(eslintResults, 'stylish');
 
-        if (fix && !dryRun) {
-          console.log(`Fixed ${fixedFilesCount} file(s) by removing blocks.`);
-        } else if (fix && dryRun) {
-          console.log(`[dry-run] Would have fixed ${fixedFilesCount} file(s).`);
-        } else {
-          console.log('Run with --fix to automatically remove these blocks.');
-        }
-
-        console.log('');
-      } else {
-        console.log('No auto-doc blocks found.');
-      }
+    if (formattedOutput) {
+      console.log(formattedOutput);
     }
+
+    if (issues.length > 0) {
+      if (fix && !dryRun) {
+        console.log(`✔ Fixed ${fixedFilesCount} file(s) by removing blocks.`);
+      } else if (fix && dryRun) {
+        console.log(`[dry-run] Would have fixed ${fixedFilesCount} file(s).`);
+      } else {
+        console.log('\nRun with --fix to automatically remove these blocks.');
+      }
+    } else {
+      console.log('✔ No auto-doc blocks found.');
+    }
+  }
+
+  if (json) {
+    process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
   }
 
   if (debug) {
@@ -151,7 +136,8 @@ function runLinter({
     }
   }
 
-  process.exitCode = issues.length > 0 && !fix ? 1 : 0;
+  const errorCount = issues.filter(issue => issue.severity === 2).length;
+  process.exitCode = errorCount > 0 ? 1 : 0;
 
   return { issueCount: issues.length, fixedCount: fixedFilesCount };
 }
@@ -183,4 +169,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

@@ -16,9 +16,18 @@ function runStep({ label, command, args, ignoreFailure = false, dryRun = false }
   }
 
   const result = spawnSync(command, args, {
-    stdio: 'inherit',
+    stdio: 'pipe',
+    encoding: 'utf-8',
     cwd: projectRoot,
+    env: { ...process.env, FORCE_COLOR: '1' }, // Force color output
   });
+
+  const stdout = result.stdout.trim();
+  const stderr = result.stderr.trim();
+
+  if (stdout) console.log(stdout);
+  if (stderr) console.error(chalk.red(stderr));
+
 
   if (result.error) {
     console.error(chalk.red(`\n--- ERROR: Failed to spawn ${command}: ${result.error.message}`));
@@ -27,14 +36,19 @@ function runStep({ label, command, args, ignoreFailure = false, dryRun = false }
 
   if (result.status !== 0) {
     if (ignoreFailure) {
-      console.warn(chalk.yellow(`\n--- WARNING: ${label} completed with non-zero exit code ${result.status} (ignored) ---`));
+      console.warn(chalk.yellow(`--- Step finished with non-zero exit code ${result.status} (ignored) ---`));
       return true;
     }
     console.error(chalk.red(`\n--- ERROR: ${label} failed with exit code ${result.status} ---`));
     return false;
   }
 
-  console.log(chalk.green(`--- SUCCESS: Finished ${label} ---`));
+  if (stdout.includes('problems') || stdout.includes('warnings')) {
+    console.log(chalk.yellow(`--- COMPLETED (with warnings): ${label} ---`));
+  } else {
+    console.log(chalk.green(`--- SUCCESS: ${label} ---`));
+  }
+
   return true;
 }
 
@@ -48,7 +62,7 @@ function runHarness(config, globalFlags, targets, only) {
   const flagList = ['fix', 'quiet', 'json', 'debug', 'force', 'dryRun'];
 
   for (const step of lintSteps) {
-    const stepLabel = step.label ? step.label.toLowerCase() : '';
+    const stepLabel = step.label || '';
     const stepKey = step.key || '';
 
     let labelMatch = false;
@@ -56,19 +70,15 @@ function runHarness(config, globalFlags, targets, only) {
 
     if (only) {
       const onlyLower = only.toLowerCase();
-      labelMatch = stepLabel.includes(onlyLower);
+      labelMatch = stepLabel.toLowerCase().includes(onlyLower);
       keyMatch = stepKey.toLowerCase() === onlyLower;
     }
 
-    const skipByOnly = only && !(labelMatch || keyMatch);
-    const skipByConfig = step.skip !== undefined
-      ? step.skip
-      : (harnessDefaults.skip !== undefined ? harnessDefaults.skip : false);
-
     const skipByFlag = globalFlags.skip &&
-      stepLabel.includes(globalFlags.skip.toLowerCase());
+        (stepKey.toLowerCase() === globalFlags.skip.toLowerCase() ||
+         stepLabel.toLowerCase().includes(globalFlags.skip.toLowerCase()));
 
-    const shouldSkip = skipByOnly || skipByConfig || skipByFlag;
+    const shouldSkip = only ? !(labelMatch || keyMatch) : skipByFlag;
 
     if (shouldSkip) {
       console.log(chalk.yellow(`\n--- SKIPPED: ${step.label} ---`));
@@ -77,28 +87,15 @@ function runHarness(config, globalFlags, targets, only) {
 
     let command, commandArgs;
 
-    // Fixed flag resolution logic for runHarness function
     const resolvedFlags = {};
     for (const flag of flagList) {
-      if (flag === 'json' && step.command === 'eslint') {
-        resolvedFlags.json = step.json === true;
-      } else if (flag === 'dryRun') {
+      if (flag === 'dryRun') {
         resolvedFlags.dryRun = globalFlags.dryRun === true;
       } else {
-        // Fixed logic: Only use globalFlags if they are explicitly set to true
-        // Otherwise, fall back to step config, then harness defaults
-        if (globalFlags[flag] === true) {
-          resolvedFlags[flag] = true;
-        } else {
-          resolvedFlags[flag] =
-        step[flag] !== undefined
-          ? step[flag]
-          : (harnessDefaults[flag] !== undefined ? harnessDefaults[flag] : false);
-        }
+        resolvedFlags[flag] = globalFlags[flag] === true || step[flag] === true || harnessDefaults[flag] === true;
       }
     }
 
-    // Construct command and args
     if (step.command) {
       command = (step.command === 'eslint') ? eslintPath : step.command;
       const stepTargets = targets.length > 0 ? targets : (step.defaultTargets || []);

@@ -3,78 +3,89 @@
 
 require('module-alias/register');
 
-const yaml = require('js-yaml');
+const chalk = require('chalk');
 const { lintingConfigPath, lintHelpersPath, lintingHarnessPath } = require('@paths');
 const { loadLintConfig, parseCliArgs } = require(lintHelpersPath);
 const { runHarness } = require(lintingHarnessPath);
 
+function printHelp() {
+  console.log(`md-to-pdf Linter
+
+Usage:
+  node scripts/linting/lint.js [options] [targets...]
+  node scripts/linting/lint.js --only <step_key>
+  node scripts/linting/lint.js --list
+
+Description:
+  The main orchestrator for running code quality and documentation linters.
+  Reads steps from 'scripts/linting/config.yaml' and executes them in order.
+
+Options:
+      --only <key>         run only the step matching the specified key
+      --skip <key>         skip the step matching the specified key
+
+      --fix                attempt to automatically fix any fixable issues
+      --dry-run            preview fixes without writing to disk
+      --force              run even if 'excludes' apply in configuration
+
+      --quiet              suppress all output except for errors
+      --debug              display detailed debug output (if supported)
+      --json               output linter results in JSON format
+
+      --list               list available linter steps and their keys
+  -h, --help               display this help message
+
+Examples:
+  # Run all configured linters
+  $ node scripts/linting/lint.js
+  # or
+  $ npm run lint
+
+  # Run only the ESLint step
+  $ node scripts/linting/lint.js --only eslint
+
+  # Try fixing everything
+  $ node scripts/linting/lint.js --fix
+
+  # Run postman-link validator in dry-run mode with debug logging
+  $ node scripts/linting/lint.js --only doc-links --fix --dry-run --debug
+`);
+}
+
+
 function main() {
   const { flags, targets, only } = parseCliArgs(process.argv.slice(2));
 
+  // Handle --help or -h
+  if (flags.help || flags.h) {
+    printHelp();
+    process.exit(0);
+  }
+
   try {
     const fullConfig = loadLintConfig(lintingConfigPath);
-    const topLevelKeys = Object.keys(fullConfig || {});
     const harnessSteps = fullConfig.harness?.steps || [];
-
-    // Handle --config
-    if (flags.config) {
-      let output;
-
-      if (only) {
-        if (topLevelKeys.includes(only)) {
-          output = { [only]: fullConfig[only] };
-        } else {
-          console.error(`No top-level config section found matching: "${only}"`);
-          process.exit(1);
-        }
-      } else {
-        output = fullConfig;
-      }
-
-      const formatted = flags.json
-        ? JSON.stringify(output, null, 2)
-        : yaml.dump(output, { noRefs: true });
-
-      console.log(formatted);
-      process.exit(0);
-    }
 
     // Handle --list
     if (flags.list) {
-      let filtered = harnessSteps;
-      if (only) {
-        filtered = harnessSteps.filter(step => {
-          const key = step.key || '';
-          const label = step.label || '';
-          const search = only.toLowerCase();
-          return key.toLowerCase().includes(search) ||
-                 label.toLowerCase().includes(search);
+      console.log(chalk.bold.underline('Available Linter Steps:'));
+
+      const filtered = only
+        ? harnessSteps.filter(step =>
+          (step.key || '').toLowerCase().includes(only.toLowerCase()) ||
+            (step.label || '').toLowerCase().includes(only.toLowerCase()))
+        : harnessSteps;
+
+      if (filtered.length > 0) {
+        filtered.forEach(step => {
+          console.log(`  ${chalk.cyan((step.key || '').padEnd(20))} ${step.label}`);
         });
-      }
-
-      const rows = filtered.map(step => ({
-        Key: step.key || '',
-        Label: step.label || '',
-      }));
-
-      if (rows.length > 0) {
-        const pad = (str, len) => str.padEnd(len, ' ');
-        const keyWidth = Math.max(...rows.map(r => r.Key.length), 8);
-        const labelWidth = Math.max(...rows.map(r => r.Label.length), 8);
-
-        console.log('┌' + '─'.repeat(keyWidth + 2) + '┬' + '─'.repeat(labelWidth + 2) + '┐');
-        console.log(`│ ${pad('Key', keyWidth)} │ ${pad('Label', labelWidth)} │`);
-        console.log('├' + '─'.repeat(keyWidth + 2) + '┼' + '─'.repeat(labelWidth + 2) + '┤');
-
-        for (const row of rows) {
-          console.log(`│ ${pad(row.Key, keyWidth)} │ ${pad(row.Label, labelWidth)} │`);
-        }
-
-        console.log('└' + '─'.repeat(keyWidth + 2) + '┴' + '─'.repeat(labelWidth + 2) + '┘');
       } else {
         console.log('No matching steps found.');
       }
 
+      console.log('\nUsage: node scripts/linting/lint.js --only <key>');
+      console.log(chalk.gray('Tip: Use \'node scripts/linting/lint.js --help\' for all options.'));
       process.exit(0);
     }
 

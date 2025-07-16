@@ -7,8 +7,18 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const paths = require('@paths');
-const { lintHelpersPath, lintingConfigPath } = require('@paths');
+const {
+  lintHelpersPath,
+  lintingConfigPath,
+  formattersPath,
+  projectRoot
+} = require('@paths');
+
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
+const {
+  adaptRawIssuesToEslintFormat,
+  formatLintResults
+} = require(formattersPath);
 
 function isIgnored(filePath, ignores) {
   return (ignores || []).some(ignored =>
@@ -32,8 +42,8 @@ function runValidator({
   json = false,
   debug = false,
   dryRun = false,
-  fix = false,     // stubbed by policy
-  force = false,   // stubbed by policy
+  fix = false,     // policy stub
+  force = false,   // policy stub
   config = {}
 } = {}) {
   const ignores = config.ignores || [];
@@ -43,18 +53,22 @@ function runValidator({
   for (const [name, filePath] of walkRegistry(paths)) {
     if (typeof filePath !== 'string') continue;
 
+    const relPath = path.isAbsolute(filePath)
+      ? path.relative(projectRoot, filePath)
+      : filePath;
+
     if (isIgnored(filePath, ignores)) {
-      results.push({ type: 'ignored', name, filePath });
+      results.push({ type: 'ignored', name, filePath: relPath });
       continue;
     }
 
     if (fs.existsSync(filePath)) {
-      results.push({ type: 'found', name, filePath });
+      results.push({ type: 'found', name, filePath: relPath });
     } else {
-      results.push({ type: 'missing', name, filePath });
+      results.push({ type: 'missing', name, filePath: relPath });
       issues.push({
         file: 'paths.js',
-        message: `Entry '${name}' expected file at path: ${filePath}. File not found.`,
+        message: `Entry '${name}' expected file at path: ${relPath}. File not found.`,
         rule: 'missing-path-entry',
         severity: 2
       });
@@ -68,37 +82,53 @@ function runValidator({
   };
 
   if (!quiet) {
-    if (json) {
-      process.stdout.write(JSON.stringify({ summary, results, issues }, null, 2) + '\n');
-    } else {
-      console.log('Validating entries in @paths:');
-      console.log('-------------------------------------');
-
-      for (const res of results) {
-        if (res.type === 'found') {
-          console.log(chalk.green(`  FOUND   : ${res.name} -> ${res.filePath}`));
-        } else if (res.type === 'missing') {
-          console.log(chalk.red(`  MISSING : ${res.name} -> ${res.filePath}`));
-        } else if (res.type === 'ignored') {
-          console.log(chalk.gray(`  IGNORED : ${res.name} -> ${res.filePath}`));
-        }
-      }
-
-      console.log('-------------------------------------');
-      if (summary.missing === 0) {
-        console.log(chalk.green('Validation complete. All paths are valid.'));
-      } else {
-        console.log(chalk.yellow(`Validation complete: ${summary.missing} missing path(s).`));
-      }
+    const formatted = formatLintResults(adaptRawIssuesToEslintFormat(issues));
+    if (formatted) {
+      console.log(formatted);
     }
+
+    if (issues.length === 0 && !json) {
+      console.log('✔ No problems');
+      console.log('✔ All path entries in paths.js are valid.');
+    }
+  }
+
+  if (debug && results.length > 0) {
+    console.log('\n[DEBUG] Validated @paths entries:');
+
+    const maxNameLength = Math.max(...results.map(r => r.name.length));
+    const padKey = key =>
+      key.length > 60 ? key.slice(0, 57) + '...' : key.padEnd(maxNameLength, ' ');
+
+    for (const res of results) {
+      const symbol =
+        res.type === 'found'
+          ? chalk.green('[✓]')
+          : res.type === 'missing'
+            ? chalk.red('[✗]')
+            : chalk.gray('[–]');
+
+      const trail =
+        res.type === 'missing'
+          ? chalk.gray('→ NOT FOUND')
+          : res.type === 'ignored'
+            ? chalk.gray('→ IGNORED')
+            : '';
+
+      console.log(`  ${symbol} ${padKey(res.name)} → ${res.filePath} ${trail}`);
+    }
+  }
+
+
+  if (json) {
+    process.stdout.write(JSON.stringify({ summary, results, issues }, null, 2) + '\n');
   }
 
   if (debug && dryRun) {
     console.log('[DEBUG] Dry-run mode enabled — no files were written.');
   }
 
-  process.exitCode = summary.missing === 0 ? 0 : 1;
-
+  process.exitCode = summary.missing > 0 ? 1 : 0;
   return { summary, results, issues };
 }
 

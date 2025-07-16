@@ -43,7 +43,7 @@ When all eight atomic lints satisfy an **L?**, we may check that item off.
 - [x] **Lc** Clear domain separation (code, docs, validators)
 - [x] **Ld** ★ Uses **unified linter config** `lint.yaml`
 - [x] **Le** Hardcoded variables removed and declared in the linter config.
-- [ ] **Lf** Human-readable (`--pretty`) *implicitly*
+- [x] **Lf** Human-readable (`--pretty`) *implicitly*
 - [x] **Lg** Machine-readable (`--json`) *explicitly*
 - [x] **Lh** Universal CLI options: `--fix`, `--quiet`, `--debug`, `--force`
 - [x] **Li** Common boilerplate moved to `scripts/shared/lint-helpers.js`
@@ -71,16 +71,39 @@ From `scripts/refactor/`, decide which refactor scripts to part-out to lints.
 
 **Automated Smoke Testing.** \
 Construct validation harness to smoke-test `md-to-pdf`'s state-preserving CLI options.
-- [ ] `test/smoke/validate-help.js` moved from `scripts/validators/validate-help.js`
-- [ ] `test/smoke/validate-plugins.js` ( `md-to-pdf plugin validate --all` )
-- [ ] `test/smoke/validate-config.js` ( `md-to-pdf config <options>` )
-- [ ] `test/smoke/validate-listing.js` ( `md-to-pdf collection list <options>`)
+- [ ] `test/smoke/validate-app-help.js` moved from `scripts/validators/validate-help.js`
+- [ ] `test/smoke/validate-bundled-plugins.js` ( `md-to-pdf plugin validate --all` )
+- [ ] `test/smoke/validate-app-config.js` ( `md-to-pdf config <options>` )
+- [ ] `test/smoke/validate-plugin-list.js` ( `md-to-pdf plugin/collection list <options>`)
 
 **Evolve pathing linters.** \
 Enhance into first-class validators
 - [ ] `paths-js-validator.js`: validate `const { fooPath } = require('@paths');` for all `src/**/*.js`.
 - [ ] ★ Prototype path registry generator [ can double as anchor in `logger.debug() `]
+- [ ] Find unused entries (eslint does not do this for us)
 - [x] `mocha-path-validator.js`: may be feature-complete.
+
+**Add new config options.**
+- [ ] Change the `severity` of a linter based on branch:
+    ```yaml
+    severity-bump:
+      develop: 0      # no change
+      main: 1         # bump all warnings to errors
+    ```
+- [ ] Change the `severity: 1,2,..` for a linter based atomic linter.
+- [ ] Add aliases for and/or groups of linters:
+    ```yaml
+    groups:
+      code: ["remove-ws", "standardize-line-one", .. ]
+    remove-ws:
+      alias: ["ws", "whitespace"]
+      group: ["code"]
+    ```
+    and via `--only code` or `--skip docs`.
+
+**Testing for the linters.**
+- [ ] Build a dummy suite as a test fixture for the setup to reliable test them on.
+ 
 
 ### 3. Centralized Linting Infrastructure
 
@@ -111,7 +134,8 @@ Ergonomics and user-friendliness.
 - [x] `--dry-run`: show what would run without executing
 - [x] `--skip `: skip a specific step by label or alias
 - [ ] Aggregate results: collect and summarize pass/fail status for all steps
-- [ ] Add support for `--config ` to load an alternate config file (*maybe*)
+- [ ] ~~Add support for `--config ` to load an alternate config file (*maybe*)~~
+  - *determinantion:* do this option when applying it to other projects.
 
 **Meta-Linter.** \
 Validation and quality control.

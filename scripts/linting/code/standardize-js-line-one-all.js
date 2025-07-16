@@ -5,17 +5,16 @@ require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const chalk = require('chalk');
 const { minimatch } = require('minimatch');
-const { lintHelpersPath, lintingConfigPath } = require('@paths');
+const { lintHelpersPath, lintingConfigPath, formattersPath } = require('@paths');
 const {
   findFilesArray,
   parseCliArgs,
-  getFirstDir,
   getPatternsFromArgs,
   getDefaultGlobIgnores,
   loadLintSection,
 } = require(lintHelpersPath);
+const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
 
 function runLinter({
   patterns = [],
@@ -57,7 +56,6 @@ function runLinter({
     const actualHeaderPath = headerMatch?.[1]?.trim() ?? '';
     const reportLine = headerLineIndex + 1;
 
-    // Check if the header is missing
     if (!currentHeader || !currentHeader.startsWith('//')) {
       issues.push({
         file: relPath,
@@ -65,20 +63,15 @@ function runLinter({
         column: 1,
         message: 'Missing file header comment.',
         rule: 'file-header',
-        severity: 2,
+        severity: 1, // Warning
       });
 
       if (fix && !dryRun) {
-        if (headerLineIndex === 1) {
-          lines.splice(1, 0, expectedHeader);
-        } else {
-          lines.unshift(expectedHeader);
-        }
+        lines.splice(headerLineIndex, 0, expectedHeader);
         changed = true;
       }
 
     } else {
-      // Header exists — check path mismatch
       if (actualHeaderPath !== relPath) {
         issues.push({
           file: relPath,
@@ -86,28 +79,13 @@ function runLinter({
           column: 1,
           message: `Incorrect header path. Expected: "${relPath}", Found: "${actualHeaderPath}"`,
           rule: 'file-header',
-          severity: 2,
+          severity: 1, // Warning
         });
 
         if (fix && !dryRun) {
           lines[headerLineIndex] = expectedHeader;
           changed = true;
         }
-      }
-
-      // Top-level dir mismatch
-      const fileDir = getFirstDir(relPath);
-      const headerDir = getFirstDir(actualHeaderPath);
-
-      if (fileDir !== headerDir) {
-        issues.push({
-          file: relPath,
-          line: reportLine,
-          column: 1,
-          message: `Top-level folder mismatch. File is in "${fileDir}" but header says "${headerDir}".`,
-          rule: 'file-header',
-          severity: 1,
-        });
       }
     }
 
@@ -119,28 +97,28 @@ function runLinter({
   }
 
   if (!quiet) {
-    if (json) {
-      process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
-    } else {
-      if (issues.length > 0) {
-        issues.forEach(issue => {
-          const { file, line, column, message, rule, severity } = issue;
-          const color = severity === 2 ? chalk.red : chalk.yellow;
-          console.log(color(`  × ${file}:${line}:${column}  ${message} (${rule})`));
-        });
+    const eslintResults = adaptRawIssuesToEslintFormat(issues);
+    const formattedOutput = formatLintResults(eslintResults, 'stylish');
 
-        console.log(`\nFound ${issues.length} issue(s) in ${new Set(issues.map(i => i.file)).size} file(s).`);
-        if (fix && !dryRun) {
-          console.log(chalk.green(`✔ Fixed ${changedFiles.length} file(s).`));
-        } else if (fix && dryRun) {
-          console.log(chalk.gray(`[dry-run] Would have fixed ${changedFiles.length} file(s).`));
-        } else {
-          console.log(chalk.cyan('Run with --fix to automatically correct these issues.'));
-        }
-      } else {
-        console.log(chalk.green('✔ All file headers are standardized.'));
-      }
+    if (formattedOutput) {
+      console.log(formattedOutput);
     }
+
+    if (issues.length > 0) {
+      if (fix && !dryRun) {
+        console.log(`✔ Fixed ${changedFiles.length} file(s).`);
+      } else if (fix && dryRun) {
+        console.log(`[dry-run] Would have fixed ${changedFiles.length} file(s).`);
+      } else if (!fix){
+        console.log('\nRun with --fix to automatically correct these issues.');
+      }
+    } else {
+      console.log('✔ All file headers are standardized.');
+    }
+  }
+
+  if (json) {
+    process.stdout.write(JSON.stringify({ issues }, null, 2) + '\n');
   }
 
   if (debug) {
@@ -148,7 +126,9 @@ function runLinter({
     if (dryRun) console.log('[DEBUG] Dry-run mode enabled — no files were written.');
   }
 
-  process.exitCode = issues.length > 0 ? 1 : 0;
+  const errorCount = issues.filter(issue => issue.severity === 2).length;
+  process.exitCode = errorCount > 0 ? 1 : 0;
+
   return { issueCount: issues.length, fixedCount: changedFiles.length };
 }
 
@@ -175,4 +155,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

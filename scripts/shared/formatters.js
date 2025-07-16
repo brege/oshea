@@ -1,15 +1,10 @@
 // scripts/shared/formatters.js
+
 const chalk = require('chalk');
 const path = require('path');
 
 function padRight(str = '', len) {
-  return str + ' '.repeat(Math.max(0, len - str.length));
-}
-
-function formatProblem({ file, line = 1, column = 1, message, rule, severity = 'warning' }) {
-  const loc = `${line}:${column}`;
-  const color = severity === 'error' ? chalk.red : chalk.yellow;
-  return `${chalk.gray(padRight(file, 36))} ${chalk.gray(padRight(loc, 6))} ${color(padRight(severity, 8))} ${padRight(message, 50)} ${chalk.dim(rule)}`;
+  return str.length >= len ? str : str + ' '.repeat(len - str.length);
 }
 
 function createLintResult(filePath, messages = []) {
@@ -20,54 +15,61 @@ function createLintResult(filePath, messages = []) {
     filePath: path.resolve(filePath),
     messages: messages.map(msg => ({
       ruleId: msg.rule || msg.ruleId || 'unknown',
-      severity: msg.severity || (msg.level === 'error' ? 2 : 1),
+      severity: msg.severity === 2 ? 2 : 1,
       message: msg.message || '',
       line: msg.line || 1,
       column: msg.column || 1,
       nodeType: msg.nodeType || null,
       source: msg.source || null,
-      fix: msg.fix || null
+      fix: msg.fix || null,
     })),
     errorCount,
     warningCount,
-    source: null
+    source: null,
   };
 }
 
 const formatters = {
-  stylish: function(results) {
+  stylish(results) {
     let output = '';
     let totalErrors = 0;
     let totalWarnings = 0;
 
-    results.forEach(result => {
+    for (const result of results) {
       const { filePath, messages, errorCount, warningCount } = result;
-
-      if (messages.length === 0) return;
+      if (messages.length === 0) continue;
 
       totalErrors += errorCount;
       totalWarnings += warningCount;
 
-      output += `\n${chalk.underline(path.relative(process.cwd(), filePath))}\n`;
+      const relPath = path.relative(process.cwd(), filePath);
+      output += `\n${relPath}\n`;
 
-      messages.forEach(message => {
-        const { line, column, severity, message: msg, ruleId } = message;
-        const levelColor = severity === 2 ? chalk.red : chalk.yellow;
-        const levelText = severity === 2 ? 'error' : 'warning';
+      for (const msg of messages) {
+        const location = `${msg.line}:${msg.column}`;
+        const locationStr = chalk.gray(padRight(location, 8));
 
-        output += `  ${chalk.dim(`${line}:${column}`)}  `;
-        output += `${levelColor(levelText)}  `;
-        output += `${msg}  `;
-        output += `${chalk.dim(ruleId || '')}\n`;
-      });
-    });
+        const levelText = msg.severity === 2 ? 'error' : 'warning';
+        const levelColor = msg.severity === 2 ? chalk.red : chalk.yellow;
+        const levelStr = levelColor(padRight(levelText, 8));
 
-    if (totalErrors > 0 || totalWarnings > 0) {
-      output += `\n${chalk.red('✖')} ${totalErrors + totalWarnings} problems `;
-      output += `(${chalk.red(`${totalErrors} errors`)}, ${chalk.yellow(`${totalWarnings} warnings`)})`;
+        const message = padRight(msg.message.replace(/\.$/, ''), 45);
+        const ruleId = chalk.dim(msg.ruleId || '');
+
+        output += `  ${locationStr} ${levelStr} ${message} ${ruleId}\n`;
+      }
     }
 
-    return output;
+    const totalProblems = totalErrors + totalWarnings;
+    if (totalProblems > 0) {
+      output += '\n';
+      const x = totalErrors > 0 ? chalk.red('✖') : chalk.yellow('✖');
+      output += `${x} ${totalProblems} problem${totalProblems !== 1 ? 's' : ''} (${totalErrors} error${totalErrors !== 1 ? 's' : ''}, ${totalWarnings} warning${totalWarnings !== 1 ? 's' : ''})`;
+    } else {
+      output += chalk.green('\n✔ No problems');
+    }
+
+    return output.trim();
   },
 };
 
@@ -101,7 +103,7 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
 
     resultsByFile[filePath].push({
       ruleId: issue.rule || 'unknown-rule',
-      severity: 2,
+      severity: issue.severity === 2 ? 2 : 1,
       message: issue.message || '',
       line: issue.line || 1,
       column: issue.column || 1,
@@ -114,9 +116,9 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
 }
 
 module.exports = {
-  formatProblem,
+  formatters,
   createLintResult,
   formatLintResults,
-  formatters,
-  adaptRawIssuesToEslintFormat
+  adaptRawIssuesToEslintFormat,
 };
+

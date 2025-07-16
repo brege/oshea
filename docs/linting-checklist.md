@@ -6,16 +6,16 @@ Task matrix for total feature parity. This makes more sense via `git s -w docs/l
 
 | Lints [ `scripts/linting/` ]   | La | Lb | Lc | Ld | Le | Lf | Lg | Lh | Li | Lj | Lk | Ll |
 |--------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| `code/logging-lint.js`         | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| `code/remove-auto-doc.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| `code/standardize-js-line-o..` | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| `code/strip-trailing-whites..` | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `code/logging-lint.js`         | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `code/remove-auto-doc.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `code/standardize-js-line-o..` | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `code/strip-trailing-whites..` | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
 | `docs/postman-helpers.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | -- | -- | -- | ✔  | -- | -- | -- |
-| `docs/postman.js`              | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| `docs/update-project-index...` | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| `lint.js`                      | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | -- |
-| `validators/mocha-path-vali..` | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| `validators/paths-js-valida..` | ✔  | ✔  | ✔  | ✔  | ✔  | ●  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `docs/postman.js`              | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `docs/update-project-index...` | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `lint.js`                      | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | -- |
+| `validators/mocha-path-vali..` | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `validators/paths-js-valida..` | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
 
 **Legend:**  ✔ = complete | ● = partial | × = missing | -- = not applicable
 
@@ -63,7 +63,7 @@ Obsolescence of refactor scripts and birth of new lints. Can all be done in para
 From `scripts/refactor/`, decide which refactor scripts to part-out to lints.
 - [ ] Split `generate-help-checklist.js` into checklist updater and help validator.
   - [ ] **Checklist Tool.** `scripts/docs/generate-checklist.js`
-  - [ ] **Help Validator.** `test/smoke/validate-help.js` ( not a linter, too slow )
+  - [ ] **Help Validator.** `test/smoke/validate-help.js` [ not a linter, too slow ]
 - [ ] *--- additional refactor scripts go here ---*
 - [ ] Find historical scripts in the index (chore: find **GitHub permalinks**).
 - [ ] Prune obsolete, one-off, and duplicate scripts.
@@ -71,11 +71,10 @@ From `scripts/refactor/`, decide which refactor scripts to part-out to lints.
 
 **Automated Smoke Testing.** \
 Construct validation harness to smoke-test `md-to-pdf`'s state-preserving CLI options.
-- [ ] `test/smoke/validate-app-help.js` moved from `scripts/validators/validate-help.js`
-- [ ] `test/smoke/validate-bundled-plugins.js` ( `md-to-pdf plugin validate --all` )
-- [ ] `test/smoke/validate-app-config.js` ( `md-to-pdf config <options>` )
-- [ ] `test/smoke/validate-plugin-list.js` ( `md-to-pdf plugin/collection list <options>`)
-
+- [ ] `test/smoke/validate-app-help.js`         [ `scripts/validators/validate-help.js` ]
+- [ ] `test/smoke/validate-bundled-plugins.js`  [ `md-to-pdf plugin validate --all` ]
+- [ ] `test/smoke/validate-app-config.js`       [ `md-to-pdf config <options>` ]
+- [ ] `test/smoke/validate-plugin-list.js`      [ `md-to-pdf plugin list <options>` ]
 **Evolve pathing linters.** \
 Enhance into first-class validators
 - [ ] `paths-js-validator.js`: validate `const { fooPath } = require('@paths');` for all `src/**/*.js`.
@@ -101,7 +100,7 @@ Enhance into first-class validators
     ```
     and via `--only code` or `--skip docs`.
 
-**Testing for the linters.**
+**Testing for the lints.**
 - [ ] Build a dummy suite as a test fixture for the setup to reliable test them on.
  
 
@@ -145,7 +144,6 @@ Validation and quality control.
   - Invalid paths (e.g. `!fs.existsSync`)
   - Duplicate or ambiguous labels
 - [ ] Warn on unused linters or unreachable steps
-- [ ] Optionally auto-fix or suggest corrections
 
 ### 4. Dream-board v0.11 .. v1.0
 
@@ -154,3 +152,56 @@ What are we working towards?
 - [ ] Lay groundwork for an API layer on top of the CLI.
 - [ ] Prototype engine features using the harness as a foundation.
 - [ ] Explore exposing engine APIs for integration, automation, or external toolchains.
+
+### Appendix -- Housekeeping Refactor Scripts
+
+node scripts/trees/tree-explorer.js scripts/linting/ scripts/docs/ scripts/shared/ scripts/refactor/ --count=lines
+└── scripts
+    ├── docs
+    │   ├── generate-help-checklist.js        # split into checklist util and --help validator
+    │   └── generate-toc.js                   # possibly combine with checklist util
+    ├── linting
+    │   ├── code
+    │   │   ├── logging-lint.js               # keep 
+    │   │   ├── remove-auto-doc.js            # keep
+    │   │   ├── standardize-js-line-one-all.. # keep
+    │   │   └── strip-trailing-whitespace.js  # keep
+    │   ├── config.yaml                       # core
+    │   ├── docs
+    │   │   ├── postman-helpers.js            # keep
+    │   │   ├── postman.js                    # keep
+    │   │   └── update-project-indices.js     # keep
+    │   ├── lint-harness.js                   # core
+    │   ├── lint.js                           # core
+    │   └── validators
+    │       ├── mocha-path-validator.js       # keep
+    │       └── paths-js-validator.js         # keep
+    ├── refactor
+    │   ├── @paths
+    │   │   ├── pathing\_rejects.txt          # remove
+    │   │   ├── probe
+    │   │   │   ├── probe-require-and-path.js # ?       [ survey for removal / repurpose ]
+    │   │   │   ├── require-classifier.js     # ?       [ survey for removal / repurpose ]
+    │   │   │   └── scan-path-usage.js        # ?       [ survey for removal / repurpose ]
+    │   │   ├── replace-src-paths.md          # archive
+    │   │   ├── replace-test-paths.md         # archive
+    │   │   ├── replace
+    │   │   │   ├── replace-default-require.. # ?       [ survey for removal / repurpose ]
+    │   │   │   └── replace-pattern.js        # remove
+    │   │   └── utils
+    │   │       └── require-taxonomy-list.js  # ?       [ survey for removal / repurpose ]
+    │   ├── fix-require-paths
+    │   │   ├── config.ini                    # remove
+    │   │   ├── progress.md                   # archive
+    │   │   ├── replace-requires.js           # ?       [ survey for removal / repurpose ]
+    │   │   ├── require-catalogue.js          # ?       [ survey for removal / repurpose ]
+    │   │   └── require-catalogue.json        # remove
+    │   └── validators
+    │       └── require-path-validator.sh     # remove
+    └── shared
+        ├── comment-surfacer.js               # combine with emoji surfacer
+        ├── file-helpers.js                   # core
+        ├── formatters.js                     # core    [ move to ../linting/utils ]
+        ├── lint-helpers.js                   # core    [ move to ../linting/utils ]
+        └── output-adapter.js                 # remove
+

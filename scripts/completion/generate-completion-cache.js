@@ -7,7 +7,6 @@ const path = require('path');
 const os = require('os');
 const chalk = require('chalk');
 
-// Use your path registry for all internal modules
 const { cliTreeBuilderPath, cliCommandsPath } = require('@paths');
 const { discoverCommandTree } = require(cliTreeBuilderPath);
 

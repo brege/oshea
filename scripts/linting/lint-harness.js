@@ -155,7 +155,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       ? chalk.green('✔')
       : step.errorCount > 0
         ? chalk.red('✖')
-        : chalk.yellow('⚠');
+        : chalk.yellow('!');
 
     const fixText = step.fixedCount > 0
       ? chalk.gray(` (${step.fixedCount} fixed)`)

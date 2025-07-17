@@ -67,6 +67,7 @@ class BeautifulPathsGenerator {
         items: {
           katexPath: 'path.join(assetsRoot, \'katex.min.css\')',
           basePluginSchemaPath: 'path.join(srcRoot, \'validators\', \'base-plugin.schema.json\')',
+          findLitterRulesPath: 'path.join(assetsRoot, \'litter-list.txt\')',
         }
       }
     };

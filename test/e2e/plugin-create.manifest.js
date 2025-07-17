@@ -68,7 +68,6 @@ module.exports = [
     describe: '3.5.3: (Happy Path) A plugin created from the default template passes validation',
     setup: async (sandboxDir, harness) => {
       // The setup runs the prerequisite 'plugin create' command.
-      // Assertions are removed and replaced with error throwing for robustness.
       const newPluginDir = path.join(sandboxDir, 'temp-valid-plugin');
       const createResult = await harness.runCli([
         'plugin',
@@ -101,7 +100,6 @@ module.exports = [
     describe: '3.5.4: (Happy Path) A plugin archetyped from a valid bundled plugin passes validation',
     setup: async (sandboxDir, harness) => {
       // The setup runs the prerequisite 'plugin create --from' command.
-      // Assertions are removed and replaced with error throwing.
       const newPluginName = 'archetype-from-bundled-plugin';
       const newPluginDir = path.join(sandboxDir, newPluginName);
       const createResult = await harness.runCli([

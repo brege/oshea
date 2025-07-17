@@ -66,10 +66,9 @@ From `scripts/refactor/`, decide which refactor scripts to part-out to lints.
 - [ ] Split `generate-help-checklist.js` into checklist updater and help validator.
   - [ ] **Checklist Tool.** `scripts/docs/generate-checklist.js`
   - [ ] **Help Validator.** `test/smoke/validate-help.js` [ not a linter, too slow ]
-- [ ] *--- additional refactor scripts go here ---*
-- [ ] Find historical scripts in the index (chore: find **GitHub permalinks**).
-- [ ] Prune obsolete, one-off, and duplicate scripts.
-- [ ] Good-night `scripts/refactor/`
+- [x] Find historical scripts in the index (chore: find **GitHub permalinks**).
+- [x] Prune obsolete, one-off, and duplicate scripts.
+- [x] Good-night `scripts/refactor/`
 
 **Automated Smoke Testing.** \
 Construct validation harness to smoke-test `md-to-pdf`'s state-preserving CLI options.
@@ -92,7 +91,6 @@ Enhance into first-class validators
       develop: 0      # no change
       main: 1         # bump all warnings to errors
     ```
-- [ ] Change the `severity: 1,2,..` for a linter based atomic linter.
 - [ ] Add aliases for and/or groups of linters:
     ```yaml
     groups:
@@ -103,8 +101,8 @@ Enhance into first-class validators
     ```
     and via `--only code` or `--skip docs`.
 
-**Testing for the lints.**
-- [ ] Build a dummy suite as a test fixture for the setup to reliable test them on.
+**Testing of the lints.**
+- [ ] Build a dummy suite as a test fixture to reliably test lints.
 
 ---
 
@@ -136,18 +134,17 @@ Ergonomics and user-friendliness.
 - [x] `--list`: print all available steps (labels), optionally filtered
 - [x] `--dry-run`: show what would run without executing
 - [x] `--skip `: skip a specific step by label or alias
-- [ ] Aggregate results: collect and summarize pass/fail status for all steps
+- [ ] Aggregate results: collect and summarize pass/fail as a report [ *partially implemented* ]
 - [ ] ~~Add support for `--config ` to load an alternate config file (*maybe*)~~
-  - *determinantion:* do this option when applying it to other projects.
 
 **Meta-Linter.** \
 Validation and quality control.
-- [ ] Validate config structure.
+- [ ] Validate config structure
   - Missing required fields (`label`, `command` or `scriptPath`)
   - Conflicting flags (e.g. `quiet: true` + `json: true`)
   - Invalid paths (e.g. `!fs.existsSync`)
   - Duplicate or ambiguous labels
-- [ ] Warn on unused linters or unreachable steps
+- [ ] Warn on unused lints or unreachable steps
 
 ---
 
@@ -163,6 +160,7 @@ What are we working towards?
 
 ### Appendix -- Housekeeping Refactor Scripts
 
+```
 node scripts/trees/tree-explorer.js scripts/linting/ scripts/docs/ scripts/shared/ scripts/refactor/ --count=lines
 └── scripts
     ├── docs
@@ -209,9 +207,9 @@ node scripts/trees/tree-explorer.js scripts/linting/ scripts/docs/ scripts/share
     │   └── validators
     │       └── require-path-validator.sh     # [x] del
     └── shared
-        ├── comment-surfacer.js               # combine with emoji tool [ `llm-trash.js` linter ]
+        ├── comment-surfacer.js               # [x] combine with emoji tool [ `docs/remove-litter.js` ]
         ├── file-helpers.js                   # stay
         ├── formatters.js                     # [x] move [ to `../linting/lib` ]
         ├── lint-helpers.js                   # [x] move [ to `../linting/lib` ]
         └── output-adapter.js                 # [x] del
-
+```

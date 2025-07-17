@@ -99,10 +99,8 @@ headings.forEach(h => {
   const anchor = h.anchor;
   let line;
   if (tocMap.hasOwnProperty(anchor)) {
-    // Use your custom TOC title
     line = `${indent}- [ ] [${tocMap[anchor].text}](#${anchor})`;
   } else {
-    // Use heading text as fallback
     line = `${indent}- [ ] [${h.text}](#${anchor})`;
   }
   output.push(line);

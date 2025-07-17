@@ -68,8 +68,6 @@ function buildFullDependencyGraph(entryPath, seenFiles = new Set()) {
       for (const decl of node.declarations) {
         if (!decl.id || !decl.init) continue;
         if (decl.id.type !== 'Identifier') continue;
-        // const varName = decl.id.name;  // removed (was unused)
-
         if (
           decl.init.type === 'CallExpression' &&
           decl.init.callee.type === 'MemberExpression' &&
@@ -139,7 +137,13 @@ function runValidator(options = {}) {
     targets = [],
     excludes = [],
     debug = false,
+    config = {},
   } = options;
+
+  // Support allow field for ignoring specific unused-keys warnings
+  const allow = options.allow ||
+    (config && config.allow) ||
+    [];
 
   const allKeys = new Set([...walkRegistry(paths)]);
 
@@ -200,7 +204,10 @@ function runValidator(options = {}) {
 
   propagateUsage(usedKeys, depGraph);
 
-  const unusedKeys = [...allKeys].filter(k => !usedKeys.has(k));
+  // Only keys not used AND not allowed are flagged as unused
+  const unusedKeys = [...allKeys].filter(
+    k => !usedKeys.has(k) && !allow.includes(k)
+  );
 
   const issues = [];
   const results = [];
@@ -242,6 +249,7 @@ if (require.main === module) {
     excludes,
     config,
     debug: flags.debug,
+    allow: config.allow,
   });
 
   renderLintOutput({ summary, issues, results, flags });

@@ -1,7 +1,7 @@
 // test/e2e/plugin-enable.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
-const yaml = require('js-yaml'); // Added for checking enabled.yaml content in assertions
+const yaml = require('js-yaml');
 
 // Helper to create a dummy plugin structure for testing CM commands
 async function createDummyPlugin(pluginDir, pluginName) {
@@ -61,7 +61,7 @@ module.exports = [
       const pluginName = 'valid-plugin';
       const collDir = path.join(sandboxDir, collectionName);
       const pluginDir = path.join(collDir, pluginName);
-      await createWellFormedPlugin(pluginDir, pluginName); // Create a valid plugin
+      await createWellFormedPlugin(pluginDir, pluginName);
       await harness.runCli(['collection', 'add', collDir, '--name', collectionName]);
     },
     args: (sandboxDir) => [
@@ -89,7 +89,7 @@ module.exports = [
       const pluginName = 'invalid-plugin';
       const collDir = path.join(sandboxDir, collectionName);
       const pluginDir = path.join(collDir, pluginName);
-      await createMalformedPlugin(pluginDir, pluginName); // Create a malformed plugin (missing index.js)
+      await createMalformedPlugin(pluginDir, pluginName);
       await harness.runCli(['collection', 'add', collDir, '--name', collectionName]);
     },
     args: (sandboxDir) => [

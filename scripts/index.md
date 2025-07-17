@@ -108,8 +108,11 @@ This document is a central index for all developer and automation scripts within
 New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
 
 <!-- uncategorized-start -->
-- [scriptsPaths.js](scriptsPaths.js)
-- [output-adapter.js](shared/output-adapter.js)
-- [lint-harness.js](linting/lint-harness.js)
 - [formatters.js](shared/formatters.js)
+- [generate-paths-beautiful.js](generate-paths-beautiful.js)
+- [lint-harness.js](linting/lint-harness.js)
+- [no-relative-paths.js](linting/code/no-relative-paths.js)
+- [output-adapter.js](shared/output-adapter.js)
+- [paths-usage-validator.js](linting/validators/paths-usage-validator.js)
+- [scriptsPaths.js](scriptsPaths.js)
 <!-- uncategorized-end -->

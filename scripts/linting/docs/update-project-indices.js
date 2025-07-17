@@ -177,7 +177,7 @@ function scanGroup(name, config, opts = {}) {
         line: 1,
         severity: 2,
         rule: 'uncategorized-block-missing',
-        message: `Uncategorized block missing in index file.`
+        message: 'Uncategorized block missing in index file.'
       });
       return { issues, fixedCount };
     }

@@ -7,6 +7,8 @@ const { lintingConfigPath, lintHelpersPath } = require('@paths');
 const { findFilesArray } = require(lintHelpersPath);
 const { loadLintSection } = require(lintHelpersPath);
 
+const LINT_SKIP_TAG = 'lint-skip-postman';
+
 function loadPostmanRules(yamlPath = lintingConfigPath) {
   return loadLintSection('postman', yamlPath);
 }
@@ -40,9 +42,9 @@ function getMarkdownFiles(rootDir, rules, userGlobs = [], excludeDirs = []) {
     if (excludes.some(pattern => minimatch(rel, pattern))) return false;
     try {
       const content = fs.readFileSync(file, 'utf8');
-      if (content.includes('lint-skip-index')) return false;
+      if (content.includes(LINT_SKIP_TAG)) return false;
     } catch (e) {
-      //
+      void 0; // eslint-disable-line
     }
     return true;
   });

@@ -1,11 +1,7 @@
 # scripts/linting/config.yaml
 
-# --- Global ---
-
-# excludes:
-#   - "node_modules/**"
-
 # --- Code ---
+# scripts/linting/code/remove-auto-doc.js
 remove-auto-doc:
   targets:
     - cli.js
@@ -22,7 +18,7 @@ remove-auto-doc:
     - node_modules
     - test/scripts
     - scripts
-
+# scripts/linting/code/logging-lint.js
 logging:
   targets:
     - src
@@ -36,7 +32,7 @@ logging:
     - "scripts/**"
     - "test/scripts/**"
     - "plugins/**"
-
+# scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:
   targets:
     - "src/**/*.js"
@@ -47,7 +43,7 @@ standardize-line-one:
     - "scripts/shared/**"
     - "plugins/**"
     - "test/fixtures/**"
-
+# scripts/linting/code/strip-trailing-whitespace.js
 remove-ws:
   targets:
     - "src/**/*.js"
@@ -61,7 +57,7 @@ remove-ws:
     - "scripts/shared/**"
     - "plugins/**/.contract/**"
     - "test/fixtures/**"
-
+# scripts/linting/code/no-relative-paths.js
 no-relative-paths:
   targets:
     - "src/**/*.js"
@@ -77,19 +73,24 @@ no-relative-paths:
     - "scripts/shared/**"
     - "plugins/**"
     - "test/fixtures/**"
+    - "paths.js"
+    - "scripts/scriptsPaths.js"
+
 
 # --- Validators ---
+# scripts/linting/validators/mocha-path-validator.js
 validate-mocha:
   excludes: []
-
+# scripts/linting/validators/paths-js-validator.js
 validate-paths:
   ignores:
     - config.yaml
-
+# scripts/linting/validators/paths-usage-validator.js
 validate-paths-usage:
   targets:
     - "src"
     - "scripts"
+    - "test"
     - "*.js"
   ignores:
     - "node_modules/**"
@@ -97,8 +98,11 @@ validate-paths-usage:
     - "scripts/shared/**"
     - "plugins/**"
     - "test/fixtures/**"
+    #- "paths.js"
+    #- "scripts/scriptsPaths.js"
 
 # --- Docs ---
+# scripts/linting/docs/update-project-indices.js
 update-indices:
   docs:
     indexFile: docs/index.md
@@ -126,16 +130,17 @@ update-indices:
       - ".sh"
       - ".mjs"
     excludePatterns:
-      - "scripts/refactor/**"
+      - "scripts/scriptsPaths.js"
+      - "scripts/linting/**"
     marker: "scripts"
-  refactor-scripts:
-    indexFile: scripts/refactor/index.md
-    scanRoot: scripts/refactor
+  linting:
+    indexFile: scripts/linting/index.md
+    scanRoot: scripts/linting
     fileExtensions:
       - ".js"
       - ".sh"
     excludePatterns: []
-    marker: "scripts"
+    marker: "linting"
   test-scripts:
     indexFile: test/index.md
     scanRoot: 
@@ -146,7 +151,7 @@ update-indices:
       - .md
     excludePatterns: [] 
     marker: "test-scripts"
-
+# scripts/linting/docs/postman.js
 doc-links:
   excludes:
     - "node_modules/**"
@@ -163,17 +168,17 @@ doc-links:
     - "**/my[-_]*/**"
     - "**/sample.md"
     - "**/index.js"
+    - "paths.js"
 
 # --- Harness Configuration ---
 harness:
   continueOnError: false
-  #quiet: true
   steps:
     # --- Code ---
     - key: 'remove-ws'
       label: 'Code: Strip Trailing Whitespace'
       scriptPath: scripts/linting/code/strip-trailing-whitespace.js
-      #fix: true
+      fix: true
     - key: 'standardize-line-one'
       label: 'Code: Standardize File Headers'
       scriptPath: scripts/linting/code/standardize-js-line-one-all.js

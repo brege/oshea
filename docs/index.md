@@ -6,6 +6,8 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 **Active Documents and Checklists** \
 *For convenience, these are symlinks to the latest version of each document below.*
 
+- [**Linting Checklist**](linting-checklist.md): **Policy.**
+  Linting and code quality strategy for the project.
 * [**Release Candidate Checklist**](rc-checklist.md): **Hygiene.**
   Updating user docs and internal refactoring of code for ease of use.
 * [**Reoganization Planner**](archive/v0.10/reorganization-planner.md): **Planning.**
@@ -47,8 +49,6 @@ at the project root.
   Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
 * [**Scripts Index**](../scripts/index.md):
   An index of tools and utilities used by the project, from analysis to guides, documentation, linting, and more.
-  - [Refactoring Tools](../scripts/refactor/fix-require-paths/progress.md):
-    Probes, repairs, validators, and other tools used in the reoganization of `md-to-pdf`.
     
 ---
 
@@ -70,10 +70,25 @@ at the project root.
 *Discussions that explore the context and reasoning behind project decisions.*
 
 ### High-Level Vision & History
-*The main "living" documents of the project's evolution and direction--updated in commit timescales*
+*The main "living" and archived documents of the project's evolution and direction--updated in commit timescales*
 
 * [**Release Candidate Checklist**](rc-checklist.md): **Hygiene**. 
   Updating user docs and internal refactoring of code for ease of use.
+
+- [**v0.10 Architecture Evolution**](docs/archive/v0.10/)
+  - [Reorganization Planner for `src/`](docs/archive/v0.10/reorganization-planner.md).
+    Housekeeping task to move-on from a flat `src/` directory along with [a progress report](archive/v0.10/test-refactor-require-path-progress.md).
+  - [Fixing `test/` paths after re-organizing `src/`](docs/archive/v0.10/test-refactor-require-path-progress.md).
+    Brittle assert and import patterns requiring several slices of refactory.
+  - [Replacing `src/` paths to new Pathing Registry](archive/v0.10/replace-src-paths.md).
+    Moving on to a central pathing registry to not repeat mistakes.  cf. [*Why I Should Make a Pathing Registry*](archive/v0.10/why-i-should-make-a-pathing-registry.md).
+  - [Replacing `test/` paths to new Pathing Registry](archive/v0.10/replace-test-paths.md).
+    Again fixing brittle test framework.
+  - [**Index of Scripting Tools used during Refactor**](archive/v0.10/scripts.refactor.index.md). 
+    Many of these scripts were parted out for linters to re-enforce updated standards.
+    These clickthroughs resolve to GitHub, snapshotted at
+    [v0.10.31](https://github.com/brege/md-to-pdf/releases/tag/v0.10.31),
+    as the `scripts/refactor/` directory was removed.
 * [**Dream Board v0.9**](archive/v0.9/dream-board-v0.9.md): **Standardization**.
   Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
   Muxes changelogs, task checklists, and outlook from a central, living document.
@@ -153,6 +168,5 @@ at the project root.
 *This list is automatically updated by [`scripts/linting/docs/update-project-indices.js`](../scripts/linting/docs/update-project-indices.js)*
 
 <!-- uncategorized-start -->
-- [scripts.refactor.index.md](archive/v0.10/scripts.refactor.index.md)
 <!-- uncategorized-end -->
 

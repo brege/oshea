@@ -76,7 +76,6 @@ no-relative-paths:
     - "paths.js"
     - "scripts/scriptsPaths.js"
 
-
 # --- Validators ---
 # scripts/linting/validators/mocha-path-validator.js
 validate-mocha:
@@ -98,8 +97,9 @@ validate-paths-usage:
     - "scripts/shared/**"
     - "plugins/**"
     - "test/fixtures/**"
-    #- "paths.js"
-    #- "scripts/scriptsPaths.js"
+  allow:
+    - pathsPath
+    - scriptsPaths
 
 # --- Docs ---
 # scripts/linting/docs/update-project-indices.js
@@ -169,6 +169,20 @@ doc-links:
     - "**/sample.md"
     - "**/index.js"
     - "paths.js"
+find-litter:
+  targets:
+    - src
+    - docs
+    - plugins
+    - scripts
+    - test
+    - "*.js"
+    - "*.md"
+  excludes:
+    - "node_modules/**"
+    - ".git/**"
+    - "docs/archive/**"
+    - "plugins/template-basic/"
 
 # --- Harness Configuration ---
 harness:
@@ -211,6 +225,9 @@ harness:
     - key: 'doc-links' 
       label: 'Docs: Check Markdown Links (Postman)'
       scriptPath: scripts/linting/docs/postman.js
+    - key: 'remove-litter'
+      label: 'Docs: Find Litter'
+      scriptPath: scripts/linting/docs/find-litter.js
 
     # --- Harness ---
     - key: 'eslint' 

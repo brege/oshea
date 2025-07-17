@@ -6,7 +6,7 @@ module.exports = [
   {
     describe: '1.3.1: Should prioritize CLI plugin over front matter and local config',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
       plugin: 'cli-priority-plugin'
     },
     defaultPluginName: 'default',
@@ -29,7 +29,7 @@ md_to_pdf_plugin: ${fmPluginName}
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal(args.plugin);
       expect(result.source).to.equal('CLI option');
       expect(result.localConfigOverrides).to.deep.equal({ someOverride: 'value' });
@@ -72,7 +72,7 @@ md_to_pdf_plugin: ${fmPluginName}
 
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const fmPluginName = 'front-matter-plugin-from-doc';
       expect(result.pluginSpec).to.equal(fmPluginName);
       expect(result.source).to.equal(`front matter in '${constants.DUMMY_MARKDOWN_FILENAME}'`);
@@ -111,7 +111,7 @@ md_to_pdf_plugin: ${fmPluginName}
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('local-config-only-plugin');
       expect(result.source).to.equal(`local '${constants.DUMMY_LOCAL_CONFIG_FILE_PATH.split('/').pop()}'`);
       expect(result.localConfigOverrides).to.deep.equal({ anotherSetting: 'anotherValue' });
@@ -146,7 +146,7 @@ some_other_key: some_value
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('default');
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.deep.equal({ someOtherConfig: true });
@@ -183,7 +183,7 @@ some_other_fm_key: fm_value
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('plugin-with-overrides');
       expect(result.source).to.equal(`local '${constants.DUMMY_LOCAL_CONFIG_FILE_PATH.split('/').pop()}'`);
       expect(result.localConfigOverrides).to.deep.equal({
@@ -213,7 +213,7 @@ some_other_fm_key: fm_value
 
       mocks.mockFsSync.existsSync.withArgs(args.markdownFile).returns(false);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('default');
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.be.null;
@@ -260,7 +260,7 @@ some_other_fm_key: fm_value
       setupTestFiles(mocks, constants, fileContents, parsedContents);
       mocks.mockMarkdownUtils.extractFrontMatter.withArgs(fileContents.markdown).throws(new Error(MALFORMED_FM_ERROR_MESSAGE));
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('default');
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.be.null;
@@ -309,7 +309,7 @@ some_other_key: some_value
       setupTestFiles(mocks, constants, fileContents, parsedContents);
       mocks.mockYaml.load.withArgs(fileContents.localConfig).throws(new Error(MALFORMED_LOCAL_CONFIG_ERROR_MESSAGE));
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('default');
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.be.null;
@@ -359,7 +359,7 @@ md_to_pdf_plugin: ${pluginName}
       mocks.mockFsSync.existsSync.withArgs(expectedSubdirPath).returns(true);
       mocks.mockFsSync.statSync.withArgs(expectedSubdirPath).returns({ isFile: () => true });
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const pluginName = 'my-custom-plugin';
       const expectedSubdirPath = path.join(path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH), pluginName, `${pluginName}.config.yaml`);
 
@@ -408,7 +408,7 @@ md_to_pdf_plugin: ${pluginName}
       mocks.mockFsSync.existsSync.withArgs(expectedDirectPath).returns(true);
       mocks.mockFsSync.statSync.withArgs(expectedDirectPath).returns({ isFile: () => true });
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const pluginName = 'direct-plugin';
       const expectedSubdirPath = path.join(path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH), pluginName, `${pluginName}.config.yaml`);
       const expectedDirectPath = path.join(path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH), `${pluginName}.config.yaml`);
@@ -456,7 +456,7 @@ md_to_pdf_plugin: ${pluginName}
       mocks.mockFsSync.existsSync.withArgs(expectedSubdirPath).returns(false);
       mocks.mockFsSync.existsSync.withArgs(expectedDirectPath).returns(false);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const pluginName = 'non-existent-plugin-name';
       const expectedSubdirPath = path.join(path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH), pluginName, `${pluginName}.config.yaml`);
       const expectedDirectPath = path.join(path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH), `${pluginName}.config.yaml`);
@@ -498,7 +498,7 @@ md_to_pdf_plugin: ${relativePluginPath}
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const expectedResolvedPath = path.resolve(path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH), './my-relative-plugin-dir/my-relative-plugin.config.yaml');
 
       expect(result.pluginSpec).to.equal(expectedResolvedPath);
@@ -525,7 +525,7 @@ md_to_pdf_plugin: ${relativePluginPath}
       mocks.mockProcessCwd.returns('/mock/current/working/dir');
       setupTestFiles(mocks, constants, { markdownContent: undefined, localConfigContent: undefined });
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const expectedResolvedPath = path.resolve('/mock/current/working/dir', './cli-relative-plugin');
 
       expect(result.pluginSpec).to.equal(expectedResolvedPath);
@@ -564,7 +564,7 @@ md_to_pdf_plugin: ${fmPluginName}
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const fmPluginName = 'fm-test-plugin';
 
       expect(result.pluginSpec).to.equal(args.plugin);
@@ -593,7 +593,7 @@ md_to_pdf_plugin: ${fmPluginName}
     setup: async (args, mocks, constants) => {
       setupTestFiles(mocks, constants, { markdownContent: undefined, localConfigContent: undefined });
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('default');
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.be.null;
@@ -627,7 +627,7 @@ md_to_pdf_plugin: ${fmPluginName}
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
-    assert: async (result, args, mocks, constants, expect, logs) => { // Added logs parameter
+    assert: async (result, args, mocks, constants, expect, logs) => {
       const fmPluginName = 'fm-test-plugin';
 
       expect(result.pluginSpec).to.equal(fmPluginName);

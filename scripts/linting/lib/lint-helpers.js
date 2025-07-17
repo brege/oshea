@@ -139,8 +139,15 @@ function parseCliArgs(args) {
     } else if (arg.startsWith('--skip=')) {
       flags.skip = arg.replace('--skip=', '');
     } else if (arg.startsWith('--')) {
-      const flagName = arg.replace(/^--/, '');
-      flags[flagName] = true;
+      const eqIdx = arg.indexOf('=');
+      if (eqIdx !== -1) {
+        const key = arg.slice(2, eqIdx);      // e.g. 'rules'
+        const value = arg.slice(eqIdx + 1);   // e.g. './llm-litter-list.txt'
+        flags[key] = value;
+      } else {
+        const flagName = arg.replace(/^--/, '');
+        flags[flagName] = true;
+      }
     } else {
       targets.push(arg);
     }

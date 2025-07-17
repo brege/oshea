@@ -1,0 +1,40 @@
+# llm litter list
+# format:    [type:severity:filetypes] pattern
+# types:     comment, string, error, import
+# severity:  low, medium, high
+# filetypes: js,ts,md,html,css,json,yml,yaml or * for all
+# patterns support regex and adblock-style wildcards (* = .*, ^ = word boundary)
+
+# --- code comments ---
+# high-confidence LLM comment patterns
+[comment:high:js,ts] MODIFIED$match-case
+[comment:high:js,ts] REMOVE.*$match-case
+[comment:high:js,ts] CORRECT$match-case
+[comment:high:js,ts] FIX$match-case
+[comment:high:js,ts] BEGIN$match-case
+[comment:high:js,ts] END$match-case
+[comment:high:js,ts] Added$match-case
+[comment:high:js,ts] Removed $match-case
+[comment:high:js,ts] NEW$match-case
+[comment:high:js,ts] <--
+
+# medium-confidence patterns
+[comment:medium:*] corrected
+[comment:medium:*] Your$match-case
+
+# slimy salesman language
+[string:medium:md] robustify
+[string:medium:md] robustly
+
+# custom patterns 
+
+# emoji whitelist 
+[emoji:md,js,ts,html,css]
+✔
+×
+●
+○
+✖
+★
+➜ 
+↔

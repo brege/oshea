@@ -92,7 +92,7 @@ These are internal, code-hygienic tasks.
 | ✔ |`lg4`| Configure GitHub Actions for CI workflows                        |
 | ✔ |`lg5`| Automate version bumping and release tagging                     |
 
-*Status: In Progress*
+> **Historical Note**: This feature set expanded significantly. The above tasks were superseded by [`linting-checklist.md`](./linting-checklist.md).
 
 ---
 

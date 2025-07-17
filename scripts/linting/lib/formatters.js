@@ -7,6 +7,16 @@ function padRight(str = '', len) {
   return str.length >= len ? str : str + ' '.repeat(len - str.length);
 }
 
+function highlightMatch(line, matchedText) {
+  if (!line || !matchedText) return line;
+  // Escape any regex special chars in matchedText
+  const safe = matchedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return line.replace(
+    new RegExp(safe, 'g'),
+    chalk.bgYellow.black(matchedText)
+  );
+}
+
 function createLintResult(filePath, messages = []) {
   const errorCount = messages.filter(msg => msg.severity === 2).length;
   const warningCount = messages.filter(msg => msg.severity === 1).length;
@@ -22,6 +32,9 @@ function createLintResult(filePath, messages = []) {
       nodeType: msg.nodeType || null,
       source: msg.source || null,
       fix: msg.fix || null,
+      // pass through highlighting fields if present
+      matchedText: msg.matchedText,
+      sourceLine: msg.sourceLine
     })),
     errorCount,
     warningCount,
@@ -57,6 +70,10 @@ const formatters = {
         const ruleId = chalk.dim(msg.ruleId || '');
 
         output += `  ${locationStr} ${levelStr} ${message} ${ruleId}\n`;
+
+        if (msg.sourceLine && msg.matchedText) {
+          output += '       ' + highlightMatch(msg.sourceLine, msg.matchedText) + '\n';
+        }
       }
     }
 
@@ -87,7 +104,7 @@ function formatLintResults(results, formatter = 'stylish') {
   throw new Error('Formatter must be a string or function');
 }
 
-
+// --- UPDATED: pass through matchedText and sourceLine if present
 function adaptRawIssuesToEslintFormat(rawIssues) {
   if (!rawIssues || rawIssues.length === 0) {
     return [];
@@ -107,6 +124,8 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
       message: issue.message || '',
       line: issue.line || 1,
       column: issue.column || 1,
+      matchedText: issue.matchedText,   // pass through!
+      sourceLine: issue.sourceLine,     // pass through!
     });
   });
 
@@ -166,8 +185,6 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
   printDebugResults(results, flags);
 }
 
-
-
 module.exports = {
   formatters,
   createLintResult,
@@ -175,3 +192,4 @@ module.exports = {
   renderLintOutput,
   adaptRawIssuesToEslintFormat
 };
+

@@ -1,4 +1,4 @@
-// scripts/shared/lint-helpers.js
+// scripts/linting/lib/lint-helpers.js
 
 require('module-alias/register');
 

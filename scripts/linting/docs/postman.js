@@ -8,6 +8,7 @@ const {
   lintHelpersPath,
   lintingConfigPath,
   formattersPath,
+  postmanHelpersPath,
   projectRoot
 } = require('@paths');
 
@@ -20,10 +21,10 @@ const {
   isSkipLink,
   resolveReference,
   findCandidates
-} = require('./postman-helpers.js');
+} = require(postmanHelpersPath);
 
-const ENABLE_MARKER = '<!-- lint-enable-links -->';
 const DISABLE_MARKER = '<!-- lint-disable-links -->';
+const ENABLE_MARKER = '<!-- lint-enable-links -->';
 
 function buildLinksEnabledMap(lines) {
   let enabled = true;

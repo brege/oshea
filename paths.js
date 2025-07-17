@@ -1,5 +1,5 @@
 // paths.js - Project Path Registry
-// Generated: 2025-07-17T00:47:16.787Z
+// Generated: 2025-07-17T06:20:30.812Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run generate:paths
 

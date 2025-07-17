@@ -49,7 +49,7 @@ function buildFullDependencyGraph(entryPath, seenFiles = new Set()) {
 
   let m;
   while ((m = REQUIRE_REGEX.exec(source)) !== null) {
-    const [, varName, relPath] = m;
+    const [, /* varName */, relPath] = m;
     if (!relPath.startsWith('.') && !relPath.startsWith('/')) {
       continue;
     }
@@ -68,7 +68,7 @@ function buildFullDependencyGraph(entryPath, seenFiles = new Set()) {
       for (const decl of node.declarations) {
         if (!decl.id || !decl.init) continue;
         if (decl.id.type !== 'Identifier') continue;
-        const varName = decl.id.name;
+        // const varName = decl.id.name;  // removed (was unused)
 
         if (
           decl.init.type === 'CallExpression' &&
@@ -79,11 +79,11 @@ function buildFullDependencyGraph(entryPath, seenFiles = new Set()) {
           const deps = decl.init.arguments
             .filter(arg => arg.type === 'Identifier')
             .map(arg => arg.name);
-          depGraph.set(varName, deps);
+          depGraph.set(decl.id.name, deps);
           continue;
         }
 
-        depGraph.set(varName, []);
+        depGraph.set(decl.id.name, []);
       }
     }
   });
@@ -250,3 +250,4 @@ if (require.main === module) {
 }
 
 module.exports = { runValidator };
+

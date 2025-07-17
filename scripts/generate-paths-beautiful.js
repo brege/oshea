@@ -139,10 +139,9 @@ class BeautifulPathsGenerator {
   }
 
   scanFeature(featureName, feature) {
-    const files = [];
+    // Only returns scanDirectory result
     const pattern = feature.pattern;
     const baseDir = pattern.split('**')[0];
-
     return this.scanDirectory(baseDir, featureName);
   }
 
@@ -214,7 +213,7 @@ class BeautifulPathsGenerator {
     content.push('// ==========================================');
     content.push('');
 
-    for (const [sectionName, section] of Object.entries(this.architecture)) {
+    for (const [_sectionName, section] of Object.entries(this.architecture)) { // eslint-disable-line no-unused-vars
       content.push(`// --- ${section.comment} ---`);
       for (const [varName, pathDef] of Object.entries(section.items)) {
         content.push(`const ${varName} = ${pathDef};`);
@@ -368,3 +367,4 @@ if (require.main === module) {
 }
 
 module.exports = BeautifulPathsGenerator;
+

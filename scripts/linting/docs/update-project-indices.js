@@ -86,6 +86,7 @@ function fileHasLintSkip(file) {
 function scanGroup(name, config, opts = {}) {
   const {
     dryRun = false,
+    fix = false
   } = opts;
 
   const {
@@ -96,7 +97,7 @@ function scanGroup(name, config, opts = {}) {
     fix: configFix = false
   } = config;
 
-  const allowFix = configFix;
+  const allowFix = configFix || fix;
   const indexAbsPath = path.resolve(indexFile);
   const indexDir = path.dirname(indexAbsPath);
   let issues = [];
@@ -108,7 +109,7 @@ function scanGroup(name, config, opts = {}) {
       line: 1,
       message: `Index file not found for group: '${name}'`,
       rule: 'missing-index-file',
-      severity: 2
+      severity: 1
     });
     return { issues, fixedCount };
   }
@@ -133,54 +134,76 @@ function scanGroup(name, config, opts = {}) {
 
   const filesToIndex = collected.filter(f => !fileHasLintSkip(f));
   const indexRelPath = path.relative(projectRoot, indexAbsPath);
-  const missingEntries = [];
 
+  /** NEW: Always warn on everything in the uncat block */
+  for (const rel of uncatLinks) {
+    issues.push({
+      file: indexRelPath,
+      line: 1,
+      severity: 1,
+      rule: 'uncategorized-index-entry',
+      message: `Uncategorized index entry: '${rel}'`
+    });
+  }
+
+  // Find files missing from any block
+  const missingInIndex = [];
   for (const file of filesToIndex) {
     const rel = path.relative(indexDir, file).replace(/\\/g, '/');
-    if (allLinks.has(rel)) continue;
-
-    if (uncatLinks.has(rel)) {
-      issues.push({
-        file: indexRelPath,
-        line: 1,
-        severity: 1,
-        rule: 'uncategorized-index-entry',
-        message: `Uncategorized index entry: '${rel}'`
-      });
-    } else {
-      issues.push({
-        file: indexRelPath,
-        line: 1,
-        severity: 1,
-        rule: 'missing-index-entry',
-        message: `Untracked file: '${rel}'`
-      });
-      missingEntries.push(rel);
+    if (!allLinks.has(rel) && !uncatLinks.has(rel)) {
+      missingInIndex.push(rel);
     }
   }
 
-  if (allowFix && missingEntries.length > 0) {
+  // Also warn about files missing from the whole index (as before)
+  for (const rel of missingInIndex) {
+    issues.push({
+      file: indexRelPath,
+      line: 1,
+      severity: 1,
+      rule: 'missing-index-entry',
+      message: `Untracked file: '${rel}'`
+    });
+  }
+
+  /** If fixing, insert any missingInIndex into the block */
+  if (allowFix && missingInIndex.length > 0) {
     const startIdx = lines.findIndex(l => l.trim() === START_MARKER);
     const endIdx = lines.findIndex(l => l.trim() === END_MARKER);
-    const additions = missingEntries.map(p => `- [${path.basename(p)}](${p})`);
 
-    if (!dryRun) {
-      const before = lines.slice(0, startIdx + 1);
-      const after = lines.slice(endIdx);
-      const block = [...new Set([...lines.slice(startIdx + 1, endIdx), ...additions])];
-      const newContent = [...before, ...block.sort(), ...after].join('\n');
-      fs.writeFileSync(indexAbsPath, newContent, 'utf8');
+    if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
+      issues.push({
+        file: indexRelPath,
+        line: 1,
+        severity: 2,
+        rule: 'uncategorized-block-missing',
+        message: `Uncategorized block missing in index file.`
+      });
+      return { issues, fixedCount };
     }
 
-    fixedCount = missingEntries.length;
-    const fixedFiles = new Set(missingEntries);
-    issues = issues.filter(issue => {
-      if (issue.rule === 'missing-index-entry') {
-        const fileName = issue.message.match(/'([^']+)'/)?.[1];
-        return !fixedFiles.has(fileName);
-      }
-      return true;
-    });
+    const previousBlockLines = lines.slice(startIdx + 1, endIdx);
+    // Extract filenames already in block; may be bullet links or not
+    const existingEntries = new Set(previousBlockLines
+      .map(line => {
+        const match = line.match(/\[.*?\]\((.*?)\)/);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean)
+    );
+
+    // Compute additions (skip if already in block)
+    const additions = missingInIndex
+      .filter(p => !existingEntries.has(p))
+      .map(p => `- [${path.basename(p)}](${p})`);
+    if (!dryRun && additions.length > 0) {
+      const before = lines.slice(0, startIdx + 1);
+      const after = lines.slice(endIdx);
+      const dedupedBlock = [...new Set([...previousBlockLines, ...additions])].sort();
+      const newContent = [...before, ...dedupedBlock, ...after].join('\n');
+      fs.writeFileSync(indexAbsPath, newContent, 'utf8');
+    }
+    fixedCount = additions.length;
   }
 
   return { issues, fixedCount };

@@ -153,5 +153,6 @@ at the project root.
 *This list is automatically updated by [`scripts/linting/docs/update-project-indices.js`](../scripts/linting/docs/update-project-indices.js)*
 
 <!-- uncategorized-start -->
+- [scripts.refactor.index.md](archive/v0.10/scripts.refactor.index.md)
 <!-- uncategorized-end -->
 

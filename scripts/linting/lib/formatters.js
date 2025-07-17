@@ -1,4 +1,4 @@
-// scripts/shared/formatters.js
+// scripts/linting/lib/formatters.js
 
 const chalk = require('chalk');
 const path = require('path');

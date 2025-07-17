@@ -10,6 +10,7 @@
     "start": "node cli.js",
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
+    "generate:paths": "node scripts/generate-paths-beautiful.js",
     "test": "mocha",
     "test:last-fails": "node test/scripts/run-last-fails.js",
     "test:report": "MOCHA_JSON_REPORT_FILE=./test-report.json mocha",

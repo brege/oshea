@@ -1,11 +1,14 @@
 // src/cli/commands/collectionCmd.js
-const { cliCommandsPath } = require('@paths');
-const path = require('path');
-
-const addCmd = require(path.join(cliCommandsPath, 'collection', 'addCmd.js'));
-const listCmd = require(path.join(cliCommandsPath, 'collection', 'listCmd.js'));
-const removeCmd = require(path.join(cliCommandsPath, 'collection', 'removeCmd.js'));
-const updateCmd = require(path.join(cliCommandsPath, 'collection', 'updateCmd.js'));
+const {
+  collectionsAddCmdPath,
+  collectionsListCmdPath,
+  collectionsRemoveCmdPath,
+  collectionsUpdateCmdPath
+} = require('@paths');
+const addCmd = require(collectionsAddCmdPath);
+const listCmd = require(collectionsListCmdPath);
+const removeCmd = require(collectionsRemoveCmdPath);
+const updateCmd = require(collectionsUpdateCmdPath);
 
 module.exports = {
   command: 'collection <subcommand>',

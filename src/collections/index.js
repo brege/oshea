@@ -6,8 +6,22 @@ const os = require('os');
 const { spawn } = require('child_process');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
-const matter = require('gray-matter');
-const { cmUtilsPath, constantsPath, collectionsCommandsRoot, loggerPath } = require('@paths');
+const matter = 'gray-matter';
+const {
+  cmUtilsPath,
+  constantsPath,
+  loggerPath,
+  addPath,
+  enablePath,
+  enableAllPath,
+  disablePath,
+  removePath,
+  updatePath,
+  updateAllPath,
+  listAvailablePath,
+  listPath,
+  addSingletonPath
+} = require('@paths');
 const logger = require(loggerPath);
 
 // Internal Utilities
@@ -15,16 +29,16 @@ const cmUtils = require(cmUtilsPath);
 const constants = require(constantsPath);
 
 // Command Modules
-const addCollectionCmd = require(path.join(collectionsCommandsRoot, 'add.js'));
-const enablePluginCmd = require(path.join(collectionsCommandsRoot, 'enable.js'));
-const enableAllPluginsInCollectionCmd = require(path.join(collectionsCommandsRoot, 'enableAll.js'));
-const disablePluginCmd = require(path.join(collectionsCommandsRoot, 'disable.js'));
-const removeCollectionCmd = require(path.join(collectionsCommandsRoot, 'remove.js'));
-const updateCollectionCmd = require(path.join(collectionsCommandsRoot, 'update.js'));
-const updateAllCollectionsCmd = require(path.join(collectionsCommandsRoot, 'updateAll.js'));
-const listAvailablePluginsCmd = require(path.join(collectionsCommandsRoot, 'listAvailable.js'));
-const listCollectionsCmd = require(path.join(collectionsCommandsRoot, 'list.js'));
-const addSingletonPluginCmd = require(path.join(collectionsCommandsRoot, 'addSingleton.js'));
+const addCollectionCmd = require(addPath);
+const enablePluginCmd = require(enablePath);
+const enableAllPluginsInCollectionCmd = require(enableAllPath);
+const disablePluginCmd = require(disablePath);
+const removeCollectionCmd = require(removePath);
+const updateCollectionCmd = require(updatePath);
+const updateAllCollectionsCmd = require(updateAllPath);
+const listAvailablePluginsCmd = require(listAvailablePath);
+const listCollectionsCmd = require(listPath);
+const addSingletonPluginCmd = require(addSingletonPath);
 
 class CollectionsManager {
   constructor(options = {}, dependencies = {}) {

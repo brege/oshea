@@ -7,16 +7,31 @@ const { hideBin } = require('yargs/helpers');
 const path = require('path');
 const fs = require('fs');
 
-const { loggerPath } = require('@paths');
+const {
+  loggerPath,
+  configResolverPath,
+  pluginManagerPath,
+  watchHandlerPath,
+  pluginDeterminerPath,
+  indexPath,
+  mainConfigLoaderPath,
+  markdownUtilsPath,
+  configCmdPath,
+  pluginCmdPath,
+  convertCmdPath,
+  generateCmdPath,
+  collectionCmdPath,
+  updateCmdPath,
+  enginePath,
+} = require('@paths');
 const logger = require(loggerPath);
 
 const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
 
 // This block is a special case for shell completion.
-// It must write directly to stdout without any formatting from the logger.
 if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
-  const { getSuggestions } = require('./src/completion/engine');
+  const { getSuggestions } = require(enginePath);
 
   const completionArgv = {
     _: [],
@@ -56,24 +71,23 @@ const os = require('os');
 const fsp = require('fs').promises;
 const { spawn, execSync } = require('child_process');
 
-const ConfigResolver = require('./src/config/ConfigResolver');
-const PluginManager = require('./src/plugins/PluginManager');
-const { setupWatch } = require('./src/core/watch_handler');
-const { determinePluginToUse } = require('./src/plugins/plugin_determiner');
-const CollectionsManager = require('./src/collections');
-const MainConfigLoader = require('./src/config/main_config_loader');
-const markdownUtils = require('./src/core/markdown_utils');
+const ConfigResolver = require(configResolverPath);
+const PluginManager = require(pluginManagerPath);
+const { setupWatch } = require(watchHandlerPath);
+const { determinePluginToUse } = require(pluginDeterminerPath);
+const CollectionsManager = require(indexPath);
+const MainConfigLoader = require(mainConfigLoaderPath);
+const markdownUtils = require(markdownUtilsPath);
 const yaml = require('js-yaml');
 
 const yargs = require('yargs/yargs');
 
-const configCmd = require('./src/cli/commands/configCmd');
-const pluginCmd = require('./src/cli/commands/pluginCmd');
-const convertCmdModule = require('./src/cli/commands/convertCmd');
-const generateCmd = require('./src/cli/commands/generateCmd');
-const collectionCmd = require('./src/cli/commands/collectionCmd');
-const updateCmd = require('./src/cli/commands/updateCmd.js');
-
+const configCmd = require(configCmdPath);
+const pluginCmd = require(pluginCmdPath);
+const convertCmdModule = require(convertCmdPath);
+const generateCmd = require(generateCmdPath);
+const collectionCmd = require(collectionCmdPath);
+const updateCmd = require(updateCmdPath);
 
 function openPdf(pdfPath, viewerCommand) {
   if (!viewerCommand) {

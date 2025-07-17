@@ -1,12 +1,21 @@
 // index.js
 // Main module entry point for md-to-pdf
 
-const DefaultHandler = require('./src/core/default_handler');
-const markdownUtils = require('./src/core/markdown_utils');
-const pdfGenerator = require('./src/core/pdf_generator');
-const ConfigResolver = require('./src/config/ConfigResolver');
-const PluginManager = require('./src/plugins/PluginManager');
-const PluginRegistryBuilder = require('./src/plugins/PluginRegistryBuilder');
+const {
+  defaultHandlerPath,
+  markdownUtilsPath,
+  pdfGeneratorPath,
+  configResolverPath,
+  pluginManagerPath,
+  pluginRegistryBuilderPath,
+} = require('@paths');
+
+const DefaultHandler = require(defaultHandlerPath);
+const markdownUtils = require(markdownUtilsPath);
+const pdfGenerator = require(pdfGeneratorPath);
+const ConfigResolver = require(configResolverPath);
+const PluginManager = require(pluginManagerPath);
+const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 
 // Functions/Classes intended for use by plugins or potentially external tools
 module.exports = {

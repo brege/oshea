@@ -90,10 +90,7 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       '@paths': {
         ...require('@paths'),
         loggerPath: testLoggerPath,
-        cmUtilsPath,
-        constantsPath,
-        collectionsCommandsRoot: require('@paths').collectionsCommandsRoot,
-        validatorPath: require('@paths').validatorPath,
+        // The rest are automatically included from the real @paths
       },
       [cmUtilsPath]: mockDependencies.cmUtils,
       [constantsPath]: mockDependencies.constants
@@ -192,4 +189,3 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
     });
   });
 });
-

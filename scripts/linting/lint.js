@@ -4,9 +4,9 @@
 require('module-alias/register');
 
 const chalk = require('chalk');
-const { lintingConfigPath, lintHelpersPath, lintingHarnessPath } = require('@paths');
+const { lintingConfigPath, lintHelpersPath, lintHarnessPath } = require('@paths');
 const { loadLintConfig, parseCliArgs } = require(lintHelpersPath);
-const { runHarness } = require(lintingHarnessPath);
+const { runHarness } = require(lintHarnessPath);
 
 function printHelp() {
   console.log(`md-to-pdf Linter

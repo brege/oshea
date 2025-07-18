@@ -9,11 +9,7 @@ const walk = require('acorn-walk');
 const paths = require('@paths');
 const chalk = require('chalk');
 
-/**
- * Recursively finds the variable name in the @paths registry that matches a given file path.
- * @param {string} targetPath - The absolute path of the file to find.
- * @returns {string[]} An array of matching variable names.
- */
+
 function findVariableByPath(targetPath) {
   const absoluteTargetPath = path.resolve(targetPath);
 
@@ -36,11 +32,7 @@ function findVariableByPath(targetPath) {
   return [...new Set(walkRegistry(paths))];
 }
 
-/**
- * Parses a JS file and returns its exported keys from `module.exports`.
- * @param {string} targetPath - The absolute path of the file to parse.
- * @returns {string[]} A sorted array of exported keys.
- */
+
 function getFileExports(targetPath) {
   const exports = new Set();
   if (!fs.existsSync(targetPath)) return [];
@@ -61,7 +53,6 @@ function getFileExports(targetPath) {
               if (prop.type === 'Property' && prop.key.type === 'Identifier') {
                 exports.add(prop.key.name);
               } else if (prop.type === 'SpreadElement' && prop.argument.type === 'Identifier') {
-                // This is a simplification; for full accuracy, you'd need to trace the spread identifier.
                 exports.add(`...${prop.argument.name}`);
               }
             });
@@ -70,7 +61,7 @@ function getFileExports(targetPath) {
       }
     });
   } catch (e) {
-    // Silently fail if parsing fails (e.g., for non-JS files or complex syntax)
+    void 0; // eslint-disable-line no-empty
   }
 
   return Array.from(exports).sort();
@@ -100,9 +91,6 @@ if (require.main === module) {
     console.error(chalk.red(`No variable found for path: ${path.resolve(target)}`));
     process.exit(1);
   }
-
-
-
 
 }
 

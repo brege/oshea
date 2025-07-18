@@ -7,42 +7,45 @@ remove-auto-doc:
     - cli.js
     - index.js
     - src
-    - test/e2e
-    - test/integration
+    - test
+    - plugins
+    - scripts
+    - paths
   excludes:
     - .mocharc.js
-    - "test/scripts/**"
-    - "scripts/**"
+    - "scripts/shared/file-helpers.js"
+    - "scripts/ai/ai-context-generator.js"
   excludeDirs:
     - assets
-    - node_modules
-    - test/scripts
-    - scripts
+    - "node_modules"
+    - ".git"
+
 # scripts/linting/code/logging-lint.js
 logging:
   targets:
+    - cli.js
+    - index.js
     - src
-    - "*.js"
-    - test/e2e
     - test/integration
+    - test/e2e
   excludes:
     - "node_modules/**"
     - ".git/**"
     - src/utils/logger.js
-    - "scripts/**"
-    - "test/scripts/**"
     - "plugins/**"
+
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:
   targets:
     - "src/**/*.js"
     - "test/**/*.js"
     - "scripts/**/*.js"
+    - "plugins/**/*.js"
+    - "paths/generator.js"
   excludes:
     - "node_modules/**"
-    - "scripts/shared/**"
     - "plugins/**"
-    - "test/fixtures/**"
+
 # scripts/linting/code/strip-trailing-whitespace.js
 remove-ws:
   targets:
@@ -50,36 +53,31 @@ remove-ws:
     - "test/**/*.js"
     - "scripts/**/*.js"
     - "plugins/**/*.js"
+    - "paths/**/*.js"
     - "*.js"
     - "*.sh"
   excludes:
     - "node_modules/**"
-    - "scripts/shared/**"
     - "plugins/**/.contract/**"
-    - "test/fixtures/**"
+
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
   targets:
+    - cli.js
+    - index.js
     - "src/**/*.js"
     #- "test/**/*.js"
-    #- "plugins/**/*.js"
-    #- "scripts/**/*.js"
-    # fix these in batches
-    - "scripts/linting/**/*.js"
-    - "*.js"
+    - "scripts/**/*.js"
   excludes:
     - "node_modules/**"
     - ".git/**"
-    - "scripts/shared/**"
+    - paths
     - "plugins/**"
     - "test/fixtures/**"
-    - "paths.js"
-    - "scripts/scriptsPaths.js"
 
 # --- Validators ---
 # scripts/linting/validators/mocha-path-validator.js
-validate-mocha:
-  excludes: []
+validate-mocha: []
 
 # --- Docs ---
 # scripts/linting/docs/update-project-indices.js
@@ -91,9 +89,8 @@ update-indices:
       - ".md"
     excludePatterns:
       - docs/dream-board.md
-      - "docs/images/**"
-    marker: "etc"
   plugins:
+    marker: "plugins"
     indexFile: plugins/index.md
     scanRoot: "plugins"
     fileExtensions:
@@ -101,27 +98,25 @@ update-indices:
     excludePatterns:
       - "plugins/**/index.md"
       - "plugins/**/*-example.md"
-    marker: "plugins"
   scripts:
+    marker: "scripts"
     indexFile: scripts/index.md
     scanRoot: "scripts"
     fileExtensions:
       - ".js"
       - ".sh"
-      - ".mjs"
     excludePatterns:
-      - "scripts/scriptsPaths.js"
       - "scripts/linting/**"
-    marker: "scripts"
   linting:
+    marker: "linting"
     indexFile: scripts/linting/index.md
     scanRoot: scripts/linting
     fileExtensions:
       - ".js"
       - ".sh"
     excludePatterns: []
-    marker: "linting"
   test-scripts:
+    marker: "test-scripts"
     indexFile: test/index.md
     scanRoot: 
       - test/docs
@@ -130,7 +125,6 @@ update-indices:
       - .js
       - .md
     excludePatterns: [] 
-    marker: "test-scripts"
 # scripts/linting/docs/postman.js
 doc-links:
   excludes:
@@ -148,7 +142,7 @@ doc-links:
     - "**/my[-_]*/**"
     - "**/sample.md"
     - "**/index.js"
-    - "paths.js"
+# scripts/linting/docs/find-litter.js
 find-litter:
   targets:
     - src
@@ -156,6 +150,7 @@ find-litter:
     - plugins
     - scripts
     - test
+    - paths
     - "*.js"
     - "*.md"
   excludes:

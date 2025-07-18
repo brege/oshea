@@ -1,5 +1,5 @@
 // scripts.js - Scripts Path Registry
-// Generated: 2025-07-18T08:04:56.771Z
+// Generated: 2025-07-18T17:27:27.107Z
 // Architecture: Feature-based
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -39,7 +39,6 @@ const generateCompletionDynamicCachePath = path.join(projectRoot, 'scripts/compl
 
 // Documentation Helpers
 const docsRoot = path.join(projectRoot, 'scripts/docs/');
-const generateHelpChecklistPath = path.join(projectRoot, 'scripts/docs/generate-help-checklist.js');
 const generateTocPath = path.join(projectRoot, 'scripts/docs/generate-toc.js');
 
 // --- Rank 2: supportive operations ---
@@ -72,7 +71,6 @@ module.exports = {
   generateCompletionCachePath,
   generateCompletionDynamicCachePath,
   docsRoot,
-  generateHelpChecklistPath,
   generateTocPath,
 
   // --- supportive operations ---

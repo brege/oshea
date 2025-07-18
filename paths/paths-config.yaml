@@ -1,0 +1,100 @@
+# paths/paths-config.yaml
+# Declarative Master Configuration for the Path Registry Generator
+
+metadata:
+  version: "1.0"
+  generated_warning: "Auto-generated - do not edit manually"
+  regenerate_command: "npm run paths"
+
+registries:
+  # Main application registry (generates paths/index.js)
+  main:
+    output_file: "paths/index.js"
+    title: "Project Path Registry"
+    architecture: "Feature-based with dependency ranking"
+    imports:
+      scriptsPaths: "./scripts.js"
+    architecture_sections:
+      foundation:
+        comment: "Project Foundation"
+        items:
+          project_root: "path.resolve(__dirname, '..')"
+          paths_path: "path.join(__dirname, 'index.js')"
+          node_modules_path: "path.join(projectRoot, 'node_modules')"
+          config_example_path: "path.join(projectRoot, 'config.example.yaml')"
+          default_config_path: "path.join(projectRoot, 'config.yaml')"
+          factory_default_config_path: "path.join(projectRoot, 'config.example.yaml')"
+      interfaces:
+        comment: "CLI & External Interfaces"
+        items:
+          cli_path: "path.join(projectRoot, 'cli.js')"
+          template_basic_plugin: "path.join(projectRoot, 'plugins', 'template-basic')"
+      boundaries:
+        comment: "Architectural Boundaries"
+        items:
+          src_root: "path.join(projectRoot, 'src')"
+          assets_root: "path.join(projectRoot, 'assets')"
+          scripts_root: "path.join(projectRoot, 'scripts')"
+          test_root: "path.join(projectRoot, 'test')"
+          cli_commands_path: "path.join(srcRoot, 'cli', 'commands')"
+          collections_commands_root: "path.join(srcRoot, 'collections', 'commands')"
+          scripts_shared_root: "path.join(scriptsRoot, 'shared')"
+          test_shared_root: "path.join(testRoot, 'shared')"
+      tooling:
+        comment: "Development & Build Tools"
+        items:
+          eslint_path: "path.join(nodeModulesPath, '.bin', 'eslint')"
+          mocha_path: "path.join(nodeModulesPath, '.bin', 'mocha')"
+          mocharc_path: "path.join(projectRoot, '.mocharc.js')"
+          file_helpers_path: "path.join(scriptsSharedRoot, 'file-helpers.js')"
+          test_file_helpers_path: "path.join(testSharedRoot, 'test-helpers.js')"
+          dynamic_completion_script_path: "path.join(scriptsRoot, 'completion', 'generate-completion-dynamic-cache.js')"
+      statics:
+        comment: "Key Static File Paths"
+        items:
+          katex_path: "path.join(assetsRoot, 'katex.min.css')"
+          base_plugin_schema_path: "path.join(srcRoot, 'validators', 'base-plugin.schema.json')"
+          find_litter_rules_path: "path.join(assetsRoot, 'litter-list.txt')"
+          linting_config_path: "path.join(scriptsRoot, 'linting', 'config.yaml')"
+    features:
+      cli: { comment: "Command Line Interface", pattern: "src/cli/**/*.js", rank: 0 }
+      core: { comment: "Core Processing Engine", pattern: "src/core/**/*.js", rank: 1 }
+      plugins: { comment: "Plugin System", pattern: "src/plugins/**/*.js", rank: 2 }
+      collections: { comment: "Collections Management", pattern: "src/collections/**/*.js", rank: 2 }
+      config: { comment: "Configuration System", pattern: "src/config/**/*.js", rank: 1 }
+      completion: { comment: "CLI Completion Engine", pattern: "src/completion/**/*.js", rank: 3 }
+      utils: { comment: "Utilities & Helpers", pattern: "src/utils/**/*.js", rank: 3 }
+      validators: { comment: "Validation Framework", pattern: "src/validators/**/*.js", rank: 2 }
+    contextual_naming:
+      "addCmd.js":
+        "cli/commands/collection": "collections_add_cmd"
+        "cli/commands/plugin": "plugin_add_cmd"
+        "collections/commands": "collections_add"
+      "listCmd.js":
+        "cli/commands/collection": "collections_list_cmd"
+        "cli/commands/plugin": "plugin_list_cmd"
+        "collections/commands": "collections_list"
+      "removeCmd.js":
+        "cli/commands/collection": "collections_remove_cmd"
+        "collections/commands": "collections_remove"
+      "updateCmd.js":
+        "cli/commands/collection": "collections_update_cmd"
+        "collections/commands": "collections_update"
+
+  # Scripts registry (generates paths/scripts.js)
+  scripts:
+    output_file: "paths/scripts.js"
+    title: "Scripts Path Registry"
+    architecture: "Directory-based"
+    scan_mode: true
+    base_var: "scriptsRoot"
+    base_path: "scripts"
+    file_extensions: [".js", ".sh"]
+    exclude_patterns:
+      - "scripts/scriptsPaths.js" # Exclude the old file if it still exists
+
+rank_definitions:
+  0: "user-facing interfaces"
+  1: "essential operations"
+  2: "supportive operations"
+  3: "enhancements & utilities"

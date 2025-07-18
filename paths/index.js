@@ -1,7 +1,8 @@
 // index.js - Project Path Registry
-// Generated: 2025-07-18T03:45:21.925Z
+// Generated: 2025-07-18T05:54:24.965Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
+// Auto-generated - do not edit manually
 
 const path = require('path');
 const scriptsPaths = require('./scripts.js');
@@ -168,7 +169,7 @@ module.exports = {
   findLitterRulesPath,
   lintingConfigPath,
 
-  // --- Rank 0: User Interfaces ---
+  // --- user-facing interfaces ---
   cliRoot,
   collectionCmdPath,
   configDisplayPath,
@@ -190,7 +191,7 @@ module.exports = {
   collectionsUpdateCmdPath,
   validateCmdPath,
 
-  // --- Rank 1: Essential Operations ---
+  // --- essential operations ---
   coreRoot,
   defaultHandlerPath,
   markdownUtilsPath,
@@ -203,7 +204,7 @@ module.exports = {
   mainConfigLoaderPath,
   pluginConfigLoaderPath,
 
-  // --- Rank 2: Supportive Operations ---
+  // --- supportive operations ---
   pluginsRoot,
   pluginArchetyperPath,
   pluginDeterminerPath,
@@ -227,7 +228,7 @@ module.exports = {
   validatorsRoot,
   v1Path,
 
-  // --- Rank 3: Enhancements ---
+  // --- enhancements & utilities ---
   completionRoot,
   cliTreeBuilderPath,
   enginePath,
@@ -236,7 +237,7 @@ module.exports = {
   assetResolverPath,
   loggerPath,
 
-  // --- Scripts Registry ---
+  // --- Imported Registries ---
   ...scriptsPaths,
 
 };

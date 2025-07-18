@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // scripts/linting/lint.js
-
 require('module-alias/register');
 
 const chalk = require('chalk');
 const { lintingConfigPath, lintHelpersPath, lintHarnessPath } = require('@paths');
+
 const { loadLintConfig, parseCliArgs } = require(lintHelpersPath);
 const { runHarness } = require(lintHarnessPath);
 
@@ -55,7 +55,6 @@ Examples:
 
 function main() {
   const { flags, targets, only } = parseCliArgs(process.argv.slice(2));
-
   // Handle --help or -h
   if (flags.help || flags.h) {
     printHelp();

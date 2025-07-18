@@ -1,11 +1,12 @@
 // index.js - Project Path Registry
-// Generated: 2025-07-18T05:54:24.965Z
+// Generated: 2025-07-18T09:03:25.986Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
 
 const path = require('path');
 const scriptsPaths = require('./scripts.js');
+const lintersPaths = require('./linters.js');
 
 // ==========================================
 // ARCHITECTURE
@@ -54,13 +55,13 @@ const lintingConfigPath = path.join(scriptsRoot, 'linting', 'config.yaml');
 // --- Rank 0: user-facing interfaces ---
 
 // Command Line Interface
-const cliRoot = path.join(srcRoot, 'cli');
-const collectionCmdPath = path.join(projectRoot, 'src/cli/commands/collectionCmd.js');
+const cliRoot = path.join(projectRoot, 'src/cli/');
 const configDisplayPath = path.join(projectRoot, 'src/cli/config_display.js');
+const getHelpPath = path.join(projectRoot, 'src/cli/get_help.js');
+const collectionCmdPath = path.join(projectRoot, 'src/cli/commands/collectionCmd.js');
 const configCmdPath = path.join(projectRoot, 'src/cli/commands/configCmd.js');
 const convertCmdPath = path.join(projectRoot, 'src/cli/commands/convertCmd.js');
 const generateCmdPath = path.join(projectRoot, 'src/cli/commands/generateCmd.js');
-const getHelpPath = path.join(projectRoot, 'src/cli/get_help.js');
 const pluginCmdPath = path.join(projectRoot, 'src/cli/commands/pluginCmd.js');
 const updateCmdPath = path.join(projectRoot, 'src/cli/commands/updateCmd.js');
 const collectionsAddCmdPath = path.join(projectRoot, 'src/cli/commands/collection/addCmd.js');
@@ -78,7 +79,7 @@ const validateCmdPath = path.join(projectRoot, 'src/cli/commands/plugin/validate
 // --- Rank 1: essential operations ---
 
 // Core Processing Engine
-const coreRoot = path.join(srcRoot, 'core');
+const coreRoot = path.join(projectRoot, 'src/core/');
 const defaultHandlerPath = path.join(projectRoot, 'src/core/default_handler.js');
 const markdownUtilsPath = path.join(projectRoot, 'src/core/markdown_utils.js');
 const mathIntegrationPath = path.join(projectRoot, 'src/core/math_integration.js');
@@ -86,7 +87,7 @@ const pdfGeneratorPath = path.join(projectRoot, 'src/core/pdf_generator.js');
 const watchHandlerPath = path.join(projectRoot, 'src/core/watch_handler.js');
 
 // Configuration System
-const configRoot = path.join(srcRoot, 'config');
+const configRoot = path.join(projectRoot, 'src/config/');
 const configUtilsPath = path.join(projectRoot, 'src/config/config_utils.js');
 const configResolverPath = path.join(projectRoot, 'src/config/ConfigResolver.js');
 const mainConfigLoaderPath = path.join(projectRoot, 'src/config/main_config_loader.js');
@@ -95,7 +96,7 @@ const pluginConfigLoaderPath = path.join(projectRoot, 'src/config/plugin_config_
 // --- Rank 2: supportive operations ---
 
 // Plugin System
-const pluginsRoot = path.join(srcRoot, 'plugins');
+const pluginsRoot = path.join(projectRoot, 'src/plugins/');
 const pluginArchetyperPath = path.join(projectRoot, 'src/plugins/plugin_archetyper.js');
 const pluginDeterminerPath = path.join(projectRoot, 'src/plugins/plugin_determiner.js');
 const pluginManagerPath = path.join(projectRoot, 'src/plugins/PluginManager.js');
@@ -103,15 +104,15 @@ const pluginRegistryBuilderPath = path.join(projectRoot, 'src/plugins/PluginRegi
 const validatorPath = path.join(projectRoot, 'src/plugins/validator.js');
 
 // Collections Management
-const collectionsRoot = path.join(srcRoot, 'collections');
-const addPath = path.join(projectRoot, 'src/collections/commands/add.js');
-const addSingletonPath = path.join(projectRoot, 'src/collections/commands/addSingleton.js');
+const collectionsRoot = path.join(projectRoot, 'src/collections/');
 const cmUtilsPath = path.join(projectRoot, 'src/collections/cm-utils.js');
 const constantsPath = path.join(projectRoot, 'src/collections/constants.js');
+const indexPath = path.join(projectRoot, 'src/collections/index.js');
+const addPath = path.join(projectRoot, 'src/collections/commands/add.js');
+const addSingletonPath = path.join(projectRoot, 'src/collections/commands/addSingleton.js');
 const disablePath = path.join(projectRoot, 'src/collections/commands/disable.js');
 const enablePath = path.join(projectRoot, 'src/collections/commands/enable.js');
 const enableAllPath = path.join(projectRoot, 'src/collections/commands/enableAll.js');
-const indexPath = path.join(projectRoot, 'src/collections/index.js');
 const listPath = path.join(projectRoot, 'src/collections/commands/list.js');
 const listAvailablePath = path.join(projectRoot, 'src/collections/commands/listAvailable.js');
 const removePath = path.join(projectRoot, 'src/collections/commands/remove.js');
@@ -119,19 +120,19 @@ const updatePath = path.join(projectRoot, 'src/collections/commands/update.js');
 const updateAllPath = path.join(projectRoot, 'src/collections/commands/updateAll.js');
 
 // Validation Framework
-const validatorsRoot = path.join(srcRoot, 'validators');
+const validatorsRoot = path.join(projectRoot, 'src/validators/');
 const v1Path = path.join(projectRoot, 'src/validators/v1.js');
 
 // --- Rank 3: enhancements & utilities ---
 
 // CLI Completion Engine
-const completionRoot = path.join(srcRoot, 'completion');
+const completionRoot = path.join(projectRoot, 'src/completion/');
 const cliTreeBuilderPath = path.join(projectRoot, 'src/completion/cli-tree-builder.js');
 const enginePath = path.join(projectRoot, 'src/completion/engine.js');
 const trackerPath = path.join(projectRoot, 'src/completion/tracker.js');
 
 // Utilities & Helpers
-const utilsRoot = path.join(srcRoot, 'utils');
+const utilsRoot = path.join(projectRoot, 'src/utils/');
 const assetResolverPath = path.join(projectRoot, 'src/utils/asset_resolver.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
 
@@ -171,12 +172,12 @@ module.exports = {
 
   // --- user-facing interfaces ---
   cliRoot,
-  collectionCmdPath,
   configDisplayPath,
+  getHelpPath,
+  collectionCmdPath,
   configCmdPath,
   convertCmdPath,
   generateCmdPath,
-  getHelpPath,
   pluginCmdPath,
   updateCmdPath,
   collectionsAddCmdPath,
@@ -212,14 +213,14 @@ module.exports = {
   pluginRegistryBuilderPath,
   validatorPath,
   collectionsRoot,
-  addPath,
-  addSingletonPath,
   cmUtilsPath,
   constantsPath,
+  indexPath,
+  addPath,
+  addSingletonPath,
   disablePath,
   enablePath,
   enableAllPath,
-  indexPath,
   listPath,
   listAvailablePath,
   removePath,
@@ -239,5 +240,6 @@ module.exports = {
 
   // --- Imported Registries ---
   ...scriptsPaths,
+  ...lintersPaths,
 
 };

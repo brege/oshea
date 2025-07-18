@@ -6,11 +6,14 @@ const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
 const chalk = require('chalk');
 
+require('module-alias/register');
+const { cliCommandsPath, cliPath } = require('@paths');
+
 // --- Configuration ---
-const COMMANDS_DIR = path.resolve(__dirname, '../../src/cli/commands');
+const COMMANDS_DIR = path.resolve(__dirname, cliCommandsPath);
 const CHECKLIST_PATH = path.resolve(__dirname, '../../test/docs/help-text-checklist.md');
 const ROOT_CMD_NAME = 'md-to-pdf';
-const CLI_PATH = path.resolve(__dirname, '../../cli.js');
+const CLI_PATH = path.resolve(__dirname, cliPath);
 const START_MARKER = '<!-- help-checklist-start -->';
 const END_MARKER = '<!-- help-checklist-end -->';
 

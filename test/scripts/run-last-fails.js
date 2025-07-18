@@ -1,9 +1,10 @@
 // test/scripts/run-last-fails.js
+require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
-const { mochaPath } = require('../../paths.js');
+const { mochaPath } = require('@paths');
 
 function getReportPath() {
   if (process.env.MOCHA_JSON_REPORT_FILE) {

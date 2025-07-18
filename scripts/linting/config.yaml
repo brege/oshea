@@ -80,26 +80,6 @@ no-relative-paths:
 # scripts/linting/validators/mocha-path-validator.js
 validate-mocha:
   excludes: []
-# scripts/linting/validators/paths-js-validator.js
-validate-paths:
-  ignores:
-    - config.yaml
-# scripts/linting/validators/paths-usage-validator.js
-validate-paths-usage:
-  targets:
-    - "src"
-    - "scripts"
-    - "test"
-    - "*.js"
-  ignores:
-    - "node_modules/**"
-    - ".git/**"
-    - "scripts/shared/**"
-    - "plugins/**"
-    - "test/fixtures/**"
-  allow:
-    - pathsPath
-    - scriptsPaths
 
 # --- Docs ---
 # scripts/linting/docs/update-project-indices.js
@@ -211,12 +191,6 @@ harness:
     - key: 'validate-mocha' 
       label: 'Validator: Check .mocharc.js paths'
       scriptPath: scripts/linting/validators/mocha-path-validator.js
-    - key: 'validate-paths' 
-      label: 'Validator: Check paths.js'
-      scriptPath: scripts/linting/validators/paths-js-validator.js
-    - key: 'validate-paths-usage' 
-      label: 'Validator: Check paths usage'
-      scriptPath: scripts/linting/validators/paths-usage-validator.js
 
     # --- Docs ---
     - key: 'update-indices' 
@@ -226,7 +200,7 @@ harness:
       label: 'Docs: Check Markdown Links (Postman)'
       scriptPath: scripts/linting/docs/postman.js
     - key: 'remove-litter'
-      label: 'Docs: Find Litter'
+      label: 'Docs: Find Litter (Custodian)'
       scriptPath: scripts/linting/docs/find-litter.js
 
     # --- Harness ---

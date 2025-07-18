@@ -16,10 +16,12 @@
  *   node scripts/ai/ai-context-generator.js --plugin cv | xclip -selection clipboard
  *   node scripts/ai/ai-context-generator.js --plugin cv | pbcopy
  */
+require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const { findFiles } = require('../shared/file-helpers.js');
+const { fileHelpersPath } = require('@paths');
+const { findFiles } = require(fileHelpersPath);
 
 const DOCS_DIR = 'docs';
 const PLUGINS_DIR = 'plugins';

@@ -1,7 +1,8 @@
 // scripts.js - Scripts Path Registry
-// Generated: 2025-07-18T03:43:40.742Z
+// Generated: 2025-07-18T05:54:24.995Z
 // Architecture: Directory-based
 // Regenerate: npm run paths
+// Auto-generated - do not edit manually
 
 const path = require('path');
 

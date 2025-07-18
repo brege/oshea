@@ -1,180 +1,39 @@
 #!/usr/bin/env node
-// paths/generator.js
+// paths/generator.js - Refactored declarative version
 
 const fs = require('fs');
 const path = require('path');
+const yaml = require('js-yaml');
 
-class BeautifulPathsGenerator {
-  constructor(projectRoot = process.cwd()) {
+class DeclarativePathsGenerator {
+  constructor(configPath = null, projectRoot = process.cwd()) {
     this.projectRoot = projectRoot;
-    this.mainOutputFile = path.join(projectRoot, 'paths', 'index.js');
-    this.scriptsOutputFile = path.join(projectRoot, 'paths', 'scripts.js');
+    this.configPath = configPath || path.join(projectRoot, 'paths', 'paths-config.yaml');
+    this.config = this.loadConfig();
+  }
 
-    // Main application configuration
-    this.mainConfig = {
-      outputPath: this.mainOutputFile,
-      header: {
-        title: 'Project Path Registry',
-        architecture: 'Feature-based with dependency ranking',
-        regenerate: 'npm run paths',
-      },
-      imports: {
-        scriptsPaths: './scripts.js',
-      },
-      architecture: {
-        // Core system paths (foundation)
-        foundation: {
-          comment: 'Project Foundation',
-          items: {
-            projectRoot: 'path.resolve(__dirname, \'..\')',
-            pathsPath: 'path.join(__dirname, \'index.js\')',
-            nodeModulesPath: 'path.join(projectRoot, \'node_modules\')',
-            configExamplePath: 'path.join(projectRoot, \'config.example.yaml\')',
-            defaultConfigPath: 'path.join(projectRoot, \'config.yaml\')',
-            factoryDefaultConfigPath: 'path.join(projectRoot, \'config.example.yaml\')',
-          }
-        },
-
-        // Entry points and interfaces
-        interfaces: {
-          comment: 'CLI & External Interfaces',
-          items: {
-            cliPath: 'path.join(projectRoot, \'cli.js\')',
-            templateBasicPlugin: 'path.join(projectRoot, \'plugins\', \'template-basic\')',
-          }
-        },
-
-        // Directory roots (architectural boundaries)
-        boundaries: {
-          comment: 'Architectural Boundaries',
-          items: {
-            srcRoot: 'path.join(projectRoot, \'src\')',
-            assetsRoot: 'path.join(projectRoot, \'assets\')',
-            scriptsRoot: 'path.join(projectRoot, \'scripts\')',
-            testRoot: 'path.join(projectRoot, \'test\')',
-            cliCommandsPath: 'path.join(srcRoot, \'cli\', \'commands\')',
-            collectionsCommandsRoot: 'path.join(srcRoot, \'collections\', \'commands\')',
-            scriptsSharedRoot: 'path.join(scriptsRoot, \'shared\')',
-            testSharedRoot: 'path.join(testRoot, \'shared\')',
-          }
-        },
-
-        // Development and build tooling
-        tooling: {
-          comment: 'Development & Build Tools',
-          items: {
-            eslintPath: 'path.join(nodeModulesPath, \'.bin\', \'eslint\')',
-            mochaPath: 'path.join(nodeModulesPath, \'.bin\', \'mocha\')',
-            mocharcPath: 'path.join(projectRoot, \'.mocharc.js\')',
-            fileHelpersPath: 'path.join(scriptsSharedRoot, \'file-helpers.js\')',
-            testFileHelpersPath: 'path.join(testSharedRoot, \'test-helpers.js\')',
-            dynamicCompletionScriptPath: 'path.join(scriptsRoot, \'completion\', \'generate-completion-dynamic-cache.js\')',
-          }
-        },
-
-        // Specific file paths that are easier to manage statically
-        statics: {
-          comment: 'Key Static File Paths',
-          items: {
-            katexPath: 'path.join(assetsRoot, \'katex.min.css\')',
-            basePluginSchemaPath: 'path.join(srcRoot, \'validators\', \'base-plugin.schema.json\')',
-            findLitterRulesPath: 'path.join(assetsRoot, \'litter-list.txt\')',
-            lintingConfigPath: 'path.join(scriptsRoot, \'linting\', \'config.yaml\')',
-          }
-        }
-      },
-
-      // Feature-based grouping
-      features: {
-        cli: {
-          comment: 'Command Line Interface',
-          pattern: 'src/cli/**/*.js',
-          rank: 0 // user-facing
-        },
-        core: {
-          comment: 'Core Processing Engine',
-          pattern: 'src/core/**/*.js',
-          rank: 1 // essential operations
-        },
-        plugins: {
-          comment: 'Plugin System',
-          pattern: 'src/plugins/**/*.js',
-          rank: 2 // extensibility
-        },
-        collections: {
-          comment: 'Collections Management',
-          pattern: 'src/collections/**/*.js',
-          rank: 2 // supportive operations
-        },
-        config: {
-          comment: 'Configuration System',
-          pattern: 'src/config/**/*.js',
-          rank: 1 // essential operations
-        },
-        completion: {
-          comment: 'CLI Completion Engine',
-          pattern: 'src/completion/**/*.js',
-          rank: 3 // enhancement
-        },
-        utils: {
-          comment: 'Utilities & Helpers',
-          pattern: 'src/utils/**/*.js',
-          rank: 3 // support
-        },
-        validators: {
-          comment: 'Validation Framework',
-          pattern: 'src/validators/**/*.js',
-          rank: 2 // supportive operations
-        }
-      },
-
-      // Degenerate handling with context
-      contextualNaming: {
-        'addCmd.js': {
-          'cli/commands/collection': 'collectionsAddCmd',
-          'cli/commands/plugin': 'pluginAddCmd',
-          'collections/commands': 'collectionsAdd'
-        },
-        'listCmd.js': {
-          'cli/commands/collection': 'collectionsListCmd',
-          'cli/commands/plugin': 'pluginListCmd',
-          'collections/commands': 'collectionsList'
-        },
-        'removeCmd.js': {
-          'cli/commands/collection': 'collectionsRemoveCmd',
-          'collections/commands': 'collectionsRemove'
-        },
-        'updateCmd.js': {
-          'cli/commands/collection': 'collectionsUpdateCmd',
-          'collections/commands': 'collectionsUpdate'
-        }
-      },
-    };
-
-    // Scripts registry configuration
-    this.scriptsConfig = {
-      outputPath: this.scriptsOutputFile,
-      header: {
-        title: 'Scripts Path Registry',
-        architecture: 'Directory-based',
-        regenerate: 'npm run paths',
-      },
-      baseVar: 'scriptsRoot',
-      basePath: 'scripts',
-      scan: true, // Indicates this config should be based on a directory scan
-      fileExtensions: ['.js', '.sh'],
-      excludePatterns: ['scripts/scriptsPaths.js'], // Exclude the old, now-moved file
-    };
+  loadConfig() {
+    if (!fs.existsSync(this.configPath)) {
+      throw new Error(`Configuration file not found: ${this.configPath}`);
+    }
+    
+    try {
+      const configContent = fs.readFileSync(this.configPath, 'utf8');
+      return yaml.load(configContent);
+    } catch (error) {
+      throw new Error(`Failed to parse configuration: ${error.message}`);
+    }
   }
 
   scanFeature(featureName, feature) {
-    // Only returns scanDirectory result
     const pattern = feature.pattern;
     const baseDir = pattern.split('**')[0];
     return this.scanDirectory(baseDir, featureName);
   }
 
-  scanDirectory(dir, featureName = '', fileExtensions = ['.js', '.sh']) {
+  scanDirectory(dir, featureName = '', fileExtensions = null) {
+    const extensions = fileExtensions || this.config.globals?.file_extensions || ['.js', '.sh'];
+    const excludePatterns = this.config.globals?.exclude_patterns || [];
     const files = [];
     const fullPath = path.join(this.projectRoot, dir);
 
@@ -185,13 +44,22 @@ class BeautifulPathsGenerator {
     for (const item of items) {
       const itemPath = path.join(fullPath, item);
       const stat = fs.statSync(itemPath);
+      const relativePath = path.join(dir, item).replace(/\\/g, '/');
+
+      // Check exclude patterns
+      const isExcluded = excludePatterns.some(pattern => {
+        const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'));
+        return regex.test(relativePath);
+      });
+
+      if (isExcluded) continue;
 
       if (stat.isDirectory()) {
-        files.push(...this.scanDirectory(path.join(dir, item), featureName, fileExtensions));
-      } else if (fileExtensions.some(ext => item.endsWith(ext))) {
+        files.push(...this.scanDirectory(path.join(dir, item), featureName, extensions));
+      } else if (extensions.some(ext => item.endsWith(ext))) {
         files.push({
           name: item,
-          relativePath: path.join(dir, item).replace(/\\/g, '/'),
+          relativePath,
           directory: dir,
           feature: featureName
         });
@@ -200,6 +68,14 @@ class BeautifulPathsGenerator {
 
     return files;
   }
+    
+  camelCase(str) {
+    if (typeof str !== 'string') return '';
+    return str.replace(/[-_]/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/\s/g, '')
+      .replace(/^\w/, l => l.toLowerCase());
+  }
 
   getVariableName(file, contextualNaming = {}) {
     // Check contextual naming first
@@ -207,7 +83,8 @@ class BeautifulPathsGenerator {
       const contexts = contextualNaming[file.name];
       for (const [contextPath, varName] of Object.entries(contexts)) {
         if (file.directory.includes(contextPath)) {
-          return `${varName}Path`;
+          // FIX: Ensure the contextual name is camelCased
+          return `${this.camelCase(varName)}Path`;
         }
       }
     }
@@ -217,59 +94,73 @@ class BeautifulPathsGenerator {
     const ext = path.extname(baseNameWithExt);
     const baseName = path.basename(baseNameWithExt, ext);
     const suffix = ext.replace('.', '');
-
-    const camelCase = baseName
-      .replace(/[-_]/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase())
-      .replace(/\s/g, '')
-      .replace(/^\w/, l => l.toLowerCase());
+    
+    const camelCaseName = this.camelCase(baseName);
 
     const suffixUpper = suffix.charAt(0).toUpperCase() + suffix.slice(1);
-    return `${camelCase}${suffix.toLowerCase() === 'js' ? '' : suffixUpper}Path`;
+    return `${camelCaseName}${suffix.toLowerCase() === 'js' ? '' : suffixUpper}Path`;
   }
 
-  generateRegistry(config) {
-    const { header, imports, architecture, features, contextualNaming, baseVar, basePath, scan, fileExtensions, excludePatterns } = config;
+  generateRegistry(registryName, registryConfig) {
     const content = [];
+    const metadata = this.config.metadata || {};
 
     // Header with metadata
-    content.push(`// ${path.basename(config.outputPath)} - ${header.title}`);
+    content.push(`// ${path.basename(registryConfig.output_file)} - ${registryConfig.title}`);
     content.push(`// Generated: ${new Date().toISOString()}`);
-    content.push(`// Architecture: ${header.architecture}`);
-    content.push(`// Regenerate: ${header.regenerate}`);
+    content.push(`// Architecture: ${registryConfig.architecture}`);
+    content.push(`// Regenerate: ${metadata.regenerate_command || 'npm run paths'}`);
+    if (metadata.generated_warning) {
+      content.push(`// ${metadata.generated_warning}`);
+    }
     content.push('');
     content.push('const path = require(\'path\');');
-    if (imports) {
-      for (const [key, value] of Object.entries(imports)) {
-        content.push(`const ${key} = require('${value}');`);
+    
+    // Imports
+    if (registryConfig.imports) {
+      for (const [key, value] of Object.entries(registryConfig.imports)) {
+        content.push(`const ${this.camelCase(key)} = require('${value}');`);
       }
     }
     content.push('');
 
     // Architecture section
-    if (architecture) {
+    const archSections = registryConfig.architecture_sections || registryConfig.architecture;
+    if (archSections && typeof archSections === 'object') {
       content.push('// ==========================================');
       content.push('// ARCHITECTURE');
       content.push('// ==========================================');
       content.push('');
-      for (const [_sectionName, section] of Object.entries(architecture)) { // eslint-disable-line no-unused-vars
-        content.push(`// --- ${section.comment} ---`);
-        for (const [varName, pathDef] of Object.entries(section.items)) {
-          content.push(`const ${varName} = ${pathDef};`);
+      
+      for (const [_sectionName, section] of Object.entries(archSections)) {
+        if (section && section.comment && section.items) {
+          content.push(`// --- ${section.comment} ---`);
+          for (const [varName, pathDef] of Object.entries(section.items)) {
+            content.push(`const ${this.camelCase(varName)} = ${pathDef};`);
+          }
+          content.push('');
         }
-        content.push('');
       }
     }
 
     // Scan-based section
-    if(scan) {
+    if (registryConfig.scan_mode) {
       content.push('// ==========================================');
       content.push('// SCANNED ENTRIES');
       content.push('// ==========================================');
       content.push('');
+      
+      const baseVar = this.camelCase(registryConfig.base_var);
+      const basePath = registryConfig.base_path;
       content.push(`const ${baseVar} = path.join(__dirname, '..', '${basePath}');`);
-      const scannedFiles = this.scanDirectory(basePath, '', fileExtensions)
-        .filter(file => !(excludePatterns || []).includes(file.relativePath));
+      
+      const scannedFiles = this.scanDirectory(
+        basePath, 
+        '', 
+        registryConfig.file_extensions
+      ).filter(file => 
+        !(registryConfig.exclude_patterns || []).includes(file.relativePath)
+      );
 
       const filesByDir = scannedFiles.reduce((acc, file) => {
         const dir = path.dirname(file.relativePath);
@@ -278,10 +169,10 @@ class BeautifulPathsGenerator {
         return acc;
       }, {});
 
-      for(const dir in filesByDir) {
+      for (const dir in filesByDir) {
         content.push(`// --- ${dir.replace(/\\/g, '/')} ---`);
         filesByDir[dir].forEach(file => {
-          const varName = this.getVariableName(file);
+          const varName = this.getVariableName(file, registryConfig.contextual_naming);
           const relPath = path.relative(basePath, file.relativePath);
           content.push(`const ${varName} = path.join(${baseVar}, '${relPath.replace(/\\/g, '/')}');`);
         });
@@ -291,43 +182,47 @@ class BeautifulPathsGenerator {
 
     // Features section
     const featureFiles = {};
-    if (features) {
+    if (registryConfig.features) {
       content.push('// ==========================================');
       content.push('// FEATURES (by dependency rank)');
       content.push('// ==========================================');
       content.push('');
-      for (const [featureName, feature] of Object.entries(features)) {
+      
+      // Collect all feature files
+      for (const [featureName, feature] of Object.entries(registryConfig.features)) {
         featureFiles[featureName] = this.scanFeature(featureName, feature);
       }
+      
+      // Group by rank
       const ranks = {};
-      for (const [featureName, feature] of Object.entries(features)) {
-        const rank = feature.rank;
+      for (const [featureName, feature] of Object.entries(registryConfig.features)) {
+        const rank = feature.rank || 0;
         if (!ranks[rank]) ranks[rank] = [];
         ranks[rank].push({ featureName, feature, files: featureFiles[featureName] });
       }
+      
       // Output by rank
+      const rankDefinitions = this.config.rank_definitions || {};
       for (const rankNum of Object.keys(ranks).sort()) {
-        const rankComment = {
-          0: 'user-facing interfaces',
-          1: 'essential operations',
-          2: 'supportive operations',
-          3: 'enhancements & utilities'
-        }[rankNum];
+        const rankComment = rankDefinitions[rankNum] || `rank ${rankNum}`;
         content.push(`// --- Rank ${rankNum}: ${rankComment} ---`);
         content.push('');
+        
         for (const { featureName, feature, files } of ranks[rankNum]) {
           if (files.length === 0) continue;
+          
           content.push(`// ${feature.comment}`);
-          content.push(`const ${featureName}Root = path.join(srcRoot, '${featureName}');`);
-          // Sort files within feature
+          content.push(`const ${this.camelCase(featureName)}Root = path.join(srcRoot, '${featureName}');`);
+          
           const sortedFiles = files.sort((a, b) => {
             const aDepth = a.directory.split('/').length;
             const bDepth = b.directory.split('/').length;
             if (aDepth !== bDepth) return aDepth - bDepth;
             return a.name.localeCompare(b.name);
           });
+          
           for (const file of sortedFiles) {
-            const varName = this.getVariableName(file, contextualNaming);
+            const varName = this.getVariableName(file, registryConfig.contextual_naming);
             content.push(`const ${varName} = path.join(projectRoot, '${file.relativePath}');`);
           }
           content.push('');
@@ -342,41 +237,55 @@ class BeautifulPathsGenerator {
     content.push('');
     content.push('module.exports = {');
     content.push('');
-    if (architecture) {
-      content.push('  // --- Architecture ---');
-      for (const section of Object.values(architecture)) {
-        for (const varName of Object.keys(section.items)) {
-          content.push(`  ${varName},`);
+
+    // Export architecture variables
+    const archSectionsToExport = registryConfig.architecture_sections || registryConfig.architecture;
+    if (archSectionsToExport && typeof archSectionsToExport === 'object') {
+        content.push('  // --- Architecture ---');
+        for (const section of Object.values(archSectionsToExport)) {
+            if (section && section.items) {
+                for (const varName of Object.keys(section.items)) {
+                    content.push(`  ${this.camelCase(varName)},`);
+                }
+            }
         }
-      }
-      content.push('');
+        content.push('');
     }
 
-    if (scan) {
-      const scannedFiles = this.scanDirectory(basePath, '', fileExtensions)
-        .filter(file => !(excludePatterns || []).includes(file.relativePath));
+
+    // Export scanned variables
+    if (registryConfig.scan_mode) {
+      const baseVar = this.camelCase(registryConfig.base_var);
+      const basePath = registryConfig.base_path;
+      const scannedFiles = this.scanDirectory(basePath, '', registryConfig.file_extensions)
+        .filter(file => !(registryConfig.exclude_patterns || []).includes(file.relativePath));
+      
       content.push(`  ${baseVar},`);
       scannedFiles.forEach(file => {
-        content.push(`  ${this.getVariableName(file)},`);
+        content.push(`  ${this.getVariableName(file, registryConfig.contextual_naming)},`);
       });
       content.push('');
     }
 
-    if (features) {
+    // Export feature variables
+    if (registryConfig.features) {
       const ranks = {};
-      for (const [featureName, feature] of Object.entries(features)) {
-        const rank = feature.rank;
+      for (const [featureName, feature] of Object.entries(registryConfig.features)) {
+        const rank = feature.rank || 0;
         if (!ranks[rank]) ranks[rank] = [];
         ranks[rank].push({ featureName, feature, files: featureFiles[featureName] });
       }
+      
+      const rankDefinitions = this.config.rank_definitions || {};
       for (const rankNum of Object.keys(ranks).sort()) {
-        const rankComment = { 0: 'User Interfaces', 1: 'Essential Operations', 2: 'Supportive Operations', 3: 'Enhancements' }[rankNum];
-        content.push(`  // --- Rank ${rankNum}: ${rankComment} ---`);
+        const rankComment = rankDefinitions[rankNum] || `Rank ${rankNum}`;
+        content.push(`  // --- ${rankComment} ---`);
+        
         for (const { featureName, files } of ranks[rankNum]) {
           if (files.length === 0) continue;
-          content.push(`  ${featureName}Root,`);
+          content.push(`  ${this.camelCase(featureName)}Root,`);
           for (const file of files) {
-            const varName = this.getVariableName(file, contextualNaming);
+            const varName = this.getVariableName(file, registryConfig.contextual_naming);
             content.push(`  ${varName},`);
           }
         }
@@ -384,35 +293,43 @@ class BeautifulPathsGenerator {
       }
     }
 
-    if (imports) {
-      content.push('  // --- Scripts Registry ---');
-      for (const key of Object.keys(imports)) {
-        content.push(`  ...${key},`);
+    // Export imports
+    if (registryConfig.imports) {
+      content.push('  // --- Imported Registries ---');
+      for (const key of Object.keys(registryConfig.imports)) {
+        content.push(`  ...${this.camelCase(key)},`);
       }
       content.push('');
     }
+
     content.push('};');
     return content.join('\n');
   }
 
-  writeRegistry(config, dryRun = false) {
-    const newContent = this.generateRegistry(config);
-    const outputPath = config.outputPath;
+  writeRegistry(registryName, registryConfig, dryRun = false) {
+    const newContent = this.generateRegistry(registryName, registryConfig);
+    const outputPath = path.join(this.projectRoot, registryConfig.output_file);
 
     if (dryRun) {
-      console.log(` DRY RUN - Generated content for ${outputPath}:`);
-      console.log('='.repeat(50));
+      console.log(`\n DRY RUN - Generated content for ${registryName} (${outputPath}):`);
+      console.log('='.repeat(60));
       console.log(newContent);
-      console.log('='.repeat(50));
+      console.log('='.repeat(60));
       return;
+    }
+
+    // Ensure directory exists
+    const outputDir = path.dirname(outputPath);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
     }
 
     let hasChanged = true;
     if (fs.existsSync(outputPath)) {
       const oldContent = fs.readFileSync(outputPath, 'utf8');
-      // Compare content without the first 4 header lines (which include the timestamp)
-      const oldContentBody = oldContent.split('\n').slice(4).join('\n');
-      const newContentBody = newContent.split('\n').slice(4).join('\n');
+      // Compare content without the timestamp line
+      const oldContentBody = oldContent.split('\n').slice(2).join('\n');
+      const newContentBody = newContent.split('\n').slice(2).join('\n');
       if (oldContentBody === newContentBody) {
         hasChanged = false;
       }
@@ -420,23 +337,85 @@ class BeautifulPathsGenerator {
 
     if (hasChanged) {
       fs.writeFileSync(outputPath, newContent);
-      console.log(`Generated beautiful paths registry at ${outputPath}`);
+      console.log(`Generated ${registryName} registry: ${outputPath}`);
     } else {
-      console.log(`No changes detected in path registry. File not updated: ${outputPath}`);
+      console.log(`No changes in ${registryName} registry: ${outputPath}`);
     }
   }
 
   run(dryRun = false) {
-    this.writeRegistry(this.mainConfig, dryRun);
-    this.writeRegistry(this.scriptsConfig, dryRun);
+    console.log(`\nGenerating path registries from: ${this.configPath}`);
+    console.log(`Project root: ${this.projectRoot}\n`);
+
+    const registries = this.config.registries || {};
+    const registryNames = Object.keys(registries);
+
+    if (registryNames.length === 0) {
+      console.log(' No registries configured');
+      return;
+    }
+
+    console.log(`Found ${registryNames.length} registries: ${registryNames.join(', ')}\n`);
+
+    for (const [registryName, registryConfig] of Object.entries(registries)) {
+      try {
+        this.writeRegistry(registryName, registryConfig, dryRun);
+      } catch (error) {
+        console.error(`Error generating ${registryName}: ${error.message}`);
+        console.error(error.stack); // Added for more detailed error logging
+      }
+    }
+
+    console.log('\nPath registry generation complete!');
+  }
+
+  // Validation method
+  validateConfig() {
+    const errors = [];
+    
+    if (!this.config.registries) {
+      errors.push('Missing "registries" section in configuration');
+    }
+
+    for (const [name, registry] of Object.entries(this.config.registries || {})) {
+      if (!registry.output_file) {
+        errors.push(`Registry "${name}" missing output_file`);
+      }
+      if (!registry.title) {
+        errors.push(`Registry "${name}" missing title`);
+      }
+    }
+
+    return errors;
   }
 }
 
 // CLI usage
 if (require.main === module) {
-  const generator = new BeautifulPathsGenerator();
+  const configPath = process.argv.find(arg => arg.startsWith('--config='))?.split('=')[1];
   const dryRun = process.argv.includes('--dry-run');
-  generator.run(dryRun);
+  const validate = process.argv.includes('--validate');
+
+  try {
+    const generator = new DeclarativePathsGenerator(configPath);
+    
+    if (validate) {
+      const errors = generator.validateConfig();
+      if (errors.length > 0) {
+        console.error('Configuration validation failed:');
+        errors.forEach(error => console.error(`  • ${error}`));
+        process.exit(1);
+      } else {
+        console.log('Configuration is valid');
+        process.exit(0);
+      }
+    }
+
+    generator.run(dryRun);
+  } catch (error) {
+    console.error(`Fatal error: ${error.message}`);
+    process.exit(1);
+  }
 }
 
-module.exports = BeautifulPathsGenerator;
+module.exports = DeclarativePathsGenerator;

@@ -10,7 +10,7 @@
     "start": "node cli.js",
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
-    "paths": "node scripts/generate-paths-beautiful.js",
+    "paths": "node paths/generator.js",
     "test": "mocha",
     "test:last-fails": "node test/scripts/run-last-fails.js",
     "test:report": "MOCHA_JSON_REPORT_FILE=./test-report.json mocha",
@@ -20,7 +20,7 @@
     "prepare": "husky"
   },
   "_moduleAliases": {
-    "@paths": "paths.js"
+    "@paths": "paths/index.js"
   },
   "keywords": [
     "markdown",

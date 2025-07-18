@@ -14,6 +14,7 @@ registries:
     architecture: "Feature-based with dependency ranking"
     imports:
       scriptsPaths: "./scripts.js"
+      lintersPaths: "./linters.js"
     architecture_sections:
       foundation:
         comment: "Project Foundation"
@@ -57,41 +58,120 @@ registries:
           find_litter_rules_path: "path.join(assetsRoot, 'litter-list.txt')"
           linting_config_path: "path.join(scriptsRoot, 'linting', 'config.yaml')"
     features:
-      cli: { comment: "Command Line Interface", pattern: "src/cli/**/*.js", rank: 0 }
-      core: { comment: "Core Processing Engine", pattern: "src/core/**/*.js", rank: 1 }
-      plugins: { comment: "Plugin System", pattern: "src/plugins/**/*.js", rank: 2 }
-      collections: { comment: "Collections Management", pattern: "src/collections/**/*.js", rank: 2 }
-      config: { comment: "Configuration System", pattern: "src/config/**/*.js", rank: 1 }
-      completion: { comment: "CLI Completion Engine", pattern: "src/completion/**/*.js", rank: 3 }
-      utils: { comment: "Utilities & Helpers", pattern: "src/utils/**/*.js", rank: 3 }
-      validators: { comment: "Validation Framework", pattern: "src/validators/**/*.js", rank: 2 }
+      cli:
+        comment: "Command Line Interface"
+        pattern: "src/cli/**/*.js"
+        rank: 0
+      core:
+        comment: "Core Processing Engine"
+        pattern: "src/core/**/*.js"
+        rank: 1
+      plugins:
+        comment: "Plugin System"
+        pattern: "src/plugins/**/*.js"
+        rank: 2
+      collections:
+        comment: "Collections Management"
+        pattern: "src/collections/**/*.js"
+        rank: 2
+      config:
+        comment: "Configuration System"
+        pattern: "src/config/**/*.js"
+        rank: 1
+      completion:
+        comment: "CLI Completion Engine"
+        pattern: "src/completion/**/*.js"
+        rank: 3
+      utils:
+        comment: "Utilities & Helpers"
+        pattern: "src/utils/**/*.js"
+        rank: 3
+      validators:
+        comment: "Validation Framework"
+        pattern: "src/validators/**/*.js"
+        rank: 2
     contextual_naming:
-      "addCmd.js":
-        "cli/commands/collection": "collections_add_cmd"
-        "cli/commands/plugin": "plugin_add_cmd"
-        "collections/commands": "collections_add"
-      "listCmd.js":
-        "cli/commands/collection": "collections_list_cmd"
-        "cli/commands/plugin": "plugin_list_cmd"
-        "collections/commands": "collections_list"
-      "removeCmd.js":
-        "cli/commands/collection": "collections_remove_cmd"
-        "collections/commands": "collections_remove"
-      "updateCmd.js":
-        "cli/commands/collection": "collections_update_cmd"
-        "collections/commands": "collections_update"
+      addCmd.js:
+        cli/commands/collection: "collections_add_cmd"
+        cli/commands/plugin: "plugin_add_cmd"
+        collections/commands: "collections_add"
+      listCmd.js:
+        cli/commands/collection: "collections_list_cmd"
+        cli/commands/plugin: "plugin_list_cmd"
+        collections/commands: "collections_list"
+      removeCmd.js:
+        cli/commands/collection: "collections_remove_cmd"
+        collections/commands: "collections_remove"
+      updateCmd.js:
+        cli/commands/collection: "collections_update_cmd"
+        collections/commands: "collections_update"
 
   # Scripts registry (generates paths/scripts.js)
   scripts:
     output_file: "paths/scripts.js"
     title: "Scripts Path Registry"
-    architecture: "Directory-based"
-    scan_mode: true
-    base_var: "scriptsRoot"
-    base_path: "scripts"
-    file_extensions: [".js", ".sh"]
-    exclude_patterns:
-      - "scripts/scriptsPaths.js" # Exclude the old file if it still exists
+    architecture: "Feature-based"
+    architecture_sections:
+      foundation:
+        comment: "Project Foundation"
+        items:
+          project_root: "path.resolve(__dirname, '..')"
+          scripts_root: "path.join(projectRoot, 'scripts')"
+    features:
+      ai:
+        comment: "AI Tooling"
+        pattern: "scripts/ai/**/*.js"
+        rank: 0
+      batch:
+        comment: "Batch Processing Scripts"
+        pattern: "scripts/batch/**/*"
+        rank: 1
+      completion:
+        comment: "CLI Tab Completion Scripts"
+        pattern: "scripts/completion/**/*.js"
+        rank: 1
+      docs:
+        comment: "Documentation Helpers"
+        pattern: "scripts/docs/**/*.js"
+        rank: 1
+      shared:
+        comment: "Shared Script Utilities"
+        pattern: "scripts/shared/**/*.js"
+        rank: 2
+
+  # Linting registry (generates paths/linters.js)
+  linters:
+    output_file: "paths/linters.js"
+    title: "Linting Tools Registry"
+    architecture: "Feature-based linting infrastructure"
+    architecture_sections:
+      foundation:
+        comment: "Project Foundation"
+        items:
+          project_root: "path.resolve(__dirname, '..')"
+          scripts_root: "path.join(projectRoot, 'scripts')"
+          linting_root: "path.join(scriptsRoot, 'linting')"
+    features:
+      core:
+        comment: "Core Linting Infrastructure"
+        pattern: "scripts/linting/lint*.js"
+        rank: 0
+      code:
+        comment: "Code Quality Linters"
+        pattern: "scripts/linting/code/**/*.js"
+        rank: 1
+      docs:
+        comment: "Documentation Linters"
+        pattern: "scripts/linting/docs/**/*.js"
+        rank: 1
+      validators:
+        comment: "Validation Linters"
+        pattern: "scripts/linting/validators/**/*.js"
+        rank: 2
+      lib:
+        comment: "Linting Utilities & Helpers"
+        pattern: "scripts/linting/lib/**/*.js"
+        rank: 3
 
 rank_definitions:
   0: "user-facing interfaces"

@@ -10,6 +10,7 @@ const {
 } = require('minimatch');
 const {
   fileHelpersPath,
+  lintingConfigPath,
   projectRoot
 } = require('@paths');
 const {
@@ -17,9 +18,6 @@ const {
   getPatternsFromArgs,
   getDefaultGlobIgnores
 } = require(fileHelpersPath);
-const {
-  lintingConfigPath
-} = require('@paths');
 
 function loadLintSection(section, configPath = lintingConfigPath) {
   const raw = fs.readFileSync(configPath, 'utf8');

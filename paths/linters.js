@@ -1,0 +1,97 @@
+// linters.js - Linting Tools Registry
+// Generated: 2025-07-18T09:30:46.715Z
+// Architecture: Feature-based linting infrastructure
+// Regenerate: npm run paths
+// Auto-generated - do not edit manually
+
+const path = require('path');
+
+// ==========================================
+// ARCHITECTURE
+// ==========================================
+
+// --- Project Foundation ---
+const projectRoot = path.resolve(__dirname, '..');
+const scriptsRoot = path.join(projectRoot, 'scripts');
+const lintingRoot = path.join(scriptsRoot, 'linting');
+
+// ==========================================
+// FEATURES (by dependency rank)
+// ==========================================
+
+// --- Rank 0: user-facing interfaces ---
+
+// Core Linting Infrastructure
+const coreRoot = path.join(projectRoot, 'scripts/linting/lint*.js');
+const lintHarnessPath = path.join(projectRoot, 'scripts/linting/lint-harness.js');
+const lintPath = path.join(projectRoot, 'scripts/linting/lint.js');
+
+// --- Rank 1: essential operations ---
+
+// Code Quality Linters
+const codeRoot = path.join(projectRoot, 'scripts/linting/code/');
+const loggingLintPath = path.join(projectRoot, 'scripts/linting/code/logging-lint.js');
+const noRelativePathsPath = path.join(projectRoot, 'scripts/linting/code/no-relative-paths.js');
+const removeAutoDocPath = path.join(projectRoot, 'scripts/linting/code/remove-auto-doc.js');
+const standardizeJsLineOneAllPath = path.join(projectRoot, 'scripts/linting/code/standardize-js-line-one-all.js');
+const stripTrailingWhitespacePath = path.join(projectRoot, 'scripts/linting/code/strip-trailing-whitespace.js');
+
+// Documentation Linters
+const docsRoot = path.join(projectRoot, 'scripts/linting/docs/');
+const findLitterPath = path.join(projectRoot, 'scripts/linting/docs/find-litter.js');
+const postmanHelpersPath = path.join(projectRoot, 'scripts/linting/docs/postman-helpers.js');
+const postmanPath = path.join(projectRoot, 'scripts/linting/docs/postman.js');
+const updateProjectIndicesPath = path.join(projectRoot, 'scripts/linting/docs/update-project-indices.js');
+
+// --- Rank 2: supportive operations ---
+
+// Validation Linters
+const validatorsRoot = path.join(projectRoot, 'scripts/linting/validators/');
+const mochaPathValidatorPath = path.join(projectRoot, 'scripts/linting/validators/mocha-path-validator.js');
+
+// --- Rank 3: enhancements & utilities ---
+
+// Linting Utilities & Helpers
+const libRoot = path.join(projectRoot, 'scripts/linting/lib/');
+const formattersPath = path.join(projectRoot, 'scripts/linting/lib/formatters.js');
+const lintHelpersPath = path.join(projectRoot, 'scripts/linting/lib/lint-helpers.js');
+
+// ==========================================
+// EXPORTS
+// ==========================================
+
+module.exports = {
+
+  // --- Architecture ---
+  projectRoot,
+  scriptsRoot,
+  lintingRoot,
+
+  // --- user-facing interfaces ---
+  coreRoot,
+  lintHarnessPath,
+  lintPath,
+
+  // --- essential operations ---
+  codeRoot,
+  loggingLintPath,
+  noRelativePathsPath,
+  removeAutoDocPath,
+  standardizeJsLineOneAllPath,
+  stripTrailingWhitespacePath,
+  docsRoot,
+  findLitterPath,
+  postmanHelpersPath,
+  postmanPath,
+  updateProjectIndicesPath,
+
+  // --- supportive operations ---
+  validatorsRoot,
+  mochaPathValidatorPath,
+
+  // --- enhancements & utilities ---
+  libRoot,
+  formattersPath,
+  lintHelpersPath,
+
+};

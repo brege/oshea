@@ -1,12 +1,15 @@
 // scripts/batch/batch_convert_hugo_recipes.js
 const { exec } = require('child_process');
 const fs = require('fs').promises;
-const fss = require('fs'); // For existsSync
+const fss = require('fs');
 const path = require('path');
 const glob = require('glob');
 const matter = require('gray-matter');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
+require('module-alias/register');
+const { cliPath } = require('@paths');
+console.log('cliPath', cliPath);
 
 // --- Argument Parsing ---
 const argv = yargs(hideBin(process.argv))
@@ -32,7 +35,7 @@ const argv = yargs(hideBin(process.argv))
   .option('md-to-pdf-path', {
     describe: 'Path to the md-to-pdf cli.js script',
     type: 'string',
-    default: path.resolve(__dirname, '../cli.js') // Assumes script is in project_root/scripts/
+    default: path.resolve(__dirname, cliPath)
   })
   .help()
   .alias('help', 'h')

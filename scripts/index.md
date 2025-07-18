@@ -54,7 +54,20 @@ This module has its own index file at [**the test index**](../test/index.md) for
   - [ [`file-helpers.js`](shared/file-helpers.js) ] -- Makes the rest of the Node.js scripts easier to point and shoot at file(s) and directories.
   - [ [`comment-surfacer.js`](shared/comment-surfacer.js) ]
     -- A utility to surface code comment-ditritus in `.js` files.
+  - [ [`find-path-variable.js`](shared/find-path-variable.js) ]
+    -- A helper tool that turns a script path in to a variable name.
 
+    `node scripts/shared/find-path-variable.js scripts/shared/file-helpers.js`
+    ```js
+    require('module-alias/register');
+    const { fileHelpersPath } = require('@paths');
+    const {
+      findFiles,
+      findFilesArray,
+      getDefaultGlobIgnores,
+      getPatternsFromArgs
+    } = require(fileHelpersPath);
+    ``` 
 ### Uncategorized Scripts
 
 New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**

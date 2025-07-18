@@ -1,24 +1,15 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Advanced Card Plugin Configuration Schema",
-    "type": "object",
-    "properties": {
-        "params": {
-            "type": "object",
-            "properties": {
-                "defaultWebsite": {
-                    "type": "string",
-                    "format": "uri"
-                },
-                "defaultBrandingColor": {
-                    "type": "string"
-                },
-                "companyLogoUrl": {
-                    "type": "string",
-                    "format": "uri"
-                }
-            },
-            "additionalProperties": false
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Schema for advanced-card Plugin",
+  "type": "object",
+  "properties": {
+    "params": {
+      "type": "object",
+      "properties": {
+        "defaultWebsite": {
+          "type": "string"
         }
+      }
     }
+  }
 }

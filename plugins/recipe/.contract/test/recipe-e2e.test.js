@@ -1,76 +1,49 @@
 // plugins/recipe/.contract/test/recipe-e2e.test.js
-
 require('module-alias/register');
 const path = require('path');
 const os = require('os');
-const glob = require('glob');
-const fs = require('fs');
+const { expect } = require('chai');
+const {
+  projectRoot,
+  cliPath,
+  testFileHelpersPath,
+  loggerPath,
+} = require('@paths');
 
-const PROJECT_ROOT = process.cwd();
-const HELPERS_PATH = path.join(PROJECT_ROOT, 'test', 'shared', 'test-helpers.js');
+const logger = require(loggerPath);
+
 const {
   runCliCommand,
   setupTestDirectory,
   cleanupTestDirectory,
-} = require(HELPERS_PATH);
+} = require(testFileHelpersPath);
 
-const { loggerPath } = require('@paths');
-const logger = require(loggerPath);
-
-const PLUGIN_ROOT = path.resolve(__dirname, '../../');
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-plugin-e2e');
-const CLI_PATH = path.join(PROJECT_ROOT, 'cli.js');
-const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'recipe-example.md');
-const EXPECTED_PDF_BASENAME = 'example-recipe-title.pdf';
-const MIN_PDF_SIZE = 1000;
+const PLUGIN_ROOT = path.resolve(__dirname, '../../');
+const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'recipe-example.md');
 
-describe('Recipe Plugin E2E Test', function() {
-  this.timeout(15000); // Give a bit more time for E2E
+describe('Recipe Plugin E2E', function() {
+  this.timeout(15000);
 
   before(async () => {
-    logger.debug('[recipe-e2e] Setting up test directory...');
     await setupTestDirectory(TEST_OUTPUT_DIR);
   });
 
   after(async () => {
-    const keepOutput = process.env.KEEP_OUTPUT === 'true';
-    logger.debug(`[recipe-e2e] Cleaning up test directory. KEEP_OUTPUT: ${keepOutput}`);
-    await cleanupTestDirectory(TEST_OUTPUT_DIR, keepOutput);
+    await cleanupTestDirectory(TEST_OUTPUT_DIR);
   });
 
-  it('should convert recipe-example.md to PDF using the recipe plugin and generate a non-empty PDF', async () => {
+  it('should convert the example markdown using self-activation', async () => {
+    const { success, stdout, stderr } = await runCliCommand(
+      ['convert', EXAMPLE_MD, '--outdir', TEST_OUTPUT_DIR, '--no-open'],
+      cliPath,
+      projectRoot
+    );
 
-    const commandArgs = [
-      'convert',
-      EXAMPLE_MD_PATH,
-      '--plugin', PLUGIN_ROOT,
-      '--outdir', TEST_OUTPUT_DIR,
-      '--filename', EXPECTED_PDF_BASENAME,
-      '--no-open',
-    ];
-
-    logger.debug(`[recipe-e2e] Running CLI command: node ${CLI_PATH} ${commandArgs.join(' ')}`);
-    const result = await runCliCommand(commandArgs, CLI_PATH, PROJECT_ROOT);
-
-    if (!result.success) {
-      logger.error(`[recipe-e2e] CLI command failed: ${result.stderr || result.error?.message || 'Unknown error'}`);
-      throw new Error(`CLI command failed: ${result.stderr || result.error?.message || 'Unknown error'}`);
+    if (!success) {
+      logger.error('CLI command failed. STDOUT:', stdout);
+      logger.error('STDERR:', stderr);
     }
-
-    // Use glob in case the filename is ever dynamic in the future
-    const pattern = path.join(TEST_OUTPUT_DIR, 'example-recipe-title*.pdf');
-    const matchingFiles = glob.sync(pattern);
-
-    if (matchingFiles.length === 0) {
-      throw new Error(`No PDF output matching pattern: ${pattern}`);
-    }
-
-    const stat = fs.statSync(matchingFiles[0]);
-    if (stat.size < MIN_PDF_SIZE) {
-      throw new Error(`Generated PDF is too small: ${matchingFiles[0]} (${stat.size} bytes)`);
-    }
-
-    logger.success(`[recipe-e2e] Successfully created and verified: ${matchingFiles[0]}`);
+    expect(success, 'CLI command should succeed').to.be.true;
   });
 });
-

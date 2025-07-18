@@ -1,7 +1,10 @@
 // plugins/advanced-card/index.js
+require('module-alias/register');
 const fs = require('fs').promises;
 const fss = require('fs'); // Synchronous for operations like existsSync
 const path = require('path');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 class AdvancedCardHandler {
   constructor(coreUtils) {
@@ -10,7 +13,7 @@ class AdvancedCardHandler {
   }
 
   async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
-    console.log(`INFO (AdvancedCardHandler): Processing for plugin '${pluginSpecificConfig.description || 'advanced-card'}' using Markdown body.`);
+    logger.info(`(AdvancedCardHandler): Processing for plugin '${pluginSpecificConfig.description || 'advanced-card'}' using Markdown body.`);
 
     const { markdownFilePath } = data;
     if (!markdownFilePath || !fss.existsSync(markdownFilePath)) {
@@ -25,28 +28,22 @@ class AdvancedCardHandler {
 
       const globalParams = globalConfig.params || {};
 
-      // Render the main Markdown body to HTML
-      // Pass toc_options and math from pluginSpecificConfig, though likely disabled for a card.
-      // Anchor options can be passed from merged PDF options if defined.
-      const pdfGenOptions = { // For anchor_options, primarily
+      const pdfGenOptions = {
         ...(globalConfig.global_pdf_options || {}),
         ...(pluginSpecificConfig.pdf_options || {}),
       };
       const renderedMarkdownHtml = this.markdownUtils.renderMarkdownToHtml(
         markdownBody,
-        pluginSpecificConfig.toc_options, // Disabled for a card
-        pdfGenOptions.anchor_options,     // Pass anchor options if any
-        pluginSpecificConfig.math         // Disabled for a card
+        pluginSpecificConfig.toc_options,
+        pdfGenOptions.anchor_options,
+        pluginSpecificConfig.math
       );
 
-      // Determine QR code data: use fm.qr_data, then fm.website, then global.defaultWebsite
       const qrDataSource = fm.qr_data || fm.website || globalParams.defaultWebsite || 'https://example.com';
-      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(qrDataSource)}`; // Slightly smaller QR
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(qrDataSource)}`;
 
-      // Branding color from front matter or global params
       const cardBrandingColor = fm.brandingColor || globalParams.defaultBrandingColor || '#333';
 
-      // Construct custom HTML layout, injecting the rendered Markdown
       const htmlBodyContent = `
                 <div class="card-container" style="border-top: 5px solid ${cardBrandingColor};">
                     <div class="main-content-from-markdown">
@@ -59,12 +56,10 @@ class AdvancedCardHandler {
                 </div>
             `;
 
-      // Determine output PDF path
       const cardNameForFile = fm.name || (markdownBody.split('\n')[0].replace(/^#+\s*/, '')) || 'advanced-card';
       const baseOutputFilename = outputFilenameOpt || `${this.markdownUtils.generateSlug(cardNameForFile)}.pdf`;
       const finalOutputPdfPath = path.join(outputDir, baseOutputFilename);
 
-      // Merge PDF options (plugin's own config should define card dimensions)
       const pdfOptions = {
         ...(globalConfig.global_pdf_options || {}),
         ...(pluginSpecificConfig.pdf_options || {}),
@@ -74,10 +69,9 @@ class AdvancedCardHandler {
         }
       };
       if (pdfOptions.width || pdfOptions.height) {
-        delete pdfOptions.format; // Prioritize explicit width/height
+        delete pdfOptions.format;
       }
 
-      // Load CSS files
       const cssFileContentsArray = [];
       if (pluginSpecificConfig.css_files && Array.isArray(pluginSpecificConfig.css_files)) {
         for (const cssFile of pluginSpecificConfig.css_files) {
@@ -85,7 +79,7 @@ class AdvancedCardHandler {
           if (fss.existsSync(cssFilePath)) {
             cssFileContentsArray.push(await fs.readFile(cssFilePath, 'utf8'));
           } else {
-            console.warn(`WARN (AdvancedCardHandler): CSS file not found at ${cssFilePath}`);
+            logger.warn(`(AdvancedCardHandler): CSS file not found at ${cssFilePath}`);
           }
         }
       }
@@ -97,13 +91,13 @@ class AdvancedCardHandler {
         cssFileContentsArray
       );
 
-      console.log(`Successfully generated PDF: ${finalOutputPdfPath}`);
+      logger.success(`Successfully generated PDF: ${finalOutputPdfPath}`);
       return finalOutputPdfPath;
 
     } catch (error) {
-      console.error(`ERROR (AdvancedCardHandler): Failed to generate card for ${markdownFilePath}: ${error.message}`);
+      logger.error(`(AdvancedCardHandler): Failed to generate card for ${markdownFilePath}: ${error.message}`);
       if (error.stack) {
-        console.error(error.stack);
+        logger.error(error.stack);
       }
       throw error;
     }

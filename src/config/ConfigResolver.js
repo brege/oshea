@@ -292,7 +292,7 @@ class ConfigResolver {
 
     const originalHandlerScript = layer0Data.rawConfig.handler_script;
     if (!originalHandlerScript) {
-      throw new Error(`'handler_script' not defined in plugin '${nominalPluginNameForLookup}'s own configuration file: ${pluginOwnConfigPath}`);
+      throw new Error(`'handler_script' not defined in plugin '${nominalPluginNameForLookup}'s own configuration file: ${pluginOwnConfigPath}. This can happen if the YAML is invalid or fails schema validation. Please check the logs for warnings from the configuration loader.`);
     }
 
     const {

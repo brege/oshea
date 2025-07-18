@@ -63,19 +63,19 @@ Obsolescence of refactor scripts and birth of new lints. Can all be done in para
 
 **Salvage Refactor Jetsam.** \
 From `scripts/refactor/`, decide which refactor scripts to part-out to lints.
-- [ ] Split `generate-help-checklist.js` into checklist updater and help validator.
-  - [ ] **Checklist Tool.** `scripts/docs/generate-checklist.js`
-  - [ ] **Help Validator.** `test/smoke/validate-help.js` [ not a linter, too slow ]
+- [x] Split `generate-help-checklist.js` into checklist updater and help validator.
+  - [x] **Checklist Tool.** `scripts/docs/generate-checklist.js`
+  - [x] **Help Validator.** `test/smoke/validate-help.js` [ not a linter, too slow ]
 - [x] Find historical scripts in the index (chore: find **GitHub permalinks**).
 - [x] Prune obsolete, one-off, and duplicate scripts.
 - [x] Good-night `scripts/refactor/`
 
 **Automated Smoke Testing.** \
 Construct validation harness to smoke-test `md-to-pdf`'s state-preserving CLI options.
-- [ ] `test/smoke/validate-app-help.js`         [ `scripts/validators/validate-help.js` ]
-- [ ] `test/smoke/validate-bundled-plugins.js`  [ `md-to-pdf plugin validate --all` ]
-- [ ] `test/smoke/validate-app-config.js`       [ `md-to-pdf config <options>` ]
-- [ ] `test/smoke/validate-plugin-list.js`      [ `md-to-pdf plugin list <options>` ]
+- [x] `test/smoke/validate-app-help.js`         [ `scripts/validators/validate-help.js` ]
+- [x] `test/smoke/validate-bundled-plugins.js`  [ `md-to-pdf plugin validate --all` ]
+- [x] `test/smoke/validate-app-config.js`       [ `md-to-pdf config <options>` ]
+- [x] `test/smoke/validate-plugin-list.js`      [ `md-to-pdf plugin list <options>` ]
 
 **Evolve pathing linters.** \
 Enhance into first-class validators
@@ -164,8 +164,8 @@ What are we working towards?
 node scripts/trees/tree-explorer.js scripts/linting/ scripts/docs/ scripts/shared/ scripts/refactor/ --count=lines
 └── scripts
     ├── docs
-    │   ├── generate-help-checklist.js        # [ ] split into checklist util and `--help` validator
-    │   └── generate-toc.js                   # [ ] possibly combine with checklist util
+    │   ├── generate-help-checklist.js        # [x] extract to `--help` validator; remove updater
+    │   └── generate-toc.js                   # [x] keep as is
     ├── linting
     │   ├── code
     │   │   ├── logging-lint.js               #  - 

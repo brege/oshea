@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// paths/generator.js - Refactored declarative version
+// paths/generator.js
 
 const fs = require('fs');
 const path = require('path');
@@ -229,7 +229,6 @@ class DeclarativePathsGenerator {
           if (files.length === 0) continue;
 
           content.push(`// ${feature.comment}`);
-          // CORRECTED LOGIC: Determine the root variable based on the registry's own definitions or projectRoot
           const featureBaseDir = feature.pattern.split('**')[0];
           const rootVarName = `${this.camelCase(featureName)}Root`;
           content.push(`const ${rootVarName} = path.join(projectRoot, '${featureBaseDir}');`);

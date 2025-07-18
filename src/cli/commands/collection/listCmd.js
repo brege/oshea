@@ -3,7 +3,7 @@ const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
 module.exports = {
-  command: 'list <type> [collection_name]',
+  command: 'list [type] [collection_name]',
   describe: 'list downloaded collections or plugins',
   builder: (yargsCmd) => {
     yargsCmd
@@ -11,6 +11,7 @@ module.exports = {
         describe: 'the type of items to list',
         type: 'string',
         choices: ['names', 'available', 'enabled', 'all'],
+        default: 'names', // Set default type
         completionKey: 'listTypes'
       })
       .positional('collection_name', {

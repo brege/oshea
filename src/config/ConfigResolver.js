@@ -9,7 +9,7 @@ const {
   mainConfigLoaderPath,
   pluginConfigLoaderPath,
   assetResolverPath,
-  validatorsRoot,
+  basePluginSchemaPath, // Use the direct path
   loggerPath
 } = require('@paths');
 
@@ -53,9 +53,9 @@ class ConfigResolver {
     this.resolvedCollRoot = this.dependencies.collRoot || null;
 
     this.ajv = new Ajv({ allErrors: true });
-    const baseSchemaPath = this.dependencies.path.join(validatorsRoot, 'base-plugin.schema.json');
-    if (this.dependencies.fs.existsSync(baseSchemaPath)) {
-      const baseSchema = JSON.parse(this.dependencies.fs.readFileSync(baseSchemaPath, 'utf8'));
+    // Use the direct, canonical path from the registry
+    if (this.dependencies.fs.existsSync(basePluginSchemaPath)) {
+      const baseSchema = JSON.parse(this.dependencies.fs.readFileSync(basePluginSchemaPath, 'utf8'));
       this.ajv.addSchema(baseSchema, 'base-plugin.schema.json');
     } else {
       logger.error('CRITICAL: Base plugin schema not found. Validation will not work.', { module: 'src/config/ConfigResolver.js' });
@@ -88,7 +88,7 @@ class ConfigResolver {
   _validatePluginConfig(pluginName, configData, pluginConfigPath) {
     const baseSchema = this.ajv.getSchema('base-plugin.schema.json').schema;
     let specificSchema = {};
-    const pluginSchemaPath = this.dependencies.path.join(this.dependencies.path.dirname(pluginConfigPath), `${this.dependencies.path.basename(pluginConfigPath, '.config.yaml')}.schema.json`);
+    const pluginSchemaPath = this.dependencies.path.join(this.dependencies.path.dirname(pluginConfigPath), `.contract/${this.dependencies.path.basename(pluginConfigPath, '.config.yaml')}.schema.json`);
 
     if (this.dependencies.fs.existsSync(pluginSchemaPath)) {
       try {
@@ -154,7 +154,8 @@ class ConfigResolver {
     this.pluginConfigLoader = new this.dependencies.PluginConfigLoader(
       xdg.baseDir, xdg.config, xdg.path,
       project.baseDir, project.config, project.path,
-      this.useFactoryDefaultsOnly
+      this.useFactoryDefaultsOnly,
+      { logger: logger } // Pass logger dependency
     );
 
     const currentProjectManifestPath = project.path;

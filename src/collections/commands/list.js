@@ -46,7 +46,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
       logger.error(`Error listing downloaded collections: ${error.message}`, { module: 'src/collections/commands/list.js' });
       throw error;
     }
-  } else if (type === 'available') {
+  } else if (type === 'available' || type === 'all') {
     return await this.listAvailablePlugins(collectionNameFilter);
   } else if (type === 'enabled') {
     const enabledManifest = await this._readEnabledManifest();

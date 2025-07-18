@@ -21,19 +21,14 @@ const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 const CollectionsManager = require(indexPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
 
-/**
- * Determines the path for the dynamic completion cache file.
- * @returns {string} The absolute path to the cache file.
- */
+
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
   const cacheDir = path.join(xdgCacheHome, 'md-to-pdf');
   return path.join(cacheDir, 'dynamic-completion-data.json');
 }
 
-/**
- * The main function to gather dynamic data and write it to the cache.
- */
+
 async function generateCache() {
   try {
     // We cannot rely on CLI args here, so we load config to find collRoot

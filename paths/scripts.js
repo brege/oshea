@@ -1,8 +1,8 @@
-// scripts/scriptsPaths.js
+// paths/scripts.js
 const path = require('path');
 
 // Root
-const scriptsRoot = path.join(__dirname);
+const scriptsRoot = path.join(__dirname, '..', 'scripts');
 
 // AI
 const aiRoot = path.join(scriptsRoot, 'ai');
@@ -28,9 +28,6 @@ const generateTocPath = path.join(docsRoot, 'generate-toc.js');
 const sharedRoot = path.join(scriptsRoot, 'shared');
 const commentSurfacerPath = path.join(sharedRoot, 'comment-surfacer.js');
 const fileHelpersPath = path.join(sharedRoot, 'file-helpers.js');
-
-// Generate
-const generatePathsBeautifulPath = path.join(scriptsRoot, 'generate-paths-beautiful.js');
 
 // Linting
 const lintingRoot = path.join(scriptsRoot, 'linting');
@@ -93,9 +90,6 @@ module.exports = {
   commentSurfacerPath,
   fileHelpersPath,
 
-  // Generate
-  generatePathsBeautifulPath,
-
   // Linting
   lintingRoot,
   lintingHarnessPath,
@@ -128,4 +122,3 @@ module.exports = {
   pathsJsValidatorPath,
   pathsUsageValidatorPath,
 };
-

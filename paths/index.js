@@ -1,18 +1,18 @@
 // paths.js - Project Path Registry
-// Generated: 2025-07-17T18:20:29.090Z
+// Generated: 2025-07-18T00:18:38.811Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run generate:paths
 
 const path = require('path');
-const scriptsPaths = require('./scripts/scriptsPaths');
+const scriptsPaths = require('./scripts.js');
 
 // ==========================================
 // ARCHITECTURE
 // ==========================================
 
 // --- Project Foundation ---
-const projectRoot = __dirname;
-const pathsPath = path.join(__dirname, 'paths.js');
+const projectRoot = path.resolve(__dirname, '..');
+const pathsPath = path.join(__dirname, 'index.js');
 const nodeModulesPath = path.join(projectRoot, 'node_modules');
 const configExamplePath = path.join(projectRoot, 'config.example.yaml');
 const defaultConfigPath = path.join(projectRoot, 'config.yaml');

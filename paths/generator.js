@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/generate-paths-beautiful.js
+// paths/generator.js
 
 const fs = require('fs');
 const path = require('path');
@@ -7,7 +7,7 @@ const path = require('path');
 class BeautifulPathsGenerator {
   constructor(projectRoot = process.cwd()) {
     this.projectRoot = projectRoot;
-    this.pathsFile = path.join(projectRoot, 'paths.js');
+    this.pathsFile = path.join(projectRoot, 'paths', 'index.js');
 
     // Architecture-driven organization
     this.architecture = {
@@ -15,8 +15,8 @@ class BeautifulPathsGenerator {
       foundation: {
         comment: 'Project Foundation',
         items: {
-          projectRoot: '__dirname',
-          pathsPath: 'path.join(__dirname, \'paths.js\')',
+          projectRoot: 'path.resolve(__dirname, "..")',
+          pathsPath: 'path.join(__dirname, \'index.js\')',
           nodeModulesPath: 'path.join(projectRoot, \'node_modules\')',
           configExamplePath: 'path.join(projectRoot, \'config.example.yaml\')',
           defaultConfigPath: 'path.join(projectRoot, \'config.yaml\')',
@@ -205,7 +205,7 @@ class BeautifulPathsGenerator {
     content.push('// Regenerate: npm run generate:paths');
     content.push('');
     content.push('const path = require(\'path\');');
-    content.push('const scriptsPaths = require(\'./scripts/scriptsPaths\');');
+    content.push('const scriptsPaths = require(\'./scripts.js\');');
     content.push('');
 
     // Architecture section (foundation, interfaces, boundaries, tooling)
@@ -368,4 +368,3 @@ if (require.main === module) {
 }
 
 module.exports = BeautifulPathsGenerator;
-

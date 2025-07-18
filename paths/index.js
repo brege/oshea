@@ -1,7 +1,7 @@
-// paths.js - Project Path Registry
-// Generated: 2025-07-18T00:18:38.811Z
+// index.js - Project Path Registry
+// Generated: 2025-07-18T03:45:21.925Z
 // Architecture: Feature-based with dependency ranking
-// Regenerate: npm run generate:paths
+// Regenerate: npm run paths
 
 const path = require('path');
 const scriptsPaths = require('./scripts.js');
@@ -44,6 +44,7 @@ const dynamicCompletionScriptPath = path.join(scriptsRoot, 'completion', 'genera
 const katexPath = path.join(assetsRoot, 'katex.min.css');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
 const findLitterRulesPath = path.join(assetsRoot, 'litter-list.txt');
+const lintingConfigPath = path.join(scriptsRoot, 'linting', 'config.yaml');
 
 // ==========================================
 // FEATURES (by dependency rank)
@@ -165,6 +166,7 @@ module.exports = {
   katexPath,
   basePluginSchemaPath,
   findLitterRulesPath,
+  lintingConfigPath,
 
   // --- Rank 0: User Interfaces ---
   cliRoot,

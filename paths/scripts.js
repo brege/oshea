@@ -1,124 +1,93 @@
-// paths/scripts.js
+// scripts.js - Scripts Path Registry
+// Generated: 2025-07-18T03:43:40.742Z
+// Architecture: Directory-based
+// Regenerate: npm run paths
+
 const path = require('path');
 
-// Root
+// ==========================================
+// SCANNED ENTRIES
+// ==========================================
+
 const scriptsRoot = path.join(__dirname, '..', 'scripts');
+// --- scripts/ai ---
+const aiContextGeneratorPath = path.join(scriptsRoot, 'ai/ai-context-generator.js');
 
-// AI
-const aiRoot = path.join(scriptsRoot, 'ai');
-const aiContextGeneratorPath = path.join(aiRoot, 'ai-context-generator.js');
+// --- scripts/batch ---
+const batchConvertHugoRecipesPath = path.join(scriptsRoot, 'batch/batch_convert_hugo_recipes.js');
+const batchConvertHugoRecipesShPath = path.join(scriptsRoot, 'batch/batch_convert_hugo_recipes.sh');
+const makeScreenshotsShPath = path.join(scriptsRoot, 'batch/make-screenshots.sh');
 
-// Batch
-const batchRoot = path.join(scriptsRoot, 'batch');
-const batchConvertHugoRecipesJsPath = path.join(batchRoot, 'batch_convert_hugo_recipes.js');
-const batchConvertHugoRecipesShPath = path.join(batchRoot, 'batch_convert_hugo_recipes.sh');
-const makeScreenshotsShPath = path.join(batchRoot, 'make-screenshots.sh');
+// --- scripts/completion ---
+const generateCompletionCachePath = path.join(scriptsRoot, 'completion/generate-completion-cache.js');
+const generateCompletionDynamicCachePath = path.join(scriptsRoot, 'completion/generate-completion-dynamic-cache.js');
 
-// Completion
-const completionRoot = path.join(scriptsRoot, 'completion');
-const generateCompletionCachePath = path.join(completionRoot, 'generate-completion-cache.js');
-const generateCompletionDynamicCachePath = path.join(completionRoot, 'generate-completion-dynamic-cache.js');
+// --- scripts/docs ---
+const generateHelpChecklistPath = path.join(scriptsRoot, 'docs/generate-help-checklist.js');
+const generateTocPath = path.join(scriptsRoot, 'docs/generate-toc.js');
 
-// Docs
-const docsRoot = path.join(scriptsRoot, 'docs');
-const generateHelpChecklistPath = path.join(docsRoot, 'generate-help-checklist.js');
-const generateTocPath = path.join(docsRoot, 'generate-toc.js');
+// --- scripts/linting/code ---
+const loggingLintPath = path.join(scriptsRoot, 'linting/code/logging-lint.js');
+const noRelativePathsPath = path.join(scriptsRoot, 'linting/code/no-relative-paths.js');
+const removeAutoDocPath = path.join(scriptsRoot, 'linting/code/remove-auto-doc.js');
+const standardizeJsLineOneAllPath = path.join(scriptsRoot, 'linting/code/standardize-js-line-one-all.js');
+const stripTrailingWhitespacePath = path.join(scriptsRoot, 'linting/code/strip-trailing-whitespace.js');
 
-// Shared
-const sharedRoot = path.join(scriptsRoot, 'shared');
-const commentSurfacerPath = path.join(sharedRoot, 'comment-surfacer.js');
-const fileHelpersPath = path.join(sharedRoot, 'file-helpers.js');
+// --- scripts/linting/docs ---
+const findLitterPath = path.join(scriptsRoot, 'linting/docs/find-litter.js');
+const postmanHelpersPath = path.join(scriptsRoot, 'linting/docs/postman-helpers.js');
+const postmanPath = path.join(scriptsRoot, 'linting/docs/postman.js');
+const updateProjectIndicesPath = path.join(scriptsRoot, 'linting/docs/update-project-indices.js');
 
-// Linting
-const lintingRoot = path.join(scriptsRoot, 'linting');
-const lintingHarnessPath = path.join(lintingRoot, 'lint-harness.js');
-const lintingConfigPath = path.join(lintingRoot, 'config.yaml');
-const lintingIndexMdPath = path.join(lintingRoot, 'index.md');
-const lintJsPath = path.join(lintingRoot, 'lint.js');
+// --- scripts/linting/lib ---
+const formattersPath = path.join(scriptsRoot, 'linting/lib/formatters.js');
+const lintHelpersPath = path.join(scriptsRoot, 'linting/lib/lint-helpers.js');
 
-// Linting: Code Linters
-const lintingCodeRoot = path.join(lintingRoot, 'code');
-const loggingLintPath = path.join(lintingCodeRoot, 'logging-lint.js');
-const noRelativePathsPath = path.join(lintingCodeRoot, 'no-relative-paths.js');
-const removeAutoDocPath = path.join(lintingCodeRoot, 'remove-auto-doc.js');
-const standardizeJsLineOneAllPath = path.join(lintingCodeRoot, 'standardize-js-line-one-all.js');
-const stripTrailingWhitespacePath = path.join(lintingCodeRoot, 'strip-trailing-whitespace.js');
+// --- scripts/linting ---
+const lintHarnessPath = path.join(scriptsRoot, 'linting/lint-harness.js');
+const lintPath = path.join(scriptsRoot, 'linting/lint.js');
 
-// Linting: Docs
-const lintingDocsRoot = path.join(lintingRoot, 'docs');
-const postmanPath = path.join(lintingDocsRoot, 'postman.js');
-const postmanHelpersPath = path.join(lintingDocsRoot, 'postman-helpers.js');
-const updateProjectIndicesPath = path.join(lintingDocsRoot, 'update-project-indices.js');
+// --- scripts/linting/validators ---
+const mochaPathValidatorPath = path.join(scriptsRoot, 'linting/validators/mocha-path-validator.js');
+const pathsJsValidatorPath = path.join(scriptsRoot, 'linting/validators/paths-js-validator.js');
+const pathsUsageValidatorPath = path.join(scriptsRoot, 'linting/validators/paths-usage-validator.js');
 
-// Linting: Lib
-const lintingLibRoot = path.join(lintingRoot, 'lib');
-const formattersPath = path.join(lintingLibRoot, 'formatters.js');
-const lintHelpersPath = path.join(lintingLibRoot, 'lint-helpers.js');
+// --- scripts/shared ---
+const commentSurfacerPath = path.join(scriptsRoot, 'shared/comment-surfacer.js');
+const fileHelpersPath = path.join(scriptsRoot, 'shared/file-helpers.js');
 
-// Linting: Validators
-const lintingValidatorsRoot = path.join(lintingRoot, 'validators');
-const mochaPathValidatorPath = path.join(lintingValidatorsRoot, 'mocha-path-validator.js');
-const pathsJsValidatorPath = path.join(lintingValidatorsRoot, 'paths-js-validator.js');
-const pathsUsageValidatorPath = path.join(lintingValidatorsRoot, 'paths-usage-validator.js');
+// ==========================================
+// EXPORTS
+// ==========================================
 
-// Export all scripts-related paths
 module.exports = {
+
   scriptsRoot,
-
-  // AI
-  aiRoot,
   aiContextGeneratorPath,
-
-  // Batch
-  batchRoot,
-  batchConvertHugoRecipesJsPath,
+  batchConvertHugoRecipesPath,
   batchConvertHugoRecipesShPath,
   makeScreenshotsShPath,
-
-  // Completion
-  completionRoot,
   generateCompletionCachePath,
   generateCompletionDynamicCachePath,
-
-  // Docs
-  docsRoot,
   generateHelpChecklistPath,
   generateTocPath,
-
-  // Shared
-  sharedRoot,
-  commentSurfacerPath,
-  fileHelpersPath,
-
-  // Linting
-  lintingRoot,
-  lintingHarnessPath,
-  lintingConfigPath,
-  lintingIndexMdPath,
-  lintJsPath,
-
-  // Linting: Code
-  lintingCodeRoot,
   loggingLintPath,
   noRelativePathsPath,
   removeAutoDocPath,
   standardizeJsLineOneAllPath,
   stripTrailingWhitespacePath,
-
-  // Linting: Docs
-  lintingDocsRoot,
+  findLitterPath,
   postmanHelpersPath,
   postmanPath,
   updateProjectIndicesPath,
-
-  // Linting: Lib
-  lintingLibRoot,
   formattersPath,
   lintHelpersPath,
-
-  // Linting: Validators
-  lintingValidatorsRoot,
+  lintHarnessPath,
+  lintPath,
   mochaPathValidatorPath,
   pathsJsValidatorPath,
   pathsUsageValidatorPath,
+  commentSurfacerPath,
+  fileHelpersPath,
+
 };

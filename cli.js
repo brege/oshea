@@ -16,12 +16,12 @@ const {
   indexPath,
   mainConfigLoaderPath,
   markdownUtilsPath,
-  configCmdPath,
-  pluginCmdPath,
-  convertCmdPath,
-  generateCmdPath,
-  collectionCmdPath,
-  updateCmdPath,
+  configCommandPath,
+  pluginCommandPath,
+  convertCommandPath,
+  generateCommandPath,
+  collectionCommandPath,
+  updateCommandPath,
   enginePath,
 } = require('@paths');
 const logger = require(loggerPath);
@@ -82,12 +82,13 @@ const yaml = require('js-yaml');
 
 const yargs = require('yargs/yargs');
 
-const configCmd = require(configCmdPath);
-const pluginCmd = require(pluginCmdPath);
-const convertCmdModule = require(convertCmdPath);
-const generateCmd = require(generateCmdPath);
-const collectionCmd = require(collectionCmdPath);
-const updateCmd = require(updateCmdPath);
+const configCommand = require(configCommandPath);
+const pluginCommand = require(pluginCommandPath);
+const convertCommandModule = require(convertCommandPath);
+const generateCommand = require(generateCommandPath);
+const collectionCommand = require(collectionCommandPath);
+const updateCommand = require(updateCommandPath);
+
 
 function openPdf(pdfPath, viewerCommand) {
   if (!viewerCommand) {
@@ -298,8 +299,8 @@ async function main() {
   argvBuilder.command({
     command: '_tab_cache',
     describe: false,
-    builder: (yargsCmd) => {
-      yargsCmd.option('config', { type: 'string' })
+    builder: (yargsCommand) => {
+      yargsCommand.option('config', { type: 'string' })
         .option('coll-root', { type: 'string' });
     },
     handler: (args) => {
@@ -315,7 +316,7 @@ async function main() {
 
   argvBuilder
     .command({
-      ...convertCmdModule.defaultCmd,
+      ...convertCommandModule.defaultCommand,
       handler: async (args) => {
         const potentialFile = args.markdownFile;
         if (potentialFile) {
@@ -332,23 +333,23 @@ async function main() {
       }
     })
     .command({
-      ...convertCmdModule.explicitConvert,
+      ...convertCommandModule.explicitConvert,
       handler: async (args) => {
         args.isLazyLoad = false;
         await commonCommandHandler(args, executeConversion, 'convert (explicit)');
       }
     })
     .command({
-      ...generateCmd,
+      ...generateCommand,
       handler: async (args) => {
         args.isLazyLoad = false;
         await commonCommandHandler(args, executeGeneration, 'generate');
       }
     })
-    .command(pluginCmd)
-    .command(collectionCmd)
-    .command(updateCmd)
-    .command(configCmd)
+    .command(pluginCommand)
+    .command(collectionCommand)
+    .command(updateCommand)
+    .command(configCommand)
     .alias('h', 'help')
     .alias('v', 'version')
     .strictCommands()

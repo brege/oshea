@@ -1,5 +1,5 @@
 // scripts.js - Scripts Path Registry
-// Generated: 2025-07-19T00:04:19.416Z
+// Generated: 2025-07-19T05:14:07.254Z
 // Architecture: Feature-based
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -28,8 +28,8 @@ const aiContextGeneratorPath = path.join(projectRoot, 'scripts/ai/ai-context-gen
 
 // Batch Processing Scripts
 const batchRoot = path.join(projectRoot, 'scripts/batch/');
-const batchConvertHugoRecipesPath = path.join(projectRoot, 'scripts/batch/batch_convert_hugo_recipes.js');
 const batchConvertHugoRecipesShPath = path.join(projectRoot, 'scripts/batch/batch_convert_hugo_recipes.sh');
+const batchConvertHugoRecipesPath = path.join(projectRoot, 'scripts/batch/batch-convert-hugo-recipes.js');
 const makeScreenshotsShPath = path.join(projectRoot, 'scripts/batch/make-screenshots.sh');
 
 // CLI Tab Completion Scripts
@@ -64,8 +64,8 @@ module.exports = {
 
   // --- essential operations ---
   batchRoot,
-  batchConvertHugoRecipesPath,
   batchConvertHugoRecipesShPath,
+  batchConvertHugoRecipesPath,
   makeScreenshotsShPath,
   completionRoot,
   generateCompletionCachePath,

@@ -1,6 +1,6 @@
 // test/integration/config/config-resolver.constructor.manifest.js
 
-const { makeConfigResolverScenario } = require('./config-resolver.factory');
+const { makeConfigResolverScenario } = require('./config-resolver.factory.js');
 
 module.exports = [
   makeConfigResolverScenario({

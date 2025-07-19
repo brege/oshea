@@ -10,8 +10,8 @@ const allPaths = require('@paths');
 const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
 
 const constructorManifest = require('./plugin-config-loader.constructor.manifest.js');
-const loadSingleLayerManifest = require('./plugin-config-loader.loadSingleLayer.manifest.js');
-const applyOverridesManifest = require('./plugin-config-loader.applyOverrides.manifest.js');
+const loadSingleLayerManifest = require('./plugin-config-loader.load-single-layer.manifest.js');
+const applyOverridesManifest = require('./plugin-config-loader.apply-overrides.manifest.js');
 
 const allTestCases = [
   ...constructorManifest,

@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { convertCmdPath, loggerPath  } = require('@paths');
+const { convertCommandPath, loggerPath  } = require('@paths');
 const logger = require(loggerPath);
 
 // --- Dynamic Proxy Yargs Stub ---
@@ -53,13 +53,13 @@ function discoverCommandTree(dir, prefixParts = []) {
     let defaultCommandOptions = [];
 
     try {
-      const convertCmdModule = require(convertCmdPath);
-      const defaultCmdStub = createYargsStub();
-      if (typeof convertCmdModule.defaultCmd.builder === 'function') {
-        convertCmdModule.defaultCmd.builder(defaultCmdStub);
+      const convertCommandModule = require(convertCommandPath);
+      const defaultCommandStub = createYargsStub();
+      if (typeof convertCommandModule.defaultCommand.builder === 'function') {
+        convertCommandModule.defaultCommand.builder(defaultCommandStub);
       }
-      defaultCommandPositionals = (defaultCmdStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey, choices: p.choices}));
-      defaultCommandOptions = Object.keys(defaultCmdStub.options || {}).map(optKey => ({name: optKey, completionKey: defaultCmdStub.options[optKey].completionKey, choices: defaultCmdStub.options[optKey].choices}));
+      defaultCommandPositionals = (defaultCommandStub.positionals || []).map(p => ({key: p.key, completionKey: p.completionKey, choices: p.choices}));
+      defaultCommandOptions = Object.keys(defaultCommandStub.options || {}).map(optKey => ({name: optKey, completionKey: defaultCommandStub.options[optKey].completionKey, choices: defaultCommandStub.options[optKey].choices}));
     } catch (builderError) {
       logger.warn(`Could not extract default command builder info for $0 node: ${builderError.message}`, { module: 'src/completion/cli-tree-builder.js' });
     }
@@ -85,7 +85,7 @@ function discoverCommandTree(dir, prefixParts = []) {
         options: [],
         positionals: []
       });
-    } else if (entry.endsWith('Cmd.js')) {
+    } else if (entry.endsWith('.command.js')) {
       const commandModule = require(fullPath);
 
       const processAndAddCommand = (cmdObj) => {

@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
-const { makeBuildRegistryScenario, makeCacheInvalidationScenario } = require('./plugin-registry-builder.factory');
+const { makeBuildRegistryScenario, makeCacheInvalidationScenario } = require('./plugin-registry-builder.factory.js');
 const sinon = require('sinon');
 
 module.exports = [

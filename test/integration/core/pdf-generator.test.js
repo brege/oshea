@@ -3,7 +3,7 @@ const { pdfGeneratorPath } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const { logs, clearLogs } = require('../../shared/capture-logs');
-const testManifest = require('./pdf-generator.manifest');
+const testManifest = require('./pdf-generator.manifest.js');
 const proxyquire = require('proxyquire');
 const path = require('path');
 

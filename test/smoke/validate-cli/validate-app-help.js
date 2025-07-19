@@ -25,7 +25,7 @@ function discoverCommands(dir, prefixParts = []) {
       const groupName = path.basename(fullPath);
       commands.push([...prefixParts, groupName]);
       commands.push(...discoverCommands(fullPath, [...prefixParts, groupName]));
-    } else if (entry.endsWith('Cmd.js')) {
+    } else if (entry.endsWith('.command.js')) {
       const commandModule = require(fullPath);
       if (!commandModule.command) continue;
 

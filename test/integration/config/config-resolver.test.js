@@ -9,12 +9,12 @@ const nodePath = require('path');
 const _ = require('lodash');
 
 const allPaths = require('@paths');
-const testLoggerPath = nodePath.resolve(__dirname, '../../shared/testLogger.js');
+const testLoggerPath = nodePath.resolve(__dirname, '../../shared/test-logger.js');
 
-const constructorManifest = require('./config-resolver.constructor.manifest');
-const initializeManifest = require('./config-resolver.initialize.manifest');
-const loadPluginBaseConfigManifest = require('./config-resolver.loadPluginBaseConfig.manifest');
-const getEffectiveConfigManifest = require('./config-resolver.getEffectiveConfig.manifest');
+const constructorManifest = require('./config-resolver.constructor.manifest.js');
+const initializeManifest = require('./config-resolver.initialize.manifest.js');
+const loadPluginBaseConfigManifest = require('./config-resolver.load-plugin-base-config.manifest.js');
+const getEffectiveConfigManifest = require('./config-resolver.get-effective-config.manifest.js');
 
 const allTestCases = [
   ...constructorManifest,

@@ -49,7 +49,7 @@ This document will be renamed and better formatted.  For now, I'm taking invento
     and via `--only code` or `--skip docs`.
 
 **Naming standardization.**
-- [ ] hyphenate all JavaScript files for consistency (kebab-case)
+- [x] hyphenate all JavaScript files for consistency (kebab-case)
 - [x] make ESlint rule to enforce camelCase for variable/function names
 - [ ] rename linters and add aliasing, grouping, and fie tuning params
 
@@ -61,6 +61,5 @@ This document will be renamed and better formatted.  For now, I'm taking invento
 
 **Linting reporting.**
 - [ ] fix current implementation of reporter
-
 
 

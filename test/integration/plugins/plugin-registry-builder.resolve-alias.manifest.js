@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
-const { makeResolveAliasScenario } = require('./plugin-registry-builder.factory');
+const { makeResolveAliasScenario } = require('./plugin-registry-builder.factory.js');
 const path = require('path');
 
 module.exports = [

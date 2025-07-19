@@ -1,4 +1,7 @@
 // test/scripts/qa-dashboard.js
+require('module-alias/register');
+const { integrationTestDir, e2eTestDir, docsTestDir, testRoot } = require('@paths');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -6,7 +9,7 @@ const path = require('path');
 
 // 1. Build testId -> testTarget, checklistStatus for ALL checklist entries
 function getChecklistStatuses() {
-  const DOCS_DIR = path.join(__dirname, '../docs');
+  const DOCS_DIR = docsTestDir;
   const checklistFiles = fs.readdirSync(DOCS_DIR)
     .filter(f => /^checklist-level-\d+\.md$/.test(f))
     .map(f => path.join(DOCS_DIR, f));
@@ -65,8 +68,8 @@ function findAllJsFiles(dir) {
 }
 function getTestIdToFileAndSkipMap() {
   const dirs = [
-    path.join(__dirname, '../integration'),
-    path.join(__dirname, '../e2e'),
+    integrationTestDir,
+    e2eTestDir
   ];
   const testIdToFile = {};
   dirs.forEach(dir => {
@@ -89,7 +92,7 @@ function getTestIdToFileAndSkipMap() {
 
 // 3. Build testId -> auditLogLine
 function getAuditLogMap() {
-  const AUDIT_LOG = path.join(__dirname, '../docs/audit-log.md');
+  const AUDIT_LOG = path.join(docsTestDir, 'audit-log.md');
   const lines = fs.readFileSync(AUDIT_LOG, 'utf8').split('\n');
   const auditMap = {};
   for (let i = 0; i < lines.length; i++) {
@@ -175,7 +178,7 @@ function generateDashboardContent() {
 }
 
 function updateIndex(dashboardLines) {
-  const indexPath = path.join(__dirname, '..', 'index.md');
+  const indexPath = path.join(testRoot, 'index.md');
   const startMarker = '<!--qa-dashboard-start-->';
   const endMarker = '<!--qa-dashboard-end-->';
 

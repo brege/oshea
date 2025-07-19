@@ -1,6 +1,8 @@
 // test/integration/core/default-handler.manifest.js
+require('module-alias/register');
+const { defaultHandlerFactoryPath } = require('@paths');
 
-const { makeDefaultHandlerScenario } = require('./default-handler.factory.js');
+const { makeDefaultHandlerScenario } = require(defaultHandlerFactoryPath);
 
 const alwaysTestSlug = {
   'Test Doc': 'test-slug',

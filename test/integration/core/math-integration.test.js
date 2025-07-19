@@ -1,13 +1,19 @@
 // test/integration/core/math-integration.test.js
+require('module-alias/register');
+const {
+  mathIntegrationFactoryPath,
+  mathIntegrationManifestPath,
+  katexPath,
+  captureLogsPath
+} = require('@paths');
 const { expect } = require('chai');
-const path = require('path');
-const { logs, clearLogs } = require('../../shared/capture-logs');
-const { buildMocks } = require('./math-integration.factory.js');
-const testManifest = require('./math-integration.manifest.js');
+const { logs, clearLogs } = require(captureLogsPath);
+const { buildMocks } = require(mathIntegrationFactoryPath);
+const testManifest = require(mathIntegrationManifestPath);
 
-const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+const testLoggerPath = captureLogsPath;
 const commonTestConstants = {
-  KATEX_CSS_PATH: path.resolve(__dirname, '../../../assets/katex.min.css'),
+  KATEX_CSS_PATH: katexPath,
   TEST_LOGGER_PATH: testLoggerPath
 };
 

@@ -1,6 +1,8 @@
 // test/integration/plugins/plugin-determiner.manifest.js
+require('module-alias/register');
+const { pluginDeterminerFactoryPath } = require('@paths');
 const path = require('path');
-const { setupTestFiles, assertCommonFileAndParsingInteractions } = require('./plugin-determiner.factory.js');
+const { setupTestFiles, assertCommonFileAndParsingInteractions } = require(pluginDeterminerFactoryPath);
 
 module.exports = [
   {
@@ -526,7 +528,7 @@ md_to_pdf_plugin: ${relativePluginPath}
       setupTestFiles(mocks, constants, { markdownContent: undefined, localConfigContent: undefined });
     },
     assert: async (result, args, mocks, constants, expect, logs) => {
-      const expectedResolvedPath = path.resolve('/mock/current/working/dir', './cli-relative-plugin');
+      const expectedResolvedPath = path.resolve('/mock/current/working/dir', 'cli-relative-plugin');
 
       expect(result.pluginSpec).to.equal(expectedResolvedPath);
       expect(result.source).to.equal('CLI option');

@@ -1,10 +1,13 @@
 // test/scripts/find-skipped-tests.js
+require('module-alias/register');
+const { integrationTestDir, e2eTestDir } = require('@paths');
+
 const fs = require('fs');
 const path = require('path');
 
 const TEST_DIRS = [
-  path.join(__dirname, '../integration'),
-  path.join(__dirname, '../e2e'),
+  integrationTestDir,
+  e2eTestDir
 ];
 
 function findAllJsFiles(dir) {

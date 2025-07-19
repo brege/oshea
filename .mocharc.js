@@ -24,7 +24,7 @@ const paths = {
   // --- Subsystem & Module Integration Test Paths ---
   default_handler:        'test/integration/core/default-handler.*.js',               // Rank 0
   pdf_generator:          'test/integration/core/pdf-generator.*.js',                 // Rank 0
-  math_integration:       'test/integration/core/math_integration.*.js',              // Rank 2
+  math_integration:       'test/integration/core/math-integration.*.js',              // Rank 2
 
   ConfigResolver:         'test/integration/config/config-resolver.*.js',             // Rank 1
   main_config_loader:     'test/integration/config/main-config-loader.*.js',          // Rank 2
@@ -52,6 +52,9 @@ const paths = {
 
   // --- Linting ---
   linting_units:          'test/linting/unit/all-linting-unit.test.js',
+
+  // --- Smoke Tests ---
+  //smoke:                  'test/smoke/smoke.test.js'
 
 };
 
@@ -170,7 +173,13 @@ const groups = {
   linting:         paths.linting_units,
 
   // Everything
-  all: [paths.integration, paths.e2e, paths.insitu, paths.linting_units]
+  all: [
+    paths.integration,
+    paths.e2e,
+    paths.insitu,
+    paths.linting_units,
+    //paths.smoke
+  ]
 };
 
 // --- E2E Grep Patterns for Group Slicing ---

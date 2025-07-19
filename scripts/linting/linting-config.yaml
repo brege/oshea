@@ -4,16 +4,17 @@
 
 # scripts/linting/code/remove-auto-doc.js
 remove-auto-doc:
+  group: "code"
+  alias: "auto-doc"
   targets:
     - cli.js
     - index.js
-    - src
-    - test
-    - plugins
-    - scripts
-    - paths
+    - "src/**/*.js"
+    - "test/**/*.js"
+    - "plugins/**/*.js"
+    - "scripts/**/*.js"
+    - "paths/**/*.js"
   excludes:
-    - .mocharc.js
     - "scripts/shared/file-helpers.js"
     - "scripts/ai/ai-context-generator.js"
   excludeDirs:
@@ -27,6 +28,13 @@ logging:
     - cli.js
     - index.js
     - src
+    ### TODO
+    ###- paths
+    ###- test/smoke
+    ###- test/linting
+    ###- scripts/linting (?)
+    ###- scripts/shared (?)
+    ###- plugins
     - test/integration
     - test/e2e
   excludes:
@@ -42,15 +50,14 @@ standardize-line-one:
     - "test/**/*.js"
     - "scripts/**/*.js"
     - "plugins/**/*.js"
-    - "paths/generator.js"
+    - paths/generator.js"
   excludes:
     - "node_modules/**"
-    - "plugins/**"
 
 # scripts/linting/code/strip-trailing-whitespace.js
 remove-ws:
-  alias: "ws" # Added alias
-  group: "code" # Added group
+  alias: "ws"
+  group: "code"
   targets:
     - "src/**/*.js"
     - "test/**/*.js"
@@ -61,35 +68,37 @@ remove-ws:
     - "*.sh"
   excludes:
     - "node_modules/**"
-    - "plugins/**/.contract/**"
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
-  group: "code" # Added group
+  alias: "paths"
+  group: "code"
   targets:
     - cli.js
     - index.js
-    - "src/**/*.js"
-    - "scripts/**/*.js"
+    - plugins
+    - src
+    - scripts
+    - test
   excludes:
     - "node_modules/**"
     - ".git/**"
     - paths
-    - "plugins/**"
-    - "test/fixtures/**"
+    - "plugins/**/.contract/test/*.test.js"
 
 # --- Validators ---
 
 # scripts/linting/validators/mocha-path-validator.js
 validate-mocha:
-  group: "validators" # Added group
+  alias: "mocha"
+  group: "validators"
 
 # --- Docs ---
 
 # scripts/linting/docs/update-project-indices.js
 update-indices:
   alias: "librarian"
-  group: "docs" # Added group
+  group: "docs"
   docs:
     indexFile: docs/index.md
     scanRoot: "docs"
@@ -137,7 +146,7 @@ update-indices:
 # scripts/linting/docs/postman.js
 doc-links:
   alias: "postman"
-  group: "docs" # Added group
+  group: "docs"
   excludes:
     - "node_modules/**"
     - ".git/**"
@@ -155,7 +164,8 @@ doc-links:
     - "**/index.js"
 # scripts/linting/docs/find-litter.js
 find-litter:
-  group: "docs" # Added group
+  alias: "custodian"
+  group: "docs"
   targets:
     - src
     - docs

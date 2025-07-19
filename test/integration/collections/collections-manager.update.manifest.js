@@ -1,5 +1,7 @@
 // test/integration/collections/collections-manager.update.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
+require('module-alias/register');
+const { collectionsManagerFactoryPath } = require('@paths');
+const { makeCollectionsManagerScenario } = require(collectionsManagerFactoryPath);
 const sinon = require('sinon');
 
 const COLLECTION_TO_UPDATE = 'my-git-collection';

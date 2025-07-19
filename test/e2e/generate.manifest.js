@@ -1,7 +1,10 @@
 // test/e2e/generate.manifest.js
+require('module-alias/register');
+const { fixturesDir } = require('@paths');
 const fs = require('fs-extra');
 const path = require('path');
-const { HUGO_EXAMPLE_SOURCE_IN_EXAMPLES } = require('../shared/test-constants');
+
+const hugoExampleDir = path.join(fixturesDir, 'hugo-example');
 
 // Reusable helper from convert.manifest.js
 async function checkPdf(outputDir, expectedFilename, minSize = 1000) {
@@ -21,7 +24,7 @@ module.exports = [
     setup: async (sandboxDir) => {
       // Copy the entire hugo-example directory into the sandbox to act as the source
       const fixtureDest = path.join(sandboxDir, 'hugo-example-src');
-      await fs.copy(HUGO_EXAMPLE_SOURCE_IN_EXAMPLES, fixtureDest);
+      await fs.copy(hugoExampleDir, fixtureDest);
     },
     args: (sandboxDir) => [
       'generate',

@@ -7,7 +7,7 @@ This document is a central index for all developer and automation scripts within
     
 ### Batch Jobs [ `batch/` ]
 
-  - [ [`batch_convert_hugo_recipes.js`](batch/batch_convert_hugo_recipes.js) ]
+  - [ [`batch-convert-hugo-recipes.js`](batch/batch-convert-hugo-recipes.js) ]
     -- Converts a directory of Hugo-formatted recipe files into individual PDFs.
   - [ [`batch_convert_hugo_recipes.sh`](batch/batch_convert_hugo_recipes.sh) ]
     -- A shell script version for converting Hugo recipes.

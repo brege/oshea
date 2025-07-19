@@ -7,6 +7,7 @@ const {
   projectRoot,
   cliPath,
   testFileHelpersPath,
+  fixturesDir,
   loggerPath,
 } = require('@paths');
 
@@ -20,7 +21,7 @@ const {
 } = require(testFileHelpersPath);
 
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-book-e2e');
-const HUGO_EXAMPLE_PATH = path.join(projectRoot, 'test', 'fixtures', 'hugo-example');
+const HUGO_EXAMPLE_PATH = path.join(fixturesDir, 'hugo-example');
 
 describe('Recipe Book Plugin E2E', function () {
   this.timeout(20000);

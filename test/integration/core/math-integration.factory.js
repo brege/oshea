@@ -5,14 +5,15 @@ const proxyquire = require('proxyquire');
 
 
 function makeMathIntegrationScenario({
-  testId,
+  test_id, // eslint-disable-line camelcase
   description,
   scenario = {},
   assertion,
   only,
   skip,
 }) {
-  return { testId, description, scenario, assertion, only, skip };
+  // eslint-disable-next-line camelcase
+  return { test_id, description, scenario, assertion, only, skip };
 }
 
 

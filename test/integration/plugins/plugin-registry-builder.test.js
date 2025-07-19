@@ -1,18 +1,20 @@
 // test/integration/plugins/plugin-registry-builder.test.js
-const { pluginRegistryBuilderPath } = require('@paths');
+require('module-alias/register');
+const {
+  pluginRegistryBuilderPath,
+  captureLogsPath,
+  pluginRegistryBuilderConstructorManifestPath,
+  pluginRegistryBuilderResolveAliasManifestPath,
+  pluginRegistryBuilderResolvePluginConfigPathManifestPath,
+  pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath,
+  pluginRegistryBuilderCmManifestsManifestPath,
+  pluginRegistryBuilderBuildRegistryManifestPath,
+  pluginRegistryBuilderGetAllPluginDetailsManifestPath
+} = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const path = require('path');
-
-const { logs, clearLogs } = require('../../shared/capture-logs');
-
-const constructorManifest = require('./plugin-registry-builder.constructor.manifest.js');
-const resolveAliasManifest = require('./plugin-registry-builder.resolve-alias.manifest.js');
-const resolvePluginConfigPathManifest = require('./plugin-registry-builder.resolve-plugin-config-path.manifest.js');
-const getPluginRegistrationsFromFileManifest = require('./plugin-registry-builder.get-plugin-registrations-from-file.manifest.js');
-const cmManifestsManifest = require('./plugin-registry-builder.cm-manifests.manifest.js');
-const buildRegistryManifest = require('./plugin-registry-builder.build-registry.manifest.js');
-const getAllPluginDetailsManifest = require('./plugin-registry-builder.get-all-plugin-details.manifest.js');
+const { logs, clearLogs } = require(captureLogsPath);
 
 const getTestCases = (manifest) => {
   if (Array.isArray(manifest)) {
@@ -23,6 +25,14 @@ const getTestCases = (manifest) => {
   }
   throw new Error(`Invalid manifest format: ${JSON.stringify(manifest)}`);
 };
+
+const constructorManifest = require(pluginRegistryBuilderConstructorManifestPath);
+const resolveAliasManifest = require(pluginRegistryBuilderResolveAliasManifestPath);
+const resolvePluginConfigPathManifest = require(pluginRegistryBuilderResolvePluginConfigPathManifestPath);
+const getPluginRegistrationsFromFileManifest = require(pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath);
+const cmManifestsManifest = require(pluginRegistryBuilderCmManifestsManifestPath);
+const buildRegistryManifest = require(pluginRegistryBuilderBuildRegistryManifestPath);
+const getAllPluginDetailsManifest = require(pluginRegistryBuilderGetAllPluginDetailsManifestPath);
 
 const allTestCases = [
   ...getTestCases(constructorManifest),
@@ -58,7 +68,7 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
     delete require.cache[pathsPath];
 
     // Inject loggerPath for log capturing
-    const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+    const testLoggerPath = captureLogsPath;
     require.cache[pathsPath] = {
       exports: {
         ...require(pathsPath),
@@ -79,12 +89,12 @@ describe('PluginRegistryBuilder (Integration Tests)', function() {
         platform: sinon.stub().returns('linux')
       },
       path: {
-        join: sinon.stub().callsFake((...args) => require('path').join(...args)),
-        dirname: sinon.stub().callsFake((...args) => require('path').dirname(...args)),
-        resolve: sinon.stub().callsFake((...args) => require('path').resolve(...args)),
-        isAbsolute: sinon.stub().callsFake((p) => require('path').isAbsolute(p)),
-        basename: sinon.stub().callsFake((p) => require('path').basename(p)),
-        extname: sinon.stub().callsFake((p) => require('path').extname(p)),
+        join: sinon.stub().callsFake((...args) => path.join(...args)),
+        dirname: sinon.stub().callsFake((...args) => path.dirname(...args)),
+        resolve: sinon.stub().callsFake((...args) => path.resolve(...args)),
+        isAbsolute: sinon.stub().callsFake((p) => path.isAbsolute(p)),
+        basename: sinon.stub().callsFake((p) => path.basename(p)),
+        extname: sinon.stub().callsFake((p) => path.extname(p)),
       },
       process: { env: {} },
       loadYamlConfig: sinon.stub(),

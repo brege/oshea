@@ -1,11 +1,16 @@
 // test/integration/core/pdf-generator.test.js
-const { pdfGeneratorPath } = require('@paths');
+require('module-alias/register');
+const {
+  pdfGeneratorPath,
+  captureLogsPath,
+  pdfGeneratorManifestPath,
+  allPaths
+} = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { logs, clearLogs } = require('../../shared/capture-logs');
-const testManifest = require('./pdf-generator.manifest.js');
+const { logs, clearLogs } = require(captureLogsPath);
+const testManifest = require(pdfGeneratorManifestPath);
 const proxyquire = require('proxyquire');
-const path = require('path');
 
 describe('pdf_generator (Integration Tests)', function () {
   let generatePdf;
@@ -37,11 +42,11 @@ describe('pdf_generator (Integration Tests)', function () {
     };
 
     // Use proxyquire to inject the mocked puppeteer module and loggerPath
-    const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+    const testLoggerPath = captureLogsPath;
     const { generatePdf: proxiedGeneratePdf } = proxyquire(pdfGeneratorPath, {
       'puppeteer': mockPuppeteer,
       '@paths': {
-        ...require('@paths'), // Ensure other paths are preserved
+        ...allPaths, // Ensure other paths are preserved
         loggerPath: testLoggerPath
       }
     });
@@ -76,7 +81,7 @@ describe('pdf_generator (Integration Tests)', function () {
 
       let result = null;
       try {
-        await generatePdf(
+        result = await generatePdf(
           constants.htmlBodyContent, // Use as-is, including null/empty string!
           constants.outputPdfPath,
           constants.pdfOptionsFromConfig,

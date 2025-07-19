@@ -1,20 +1,26 @@
 // test/integration/config/config-resolver.test.js
-
-const { configResolverPath } = require('@paths');
+require('module-alias/register');
+const {
+  configResolverPath,
+  captureLogsPath,
+  configResolverConstructorManifestPath,
+  configResolverInitializeManifestPath,
+  configResolverLoadPluginBaseConfigManifestPath,
+  configResolverGetEffectiveConfigManifestPath,
+  allPaths,
+  testLoggerPath
+} = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const { logs, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require(captureLogsPath);
 const proxyquire = require('proxyquire');
 const nodePath = require('path');
 const _ = require('lodash');
 
-const allPaths = require('@paths');
-const testLoggerPath = nodePath.resolve(__dirname, '../../shared/test-logger.js');
-
-const constructorManifest = require('./config-resolver.constructor.manifest.js');
-const initializeManifest = require('./config-resolver.initialize.manifest.js');
-const loadPluginBaseConfigManifest = require('./config-resolver.load-plugin-base-config.manifest.js');
-const getEffectiveConfigManifest = require('./config-resolver.get-effective-config.manifest.js');
+const constructorManifest = require(configResolverConstructorManifestPath);
+const initializeManifest = require(configResolverInitializeManifestPath);
+const loadPluginBaseConfigManifest = require(configResolverLoadPluginBaseConfigManifestPath);
+const getEffectiveConfigManifest = require(configResolverGetEffectiveConfigManifestPath);
 
 const allTestCases = [
   ...constructorManifest,

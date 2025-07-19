@@ -1,17 +1,25 @@
 // test/integration/config/main-config-loader.test.js
-const { mainConfigLoaderPath, defaultConfigPath, factoryDefaultConfigPath } = require('@paths');
+require('module-alias/register');
+const {
+  mainConfigLoaderPath,
+  defaultConfigPath,
+  factoryDefaultConfigPath,
+  captureLogsPath,
+  allPaths,
+  mainConfigLoaderConstructorManifestPath,
+  mainConfigLoaderInitializeManifestPath,
+  mainConfigLoaderGettersManifestPath
+} = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const path = require('path');
-const { logs, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require(captureLogsPath);
 const proxyquire = require('proxyquire');
 
-const allPaths = require('@paths');
-const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+const testLoggerPath = captureLogsPath;
 
-const constructorManifest = require('./main-config-loader.constructor.manifest.js');
-const initializeManifest = require('./main-config-loader.initialize.manifest.js');
-const gettersManifest = require('./main-config-loader.getters.manifest.js');
+const constructorManifest = require(mainConfigLoaderConstructorManifestPath);
+const initializeManifest = require(mainConfigLoaderInitializeManifestPath);
+const gettersManifest = require(mainConfigLoaderGettersManifestPath);
 
 const allTestCases = [
   ...constructorManifest,
@@ -38,7 +46,7 @@ describe('MainConfigLoader (Integration Tests)', function() {
         existsSync: sinon.stub(),
         readFile: sinon.stub().resolves(''),
       },
-      path: { ...path }, // Use a mutable copy of the real path module
+      path: { ...require('path') }, // Use a mutable copy of the real path module
       os: {
         homedir: sinon.stub().returns(commonTestConstants.MOCK_OS_HOME_DIR),
         platform: sinon.stub().returns('linux'),

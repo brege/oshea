@@ -1,4 +1,14 @@
 // test/integration/plugins/plugin-validator.test.js
+require('module-alias/register');
+const {
+  captureLogsPath,
+  pluginValidatorManifestPath,
+  validatorPath,
+  v1Path
+} = require('@paths');
+const { logs, testLogger, clearLogs } = require(captureLogsPath);
+const testManifest = require(pluginValidatorManifestPath);
+
 require('chalk').level = 0; // Disable all chalk colors for this test run
 
 const { expect } = require('chai');
@@ -7,9 +17,6 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-const { validatorPath, v1Path } = require('@paths');
-const { logs, testLogger, clearLogs } = require('../../shared/capture-logs');
-const testManifest = require('./plugin-validator.manifest.js');
 const proxyquire = require('proxyquire');
 
 describe('Plugin Validator (Integration Tests)', function() {

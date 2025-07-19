@@ -51,7 +51,6 @@ This document will be renamed and better formatted.  For now, I'm taking invento
 **Naming standardization.**
 - [x] hyphenate all JavaScript files for consistency (kebab-case)
 - [x] make ESlint rule to enforce camelCase for variable/function names
-- [ ] rename linters and add aliasing, grouping, and fie tuning params
 
 **Validate config structure.**
 - [ ] missing required fields (`label`, `command`)

@@ -1,5 +1,7 @@
 // test/integration/collections/collections-manager.disable.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
+require('module-alias/register');
+const { collectionsManagerFactoryPath } = require('@paths');
+const { makeCollectionsManagerScenario } = require(collectionsManagerFactoryPath);
 
 const PLUGIN_TO_DISABLE = 'my-enabled-plugin';
 const FAKE_ENABLED_PLUGINS = [

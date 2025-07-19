@@ -1,5 +1,7 @@
 // test/integration/collections/cm-utils.test.js
-const manifest = require('./cm-utils.manifest.js');
+require('module-alias/register');
+const { cmUtilsManifestPath } = require('@paths');
+const manifest = require(cmUtilsManifestPath);
 
 describe('cm-utils (Module Integration Tests)', () => {
   manifest.forEach(scenario => {
@@ -8,3 +10,4 @@ describe('cm-utils (Module Integration Tests)', () => {
     });
   });
 });
+

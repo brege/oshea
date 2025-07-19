@@ -1,10 +1,11 @@
 // test/e2e/e2e-harness.js
+require('module-alias/register');
+const { cliPath } = require('@paths');
+
 const { spawn } = require('child_process');
 const fs = require('fs-extra');
 const path = require('path');
 const os = require('os');
-
-const cliPath = path.resolve(__dirname, '../../cli.js');
 
 class TestHarness {
   constructor() {

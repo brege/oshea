@@ -1,6 +1,7 @@
 // test/e2e/config.manifest.js
+require('module-alias/register');
+const { testConfigPath } = require('@paths');
 const yaml = require('js-yaml');
-const { TEST_CONFIG_PATH } = require('../shared/test-constants');
 
 module.exports = [
   {
@@ -12,7 +13,7 @@ module.exports = [
     args: (sandboxDir) => [
       'config',
       '--config',
-      TEST_CONFIG_PATH,
+      testConfigPath,
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
@@ -33,7 +34,7 @@ module.exports = [
       '--plugin',
       'default',
       '--config',
-      TEST_CONFIG_PATH,
+      testConfigPath,
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
@@ -55,7 +56,7 @@ module.exports = [
       'config',
       '--pure',
       '--config',
-      TEST_CONFIG_PATH,
+      testConfigPath,
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);

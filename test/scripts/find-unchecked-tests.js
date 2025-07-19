@@ -1,4 +1,7 @@
 // test/scripts/find-unchecked-tests.js
+require('module-alias/register');
+const { integrationTestDir, e2eTestDir, docsTestDir } = require('@paths');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -19,8 +22,8 @@ function findAllJsFiles(dir) {
 }
 function buildTestIdToPathMap() {
   const dirs = [
-    path.join(__dirname, '../integration'),
-    path.join(__dirname, '../e2e'),
+    integrationTestDir,
+    e2eTestDir
   ];
   const testIdToPath = {};
   dirs.forEach(dir => {
@@ -38,7 +41,7 @@ function buildTestIdToPathMap() {
 }
 const testIdToPath = buildTestIdToPathMap();
 
-const DOCS_DIR = path.join(__dirname, '../docs');
+const DOCS_DIR = docsTestDir;
 const checklistFiles = fs.readdirSync(DOCS_DIR)
   .filter(f => /^checklist-level-\d+\.md$/.test(f))
   .map(f => path.join(DOCS_DIR, f));

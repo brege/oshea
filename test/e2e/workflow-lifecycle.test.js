@@ -2,7 +2,7 @@
 const { expect } = require('chai');
 const path = require('path');
 const fs = require('fs-extra');
-const { TestHarness } = require('./harness');
+const { TestHarness } = require('./e2e-harness');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 

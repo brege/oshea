@@ -1,6 +1,7 @@
 # scripts/linting/config.yaml
 
 # --- Code ---
+
 # scripts/linting/code/remove-auto-doc.js
 remove-auto-doc:
   targets:
@@ -76,10 +77,12 @@ no-relative-paths:
     - "test/fixtures/**"
 
 # --- Validators ---
+
 # scripts/linting/validators/mocha-path-validator.js
 validate-mocha: []
 
 # --- Docs ---
+
 # scripts/linting/docs/update-project-indices.js
 update-indices:
   docs:
@@ -124,7 +127,8 @@ update-indices:
     fileExtensions:
       - .js
       - .md
-    excludePatterns: [] 
+    excludePatterns: []
+
 # scripts/linting/docs/postman.js
 doc-links:
   excludes:
@@ -158,6 +162,7 @@ find-litter:
     - ".git/**"
     - "docs/archive/**"
     - "plugins/template-basic/"
+    - "**/linting-docs.manifest.js"
 
 # --- Harness Configuration ---
 harness:

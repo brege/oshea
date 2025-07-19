@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/shared/find-path-variable.js
+// scripts/shared/path-finder.js
 require('module-alias/register');
 
 const fs = require('fs');

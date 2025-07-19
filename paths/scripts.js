@@ -1,5 +1,5 @@
 // scripts.js - Scripts Path Registry
-// Generated: 2025-07-18T17:27:27.107Z
+// Generated: 2025-07-19T00:04:19.416Z
 // Architecture: Feature-based
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -46,7 +46,7 @@ const generateTocPath = path.join(projectRoot, 'scripts/docs/generate-toc.js');
 // Shared Script Utilities
 const sharedRoot = path.join(projectRoot, 'scripts/shared/');
 const fileHelpersPath = path.join(projectRoot, 'scripts/shared/file-helpers.js');
-const findPathVariablePath = path.join(projectRoot, 'scripts/shared/find-path-variable.js');
+const pathFinderPath = path.join(projectRoot, 'scripts/shared/path-finder.js');
 
 // ==========================================
 // EXPORTS
@@ -76,6 +76,6 @@ module.exports = {
   // --- supportive operations ---
   sharedRoot,
   fileHelpersPath,
-  findPathVariablePath,
+  pathFinderPath,
 
 };

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test/smoke/validate-bundled-plugins.js
+// test/smoke/validate-cli/validate-bundled-plugins.js
 
 require('module-alias/register');
 

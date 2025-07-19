@@ -6,13 +6,13 @@ const path = require('path');
 
 const { logs, clearLogs } = require('../../shared/capture-logs');
 
-const constructorManifest = require('./plugin-registry-builder.constructor.manifest');
-const resolveAliasManifest = require('./plugin-registry-builder.resolve-alias.manifest');
-const resolvePluginConfigPathManifest = require('./plugin-registry-builder.resolve-plugin-config-path.manifest');
-const getPluginRegistrationsFromFileManifest = require('./plugin-registry-builder.get-plugin-registrations-from-file.manifest');
-const cmManifestsManifest = require('./plugin-registry-builder.cm-manifests.manifest');
-const buildRegistryManifest = require('./plugin-registry-builder.build-registry.manifest');
-const getAllPluginDetailsManifest = require('./plugin-registry-builder.get-all-plugin-details.manifest');
+const constructorManifest = require('./plugin-registry-builder.constructor.manifest.js');
+const resolveAliasManifest = require('./plugin-registry-builder.resolve-alias.manifest.js');
+const resolvePluginConfigPathManifest = require('./plugin-registry-builder.resolve-plugin-config-path.manifest.js');
+const getPluginRegistrationsFromFileManifest = require('./plugin-registry-builder.get-plugin-registrations-from-file.manifest.js');
+const cmManifestsManifest = require('./plugin-registry-builder.cm-manifests.manifest.js');
+const buildRegistryManifest = require('./plugin-registry-builder.build-registry.manifest.js');
+const getAllPluginDetailsManifest = require('./plugin-registry-builder.get-all-plugin-details.manifest.js');
 
 const getTestCases = (manifest) => {
   if (Array.isArray(manifest)) {

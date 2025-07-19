@@ -1,6 +1,6 @@
 // test/integration/config/config-resolver.initialize.manifest.js
 
-const { makeConfigResolverScenario } = require('./config-resolver.factory');
+const { makeConfigResolverScenario } = require('./config-resolver.factory.js');
 
 const mainConfigStubs = {
   getPrimaryMainConfig: {

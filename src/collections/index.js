@@ -29,16 +29,16 @@ const cmUtils = require(cmUtilsPath);
 const constants = require(constantsPath);
 
 // Command Modules
-const addCollectionCmd = require(addPath);
-const enablePluginCmd = require(enablePath);
-const enableAllPluginsInCollectionCmd = require(enableAllPath);
-const disablePluginCmd = require(disablePath);
-const removeCollectionCmd = require(removePath);
-const updateCollectionCmd = require(updatePath);
-const updateAllCollectionsCmd = require(updateAllPath);
-const listAvailablePluginsCmd = require(listAvailablePath);
-const listCollectionsCmd = require(listPath);
-const addSingletonPluginCmd = require(addSingletonPath);
+const addCollectionCommand = require(addPath);
+const enablePluginCommand = require(enablePath);
+const enableAllPluginsInCollectionCommand = require(enableAllPath);
+const disablePluginCommand = require(disablePath);
+const removeCollectionCommand = require(removePath);
+const updateCollectionCommand = require(updatePath);
+const updateAllCollectionsCommand = require(updateAllPath);
+const listAvailablePluginsCommand = require(listAvailablePath);
+const listCollectionsCommand = require(listPath);
+const addSingletonPluginCommand = require(addSingletonPath);
 
 class CollectionsManager {
   constructor(options = {}, dependencies = {}) {
@@ -54,16 +54,16 @@ class CollectionsManager {
     this.collRoot = this.determineCollRoot(options.collRootCliOverride, options.collRootFromMainConfig);
 
     // Bind all commands, passing the 'dependencies' object as the first argument
-    this.addCollection = addCollectionCmd.bind(this, this.dependencies);
-    this.enablePlugin = enablePluginCmd.bind(this, this.dependencies);
-    this.enableAllPluginsInCollection = enableAllPluginsInCollectionCmd.bind(this, this.dependencies);
-    this.disablePlugin = disablePluginCmd.bind(this, this.dependencies);
-    this.removeCollection = removeCollectionCmd.bind(this, this.dependencies);
-    this.updateCollection = updateCollectionCmd.bind(this, this.dependencies);
-    this.updateAllCollections = updateAllCollectionsCmd.bind(this, this.dependencies);
-    this.listAvailablePlugins = listAvailablePluginsCmd.bind(this, this.dependencies);
-    this.listCollections = listCollectionsCmd.bind(this, this.dependencies);
-    this.addSingletonPlugin = addSingletonPluginCmd.bind(this, this.dependencies);
+    this.addCollection = addCollectionCommand.bind(this, this.dependencies);
+    this.enablePlugin = enablePluginCommand.bind(this, this.dependencies);
+    this.enableAllPluginsInCollection = enableAllPluginsInCollectionCommand.bind(this, this.dependencies);
+    this.disablePlugin = disablePluginCommand.bind(this, this.dependencies);
+    this.removeCollection = removeCollectionCommand.bind(this, this.dependencies);
+    this.updateCollection = updateCollectionCommand.bind(this, this.dependencies);
+    this.updateAllCollections = updateAllCollectionsCommand.bind(this, this.dependencies);
+    this.listAvailablePlugins = listAvailablePluginsCommand.bind(this, this.dependencies);
+    this.listCollections = listCollectionsCommand.bind(this, this.dependencies);
+    this.addSingletonPlugin = addSingletonPluginCommand.bind(this, this.dependencies);
   }
 
   determineCollRoot(collRootCliOverride = null, collRootFromConfig = null) {

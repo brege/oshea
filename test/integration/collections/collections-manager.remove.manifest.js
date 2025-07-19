@@ -1,5 +1,5 @@
 // test/integration/collections/collections-manager.remove.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory');
+const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
 
 const COLLECTION_TO_REMOVE = 'my-collection';
 

@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-validator.manifest.js
-const { makeValidatorScenario, setupPluginScenario, setupWellFormedPlugin } = require('./plugin-validator.factory');
+const { makeValidatorScenario, setupPluginScenario, setupWellFormedPlugin } = require('./plugin-validator.factory.js');
 const path = require('path');
 
 module.exports = [

@@ -87,7 +87,7 @@ class DeclarativePathsGenerator {
 
   camelCase(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/[-_]/g, ' ')
+    return str.replace(/[-_.]/g, ' ')
       .replace(/\b\w/g, l => l.toUpperCase())
       .replace(/\s/g, '')
       .replace(/^\w/, l => l.toLowerCase());

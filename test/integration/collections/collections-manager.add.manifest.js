@@ -1,5 +1,5 @@
 // test/integration/collections/collections-manager.add.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory');
+const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
 const sinon = require('sinon');
 
 const FAKE_REPO_URL = 'https://github.com/fake/repo.git';

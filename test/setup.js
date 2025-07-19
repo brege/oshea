@@ -3,14 +3,20 @@ require('module-alias/register');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const path = require('path');
-// Require core Node.js modules and utility modules that don't need special caching handling
 const fs = require('fs').promises;
-const fss = require('fs'); // Sync operations (and now for fs.constants.F_OK)
+const fss = require('fs');
+
+const {
+  markdownUtilsPath,
+  pdfGeneratorPath,
+  mathIntegrationPath,
+  defaultHandlerPath
+} = require('@paths');
 
 // Require all modules that will be stubbed globally
-const markdownUtils = require('../src/core/markdown_utils');
-const pdfGenerator = require('../src/core/pdf_generator');
-const createMathIntegration = require('../src/core/math_integration'); // The factory
+const markdownUtils = require(markdownUtilsPath);
+const pdfGenerator = require(pdfGeneratorPath);
+const createMathIntegration = require(mathIntegrationPath);
 
 // Import the test logger for capturing logs
 const { testLogger } = require('./shared/capture-logs');
@@ -41,7 +47,7 @@ module.exports = {
       this.getMathCssContentStub = this.sandbox.stub(mathIntegrationInstance, 'getMathCssContent');
       this.configureMarkdownItForMathStub = this.sandbox.stub(mathIntegrationInstance, 'configureMarkdownItForMath');
       // Hijack the require cache so any call to require('../src/core/math_integration') gets our stubbed instance's factory
-      require.cache[require.resolve('../src/core/math_integration')] = {
+      require.cache[require.resolve(mathIntegrationPath)] = {
         exports: () => mathIntegrationInstance
       };
 
@@ -58,8 +64,8 @@ module.exports = {
       };
 
       // Re-require DefaultHandler to ensure it picks up all stubbed dependencies
-      delete require.cache[require.resolve('../src/core/default_handler')];
-      const DefaultHandler = require('../src/core/default_handler');
+      delete require.cache[require.resolve(defaultHandlerPath)];
+      const DefaultHandler = require(defaultHandlerPath);
       this.defaultHandler = new DefaultHandler();
 
       if (done) done();
@@ -69,12 +75,11 @@ module.exports = {
       // Restore the sandbox
       this.sandbox.restore();
       // Clean up the require cache to prevent test pollution
-      delete require.cache[require.resolve('../src/core/math_integration')];
-      delete require.cache[require.resolve('../src/core/default_handler')];
+      delete require.cache[require.resolve(mathIntegrationPath)];
+      delete require.cache[require.resolve(defaultHandlerPath)];
       // Clean up the logger injection
       delete require.cache[require.resolve('@paths')];
       if (done) done();
     }
   }
 };
-

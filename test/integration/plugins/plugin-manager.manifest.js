@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-manager.manifest.js
-const { makePluginManagerScenario } = require('./plugin-manager.factory');
+const { makePluginManagerScenario } = require('./plugin-manager.factory.js');
 
 module.exports = [
   makePluginManagerScenario({

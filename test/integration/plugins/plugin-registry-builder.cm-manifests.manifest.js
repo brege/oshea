@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
-const { makeCmManifestScenario } = require('./plugin-registry-builder.factory');
+const { makeCmManifestScenario } = require('./plugin-registry-builder.factory.js');
 
 module.exports = [
   {

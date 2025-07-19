@@ -1,5 +1,5 @@
 // test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-const { makeResolveConfigPathScenario } = require('./plugin-registry-builder.factory');
+const { makeResolveConfigPathScenario } = require('./plugin-registry-builder.factory.js');
 const path = require('path');
 
 module.exports = [

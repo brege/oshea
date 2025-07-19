@@ -91,19 +91,23 @@ registries:
         pattern: "src/validators/**/*.js"
         rank: 2
     contextual_naming:
-      addCmd.js:
-        cli/commands/collection: "collections_add_cmd"
-        cli/commands/plugin: "plugin_add_cmd"
+      "add.command.js":
+        cli/commands/collection: "collections_add_command"
+        cli/commands/plugin: "plugin_add_command"
+      "list.command.js":
+        cli/commands/collection: "collections_list_command"
+        cli/commands/plugin: "plugin_list_command"
+      "remove.command.js":
+        cli/commands/collection: "collections_remove_command"
+      "update.command.js":
+        cli/commands/collection: "collections_update_command"
+      add:
         collections/commands: "collections_add"
-      listCmd.js:
-        cli/commands/collection: "collections_list_cmd"
-        cli/commands/plugin: "plugin_list_cmd"
+      list:
         collections/commands: "collections_list"
-      removeCmd.js:
-        cli/commands/collection: "collections_remove_cmd"
+      remove:
         collections/commands: "collections_remove"
-      updateCmd.js:
-        cli/commands/collection: "collections_update_cmd"
+      update:
         collections/commands: "collections_update"
 
   # Scripts registry (generates paths/scripts.js)

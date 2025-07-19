@@ -1,5 +1,5 @@
 // test/integration/collections/collections-manager.update.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory');
+const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
 const sinon = require('sinon');
 
 const COLLECTION_TO_UPDATE = 'my-git-collection';

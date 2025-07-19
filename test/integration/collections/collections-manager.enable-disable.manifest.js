@@ -1,5 +1,5 @@
 // test/integration/collections/collections-manager.enable-disable.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory');
+const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
 
 const FAKE_PLUGIN_ID = 'my-plugin';
 const FAKE_COLLECTION = 'test-collection';

@@ -1,5 +1,5 @@
 // test/integration/core/pdf-generator.manifest.js
-const { makePdfGeneratorScenario } = require('./pdf-generator.factory');
+const { makePdfGeneratorScenario } = require('./pdf-generator.factory.js');
 const { JSDOM } = require('jsdom');
 
 module.exports = [

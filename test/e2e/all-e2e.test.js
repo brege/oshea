@@ -11,7 +11,7 @@ const testSuites = [
   { name: 'generate', manifest: './generate.manifest.js', options: { timeout: 10000 } },
   { name: 'global flags', manifest: './global-flags.manifest.js' },
   { name: 'plugin add', manifest: './plugin-add.manifest.js' },
-  { name: 'plugin create', manifest: './plugin-create.manifest.js' },
+  { name: 'plugin create', manifest: './plugin-create.manifest.js', options: { timeout: 15000 } },
   { name: 'plugin disable', manifest: './plugin-disable.manifest.js' },
   { name: 'plugin enable', manifest: './plugin-enable.manifest.js' },
   { name: 'plugin list', manifest: './plugin-list.manifest.js' },

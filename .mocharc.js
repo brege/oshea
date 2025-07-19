@@ -49,6 +49,10 @@ const paths = {
 
   // --- Bundled Plugin In-Situ Test Paths ---
   insitu:                 'plugins/**/.contract/test/*.test.js',
+
+  // --- Linting ---
+  linting_units:          'test/linting/unit/all-linting-unit.test.js',
+
 };
 
 // --- By Rank -- Integration Tests ---
@@ -162,8 +166,11 @@ const groups = {
   // All End-to-End Tests
   e2e:             paths.e2e,
 
+  // All Linting Tests
+  linting:         paths.linting_units,
+
   // Everything
-  all: [paths.integration, paths.e2e, paths.insitu]
+  all: [paths.integration, paths.e2e, paths.insitu, paths.linting_units]
 };
 
 // --- E2E Grep Patterns for Group Slicing ---

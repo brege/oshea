@@ -1,54 +1,44 @@
 #!/usr/bin/env node
-// test/smoke/validate-app-config.js
+// test/smoke/validate-cli/validate-collection-list.js
 
 require('module-alias/register');
 
 const { exec } = require('child_process');
 const chalk = require('chalk');
 const { cliPath } = require('@paths');
-const yaml = require('js-yaml');
 
 // --- Test Scenarios ---
 const scenarios = [
   {
-    description: 'Global config (default)',
-    commandArgs: 'config',
-    validate: (stdout) => stdout.includes('pdf_viewer:')
+    description: 'List collection names (short)',
+    commandArgs: 'collection list names --short',
+    validate: (stdout) => stdout.includes('NAME') && stdout.includes('TYPE') && stdout.includes('SOURCE')
   },
   {
-    description: 'Global config (--pure)',
-    commandArgs: 'config --pure',
-    validate: (stdout) => {
-      try {
-        const doc = yaml.load(stdout);
-        return typeof doc === 'object' && doc !== null && 'pdf_viewer' in doc;
-      } catch (e) {
-        return false;
-      }
-    }
+    description: 'List downloaded collections (default)',
+    commandArgs: 'collection list names',
+    validate: (stdout) => stdout.includes('Downloaded plugin collections:') || stdout.includes('No downloaded collections found.')
   },
   {
-    description: 'Plugin config (default)',
-    commandArgs: 'config --plugin cv',
-    validate: (stdout) => stdout.includes('handler_script:') && stdout.includes('Plugin Base Path:')
+    description: 'List available plugins from collections',
+    commandArgs: 'collection list available',
+    validate: (stdout) => stdout.includes('Available plugins') || stdout.includes('No available plugins found')
   },
   {
-    description: 'Plugin config (--pure)',
-    commandArgs: 'config --plugin cv --pure',
-    validate: (stdout) => {
-      try {
-        const doc = yaml.load(stdout);
-        return typeof doc === 'object' && doc !== null && 'handler_script' in doc;
-      } catch (e) {
-        return false;
-      }
-    }
+    description: 'List enabled plugins from collections',
+    commandArgs: 'collection list enabled',
+    validate: (stdout) => stdout.includes('Enabled plugins') || stdout.includes('No enabled plugins found')
+  },
+  {
+    description: 'List all plugins (alias for available)',
+    commandArgs: 'collection list all',
+    validate: (stdout) => stdout.includes('Available plugins') || stdout.includes('No available plugins found')
   }
 ];
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  console.log(chalk.blue('Smoke Test: Validating `config` command...'));
+  console.log(chalk.blue('Smoke Test: Validating `collection list` command...'));
 
   let failedScenarios = [];
 
@@ -74,7 +64,7 @@ async function runSmokeTest() {
       if (scenario.validate(stdout)) {
         console.log(chalk.green('✓ OK'));
       } else {
-        failedScenarios.push({ command: commandDisplay, reason: 'Validation function returned false.' });
+        failedScenarios.push({ command: commandDisplay, reason: 'Validation function returned false. Output did not contain expected text.' });
         console.log(chalk.red('✗ FAIL'));
       }
 
@@ -86,14 +76,14 @@ async function runSmokeTest() {
 
   if (failedScenarios.length > 0) {
     console.error(chalk.red.bold('\n--- Smoke Test Failed ---'));
-    console.error(chalk.red(`${failedScenarios.length} config scenario(s) failed:`));
+    console.error(chalk.red(`${failedScenarios.length} 'collection list' scenario(s) failed:`));
     failedScenarios.forEach(({ command, reason }) => {
       console.error(`\n  - ${chalk.cyan(command)}`);
       console.error(chalk.gray(`    Reason: ${reason}`));
     });
     process.exit(1);
   } else {
-    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All `config` commands executed successfully.'));
+    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All `collection list` commands executed successfully.'));
     process.exit(0);
   }
 }

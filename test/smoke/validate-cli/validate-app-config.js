@@ -1,44 +1,54 @@
 #!/usr/bin/env node
-// test/smoke/validate-plugin-list.js
+// test/smoke/validate-cli/validate-app-config.js
 
 require('module-alias/register');
 
 const { exec } = require('child_process');
 const chalk = require('chalk');
 const { cliPath } = require('@paths');
+const yaml = require('js-yaml');
 
 // --- Test Scenarios ---
 const scenarios = [
   {
-    description: 'List plugins (default)',
-    commandArgs: 'plugin list',
-    validate: (stdout) => stdout.includes('usable by md-to-pdf')
+    description: 'Global config (default)',
+    commandArgs: 'config',
+    validate: (stdout) => stdout.includes('pdf_viewer:')
   },
   {
-    description: 'List enabled plugins',
-    commandArgs: 'plugin list --enabled',
-    validate: (stdout) => stdout.includes('Enabled plugins')
+    description: 'Global config (--pure)',
+    commandArgs: 'config --pure',
+    validate: (stdout) => {
+      try {
+        const doc = yaml.load(stdout);
+        return typeof doc === 'object' && doc !== null && 'pdf_viewer' in doc;
+      } catch (e) {
+        return false;
+      }
+    }
   },
   {
-    description: 'List available plugins',
-    commandArgs: 'plugin list --available',
-    validate: (stdout) => stdout.includes('Available CM-managed plugins')
+    description: 'Plugin config (default)',
+    commandArgs: 'config --plugin cv',
+    validate: (stdout) => stdout.includes('handler_script:') && stdout.includes('Plugin Base Path:')
   },
   {
-    description: 'List disabled plugins',
-    commandArgs: 'plugin list --disabled',
-    validate: (stdout) => stdout.includes('Disabled (but available) CM-managed plugins')
-  },
-  {
-    description: 'List plugins (--short)',
-    commandArgs: 'plugin list --short',
-    validate: (stdout) => stdout.includes('NAME/INVOKE KEY') && stdout.includes('CM ORIGIN')
+    description: 'Plugin config (--pure)',
+    commandArgs: 'config --plugin cv --pure',
+    validate: (stdout) => {
+      try {
+        const doc = yaml.load(stdout);
+        return typeof doc === 'object' && doc !== null && 'handler_script' in doc;
+      } catch (e) {
+        return false;
+      }
+    }
   }
 ];
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  console.log(chalk.blue('Smoke Test: Validating `plugin list` command...'));
+  console.log(chalk.blue('Smoke Test: Validating `config` command...'));
 
   let failedScenarios = [];
 
@@ -64,7 +74,7 @@ async function runSmokeTest() {
       if (scenario.validate(stdout)) {
         console.log(chalk.green('✓ OK'));
       } else {
-        failedScenarios.push({ command: commandDisplay, reason: 'Validation function returned false. Output did not contain expected text.' });
+        failedScenarios.push({ command: commandDisplay, reason: 'Validation function returned false.' });
         console.log(chalk.red('✗ FAIL'));
       }
 
@@ -76,14 +86,14 @@ async function runSmokeTest() {
 
   if (failedScenarios.length > 0) {
     console.error(chalk.red.bold('\n--- Smoke Test Failed ---'));
-    console.error(chalk.red(`${failedScenarios.length} 'plugin list' scenario(s) failed:`));
+    console.error(chalk.red(`${failedScenarios.length} config scenario(s) failed:`));
     failedScenarios.forEach(({ command, reason }) => {
       console.error(`\n  - ${chalk.cyan(command)}`);
       console.error(chalk.gray(`    Reason: ${reason}`));
     });
     process.exit(1);
   } else {
-    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All `plugin list` commands executed successfully.'));
+    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All `config` commands executed successfully.'));
     process.exit(0);
   }
 }

@@ -26,6 +26,8 @@ const WHITELIST_RE = /^\[whitelist:(\w+):([\w*,.]+)\]$/i;
 const EMOJI_RULE = /^\[emoji:([\w*,.]+)\]$/i;
 const EMOJI_REGEX = /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\u{1F3FB}-\u{1F3FF}|\u{1F9B0}-\u{1F9B3})/gu;
 
+const LINT_SKIP_TAG = 'lint-skip-litter';
+
 function parseRulesFile(filename) {
   const rules = [];
   let currentMode = null;
@@ -110,6 +112,8 @@ function scanFileForLitter(filePath, config) {
   const emojiEnabled = emojiFiletypes.includes('*') || emojiFiletypes.includes(ext);
 
   lines.forEach((line, index) => {
+    if (line.includes(LINT_SKIP_TAG)) return;
+
     for (const rule of rulesForExt) {
       let subject = '';
       if (rule.type === 'comment') {
@@ -246,3 +250,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test/smoke/validate-app-help.js
+// test/smoke/validate-cli/validate-app-help.js
 
 require('module-alias/register');
 

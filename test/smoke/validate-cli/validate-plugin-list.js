@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test/smoke/validate-collection-list.js
+// test/smoke/validate-cli/validate-plugin-list.js
 
 require('module-alias/register');
 
@@ -10,35 +10,35 @@ const { cliPath } = require('@paths');
 // --- Test Scenarios ---
 const scenarios = [
   {
-    description: 'List collection names (short)',
-    commandArgs: 'collection list names --short',
-    validate: (stdout) => stdout.includes('NAME') && stdout.includes('TYPE') && stdout.includes('SOURCE')
+    description: 'List plugins (default)',
+    commandArgs: 'plugin list',
+    validate: (stdout) => stdout.includes('usable by md-to-pdf')
   },
   {
-    description: 'List downloaded collections (default)',
-    commandArgs: 'collection list names',
-    validate: (stdout) => stdout.includes('Downloaded plugin collections:') || stdout.includes('No downloaded collections found.')
+    description: 'List enabled plugins',
+    commandArgs: 'plugin list --enabled',
+    validate: (stdout) => stdout.includes('Enabled plugins')
   },
   {
-    description: 'List available plugins from collections',
-    commandArgs: 'collection list available',
-    validate: (stdout) => stdout.includes('Available plugins') || stdout.includes('No available plugins found')
+    description: 'List available plugins',
+    commandArgs: 'plugin list --available',
+    validate: (stdout) => stdout.includes('Available CM-managed plugins')
   },
   {
-    description: 'List enabled plugins from collections',
-    commandArgs: 'collection list enabled',
-    validate: (stdout) => stdout.includes('Enabled plugins') || stdout.includes('No enabled plugins found')
+    description: 'List disabled plugins',
+    commandArgs: 'plugin list --disabled',
+    validate: (stdout) => stdout.includes('Disabled (but available) CM-managed plugins')
   },
   {
-    description: 'List all plugins (alias for available)',
-    commandArgs: 'collection list all',
-    validate: (stdout) => stdout.includes('Available plugins') || stdout.includes('No available plugins found')
+    description: 'List plugins (--short)',
+    commandArgs: 'plugin list --short',
+    validate: (stdout) => stdout.includes('NAME/INVOKE KEY') && stdout.includes('CM ORIGIN')
   }
 ];
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  console.log(chalk.blue('Smoke Test: Validating `collection list` command...'));
+  console.log(chalk.blue('Smoke Test: Validating `plugin list` command...'));
 
   let failedScenarios = [];
 
@@ -76,14 +76,14 @@ async function runSmokeTest() {
 
   if (failedScenarios.length > 0) {
     console.error(chalk.red.bold('\n--- Smoke Test Failed ---'));
-    console.error(chalk.red(`${failedScenarios.length} 'collection list' scenario(s) failed:`));
+    console.error(chalk.red(`${failedScenarios.length} 'plugin list' scenario(s) failed:`));
     failedScenarios.forEach(({ command, reason }) => {
       console.error(`\n  - ${chalk.cyan(command)}`);
       console.error(chalk.gray(`    Reason: ${reason}`));
     });
     process.exit(1);
   } else {
-    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All `collection list` commands executed successfully.'));
+    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All `plugin list` commands executed successfully.'));
     process.exit(0);
   }
 }

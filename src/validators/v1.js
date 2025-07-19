@@ -124,7 +124,14 @@ const runSelfActivation = (pluginDirectoryPath, pluginName, errors) => {
   const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), `md-to-pdf-test-${pluginName}-`));
   try {
     const command = `node "${cliPath}" convert "${exampleMdPath}" --outdir "${tempOutputDir}" --no-open`;
-    execSync(command, { cwd: projectRoot, stdio: 'pipe' });
+    execSync(command, {
+      cwd: projectRoot,
+      stdio: 'pipe',
+      env: {
+        ...process.env,
+        NODE_PATH: nodeModulesPath
+      }
+    });
     logger.success('    [✔] Self-activation successful.', { module: 'src/validators/v1.js' });
   } catch (e) {
     errors.push('Self-activation failed: The plugin was unable to convert its own example file.');
@@ -168,4 +175,3 @@ module.exports = {
   runSelfActivation,
   checkReadmeFrontMatterV1
 };
-

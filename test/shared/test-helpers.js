@@ -4,7 +4,7 @@ const fss = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const util = require('util');
-const { loggerPath } = require('@paths');
+const { loggerPath, nodeModulesPath } = require('@paths');
 const logger = require(loggerPath);
 const execAsync = util.promisify(exec);
 
@@ -57,7 +57,13 @@ async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPa
 
   logger.debug(`  Executing: ${command}`);
   try {
-    const { stdout, stderr } = await execAsync(command, { cwd: projectRoot });
+    const { stdout, stderr } = await execAsync(command, {
+      cwd: projectRoot,
+      env: {
+        ...process.env,
+        NODE_PATH: nodeModulesPath
+      }
+    });
     if (stdout) logger.debug('  stdout:\n', stdout);
     const stderrContent = stderr && stderr.trim();
     if (stderrContent) {
@@ -142,4 +148,3 @@ module.exports = {
   checkFileExists,
   cleanupDir,
 };
-

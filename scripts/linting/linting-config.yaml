@@ -1,4 +1,4 @@
-# scripts/linting/config.yaml
+# scripts/linting/linting-config.yaml
 
 # --- Code ---
 
@@ -49,6 +49,8 @@ standardize-line-one:
 
 # scripts/linting/code/strip-trailing-whitespace.js
 remove-ws:
+  alias: "ws" # Added alias
+  group: "code" # Added group
   targets:
     - "src/**/*.js"
     - "test/**/*.js"
@@ -63,11 +65,11 @@ remove-ws:
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
+  group: "code" # Added group
   targets:
     - cli.js
     - index.js
     - "src/**/*.js"
-    #- "test/**/*.js"
     - "scripts/**/*.js"
   excludes:
     - "node_modules/**"
@@ -79,12 +81,15 @@ no-relative-paths:
 # --- Validators ---
 
 # scripts/linting/validators/mocha-path-validator.js
-validate-mocha: []
+validate-mocha:
+  group: "validators" # Added group
 
 # --- Docs ---
 
 # scripts/linting/docs/update-project-indices.js
 update-indices:
+  alias: "librarian"
+  group: "docs" # Added group
   docs:
     indexFile: docs/index.md
     scanRoot: "docs"
@@ -121,7 +126,7 @@ update-indices:
   test-scripts:
     marker: "test-scripts"
     indexFile: test/index.md
-    scanRoot: 
+    scanRoot:
       - test/docs
       - test/scripts
     fileExtensions:
@@ -131,6 +136,8 @@ update-indices:
 
 # scripts/linting/docs/postman.js
 doc-links:
+  alias: "postman"
+  group: "docs" # Added group
   excludes:
     - "node_modules/**"
     - ".git/**"
@@ -148,6 +155,7 @@ doc-links:
     - "**/index.js"
 # scripts/linting/docs/find-litter.js
 find-litter:
+  group: "docs" # Added group
   targets:
     - src
     - docs
@@ -180,7 +188,7 @@ harness:
     - key: 'logging'
       label: 'Code: Check for console/chalk usage'
       scriptPath: scripts/linting/code/logging-lint.js
-    - key: 'remove-auto-doc' 
+    - key: 'remove-auto-doc'
       label: 'Code: Check for auto-doc comments'
       scriptPath: scripts/linting/code/remove-auto-doc.js
     - key: no-relative-paths
@@ -188,15 +196,15 @@ harness:
       scriptPath: scripts/linting/code/no-relative-paths.js
 
     # --- Validators ---
-    - key: 'validate-mocha' 
+    - key: 'validate-mocha'
       label: 'Validator: Check .mocharc.js paths'
       scriptPath: scripts/linting/validators/mocha-path-validator.js
 
     # --- Docs ---
-    - key: 'update-indices' 
+    - key: 'update-indices'
       label: 'Docs: Update Project Indices (Librarian)'
       scriptPath: scripts/linting/docs/update-project-indices.js
-    - key: 'doc-links' 
+    - key: 'doc-links'
       label: 'Docs: Check Markdown Links (Postman)'
       scriptPath: scripts/linting/docs/postman.js
     - key: 'remove-litter'
@@ -204,9 +212,8 @@ harness:
       scriptPath: scripts/linting/docs/find-litter.js
 
     # --- Harness ---
-    - key: 'eslint' 
+    - key: 'eslint'
       label: 'ESLint'
       quiet: false
       command: 'eslint'
       defaultTargets: ['.']
-

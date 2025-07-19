@@ -68,13 +68,26 @@ function runHarness(config, globalFlags, targets = [], only = '') {
   for (const step of steps) {
     const label = step.label || '(unnamed step)';
     const key = step.key || '';
-    const shouldRun =
-      !only || label.toLowerCase().includes(only.toLowerCase()) || key.toLowerCase() === only.toLowerCase();
+    const group = step.group || '';
+    const alias = step.alias || '';
 
-    if (!shouldRun || (globalFlags.skip && (key === globalFlags.skip || label.toLowerCase().includes(globalFlags.skip)))) {
-      console.log(chalk.yellow(`\n--- SKIPPED: ${label} ---`));
+    const shouldRun = !only ||
+                      label.toLowerCase().includes(only.toLowerCase()) ||
+                      key.toLowerCase() === only.toLowerCase() ||
+                      group.toLowerCase() === only.toLowerCase() ||
+                      alias.toLowerCase() === only.toLowerCase();
+
+    const shouldSkip = globalFlags.skip &&
+                       (key === globalFlags.skip ||
+                        label.toLowerCase().includes(globalFlags.skip.toLowerCase()) ||
+                        group.toLowerCase() === globalFlags.skip.toLowerCase() ||
+                        alias.toLowerCase() === globalFlags.skip.toLowerCase());
+
+    if (!shouldRun || shouldSkip) {
+      if (shouldSkip) console.log(chalk.yellow(`\n--- SKIPPED: ${label} ---`));
       continue;
     }
+
 
     const resolvedFlags = {};
     for (const flag of flagList) {
@@ -174,4 +187,3 @@ function runHarness(config, globalFlags, targets = [], only = '') {
 }
 
 module.exports = { runHarness };
-

@@ -1,5 +1,5 @@
 // index.js - Project Path Registry
-// Generated: 2025-07-18T09:03:25.986Z
+// Generated: 2025-07-19T01:25:28.978Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -46,7 +46,7 @@ const dynamicCompletionScriptPath = path.join(scriptsRoot, 'completion', 'genera
 const katexPath = path.join(assetsRoot, 'katex.min.css');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
 const findLitterRulesPath = path.join(assetsRoot, 'litter-list.txt');
-const lintingConfigPath = path.join(scriptsRoot, 'linting', 'config.yaml');
+const lintingConfigPath = path.join(scriptsRoot, 'linting', 'linting-config.yaml');
 
 // ==========================================
 // FEATURES (by dependency rank)

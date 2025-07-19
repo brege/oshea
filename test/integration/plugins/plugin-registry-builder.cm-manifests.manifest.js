@@ -7,7 +7,7 @@ module.exports = [
     methodName: '_getPluginRegistrationsFromCmManifest',
     methodArgs: ['/fake/cm/enabled.yaml', 'Test'],
     ...makeCmManifestScenario({
-      enabled_plugins: [
+      enabledPlugins: [
         { invoke_name: 'good-plugin', config_path: '/fake/path' },
         { invoke_name: 'bad-plugin-no-path' },
         null,
@@ -33,7 +33,7 @@ module.exports = [
     methodName: '_getPluginRegistrationsFromCmManifest',
     methodArgs: ['/fake/cm/enabled.yaml', 'Test'],
     ...makeCmManifestScenario({
-      enabled_plugins: [{ invoke_name: 'plugin-with-missing-config', config_path: '/path/to/missing/config.yaml' }],
+      enabledPlugins: [{ invoke_name: 'plugin-with-missing-config', config_path: '/path/to/missing/config.yaml' }],
       configPathsExist: { '/path/to/missing/config.yaml': false },
       expectResult: {},
       expectLogs: [
@@ -42,4 +42,3 @@ module.exports = [
     })
   },
 ];
-

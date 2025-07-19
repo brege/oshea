@@ -200,13 +200,13 @@ class ConfigResolver {
         rawConfig.css_files, assetsBasePath, [], false,
         pluginName, configFilePath
       );
-      const inherit_css = rawConfig.inherit_css === true;
-      const result = { rawConfig, resolvedCssPaths: initialCssPaths, inherit_css, actualPath: configFilePath };
+      const inheritCss = rawConfig.inherit_css === true;
+      const result = { rawConfig, resolvedCssPaths: initialCssPaths, inheritCss, actualPath: configFilePath };
       this.pluginConfigLoader._rawPluginYamlCache[cacheKey] = result;
       return result;
     } catch (error) {
       logger.error(`ERROR (ConfigResolver): loading plugin base configuration from '${configFilePath}' for ${pluginName}: ${error.message}`, { module: 'src/config/ConfigResolver.js' });
-      return { rawConfig: {}, resolvedCssPaths: [], inherit_css: false, actualPath: null };
+      return { rawConfig: {}, resolvedCssPaths: [], inheritCss: false, actualPath: null };
     }
   }
 
@@ -314,7 +314,7 @@ class ConfigResolver {
           localConfigOverrides.css_files,
           localConfigDir,
           currentCssPaths,
-          localConfigOverrides.inherit_css === true,
+          localConfigOverrides.inheritCss === true,
           nominalPluginNameForLookup,
           `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}.config.yaml`
         );

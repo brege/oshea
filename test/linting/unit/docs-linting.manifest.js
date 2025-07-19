@@ -36,12 +36,6 @@ module.exports = [
       expect(stdout).to.match(/Disallowed emoji\(s\) found: ❌/i); // lint-skip-litter
     },
   },
-  // add librarian (update-project-indexes)
-
-
-
-
-
   {
     describe: 'librarian warns for dummy .js not listed in local scripts/index.md',
     scriptPath: updateProjectIndicesPath,
@@ -58,33 +52,15 @@ module.exports = [
           '<!-- uncategorized-start -->',
           // blank section: dummy.js is missing
           '<!-- uncategorized-end -->',
-          '',
         ].join('\n')
       );
-      // minimal config.yaml: points at *this* scripts dir + .js files only!
-      await fs.writeFile(
-        path.join(sandboxDir, 'config.yaml'),
-        `
-update-indices:
-  scripts:
-    indexFile: scripts/index.md
-    scanRoot: scripts
-    fileExtensions:
-      - ".js"
-    excludePatterns: []
-      `.trim()
-      );
+      // This test is designed to run against the main project config
     },
-    args: (sandboxDir) => ['--group=scripts', '--config', 'config.yaml'],
+    args: (sandboxDir) => ['--group=scripts'],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Untracked file: 'dummy\.js'/i);
       expect(stdout).to.match(/missing-index-entry/);
     },
   },
-
-
-
-
-
 ];

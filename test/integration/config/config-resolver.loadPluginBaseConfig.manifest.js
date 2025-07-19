@@ -42,10 +42,9 @@ module.exports = [
       expect(result).to.deep.equal({
         rawConfig: rawConfigData,
         resolvedCssPaths: resolvedCssPaths,
-        inherit_css: true,
+        inheritCss: true,
         actualPath: fakeConfigPath,
       });
     }
   }),
 ];
-

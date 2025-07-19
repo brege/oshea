@@ -97,6 +97,11 @@ function scanGroup(name, config, opts = {}) {
     fix: configFix = false
   } = config;
 
+  // Add a guard clause to ensure indexFile is a valid string before proceeding.
+  if (typeof indexFile !== 'string' || !indexFile) {
+    return { issues: [], fixedCount: 0 };
+  }
+
   const allowFix = configFix || fix;
   const indexAbsPath = path.resolve(indexFile);
   const indexDir = path.dirname(indexAbsPath);
@@ -238,8 +243,7 @@ async function runLibrarian(options = {}) {
 if (require.main === module) {
   (async () => {
     const { flags } = parseCliArgs(process.argv.slice(2));
-    const groupFlagKey = Object.keys(flags).find(k => k.startsWith('group='));
-    const group = groupFlagKey ? groupFlagKey.split('=')[1] : null;
+    const group = flags.group || null;
 
     const { issues, summary } = await runLibrarian({
       group,

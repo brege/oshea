@@ -2,11 +2,11 @@
 const path = require('path');
 const sinon = require('sinon');
 
-function makeCmManifestScenario({ enabled_plugins, configPathsExist = {}, expectResult, expectLogs }) {
+function makeCmManifestScenario({ enabledPlugins, configPathsExist = {}, expectResult, expectLogs }) {
   return {
     setup: async ({ mockDependencies }) => {
       const FAKE_MANIFEST_PATH = '/fake/cm/enabled.yaml';
-      const fakeParsedData = { enabled_plugins };
+      const fakeParsedData = { enabled_plugins: enabledPlugins };
 
       mockDependencies.fs.existsSync.withArgs(FAKE_MANIFEST_PATH).returns(true);
 

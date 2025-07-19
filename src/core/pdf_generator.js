@@ -17,7 +17,7 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
 
     const combinedCss = (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
 
-    const { head_html = '', body_html_start = '', body_html_end = '', lang = 'en' } = injectionPoints;
+    const { headHtml = '', bodyHtmlStart = '', bodyHtmlEnd = '', lang = 'en' } = injectionPoints;
 
     let template = htmlTemplateStr;
     if (!template || typeof template !== 'string') {
@@ -27,9 +27,9 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
             <meta charset="utf-8">
             <title>{{{title}}}</title>
             <style>{{{styles}}}</style>
-            ${head_html}
+            ${headHtml}
         </head>
-        <body>${body_html_start}{{{body}}}${body_html_end}</body>
+        <body>${bodyHtmlStart}{{{body}}}${bodyHtmlEnd}</body>
         </html>`;
     }
 

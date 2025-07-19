@@ -56,7 +56,7 @@ registries:
           katex_path: "path.join(assetsRoot, 'katex.min.css')"
           base_plugin_schema_path: "path.join(srcRoot, 'validators', 'base-plugin.schema.json')"
           find_litter_rules_path: "path.join(assetsRoot, 'litter-list.txt')"
-          linting_config_path: "path.join(scriptsRoot, 'linting', 'config.yaml')"
+          linting_config_path: "path.join(scriptsRoot, 'linting', 'linting-config.yaml')"
     features:
       cli:
         comment: "Command Line Interface"

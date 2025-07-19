@@ -13,7 +13,7 @@ function printHelp() {
 
 Usage:
   node scripts/linting/lint.js [options] [targets...]
-  node scripts/linting/lint.js --only <step_key>
+  node scripts/linting/lint.js --only <step_key_or_group>
   node scripts/linting/lint.js --list
 
 Description:
@@ -21,8 +21,8 @@ Description:
   Reads steps from 'scripts/linting/config.yaml' and executes them in order.
 
 Options:
-      --only <key>         run only the step matching the specified key
-      --skip <key>         skip the step matching the specified key
+      --only <key>         run only the step or group matching the specified key
+      --skip <key>         skip the step or group matching the specified key
 
       --fix                attempt to automatically fix any fixable issues
       --dry-run            preview fixes without writing to disk
@@ -44,11 +44,11 @@ Examples:
   # Run only the ESLint step
   $ node scripts/linting/lint.js --only eslint
 
+  # Run all linters in the 'code' group
+  $ node scripts/linting/lint.js --only code
+
   # Try fixing everything
   $ node scripts/linting/lint.js --fix
-
-  # Run postman-link validator in dry-run mode with debug logging
-  $ node scripts/linting/lint.js --only doc-links --fix --dry-run --debug
 `);
 }
 
@@ -83,7 +83,7 @@ function main() {
         console.log('No matching steps found.');
       }
 
-      console.log('\nUsage: node scripts/linting/lint.js --only <key>');
+      console.log('\nUsage: node scripts/linting/lint.js --only <key_or_group>');
       console.log(chalk.gray('Tip: Use \'node scripts/linting/lint.js --help\' for all options.'));
       process.exit(0);
     }
@@ -104,4 +104,3 @@ if (require.main === module) {
 }
 
 module.exports = { main };
-

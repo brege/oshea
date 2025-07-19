@@ -1,5 +1,7 @@
 // test/integration/core/math-integration.manifest.js
-const { makeMathIntegrationScenario } = require('./math-integration.factory.js');
+require('module-alias/register');
+const { mathIntegrationFactoryPath } = require('@paths');
+const { makeMathIntegrationScenario } = require(mathIntegrationFactoryPath);
 
 module.exports = [
   makeMathIntegrationScenario({
@@ -153,4 +155,3 @@ module.exports = [
   }),
 
 ];
-

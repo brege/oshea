@@ -1,5 +1,7 @@
 // test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
-const { makeFileRegistrationScenario } = require('./plugin-registry-builder.factory.js');
+require('module-alias/register');
+const { pluginRegistryBuilderFactoryPath } = require('@paths');
+const { makeFileRegistrationScenario } = require(pluginRegistryBuilderFactoryPath);
 
 const FAKE_CONFIG_PATH = '/fake/config.yaml';
 const FAKE_BASE_DIR = '/fake';

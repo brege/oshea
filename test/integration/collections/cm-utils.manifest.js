@@ -1,5 +1,7 @@
 // test/integration/collections/cm-utils.manifest.js
-const { makeCmUtilsScenario } = require('./cm-utils.factory.js');
+require('module-alias/register');
+const { cmUtilsFactoryPath } = require('@paths');
+const { makeCmUtilsScenario } = require(cmUtilsFactoryPath);
 
 module.exports = [
   // --- deriveCollectionName (1.8.1) ---

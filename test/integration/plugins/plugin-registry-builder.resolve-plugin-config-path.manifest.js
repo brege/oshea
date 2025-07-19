@@ -1,7 +1,7 @@
 // test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-const { makeResolveConfigPathScenario } = require('./plugin-registry-builder.factory.js');
-const path = require('path');
-
+require('module-alias/register');
+const { pluginRegistryBuilderFactoryPath } = require('@paths');
+const { makeResolveConfigPathScenario } = require(pluginRegistryBuilderFactoryPath);
 module.exports = [
   {
     description: '1.2.7: Should correctly resolve an alias-prefixed raw path',

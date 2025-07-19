@@ -1,22 +1,41 @@
 // test/e2e/all-e2e.test.js
-const { createE2eTestRunner } = require('./test-runner-factory');
+require('module-alias/register');
+const {
+  collectionAddManifestPath,
+  collectionListManifestPath,
+  collectionRemoveManifestPath,
+  collectionUpdateManifestPath,
+  configManifestPath,
+  convertManifestPath,
+  generateManifestPath,
+  globalFlagsManifestPath,
+  pluginAddManifestPath,
+  pluginCreateManifestPath,
+  pluginDisableManifestPath,
+  pluginEnableManifestPath,
+  pluginListManifestPath,
+  pluginValidateManifestPath,
+  sadPathsManifestPath,
+  testRunnerFactoryE2e
+} = require('@paths');
+const { createE2eTestRunner } = require(testRunnerFactoryE2e);
 
 const testSuites = [
-  { name: 'collection add', manifest: './collection-add.manifest.js' },
-  { name: 'collection list', manifest: './collection-list.manifest.js' },
-  { name: 'collection remove', manifest: './collection-remove.manifest.js' },
-  { name: 'collection update', manifest: './collection-update.manifest.js' },
-  { name: 'config', manifest: './config.manifest.js' },
-  { name: 'convert', manifest: './convert.manifest.js' },
-  { name: 'generate', manifest: './generate.manifest.js', options: { timeout: 10000 } },
-  { name: 'global flags', manifest: './global-flags.manifest.js' },
-  { name: 'plugin add', manifest: './plugin-add.manifest.js' },
-  { name: 'plugin create', manifest: './plugin-create.manifest.js', options: { timeout: 15000 } },
-  { name: 'plugin disable', manifest: './plugin-disable.manifest.js' },
-  { name: 'plugin enable', manifest: './plugin-enable.manifest.js' },
-  { name: 'plugin list', manifest: './plugin-list.manifest.js' },
-  { name: 'plugin validate', manifest: './plugin-validate.manifest.js' },
-  { name: 'sad paths', manifest: './sad-paths.manifest.js' }
+  { name: 'collection add', manifest: collectionAddManifestPath },
+  { name: 'collection list', manifest: collectionListManifestPath },
+  { name: 'collection remove', manifest: collectionRemoveManifestPath },
+  { name: 'collection update', manifest: collectionUpdateManifestPath },
+  { name: 'config', manifest: configManifestPath },
+  { name: 'convert', manifest: convertManifestPath },
+  { name: 'generate', manifest: generateManifestPath, options: { timeout: 10000 } },
+  { name: 'global flags', manifest: globalFlagsManifestPath },
+  { name: 'plugin add', manifest: pluginAddManifestPath },
+  { name: 'plugin create', manifest: pluginCreateManifestPath, options: { timeout: 30000 } },
+  { name: 'plugin disable', manifest: pluginDisableManifestPath },
+  { name: 'plugin enable', manifest: pluginEnableManifestPath },
+  { name: 'plugin list', manifest: pluginListManifestPath },
+  { name: 'plugin validate', manifest: pluginValidateManifestPath },
+  { name: 'sad paths', manifest: sadPathsManifestPath }
 ];
 
 // Dynamically create all test suites

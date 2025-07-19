@@ -1,9 +1,10 @@
 // test/e2e/workflow-lifecycle.test.js
+require('module-alias/register');
+const { e2eHarness, loggerPath, simpleMdFixture } = require('@paths');
 const { expect } = require('chai');
 const path = require('path');
 const fs = require('fs-extra');
-const { TestHarness } = require('./e2e-harness');
-const { loggerPath } = require('@paths');
+const { TestHarness } = require(e2eHarness);
 const logger = require(loggerPath);
 
 describe('E2E - Full User Workflow (Lifecycle)', function() {
@@ -24,7 +25,7 @@ describe('E2E - Full User Workflow (Lifecycle)', function() {
     const sandboxDir = harness.sandboxDir;
     const cliOptions = { useFactoryDefaults: false };
 
-    const markdownFixturePath = path.resolve(__dirname, '../fixtures/markdown/simple.md');
+    const markdownFixturePath = simpleMdFixture;
     const markdownFilePath = path.join(sandboxDir, 'simple.md');
     await fs.copy(markdownFixturePath, markdownFilePath);
 
@@ -67,7 +68,7 @@ describe('E2E - Full User Workflow (Lifecycle)', function() {
     const sourcePluginName = 'cv';
     const newArchetypeName = 'my-custom-cv';
 
-    const markdownFixturePath = path.resolve(__dirname, '../fixtures/markdown/simple.md');
+    const markdownFixturePath = simpleMdFixture;
     const markdownFilePath = path.join(sandboxDir, 'simple.md');
     await fs.copy(markdownFixturePath, markdownFilePath);
 

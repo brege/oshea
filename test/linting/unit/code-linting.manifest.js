@@ -68,6 +68,7 @@ module.exports = [
     scriptPath: noRelativePathsPath,
     sandboxPrefix: 'relative-path-',
     setup: async (sandboxDir) => {
+      // lint-disable-next-line
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), 'const x = require("../bad");');
     },
     args: (sandboxDir) => [path.join(sandboxDir, 'bad-file.js')],

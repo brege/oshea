@@ -1,12 +1,17 @@
 // test/integration/plugins/plugin-manager.test.js
+require('module-alias/register');
+const {
+  pluginManagerPath,
+  pluginManagerManifestPath,
+  captureLogsPath
+} = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { pluginManagerPath } = require('@paths');
-const { logs, clearLogs } = require('../../shared/capture-logs');
-const testManifest = require('./plugin-manager.manifest.js');
+const { logs, clearLogs } = require(captureLogsPath);
+const testManifest = require(pluginManagerManifestPath);
 
 describe('PluginManager Tests (1.5.x)', function() {
   let tempDir;
@@ -23,7 +28,7 @@ describe('PluginManager Tests (1.5.x)', function() {
     delete require.cache[pathsPath];
 
     // Inject loggerPath for log capturing
-    const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+    const testLoggerPath = captureLogsPath;
     require.cache[pathsPath] = {
       exports: { ...require(pathsPath), loggerPath: testLoggerPath }
     };

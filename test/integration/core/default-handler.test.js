@@ -1,15 +1,16 @@
 // test/integration/core/default-handler.test.js
-
+require('module-alias/register');
+const {
+  defaultHandlerManifestPath,
+  defaultHandlerPath,
+  allPaths,
+  captureLogsPath
+} = require('@paths');
 const { expect } = require('chai');
-const { logs, clearLogs } = require('../../shared/capture-logs');
-const path = require('path');
+const { logs, clearLogs } = require(captureLogsPath);
 const proxyquire = require('proxyquire');
-const testManifest = require('./default-handler.manifest.js');
-const defaultHandlerPath = require('@paths').defaultHandlerPath;
-const allPaths = require('@paths');
-
-// Point loggerPath to capture-logs.js
-const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+const testManifest = require(defaultHandlerManifestPath);
+const testLoggerPath = captureLogsPath;
 
 function collectStubs(ctx) {
   // List all stub names as set up in test/setup.js

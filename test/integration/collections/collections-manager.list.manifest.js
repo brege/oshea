@@ -1,5 +1,7 @@
 // test/integration/collections/collections-manager.list.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
+require('module-alias/register');
+const { collectionsManagerFactoryPath } = require('@paths');
+const { makeCollectionsManagerScenario } = require(collectionsManagerFactoryPath);
 
 const FAKE_ENABLED_PLUGINS = [
   { invoke_name: 'plugin-a', collection_name: 'collection-1' },

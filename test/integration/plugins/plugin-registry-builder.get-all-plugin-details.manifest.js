@@ -1,5 +1,7 @@
 // test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-const { makeGetAllPluginDetailsScenario } = require('./plugin-registry-builder.factory.js');
+require('module-alias/register');
+const { pluginRegistryBuilderFactoryPath } = require('@paths');
+const { makeGetAllPluginDetailsScenario } = require(pluginRegistryBuilderFactoryPath);
 
 module.exports = [
   {

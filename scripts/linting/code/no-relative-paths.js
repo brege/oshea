@@ -21,7 +21,8 @@ const {
   renderLintOutput
 } = require(formattersPath);
 
-// From require-classifier.js
+const LINT_DISABLE_TAG = 'lint-disable-next-line';
+
 function classifyRequireLine(line) {
   const code = line.replace(/\/\/.*$/, '').trim();
   if (!code.includes('require(')) return null;
@@ -52,6 +53,16 @@ function scanFileForRelativePaths(filePath, debug = false) {
 
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
+    // Check lint-disable-next-line on the previous line
+    if (index > 0) {
+      const prevLine = lines[index - 1].trim();
+      if (prevLine.startsWith('//') && prevLine.includes(LINT_DISABLE_TAG)) {
+        if (debug) {
+          console.log(`[DEBUG] Skipping line ${index + 1} in ${filePath} due to lint-disable-next-line`);
+        }
+        return;
+      }
+    }
     if (trimmedLine.startsWith('//')) return;
 
     if (trimmedLine.includes('require(')) {

@@ -1,5 +1,7 @@
 // test/e2e/global-flags.manifest.js
-const { version } = require('../../package.json'); // Import version for the test
+require('module-alias/register');
+const { packageJsonPath } = require('@paths');
+const { version } = require(packageJsonPath);
 
 module.exports = [
   {

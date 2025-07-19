@@ -10,7 +10,8 @@ const {
   markdownUtilsPath,
   pdfGeneratorPath,
   mathIntegrationPath,
-  defaultHandlerPath
+  defaultHandlerPath,
+  captureLogsPath
 } = require('@paths');
 
 // Require all modules that will be stubbed globally
@@ -19,7 +20,7 @@ const pdfGenerator = require(pdfGeneratorPath);
 const createMathIntegration = require(mathIntegrationPath);
 
 // Import the test logger for capturing logs
-const { testLogger } = require('./shared/capture-logs');
+const { testLogger } = require(captureLogsPath);
 
 // Make these globally available in the test context
 global.expect = expect;
@@ -46,7 +47,7 @@ module.exports = {
       const mathIntegrationInstance = createMathIntegration();
       this.getMathCssContentStub = this.sandbox.stub(mathIntegrationInstance, 'getMathCssContent');
       this.configureMarkdownItForMathStub = this.sandbox.stub(mathIntegrationInstance, 'configureMarkdownItForMath');
-      // Hijack the require cache so any call to require('../src/core/math_integration') gets our stubbed instance's factory
+      // Hijack the require cache so any call to require(mathIntegrationPath) gets our stubbed instance's factory
       require.cache[require.resolve(mathIntegrationPath)] = {
         exports: () => mathIntegrationInstance
       };

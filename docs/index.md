@@ -8,7 +8,7 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 - [**Linting Checklist**](linting-checklist.md): **Policy.**
   Linting and code quality strategy for the project.
-* [**Release Candidate Checklist**](rc-checklist.md): **Hygiene.**
+* [**Release Candidate Checklist**](archive/v0.10/rc-checklist.md): **Hygiene.**
   Updating user docs and internal refactoring of code for ease of use.
 * [**Reoganization Planner**](archive/v0.10/reorganization-planner.md): **Planning.**
   Strategy for the final polish, reorganization, and AI integration push.
@@ -17,7 +17,7 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 There are also several indexes for the main components of the project.
 
-**Indexes:**
+**Indexes** -
 [ [**Docs**](index.md) ]
 [ [**Scripts**](../scripts/index.md) ]
 [ [**Plugins**](../plugins/index.md) ]
@@ -26,7 +26,7 @@ There are also several indexes for the main components of the project.
 These indices are automatically managed by
 [**`scripts/linting/docs/update-project-indices.js`**](../scripts/linting/docs/update-project-indices.js)
 and configure via
-[`.index-config.yaml`](../.index-config.yaml)
+[`../scripts/linting/linting-config.yaml`](../scripts/linting/linting-config.yaml)
 at the project root.
 
 ---
@@ -89,6 +89,8 @@ at the project root.
     These clickthroughs resolve to GitHub, snapshotted at
     [v0.10.31](https://github.com/brege/md-to-pdf/releases/tag/v0.10.31),
     as the `scripts/refactor/` directory was removed.
+  - [Linting Checklist](archive/v0.10/linting-checklist.md).
+    Linting and code quality strategy for the project.
 * [**Dream Board v0.9**](archive/v0.9/dream-board-v0.9.md): **Standardization**.
   Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
   Muxes changelogs, task checklists, and outlook from a central, living document.

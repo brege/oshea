@@ -1,4 +1,7 @@
 // test/scripts/find-nonclosed-audits.js
+require('module-alias/register');
+const { integrationTestDir, e2eTestDir, docsTestDir } = require('@paths');
+
 const fs = require('fs');
 const path = require('path');
 
@@ -18,8 +21,8 @@ function findAllJsFiles(dir) {
 }
 function buildTestIdToPathMap() {
   const dirs = [
-    path.join(__dirname, '../integration'),
-    path.join(__dirname, '../e2e'),
+    integrationTestDir,
+    e2eTestDir
   ];
   const testIdToPath = {};
   dirs.forEach(dir => {
@@ -37,7 +40,7 @@ function buildTestIdToPathMap() {
 }
 const testIdToPath = buildTestIdToPathMap();
 
-const AUDIT_LOG = path.join(__dirname, '../docs/audit-log.md');
+const AUDIT_LOG = path.join(docsTestDir, 'audit-log.md');
 const lines = fs.readFileSync(AUDIT_LOG, 'utf8').split('\n');
 
 for (let i = 0; i < lines.length; i++) {

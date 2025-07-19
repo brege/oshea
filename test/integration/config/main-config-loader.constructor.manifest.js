@@ -1,5 +1,8 @@
 // test/integration/config/main-config-loader.constructor.manifest.js
-const { makeMainConfigLoaderScenario } = require('./main-config-loader.factory.js');
+require('module-alias/register');
+const { mainConfigLoaderFactoryPath } = require('@paths');
+const { makeMainConfigLoaderScenario } = require(mainConfigLoaderFactoryPath);
+
 const path = require('path');
 
 module.exports = [

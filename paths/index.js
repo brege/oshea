@@ -1,5 +1,5 @@
 // index.js - Project Path Registry
-// Generated: 2025-07-19T05:28:37.056Z
+// Generated: 2025-07-19T20:02:18.158Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -7,6 +7,7 @@
 const path = require('path');
 const scriptsPaths = require('./scripts.js');
 const lintersPaths = require('./linters.js');
+const testsPaths = require('./tests.js');
 
 // ==========================================
 // ARCHITECTURE
@@ -15,6 +16,7 @@ const lintersPaths = require('./linters.js');
 // --- Project Foundation ---
 const projectRoot = path.resolve(__dirname, '..');
 const pathsPath = path.join(__dirname, 'index.js');
+const packageJsonPath = path.join(projectRoot, 'package.json');
 const nodeModulesPath = path.join(projectRoot, 'node_modules');
 const configExamplePath = path.join(projectRoot, 'config.example.yaml');
 const defaultConfigPath = path.join(projectRoot, 'config.yaml');
@@ -47,6 +49,7 @@ const katexPath = path.join(assetsRoot, 'katex.min.css');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
 const findLitterRulesPath = path.join(assetsRoot, 'litter-list.txt');
 const lintingConfigPath = path.join(scriptsRoot, 'linting', 'linting-config.yaml');
+const testConfigPath = path.join(testRoot, 'shared', 'config.test.yaml');
 
 // ==========================================
 // FEATURES (by dependency rank)
@@ -145,6 +148,7 @@ module.exports = {
   // --- Architecture ---
   projectRoot,
   pathsPath,
+  packageJsonPath,
   nodeModulesPath,
   configExamplePath,
   defaultConfigPath,
@@ -169,6 +173,7 @@ module.exports = {
   basePluginSchemaPath,
   findLitterRulesPath,
   lintingConfigPath,
+  testConfigPath,
 
   // --- user-facing interfaces ---
   cliRoot,
@@ -241,5 +246,6 @@ module.exports = {
   // --- Imported Registries ---
   ...scriptsPaths,
   ...lintersPaths,
+  ...testsPaths,
 
 };

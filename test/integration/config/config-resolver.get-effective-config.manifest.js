@@ -1,5 +1,7 @@
 // test/integration/config/config-resolver.get-effective-config.manifest.js
-const { makeConfigResolverScenario } = require('./config-resolver.factory.js');
+require('module-alias/register');
+const { configResolverFactoryPath } = require('@paths');
+const { makeConfigResolverScenario } = require(configResolverFactoryPath);
 const _ = require('lodash');
 
 const FAKE_PLUGIN_NAME = 'my-plugin';

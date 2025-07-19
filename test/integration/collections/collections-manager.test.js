@@ -1,25 +1,32 @@
 // test/integration/collections/collections-manager.test.js
-
+require('module-alias/register');
 const {
   indexPath,
   cmUtilsPath,
-  constantsPath
+  constantsPath,
+  captureLogsPath,
+  collectionsManagerAddManifestPath,
+  collectionsManagerRemoveManifestPath,
+  collectionsManagerUpdateManifestPath,
+  collectionsManagerListManifestPath,
+  collectionsManagerEnableDisableManifestPath,
+  collectionsManagerConstructorManifestPath,
+  collectionsManagerDisableManifestPath
 } = require('@paths');
+
 const { expect } = require('chai');
 const sinon = require('sinon');
 const proxyquire = require('proxyquire');
-const path = require('path');
+const { logs, clearLogs } = require(captureLogsPath);
+const testLoggerPath = captureLogsPath;
 
-const { logs, clearLogs } = require('../../shared/capture-logs');
-const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
-
-const addManifest = require('./collections-manager.add.manifest.js');
-const removeManifest = require('./collections-manager.remove.manifest.js');
-const updateManifest = require('./collections-manager.update.manifest.js');
-const listManifest = require('./collections-manager.list.manifest.js');
-const enableDisableManifest = require('./collections-manager.enable-disable.manifest.js');
-const constructorManifest = require('./collections-manager.constructor.manifest.js');
-const disableManifest = require('./collections-manager.disable.manifest.js');
+const addManifest = require(collectionsManagerAddManifestPath);
+const removeManifest = require(collectionsManagerRemoveManifestPath);
+const updateManifest = require(collectionsManagerUpdateManifestPath);
+const listManifest = require(collectionsManagerListManifestPath);
+const enableDisableManifest = require(collectionsManagerEnableDisableManifestPath);
+const constructorManifest = require(collectionsManagerConstructorManifestPath);
+const disableManifest = require(collectionsManagerDisableManifestPath);
 
 const allTestCases = [
   ...addManifest,
@@ -90,7 +97,6 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       '@paths': {
         ...require('@paths'),
         loggerPath: testLoggerPath,
-        // The rest are automatically included from the real @paths
       },
       [cmUtilsPath]: mockDependencies.cmUtils,
       [constantsPath]: mockDependencies.constants
@@ -189,3 +195,4 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
     });
   });
 });
+

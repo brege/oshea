@@ -1,17 +1,23 @@
 // test/integration/config/plugin-config-loader.test.js
-const { pluginConfigLoaderPath } = require('@paths');
+require('module-alias/register');
+const {
+  pluginConfigLoaderPath,
+  captureLogsPath,
+  allPaths,
+  pluginConfigLoaderConstructorManifestPath,
+  pluginConfigLoaderLoadSingleLayerManifestPath,
+  pluginConfigLoaderApplyOverridesManifestPath
+} = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const path = require('path');
-const { logs, clearLogs } = require('../../shared/capture-logs');
+const { logs, clearLogs } = require(captureLogsPath);
 const proxyquire = require('proxyquire');
 
-const allPaths = require('@paths');
-const testLoggerPath = path.resolve(__dirname, '../../shared/capture-logs.js');
+const testLoggerPath = captureLogsPath;
 
-const constructorManifest = require('./plugin-config-loader.constructor.manifest.js');
-const loadSingleLayerManifest = require('./plugin-config-loader.load-single-layer.manifest.js');
-const applyOverridesManifest = require('./plugin-config-loader.apply-overrides.manifest.js');
+const constructorManifest = require(pluginConfigLoaderConstructorManifestPath);
+const loadSingleLayerManifest = require(pluginConfigLoaderLoadSingleLayerManifestPath);
+const applyOverridesManifest = require(pluginConfigLoaderApplyOverridesManifestPath);
 
 const allTestCases = [
   ...constructorManifest,
@@ -35,7 +41,7 @@ describe('PluginConfigLoader (Integration Tests)', function() {
 
     mockDependencies = {
       fs: { existsSync: sinon.stub() },
-      path: { ...path },
+      path: { ...require('path') },
       os: { homedir: sinon.stub().returns('/fake/home') },
       configUtils: {
         loadYamlConfig: sinon.stub(),
@@ -43,7 +49,7 @@ describe('PluginConfigLoader (Integration Tests)', function() {
         isObject: sinon.stub(),
       },
       AssetResolver: { resolveAndMergeCss: sinon.stub() },
-      logger: require('../../shared/capture-logs.js'),
+      logger: require(captureLogsPath),
     };
 
     PluginConfigLoader = proxyquire(pluginConfigLoaderPath, {

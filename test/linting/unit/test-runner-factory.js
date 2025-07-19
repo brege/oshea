@@ -1,6 +1,9 @@
 // test/linting/unit/test-runner-factory.js
+require('module-alias/register');
+
 const { expect } = require('chai');
-const { SmokeTestHarness } = require('./linting-unit-harness');
+const { lintingUnitHarnessPath } = require('@paths');
+const { SmokeTestHarness } = require(lintingUnitHarnessPath);
 const proxyquire = require('proxyquire');
 
 function createSmokeTestRunner(suiteName, manifestPath, options = {}) {

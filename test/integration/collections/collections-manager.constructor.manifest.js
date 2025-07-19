@@ -1,5 +1,7 @@
 // test/integration/collections/collections-manager.constructor.manifest.js
-const { makeCollectionsManagerScenario } = require('./collections-manager.factory.js');
+require('module-alias/register');
+const { collectionsManagerFactoryPath } = require('@paths');
+const { makeCollectionsManagerScenario } = require(collectionsManagerFactoryPath);
 const path = require('path');
 
 module.exports = [

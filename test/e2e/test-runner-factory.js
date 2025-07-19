@@ -1,6 +1,8 @@
 // test/e2e/test-runner-factory.js
+require('module-alias/register');
+const { e2eHarness } = require('@paths');
 const { expect } = require('chai');
-const { TestHarness } = require('./e2e-harness');
+const { TestHarness } = require(e2eHarness);
 
 
 function createE2eTestRunner(commandName, manifestPath, options = {}) {

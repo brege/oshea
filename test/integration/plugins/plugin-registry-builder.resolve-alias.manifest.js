@@ -1,7 +1,7 @@
 // test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
-const { makeResolveAliasScenario } = require('./plugin-registry-builder.factory.js');
-const path = require('path');
-
+require('module-alias/register');
+const { pluginRegistryBuilderFactoryPath } = require('@paths');
+const { makeResolveAliasScenario } = require(pluginRegistryBuilderFactoryPath);
 module.exports = [
   {
     description: '1.2.4: Should resolve a tilde-prefixed alias value to an absolute path in the user\'s home directory',

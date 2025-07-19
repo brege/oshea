@@ -1,5 +1,7 @@
 // test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
-const { makeCmManifestScenario } = require('./plugin-registry-builder.factory.js');
+require('module-alias/register');
+const { pluginRegistryBuilderFactoryPath } = require('@paths');
+const { makeCmManifestScenario } = require(pluginRegistryBuilderFactoryPath);
 
 module.exports = [
   {

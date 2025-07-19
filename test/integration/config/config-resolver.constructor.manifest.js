@@ -1,6 +1,8 @@
 // test/integration/config/config-resolver.constructor.manifest.js
+require('module-alias/register');
+const { configResolverFactoryPath } = require('@paths');
 
-const { makeConfigResolverScenario } = require('./config-resolver.factory.js');
+const { makeConfigResolverScenario } = require(configResolverFactoryPath);
 
 module.exports = [
   makeConfigResolverScenario({

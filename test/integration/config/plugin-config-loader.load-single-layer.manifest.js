@@ -1,5 +1,7 @@
 // test/integration/config/plugin-config-loader.load-single-layer.manifest.js
-const { makePluginConfigLoaderScenario } = require('./plugin-config-loader.factory.js');
+require('module-alias/register');
+const { pluginConfigLoaderFactoryPath } = require('@paths');
+const { makePluginConfigLoaderScenario } = require(pluginConfigLoaderFactoryPath);
 
 module.exports = [
   makePluginConfigLoaderScenario({

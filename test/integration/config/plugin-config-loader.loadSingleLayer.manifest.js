@@ -26,7 +26,7 @@ module.exports = [
           someSetting: 'value',
         },
         resolvedCssPaths: ['/resolved/main.css', '/resolved/theme.css'],
-        inherit_css: true,
+        inheritCss: true,
         actualPath: '/path/to/plugin/my-plugin.config.yaml',
       });
       expect(loader._rawPluginYamlCache).to.have.property('/path/to/plugin/my-plugin.config.yaml-/path/to/plugin');
@@ -77,7 +77,7 @@ module.exports = [
     fsExistsStubs: { '/path/to/bad.config.yaml': true },
     loadYamlConfigStubs: { '/path/to/bad.config.yaml': new Error('YAML Parse Error') },
     assertion: async (result, loader, mocks, constants, expect, logs) => {
-      expect(result).to.deep.equal({ rawConfig: {}, resolvedCssPaths: [], inherit_css: false, actualPath: null });
+      expect(result).to.deep.equal({ rawConfig: {}, resolvedCssPaths: [], inheritCss: false, actualPath: null });
       expect(logs.some(log => log.level === 'error' && log.msg.includes('loading plugin configuration layer'))).to.be.true;
     },
   }),

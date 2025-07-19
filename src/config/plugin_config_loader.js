@@ -52,14 +52,14 @@ class PluginConfigLoader {
         pluginName,
         configFilePath
       );
-      const inherit_css = rawConfig.inherit_css === true;
+      const inheritCss = rawConfig.inherit_css === true;
 
-      const result = { rawConfig, resolvedCssPaths: initialCssPaths, inherit_css, actualPath: configFilePath };
+      const result = { rawConfig, resolvedCssPaths: initialCssPaths, inheritCss, actualPath: configFilePath };
       this._rawPluginYamlCache[cacheKey] = result;
       return result;
     } catch (error) {
       this.logger.error(`loading plugin configuration layer from '${configFilePath}' for ${pluginName}: ${error.message}`, { module: 'plugin_config_loader'});
-      return { rawConfig: {}, resolvedCssPaths: [], inherit_css: false, actualPath: null };
+      return { rawConfig: {}, resolvedCssPaths: [], inheritCss: false, actualPath: null };
     }
   }
 
@@ -84,7 +84,7 @@ class PluginConfigLoader {
           layer1Data.rawConfig.css_files,
           xdgPluginOverrideDir,
           currentCssPaths,
-          layer1Data.inherit_css,
+          layer1Data.inheritCss,
           pluginName,
           xdgPluginOverrideFilePath
         );
@@ -132,7 +132,7 @@ class PluginConfigLoader {
               layer2Data.rawConfig.css_files,
               projectOverrideAssetBase,
               currentCssPaths,
-              layer2Data.inherit_css,
+              layer2Data.inheritCss,
               pluginName,
               projectOverrideAbsPath
             );

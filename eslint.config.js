@@ -37,6 +37,7 @@ module.exports = [
       },
     },
     rules: {
+      camelcase: ['warn', { properties: 'never' }],
       'no-unused-vars': [
         'warn',
         {
@@ -61,6 +62,7 @@ module.exports = [
       },
     },
     rules: {
+      camelcase: ['warn', { properties: 'never' }],
       'no-unused-vars': [
         'warn',
         {
@@ -75,4 +77,3 @@ module.exports = [
     },
   },
 ];
-

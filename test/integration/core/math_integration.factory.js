@@ -5,14 +5,14 @@ const proxyquire = require('proxyquire');
 
 
 function makeMathIntegrationScenario({
-  test_id,
+  testId,
   description,
   scenario = {},
   assertion,
   only,
   skip,
 }) {
-  return { test_id, description, scenario, assertion, only, skip };
+  return { testId, description, scenario, assertion, only, skip };
 }
 
 
@@ -91,4 +91,3 @@ function buildMocks(scenario, constants) {
 }
 
 module.exports = { makeMathIntegrationScenario, buildMocks };
-

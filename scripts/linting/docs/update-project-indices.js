@@ -5,8 +5,8 @@ require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const glob = require('glob');
 const yaml = require('js-yaml');
+const chalk = require('chalk');
 const {
   lintingConfigPath,
   lintHelpersPath,
@@ -14,37 +14,15 @@ const {
   projectRoot
 } = require('@paths');
 
+const { findFiles } = require('../lib/file-discovery');
 const { parseCliArgs } = require(lintHelpersPath);
 const { renderLintOutput } = require(formattersPath);
 
-const START_MARKER = '<!-- uncategorized-start -->';
-const END_MARKER = '<!-- uncategorized-end -->';
+const START_MARKER = 'uncategorized-start';
+const END_MARKER = 'uncategorized-end';
 
 const LINT_SKIP_TAG = 'lint-skip-index';
 const THIS_SCRIPT = path.resolve(__filename);
-
-function getDocignoreDirs(root) {
-  const ignoredDirs = [];
-  function walk(dir) {
-    let entries;
-    try {
-      entries = fs.readdirSync(dir, { withFileTypes: true });
-    } catch {
-      return;
-    }
-    if (entries.some(e => e.isFile() && e.name === '.docignore')) {
-      ignoredDirs.push(path.resolve(dir));
-      return;
-    }
-    for (const entry of entries) {
-      if (entry.isDirectory() && !['node_modules', '.git'].includes(entry.name)) {
-        walk(path.join(dir, entry.name));
-      }
-    }
-  }
-  walk(root);
-  return ignoredDirs.map(absDir => path.relative(process.cwd(), absDir).replace(/\\/g, '/') + '/**');
-}
 
 function getExistingLinks(content, baseDir) {
   const linkRegex = /\[.*?\]\((.*?)\)/g;
@@ -74,20 +52,16 @@ function getExistingLinks(content, baseDir) {
   return { allLinks: links, uncatLinks };
 }
 
-function fileHasLintSkip(file) {
-  if (path.resolve(file) === THIS_SCRIPT) return false;
-  try {
-    return fs.readFileSync(file, 'utf8').includes(LINT_SKIP_TAG);
-  } catch {
-    return false;
-  }
-}
-
 function scanGroup(name, config, opts = {}) {
   const {
     dryRun = false,
-    fix = false
+    fix = false,
+    debug = false,
+    targets = [],
+    force = false,
   } = opts;
+
+  if (debug) console.log(chalk.blue(`\nScanning group: '${name}'`));
 
   const {
     indexFile,
@@ -97,8 +71,8 @@ function scanGroup(name, config, opts = {}) {
     fix: configFix = false
   } = config;
 
-  // Add a guard clause to ensure indexFile is a valid string before proceeding.
   if (typeof indexFile !== 'string' || !indexFile) {
+    if (debug) console.log(chalk.red(`[Debug] Skipping group '${name}': 'indexFile' not configured.`));
     return { issues: [], fixedCount: 0 };
   }
 
@@ -119,25 +93,54 @@ function scanGroup(name, config, opts = {}) {
     return { issues, fixedCount };
   }
 
+  if (debug) console.log(chalk.gray(`[Debug] Reading index file: ${path.relative(projectRoot, indexAbsPath)}`));
+
   const content = fs.readFileSync(indexAbsPath, 'utf8');
   const lines = content.split('\n');
   const { allLinks, uncatLinks } = getExistingLinks(content, indexDir);
 
-  const roots = Array.isArray(scanRoot) ? scanRoot : [scanRoot];
-  let collected = [];
+  let filesToIndex;
 
-  for (const root of roots) {
+  if (targets.length > 0 && !force) {
+    if (debug) console.log(chalk.cyan(`[Debug] Using CLI target '${targets[0]}' to generate specific glob.`));
+    const target = targets[0];
     const extPattern = fileExtensions.length > 1
       ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}`
       : fileExtensions[0].replace(/^\./, '');
-    const globPattern = `${root}/**/*.${extPattern}`;
-    const docignore = getDocignoreDirs(root);
-    const ignoreGlobs = [...excludePatterns, '**/node_modules/**', '**/.git/**', ...docignore];
-    const files = glob.sync(globPattern, { ignore: ignoreGlobs, nodir: true });
-    collected = [...collected, ...files];
+
+    const globTarget = fs.existsSync(target) && fs.statSync(target).isDirectory()
+      ? `${target}/**/*.${extPattern}`
+      : target;
+
+    filesToIndex = findFiles({
+      targets: [globTarget],
+      ignores: [...excludePatterns, '**/node_modules/**', '**/.git/**'],
+      respectDocignore: true,
+      docignoreRoot: projectRoot,
+      skipTag: LINT_SKIP_TAG,
+      debug,
+    });
+
+  } else {
+    const globRoots = (force && targets.length > 0) ? targets : (Array.isArray(scanRoot) ? scanRoot : [scanRoot]);
+    let globTargets = [];
+    for (const root of globRoots) {
+      if (!root) continue;
+      const extPattern = fileExtensions.length > 1
+        ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}`
+        : fileExtensions[0].replace(/^\./, '');
+      globTargets.push(`${root}/**/*.${extPattern}`);
+    }
+    filesToIndex = findFiles({
+      targets: globTargets,
+      ignores: [...excludePatterns, '**/node_modules/**', '**/.git/**'],
+      respectDocignore: true,
+      docignoreRoot: projectRoot,
+      skipTag: LINT_SKIP_TAG,
+      debug,
+    });
   }
 
-  const filesToIndex = collected.filter(f => !fileHasLintSkip(f));
   const indexRelPath = path.relative(projectRoot, indexAbsPath);
 
   for (const rel of uncatLinks) {
@@ -150,16 +153,19 @@ function scanGroup(name, config, opts = {}) {
     });
   }
 
-  // Find files missing from any block
   const missingInIndex = [];
   for (const file of filesToIndex) {
+    if (path.resolve(file) === THIS_SCRIPT) continue;
     const rel = path.relative(indexDir, file).replace(/\\/g, '/');
     if (!allLinks.has(rel) && !uncatLinks.has(rel)) {
       missingInIndex.push(rel);
     }
   }
 
-  // Also warn about files missing from the whole index (as before)
+  if (debug && missingInIndex.length > 0) {
+    console.log(chalk.yellow(`[Debug] Found ${missingInIndex.length} files missing from the index for group '${name}'.`));
+  }
+
   for (const rel of missingInIndex) {
     issues.push({
       file: indexRelPath,
@@ -171,8 +177,8 @@ function scanGroup(name, config, opts = {}) {
   }
 
   if (allowFix && missingInIndex.length > 0) {
-    const startIdx = lines.findIndex(l => l.trim() === START_MARKER);
-    const endIdx = lines.findIndex(l => l.trim() === END_MARKER);
+    const startIdx = lines.findIndex(l => l.trim().includes(START_MARKER));
+    const endIdx = lines.findIndex(l => l.trim().includes(END_MARKER));
 
     if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
       issues.push({
@@ -186,7 +192,6 @@ function scanGroup(name, config, opts = {}) {
     }
 
     const previousBlockLines = lines.slice(startIdx + 1, endIdx);
-    // Extract filenames already in block; may be bullet links or not
     const existingEntries = new Set(previousBlockLines
       .map(line => {
         const match = line.match(/\[.*?\]\((.*?)\)/);
@@ -195,34 +200,57 @@ function scanGroup(name, config, opts = {}) {
       .filter(Boolean)
     );
 
-    // Compute additions (skip if already in block)
     const additions = missingInIndex
       .filter(p => !existingEntries.has(p))
-      .map(p => `- [${path.basename(p)}](${p})`);
-    if (!dryRun && additions.length > 0) {
-      const before = lines.slice(0, startIdx + 1);
-      const after = lines.slice(endIdx);
-      const dedupedBlock = [...new Set([...previousBlockLines, ...additions])].sort();
-      const newContent = [...before, ...dedupedBlock, ...after].join('\n');
-      fs.writeFileSync(indexAbsPath, newContent, 'utf8');
+      .map(p => `\n- [${path.basename(p)}](${p})`);
+
+    if (additions.length > 0) {
+      if (!dryRun) {
+        const before = lines.slice(0, startIdx + 1);
+        const after = lines.slice(endIdx);
+        const newBlock = [...previousBlockLines, ...additions].sort();
+        const newContent = [...before, ...newBlock, ...after].join('\n');
+        fs.writeFileSync(indexAbsPath, newContent, 'utf8');
+      }
+      fixedCount = additions.length;
     }
-    fixedCount = additions.length;
   }
 
   return { issues, fixedCount };
 }
 
 async function runLibrarian(options = {}) {
-  const { group = null } = options;
+  const { group = null, debug = false, targets = [], force = false } = options;
   const configYaml = fs.readFileSync(lintingConfigPath, 'utf8');
   const parsedConfig = yaml.load(configYaml);
   const groups = parsedConfig['update-indices'] || {};
-  const groupList = group ? [group] : Object.keys(groups);
   let allIssues = [];
   let totalFixed = 0;
 
-  for (const g of groupList) {
-    if (groups[g]) {
+  if (debug) console.log(chalk.bold.yellowBright('--- Running Librarian in Debug Mode ---'));
+
+  let groupsToRun = [];
+
+  if (targets.length > 0) {
+    if (debug) console.log(chalk.cyan(`[Debug] CLI targets provided. Determining relevant group(s)...`));
+    const targetPath = path.resolve(targets[0]);
+    for (const [groupName, groupConfig] of Object.entries(groups)) {
+      if (typeof groupConfig !== 'object' || !groupConfig.scanRoot) continue;
+      const scanRoots = Array.isArray(groupConfig.scanRoot) ? groupConfig.scanRoot : [groupConfig.scanRoot];
+      if (scanRoots.some(root => root && targetPath.startsWith(path.resolve(root)))) {
+        groupsToRun.push(groupName);
+        if (debug) console.log(chalk.green(`[Debug] Target '${targets[0]}' matches scan root for group '${groupName}'.`));
+      }
+    }
+    if (groupsToRun.length === 0 && debug) {
+      console.log(chalk.red(`[Debug] No matching group found for target '${targets[0]}'.`));
+    }
+  } else {
+    groupsToRun = group ? [group] : Object.keys(groups);
+  }
+
+  for (const g of groupsToRun) {
+    if (groups[g] && typeof groups[g] === 'object') {
       const { issues, fixedCount } = scanGroup(g, groups[g], options);
       allIssues.push(...issues);
       totalFixed += fixedCount;
@@ -240,18 +268,24 @@ async function runLibrarian(options = {}) {
 
 if (require.main === module) {
   (async () => {
-    const { flags } = parseCliArgs(process.argv.slice(2));
+    const { flags, targets } = parseCliArgs(process.argv.slice(2));
     const group = flags.group || null;
 
-    const { issues, summary } = await runLibrarian({
+    await runLibrarian({
       group,
+      targets,
       fix: !!flags.fix,
-      dryRun: !!flags.dryRun
+      dryRun: !!flags.dryRun,
+      debug: !!flags.debug,
+      force: !!flags.force,
+    }).then(({ issues, summary }) => {
+        renderLintOutput({ issues, summary, flags });
+        process.exitCode = summary.errorCount > 0 ? 1 : 0;
+    }).catch(error => {
+        console.error(chalk.red.bold('\n--- LIBRARIAN CRASHED ---'));
+        console.error(error);
+        process.exit(1);
     });
-
-    renderLintOutput({ issues, summary, flags });
-
-    process.exitCode = summary.errorCount > 0 ? 1 : 0;
   })();
 }
 

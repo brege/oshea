@@ -10,15 +10,11 @@ const {
   lintingConfigPath,
   formattersPath,
   projectRoot,
-  findLitterRulesPath,
-  fileHelpersPath
+  findLitterRulesPath
 } = require('@paths');
-const {
-  loadLintSection,
-  isExcluded,
-  parseCliArgs,
-} = require(lintHelpersPath);
-const { findFilesArray } = require(fileHelpersPath);
+
+const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
+const { findFiles } = require('../lib/file-discovery'); // Use the new utility
 const { renderLintOutput } = require(formattersPath);
 
 const TYPE_RE = /^\[(\w+):(\w+):([\w*,.]+)\]\s+(.+)$/i;
@@ -172,28 +168,30 @@ function scanFileForLitter(filePath, config) {
 }
 
 function runLinter(options = {}) {
-  const { targets = [], excludes = [], rulesPath, verbose = false } = options;
+  const { targets = [], excludes = [], rulesPath, debug = false } = options;
 
-  if (verbose) {
-    console.log(`[INFO] Loading rules from: ${rulesPath}`);
+  if (debug) {
+    console.log(`[DEBUG] Loading rules from: ${rulesPath}`);
   }
   const litterConfig = parseRulesFile(rulesPath);
 
-  if (verbose) {
-    console.log(`[INFO] Loaded ${litterConfig.rules.length} rules`);
-    console.log(`[INFO] Emoji whitelist: ${litterConfig.emojiWhitelist.length} items`);
-    console.log(`[INFO] Custom whitelists: ${litterConfig.customWhitelists.size} types`);
+  if (debug) {
+    console.log(`[DEBUG] Loaded ${litterConfig.rules.length} rules`);
   }
+
   const allIssues = [];
   const allFileTypes = ['.js', '.mjs', '.ts', '.tsx', '.md', '.html', '.css', '.json', '.yml', '.yaml'];
 
-  const files = findFilesArray(targets, {
-    ignores: excludes,
-    filter: (filename) => allFileTypes.some(ext => filename.endsWith(ext))
+  const files = findFiles({
+      targets: targets,
+      ignores: excludes,
+      fileFilter: (filename) => allFileTypes.some(ext => filename.endsWith(ext)),
+      respectDocignore: true,
+      skipTag: LINT_SKIP_TAG,
+      debug: debug
   });
 
   for (const file of files) {
-    if (isExcluded(file, excludes)) continue;
     const fileIssues = scanFileForLitter(file, litterConfig);
     if (fileIssues.length > 0) {
       allIssues.push(...fileIssues.map(issue => ({
@@ -240,7 +238,7 @@ if (require.main === module) {
     targets: finalTargets,
     excludes,
     rulesPath: absRulesPath,
-    verbose: flags.verbose || flags.debug,
+    debug: flags.debug,
     ...flags,
   });
 
@@ -250,4 +248,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

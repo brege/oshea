@@ -2,29 +2,52 @@
 // scripts/linting/docs/postman.js
 
 require('module-alias/register');
+
 const fs = require('fs');
 const path = require('path');
+const { minimatch } = require('minimatch');
 const {
   lintHelpersPath,
   lintingConfigPath,
   formattersPath,
-  postmanHelpersPath,
   projectRoot
 } = require('@paths');
 
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const { renderLintOutput } = require(formattersPath);
-const {
-  getMarkdownFiles,
-  isReferenceExcluded,
-  isAllowedExtension,
-  isSkipLink,
-  resolveReference,
-  findCandidates
-} = require(postmanHelpersPath);
+const { findFiles, findCandidates } = require('../lib/file-discovery');
 
-const DISABLE_MARKER = '<!-- lint-disable-links -->';
-const ENABLE_MARKER = '<!-- lint-enable-links -->';
+const LINT_SKIP_TAG = 'lint-skip-postman';
+const DISABLE_MARKER = 'lint-disable-links';
+const ENABLE_MARKER = 'lint-enable-links';
+
+function isReferenceExcluded(ref, rules) {
+  const rel = ref.replace(/\\/g, '/');
+  const patterns = rules.excludes || [];
+  return patterns.some(pattern => minimatch(rel, pattern));
+}
+
+function isAllowedExtension(ref, rules) {
+  const allowed = rules.allowed_extensions || [];
+  return allowed.some(ext => ref.endsWith(ext));
+}
+
+function isSkipLink(ref, rules) {
+  const patterns = rules.skip_link_patterns || [];
+  return patterns.some(pattern => minimatch(ref, pattern));
+}
+
+function resolveReference(mdFile, ref, allowedExts) {
+  const mdDir = path.dirname(mdFile);
+  let targetPath = path.resolve(mdDir, ref);
+  if (!allowedExts.some(ext => ref.endsWith(ext))) {
+    for (const ext of allowedExts) {
+      if (fs.existsSync(targetPath + ext)) return targetPath + ext;
+    }
+  }
+  if (fs.existsSync(targetPath)) return targetPath;
+  return null;
+}
 
 function buildLinksEnabledMap(lines) {
   let enabled = true;
@@ -67,7 +90,8 @@ async function probeMarkdownFile(mdFile, rules) {
 
     if (node.type === 'link') {
       const url = node.url.split('#')[0];
-      if (isReferenceExcluded(url, rules) || !isAllowedExtension(url, rules) || isSkipLink(url, rules)) return;
+      if (!url || url.startsWith('http')) return;
+      if (isReferenceExcluded(url, rules) || isSkipLink(url, rules)) return;
 
       const resolved = resolveReference(mdFile, url, rules.allowed_extensions);
       results.push({
@@ -85,7 +109,6 @@ async function probeMarkdownFile(mdFile, rules) {
         ancestors.some(a => a.type === 'link') ||
         node.value.includes(' ') ||
         isReferenceExcluded(node.value, rules) ||
-        !isAllowedExtension(node.value, rules) ||
         isSkipLink(node.value, rules)
       ) return;
 
@@ -109,14 +132,21 @@ async function runLinter(options = {}) {
     targets = [],
     fix = false,
     dryRun = false,
+    debug = false,
     config = {}
   } = options;
 
   const rules = config;
-  const allowedExt = rules.allowed_extensions || [];
-  const mdFiles = getMarkdownFiles(targets[0] || 'docs', rules, targets, [
-    'assets', 'docs/archive', 'node_modules', '.git'
-  ]);
+  const sourceExts = ['.md', '.markdown'];
+
+  const mdFiles = findFiles({
+    targets: targets.length > 0 ? targets : ['docs', 'plugins', 'src', 'test', 'scripts'],
+    fileFilter: (filePath) => sourceExts.some(ext => filePath.endsWith(ext)),
+    ignores: rules.excludes || [],
+    respectDocignore: true,
+    skipTag: LINT_SKIP_TAG,
+    debug: debug
+  });
 
   const issues = [];
   let fixedCount = 0;
@@ -128,7 +158,9 @@ async function runLinter(options = {}) {
     for (const r of results) {
       if (r.resolved) continue;
 
-      const candidates = findCandidates(r.target, allowedExt, ['.', 'src', 'plugins', 'scripts', 'test']);
+      if (!isAllowedExtension(r.target, rules)) continue;
+
+      const candidates = findCandidates(r.target, rules.allowed_extensions, ['.', 'src', 'plugins', 'scripts', 'test']);
       const relCandidates = candidates.map(c =>
         path.relative(path.dirname(file), c).replace(/\\/g, '/')
       );
@@ -203,6 +235,7 @@ if (require.main === module) {
       fix: !!flags.fix,
       dryRun: !!flags.dryRun,
       force: !!flags.force,
+      debug: !!flags.debug,
       config,
     });
 

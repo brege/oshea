@@ -11,7 +11,7 @@ const path = require('path');
 function getChecklistStatuses() {
   const DOCS_DIR = docsTestDir;
   const checklistFiles = fs.readdirSync(DOCS_DIR)
-    .filter(f => /^checklist-level-\d+\.md$/.test(f))
+    .filter(f => /^checklist-level-(\d+|m\d+)\.md$/i.test(f))
     .map(f => path.join(DOCS_DIR, f));
 
   const allChecklistStatuses = {};
@@ -19,7 +19,7 @@ function getChecklistStatuses() {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
     for (let i = 0; i < lines.length; i++) {
       // Capture the test ID and its status marker [ ], [x], [S], [?]
-      const checklistMatch = lines[i].match(/^\*\s*\[(\s*|x|S|\?)\s*\]\s+(\d+\.\d+\.\d+)/);
+      const checklistMatch = lines[i].match(/^\*\s*\[(\s*|x|S|\?)\s*\]\s+(\d+\.\d+\.\d+|M\.\d+\.\d+(\.\d+)?)/);
       if (checklistMatch) {
         const marker = checklistMatch[1].trim();
         const testId = checklistMatch[2];
@@ -74,7 +74,7 @@ function getTestIdToFileAndSkipMap() {
   const testIdToFile = {};
   dirs.forEach(dir => {
     findAllJsFiles(dir).forEach(file => {
-      const match = file.match(/\.test\.((?:\d+\.)*\d+)\.js$/);
+      const match = file.match(/\.test\.((?:\d+\.)*\d+|M\.(?:\d+\.)*\d+)\.js$/);
       if (match) {
         const testId = match[1];
         const idx = file.lastIndexOf('/test/');
@@ -113,7 +113,7 @@ function getAuditLogMap() {
       if (status !== 'CLOSED') {
         const testIds = testIdRaw.split(',').map(s => s.trim()).filter(Boolean);
         for (const testId of testIds) {
-          if (!/^\d+(\.\d+)*$/.test(testId)) continue; // Only numeric codes
+          if (!/^(\d+(\.\d+)*|M\.(\d+\.)*\d+)$/.test(testId)) continue; // Only codes like 1.2.3 or M.1.2.3
           auditMap[testId] = `audit-log:${entryLineNum}`;
         }
       }
@@ -136,6 +136,19 @@ function generateDashboardContent() {
   ]);
 
   const sortedIds = Array.from(allTestIds).sort((a, b) => {
+    const isMetaA = a.startsWith('M.');
+    const isMetaB = b.startsWith('M.');
+    if (isMetaA && !isMetaB) return 1;
+    if (!isMetaA && isMetaB) return -1;
+    if (isMetaA && isMetaB) {
+      const aParts = a.slice(2).split('.').map(Number);
+      const bParts = b.slice(2).split('.').map(Number);
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const diff = (aParts[i] || 0) - (bParts[i] || 0);
+        if (diff !== 0) return diff;
+      }
+      return 0;
+    }
     const aParts = a.split('.').map(Number);
     const bParts = b.split('.').map(Number);
     for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
@@ -226,3 +239,4 @@ if (process.argv.includes('update')) {
   const dashboardLines = generateDashboardContent();
   console.log(dashboardLines.join('\n'));
 }
+

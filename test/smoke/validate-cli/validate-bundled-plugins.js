@@ -6,15 +6,15 @@ require('module-alias/register');
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const chalk = require('chalk');
-const { cliPath, projectRoot } = require('@paths');
+const { cliPath, projectRoot, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 // --- Test Configuration ---
 const PLUGINS_DIR = path.join(projectRoot, 'plugins');
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  console.log(chalk.blue('Smoke Test: Validating all bundled plugins...'));
+  logger.info('Smoke Test: Validating all bundled plugins...');
 
   const bundledPlugins = fs.readdirSync(PLUGINS_DIR, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory())
@@ -26,7 +26,7 @@ async function runSmokeTest() {
   for (const pluginName of bundledPlugins) {
     const fullCommand = `node "${cliPath}" plugin validate ${pluginName}`;
 
-    process.stdout.write(`  Validating: ${chalk.cyan(pluginName)} ... `);
+    logger.writeDetail(`  Validating: ${pluginName} ... `);
 
     try {
       await new Promise((resolve, reject) => {
@@ -37,26 +37,26 @@ async function runSmokeTest() {
           resolve({ stdout, stderr });
         });
       });
-      console.log(chalk.green('✓ OK'));
+      logger.writeSuccess('✓ OK\n');
     } catch (result) {
       failedPlugins.push({ plugin: pluginName, error: result.error, stderr: result.stderr });
-      console.log(chalk.red('✗ FAIL'));
+      logger.writeError('✗ FAIL\n');
     }
   }
 
   if (failedPlugins.length > 0) {
-    console.error(chalk.red.bold('\n--- Smoke Test Failed ---'));
-    console.error(chalk.red(`${failedPlugins.length} bundled plugin(s) failed validation:`));
+    logger.error('\n--- Smoke Test Failed ---');
+    logger.error(`${failedPlugins.length} bundled plugin(s) failed validation:`);
     failedPlugins.forEach(({ plugin, error, stderr }) => {
-      console.error(`\n  - ${chalk.cyan(plugin)}`);
-      console.error(chalk.gray(`    Error: ${error.message.split('\n')[0]}`));
-      if(stderr) {
-        console.error(chalk.gray(`    Stderr: ${stderr.trim()}`));
+      logger.detail(`\n  - ${plugin}`);
+      logger.detail(`    Error: ${error.message.split('\n')[0]}`);
+      if (stderr) {
+        logger.detail(`    Stderr: ${stderr.trim()}`);
       }
     });
     process.exit(1);
   } else {
-    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All bundled plugins are valid.'));
+    logger.success('\n✓ Smoke Test Passed: All bundled plugins are valid.');
     process.exit(0);
   }
 }
@@ -64,3 +64,4 @@ async function runSmokeTest() {
 if (require.main === module) {
   runSmokeTest();
 }
+

@@ -28,7 +28,7 @@ function buildTestIdToPathMap() {
   const testIdToPath = {};
   dirs.forEach(dir => {
     findAllJsFiles(dir).forEach(file => {
-      const match = file.match(/\.test\.((?:\d+\.)*\d+)\.js$/);
+      const match = file.match(/\.test\.((?:\d+\.)*\d+|M\.(?:\d+\.)*\d+)\.js$/);
       if (match) {
         const testId = match[1];
         const idx = file.lastIndexOf('/test/');
@@ -43,14 +43,15 @@ const testIdToPath = buildTestIdToPathMap();
 
 const DOCS_DIR = docsTestDir;
 const checklistFiles = fs.readdirSync(DOCS_DIR)
-  .filter(f => /^checklist-level-\d+\.md$/.test(f))
+  .filter(f => /^checklist-level-(\d+|m\d+)\.md$/i.test(f)) // support meta checklists
   .map(f => path.join(DOCS_DIR, f));
 
 const openTests = [];
 for (const file of checklistFiles) {
   const lines = fs.readFileSync(file, 'utf8').split('\n');
   for (let i = 0; i < lines.length; i++) {
-    const checklistMatch = lines[i].match(/^\*\s*\[\s*\]\s+(\d+\.\d+\.\d+)/);
+    // Support both numeric and meta test ID
+    const checklistMatch = lines[i].match(/^\*\s*\[\s*\]\s+(\d+\.\d+\.\d+|M\.\d+\.\d+(\.\d+)?)/);
     if (checklistMatch) {
       const testId = checklistMatch[1];
       let isOpen = false;
@@ -80,3 +81,4 @@ openTests.forEach(({ testId, testTarget, testPath }) => {
   // Add two spaces between columns 2 and 3 for clarity
   console.log(`${tid}${tgt}  ${testPath}`);
 });
+

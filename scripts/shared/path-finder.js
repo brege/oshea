@@ -6,9 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const acorn = require('acorn');
 const walk = require('acorn-walk');
-const paths = require('@paths');
+const { paths, fileHelpersPath } = require('@paths');
 const chalk = require('chalk');
-
+const { findFilesArray } = require(fileHelpersPath);
 
 function findVariableByPath(targetPath) {
   const absoluteTargetPath = path.resolve(targetPath);
@@ -23,7 +23,7 @@ function findVariableByPath(targetPath) {
             yield key;
           }
         } catch (e) {
-          // Ignore paths that can't be resolved (like non-path strings in the object)
+          // eslint-disable-next-line no-empty
         }
       }
     }
@@ -32,9 +32,8 @@ function findVariableByPath(targetPath) {
   return [...new Set(walkRegistry(paths))];
 }
 
-
 function getFileExports(targetPath) {
-  const exports = new Set();
+  const exportsSet = new Set();
   if (!fs.existsSync(targetPath)) return [];
 
   try {
@@ -43,17 +42,18 @@ function getFileExports(targetPath) {
 
     walk.simple(ast, {
       AssignmentExpression(node) {
-        if (node.left.type === 'MemberExpression' &&
-                    node.left.object.type === 'Identifier' &&
-                    node.left.object.name === 'module' &&
-                    node.left.property.name === 'exports') {
-
+        if (
+          node.left.type === 'MemberExpression' &&
+          node.left.object.type === 'Identifier' &&
+          node.left.object.name === 'module' &&
+          node.left.property.name === 'exports'
+        ) {
           if (node.right.type === 'ObjectExpression') {
             node.right.properties.forEach(prop => {
               if (prop.type === 'Property' && prop.key.type === 'Identifier') {
-                exports.add(prop.key.name);
+                exportsSet.add(prop.key.name);
               } else if (prop.type === 'SpreadElement' && prop.argument.type === 'Identifier') {
-                exports.add(`...${prop.argument.name}`);
+                exportsSet.add(`...${prop.argument.name}`);
               }
             });
           }
@@ -61,37 +61,92 @@ function getFileExports(targetPath) {
       }
     });
   } catch (e) {
-    void 0; // eslint-disable-line no-empty
+    // eslint-disable-next-line no-empty
   }
-
-  return Array.from(exports).sort();
+  return Array.from(exportsSet).sort();
 }
 
+function findVariablesForTargets(targets) {
+  const fileList = findFilesArray(targets, { filter: fn => fn.endsWith('.js') || fn.endsWith('.mjs') });
+  const results = [];
+
+  for (const f of fileList) {
+    const variables = findVariableByPath(f);
+    if (variables.length > 0) {
+      results.push({ file: f, variable: variables[0] });
+    }
+  }
+
+  return results;
+}
 
 if (require.main === module) {
-  const target = process.argv[2];
-  if (!target) {
-    console.error('Usage: node scripts/shared/find-path-variable.js <path/to/file>');
+  let rawTargets = process.argv.slice(2);
+  if (!rawTargets.length) {
+    console.error(chalk.red('Usage: node scripts/shared/path-finder.js <file|dir|glob> [...]'));
     process.exit(1);
   }
+  // If the last argument is --exports, print exports for each file
+  const showExports = rawTargets.includes('--exports');
+  if (showExports) rawTargets = rawTargets.filter(arg => arg !== '--exports');
 
-  const variables = findVariableByPath(target);
+  const fileList = findFilesArray(rawTargets, { filter: fn => fn.endsWith('.js') || fn.endsWith('.mjs') });
 
-  if (variables.length > 0) {
-    const variableName = variables[0];
-    const exports = getFileExports(target);
-    console.log(`${chalk.cyan('require')}(${chalk.magenta('\'module-alias/register\'')});`);
-    console.log(chalk.cyan(`const { ${chalk.yellow(variableName)} } = require('@paths');`));
+  // Collect all variables and map to their files
+  const variableSet = new Set();
+  const fileVariables = [];
+  for (const file of fileList) {
+    const variables = findVariableByPath(file);
+    if (variables.length > 0) {
+      variableSet.add(variables[0]);
+      fileVariables.push({ file, variable: variables[0] });
+    }
+  }
 
-    if (exports.length > 0) {
-      const exportsString = exports.map(e => chalk.yellow(e)).join(',\n  ');
-      console.log(chalk.cyan(`const {\n  ${exportsString}\n} = require(${chalk.yellow(variableName)});`));
+  if (variableSet.size > 0) {
+    // Colorized 'require'
+    process.stdout.write(chalk.cyan('require'));
+    process.stdout.write('(');
+    process.stdout.write(chalk.magenta('\'module-alias/register\''));
+    process.stdout.write(');\n');
+    // Colorized destructured require line
+    const varsSorted = Array.from(variableSet).sort();
+    const coloredVars = varsSorted.map(v => chalk.yellow(v)).join(',\n  ');
+    process.stdout.write(
+      chalk.cyan('const ') +
+      '{ \n  ' + coloredVars + '\n} = ' +
+      chalk.cyan('require') +
+      '(' + chalk.green('\'@paths\'') + ');\n'
+    );
+    // Per-file exports if requested (colorized)
+    if (showExports) {
+      for (const { file, variable } of fileVariables) {
+        const exportsArr = getFileExports(file);
+        if (exportsArr.length > 0) {
+          const exportsString = exportsArr.map(e => chalk.yellow(e)).join(',\n  ');
+          process.stdout.write(
+            chalk.cyan('const ') +
+            '{\n  ' + exportsString + '\n} = require(' + chalk.yellow(variable) + ');' +
+            chalk.gray(' // File: ' + file) + '\n'
+          );
+        }
+      }
+    } else {
+      for (const { file } of fileVariables) {
+        process.stdout.write(chalk.gray('// File: ' + file + '\n'));
+      }
     }
   } else {
-    console.error(chalk.red(`No variable found for path: ${path.resolve(target)}`));
+    for (const file of fileList) {
+      console.error(chalk.red(`No variable found for path: ${path.resolve(file)}`));
+    }
     process.exit(1);
   }
-
 }
 
-module.exports = { findVariableByPath, getFileExports };
+module.exports = {
+  findVariableByPath,
+  getFileExports,
+  findVariablesForTargets,
+};
+

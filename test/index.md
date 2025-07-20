@@ -117,8 +117,8 @@ The **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script synthesizes this i
   End-to-End CLI scenarios.
 * [Test Suite Checklist Level 4](../test/docs/checklist-level-4.md):
   End-to-End lifecycle scenarios.
-* [Help Text Checklist](../test/docs/help-text-checklist.md):
-  Systematic generation of CLI help text.
+* [Test Suite Checklist Meta Level 0](../test/docs/checklist-level-m0.md):
+  Unit tests for code and documentation linters.
 
 ### Evolution of the Test Suite
 

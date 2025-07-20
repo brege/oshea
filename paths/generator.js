@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 // paths/generator.js
 
+require('module-alias/register');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
+
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
@@ -95,7 +99,7 @@ class DeclarativePathsGenerator {
 
   getVariableName(file, contextualNaming = {}) {
     // Check contextual naming first
-    if (contextualNaming[file.name]) {
+    if (contextualNaming && contextualNaming[file.name]) {
       const contexts = contextualNaming[file.name];
       for (const [contextPath, varName] of Object.entries(contexts)) {
         if (file.directory.includes(contextPath)) {
@@ -328,10 +332,10 @@ class DeclarativePathsGenerator {
     const outputPath = path.join(this.projectRoot, registryConfig.output_file);
 
     if (dryRun) {
-      console.log(`\n DRY RUN - Generated content for ${registryName} (${outputPath}):`);
-      console.log('='.repeat(60));
-      console.log(newContent);
-      console.log('='.repeat(60));
+      logger.info(`\n DRY RUN - Generated content for ${registryName} (${outputPath}):`);
+      logger.info('='.repeat(60));
+      logger.info(newContent);
+      logger.info('='.repeat(60));
       return;
     }
 
@@ -352,36 +356,36 @@ class DeclarativePathsGenerator {
 
     if (hasChanged) {
       fs.writeFileSync(outputPath, newContent);
-      console.log(`Generated ${registryName} registry: ${outputPath}`);
+      logger.success(`Generated ${registryName} registry: ${outputPath}`);
     } else {
-      console.log(`No changes in ${registryName} registry: ${outputPath}`);
+      logger.info(`No changes in ${registryName} registry: ${outputPath}`);
     }
   }
 
   run(dryRun = false) {
-    console.log(`\nGenerating path registries from: ${this.configPath}`);
-    console.log(`Project root: ${this.projectRoot}\n`);
+    logger.info(`\nGenerating path registries from: ${this.configPath}`);
+    logger.info(`Project root: ${this.projectRoot}\n`);
 
     const registries = this.config.registries || {};
     const registryNames = Object.keys(registries);
 
     if (registryNames.length === 0) {
-      console.log(' No registries configured');
+      logger.warn(' No registries configured');
       return;
     }
 
-    console.log(`Found ${registryNames.length} registries: ${registryNames.join(', ')}\n`);
+    logger.info(`Found ${registryNames.length} registries: ${registryNames.join(', ')}\n`);
 
     for (const [registryName, registryConfig] of Object.entries(registries)) {
       try {
         this.writeRegistry(registryName, registryConfig, dryRun);
       } catch (error) {
-        console.error(`Error generating ${registryName}: ${error.message}`);
-        console.error(error.stack);
+        logger.error(`Error generating ${registryName}: ${error.message}`);
+        logger.detail(error.stack);
       }
     }
 
-    console.log('\nPath registry generation complete!');
+    logger.success('\nPath registry generation complete!');
   }
 
   validateConfig() {
@@ -415,20 +419,22 @@ if (require.main === module) {
     if (validate) {
       const errors = generator.validateConfig();
       if (errors.length > 0) {
-        console.error('Configuration validation failed:');
-        errors.forEach(error => console.error(`  • ${error}`));
+        logger.error('Configuration validation failed:');
+        errors.forEach(error => logger.error(`  • ${error}`));
         process.exit(1);
       } else {
-        console.log('Configuration is valid');
+        logger.success('Configuration is valid');
         process.exit(0);
       }
     }
 
     generator.run(dryRun);
   } catch (error) {
-    console.error(`Fatal error: ${error.message}`);
+    logger.error(`Fatal error: ${error.message}`);
+    logger.detail(error.stack);
     process.exit(1);
   }
 }
 
 module.exports = DeclarativePathsGenerator;
+

@@ -22,6 +22,7 @@ const {
 } = require(formattersPath);
 
 const LINT_DISABLE_TAG = 'lint-disable-next-line';
+const LINT_DISABLE_LINE = 'lint-disable-line no-relative-paths';
 
 function classifyRequireLine(line) {
   const code = line.replace(/\/\/.*$/, '').trim();
@@ -53,6 +54,7 @@ function scanFileForRelativePaths(filePath, debug = false) {
 
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
+
     // Check lint-disable-next-line on the previous line
     if (index > 0) {
       const prevLine = lines[index - 1].trim();
@@ -65,16 +67,21 @@ function scanFileForRelativePaths(filePath, debug = false) {
     }
     if (trimmedLine.startsWith('//')) return;
 
+    // This is the addition: Check lint-disable-line on this line
+    const hasDisableLine = line.includes(LINT_DISABLE_LINE);
+
     if (trimmedLine.includes('require(')) {
       const classification = classifyRequireLine(trimmedLine);
       if (classification && classification.type === 'pathlike') {
         if (relativePathRegex.test(`'${classification.requiredPath}'`)) {
-          issues.push({
-            line: index + 1,
-            column: line.indexOf(classification.requiredPath) + 1,
-            message: `Disallowed relative path in require(): '${classification.requiredPath}'`,
-            rule: 'no-relative-require'
-          });
+          if (!hasDisableLine) {
+            issues.push({
+              line: index + 1,
+              column: line.indexOf(classification.requiredPath) + 1,
+              message: `Disallowed relative path in require(): '${classification.requiredPath}'`,
+              rule: 'no-relative-require'
+            });
+          }
         }
       }
     }
@@ -85,12 +92,14 @@ function scanFileForRelativePaths(filePath, debug = false) {
         const args = match[2].split(',').map(arg => arg.trim());
         args.forEach(arg => {
           if (relativePathRegex.test(arg)) {
-            issues.push({
-              line: index + 1,
-              column: line.indexOf(arg) + 1,
-              message: `Disallowed relative path argument in ${match[1]}: ${arg}`,
-              rule: 'no-relative-path-join'
-            });
+            if (!hasDisableLine) {
+              issues.push({
+                line: index + 1,
+                column: line.indexOf(arg) + 1,
+                message: `Disallowed relative path argument in ${match[1]}: ${arg}`,
+                rule: 'no-relative-path-join'
+              });
+            }
           }
         });
       }

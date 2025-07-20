@@ -15,6 +15,16 @@ const { renderLintOutput } = require(formattersPath);
 
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
+const LINT_SKIP_MARKER = 'lint-skip-logger';
+
+function fileHasSkipLoggerMarker(filePath, maxLines = 10) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    return content.split('\n').slice(0, maxLines).some(line => line.includes(LINT_SKIP_MARKER));
+  } catch {
+    return false;
+  }
+}
 
 function scanFile(filePath) {
   let content;
@@ -78,6 +88,9 @@ function runLinter(options = {}) {
 
   for (const file of files) {
     if (isExcluded(file, excludes)) continue;
+    if (fileHasSkipLoggerMarker(file)) {
+      continue;
+    }
     const result = scanFile(file);
     if (!result) continue;
 
@@ -102,10 +115,10 @@ function runLinter(options = {}) {
   const summary = {
     errorCount: issues.filter(i => i.severity === 2).length,
     warningCount: issues.filter(i => i.severity === 1).length,
-    fixedCount: 0 // This linter doesn't fix anything
+    fixedCount: 0
   };
 
-  return { issues, summary, results: [] }; // No detailed 'results' for this linter
+  return { issues, summary, results: [] };
 }
 
 // CLI entry
@@ -130,3 +143,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

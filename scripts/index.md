@@ -2,9 +2,6 @@
 
 This document is a central index for all developer and automation scripts within the `md-to-pdf` repo.
 
-  - [generate-paths-beautiful.js](generate-paths-beautiful.js)
-    -- Dynamically generates [`paths.js`](../paths.js), the central pathing registry for the project.
-    
 ### Batch Jobs [ `batch/` ]
 
   - [ [`batch-convert-hugo-recipes.js`](batch/batch-convert-hugo-recipes.js) ]
@@ -30,7 +27,7 @@ This document is a central index for all developer and automation scripts within
 
   - [ [`generate-toc.js`](docs/generate-toc.js) ]
     -- A utility to generate a Table of Contents for a Markdown file based on its headings.
-    -- Automatically generates the main documentation index `docs/index.md` by discovering all non-excluded Markdown files.
+    -- Automatically generates the main documentation index [`docs/index.md`](../docs/index.md) by discovering all non-excluded Markdown files.
 
 ### Linting & Code Style [ `linting/` ]
 
@@ -50,8 +47,6 @@ This module has its own index file at [**the test index**](../test/index.md) for
 ### Shared Scripts [ `shared/` ]
 
   - [ [`file-helpers.js`](shared/file-helpers.js) ] -- Makes the rest of the Node.js scripts easier to point and shoot at file(s) and directories.
-  - [ [`comment-surfacer.js`](shared/comment-surfacer.js) ]
-    -- A utility to surface code comment-ditritus in `.js` files.
   - [ [path-finder.js](shared/path-finder.js) ]
     -- A helper tool that turns a script path in to a variable name.
 
@@ -68,7 +63,8 @@ This module has its own index file at [**the test index**](../test/index.md) for
     ``` 
 ### Uncategorized Scripts
 
-New scripts or new script locations will appear below after running **[`node scripts/docs/update-project-indices.js`](../scripts/docs/update-project-indices.js).**
+New scripts or new script locations will appear below after running
+**[`node scripts/linting/docs/update-project-indices.js`](linting/docs/update-project-indices.js)**.
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

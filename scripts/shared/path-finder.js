@@ -13,9 +13,7 @@ const chalk = require('chalk');
 const { fileHelpersPath } = require('@paths');
 const { findFilesArray } = require(fileHelpersPath);
 
-/**
- * Returns all registry/export variables that resolve to the given absolute path.
- */
+// Returns all registry/export variables that resolve to the given absolute path.
 function findVariableByPath(targetPath) {
   const absoluteTargetPath = path.resolve(targetPath);
 

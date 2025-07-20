@@ -4,27 +4,26 @@
 require('module-alias/register');
 
 const fs = require('fs');
-const { lintHelpersPath, lintingConfigPath, formattersPath } = require('@paths');
+const path = require('path');
+const {
+  lintHelpersPath,
+  lintingConfigPath,
+  formattersPath,
+  projectRoot,
+  fileDiscoveryPath
+} = require('@paths');
+
 const {
   loadLintSection,
-  findFilesArray,
-  isExcluded,
   parseCliArgs,
 } = require(lintHelpersPath);
+
+const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(formattersPath);
 
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
 const LINT_SKIP_MARKER = 'lint-skip-logger';
-
-function fileHasSkipLoggerMarker(filePath, maxLines = 10) {
-  try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    return content.split('\n').slice(0, maxLines).some(line => line.includes(LINT_SKIP_MARKER));
-  } catch {
-    return false;
-  }
-}
 
 function scanFile(filePath) {
   let content;
@@ -72,25 +71,20 @@ function runLinter(options = {}) {
   const {
     targets = [],
     excludes = [],
+    debug = false
   } = options;
 
-  const files = new Set();
   const issues = [];
 
-  for (const target of targets) {
-    for (const file of findFilesArray(target, {
-      filter: name => name.endsWith('.js') || name.endsWith('.mjs'),
-      ignores: [],
-    })) {
-      files.add(file);
-    }
-  }
+  const files = findFiles({
+    targets: targets,
+    ignores: excludes,
+    fileFilter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
+    skipTag: LINT_SKIP_MARKER,
+    debug: debug
+  });
 
   for (const file of files) {
-    if (isExcluded(file, excludes)) continue;
-    if (fileHasSkipLoggerMarker(file)) {
-      continue;
-    }
     const result = scanFile(file);
     if (!result) continue;
 
@@ -100,7 +94,7 @@ function runLinter(options = {}) {
       const severity = hit.type === 'console' ? 2 : 1;
 
       issues.push({
-        file,
+        file: path.relative(projectRoot, file),
         line: hit.line,
         column: 1,
         message: `Disallowed '${hit.method}' call found.`,
@@ -121,7 +115,6 @@ function runLinter(options = {}) {
   return { issues, summary, results: [] };
 }
 
-// CLI entry
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const loggingConfig = loadLintSection('logging', lintingConfigPath) || {};
@@ -135,6 +128,7 @@ if (require.main === module) {
     targets: finalTargets,
     excludes,
     config: loggingConfig,
+    debug: !!flags.debug,
   });
 
   renderLintOutput({ issues, summary, flags });
@@ -143,4 +137,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

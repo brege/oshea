@@ -13,9 +13,11 @@ My reliance on string matching patterns in CLI output was naively brittle and ha
 
 ## Refactor Timeline
 
+<!-- lint-disable-links -->
+
 |      | Step/Module            | Diff. | M/H/F   | Logger | Notes                                                                          |
 |------|:-----------------------|:-----:|:-------:|:------:|:-------------------------------------------------------------------------------|
-| arch | `test-helpers.js`      |   M   | refresh |   ✔    | test harness updated for logger; improved capture-based assertions             |
+| arch | [`test-helpers.js`](../shared/test-helpers.js)      |   M   | refresh |   ✔    | test harness updated for logger; improved capture-based assertions             |
 |      | **Plugin System**      |       |         |        |                                                                                |
 | plug | `src/plugins/*`        |   M   | new     |   ✔    | pilot for manifest/factory refactor                                            |
 | plug | `validate` & archetyper|   M   | new     |   ✔    | plugin validator tests moved from E2E to integration                           |
@@ -45,6 +47,7 @@ My reliance on string matching patterns in CLI output was naively brittle and ha
 - M/H/F: Manifest, Harness, Factory test refactor; refresh = partially modernized, new = entirely
 - Logger: ✔ = Logger modernization complete, ✗ = Not yet modernized
 
+<!-- lint-enable-links -->
 
 ## Takeaways
 

@@ -10,12 +10,13 @@ const {
   lintHelpersPath,
   lintingConfigPath,
   formattersPath,
+  fileDiscoveryPath,
   projectRoot
 } = require('@paths');
 
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const { renderLintOutput } = require(formattersPath);
-const { findFiles, findCandidates } = require('../lib/file-discovery');
+const { findFiles, findCandidates } = require(fileDiscoveryPath);
 
 const LINT_SKIP_TAG = 'lint-skip-postman';
 const DISABLE_MARKER = 'lint-disable-links';
@@ -35,6 +36,10 @@ function isAllowedExtension(ref, rules) {
 function isSkipLink(ref, rules) {
   const patterns = rules.skip_link_patterns || [];
   return patterns.some(pattern => minimatch(ref, pattern));
+}
+
+function containsGlobPattern(ref) {
+  return /[\][*?{}]/.test(ref);
 }
 
 function resolveReference(mdFile, ref, allowedExts) {
@@ -91,7 +96,11 @@ async function probeMarkdownFile(mdFile, rules) {
     if (node.type === 'link') {
       const url = node.url.split('#')[0];
       if (!url || url.startsWith('http')) return;
-      if (isReferenceExcluded(url, rules) || isSkipLink(url, rules)) return;
+      if (
+        containsGlobPattern(url) ||
+        isReferenceExcluded(url, rules) ||
+        isSkipLink(url, rules)
+      ) return;
 
       const resolved = resolveReference(mdFile, url, rules.allowed_extensions);
       results.push({
@@ -108,6 +117,7 @@ async function probeMarkdownFile(mdFile, rules) {
       if (
         ancestors.some(a => a.type === 'link') ||
         node.value.includes(' ') ||
+        containsGlobPattern(node.value) ||
         isReferenceExcluded(node.value, rules) ||
         isSkipLink(node.value, rules)
       ) return;
@@ -246,3 +256,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

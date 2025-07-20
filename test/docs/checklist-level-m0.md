@@ -15,12 +15,12 @@ Status Legend:
   - **test_type:** LINTING_UNIT
   - **description:** (Unit Test) The `logging-lint` linter correctly identifies `console.log` usage.
 
-* [x] M.0.1.2 (Unit Test) The `remove-auto-doc` linter correctly identifies `@auto-doc` comment blocks.
+* [x] M.0.1.2 (Unit Test) The `remove-jsdoc` linter correctly identifies `@jsdoc` comment blocks.
   - **test_id:** M.0.1.2
   - **status:** CLOSED
-  - **test_target:** remove-auto-doc
+  - **test_target:** remove-jsdoc
   - **test_type:** LINTING_UNIT
-  - **description:** (Unit Test) The `remove-auto-doc` linter correctly identifies `@auto-doc` comment blocks.
+  - **description:** (Unit Test) The `remove-jsdoc` linter correctly identifies `@jsdoc` comment blocks.
 
 * [x] M.0.1.3 (Unit Test) The `strip-trailing-whitespace` linter correctly identifies trailing whitespace.
   - **test_id:** M.0.1.3

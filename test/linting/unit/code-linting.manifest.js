@@ -3,7 +3,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const {
   loggingLintPath,
-  removeAutoDocPath,
+  removeJsdocPath,
   stripTrailingWhitespacePath,
   standardizeJsLineOneAllPath,
   noRelativePathsPath
@@ -11,7 +11,7 @@ const {
 
 module.exports = [
   {
-    describe: 'logging-lint should fail on console.log usage',
+    describe: 'M.0.1.1 logging-lint should fail on console.log usage',
     scriptPath: loggingLintPath,
     sandboxPrefix: 'logging-lint-',
     setup: async (sandboxDir) => {
@@ -24,20 +24,20 @@ module.exports = [
     },
   },
   {
-    describe: 'remove-auto-doc should report auto-doc comment blocks',
-    scriptPath: removeAutoDocPath,
-    sandboxPrefix: 'auto-doc-',
+    describe: 'M.0.1.2 remove-jsdoc should report jsdoc comment blocks',
+    scriptPath: removeJsdocPath,
+    sandboxPrefix: 'jsdoc-',
     setup: async (sandboxDir) => {
-      await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), '/**\n * @auto-doc\n */');
+      await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), '/**\n * @jsdoc\n */');
     },
     args: (sandboxDir) => [path.join(sandboxDir, 'bad-file.js')],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Found auto-doc block comment/i);
+      expect(stdout).to.match(/Found jsdoc block comment/i);
     },
   },
   {
-    describe: 'strip-trailing-whitespace should report trailing whitespace',
+    describe: 'M.0.1.3 strip-trailing-whitespace should report trailing whitespace',
     scriptPath: stripTrailingWhitespacePath,
     sandboxPrefix: 'whitespace-',
     setup: async (sandboxDir) => {
@@ -50,7 +50,7 @@ module.exports = [
     },
   },
   {
-    describe: 'standardize-js-line-one-all should report incorrect header',
+    describe: 'M.0.1.4 standardize-js-line-one-all should report incorrect header',
     scriptPath: standardizeJsLineOneAllPath,
     sandboxPrefix: 'header-',
     setup: async (sandboxDir) => {
@@ -64,7 +64,7 @@ module.exports = [
   },
 
   {
-    describe: 'no-relative-paths should report relative require()',
+    describe: 'M.0.1.5 no-relative-paths should report relative require()',
     scriptPath: noRelativePathsPath,
     sandboxPrefix: 'relative-path-',
     setup: async (sandboxDir) => {

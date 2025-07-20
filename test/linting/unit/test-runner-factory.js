@@ -3,21 +3,21 @@ require('module-alias/register');
 
 const { expect } = require('chai');
 const { lintingUnitHarnessPath } = require('@paths');
-const { SmokeTestHarness } = require(lintingUnitHarnessPath);
+const { UnitTestHarness } = require(lintingUnitHarnessPath);
 const proxyquire = require('proxyquire');
 
-function createSmokeTestRunner(suiteName, manifestPath, options = {}) {
+function createUnitTestRunner(suiteName, manifestPath, options = {}) {
   const { timeout = 20000 } = options;
   const testManifest = require(manifestPath);
 
-  describe(`Smoke Tests - ${suiteName}`, function() {
+  describe(`Unit Tests - ${suiteName}`, function() {
     this.timeout(timeout);
 
     for (const testCase of testManifest) {
       const testFn = testCase.skip ? it.skip : it;
 
       testFn(testCase.describe, async () => {
-        const harness = new SmokeTestHarness();
+        const harness = new UnitTestHarness();
         try {
           const sandboxDir = await harness.createSandbox(testCase.sandboxPrefix);
 
@@ -25,7 +25,6 @@ function createSmokeTestRunner(suiteName, manifestPath, options = {}) {
             await testCase.setup(sandboxDir, harness);
           }
 
-          // Use proxyquire only if proxyStubs is provided.
           if (testCase.proxyStubs) {
             proxyquire(testCase.scriptPath, testCase.proxyStubs);
           }
@@ -45,5 +44,5 @@ function createSmokeTestRunner(suiteName, manifestPath, options = {}) {
   });
 }
 
-module.exports = { createSmokeTestRunner };
+module.exports = { createUnitTestRunner };
 

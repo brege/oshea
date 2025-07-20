@@ -5,7 +5,6 @@ require('module-alias/register');
 
 const fs = require('fs');
 const glob = require('glob');
-
 const {
   mocharcPath,
   lintHelpersPath,
@@ -31,9 +30,11 @@ function* extractJsPatterns(obj) {
 }
 
 function runValidator(options = {}) {
-  const { config = {} } = options;
+  const { config = {}, debug = false } = options;
   const issues = [];
   const results = [];
+
+  if (debug) console.log(`[DEBUG] Checking for .mocharc.js at: ${mocharcPath}`);
 
   if (!fs.existsSync(mocharcPath)) {
     issues.push({
@@ -49,10 +50,12 @@ function runValidator(options = {}) {
   try {
     mochaConfig = require(mocharcPath);
   } catch (e) {
-    const content = fs.readFileSync(mocharcPath, 'utf8');
+    if (debug) console.log(`[DEBUG] Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`);
     try {
-      mochaConfig = eval(content.replace(/^module\.exports\s*=\s*/, ''));
-    } catch {
+      const content = fs.readFileSync(mocharcPath, 'utf8');
+      mochaConfig = eval(`(() => (${content.replace(/^module\.exports\s*=\s*/, '')}))()`);
+    } catch (evalError) {
+      if (debug) console.log(`[DEBUG] Manual parsing of .mocharc.js failed. Error: ${evalError.message}`);
       mochaConfig = {};
     }
   }
@@ -61,6 +64,8 @@ function runValidator(options = {}) {
   const patterns = Array.from(extractJsPatterns(mochaConfig)).filter(
     pattern => !excludes.some(ex => pattern.includes(ex))
   );
+
+  if (debug) console.log(`[DEBUG] Found ${patterns.length} patterns to validate.`);
 
   for (const pattern of patterns) {
     if (pattern.includes('*')) {
@@ -104,7 +109,7 @@ if (require.main === module) {
   const { flags } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('validate-mocha', lintingConfigPath) || {};
 
-  const { summary, results, issues } = runValidator({ config });
+  const { summary, results, issues } = runValidator({ config, debug: !!flags.debug });
 
   renderLintOutput({ issues, summary, results, flags });
 

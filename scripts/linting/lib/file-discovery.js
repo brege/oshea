@@ -41,24 +41,24 @@ function fileHasSkipTag(filePath, skipTag) {
 }
 
 function* walkDir(dir, options) {
-    const { ignores = [], fileFilter = () => true } = options;
-    try {
-        const entries = fs.readdirSync(dir, { withFileTypes: true });
-        for (const entry of entries) {
-            const fullPath = path.resolve(dir, entry.name);
-            const relPath = path.relative(projectRoot, fullPath).replace(/\\/g, '/');
-            if (ignores.some(pattern => minimatch(relPath, pattern))) {
-                continue;
-            }
-            if (entry.isDirectory()) {
-                yield* walkDir(fullPath, options);
-            } else if (entry.isFile() && fileFilter(fullPath)) {
-                yield fullPath;
-            }
-        }
-    } catch {
-        // Suppress errors
+  const { ignores = [], fileFilter = () => true } = options;
+  try {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.resolve(dir, entry.name);
+      const relPath = path.relative(projectRoot, fullPath).replace(/\\/g, '/');
+      if (ignores.some(pattern => minimatch(relPath, pattern))) {
+        continue;
+      }
+      if (entry.isDirectory()) {
+        yield* walkDir(fullPath, options);
+      } else if (entry.isFile() && fileFilter(fullPath)) {
+        yield fullPath;
+      }
     }
+  } catch {
+    // Suppress errors
+  }
 }
 
 
@@ -90,19 +90,19 @@ function findFiles(options = {}) {
 
   for (const target of allTargets) {
     if (isGlobPattern(target)) {
-        if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a glob pattern.`));
-        const matches = glob.sync(target, { cwd: projectRoot, absolute: true, nodir: true, ignore: combinedIgnores, dot: true });
-        matches.forEach(m => matchedFiles.add(m));
+      if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a glob pattern.`));
+      const matches = glob.sync(target, { cwd: projectRoot, absolute: true, nodir: true, ignore: combinedIgnores, dot: true });
+      matches.forEach(m => matchedFiles.add(m));
     } else if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
-        if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a directory.`));
-        for (const file of walkDir(target, { ignores: combinedIgnores, fileFilter })) {
-            matchedFiles.add(file);
-        }
+      if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a directory.`));
+      for (const file of walkDir(target, { ignores: combinedIgnores, fileFilter })) {
+        matchedFiles.add(file);
+      }
     } else if (fs.existsSync(target)) {
-        if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a direct file path.`));
-        matchedFiles.add(path.resolve(target));
+      if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a direct file path.`));
+      matchedFiles.add(path.resolve(target));
     } else if (debug) {
-        console.log(chalk.red(`[findFiles:Debug] Target '${target}' does not exist and is not a valid glob. Skipping.`));
+      console.log(chalk.red(`[findFiles:Debug] Target '${target}' does not exist and is not a valid glob. Skipping.`));
     }
   }
   if (debug) console.log(chalk.cyan(`[findFiles:Debug] Total unique paths found: ${matchedFiles.size}`));
@@ -111,15 +111,15 @@ function findFiles(options = {}) {
   for (const file of matchedFiles) {
     const relPath = path.relative(projectRoot, file);
     if (ignores.some(pattern => minimatch(relPath, pattern))) {
-        if (debug) console.log(chalk.magenta(`[findFiles:Debug] Skipping file matching ignore pattern: ${relPath}`));
-        continue;
+      if (debug) console.log(chalk.magenta(`[findFiles:Debug] Skipping file matching ignore pattern: ${relPath}`));
+      continue;
     }
     if (skipTag && fileHasSkipTag(file, skipTag)) {
       if (debug) console.log(chalk.magenta(`[findFiles:Debug] Skipping file with tag '${skipTag}': ${relPath}`));
       continue;
     }
     if(fileFilter(file)) {
-        finalFiles.push(file);
+      finalFiles.push(file);
     }
   }
 

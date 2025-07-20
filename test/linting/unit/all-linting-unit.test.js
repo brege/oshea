@@ -7,7 +7,7 @@ const {
   docsLintingManifestPath
 } = require('@paths');
 const {
-  createSmokeTestRunner
+  createUnitTestRunner
 } = require(testRunnerFactoryLinting);
 
 const testSuites = [
@@ -17,5 +17,5 @@ const testSuites = [
 
 
 for (const { name, manifest, options } of testSuites) {
-  createSmokeTestRunner(name, manifest, options);
+  createUnitTestRunner(name, manifest, options);
 }

@@ -4,8 +4,8 @@
 require('module-alias/register');
 
 const { exec } = require('child_process');
-const chalk = require('chalk');
-const { cliPath } = require('@paths');
+const { cliPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 // --- Test Scenarios ---
 const scenarios = [
@@ -38,7 +38,7 @@ const scenarios = [
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  console.log(chalk.blue('Smoke Test: Validating `collection list` command...'));
+  logger.info('Smoke Test: Validating `collection list` command...');
 
   let failedScenarios = [];
 
@@ -46,7 +46,7 @@ async function runSmokeTest() {
     const fullCommand = `node "${cliPath}" ${scenario.commandArgs}`;
     const commandDisplay = `md-to-pdf ${scenario.commandArgs}`;
 
-    process.stdout.write(`  Testing: ${chalk.cyan(commandDisplay)} ... `);
+    logger.writeDetail(`  Testing: ${commandDisplay} ... `);
 
     try {
       const stdout = await new Promise((resolve, reject) => {
@@ -55,35 +55,35 @@ async function runSmokeTest() {
             return reject({ error, stdout, stderr });
           }
           if (stderr) {
-            console.warn(chalk.yellow(`\n    Warning (stderr): ${stderr.trim()}`));
+            logger.warn(`\n    Warning (stderr): ${stderr.trim()}`);
           }
           resolve(stdout);
         });
       });
 
       if (scenario.validate(stdout)) {
-        console.log(chalk.green('✓ OK'));
+        logger.writeSuccess('✓ OK\n');
       } else {
         failedScenarios.push({ command: commandDisplay, reason: 'Validation function returned false. Output did not contain expected text.' });
-        console.log(chalk.red('✗ FAIL'));
+        logger.writeError('✗ FAIL\n');
       }
 
     } catch (result) {
       failedScenarios.push({ command: commandDisplay, reason: result.error.message.split('\n')[0] });
-      console.log(chalk.red('✗ FAIL'));
+      logger.writeError('✗ FAIL\n');
     }
   }
 
   if (failedScenarios.length > 0) {
-    console.error(chalk.red.bold('\n--- Smoke Test Failed ---'));
-    console.error(chalk.red(`${failedScenarios.length} 'collection list' scenario(s) failed:`));
+    logger.error('\n--- Smoke Test Failed ---');
+    logger.error(`${failedScenarios.length} 'collection list' scenario(s) failed:`);
     failedScenarios.forEach(({ command, reason }) => {
-      console.error(`\n  - ${chalk.cyan(command)}`);
-      console.error(chalk.gray(`    Reason: ${reason}`));
+      logger.detail(`\n  - ${command}`);
+      logger.detail(`    Reason: ${reason}`);
     });
     process.exit(1);
   } else {
-    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All `collection list` commands executed successfully.'));
+    logger.success('\n✓ Smoke Test Passed: All `collection list` commands executed successfully.');
     process.exit(0);
   }
 }
@@ -91,3 +91,4 @@ async function runSmokeTest() {
 if (require.main === module) {
   runSmokeTest();
 }
+

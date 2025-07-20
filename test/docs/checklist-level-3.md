@@ -136,14 +136,14 @@
 
 * [x] 3.5.3 (Happy Path) A plugin created from the default template passes validation.
   - **test_id:** 3.5.3
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** plugin create
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) A plugin created from the default template passes validation. Verifies that `plugin create <name>` followed by `plugin validate <name>` exits successfully.
 
 * [x] 3.5.4 (Happy Path) A plugin archetyped from a valid bundled plugin passes validation.
   - **test_id:** 3.5.4
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** plugin create --from
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) A plugin archetyped from a valid bundled plugin passes validation. Verifies that `plugin create <new> --from <source>` followed by `plugin validate <new>` exits successfully.
@@ -168,14 +168,14 @@
 
 * [x] 3.7.2 (Happy Path) The `plugin enable` command successfully enables a valid plugin.
   - **test_id:** 3.7.2
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** plugin enable
   - **test_type:** E2E_CLI
   - **description:** (Happy Path) The `plugin enable` command successfully enables a valid plugin. This implicitly verifies that the pre-enable validation check passes on a known-good plugin.
 
 * [x] 3.7.3 (Sad Path) The `plugin enable` command fails to enable an invalid plugin and reports validation errors.
   - **test_id:** 3.7.3
-  - **status:** OPEN
+  - **status:** CLOSED
   - **test_target:** plugin enable
   - **test_type:** E2E_CLI
   - **description:** (Sad Path) The `plugin enable` command fails to enable an invalid plugin and reports validation errors. Verifies that the command exits with a non-zero code and that the invalid plugin is not added to the enabled manifest.
@@ -293,3 +293,40 @@
   - **test_target:** Global Flags
   - **test_type:** E2E_CLI
   - **description:** (Sad Path) An unknown command fails with a non-zero exit code and an appropriate error message.
+
+## Y.20. CLI Smoke Tests
+
+* [x] 3.20.1 (Smoke Test) The `config` command and its primary options execute without errors.
+  - **test_id:** 3.20.1
+  - **status:** CLOSED
+  - **test_target:** validate-app-config
+  - **test_type:** E2E_CLI
+  - **description:** (Smoke Test) The `config` command and its primary options execute without errors.
+
+* [x] 3.20.2 (Smoke Test) The `--help` flag for all discovered commands executes without errors.
+  - **test_id:** 3.20.2
+  - **status:** CLOSED
+  - **test_target:** validate-app-help
+  - **test_type:** E2E_CLI
+  - **description:** (Smoke Test) The `--help` flag for all discovered commands executes without errors.
+
+* [x] 3.20.3 (Smoke Test) The `plugin validate` command successfully runs on all bundled plugins.
+  - **test_id:** 3.20.3
+  - **status:** CLOSED
+  - **test_target:** validate-bundled-plugins
+  - **test_type:** E2E_CLI
+  - **description:** (Smoke Test) The `plugin validate` command successfully runs on all bundled plugins.
+
+* [x] 3.20.4 (Smoke Test) The `collection list` command and its variants execute without errors.
+  - **test_id:** 3.20.4
+  - **status:** CLOSED
+  - **test_target:** validate-collection-list
+  - **test_type:** E2E_CLI
+  - **description:** (Smoke Test) The `collection list` command and its variants execute without errors.
+
+* [x] 3.20.5 (Smoke Test) The `plugin list` command and its variants execute without errors.
+  - **test_id:** 3.20.5
+  - **status:** CLOSED
+  - **test_target:** validate-plugin-list
+  - **test_type:** E2E_CLI
+  - **description:** (Smoke Test) The `plugin list` command and its variants execute without errors.

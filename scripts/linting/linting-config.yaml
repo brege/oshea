@@ -1,5 +1,12 @@
 # scripts/linting/linting-config.yaml
 
+# --- Anchors ---
+excludes-node-git: &excludes-node-git
+  - "node_modules/**"
+  - ".git/**"
+  - "assets/**"
+  - "docs/archive/**"
+
 # --- Code ---
 
 # scripts/linting/code/remove-auto-doc.js
@@ -17,13 +24,12 @@ remove-auto-doc:
   excludes:
     - "scripts/shared/file-helpers.js"
     - "scripts/ai/ai-context-generator.js"
-  excludeDirs:
-    - assets
-    - "node_modules"
-    - ".git"
+  excludeDirs: *excludes-node-git
 
-# scripts/linting/code/logging-lint.js
+# scripts/linting/code/logging-lint.js (opt-in)
 logging:
+  alias: "chalk"
+  group: "code"
   targets:
     - cli.js
     - index.js
@@ -37,11 +43,8 @@ logging:
     ###- plugins
     - test/integration
     - test/e2e
-  excludes:
-    - "node_modules/**"
-    - ".git/**"
-    - src/utils/logger.js
-    - "plugins/**"
+    - test/smoke
+  excludes: *excludes-node-git
 
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:
@@ -51,8 +54,7 @@ standardize-line-one:
     - "scripts/**/*.js"
     - "plugins/**/*.js"
     - paths/generator.js"
-  excludes:
-    - "node_modules/**"
+  excludes: *excludes-node-git
 
 # scripts/linting/code/strip-trailing-whitespace.js
 remove-ws:
@@ -66,25 +68,20 @@ remove-ws:
     - "paths/**/*.js"
     - "*.js"
     - "*.sh"
-  excludes:
-    - "node_modules/**"
+  excludes: *excludes-node-git
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
   alias: "paths"
   group: "code"
   targets:
-    - cli.js
-    - index.js
-    - plugins
-    - src
-    - scripts
-    - test
-  excludes:
-    - "node_modules/**"
-    - ".git/**"
-    - paths
-    - "plugins/**/.contract/test/*.test.js"
+    - "plugins/**/*.js"
+    - "src/**/*.js"
+    - "scripts/**/*.js"
+    - "test/**/*.js"
+    - "*.js"
+    - "*.sh"
+  excludes: *excludes-node-git
 
 # --- Validators ---
 
@@ -104,8 +101,6 @@ update-indices:
     scanRoot: "docs"
     fileExtensions:
       - ".md"
-    excludePatterns:
-      - docs/dream-board.md
   plugins:
     marker: "plugins"
     indexFile: plugins/index.md
@@ -139,29 +134,32 @@ update-indices:
       - test/docs
       - test/scripts
     fileExtensions:
-      - .js
-      - .md
+      - ".js"
+      - ".md"
+    excludePatterns: []
+  paths:
+    marker: "paths"
+    indexFile: paths/index.md
+    scanRoot: paths
+    fileExtensions:
+      - ".js"
+      - ".yaml"
     excludePatterns: []
 
 # scripts/linting/docs/postman.js
 doc-links:
   alias: "postman"
   group: "docs"
-  excludes:
-    - "node_modules/**"
-    - ".git/**"
-    - "assets/**"
-    - "docs/archive/**"
-    - "**/test/fixtures/**"
   allowed_extensions:
-    - ".md"
-    - ".js"
-    - ".mjs"
+    - "**/**.md"
+    - .js
   skip_link_patterns:
     - "**/my[-_]*"
     - "**/my[-_]*/**"
     - "**/sample.md"
     - "**/index.js"
+  excludes: *excludes-node-git
+
 # scripts/linting/docs/find-litter.js
 find-litter:
   alias: "custodian"
@@ -175,12 +173,7 @@ find-litter:
     - paths
     - "*.js"
     - "*.md"
-  excludes:
-    - "node_modules/**"
-    - ".git/**"
-    - "docs/archive/**"
-    - "plugins/template-basic/"
-    - "**/linting-docs.manifest.js"
+  excludes: *excludes-node-git
 
 # --- Harness Configuration ---
 harness:

@@ -140,7 +140,6 @@ function scanGroup(name, config, opts = {}) {
   const filesToIndex = collected.filter(f => !fileHasLintSkip(f));
   const indexRelPath = path.relative(projectRoot, indexAbsPath);
 
-  /** NEW: Always warn on everything in the uncat block */
   for (const rel of uncatLinks) {
     issues.push({
       file: indexRelPath,
@@ -171,7 +170,6 @@ function scanGroup(name, config, opts = {}) {
     });
   }
 
-  /** If fixing, insert any missingInIndex into the block */
   if (allowFix && missingInIndex.length > 0) {
     const startIdx = lines.findIndex(l => l.trim() === START_MARKER);
     const endIdx = lines.findIndex(l => l.trim() === END_MARKER);

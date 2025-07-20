@@ -19,7 +19,7 @@ const {
 } = require(testFileHelpersPath);
 
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'default-plugin-e2e');
-const PLUGIN_ROOT = path.resolve(__dirname, '../../');
+const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-disable-line no-relative-paths
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'default-example.md');
 
 describe('Default Plugin E2E', function() {

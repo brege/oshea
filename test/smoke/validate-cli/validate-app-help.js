@@ -6,8 +6,8 @@ require('module-alias/register');
 const { exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const chalk = require('chalk');
-const { cliCommandsPath, cliPath } = require('@paths');
+const { cliCommandsPath, cliPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 // --- Command Discovery Logic (reused and simplified) ---
 function parseBaseCommand(commandDef) {
@@ -46,7 +46,7 @@ function discoverCommands(dir, prefixParts = []) {
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  console.log(chalk.blue('Smoke Test: Validating all --help commands...'));
+  logger.info('Smoke Test: Validating all --help commands...');
 
   const commandPartsList = discoverCommands(cliCommandsPath);
   commandPartsList.push([]); // Add the root command
@@ -58,7 +58,7 @@ async function runSmokeTest() {
     const fullCommand = `node "${cliPath}" ${cmdParts} --help`;
     const commandDisplay = `md-to-pdf ${cmdParts} --help`.trim();
 
-    process.stdout.write(`  Testing: ${chalk.cyan(commandDisplay)} ... `);
+    logger.writeDetail(`  Testing: ${commandDisplay} ... `);
 
     try {
       await new Promise((resolve, reject) => {
@@ -69,26 +69,26 @@ async function runSmokeTest() {
           resolve({ stdout, stderr });
         });
       });
-      console.log(chalk.green('✓ OK'));
+      logger.writeSuccess('✓ OK\n');
     } catch (result) {
       failedCommands.push({ command: commandDisplay, error: result.error, stderr: result.stderr });
-      console.log(chalk.red('✗ FAIL'));
+      logger.writeError('✗ FAIL\n');
     }
   }
 
   if (failedCommands.length > 0) {
-    console.error(chalk.red.bold('\n--- Smoke Test Failed ---'));
-    console.error(chalk.red(`${failedCommands.length} command(s) failed to execute with --help:`));
+    logger.error('\n--- Smoke Test Failed ---');
+    logger.error(`${failedCommands.length} command(s) failed to execute with --help:`);
     failedCommands.forEach(({ command, error, stderr }) => {
-      console.error(`\n  - ${chalk.cyan(command)}`);
-      console.error(chalk.gray(`    Error: ${error.message.split('\n')[0]}`));
-      if(stderr) {
-        console.error(chalk.gray(`    Stderr: ${stderr.trim()}`));
+      logger.detail(`\n  - ${command}`);
+      logger.detail(`    Error: ${error.message.split('\n')[0]}`);
+      if (stderr) {
+        logger.detail(`    Stderr: ${stderr.trim()}`);
       }
     });
     process.exit(1);
   } else {
-    console.log(chalk.green.bold('\n✓ Smoke Test Passed: All --help commands executed successfully.'));
+    logger.success('\n✓ Smoke Test Passed: All --help commands executed successfully.');
     process.exit(0);
   }
 }
@@ -96,3 +96,4 @@ async function runSmokeTest() {
 if (require.main === module) {
   runSmokeTest();
 }
+

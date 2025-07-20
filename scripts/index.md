@@ -28,8 +28,6 @@ This document is a central index for all developer and automation scripts within
 
 ### Documentation [ `docs/` ]
 
-  - [ [`generate-help-checklist.js`](docs/generate-help-checklist.js) ]
-    -- Automatically generates and updates the `help-text-checklist.md` to track CLI help text standardization.
   - [ [`generate-toc.js`](docs/generate-toc.js) ]
     -- A utility to generate a Table of Contents for a Markdown file based on its headings.
     -- Automatically generates the main documentation index `docs/index.md` by discovering all non-excluded Markdown files.

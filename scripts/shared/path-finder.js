@@ -6,10 +6,16 @@ const fs = require('fs');
 const path = require('path');
 const acorn = require('acorn');
 const walk = require('acorn-walk');
-const { paths, fileHelpersPath } = require('@paths');
+const paths = require('@paths');
 const chalk = require('chalk');
+
+// Use @paths registry for file-helpers.js
+const { fileHelpersPath } = require('@paths');
 const { findFilesArray } = require(fileHelpersPath);
 
+/**
+ * Returns all registry/export variables that resolve to the given absolute path.
+ */
 function findVariableByPath(targetPath) {
   const absoluteTargetPath = path.resolve(targetPath);
 
@@ -22,9 +28,7 @@ function findVariableByPath(targetPath) {
           if (path.resolve(value) === absoluteTargetPath) {
             yield key;
           }
-        } catch (e) {
-          // eslint-disable-next-line no-empty
-        }
+        } catch (e) {}
       }
     }
   }
@@ -60,9 +64,7 @@ function getFileExports(targetPath) {
         }
       }
     });
-  } catch (e) {
-    // eslint-disable-next-line no-empty
-  }
+  } catch (e) {}
   return Array.from(exportsSet).sort();
 }
 

@@ -56,7 +56,8 @@ module.exports = [
       );
       // This test is designed to run against the main project config
     },
-    args: (sandboxDir) => ['--group=scripts'],
+    //args: (sandboxDir) => ['--group=scripts'],
+    args: (sandboxDir) => [path.join(sandboxDir, 'scripts')],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Untracked file: 'dummy\.js'/i);

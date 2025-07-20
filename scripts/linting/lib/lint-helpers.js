@@ -5,6 +5,7 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
+const chalk = require('chalk');
 const {
   minimatch
 } = require('minimatch');
@@ -40,28 +41,28 @@ function loadLintConfig(configPath = lintingConfigPath) {
 
 function findFilesArray(inputs, opts = {}) {
   const { debug = false } = opts;
-  if (debug) console.log(`[DEBUG] findFilesArray received inputs: ${JSON.stringify(inputs)}`);
+  if (debug) console.log(chalk.yellowBright(`\n[findFilesArray:Debug] Received inputs: ${JSON.stringify(inputs)}`));
 
   const files = new Set();
   const inputsArray = Array.isArray(inputs) ? inputs : [inputs];
 
   for (const input of inputsArray) {
-    if (debug) console.log(`[DEBUG] Processing input: '${input}'`);
+    if (debug) console.log(chalk.cyan(`[findFilesArray:Debug] Processing input: '${input}'`));
     if (fs.existsSync(input) && fs.statSync(input).isDirectory()) {
-      if (debug) console.log(`[DEBUG] Input '${input}' is a directory, walking it recursively...`);
+      if (debug) console.log(chalk.gray(`[findFilesArray:Debug] Input '${input}' is a directory, walking it recursively...`));
       for (const file of findFiles(input, opts)) {
         files.add(file);
       }
     } else {
-      if (debug) console.log(`[DEBUG] Input '${input}' is being treated as a glob pattern.`);
+      if (debug) console.log(chalk.gray(`[findFilesArray:Debug] Input '${input}' is being treated as a glob pattern.`));
       const { glob } = require('glob');
       const matches = glob.sync(input, { nodir: true, ignore: opts.ignores || [], dot: true, absolute: true, cwd: projectRoot });
-      if (debug) console.log(`[DEBUG] Glob '${input}' matched ${matches.length} files.`);
+      if (debug) console.log(chalk.gray(`[findFilesArray:Debug] Glob '${input}' matched ${matches.length} files.`));
       matches.forEach(file => files.add(file));
     }
   }
   const finalFiles = Array.from(files);
-  if (debug) console.log(`[DEBUG] findFilesArray finished, returning ${finalFiles.length} unique files.`);
+  if (debug) console.log(chalk.green(`[findFilesArray:Debug] Finished, returning ${finalFiles.length} unique files.`));
   return finalFiles;
 }
 
@@ -84,13 +85,6 @@ function parseCliArgs(args) {
     skip: false,
   };
 
-  const stepAliases = {
-    '--remove-ws': 'Strip Trailing Whitespace',
-    '--eslint': 'ESLint',
-    '--doc-links': 'Check Markdown Links (Postman)',
-    // Add more aliases if needed
-  };
-
   let only = null;
   const targets = [];
 
@@ -102,9 +96,7 @@ function parseCliArgs(args) {
       continue;
     }
 
-    if (stepAliases[arg]) {
-      only = stepAliases[arg];
-    } else if (arg === '--only') {
+    if (arg === '--only') {
       const next = args[i + 1];
       if (next && !next.startsWith('--')) {
         only = next;
@@ -151,7 +143,6 @@ function parseCliArgs(args) {
     }
   }
 
-  // Debug output
   if (flags.debug) {
     console.log('Parsed CLI args:', {
       flags,

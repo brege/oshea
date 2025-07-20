@@ -151,7 +151,7 @@ doc-links:
   alias: "postman"
   group: "docs"
   allowed_extensions:
-    - "**/**.md"
+    - .md
     - .js
   skip_link_patterns:
     - "**/my[-_]*"

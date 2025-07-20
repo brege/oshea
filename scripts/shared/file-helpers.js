@@ -125,5 +125,5 @@ module.exports = {
   getPatternsFromArgs,
   getDefaultGlobIgnores,
   findFilesArray,
+  isGlobPattern, // Export the missing function
 };
-

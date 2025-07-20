@@ -1,17 +1,24 @@
 #!/usr/bin/env node
-// scripts/linting/code/remove-auto-doc.js
+// scripts/linting/code/remove-jsdoc.js
 
 require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const { lintHelpersPath, lintingConfigPath, formattersPath } = require('@paths');
+const {
+  lintHelpersPath,
+  lintingConfigPath,
+  formattersPath,
+  fileDiscoveryPath,
+  projectRoot
+} = require('@paths');
+
 const {
   loadLintSection,
-  findFilesArray,
-  isExcluded,
   parseCliArgs,
 } = require(lintHelpersPath);
+
+const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(formattersPath);
 
 const BLOCK_COMMENT_REGEX = /\/\*\*[\r\n][\s\S]*?\*\//g;
@@ -45,39 +52,34 @@ function runLinter(options = {}) {
   const {
     targets = [],
     excludes = [],
-    excludeDirs = [],
     fix = false,
-    force = false,
     dryRun = false,
+    debug = false
   } = options;
 
-  const files = new Set();
   const issues = [];
   let fixedCount = 0;
 
-  for (const target of targets) {
-    for (const file of findFilesArray(target, {
-      filter: name => name.endsWith('.js') || name.endsWith('.mjs'),
-      ignores: excludeDirs,
-    })) {
-      files.add(file);
-    }
-  }
+  const files = findFiles({
+    targets: targets,
+    ignores: excludes,
+    fileFilter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
+    debug: debug
+  });
 
   for (const file of files) {
-    if (!force && isExcluded(file, excludes)) continue;
     const result = scanFile(file);
     if (!result) continue;
 
     for (const match of result.matches) {
-      const relPath = path.relative(process.cwd(), file);
+      const relPath = path.relative(projectRoot, file);
       issues.push({
         file: relPath,
         line: match.startLine,
         column: 1,
-        message: `Found auto-doc block comment starting on line ${match.startLine}.`,
-        rule: 'no-auto-doc',
-        severity: 1, // Warning
+        message: `Found jsdoc block comment starting on line ${match.startLine}.`,
+        rule: 'no-jsdoc',
+        severity: 1,
       });
     }
 
@@ -107,13 +109,12 @@ function runLinter(options = {}) {
 
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
-  const config = loadLintSection('remove-auto-doc', lintingConfigPath) || {};
+  const config = loadLintSection('remove-jsdoc', lintingConfigPath) || {};
   const configTargets = config.targets || [];
   const configExcludes = config.excludes || [];
-  const configExcludeDirs = config.excludeDirs || [];
 
   const finalTargets = targets.length ? targets : configTargets;
-  const excludes = flags.force ? [] : configExcludeDirs.concat(configExcludes);
+  const excludes = flags.force ? [] : config.excludeDirs.concat(configExcludes);
 
   const { issues, summary } = runLinter({
     targets: finalTargets,
@@ -121,6 +122,7 @@ if (require.main === module) {
     fix: !!flags.fix,
     dryRun: !!flags.dryRun,
     force: !!flags.force,
+    debug: !!flags.debug
   });
 
   renderLintOutput({ issues, summary, flags });

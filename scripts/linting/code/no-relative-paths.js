@@ -9,17 +9,17 @@ const {
   lintHelpersPath,
   lintingConfigPath,
   formattersPath,
-  projectRoot
+  projectRoot,
+  fileDiscoveryPath
 } = require('@paths');
+
 const {
   loadLintSection,
-  findFilesArray,
-  isExcluded,
   parseCliArgs
 } = require(lintHelpersPath);
-const {
-  renderLintOutput
-} = require(formattersPath);
+
+const { findFiles } = require(fileDiscoveryPath);
+const { renderLintOutput } = require(formattersPath);
 
 const LINT_DISABLE_TAG = 'lint-disable-next-line';
 const LINT_DISABLE_LINE = 'lint-disable-line no-relative-paths';
@@ -55,19 +55,17 @@ function scanFileForRelativePaths(filePath, debug = false) {
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
 
-    // Check lint-disable-next-line on the previous line
     if (index > 0) {
       const prevLine = lines[index - 1].trim();
       if (prevLine.startsWith('//') && prevLine.includes(LINT_DISABLE_TAG)) {
         if (debug) {
-          console.log(`[DEBUG] Skipping line ${index + 1} in ${filePath} due to lint-disable-next-line`);
+          console.log(`[DEBUG] Skipping line ${index + 1} due to lint-disable-next-line`);
         }
         return;
       }
     }
     if (trimmedLine.startsWith('//')) return;
 
-    // This is the addition: Check lint-disable-line on this line
     const hasDisableLine = line.includes(LINT_DISABLE_LINE);
 
     if (trimmedLine.includes('require(')) {
@@ -120,33 +118,21 @@ function runLinter(options = {}) {
     console.log('[DEBUG] Running no-relative-paths linter with options:', { targets, excludes });
   }
 
-  // Normalize excludes (optional - helps ensure directories are globbed properly)
-  const normalizedExcludes = excludes.map(p => {
-    if (p.endsWith('/')) return p + '**';
-    if (p.includes('*')) return p;
-    return p + '/**';
-  });
-
   const allIssues = [];
 
-  const filesToScan = findFilesArray(targets, {
-    filter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
-    ignores: normalizedExcludes,
+  const filesToScan = findFiles({
+    targets: targets,
+    fileFilter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
+    ignores: excludes,
     debug: debug
   });
 
-  if (debug) console.log(`[DEBUG] Found ${filesToScan.length} total files matching targets.`);
-
   for (const file of filesToScan) {
-    if (isExcluded(file, excludes)) {
-      if (debug) console.log(`[DEBUG] Skipping excluded file: ${path.relative(projectRoot, file)}`);
-      continue;
-    }
     const fileIssues = scanFileForRelativePaths(file, debug);
     if (fileIssues.length > 0) {
       allIssues.push(...fileIssues.map(issue => ({
         file: path.relative(projectRoot, file),
-        severity: 1, // Warning
+        severity: 1,
         ...issue
       })));
     }
@@ -174,7 +160,6 @@ if (require.main === module) {
   const configExcludes = config.excludes || [];
 
   const finalTargets = targets.length ? targets : configTargets;
-  // Respect --force to disable excludes
   const excludes = flags.force ? [] : configExcludes;
 
   const {
@@ -183,6 +168,7 @@ if (require.main === module) {
   } = runLinter({
     targets: finalTargets,
     excludes,
+    debug: !!flags.debug,
     ...flags
   });
 
@@ -198,4 +184,3 @@ if (require.main === module) {
 module.exports = {
   runLinter
 };
-

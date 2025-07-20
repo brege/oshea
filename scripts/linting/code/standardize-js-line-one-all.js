@@ -5,45 +5,44 @@ require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const { minimatch } = require('minimatch');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath
+  formattersPath,
+  fileDiscoveryPath,
+  projectRoot
 } = require('@paths');
+
 const {
-  findFilesArray,
-  parseCliArgs,
-  getPatternsFromArgs,
-  getDefaultGlobIgnores,
   loadLintSection,
+  parseCliArgs
 } = require(lintHelpersPath);
+
+const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(formattersPath);
 
 
 function runLinter(options = {}) {
   const {
-    patterns = [],
+    targets = [],
     ignores = [],
     fix = false,
     dryRun = false,
+    debug = false
   } = options;
 
-  const files = new Set();
   const issues = [];
   const changedFiles = new Set();
 
-  for (const file of findFilesArray('.', {
-    filter: name => name.endsWith('.js') || name.endsWith('.mjs'),
-    ignores,
-  })) {
-    if (patterns.some(pattern => minimatch(file, pattern))) {
-      files.add(file);
-    }
-  }
+  const files = findFiles({
+    targets: targets,
+    ignores: ignores,
+    fileFilter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
+    debug: debug
+  });
 
   for (const filePath of files) {
-    const relPath = path.relative(process.cwd(), filePath);
+    const relPath = path.relative(projectRoot, filePath);
     const originalContent = fs.readFileSync(filePath, 'utf8');
     let lines = originalContent.split('\n');
     let changed = false;
@@ -67,7 +66,7 @@ function runLinter(options = {}) {
         column: 1,
         message: 'Missing file header comment.',
         rule: 'file-header',
-        severity: 1, // Warning
+        severity: 1,
       });
 
       if (fix) {
@@ -82,7 +81,7 @@ function runLinter(options = {}) {
         column: 1,
         message: `Incorrect header path. Expected: "${relPath}", Found: "${actualHeaderPath}"`,
         rule: 'file-header',
-        severity: 1, // Warning
+        severity: 1,
       });
 
       if (fix) {
@@ -112,17 +111,15 @@ if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('standardize-line-one', lintingConfigPath) || {};
 
-  const patterns = targets.length > 0
-    ? getPatternsFromArgs(targets)
-    : (config.targets || []);
-
-  const ignores = config.excludes || getDefaultGlobIgnores();
+  const finalTargets = targets.length > 0 ? targets : (config.targets || []);
+  const ignores = config.excludes || [];
 
   const { issues, summary } = runLinter({
-    patterns,
+    targets: finalTargets,
     ignores,
     fix: !!flags.fix,
     dryRun: !!flags.dryRun,
+    debug: !!flags.debug
   });
 
   renderLintOutput({ issues, summary, flags });

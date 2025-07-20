@@ -11,10 +11,11 @@ const {
   lintingConfigPath,
   lintHelpersPath,
   formattersPath,
+  fileDiscoveryPath,
   projectRoot
 } = require('@paths');
 
-const { findFiles } = require('../lib/file-discovery');
+const { findFiles } = require(fileDiscoveryPath);
 const { parseCliArgs } = require(lintHelpersPath);
 const { renderLintOutput } = require(formattersPath);
 
@@ -220,7 +221,7 @@ function scanGroup(name, config, opts = {}) {
 }
 
 async function runLibrarian(options = {}) {
-  const { group = null, debug = false, targets = [], force = false } = options;
+  const { group = null, debug = false, targets = [], force = false } = options; // eslint-disable-line no-unused-vars
   const configYaml = fs.readFileSync(lintingConfigPath, 'utf8');
   const parsedConfig = yaml.load(configYaml);
   const groups = parsedConfig['update-indices'] || {};
@@ -232,7 +233,7 @@ async function runLibrarian(options = {}) {
   let groupsToRun = [];
 
   if (targets.length > 0) {
-    if (debug) console.log(chalk.cyan(`[Debug] CLI targets provided. Determining relevant group(s)...`));
+    if (debug) console.log(chalk.cyan('[Debug] CLI targets provided. Determining relevant group(s)...'));
     const targetPath = path.resolve(targets[0]);
     for (const [groupName, groupConfig] of Object.entries(groups)) {
       if (typeof groupConfig !== 'object' || !groupConfig.scanRoot) continue;
@@ -279,12 +280,12 @@ if (require.main === module) {
       debug: !!flags.debug,
       force: !!flags.force,
     }).then(({ issues, summary }) => {
-        renderLintOutput({ issues, summary, flags });
-        process.exitCode = summary.errorCount > 0 ? 1 : 0;
+      renderLintOutput({ issues, summary, flags });
+      process.exitCode = summary.errorCount > 0 ? 1 : 0;
     }).catch(error => {
-        console.error(chalk.red.bold('\n--- LIBRARIAN CRASHED ---'));
-        console.error(error);
-        process.exit(1);
+      console.error(chalk.red.bold('\n--- LIBRARIAN CRASHED ---'));
+      console.error(error);
+      process.exit(1);
     });
   })();
 }

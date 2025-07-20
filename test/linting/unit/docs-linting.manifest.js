@@ -9,7 +9,7 @@ const {
 
 module.exports = [
   {
-    describe: 'postman linter should report orphan link',
+    describe: 'M.0.2.1 postman linter should report orphan link',
     scriptPath: postmanPath,
     sandboxPrefix: 'docs-postman-',
     setup: async (sandboxDir) => {
@@ -24,7 +24,7 @@ module.exports = [
     },
   },
   {
-    describe: 'find-litter should warn on disallowed emojis',
+    describe: 'M.0.2.2 find-litter should warn on disallowed emojis',
     scriptPath: findLitterPath,
     sandboxPrefix: 'litter-',
     setup: async (sandboxDir) => {
@@ -37,7 +37,7 @@ module.exports = [
     },
   },
   {
-    describe: 'librarian warns for dummy .js not listed in local scripts/index.md',
+    describe: 'M.0.2.3 librarian warns for dummy .js not listed in local scripts/index.md',
     scriptPath: updateProjectIndicesPath,
     sandboxPrefix: 'librarian-dummy-',
     setup: async (sandboxDir) => {

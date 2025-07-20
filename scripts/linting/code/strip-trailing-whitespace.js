@@ -4,44 +4,44 @@ require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const { minimatch } = require('minimatch');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath
+  formattersPath,
+  fileDiscoveryPath,
+  projectRoot
 } = require('@paths');
+
 const {
-  findFilesArray,
+  loadLintSection,
   parseCliArgs,
   getPatternsFromArgs,
-  getDefaultGlobIgnores,
-  loadLintSection,
 } = require(lintHelpersPath);
+
+const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(formattersPath);
 
 function runLinter(options = {}) {
   const {
-    patterns = [],
+    targets = [],
     ignores = [],
     fix = false,
     dryRun = false,
+    debug = false
   } = options;
 
-  const files = new Set();
-  for (const file of findFilesArray('.', {
-    filter: () => true,
-    ignores,
-  })) {
-    if (patterns.some(pattern => minimatch(file, pattern))) {
-      files.add(file);
-    }
-  }
+  const files = findFiles({
+    targets: targets,
+    ignores: ignores,
+    // This linter can act on any file type, so no fileFilter is needed.
+    debug: debug
+  });
 
   const issues = [];
   const changedFiles = new Set();
 
   for (const filePath of files) {
-    const relPath = path.relative(process.cwd(), filePath);
+    const relPath = path.relative(projectRoot, filePath);
     const original = fs.readFileSync(filePath, 'utf8');
     const cleaned = original.replace(/[ \t]+$/gm, '');
 
@@ -55,7 +55,7 @@ function runLinter(options = {}) {
             column: line.search(/[ \t]+$/) + 1,
             message: 'Trailing whitespace found.',
             rule: 'no-trailing-whitespace',
-            severity: 1, // Warning
+            severity: 1,
           });
         }
       });
@@ -82,16 +82,17 @@ if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('remove-ws', lintingConfigPath) || {};
 
-  const patterns = targets.length > 0
+  const finalTargets = targets.length > 0
     ? getPatternsFromArgs(targets)
     : (config.targets || []);
-  const ignores = config.excludes || getDefaultGlobIgnores();
+  const ignores = config.excludes || [];
 
   const { issues, summary } = runLinter({
-    patterns,
+    targets: finalTargets,
     ignores,
     fix: !!flags.fix,
     dryRun: !!flags.dryRun,
+    debug: !!flags.debug
   });
 
   renderLintOutput({ issues, summary, flags });

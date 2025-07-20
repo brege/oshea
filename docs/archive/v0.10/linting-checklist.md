@@ -7,7 +7,7 @@ Task matrix for total feature parity. This makes more sense via `git s -w docs/l
 | Lints [ `scripts/linting/` ]   | La | Lb | Lc | Ld | Le | Lf | Lg | Lh | Li | Lj | Lk | Ll |
 |--------------------------------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
 | `code/logging-lint.js`         | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
-| `code/remove-auto-doc.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
+| `code/remove-jsdoc.js`         | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
 | `code/standardize-js-line-o..` | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
 | `code/strip-trailing-whites..` | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  | ✔  |
 | `docs/postman-helpers.js`      | ✔  | ✔  | ✔  | ✔  | ✔  | -- | -- | -- | ✔  | -- | -- | -- |
@@ -23,7 +23,7 @@ Task matrix for total feature parity. This makes more sense via `git s -w docs/l
 
 Nuances of the lints.
 1.  **`code/logging-lint.js`**:                  No autofix (by design)
-2.  **`code/remove-auto-doc.js`**:               Fully modern
+2.  **`code/remove-jsdoc.js`**:                  Fully modern
 3.  **`code/standardize-js-line-one-all.js`**:   Patterns/ignores not in config
 4.  **`code/strip-trailing-whitespace.js`**:     Patterns/ignores not in config
 5.  **`docs/postman-helpers.js`**:               Helpers only
@@ -170,7 +170,7 @@ node scripts/trees/tree-explorer.js scripts/linting/ scripts/docs/ scripts/share
     │   ├── code
     │   │   ├── logging-lint.js               #  - 
     │   │   ├── no-relative-paths.js          # [x] **NEW** [ combines ideas from `refactor/@paths` ]
-    │   │   ├── remove-auto-doc.js            #  - 
+    │   │   ├── remove-jsdoc.js               #  - 
     │   │   ├── standardize-js-line-one-all.. #  -
     │   │   └── strip-trailing-whitespace.js  #  -
     │   ├── config.yaml                       #  -

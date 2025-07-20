@@ -50,6 +50,7 @@ module.exports = [
       semi: ['warn', 'always'],
       quotes: ['warn', 'single'],
       'no-prototype-builtins': 'off',
+      'no-empty': 'off',
     },
   },
   {
@@ -77,3 +78,4 @@ module.exports = [
     },
   },
 ];
+

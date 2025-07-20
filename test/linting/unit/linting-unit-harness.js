@@ -7,12 +7,12 @@ const path = require('path');
 const os = require('os');
 const { cliPath, projectRoot } = require('@paths');
 
-class SmokeTestHarness {
+class UnitTestHarness {
   constructor() {
     this.sandboxDir = '';
   }
 
-  async createSandbox(prefix = 'smoke-test-') {
+  async createSandbox(prefix = 'unit-test-') {
     this.sandboxDir = await fs.mkdtemp(path.join(os.tmpdir(), prefix));
     return this.sandboxDir;
   }
@@ -47,5 +47,5 @@ class SmokeTestHarness {
   }
 }
 
-module.exports = { SmokeTestHarness };
+module.exports = { UnitTestHarness };
 

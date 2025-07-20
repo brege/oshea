@@ -1,5 +1,5 @@
 // linters.js - Linting Tools Registry
-// Generated: 2025-07-19T05:14:07.258Z
+// Generated: 2025-07-20T09:22:16.247Z
 // Architecture: Feature-based linting infrastructure
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -32,14 +32,13 @@ const lintPath = path.join(projectRoot, 'scripts/linting/lint.js');
 const codeRoot = path.join(projectRoot, 'scripts/linting/code/');
 const loggingLintPath = path.join(projectRoot, 'scripts/linting/code/logging-lint.js');
 const noRelativePathsPath = path.join(projectRoot, 'scripts/linting/code/no-relative-paths.js');
-const removeAutoDocPath = path.join(projectRoot, 'scripts/linting/code/remove-auto-doc.js');
+const removeJsdocPath = path.join(projectRoot, 'scripts/linting/code/remove-jsdoc.js');
 const standardizeJsLineOneAllPath = path.join(projectRoot, 'scripts/linting/code/standardize-js-line-one-all.js');
 const stripTrailingWhitespacePath = path.join(projectRoot, 'scripts/linting/code/strip-trailing-whitespace.js');
 
 // Documentation Linters
 const docsRoot = path.join(projectRoot, 'scripts/linting/docs/');
 const findLitterPath = path.join(projectRoot, 'scripts/linting/docs/find-litter.js');
-const postmanHelpersPath = path.join(projectRoot, 'scripts/linting/docs/postman-helpers.js');
 const postmanPath = path.join(projectRoot, 'scripts/linting/docs/postman.js');
 const updateProjectIndicesPath = path.join(projectRoot, 'scripts/linting/docs/update-project-indices.js');
 
@@ -53,6 +52,7 @@ const mochaPathValidatorPath = path.join(projectRoot, 'scripts/linting/validator
 
 // Linting Utilities & Helpers
 const libRoot = path.join(projectRoot, 'scripts/linting/lib/');
+const fileDiscoveryPath = path.join(projectRoot, 'scripts/linting/lib/file-discovery.js');
 const formattersPath = path.join(projectRoot, 'scripts/linting/lib/formatters.js');
 const lintHelpersPath = path.join(projectRoot, 'scripts/linting/lib/lint-helpers.js');
 
@@ -76,12 +76,11 @@ module.exports = {
   codeRoot,
   loggingLintPath,
   noRelativePathsPath,
-  removeAutoDocPath,
+  removeJsdocPath,
   standardizeJsLineOneAllPath,
   stripTrailingWhitespacePath,
   docsRoot,
   findLitterPath,
-  postmanHelpersPath,
   postmanPath,
   updateProjectIndicesPath,
 
@@ -91,6 +90,7 @@ module.exports = {
 
   // --- enhancements & utilities ---
   libRoot,
+  fileDiscoveryPath,
   formattersPath,
   lintHelpersPath,
 

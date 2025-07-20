@@ -16,7 +16,7 @@ This directory contains all assets related to testing the `md-to-pdf` applicatio
 
 ### Testing Framework
 
-The project uses [Mocha](https://mochajs.org/) as its test runner. A centralized configuration file, `.mocharc.js`, defines test groups and paths, making the suite highly flexible and easy to manage.
+The project uses [Mocha](https://mochajs.org/) as its test runner. A centralized configuration file, [`.mocharc.js`](../.mocharc.js), defines test groups and paths, making the suite highly flexible and easy to manage.
 
 #### Running Tests
 
@@ -26,7 +26,7 @@ Tests can be executed in a variety of ways to target specific groups, levels, or
     ```bash
     npm test
     ```
-  * **Run a specific group** (defined in `.mocharc.js`):
+  * **Run a specific group** (defined in [`.mocharc.js`](../.mocharc.js)):
     ```bash
     npm test -- --group level3
     ```
@@ -76,7 +76,7 @@ These items are the kinds that *do not* get picked up by a CI. These tests are o
 - [ [`find-nonclosed-audits.js`](scripts/find-nonclosed-audits.js) ]
   -- tests that are in the [audit log](docs/audit-log.md) not marked as `CLOSED`
 - [ [`find-unchecked-tests.js`](scripts/find-unchecked-tests.js) ]
-  -- tests that are unchecked in the [checklist](docs/checklist-level-%5B1-4%5D.md)
+  -- tests that are unchecked in the [checklist](docs/) `checklist-level-?.md`
 - [ [`find-skipped-tests.js`](scripts/find-skipped-tests.js) ]
   -- tests that have been skipped via `it.skip()` in test manifests
 

@@ -10,11 +10,12 @@ const {
   lintingConfigPath,
   formattersPath,
   projectRoot,
+  fileDiscoveryPath,
   findLitterRulesPath
 } = require('@paths');
 
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
-const { findFiles } = require('../lib/file-discovery'); // Use the new utility
+const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(formattersPath);
 
 const TYPE_RE = /^\[(\w+):(\w+):([\w*,.]+)\]\s+(.+)$/i;
@@ -183,12 +184,12 @@ function runLinter(options = {}) {
   const allFileTypes = ['.js', '.mjs', '.ts', '.tsx', '.md', '.html', '.css', '.json', '.yml', '.yaml'];
 
   const files = findFiles({
-      targets: targets,
-      ignores: excludes,
-      fileFilter: (filename) => allFileTypes.some(ext => filename.endsWith(ext)),
-      respectDocignore: true,
-      skipTag: LINT_SKIP_TAG,
-      debug: debug
+    targets: targets,
+    ignores: excludes,
+    fileFilter: (filename) => allFileTypes.some(ext => filename.endsWith(ext)),
+    respectDocignore: true,
+    skipTag: LINT_SKIP_TAG,
+    debug: debug
   });
 
   for (const file of files) {

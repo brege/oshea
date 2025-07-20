@@ -19,7 +19,7 @@ This document will be renamed and better formatted.  For now, I'm taking invento
 
 ### Tests
 
-- [ ] make `test/` pathing registry compliant.
+- [x] make `test/` pathing registry compliant.
 - [x] smoke test to CI
 - [x] pay debt in plugin validate
 - [ ] add level4 tests for walkthroughs

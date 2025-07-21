@@ -126,6 +126,7 @@ class DeclarativePathsGenerator {
     const metadata = this.config.metadata || {};
 
     // Header with metadata
+    content.push(`// ${registryConfig.output_file}`);
     content.push(`// ${path.basename(registryConfig.output_file)} - ${registryConfig.title}`);
     content.push(`// Generated: ${new Date().toISOString()}`);
     content.push(`// Architecture: ${registryConfig.architecture}`);
@@ -148,7 +149,7 @@ class DeclarativePathsGenerator {
     const archSections = registryConfig.architecture_sections || registryConfig.architecture;
     if (archSections && typeof archSections === 'object') {
       content.push('// ==========================================');
-      content.push('// ARCHITECTURE');
+      content.push('// Architecture');
       content.push('// ==========================================');
       content.push('');
 
@@ -166,7 +167,7 @@ class DeclarativePathsGenerator {
     // Scan-based section
     if (registryConfig.scan_mode) {
       content.push('// ==========================================');
-      content.push('// SCANNED ENTRIES');
+      content.push('// Scanned Entries');
       content.push('// ==========================================');
       content.push('');
 
@@ -205,7 +206,7 @@ class DeclarativePathsGenerator {
     const featureFiles = {};
     if (registryConfig.features) {
       content.push('// ==========================================');
-      content.push('// FEATURES (by dependency rank)');
+      content.push('// Features (by dependency rank)');
       content.push('// ==========================================');
       content.push('');
 
@@ -255,7 +256,7 @@ class DeclarativePathsGenerator {
 
     // Export section
     content.push('// ==========================================');
-    content.push('// EXPORTS');
+    content.push('// Exports');
     content.push('// ==========================================');
     content.push('');
     content.push('module.exports = {');
@@ -344,22 +345,48 @@ class DeclarativePathsGenerator {
       fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    let hasChanged = true;
+    let shouldUpdate = true;
     if (fs.existsSync(outputPath)) {
-      const oldContent = fs.readFileSync(outputPath, 'utf8');
-      const oldContentBody = oldContent.split('\n').slice(2).join('\n');
-      const newContentBody = newContent.split('\n').slice(2).join('\n');
-      if (oldContentBody === newContentBody) {
-        hasChanged = false;
+      // Extract variable names from old and new content
+      const oldVariables = this.extractVariableNames(fs.readFileSync(outputPath, 'utf8'));
+      const newVariables = this.extractVariableNames(newContent);
+
+      // Only update if there are new variables (additions)
+      const hasNewItems = newVariables.some(varName => !oldVariables.includes(varName));
+
+      if (!hasNewItems) {
+        shouldUpdate = false;
+        logger.info(`No new items detected in ${registryName} registry: ${outputPath}`);
+      } else {
+        const newItems = newVariables.filter(varName => !oldVariables.includes(varName));
+        logger.info(`New items detected in ${registryName}: ${newItems.join(', ')}`);
       }
     }
 
-    if (hasChanged) {
+    if (shouldUpdate) {
       fs.writeFileSync(outputPath, newContent);
       logger.success(`Generated ${registryName} registry: ${outputPath}`);
-    } else {
-      logger.info(`No changes in ${registryName} registry: ${outputPath}`);
     }
+  }
+
+  // Helper method to extract variable names from generated content
+  extractVariableNames(content) {
+    const lines = content.split('\n');
+    const variables = [];
+
+    // Find all 'const variableName = ' declarations
+    for (const line of lines) {
+      const match = line.match(/^const\s+(\w+)\s*=/);
+      if (match && match[1]) {
+        // Skip the common base variables that always exist
+        const varName = match[1];
+        if (!['projectRoot', 'scriptsRoot', 'testRoot', 'srcRoot', 'assetsRoot', 'nodeModulesPath'].includes(varName)) {
+          variables.push(varName);
+        }
+      }
+    }
+
+    return variables;
   }
 
   run(dryRun = false) {

@@ -1,9 +1,11 @@
 // test/scripts/find-skipped-tests.js
 require('module-alias/register');
-const { integrationTestDir, e2eTestDir } = require('@paths');
+const { integrationTestDir, e2eTestDir, loggerPath } = require('@paths');
 
 const fs = require('fs');
 const path = require('path');
+
+const logger = require(loggerPath);
 
 const TEST_DIRS = [
   integrationTestDir,
@@ -50,5 +52,6 @@ for (const dir of TEST_DIRS) {
 filesWithItSkip.forEach(({ testCode, relPath, skips }) => {
   const tid = (testCode || '').padEnd(8);
   const skipCol = `${skips} it.skip()`.padEnd(12);
-  console.log(`${tid}${skipCol}${relPath}`);
+  logger.info(`${tid}${skipCol}${relPath}`);
 });
+

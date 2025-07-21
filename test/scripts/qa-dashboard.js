@@ -1,9 +1,10 @@
 // test/scripts/qa-dashboard.js
 require('module-alias/register');
-const { integrationTestDir, e2eTestDir, docsTestDir, testRoot } = require('@paths');
+const { integrationTestDir, e2eTestDir, docsTestDir, testRoot, loggerPath } = require('@paths');
 
 const fs = require('fs');
 const path = require('path');
+const logger = require(loggerPath);
 
 // --- Helper functions for all three sources ---
 
@@ -199,7 +200,7 @@ function updateIndex(dashboardLines) {
   try {
     indexContent = fs.readFileSync(indexPath, 'utf8');
   } catch (error) {
-    console.error(`ERROR: Could not read index.md at ${indexPath}.`, error);
+    logger.error(`ERROR: Could not read index.md at ${indexPath}.`, { error });
     return;
   }
 
@@ -218,7 +219,9 @@ function updateIndex(dashboardLines) {
   );
 
   if (!regex.test(indexContent)) {
-    console.error(`ERROR: Could not find dashboard markers in ${indexPath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`);
+    logger.error(
+      `ERROR: Could not find dashboard markers in ${indexPath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`
+    );
     return;
   }
 
@@ -226,7 +229,7 @@ function updateIndex(dashboardLines) {
   indexContent = indexContent.replace(regex, newContent);
 
   fs.writeFileSync(indexPath, indexContent, 'utf8');
-  console.log(`Successfully updated dashboard in ${indexPath}`);
+  logger.success(`Successfully updated dashboard in ${indexPath}`);
 }
 
 
@@ -237,6 +240,6 @@ if (process.argv.includes('update')) {
 } else {
   // Default behavior: print to stdout
   const dashboardLines = generateDashboardContent();
-  console.log(dashboardLines.join('\n'));
+  logger.info(dashboardLines.join('\n'));
 }
 

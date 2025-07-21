@@ -1,5 +1,5 @@
 // scripts/shared/file-helpers.js
-
+// lint-skip-logger
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
@@ -21,7 +21,7 @@ const DEFAULT_DIR_IGNORES = [
   '*-devel'
 ];
 
-// Centralized glob patterns for JS/MJS files
+// Centralized glob patterns for JS files
 const DEFAULT_PATTERNS = ['**/*.{js,mjs}'];
 
 /**

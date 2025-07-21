@@ -17,6 +17,7 @@
 [comment:high:js,ts] Removed $match-case
 [comment:high:js,ts] NEW$match-case
 [comment:high:js,ts] <--
+[comment:high:js,ts] UPDATE$match-case
 
 # medium-confidence patterns
 [comment:medium:*] corrected
@@ -38,3 +39,34 @@
 ★
 ➜ 
 ↔
+
+# --- whitelist: allowed ALL CAPS in comments ---
+# pattern examples: TOC, LINT_*, ESLint
+[whitelist:comment:js,ts]
+ALL
+AND
+CLI
+CLOSED
+CONTRIBUTORS
+CSS
+CWD
+ESLint
+FILE
+GPG
+HTML
+JSDoc
+JSON
+LICENSE
+LINT_.*
+NOT
+OPEN
+PDF
+README
+ROADMAP
+TOC
+URI
+URL
+VALID
+XDG
+YAML
+

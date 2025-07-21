@@ -1,5 +1,6 @@
+// paths/linters.js
 // linters.js - Linting Tools Registry
-// Generated: 2025-07-20T09:22:16.247Z
+// Generated: 2025-07-21T05:38:15.082Z
 // Architecture: Feature-based linting infrastructure
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -7,7 +8,7 @@
 const path = require('path');
 
 // ==========================================
-// ARCHITECTURE
+// Architecture
 // ==========================================
 
 // --- Project Foundation ---
@@ -16,7 +17,7 @@ const scriptsRoot = path.join(projectRoot, 'scripts');
 const lintingRoot = path.join(scriptsRoot, 'linting');
 
 // ==========================================
-// FEATURES (by dependency rank)
+// Features (by dependency rank)
 // ==========================================
 
 // --- Rank 0: user-facing interfaces ---
@@ -57,7 +58,7 @@ const formattersPath = path.join(projectRoot, 'scripts/linting/lib/formatters.js
 const lintHelpersPath = path.join(projectRoot, 'scripts/linting/lib/lint-helpers.js');
 
 // ==========================================
-// EXPORTS
+// Exports
 // ==========================================
 
 module.exports = {

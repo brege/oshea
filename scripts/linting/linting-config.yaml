@@ -1,87 +1,73 @@
 # scripts/linting/linting-config.yaml
 
-# --- Anchors ---
-excludes-node-git: &excludes-node-git
-  - "node_modules/**"
-  - ".git/**"
-  - "assets/**"
-  - "docs/archive/**"
+# These are hardcoded core ignore paths (already write-protected):
+#
+# excludes:
+#   - "node_modules/**"
+#   - ".git/**"
+#   - "assets/**"
+#   - "docs/archive/**"
+#
+# The following filetypes are automatically linted:
+#
+# filetypes: [".js", ".json", ".md", ".sh", ".yaml", ".txt"]
+#
+# If you set `filetypes: [".js"]`, *only* `.js` files will be linted.
 
 # --- Code ---
 
 # scripts/linting/code/remove-jsdoc.js
 remove-jsdoc:
-  group: "code"
-  alias: "jsdoc"
+  group: code
+  alias: jsdoc
   targets:
-    - cli.js
-    - index.js
-    - "src/**/*.js"
-    - "test/**/*.js"
-    - "plugins/**/*.js"
-    - "scripts/**/*.js"
-    - "paths/**/*.js"
+    - "."
   excludes:
-    - "scripts/shared/file-helpers.js"
-    - "scripts/ai/ai-context-generator.js"
-  excludeDirs: *excludes-node-git
+    - scripts/shared/file-helpers.js
+    - scripts/ai/ai-context-generator.js
+  excludeDirs: []
 
-# scripts/linting/code/logging-lint.js (opt-in)
+# scripts/linting/code/logging-lint.js
 logging:
-  alias: "chalk"
-  group: "code"
+  alias: chalk
+  group: code
+  filetypes: [".js"]
   targets:
-    - cli.js
-    - index.js
-    - src
-    ### TODO
-    ###- paths
-    ###- test/smoke
-    ###- test/linting
-    ###- scripts/linting (?)
-    ###- scripts/shared (?)
-    ###- plugins
-    - test/integration
-    - test/e2e
-    - test/smoke
-  excludes: *excludes-node-git
+    - "."
+  excludes:
+    - scripts/ai
+    - scripts/batch
+    - scripts/completion
+    - scripts/docs
+    - scripts/linting
+
 
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:
+  alias: line-one
+  group: code
+  filetypes: [".js"]
   targets:
-    - "src/**/*.js"
-    - "test/**/*.js"
-    - "scripts/**/*.js"
-    - "plugins/**/*.js"
-    - paths/generator.js"
-  excludes: *excludes-node-git
+    - "."
+  excludes: []
 
 # scripts/linting/code/strip-trailing-whitespace.js
 remove-ws:
-  alias: "ws"
-  group: "code"
+  alias: whitespace
+  group: code
+  filetypes: [".css", ".js", ".json", ".yaml"]
   targets:
-    - "src/**/*.js"
-    - "test/**/*.js"
-    - "scripts/**/*.js"
-    - "plugins/**/*.js"
-    - "paths/**/*.js"
-    - "*.js"
-    - "*.sh"
-  excludes: *excludes-node-git
+    - "."
+  excludes: []
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
-  alias: "paths"
-  group: "code"
+  alias: paths
+  group: code
   targets:
-    - "plugins/**/*.js"
-    - "src/**/*.js"
-    - "scripts/**/*.js"
-    - "test/**/*.js"
-    - "*.js"
-    - "*.sh"
-  excludes: *excludes-node-git
+    - "."
+  excludes:
+    - paths
 
 # --- Validators ---
 
@@ -92,6 +78,12 @@ validate-mocha:
 
 # --- Docs ---
 
+# scripts/linting/docs/find-litter.js
+find-litter:
+  alias: "custodian"
+  group: "docs"
+  excludes: []
+
 # scripts/linting/docs/update-project-indices.js
 update-indices:
   alias: "librarian"
@@ -99,14 +91,12 @@ update-indices:
   docs:
     indexFile: docs/index.md
     scanRoot: "docs"
-    fileExtensions:
-      - ".md"
+    filetypes: [".md"]
   plugins:
     marker: "plugins"
     indexFile: plugins/index.md
     scanRoot: "plugins"
-    fileExtensions:
-      - ".md"
+    filetypes: [".md"]
     excludePatterns:
       - "plugins/**/index.md"
       - "plugins/**/*-example.md"
@@ -114,18 +104,14 @@ update-indices:
     marker: "scripts"
     indexFile: scripts/index.md
     scanRoot: "scripts"
-    fileExtensions:
-      - ".js"
-      - ".sh"
+    filetypes: [".js", ".sh"]
     excludePatterns:
       - "scripts/linting/**"
   linting:
     marker: "linting"
     indexFile: scripts/linting/index.md
     scanRoot: scripts/linting
-    fileExtensions:
-      - ".js"
-      - ".sh"
+    filetypes: [".js", ".yaml"]
     excludePatterns: []
   test-scripts:
     marker: "test-scripts"
@@ -133,54 +119,32 @@ update-indices:
     scanRoot:
       - test/docs
       - test/scripts
-    fileExtensions:
-      - ".js"
-      - ".md"
+    filetypes: [".js", ".md"]
     excludePatterns: []
   paths:
     marker: "paths"
     indexFile: paths/index.md
     scanRoot: paths
-    fileExtensions:
-      - ".js"
-      - ".yaml"
+    filetypes: [".js", ".yaml"]
     excludePatterns: []
 
 # scripts/linting/docs/postman.js
 doc-links:
   alias: "postman"
   group: "docs"
-  allowed_extensions:
-    - .md
-    - .js
+  targets: 
+   - "."
+  filetypes: [".md", ".js"]
   skip_link_patterns:
     - "**/my[-_]*"
     - "**/my[-_]*/**"
     - "**/sample.md"
     - "**/index.js"
-  excludes: # *excludes-node-git
-    - "node_modules/**"
-    - ".git/**"
-    - "assets/**"
-    - "docs/archive/**"
+  excludes:
+    - "README.md"
     - "test/docs/checklist-*.md"
     - "test/docs/audit-log.md"
     - "plugins/recipe-book/README.md"
-
-# scripts/linting/docs/find-litter.js
-find-litter:
-  alias: "custodian"
-  group: "docs"
-  targets:
-    - src
-    - docs
-    - plugins
-    - scripts
-    - test
-    - paths
-    - "*.js"
-    - "*.md"
-  excludes: *excludes-node-git
 
 # --- Harness Configuration ---
 harness:
@@ -190,18 +154,17 @@ harness:
     - key: 'remove-ws'
       label: 'Code: Strip Trailing Whitespace'
       scriptPath: scripts/linting/code/strip-trailing-whitespace.js
-      fix: true
     - key: 'standardize-line-one'
       label: 'Code: Standardize File Headers'
       scriptPath: scripts/linting/code/standardize-js-line-one-all.js
-      ignoreFailure: true
+      #ignoreFailure: true
     - key: 'logging'
       label: 'Code: Check for console/chalk usage'
       scriptPath: scripts/linting/code/logging-lint.js
     - key: 'remove-jsdoc'
       label: 'Code: Check for JSdoc comments'
       scriptPath: scripts/linting/code/remove-jsdoc.js
-    - key: no-relative-paths
+    - key: 'no-relative-paths'
       label: 'Code: Check for relative paths'
       scriptPath: scripts/linting/code/no-relative-paths.js
 
@@ -217,7 +180,7 @@ harness:
     - key: 'doc-links'
       label: 'Docs: Check Markdown Links (Postman)'
       scriptPath: scripts/linting/docs/postman.js
-    - key: 'remove-litter'
+    - key: 'find-litter'
       label: 'Docs: Find Litter (Custodian)'
       scriptPath: scripts/linting/docs/find-litter.js
 

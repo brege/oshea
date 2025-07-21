@@ -54,7 +54,8 @@ function runLinter(options = {}) {
     excludes = [],
     fix = false,
     dryRun = false,
-    debug = false
+    debug = false,
+    filetypes = undefined
   } = options;
 
   const issues = [];
@@ -63,7 +64,7 @@ function runLinter(options = {}) {
   const files = findFiles({
     targets: targets,
     ignores: excludes,
-    fileFilter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
+    filetypes,
     debug: debug
   });
 
@@ -86,14 +87,12 @@ function runLinter(options = {}) {
     if (fix && result.matches.length > 0) {
       if (!dryRun) {
         let newContent = result.content;
-        // Iterate backwards to avoid index shifting
         for (let i = result.matches.length - 1; i >= 0; i--) {
           const { start, end } = result.matches[i];
           newContent = newContent.slice(0, start) + newContent.slice(end);
         }
         fs.writeFileSync(file, newContent, 'utf8');
       }
-      // Increment fixedCount regardless of dryRun to report what *would* be fixed
       fixedCount++;
     }
   }
@@ -112,6 +111,7 @@ if (require.main === module) {
   const config = loadLintSection('remove-jsdoc', lintingConfigPath) || {};
   const configTargets = config.targets || [];
   const configExcludes = config.excludes || [];
+  const filetypes = config.filetypes;
 
   const finalTargets = targets.length ? targets : configTargets;
   const excludes = flags.force ? [] : config.excludeDirs.concat(configExcludes);
@@ -122,7 +122,8 @@ if (require.main === module) {
     fix: !!flags.fix,
     dryRun: !!flags.dryRun,
     force: !!flags.force,
-    debug: !!flags.debug
+    debug: !!flags.debug,
+    filetypes
   });
 
   renderLintOutput({ issues, summary, flags });
@@ -131,3 +132,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

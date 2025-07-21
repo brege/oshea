@@ -9,6 +9,44 @@ const { minimatch } = require('minimatch');
 const { projectRoot, fileHelpersPath } = require('@paths');
 const { isGlobPattern } = require(fileHelpersPath);
 
+// Hardcoded core directories to always exclude from linting.
+const CORE_IGNORES = [
+  '**/node_modules/**',
+  '**/.git/**',
+  'assets/**',
+  'docs/archive/**',
+  'package*.json',
+];
+
+// Only allow these extensions if filetypes is not explicitly set.
+const SAFE_DEFAULTS = ['.js', '.json', '.md', '.sh', '.yaml', '.txt'];
+
+function getEslintIgnorePatterns() {
+  const eslintIgnorePath = path.join(projectRoot, '.eslintignore');
+  if (fs.existsSync(eslintIgnorePath)) {
+    try {
+      return fs
+        .readFileSync(eslintIgnorePath, 'utf-8')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line && !line.startsWith('#'))
+        .map(pattern => {
+          // If a pattern from .eslintignore is a directory, make it match all sub-contents
+          if (pattern.endsWith('/')) {
+            return `${pattern.slice(0, -1)}/**`;
+          }
+          return pattern;
+        });
+    } catch (e) {
+      if (process.env.DEBUG) {
+        console.warn(chalk.yellow(`[WARN] Could not read .eslintignore file: ${e.message}`));
+      }
+      return [];
+    }
+  }
+  return [];
+}
+
 function getDocignorePatterns(root) {
   const ignoredDirs = [];
   function walk(dir) {
@@ -40,19 +78,28 @@ function fileHasSkipTag(filePath, skipTag) {
   }
 }
 
+// Default to common text file types if filetypes not set.
+function hasAllowedExt(filename, filetypes) {
+  const ext = path.extname(filename).toLowerCase();
+  if (filetypes && Array.isArray(filetypes) && filetypes.length) {
+    return filetypes.includes(ext);
+  }
+  return SAFE_DEFAULTS.includes(ext);
+}
+
 function* walkDir(dir, options) {
-  const { ignores = [], fileFilter = () => true } = options;
+  const { ignores = [], fileFilter = () => true, filetypes = null } = options;
   try {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       const fullPath = path.resolve(dir, entry.name);
       const relPath = path.relative(projectRoot, fullPath).replace(/\\/g, '/');
-      if (ignores.some(pattern => minimatch(relPath, pattern))) {
+      if (ignores.some(pattern => minimatch(relPath, pattern, { dot: true }))) {
         continue;
       }
       if (entry.isDirectory()) {
         yield* walkDir(fullPath, options);
-      } else if (entry.isFile() && fileFilter(fullPath)) {
+      } else if (entry.isFile() && fileFilter(fullPath) && hasAllowedExt(fullPath, filetypes)) {
         yield fullPath;
       }
     }
@@ -61,12 +108,12 @@ function* walkDir(dir, options) {
   }
 }
 
-
 function findFiles(options = {}) {
   const {
     targets,
     ignores = [],
     fileFilter = () => true,
+    filetypes = null,          // <-- option for what extensions to allow
     respectDocignore = false,
     docignoreRoot = projectRoot,
     skipTag = null,
@@ -75,7 +122,9 @@ function findFiles(options = {}) {
 
   if (debug) console.log(chalk.yellowBright(`\n[findFiles:Debug] Received targets: ${JSON.stringify(targets)}`));
 
-  const combinedIgnores = [...ignores];
+  const eslintIgnores = getEslintIgnorePatterns();
+  const combinedIgnores = [...new Set([...CORE_IGNORES, ...eslintIgnores, ...ignores])];
+
   if (respectDocignore) {
     const docIgnores = getDocignorePatterns(docignoreRoot);
     if (debug && docIgnores.length > 0) {
@@ -92,15 +141,17 @@ function findFiles(options = {}) {
     if (isGlobPattern(target)) {
       if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a glob pattern.`));
       const matches = glob.sync(target, { cwd: projectRoot, absolute: true, nodir: true, ignore: combinedIgnores, dot: true });
-      matches.forEach(m => matchedFiles.add(m));
+      matches.forEach(m => {
+        if (hasAllowedExt(m, filetypes)) matchedFiles.add(m);
+      });
     } else if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
       if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a directory.`));
-      for (const file of walkDir(target, { ignores: combinedIgnores, fileFilter })) {
+      for (const file of walkDir(target, { ignores: combinedIgnores, fileFilter, filetypes })) {
         matchedFiles.add(file);
       }
     } else if (fs.existsSync(target)) {
       if (debug) console.log(chalk.cyan(`[findFiles:Debug] Processing '${target}' as a direct file path.`));
-      matchedFiles.add(path.resolve(target));
+      if (hasAllowedExt(target, filetypes)) matchedFiles.add(path.resolve(target));
     } else if (debug) {
       console.log(chalk.red(`[findFiles:Debug] Target '${target}' does not exist and is not a valid glob. Skipping.`));
     }
@@ -109,16 +160,16 @@ function findFiles(options = {}) {
 
   const finalFiles = [];
   for (const file of matchedFiles) {
-    const relPath = path.relative(projectRoot, file);
-    if (ignores.some(pattern => minimatch(relPath, pattern))) {
-      if (debug) console.log(chalk.magenta(`[findFiles:Debug] Skipping file matching ignore pattern: ${relPath}`));
+    const relPath = path.relative(projectRoot, file).replace(/\\/g, '/');
+    if (combinedIgnores.some(pattern => minimatch(relPath, pattern, { dot: true }))) {
+      if (debug) console.log(chalk.magenta(`[findFiles:Debug] Skipping file matching combined ignore pattern: ${relPath}`));
       continue;
     }
     if (skipTag && fileHasSkipTag(file, skipTag)) {
       if (debug) console.log(chalk.magenta(`[findFiles:Debug] Skipping file with tag '${skipTag}': ${relPath}`));
       continue;
     }
-    if(fileFilter(file)) {
+    if(fileFilter(file) && hasAllowedExt(file, filetypes)) {
       finalFiles.push(file);
     }
   }
@@ -146,3 +197,4 @@ function findCandidates(ref, allowedExts, rootDirs = ['.']) {
 }
 
 module.exports = { findFiles, findCandidates };
+

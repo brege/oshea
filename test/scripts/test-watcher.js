@@ -1,13 +1,13 @@
 // test/scripts/test-watcher.js
 require('module-alias/register');
 
-const { projectRoot, srcRoot } = require('@paths');
+const { projectRoot, srcRoot, loggerPath } = require('@paths');
 const chokidar = require('chokidar');
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
 const glob = require('glob');
-const chalk = require('chalk');
+const logger = require(loggerPath);
 
 const TEST_DIR = path.join(projectRoot, 'test');
 const TEST_DOCS_DIR = path.join(TEST_DIR, 'docs');
@@ -68,34 +68,36 @@ function buildTestMap() {
 
 function runTests(testPathsInfo) {
   if (!testPathsInfo || testPathsInfo.length === 0) {
-    console.log(chalk.yellow('[Watcher] No tests found for the changed file.'));
+    logger.writeWarn('[Watcher] No tests found for the changed file.\n');
     return;
   }
   const testPaths = testPathsInfo.map(info => info.path);
-  console.log(chalk.cyan(`\n[Watcher] Running tests:\n  - ${testPaths.join('\n  - ')}`));
+  logger.writeInfo(`\n[Watcher] Running tests:\n  - ${testPaths.join('\n  - ')}\n`);
   const mocha = spawn('npx', ['mocha', ...testPaths], { stdio: 'inherit', cwd: projectRoot });
   mocha.on('close', (code) => {
-    console.log(chalk.cyan(`[Watcher] Mocha process exited with code ${code}. Watching for next change...`));
+    logger.writeInfo(`[Watcher] Mocha process exited with code ${code}. Watching for next change...\n`);
   });
 }
 
 function printInstrumentation(map) {
-  console.log(chalk.bold.underline('\nWatcher Instrumentation (Source -> Tests Map):'));
+  logger.writeInfo('\nWatcher Instrumentation (Source -> Tests Map):\n');
   if (map.size === 0) {
-    console.log(chalk.yellow('  No mappings found. Check test file names and checklists.'));
+    logger.writeWarn('  No mappings found. Check test file names and checklists.\n');
     return;
   }
   const sortedTargets = Array.from(map.keys()).sort();
   for (const target of sortedTargets) {
     const testPathsInfo = map.get(target);
-    console.log(chalk.green(`\n  ◉ ${target}`));
-    testPathsInfo.forEach(info => console.log(`    └─ ${info.path} (Found via: ${info.reason})`));
+    logger.writeSuccess(`\n  ◉ ${target}\n`);
+    testPathsInfo.forEach(info =>
+      logger.writeDetail(`    └─ ${info.path} (Found via: ${info.reason})\n`)
+    );
   }
-  console.log(chalk.bold.underline('\nEnd of Instrumentation\n'));
+  logger.writeInfo('\nEnd of Instrumentation\n\n');
 }
 
 function main() {
-  console.log(chalk.blue('[Watcher] Initializing...'));
+  logger.writeInfo('[Watcher] Initializing...\n');
   const targetToTestPathsMap = buildTestMap();
 
   printInstrumentation(targetToTestPathsMap);
@@ -107,14 +109,15 @@ function main() {
   });
 
   watcher
-    .on('ready', () => console.log(chalk.blue('[Watcher] Ready. Watching for file changes...')))
+    .on('ready', () => logger.writeInfo('[Watcher] Ready. Watching for file changes...\n'))
     .on('change', (filePath) => {
       const relativePath = path.relative(projectRoot, filePath);
       const baseName = path.basename(filePath, '.js');
-      console.log(chalk.yellow(`\n[Watcher] File changed: ${relativePath} (Basename: ${baseName})`));
+      logger.writeWarn(`\n[Watcher] File changed: ${relativePath} (Basename: ${baseName})\n`);
       const testPathsInfo = targetToTestPathsMap.get(baseName);
       runTests(testPathsInfo);
     });
 }
 
 main();
+

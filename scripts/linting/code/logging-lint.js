@@ -71,7 +71,8 @@ function runLinter(options = {}) {
   const {
     targets = [],
     excludes = [],
-    debug = false
+    debug = false,
+    filetypes = undefined
   } = options;
 
   const issues = [];
@@ -79,7 +80,7 @@ function runLinter(options = {}) {
   const files = findFiles({
     targets: targets,
     ignores: excludes,
-    fileFilter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
+    filetypes,
     skipTag: LINT_SKIP_MARKER,
     debug: debug
   });
@@ -120,6 +121,7 @@ if (require.main === module) {
   const loggingConfig = loadLintSection('logging', lintingConfigPath) || {};
   const configTargets = loggingConfig.targets || [];
   const configExcludes = loggingConfig.excludes || [];
+  const filetypes = loggingConfig.filetypes;
 
   const finalTargets = targets.length ? targets : configTargets;
   const excludes = flags.force ? [] : configExcludes;
@@ -128,6 +130,7 @@ if (require.main === module) {
     targets: finalTargets,
     excludes,
     config: loggingConfig,
+    filetypes,
     debug: !!flags.debug,
   });
 
@@ -137,3 +140,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

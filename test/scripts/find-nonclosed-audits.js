@@ -1,7 +1,8 @@
 // test/scripts/find-nonclosed-audits.js
 require('module-alias/register');
-const { integrationTestDir, e2eTestDir, docsTestDir } = require('@paths');
+const { integrationTestDir, e2eTestDir, docsTestDir, loggerPath } = require('@paths');
 
+const logger = require(loggerPath);
 const fs = require('fs');
 const path = require('path');
 
@@ -64,7 +65,7 @@ for (let i = 0; i < lines.length; i++) {
         const relPath = testIdToPath[testId] || '';
         const tid = testId.padEnd(8);
         const audit = `audit-log:${entryLineNum}`.padEnd(16);
-        console.log(`${tid}${audit}${relPath}`);
+        logger.info(`${tid}${audit}${relPath}`);
       }
     }
   }

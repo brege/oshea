@@ -50,7 +50,7 @@ md_to_pdf_plugin: ${fmPluginName}
   {
     describe: '1.3.2: Should prioritize front matter plugin over local config when no CLI arg',
     args: {
-      markdownFile: undefined, // Set in setup using constants.DUMMY_MARKDOWN_FILE_PATH
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -95,7 +95,7 @@ md_to_pdf_plugin: ${fmPluginName}
   {
     describe: '1.3.3: Should prioritize local config plugin when no CLI or front matter plugin is present',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -129,7 +129,7 @@ md_to_pdf_plugin: ${fmPluginName}
   {
     describe: '1.3.4: Should return the default plugin when no plugin is specified anywhere',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -164,7 +164,7 @@ some_other_key: some_value
   {
     describe: '1.3.5: Should extract localConfigOverrides from local config file, excluding the plugin field',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -205,7 +205,7 @@ some_other_fm_key: fm_value
   {
     describe: '1.3.6: Should default to defaultPluginName when markdown file does not exist',
     args: {
-      markdownFile: undefined, // Set in setup, and will be mocked as non-existent
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -240,7 +240,7 @@ some_other_fm_key: fm_value
   {
     describe: '1.3.7: Should handle malformed front matter gracefully and default to defaultPluginName',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -289,7 +289,7 @@ some_other_fm_key: fm_value
   {
     describe: '1.3.8: Should handle malformed local config gracefully and default to defaultPluginName',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -338,7 +338,7 @@ some_other_key: some_value
   {
     describe: '1.3.9: Should self-activate a plugin name from front matter to a path within its subdirectory',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -384,7 +384,7 @@ md_to_pdf_plugin: ${pluginName}
   {
     describe: '1.3.10: Should self-activate a plugin name from front matter to a path directly in the markdown directory',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -434,7 +434,7 @@ md_to_pdf_plugin: ${pluginName}
   {
     describe: '1.3.11: Should retain original plugin name from front matter if self-activation paths are not found',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -481,7 +481,7 @@ md_to_pdf_plugin: ${pluginName}
   {
     describe: '1.3.12: Should resolve a relative pluginSpec from front matter against the markdown file path',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -609,7 +609,7 @@ md_to_pdf_plugin: ${fmPluginName}
   {
     describe: '1.3.14.3: Should log final determination once when not lazy load and not default',
     args: {
-      markdownFile: undefined, // Set in setup
+      markdownFile: undefined,
       isLazyLoad: false,
     },
     defaultPluginName: 'default',

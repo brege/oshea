@@ -1,5 +1,6 @@
+// paths/tests.js
 // tests.js - Test Suite Registry
-// Generated: 2025-07-19T21:03:36.406Z
+// Generated: 2025-07-21T05:38:15.085Z
 // Architecture: Multi-layered testing infrastructure with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -7,7 +8,7 @@
 const path = require('path');
 
 // ==========================================
-// ARCHITECTURE
+// Architecture
 // ==========================================
 
 // --- Test Infrastructure Foundation ---
@@ -37,7 +38,7 @@ const simpleMdFixtureWithFm = path.join(fixturesDir, 'markdown/with-front-matter
 const hugoExampleFixturePath = path.join(fixturesDir, 'hugo-example');
 
 // ==========================================
-// FEATURES (by dependency rank)
+// Features (by dependency rank)
 // ==========================================
 
 // --- Rank 0: user-facing interfaces ---
@@ -174,7 +175,7 @@ const testHelpersPath = path.join(projectRoot, 'test/shared/test-helpers.js');
 const testLoggerPath = path.join(projectRoot, 'test/shared/test-logger.js');
 
 // ==========================================
-// EXPORTS
+// Exports
 // ==========================================
 
 module.exports = {

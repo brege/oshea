@@ -26,7 +26,7 @@ There are also several indexes for the main components of the project.
 These indices are automatically managed by
 [**`scripts/linting/docs/update-project-indices.js`**](../scripts/linting/docs/update-project-indices.js)
 and configure via
-[`../scripts/linting/linting-config.yaml`](../scripts/linting/linting-config.yaml)
+[`scripts/linting/linting-config.yaml`](../scripts/linting/linting-config.yaml)
 at the project root.
 
 ---
@@ -75,10 +75,10 @@ at the project root.
 * [**Release Candidate Checklist**](rc-checklist.md): **Hygiene**. 
   Updating user docs and internal refactoring of code for ease of use.
 
-- [**v0.10 Architecture Evolution**](docs/archive/v0.10/)
-  - [Reorganization Planner for `src/`](docs/archive/v0.10/reorganization-planner.md).
+- [**v0.10 Architecture Evolution**](archive/v0.10/)
+  - [Reorganization Planner for `src/`](archive/v0.10/reorganization-planner.md).
     Housekeeping task to move-on from a flat `src/` directory along with [a progress report](archive/v0.10/test-refactor-require-path-progress.md).
-  - [Fixing `test/` paths after re-organizing `src/`](docs/archive/v0.10/test-refactor-require-path-progress.md).
+  - [Fixing `test/` paths after re-organizing `src/`](archive/v0.10/test-refactor-require-path-progress.md).
     Brittle assert and import patterns requiring several slices of refactory.
   - [Replacing `src/` paths to new Pathing Registry](archive/v0.10/replace-src-paths.md).
     Moving on to a central pathing registry to not repeat mistakes.  cf. [*Why I Should Make a Pathing Registry*](archive/v0.10/why-i-should-make-a-pathing-registry.md).

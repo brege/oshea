@@ -29,7 +29,7 @@ function isReferenceExcluded(ref, rules) {
 }
 
 function isAllowedExtension(ref, rules) {
-  const allowed = rules.allowed_extensions || [];
+  const allowed = rules.filetypes || [];
   return allowed.some(ext => ref.endsWith(ext));
 }
 
@@ -102,7 +102,7 @@ async function probeMarkdownFile(mdFile, rules) {
         isSkipLink(url, rules)
       ) return;
 
-      const resolved = resolveReference(mdFile, url, rules.allowed_extensions);
+      const resolved = resolveReference(mdFile, url, rules.filetypes);
       results.push({
         file: mdFile,
         line: lineNum,
@@ -122,7 +122,7 @@ async function probeMarkdownFile(mdFile, rules) {
         isSkipLink(node.value, rules)
       ) return;
 
-      const resolved = resolveReference(mdFile, node.value, rules.allowed_extensions);
+      const resolved = resolveReference(mdFile, node.value, rules.filetypes);
       results.push({
         file: mdFile,
         line: lineNum,
@@ -150,8 +150,8 @@ async function runLinter(options = {}) {
   const sourceExts = ['.md', '.markdown'];
 
   const mdFiles = findFiles({
-    targets: targets.length > 0 ? targets : ['docs', 'plugins', 'src', 'test', 'scripts'],
-    fileFilter: (filePath) => sourceExts.some(ext => filePath.endsWith(ext)),
+    targets: targets.length > 0 ? targets : (rules.targets || []),
+    fileFilter: (filename) => sourceExts.some(ext => filename.endsWith(ext)),
     ignores: rules.excludes || [],
     respectDocignore: true,
     skipTag: LINT_SKIP_TAG,
@@ -170,7 +170,7 @@ async function runLinter(options = {}) {
 
       if (!isAllowedExtension(r.target, rules)) continue;
 
-      const candidates = findCandidates(r.target, rules.allowed_extensions, ['.', 'src', 'plugins', 'scripts', 'test']);
+      const candidates = findCandidates(r.target, rules.filetypes, ['.', 'src', 'plugins', 'scripts', 'test']);
       const relCandidates = candidates.map(c =>
         path.relative(path.dirname(file), c).replace(/\\/g, '/')
       );
@@ -241,7 +241,7 @@ if (require.main === module) {
     const config = loadLintSection('doc-links', lintingConfigPath) || {};
 
     const { issues, summary } = await runLinter({
-      targets,
+      targets: targets.length > 0 ? targets : config.targets,
       fix: !!flags.fix,
       dryRun: !!flags.dryRun,
       force: !!flags.force,
@@ -256,4 +256,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

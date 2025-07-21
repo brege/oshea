@@ -14,7 +14,7 @@ global_pdf_options:
     left: "1in"
 
 global_remove_shortcodes:
-  - "" 
+  - ""
 
 # --- Math Rendering Settings for Tests ---
 math:
@@ -39,8 +39,8 @@ params:
       value: "Base Nested Value"
   fallback_param: "Base Fallback Value"
 
-# --- Plugin Registrations --- 
-# This section is no longer needed for bundled plugins as they are 
+# --- Plugin Registrations ---
+# This section is no longer needed for bundled plugins as they are
 # discovered automatically. Only custom test plugins need to be listed.
 plugins:
 

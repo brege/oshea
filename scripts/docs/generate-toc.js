@@ -71,7 +71,7 @@ function parseHeadings(lines, startLine) {
     .filter(Boolean);
 }
 
-// MAIN
+// Main
 const { filePath, maxLevel: cliLevel } = parseArgs();
 if (!filePath) {
   console.error('Usage: node generate-toc-smart.js [-L4|--level 3] <markdown-file>');

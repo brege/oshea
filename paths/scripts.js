@@ -1,5 +1,6 @@
+// paths/scripts.js
 // scripts.js - Scripts Path Registry
-// Generated: 2025-07-19T05:14:07.254Z
+// Generated: 2025-07-21T05:38:15.077Z
 // Architecture: Feature-based
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -7,7 +8,7 @@
 const path = require('path');
 
 // ==========================================
-// ARCHITECTURE
+// Architecture
 // ==========================================
 
 // --- Project Foundation ---
@@ -15,7 +16,7 @@ const projectRoot = path.resolve(__dirname, '..');
 const scriptsRoot = path.join(projectRoot, 'scripts');
 
 // ==========================================
-// FEATURES (by dependency rank)
+// Features (by dependency rank)
 // ==========================================
 
 // --- Rank 0: user-facing interfaces ---
@@ -49,7 +50,7 @@ const fileHelpersPath = path.join(projectRoot, 'scripts/shared/file-helpers.js')
 const pathFinderPath = path.join(projectRoot, 'scripts/shared/path-finder.js');
 
 // ==========================================
-// EXPORTS
+// Exports
 // ==========================================
 
 module.exports = {

@@ -27,13 +27,14 @@ function runLinter(options = {}) {
     ignores = [],
     fix = false,
     dryRun = false,
-    debug = false
+    debug = false,
+    filetypes = undefined
   } = options;
 
   const files = findFiles({
     targets: targets,
     ignores: ignores,
-    // This linter can act on any file type, so no fileFilter is needed.
+    filetypes,
     debug: debug
   });
 
@@ -86,13 +87,19 @@ if (require.main === module) {
     ? getPatternsFromArgs(targets)
     : (config.targets || []);
   const ignores = config.excludes || [];
+  const filetypes = config.filetypes;
+
+  if (!filetypes) {
+    console.warn('[WARN] No filetypes specified! Using file-discovery safe defaults (common text/code files).');
+  }
 
   const { issues, summary } = runLinter({
     targets: finalTargets,
     ignores,
     fix: !!flags.fix,
     dryRun: !!flags.dryRun,
-    debug: !!flags.debug
+    debug: !!flags.debug,
+    filetypes
   });
 
   renderLintOutput({ issues, summary, flags });
@@ -101,3 +108,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

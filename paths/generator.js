@@ -356,7 +356,7 @@ class DeclarativePathsGenerator {
 
       if (!hasNewItems) {
         shouldUpdate = false;
-        logger.info(`No new items detected in ${registryName} registry: ${outputPath}`);
+        logger.detail(`No new items detected in ${registryName} registry: ${outputPath}`);
       } else {
         const newItems = newVariables.filter(varName => !oldVariables.includes(varName));
         logger.info(`New items detected in ${registryName}: ${newItems.join(', ')}`);

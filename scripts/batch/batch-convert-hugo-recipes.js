@@ -1,4 +1,8 @@
 // scripts/batch/batch-convert-hugo-recipes.js
+require('module-alias/register');
+const { loggerPath, cliPath } = require('@paths');
+const logger = require(loggerPath);
+
 const { exec } = require('child_process');
 const fs = require('fs').promises;
 const fss = require('fs');
@@ -7,13 +11,12 @@ const glob = require('glob');
 const matter = require('gray-matter');
 const yargs = require('yargs/yargs');
 const { hideBin } = require('yargs/helpers');
-require('module-alias/register');
-const { cliPath } = require('@paths');
-console.log('cliPath', cliPath);
+
+logger.info(`cliPath, ${cliPath}`);
 
 // --- Argument Parsing ---
 const argv = yargs(hideBin(process.argv))
-  .usage('Usage: $0 --source-dir <path> --output-dir <path> --base-plugin <name>')
+  .usage('Usage: $0 --source-dir <path> --output-dir <path> --plugin <name>')
   .option('source-dir', {
     alias: 's',
     describe: 'Source directory containing Markdown files (e.g., ./examples/hugo-example)',
@@ -26,7 +29,7 @@ const argv = yargs(hideBin(process.argv))
     type: 'string',
     demandOption: true
   })
-  .option('base-plugin', {
+  .option('plugin', {
     alias: 'p',
     describe: 'The md-to-pdf plugin to use for styling each document',
     type: 'string',
@@ -37,14 +40,30 @@ const argv = yargs(hideBin(process.argv))
     type: 'string',
     default: path.resolve(__dirname, cliPath)
   })
-  .help()
+  .epilog('For help, run with --help. All logs are detailed.').help('help')
   .alias('help', 'h')
   .argv;
+
+if (argv.help) {
+  logger.detail(`
+Batch convert Markdown to PDF using md-to-pdf.
+
+  --source-dir, -s      Source directory containing Markdown recipe folders
+  --output-dir, -o      Output directory to save generated PDFs
+  --plugin, -p          The md-to-pdf plugin to use for styling (default "recipe")
+  --md-to-pdf-path      Path to md-to-pdf cli.js script (default: autodetected)
+  -h, --help            Show this help
+
+Example:
+  node scripts/batch/batch-convert-hugo-recipes.js -s ./examples/hugo-example -o ./pdfs -p cv
+`);
+  process.exit(0);
+}
 
 // --- Configuration from Arguments ---
 const sourceBaseDir = path.resolve(argv.sourceDir);
 const outputBaseDir = path.resolve(argv.outputDir);
-const basePlugin = argv.basePlugin;
+const basePlugin = argv.plugin;
 const mdToPdfCliPath = path.resolve(argv.mdToPdfPath);
 
 // Function to generate a slug (simplified version)
@@ -67,7 +86,7 @@ function extractAuthorFromContent(content) {
 
 async function processRecipe(markdownFilePath) {
   try {
-    console.log(`Processing: ${markdownFilePath}`);
+    logger.info(`Processing: ${markdownFilePath}`);
     const rawContent = await fs.readFile(markdownFilePath, 'utf8');
     const { data: frontMatter, content: bodyContent } = matter(rawContent);
 
@@ -107,69 +126,67 @@ async function processRecipe(markdownFilePath) {
       '--no-open'
     ].join(' ');
 
-    console.log(`  Executing: ${mdToPdfCommand}`);
+    logger.detail(`  Executing: ${mdToPdfCommand}`);
 
     return new Promise((resolve, reject) => {
       exec(mdToPdfCommand, (error, stdout, stderr) => {
         if (error) {
-          console.error(`  ERROR converting ${markdownFilePath}: ${error.message}`);
-          if (stderr) console.error(`  Stderr: ${stderr}`);
+          logger.error(`  ERROR converting ${markdownFilePath}: ${error.message}`);
+          if (stderr) logger.error(`  Stderr: ${stderr}`);
           return reject(error);
         }
         if (stderr) {
-          console.warn(`  Stderr during conversion of ${markdownFilePath}: ${stderr}`);
+          logger.warn(`  Stderr during conversion of ${markdownFilePath}: ${stderr}`);
         }
-        console.log(`  Successfully generated: ${outputPdfPath}`);
+        logger.success(`  Successfully generated: ${outputPdfPath}`);
         resolve(outputPdfPath);
       });
     });
 
   } catch (err) {
-    console.error(`Failed to process file ${markdownFilePath}:`, err);
+    logger.error(`Failed to process file ${markdownFilePath}: ${err}`);
     return Promise.reject(err);
   }
 }
 
 async function main() {
-  console.log('Starting batch conversion (Node.js script)...');
-  console.log(`Source directory: ${sourceBaseDir}`);
-  console.log(`Output directory: ${outputBaseDir}`);
-  console.log(`Base plugin: ${basePlugin}`);
-  console.log(`md-to-pdf CLI path: ${mdToPdfCliPath}`);
-
+  logger.info('Starting batch conversion (Node.js script)...');
+  logger.info(`Source directory: ${sourceBaseDir}`);
+  logger.info(`Output directory: ${outputBaseDir}`);
+  logger.info(`Plugin: ${basePlugin}`);
+  logger.info(`md-to-pdf CLI path: ${mdToPdfCliPath}`);
 
   if (!fss.existsSync(sourceBaseDir)) {
-    console.error(`Source directory does not exist: ${sourceBaseDir}`);
+    logger.error(`Source directory does not exist: ${sourceBaseDir}`);
     process.exit(1);
   }
   if (!fss.existsSync(outputBaseDir)) {
     await fs.mkdir(outputBaseDir, { recursive: true });
   }
   if (!fss.existsSync(mdToPdfCliPath)) {
-    console.error(`md-to-pdf CLI script not found at: ${mdToPdfCliPath}. Please check the path or install md-to-pdf globally.`);
+    logger.error(`md-to-pdf CLI script not found at: ${mdToPdfCliPath}. Please check the path or install md-to-pdf globally.`);
     process.exit(1);
   }
-
 
   const filesToProcess = glob.sync('**/index.md', { cwd: sourceBaseDir, absolute: true });
 
   if (filesToProcess.length === 0) {
-    console.log('No Markdown files found to process with pattern "**/index.md".');
+    logger.warn('No Markdown files found to process with pattern "**/index.md".');
     return;
   }
-  console.log(`Found ${filesToProcess.length} recipes to process.`);
+  logger.info(`Found ${filesToProcess.length} recipes to process.`);
 
   for (const filePath of filesToProcess) {
     try {
       await processRecipe(filePath);
     } catch {
-      console.error(`Skipping ${filePath} due to error.`);
+      logger.error(`Skipping ${filePath} due to error.`);
     }
   }
-  console.log('Batch processing complete.');
+  logger.info('Batch processing complete.');
 }
 
 main().catch(err => {
-  console.error('Batch script failed:', err);
+  logger.error('Batch script failed:', err);
   process.exit(1);
 });

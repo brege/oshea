@@ -5,9 +5,9 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const chalk = require('chalk');
 
-const { cliTreeBuilderPath, cliCommandsPath } = require('@paths');
+const { loggerPath, cliTreeBuilderPath, cliCommandsPath } = require('@paths');
+const logger = require(loggerPath);
 const { discoverCommandTree } = require(cliTreeBuilderPath);
 
 const COMMANDS_DIR = cliCommandsPath;
@@ -20,18 +20,18 @@ function getCachePath() {
 
 function main() {
   try {
-    console.log(chalk.blue('Generating CLI completion cache...'));
+    logger.writeInfo('Generating CLI completion cache...\n');
     const commandTree = discoverCommandTree(COMMANDS_DIR);
     const cachePath = getCachePath();
 
     fs.mkdirSync(path.dirname(cachePath), { recursive: true });
     fs.writeFileSync(cachePath, JSON.stringify(commandTree, null, 2));
 
-    console.log(chalk.green(`Completion cache successfully written to: ${cachePath}`));
+    logger.writeSuccess(`Completion cache successfully written to: ${cachePath}\n`);
   } catch (error) {
-    console.error(chalk.red(`ERROR: Failed to generate completion cache: ${error.message}`));
+    logger.writeError(`ERROR: Failed to generate completion cache: ${error.message}\n`);
     if (error.stack) {
-      console.error(chalk.red(error.stack));
+      logger.writeError(`${error.stack}\n`);
     }
     process.exit(1);
   }

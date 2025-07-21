@@ -1,4 +1,8 @@
 // scripts/docs/generate-toc.js
+require('module-alias/register');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
+
 const fs = require('fs');
 
 // GitHub anchor generator
@@ -25,12 +29,16 @@ function parseTocBlock(lines) {
 
 // Find TOC block indices and extract level from marker
 function findTocBlockIndices(lines) {
-  let start = lines.findIndex(line => line.toLowerCase().includes('toc-start'));
-  let end = lines.findIndex(line => line.toLowerCase().includes('toc-end'));
-  let level = 4; // default
-  if (start !== -1) {
-    const match = lines[start].match(/level-(\d+)/i);
-    if (match) level = parseInt(match[1], 10);
+  let start = -1, end = -1, level = 4;
+  for (let i = 0; i < lines.length; ++i) {
+    if (start === -1 && /toc-start/i.test(lines[i])) {
+      start = i;
+      const match = lines[i].match(/level-(\d+)/i);
+      if (match) level = parseInt(match[1], 10);
+    } else if (start !== -1 && /toc-end/i.test(lines[i])) {
+      end = i;
+      break;
+    }
   }
   return [start, end, level];
 }
@@ -38,24 +46,26 @@ function findTocBlockIndices(lines) {
 // Parse CLI args for -L flag
 function parseArgs() {
   const args = process.argv.slice(2);
-  let filePath = null, maxLevel = null;
+  let filePath = null, maxLevel = null, help = false;
   for (let i = 0; i < args.length; ++i) {
     if (args[i] === '-L' || args[i] === '--level') {
       maxLevel = parseInt(args[i + 1], 10);
       i++;
     } else if (args[i].match(/^-L\d+$/)) {
       maxLevel = parseInt(args[i].slice(2), 10);
+    } else if (args[i] === '--help' || args[i] === '-h') {
+      help = true;
     } else if (!args[i].startsWith('-')) {
       filePath = args[i];
     }
   }
-  return { filePath, maxLevel };
+  return { filePath, maxLevel, help };
 }
 
 // Parse headings only after TOC start line
 function parseHeadings(lines, startLine) {
   return lines
-    .slice(startLine + 1) // skip lines before TOC start
+    .slice(startLine + 1)
     .map((line, idx) => {
       const heading = line.match(/^(#+)\s+(.+)/);
       if (heading) {
@@ -71,10 +81,38 @@ function parseHeadings(lines, startLine) {
     .filter(Boolean);
 }
 
+// Print help/usage message
+function printHelp() {
+  logger.info(`
+md-to-pdf TOC generator
+
+Usage:
+  node generate-toc.js [-L4|--level 3] [--help] <markdown-file>
+
+Inserts or updates a Table of Contents block in the specified markdown file.
+The TOC block must be delimited like this:
+
+  <!-- toc-start level-4 -->
+  (generated list)
+  <!-- toc-end -->
+
+Options:
+  -L, --level [N]    Max header depth for toc entries (e.g. -L3 or --level 3)
+  -h, --help         Show this help and exit
+
+Example:
+  node scripts/docs/generate-toc.js -L3 README.md
+  `);
+}
+
 // Main
-const { filePath, maxLevel: cliLevel } = parseArgs();
+const { filePath, maxLevel: cliLevel, help } = parseArgs();
+if (help) {
+  printHelp();
+  process.exit(0);
+}
 if (!filePath) {
-  console.error('Usage: node generate-toc-smart.js [-L4|--level 3] <markdown-file>');
+  printHelp();
   process.exit(1);
 }
 const md = fs.readFileSync(filePath, 'utf8');
@@ -128,5 +166,5 @@ if (tocStart !== -1 && tocEnd !== -1 && tocEnd > tocStart) {
 
 // Write back to file
 fs.writeFileSync(filePath, newLines.join('\n'), 'utf8');
-console.log(`TOC updated in ${filePath} (up to level ${maxLevel}, baseLevel ${baseLevel})`);
+logger.info(`TOC updated in ${filePath} (up to level ${maxLevel}, baseLevel ${baseLevel})`);
 

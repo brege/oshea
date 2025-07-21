@@ -18,7 +18,7 @@ This document is a central index for all developer and automation scripts within
   - [ [`generate-completion-dynamic-cache.js`](completion/generate-completion-dynamic-cache.js) ]
     -- A runtime dynamic data cache `~/.cache/md-to-pdf/dynamic-completion-data.json` for tab completion.
 
-### AI Scripts [ `ai/` ] 
+### AI Scripts [ `ai/` ]
 
   - [ [`ai-context-generator.js`](ai/ai-context-generator.js) ]
     -- Generates AI context from a source plugin as input and a context file as output to provide one big beautiful paste.
@@ -33,15 +33,15 @@ This document is a central index for all developer and automation scripts within
 
 This module has its own index file at [**the linting index**](linting/index.md).
 
-- [ [**`code/`**](linting/code/) ] 
+- [ [**`code/`**](linting/code/) ]
   [ [**`docs/`**](linting/docs/) ]
   [ [**`validators/`**](linting/validators/) ]
 
 ### Test-Related Scripts [ `../test/scripts/` ]
 
 This module has its own index file at [**the test index**](../test/index.md) for more information.
-  
-  These scripts are separated from the rest of the project scripts because they are only relevant to the test suite.  
+
+  These scripts are separated from the rest of the project scripts because they are only relevant to the test suite.
   The main test runner is managed by `mocha` via `npm test`.
 
 ### Shared Scripts [ `shared/` ]
@@ -60,11 +60,12 @@ This module has its own index file at [**the test index**](../test/index.md) for
       getDefaultGlobIgnores,
       getPatternsFromArgs
     } = require(fileHelpersPath);
-    ``` 
+    ```
+
 ### Uncategorized Scripts
 
 New scripts or new script locations will appear below after running
-**[`node scripts/linting/docs/update-project-indices.js`](linting/docs/update-project-indices.js)**.
+**`node scripts/linting/docs/update-project-indices.js`**.
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

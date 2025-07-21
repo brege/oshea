@@ -6,12 +6,12 @@ const fs = require('fs');
 const path = require('path');
 const acorn = require('acorn');
 const walk = require('acorn-walk');
-const paths = require('@paths');
-const chalk = require('chalk');
-
-// Use @paths registry for file-helpers.js
-const { fileHelpersPath } = require('@paths');
+const {
+  fileHelpersPath,
+  loggerPath
+} = require('@paths');
 const { findFilesArray } = require(fileHelpersPath);
+const logger = require(loggerPath);
 
 // Returns all registry/export variables that resolve to the given absolute path.
 function findVariableByPath(targetPath) {
@@ -31,7 +31,7 @@ function findVariableByPath(targetPath) {
     }
   }
 
-  return [...new Set(walkRegistry(paths))];
+  return [...new Set(walkRegistry(require('@paths')))];
 }
 
 function getFileExports(targetPath) {
@@ -83,7 +83,7 @@ function findVariablesForTargets(targets) {
 if (require.main === module) {
   let rawTargets = process.argv.slice(2);
   if (!rawTargets.length) {
-    console.error(chalk.red('Usage: node scripts/shared/path-finder.js <file|dir|glob> [...]'));
+    logger.error('Usage: node scripts/shared/path-finder.js <file|dir|glob> [...]');
     process.exit(1);
   }
   // If the last argument is --exports, print exports for each file
@@ -105,40 +105,37 @@ if (require.main === module) {
 
   if (variableSet.size > 0) {
     // Colorized 'require'
-    process.stdout.write(chalk.cyan('require'));
-    process.stdout.write('(');
-    process.stdout.write(chalk.magenta('\'module-alias/register\''));
-    process.stdout.write(');\n');
+    logger.writeInfo('require');
+    logger.writeInfo('(');
+    logger.writeDetail('\'module-alias/register\'');
+    logger.info(');');
     // Colorized destructured require line
     const varsSorted = Array.from(variableSet).sort();
-    const coloredVars = varsSorted.map(v => chalk.yellow(v)).join(',\n  ');
-    process.stdout.write(
-      chalk.cyan('const ') +
-      '{ \n  ' + coloredVars + '\n} = ' +
-      chalk.cyan('require') +
-      '(' + chalk.green('\'@paths\'') + ');\n'
-    );
-    // Per-file exports if requested (colorized)
+    const coloredVars = varsSorted.map(v => v).join(',\n  ');
+    logger.writeInfo('const ');
+    logger.writeInfo('{ \n  ' + coloredVars + '\n} = ');
+    logger.writeInfo('require(');
+    logger.writeDetail('\'@paths\'');
+    logger.info(');\n');
+    // Per-file exports if requested
     if (showExports) {
       for (const { file, variable } of fileVariables) {
         const exportsArr = getFileExports(file);
         if (exportsArr.length > 0) {
-          const exportsString = exportsArr.map(e => chalk.yellow(e)).join(',\n  ');
-          process.stdout.write(
-            chalk.cyan('const ') +
-            '{\n  ' + exportsString + '\n} = require(' + chalk.yellow(variable) + ');' +
-            chalk.gray(' // File: ' + file) + '\n'
-          );
+          const exportsString = exportsArr.map(e => e).join(',\n  ');
+          logger.writeInfo('const ');
+          logger.writeInfo('{\n  ' + exportsString + '\n} = require(' + variable + ');');
+          logger.detail(' // File: ' + file);
         }
       }
     } else {
       for (const { file } of fileVariables) {
-        process.stdout.write(chalk.gray('// File: ' + file + '\n'));
+        logger.detail('// File: ' + file);
       }
     }
   } else {
     for (const file of fileList) {
-      console.error(chalk.red(`No variable found for path: ${path.resolve(file)}`));
+      logger.error(`No variable found for path: ${path.resolve(file)}`);
     }
     process.exit(1);
   }

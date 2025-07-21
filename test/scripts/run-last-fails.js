@@ -4,7 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
-const { mochaPath } = require('@paths');
+const { mochaPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 function getReportPath() {
   if (process.env.MOCHA_JSON_REPORT_FILE) {
@@ -21,7 +22,7 @@ function escapeRegex(string) {
 function main() {
   const reportPath = getReportPath();
   if (!fs.existsSync(reportPath)) {
-    console.log('No test failure report found. Exiting.');
+    logger.info('No test failure report found. Exiting.');
     return;
   }
 
@@ -40,12 +41,12 @@ function main() {
     .map(test => escapeRegex(test.title));
 
   if (titles.length === 0) {
-    console.log('No failures found in the last test run. Nothing to do.');
+    logger.info('No failures found in the last test run. Nothing to do.');
     return;
   }
 
   const grepPattern = titles.join('|');
-  console.log(`Re-running ${titles.length} failed test(s)...`);
+  logger.info(`Re-running ${titles.length} failed test(s)...`);
 
   const mochaArgs = ['--grep', grepPattern];
   const mocha = spawn(mochaPath, mochaArgs, { stdio: 'inherit' });
@@ -56,3 +57,4 @@ function main() {
 }
 
 main();
+

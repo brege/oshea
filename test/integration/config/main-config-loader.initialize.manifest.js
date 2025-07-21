@@ -134,7 +134,7 @@ module.exports = [
     fsExistsStubs: { '/xdg/config.yaml': true, '/project/config.yaml': true },
     loadYamlConfigStubs: { '/xdg/config.yaml': { isXdg: true }, '/project/config.yaml': { isProject: true } },
     assertion: async (loader, mocks, constants, expect) => {
-      // NOTE: Logic in module makes project primary, so this test asserts that.
+      // Note: Logic in module makes project primary, so this test asserts that.
       await loader._initialize();
       expect(loader.primaryConfig.isProject).to.be.true;
       expect(loader.projectConfigContents.isProject).to.be.true;

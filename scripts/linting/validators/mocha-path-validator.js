@@ -9,11 +9,14 @@ const {
   mocharcPath,
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath
+  formattersPath,
+  loggerPath
 } = require('@paths');
 
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
 const { renderLintOutput } = require(formattersPath);
+
+const logger = require(loggerPath);
 
 function* extractJsPatterns(obj) {
   if (typeof obj === 'string' && obj.endsWith('.js')) {
@@ -34,7 +37,7 @@ function runValidator(options = {}) {
   const issues = [];
   const results = [];
 
-  if (debug) console.log(`[DEBUG] Checking for .mocharc.js at: ${mocharcPath}`);
+  if (debug) logger.writeDebug(`[DEBUG] Checking for .mocharc.js at: ${mocharcPath}`);
 
   if (!fs.existsSync(mocharcPath)) {
     issues.push({
@@ -50,12 +53,12 @@ function runValidator(options = {}) {
   try {
     mochaConfig = require(mocharcPath);
   } catch (e) {
-    if (debug) console.log(`[DEBUG] Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`);
+    if (debug) logger.writeDebug(`[DEBUG] Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`);
     try {
       const content = fs.readFileSync(mocharcPath, 'utf8');
       mochaConfig = eval(`(() => (${content.replace(/^module\.exports\s*=\s*/, '')}))()`);
     } catch (evalError) {
-      if (debug) console.log(`[DEBUG] Manual parsing of .mocharc.js failed. Error: ${evalError.message}`);
+      if (debug) logger.writeDebug(`[DEBUG] Manual parsing of .mocharc.js failed. Error: ${evalError.message}`);
       mochaConfig = {};
     }
   }
@@ -65,7 +68,7 @@ function runValidator(options = {}) {
     pattern => !excludes.some(ex => pattern.includes(ex))
   );
 
-  if (debug) console.log(`[DEBUG] Found ${patterns.length} patterns to validate.`);
+  if (debug) logger.writeDebug(`[DEBUG] Found ${patterns.length} patterns to validate.`);
 
   for (const pattern of patterns) {
     if (pattern.includes('*')) {
@@ -117,3 +120,4 @@ if (require.main === module) {
 }
 
 module.exports = { runValidator };
+

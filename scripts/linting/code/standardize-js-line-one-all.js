@@ -21,14 +21,14 @@ const {
 const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(formattersPath);
 
-
 function runLinter(options = {}) {
   const {
     targets = [],
     ignores = [],
     fix = false,
     dryRun = false,
-    debug = false
+    debug = false,
+    filetypes = undefined
   } = options;
 
   const issues = [];
@@ -37,7 +37,7 @@ function runLinter(options = {}) {
   const files = findFiles({
     targets: targets,
     ignores: ignores,
-    fileFilter: (name) => name.endsWith('.js') || name.endsWith('.mjs'),
+    filetypes,
     debug: debug
   });
 
@@ -113,13 +113,19 @@ if (require.main === module) {
 
   const finalTargets = targets.length > 0 ? targets : (config.targets || []);
   const ignores = config.excludes || [];
+  const filetypes = config.filetypes;
+
+  if (!filetypes) {
+    console.warn('[WARN] No filetypes specified! Using file-discovery safe defaults.');
+  }
 
   const { issues, summary } = runLinter({
     targets: finalTargets,
     ignores,
     fix: !!flags.fix,
     dryRun: !!flags.dryRun,
-    debug: !!flags.debug
+    debug: !!flags.debug,
+    filetypes
   });
 
   renderLintOutput({ issues, summary, flags });
@@ -128,3 +134,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

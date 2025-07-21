@@ -88,14 +88,14 @@ fi
 find "$SOURCE_BASE_DIR" -mindepth 2 -name "index.md" -type f | while IFS= read -r markdown_file_path; do
     echo "Processing: $markdown_file_path"
 
-    item_slug=$(basename "$(dirname "$markdown_file_path")") 
-    
+    item_slug=$(basename "$(dirname "$markdown_file_path")")
+
     title_fm=$(get_fm_value "$markdown_file_path" "title")
     author_credit_fm=$(get_fm_value "$markdown_file_path" "author_credit")
     date_fm_raw=$(get_fm_value "$markdown_file_path" "date")
 
-    title=${title_fm:-$item_slug} 
-    
+    title=${title_fm:-$item_slug}
+
     author_slug=""
     if [[ -n "$author_credit_fm" ]]; then
         author_slug=$(generate_slug "$author_credit_fm")
@@ -111,17 +111,17 @@ find "$SOURCE_BASE_DIR" -mindepth 2 -name "index.md" -type f | while IFS= read -
     output_filename_base=$(generate_slug "$title")
     [[ -n "$author_slug" ]] && output_filename_base="${output_filename_base}-${author_slug}"
     [[ -n "$date_slug" ]] && output_filename_base="${output_filename_base}-${date_slug}"
-    output_filename="${output_filename_base//--/-}.pdf" 
-    output_filename=${output_filename#-} 
-    output_filename=${output_filename%-} 
+    output_filename="${output_filename_base//--/-}.pdf"
+    output_filename=${output_filename#-}
+    output_filename=${output_filename%-}
 
     item_output_dir="$OUTPUT_BASE_DIR/$item_slug"
     mkdir -p "$item_output_dir"
-    
+
     output_pdf_path="$item_output_dir/$output_filename"
 
     echo "  Generating PDF: $output_pdf_path"
-    set -x 
+    set -x
     $MD_TO_PDF_CMD convert "$markdown_file_path" \
         --plugin "$BASE_PLUGIN" \
         --outdir "$item_output_dir" \

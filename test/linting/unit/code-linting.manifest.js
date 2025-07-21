@@ -1,4 +1,5 @@
 // test/linting/unit/code-linting.manifest.js
+// lint-skip-logger
 const fs = require('fs-extra');
 const path = require('path');
 const {
@@ -6,7 +7,7 @@ const {
   removeJsdocPath,
   stripTrailingWhitespacePath,
   standardizeJsLineOneAllPath,
-  noRelativePathsPath
+  noRelativePathsPath,
 } = require('@paths');
 
 module.exports = [
@@ -15,6 +16,7 @@ module.exports = [
     scriptPath: loggingLintPath,
     sandboxPrefix: 'logging-lint-',
     setup: async (sandboxDir) => {
+      // lint-disable-line logging
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), 'console.log("bad");');
     },
     args: (sandboxDir) => [path.join(sandboxDir, 'bad-file.js')],
@@ -62,7 +64,6 @@ module.exports = [
       expect(stdout).to.match(/Incorrect header path/i);
     },
   },
-
   {
     describe: 'M.0.1.5 no-relative-paths should report relative require()',
     scriptPath: noRelativePathsPath,
@@ -78,3 +79,4 @@ module.exports = [
     },
   },
 ];
+

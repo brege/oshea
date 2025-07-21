@@ -1,5 +1,6 @@
+// paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-19T20:02:18.158Z
+// Generated: 2025-07-21T05:38:15.026Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -10,7 +11,7 @@ const lintersPaths = require('./linters.js');
 const testsPaths = require('./tests.js');
 
 // ==========================================
-// ARCHITECTURE
+// Architecture
 // ==========================================
 
 // --- Project Foundation ---
@@ -52,7 +53,7 @@ const lintingConfigPath = path.join(scriptsRoot, 'linting', 'linting-config.yaml
 const testConfigPath = path.join(testRoot, 'shared', 'config.test.yaml');
 
 // ==========================================
-// FEATURES (by dependency rank)
+// Features (by dependency rank)
 // ==========================================
 
 // --- Rank 0: user-facing interfaces ---
@@ -140,7 +141,7 @@ const assetResolverPath = path.join(projectRoot, 'src/utils/asset-resolver.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
 
 // ==========================================
-// EXPORTS
+// Exports
 // ==========================================
 
 module.exports = {

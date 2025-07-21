@@ -1,9 +1,11 @@
 // test/scripts/find-unchecked-tests.js
 require('module-alias/register');
-const { integrationTestDir, e2eTestDir, docsTestDir } = require('@paths');
+const { integrationTestDir, e2eTestDir, docsTestDir, loggerPath } = require('@paths');
 
 const fs = require('fs');
 const path = require('path');
+
+const logger = require(loggerPath);
 
 // For test file inference
 function findAllJsFiles(dir) {
@@ -79,6 +81,6 @@ openTests.forEach(({ testId, testTarget, testPath }) => {
   const tid = (testId || '').padEnd(8);
   const tgt = (testTarget || '').padEnd(18);
   // Add two spaces between columns 2 and 3 for clarity
-  console.log(`${tid}${tgt}  ${testPath}`);
+  logger.info(`${tid}${tgt}  ${testPath}`);
 });
 

@@ -91,7 +91,7 @@ Enhance into first-class validators
       develop: 0      # no change
       main: 1         # bump all warnings to errors
     ```
-- [ ] Add aliases for and/or groups of linters:
+- [x] Add aliases for and/or groups of linters:
     ```yaml
     groups:
       code: ["remove-ws", "standardize-line-one", .. ]
@@ -135,7 +135,6 @@ Ergonomics and user-friendliness.
 - [x] `--dry-run`: show what would run without executing
 - [x] `--skip `: skip a specific step by label or alias
 - [ ] Aggregate results: collect and summarize pass/fail as a report [ *partially implemented* ]
-- [ ] ~~Add support for `--config ` to load an alternate config file (*maybe*)~~
 
 **Meta-Linter.** \
 Validation and quality control.

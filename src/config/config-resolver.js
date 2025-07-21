@@ -9,7 +9,7 @@ const {
   mainConfigLoaderPath,
   pluginConfigLoaderPath,
   assetResolverPath,
-  basePluginSchemaPath, // Use the direct path
+  basePluginSchemaPath,
   loggerPath
 } = require('@paths');
 

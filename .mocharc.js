@@ -26,13 +26,13 @@ const paths = {
   pdf_generator:          'test/integration/core/pdf-generator.*.js',                 // Rank 0
   math_integration:       'test/integration/core/math-integration.*.js',              // Rank 2
 
-  ConfigResolver:         'test/integration/config/config-resolver.*.js',             // Rank 1
+  config_resolver:        'test/integration/config/config-resolver.*.js',             // Rank 1
   main_config_loader:     'test/integration/config/main-config-loader.*.js',          // Rank 2
   plugin_config_loader:   'test/integration/config/plugin-config-loader.*.js',        // Rank 2
 
   plugin_determiner:      'test/integration/plugins/plugin_determiner.*.js',          // Rank 1
-  PluginManager:          'test/integration/plugins/plugin-manager.*.js',             // Rank 2
-  PluginRegistryBuilder:  'test/integration/plugins/plugin-registry-builder.*.js',    // Rank 2
+  plugin_manager:         'test/integration/plugins/plugin-manager.*.js',             // Rank 2
+  plugin_registry_builder:'test/integration/plugins/plugin-registry-builder.*.js',    // Rank 2
   plugin_validator:       'test/integration/plugins/plugin-validator.*.js',           // Rank 2
 
   collections_manager:    'test/integration/collections/collections-manager.*.js',    // Rank 1
@@ -66,15 +66,15 @@ const ranks = {
     paths.pdf_generator,
   ],
   rank1: [ // essential operations
-    paths.ConfigResolver,
+    paths.config_resolver,
     paths.plugin_determiner,
     paths.collections_manager,
   ],
   rank2: [ // supportive operations
-    paths.PluginRegistryBuilder,
+    paths.plugin_registry_builder,
     paths.main_config_loader,
     paths.plugin_config_loader,
-    paths.PluginManager,
+    paths.plugin_manager,
     paths.math_integration,
   ]
 };
@@ -85,13 +85,13 @@ const levels = {
   level1: [ // module integration tests
     paths.collections_manager,
     paths.cm_utils,
-    paths.ConfigResolver,
+    paths.config_resolver,
     paths.main_config_loader,
     paths.math_integration,
     paths.plugin_config_loader,
     paths.plugin_determiner,
-    paths.PluginManager,
-    paths.PluginRegistryBuilder,
+    paths.plugin_manager,
+    paths.plugin_registry_builder,
   ],
   // test/docs/checklist-level-2.md
   level2: [ // subsystem integration tests
@@ -115,14 +115,14 @@ const levels = {
 const commands = {
   // By Modules (Integration)
   config: [
-    paths.ConfigResolver,
+    paths.config_resolver,
     paths.main_config_loader,
     paths.plugin_config_loader,
   ],
   plugins: [
     paths.plugin_determiner,
-    paths.PluginManager,
-    paths.PluginRegistryBuilder,
+    paths.plugin_manager,
+    paths.plugin_registry_builder,
     paths.plugin_validator
   ],
   collections: [

@@ -2,6 +2,9 @@
 
 **TODO: add linting guide**
 
+- [**`linting-config.yaml`**](linting-config.yaml)
+  -- The main linting configuration file for **all** linting scripts.
+
 ### Linting Scripts
 
 **Linting Core [`.`](index.md)**
@@ -10,7 +13,7 @@
   -- The main linting orchestrator. This is where you organize linting order.
 - [ [`lint-harness.js`](lint-harness.js) ]
   -- The main linting harness.
-- [ [file-discovery.js](lib/file-discovery.js) ]
+- [ [`file-discovery.js`](lib/file-discovery.js) ]
   -- The file discovery utility, allowing globbing, directory traversal, and walking.
 - [ [`lint-helpers.js`](lib/lint-helpers.js) ]
   -- Common patterns used by most be-spoke lints, as well as a lint-skipper.
@@ -48,5 +51,4 @@
 ## Uncategorized Test Scripts
 
 <!-- uncategorized-start -->
-
 <!-- uncategorized-end -->

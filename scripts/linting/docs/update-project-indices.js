@@ -67,9 +67,9 @@ function scanGroup(name, config, opts = {}) {
   const {
     indexFile,
     scanRoot,
-    fileExtensions,
     excludePatterns = [],
-    fix: configFix = false
+    fix: configFix = false,
+    filetypes
   } = config;
 
   if (typeof indexFile !== 'string' || !indexFile) {
@@ -105,9 +105,9 @@ function scanGroup(name, config, opts = {}) {
   if (targets.length > 0 && !force) {
     if (debug) console.log(chalk.cyan(`[Debug] Using CLI target '${targets[0]}' to generate specific glob.`));
     const target = targets[0];
-    const extPattern = fileExtensions.length > 1
-      ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}`
-      : fileExtensions[0].replace(/^\./, '');
+    const extPattern = filetypes.length > 1
+      ? `{${filetypes.map(e => e.replace(/^\./, '')).join(',')}}`
+      : filetypes[0].replace(/^\./, '');
 
     const globTarget = fs.existsSync(target) && fs.statSync(target).isDirectory()
       ? `${target}/**/*.${extPattern}`
@@ -116,6 +116,7 @@ function scanGroup(name, config, opts = {}) {
     filesToIndex = findFiles({
       targets: [globTarget],
       ignores: [...excludePatterns, '**/node_modules/**', '**/.git/**'],
+      filetypes,
       respectDocignore: true,
       docignoreRoot: projectRoot,
       skipTag: LINT_SKIP_TAG,
@@ -127,14 +128,15 @@ function scanGroup(name, config, opts = {}) {
     let globTargets = [];
     for (const root of globRoots) {
       if (!root) continue;
-      const extPattern = fileExtensions.length > 1
-        ? `{${fileExtensions.map(e => e.replace(/^\./, '')).join(',')}}`
-        : fileExtensions[0].replace(/^\./, '');
+      const extPattern = filetypes.length > 1
+        ? `{${filetypes.map(e => e.replace(/^\./, '')).join(',')}}`
+        : filetypes[0].replace(/^\./, '');
       globTargets.push(`${root}/**/*.${extPattern}`);
     }
     filesToIndex = findFiles({
       targets: globTargets,
       ignores: [...excludePatterns, '**/node_modules/**', '**/.git/**'],
+      filetypes,
       respectDocignore: true,
       docignoreRoot: projectRoot,
       skipTag: LINT_SKIP_TAG,

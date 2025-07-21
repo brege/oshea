@@ -104,7 +104,6 @@ function formatLintResults(results, formatter = 'stylish') {
   throw new Error('Formatter must be a string or function');
 }
 
-// --- UPDATED: pass through matchedText and sourceLine if present
 function adaptRawIssuesToEslintFormat(rawIssues) {
   if (!rawIssues || rawIssues.length === 0) {
     return [];
@@ -124,8 +123,8 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
       message: issue.message || '',
       line: issue.line || 1,
       column: issue.column || 1,
-      matchedText: issue.matchedText,   // pass through!
-      sourceLine: issue.sourceLine,     // pass through!
+      matchedText: issue.matchedText,
+      sourceLine: issue.sourceLine,
     });
   });
 

@@ -1,1 +1,0 @@
-archive/v0.10/rc-checklist.md

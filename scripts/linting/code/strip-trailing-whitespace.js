@@ -15,7 +15,6 @@ const {
 const {
   loadLintSection,
   parseCliArgs,
-  getPatternsFromArgs,
 } = require(lintHelpersPath);
 
 const { findFiles } = require(fileDiscoveryPath);
@@ -84,7 +83,7 @@ if (require.main === module) {
   const config = loadLintSection('remove-ws', lintingConfigPath) || {};
 
   const finalTargets = targets.length > 0
-    ? getPatternsFromArgs(targets)
+    ? targets
     : (config.targets || []);
   const ignores = config.excludes || [];
   const filetypes = config.filetypes;
@@ -108,4 +107,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

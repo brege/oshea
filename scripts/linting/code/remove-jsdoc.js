@@ -114,7 +114,7 @@ if (require.main === module) {
   const filetypes = config.filetypes;
 
   const finalTargets = targets.length ? targets : configTargets;
-  const excludes = flags.force ? [] : config.excludeDirs.concat(configExcludes);
+  const excludes = flags.force ? [] : configExcludes;
 
   const { issues, summary } = runLinter({
     targets: finalTargets,
@@ -132,4 +132,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

@@ -22,10 +22,7 @@ remove-jsdoc:
   alias: jsdoc
   targets:
     - "."
-  excludes:
-    - scripts/shared/file-helpers.js
-    - scripts/ai/ai-context-generator.js
-  excludeDirs: []
+  excludes: []
 
 # scripts/linting/code/logging-lint.js
 logging:
@@ -35,12 +32,13 @@ logging:
   targets:
     - "."
   excludes:
-    - scripts/ai
-    - scripts/batch
-    - scripts/completion
-    - scripts/docs
-    - scripts/linting
-
+    - scripts/linting/code
+    - scripts/linting/validators
+    - scripts/linting/docs
+    - scripts/linting/lib
+    - scripts/linting/lint-harness.js
+    - scripts/linting/linting-config.yaml
+    - scripts/linting/lint.js
 
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:
@@ -56,16 +54,14 @@ remove-ws:
   alias: whitespace
   group: code
   filetypes: [".css", ".js", ".json", ".yaml"]
-  targets:
-    - "."
+  targets: ["."]
   excludes: []
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
   alias: paths
   group: code
-  targets:
-    - "."
+  targets: ["."]
   excludes:
     - paths
 
@@ -82,20 +78,22 @@ validate-mocha:
 find-litter:
   alias: "custodian"
   group: "docs"
+  targets: ["."]
   excludes: []
 
 # scripts/linting/docs/update-project-indices.js
 update-indices:
   alias: "librarian"
   group: "docs"
+  #rule for README.md
   docs:
     indexFile: docs/index.md
-    scanRoot: "docs"
+    scanRoot: docs
     filetypes: [".md"]
   plugins:
     marker: "plugins"
     indexFile: plugins/index.md
-    scanRoot: "plugins"
+    scanRoot: plugins
     filetypes: [".md"]
     excludePatterns:
       - "plugins/**/index.md"
@@ -103,7 +101,7 @@ update-indices:
   scripts:
     marker: "scripts"
     indexFile: scripts/index.md
-    scanRoot: "scripts"
+    scanRoot: scripts
     filetypes: [".js", ".sh"]
     excludePatterns:
       - "scripts/linting/**"
@@ -132,7 +130,7 @@ update-indices:
 doc-links:
   alias: "postman"
   group: "docs"
-  targets: 
+  targets:
    - "."
   filetypes: [".md", ".js"]
   skip_link_patterns:
@@ -141,7 +139,7 @@ doc-links:
     - "**/sample.md"
     - "**/index.js"
   excludes:
-    - "README.md"
+    - "README.md"                       # TODO
     - "test/docs/checklist-*.md"
     - "test/docs/audit-log.md"
     - "plugins/recipe-book/README.md"
@@ -157,7 +155,6 @@ harness:
     - key: 'standardize-line-one'
       label: 'Code: Standardize File Headers'
       scriptPath: scripts/linting/code/standardize-js-line-one-all.js
-      #ignoreFailure: true
     - key: 'logging'
       label: 'Code: Check for console/chalk usage'
       scriptPath: scripts/linting/code/logging-lint.js

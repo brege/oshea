@@ -24,11 +24,11 @@ const DEFAULT_DIR_IGNORES = [
 // Centralized glob patterns for JS files
 const DEFAULT_PATTERNS = ['**/*.{js,mjs}'];
 
-/**
- * Returns normalized glob patterns based on CLI args or defaults.
- * @param {string[]} argv - process.argv.slice(2)
- * @returns {string[]} patterns
- */
+// below i am replacing JSDoc with single-line comments
+
+
+
+// Returns normalized glob patterns based on CLI args or defaults
 function getPatternsFromArgs(argv) {
   if (!argv.length) return DEFAULT_PATTERNS;
   return argv.map(p =>
@@ -36,33 +36,26 @@ function getPatternsFromArgs(argv) {
   );
 }
 
-/**
- * Returns the default ignore patterns for glob.
- * @returns {string[]}
- */
+
+
+// Returns the default ignore patterns for glob
 function getDefaultGlobIgnores() {
   return DEFAULT_GLOB_IGNORES;
 }
 
-/**
- * Checks if a string is a glob pattern.
- * @param {string} str
- * @returns {boolean}
- */
+
+
+// Checks if a string is a glob pattern
 function isGlobPattern(str) {
   // Matches *, ?, [, ], {, }, (, ), !
   return /[*?[\]{}()!]/.test(str);
 }
 
-/**
- * Recursively yields all files matching the filter, skipping ignored directories.
- * If the input is a file, yields just that file if it matches the filter.
- * If the input is missing, warns (for real files/dirs only).
- * @param {string} inputPath - File or directory path
- * @param {Object} [opts]
- * @param {string[]} [opts.ignores] - Directory names to ignore (non-glob)
- * @param {(filename: string) => boolean} [opts.filter] - Function to filter files
- */
+
+
+// Recursively yields all files matching the filter, skipping ignored directories
+// - if the input is a file, yields only that file (if it matches the filter)
+// - if the input is missing, warns (for real files/dirs only)
 function* findFiles(inputPath, opts = {}) {
   const ignores = opts.ignores || DEFAULT_DIR_IGNORES;
   const filter = opts.filter || (() => true);
@@ -99,13 +92,11 @@ function* findFiles(inputPath, opts = {}) {
   }
 }
 
-/**
- * Accepts an array of inputs (globs, files, dirs) and returns a flat array of files.
- * Expands glob patterns to files; only calls findFiles on real files/dirs.
- * @param {string[]|string} inputs
- * @param {Object} [opts]
- * @returns {string[]} files
- */
+
+
+// Accepts an array of inputs (globs, files, dirs) and returns a flat array of files
+// - expands glob patterns to files
+// - only calls findFiles on real files/dirs
 function findFilesArray(inputs, opts = {}) {
   let files = [];
   for (const input of Array.isArray(inputs) ? inputs : [inputs]) {
@@ -125,5 +116,5 @@ module.exports = {
   getPatternsFromArgs,
   getDefaultGlobIgnores,
   findFilesArray,
-  isGlobPattern, // Export the missing function
+  isGlobPattern,
 };

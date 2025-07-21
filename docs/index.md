@@ -6,14 +6,9 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 **Active Documents and Checklists** \
 *For convenience, these are symlinks to the latest version of each document below.*
 
+- [**Polish Checklist**](polish-checklist.md): **Polishing.**
 - [**Linting Checklist**](linting-checklist.md): **Policy.**
   Linting and code quality strategy for the project.
-* [**Release Candidate Checklist**](archive/v0.10/rc-checklist.md): **Hygiene.**
-  Updating user docs and internal refactoring of code for ease of use.
-* [**Reoganization Planner**](archive/v0.10/reorganization-planner.md): **Planning.**
-  Strategy for the final polish, reorganization, and AI integration push.
-* [**Dream Board**](dream-board.md): **Standardization**. 
-  Focuses on testing, plugin architecture, and the remaining task-paths to v1.0.
 
 There are also several indexes for the main components of the project.
 
@@ -72,7 +67,7 @@ at the project root.
 ### High-Level Vision & History
 *The main "living" and archived documents of the project's evolution and direction--updated in commit timescales*
 
-* [**Release Candidate Checklist**](rc-checklist.md): **Hygiene**. 
+* [**Release Candidate Checklist**](archive/v0.10/rc-checklist.md): **Hygiene**. 
   Updating user docs and internal refactoring of code for ease of use.
 
 - [**v0.10 Architecture Evolution**](archive/v0.10/)
@@ -170,5 +165,6 @@ at the project root.
 *This list is automatically updated by [`scripts/linting/docs/update-project-indices.js`](../scripts/linting/docs/update-project-indices.js)*
 
 <!-- uncategorized-start -->
+
 <!-- uncategorized-end -->
 

@@ -218,7 +218,7 @@ This checks if your plugin is self-activating, if the in-situ tests pass, and if
 [ [polish](docs/archive/v0.10/polish-checklist.md) ] ←
 [ [linting](docs/archive/v0.10/linting-checklist.md) ] ←
 [ [release candidate](docs/archive/v0.10/rc-checklist.md) ] ←
-[ [refactor.index](docs/archive/v0.10/scripts.refactor.index.md) ] ←
+[ [refactor](docs/archive/v0.10/scripts.refactor.index.md) ] ←
 [ [reorg](docs/archive/v0.10/reorganization-planner.md) ]
 ⋅ [ [`v0.9`](docs/archive/v0.9/) ]
 [ [dream-board](docs/archive/v0.9/dream-board-v0.9.md) ]

@@ -11,8 +11,11 @@ const {
   formattersPath,
   projectRoot,
   fileDiscoveryPath,
-  findLitterRulesPath
+  findLitterRulesPath,
+  loggerPath
 } = require('@paths');
+
+const logger = require(loggerPath);
 
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
 const { findFiles } = require(fileDiscoveryPath);
@@ -24,7 +27,6 @@ const EMOJI_RULE = /^\[emoji:([\w*,.]+)\]$/i;
 const EMOJI_REGEX = /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\u{1F3FB}-\u{1F3FF}|\u{1F9B0}-\u{1F9B3})/gu;
 
 const LINT_SKIP_TAG = 'lint-skip-litter';
-// All-caps-in-comment matcher
 const CAPS_COMMENT_REGEX = /\b[A-Z]{3,}\b/;
 
 function parseRulesFile(filename) {
@@ -35,7 +37,7 @@ function parseRulesFile(filename) {
   let customWhitelists = new Map();
 
   if (!fs.existsSync(filename)) {
-    console.warn(`[WARN] Rules file not found: ${filename}`);
+    logger.warn(`[WARN] Rules file not found: ${filename}`);
     return { rules, emojiFiletypes: ['*'], emojiWhitelist, customWhitelists, commentCapsWhitelist: [] };
   }
 
@@ -89,7 +91,6 @@ function parseRulesFile(filename) {
     }
   }
 
-  // Helper: convert comment whitelist Set to array of regexes
   function makeWhitelistRegexes(set) {
     if (!set) return [];
     return [...set].map(
@@ -131,11 +132,10 @@ function scanFileForLitter(filePath, config) {
         if (commentIdx === -1) continue;
         subject = line.slice(commentIdx + 2).trim();
 
-        // ALL CAPS COMMENT FILTER (skip if whitelisted)
         if (CAPS_COMMENT_REGEX.test(subject)) {
           if (commentCapsWhitelist &&
              commentCapsWhitelist.some(re => re.test(subject))) {
-            continue; // Whitelisted, don't flag
+            continue;
           }
         }
       } else if (rule.type === 'string' ||
@@ -171,7 +171,6 @@ function scanFileForLitter(filePath, config) {
       }
     }
 
-    // Dedicated surfacing of ALL CAPS comments not whitelisted
     const commentIdx = line.indexOf('//');
     if (commentIdx !== -1) {
       const subject = line.slice(commentIdx + 2).trim();
@@ -212,12 +211,12 @@ function runLinter(options = {}) {
   const { targets = [], excludes = [], rulesPath, debug = false, filetypes } = options;
 
   if (debug) {
-    console.log(`[DEBUG] Loading rules from: ${rulesPath}`);
+    logger.debug(`[DEBUG] Loading rules from: ${rulesPath}`);
   }
   const litterConfig = parseRulesFile(rulesPath);
 
   if (debug) {
-    console.log(`[DEBUG] Loaded ${litterConfig.rules.length} rules`);
+    logger.debug(`[DEBUG] Loaded ${litterConfig.rules.length} rules`);
   }
 
   const allIssues = [];
@@ -256,7 +255,7 @@ if (require.main === module) {
     config = loadLintSection('find-litter', lintingConfigPath) || {};
   } catch (e) {
     if (!e.message.includes('Section \'find-litter\' not found')) {
-      console.warn(`[WARN] Could not load linting config: ${e.message}`);
+      logger.warn(`[WARN] Could not load linting config: ${e.message}`);
     }
   }
 
@@ -272,7 +271,7 @@ if (require.main === module) {
 
   const absRulesPath = path.resolve(process.cwd(), rulesPathToUse);
   if (flags.debug) {
-    console.log('[DEBUG] Using rules file:', absRulesPath);
+    logger.debug('[DEBUG] Using rules file:', absRulesPath);
   }
 
   const { issues, summary } = runLinter({
@@ -290,3 +289,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

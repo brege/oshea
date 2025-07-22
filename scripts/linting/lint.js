@@ -2,14 +2,14 @@
 // scripts/linting/lint.js
 require('module-alias/register');
 
-const chalk = require('chalk');
-const { lintingConfigPath, lintHelpersPath, lintHarnessPath } = require('@paths');
+const { lintingConfigPath, lintHelpersPath, lintHarnessPath, loggerPath } = require('@paths');
 
 const { loadLintConfig, parseCliArgs } = require(lintHelpersPath);
 const { runHarness } = require(lintHarnessPath);
+const logger = require(loggerPath);
 
 function printHelp() {
-  console.log(`md-to-pdf Linter
+  logger.detail(`md-to-pdf Linter
 
 Usage:
   node scripts/linting/lint.js [options] [targets...]
@@ -52,7 +52,6 @@ Examples:
 `);
 }
 
-
 function main() {
   const { flags, targets, only } = parseCliArgs(process.argv.slice(2));
   // Handle --help or -h
@@ -67,24 +66,24 @@ function main() {
 
     // Handle --list
     if (flags.list) {
-      console.log(chalk.bold.underline('Available Linter Steps:'));
+      logger.info('Available Linter Steps:');
 
       const filtered = only
         ? harnessSteps.filter(step =>
           (step.key || '').toLowerCase().includes(only.toLowerCase()) ||
-            (step.label || '').toLowerCase().includes(only.toLowerCase()))
+          (step.label || '').toLowerCase().includes(only.toLowerCase()))
         : harnessSteps;
 
       if (filtered.length > 0) {
         filtered.forEach(step => {
-          console.log(`  ${chalk.cyan((step.key || '').padEnd(20))} ${step.label}`);
+          logger.info(`  ${step.key ? step.key.padEnd(20) : ''} ${step.label || ''}`);
         });
       } else {
-        console.log('No matching steps found.');
+        logger.info('No matching steps found.');
       }
 
-      console.log('\nUsage: node scripts/linting/lint.js --only <key_or_group>');
-      console.log(chalk.gray('Tip: Use \'node scripts/linting/lint.js --help\' for all options.'));
+      logger.info('\nUsage: node scripts/linting/lint.js --only <key_or_group>');
+      logger.detail('Tip: Use \'node scripts/linting/lint.js --help\' for all options.');
       process.exit(0);
     }
 
@@ -93,8 +92,8 @@ function main() {
     runHarness(config, flags, targets, only);
 
   } catch (error) {
-    console.error('Error running lint harness:', error.message);
-    console.error('Stack:', error.stack);
+    logger.error('Error running lint harness: ' + error.message);
+    logger.error('Stack: ' + error.stack);
     process.exit(1);
   }
 }
@@ -104,3 +103,4 @@ if (require.main === module) {
 }
 
 module.exports = { main };
+

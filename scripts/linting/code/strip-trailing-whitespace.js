@@ -9,8 +9,11 @@ const {
   lintingConfigPath,
   formattersPath,
   fileDiscoveryPath,
-  projectRoot
+  projectRoot,
+  loggerPath
 } = require('@paths');
+
+const logger = require(loggerPath);
 
 const {
   loadLintSection,
@@ -89,7 +92,7 @@ if (require.main === module) {
   const filetypes = config.filetypes;
 
   if (!filetypes) {
-    console.warn('[WARN] No filetypes specified! Using file-discovery safe defaults (common text/code files).');
+    logger.warn('[WARN] No filetypes specified! Using file-discovery safe defaults (common text/code files).');
   }
 
   const { issues, summary } = runLinter({
@@ -107,3 +110,4 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
+

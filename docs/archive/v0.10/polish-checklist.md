@@ -11,8 +11,8 @@ Previous checklist/roadmap documents:
 
 ### General
 
-- [ ] Update `README.md`; expand [`scripts/linting/index.md`](../scripts/linting/index.md) (like `test/index.md`)
-- [ ] Merge `develop` into `main`
+- [x] Update `README.md`; expand [`scripts/linting/index.md`](../scripts/linting/index.md) (like `test/index.md`)
+- [x] Merge `develop` into `main`
 - [ ] Rename project and string-replace `md-to-pdf` with new product name
 - [ ] Build more plugins (and have fun)
 

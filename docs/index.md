@@ -7,8 +7,6 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 *For convenience, these are symlinks to the latest version of each document below.*
 
 - [**Polish Checklist**](polish-checklist.md): **Polishing.**
-- [**Linting Checklist**](linting-checklist.md): **Policy.**
-  Linting and code quality strategy for the project.
 
 There are also several indexes for the main components of the project.
 
@@ -37,7 +35,7 @@ at the project root.
 * [Plugin Development Guide](guides/plugin-development.md): 
   Details the plugins development cycle in creating, configuring and managing plugins.
 * [Configuration Hierarchies](guides/configuration-hierarchies.md):
-  Nitty-gritty details of the configuration system and the hierarchical structure of plugin and system conf files.
+  Nitty-gritty details of the configuration system and the hierarchical structure of plugin and system config files.
 * [**Cheat Sheet**](refs/cheat-sheet.md):
   Compactly lists CLI commands, common usage, and config snippets.
 * [Plugin Contract](refs/plugin-contract.md): 
@@ -71,6 +69,7 @@ at the project root.
   Updating user docs and internal refactoring of code for ease of use.
 
 - [**v0.10 Architecture Evolution**](archive/v0.10/)
+  - [**Polish Checklist**](archive/v0.10/polish-checklist.md).
   - [Reorganization Planner for `src/`](archive/v0.10/reorganization-planner.md).
     Housekeeping task to move-on from a flat `src/` directory along with [a progress report](archive/v0.10/test-refactor-require-path-progress.md).
   - [Fixing `test/` paths after re-organizing `src/`](archive/v0.10/test-refactor-require-path-progress.md).

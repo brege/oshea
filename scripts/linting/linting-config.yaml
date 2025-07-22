@@ -31,14 +31,10 @@ logging:
   filetypes: [".js"]
   targets:
     - "."
-  excludes:
-    - scripts/linting/code
-    - scripts/linting/validators
-    - scripts/linting/docs
-    - scripts/linting/lib
+  excludes: # []
+    - scripts/linting/lib/formatters.js
     - scripts/linting/lint-harness.js
-    - scripts/linting/linting-config.yaml
-    - scripts/linting/lint.js
+    - scripts/trees
 
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:

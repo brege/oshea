@@ -12,19 +12,22 @@ There are also several indexes for the main components of the project.
 
 **Indexes** -
 [ [**Docs**](index.md) ]
-[ [**Scripts**](../scripts/index.md) ]
+[ [**Linting**](../scripts/linting/index.md) ]
+[ [**Paths**](../paths/index.md) ]
 [ [**Plugins**](../plugins/index.md) ]
+[ [**Scripts**](../scripts/index.md) ]
 [ [**Tests**](../test/index.md) ]
 
 These indices are automatically managed by
-[**`scripts/linting/docs/update-project-indices.js`**](../scripts/linting/docs/update-project-indices.js)
-and configure via
+[**the librarian**](../scripts/linting/docs/update-project-indices.js)
+and configured via
 [`scripts/linting/linting-config.yaml`](../scripts/linting/linting-config.yaml)
 at the project root.
+The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-to-date.
 
 ---
 
-## 1. Reference Documentation
+## Reference Documentation
 
 *Technical descriptions of the project's commands, APIs, and structure.*
 
@@ -45,7 +48,7 @@ at the project root.
     
 ---
 
-## 2. Tutorials & How-To Guides
+## Tutorials & How-To Guides
 
 *Practical walkthroughs providing demonstration and step-by-step instructions.*
 
@@ -58,7 +61,7 @@ at the project root.
 
 ---
 
-## 3. Architecture & Reasoning (Explanation)
+## Architecture & Reasoning (Explanation)
 
 *Discussions that explore the context and reasoning behind project decisions.*
 
@@ -120,7 +123,7 @@ at the project root.
 
 ---
 
-## 4. Testing & Quality Assurance
+## Testing & Quality Assurance
 
 *Documentation that details the project's testing framework, strategy, and metrics that define project quality.*
 
@@ -146,7 +149,7 @@ at the project root.
 
 ---
 
-## 5. AI & Automation
+## AI & Automation
 
 *Guides and specifications for programmatic interaction with the plugin system.*
 

@@ -6,14 +6,16 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
-const chalk = require('chalk');
 const {
   lintingConfigPath,
   lintHelpersPath,
   formattersPath,
   fileDiscoveryPath,
-  projectRoot
+  projectRoot,
+  loggerPath
 } = require('@paths');
+
+const logger = require(loggerPath);
 
 const { findFiles } = require(fileDiscoveryPath);
 const { parseCliArgs } = require(lintHelpersPath);
@@ -62,7 +64,7 @@ function scanGroup(name, config, opts = {}) {
     force = false,
   } = opts;
 
-  if (debug) console.log(chalk.blue(`\nScanning group: '${name}'`));
+  if (debug) logger.info(`\nScanning group: '${name}'`);
 
   const {
     indexFile,
@@ -73,7 +75,7 @@ function scanGroup(name, config, opts = {}) {
   } = config;
 
   if (typeof indexFile !== 'string' || !indexFile) {
-    if (debug) console.log(chalk.red(`[Debug] Skipping group '${name}': 'indexFile' not configured.`));
+    if (debug) logger.info(`[Debug] Skipping group '${name}': 'indexFile' not configured.`);
     return { issues: [], fixedCount: 0 };
   }
 
@@ -94,7 +96,7 @@ function scanGroup(name, config, opts = {}) {
     return { issues, fixedCount };
   }
 
-  if (debug) console.log(chalk.gray(`[Debug] Reading index file: ${path.relative(projectRoot, indexAbsPath)}`));
+  if (debug) logger.info(`[Debug] Reading index file: ${path.relative(projectRoot, indexAbsPath)}`);
 
   const content = fs.readFileSync(indexAbsPath, 'utf8');
   const lines = content.split('\n');
@@ -103,7 +105,7 @@ function scanGroup(name, config, opts = {}) {
   let filesToIndex;
 
   if (targets.length > 0 && !force) {
-    if (debug) console.log(chalk.cyan(`[Debug] Using CLI target '${targets[0]}' to generate specific glob.`));
+    if (debug) logger.info(`[Debug] Using CLI target '${targets[0]}' to generate specific glob.`);
     const target = targets[0];
     const extPattern = filetypes.length > 1
       ? `{${filetypes.map(e => e.replace(/^\./, '')).join(',')}}`
@@ -166,7 +168,7 @@ function scanGroup(name, config, opts = {}) {
   }
 
   if (debug && missingInIndex.length > 0) {
-    console.log(chalk.yellow(`[Debug] Found ${missingInIndex.length} files missing from the index for group '${name}'.`));
+    logger.info(`[Debug] Found ${missingInIndex.length} files missing from the index for group '${name}'.`);
   }
 
   for (const rel of missingInIndex) {
@@ -230,23 +232,23 @@ async function runLibrarian(options = {}) {
   let allIssues = [];
   let totalFixed = 0;
 
-  if (debug) console.log(chalk.bold.yellowBright('--- Running Librarian in Debug Mode ---'));
+  if (debug) logger.info('--- Running Librarian in Debug Mode ---');
 
   let groupsToRun = [];
 
   if (targets.length > 0) {
-    if (debug) console.log(chalk.cyan('[Debug] CLI targets provided. Determining relevant group(s)...'));
+    if (debug) logger.info('[Debug] CLI targets provided. Determining relevant group(s)...');
     const targetPath = path.resolve(targets[0]);
     for (const [groupName, groupConfig] of Object.entries(groups)) {
       if (typeof groupConfig !== 'object' || !groupConfig.scanRoot) continue;
       const scanRoots = Array.isArray(groupConfig.scanRoot) ? groupConfig.scanRoot : [groupConfig.scanRoot];
       if (scanRoots.some(root => root && targetPath.startsWith(path.resolve(root)))) {
         groupsToRun.push(groupName);
-        if (debug) console.log(chalk.green(`[Debug] Target '${targets[0]}' matches scan root for group '${groupName}'.`));
+        if (debug) logger.info(`[Debug] Target '${targets[0]}' matches scan root for group '${groupName}'.`);
       }
     }
     if (groupsToRun.length === 0 && debug) {
-      console.log(chalk.red(`[Debug] No matching group found for target '${targets[0]}'.`));
+      logger.info(`[Debug] No matching group found for target '${targets[0]}'.`);
     }
   } else {
     groupsToRun = group ? [group] : Object.keys(groups);
@@ -285,11 +287,12 @@ if (require.main === module) {
       renderLintOutput({ issues, summary, flags });
       process.exitCode = summary.errorCount > 0 ? 1 : 0;
     }).catch(error => {
-      console.error(chalk.red.bold('\n--- LIBRARIAN CRASHED ---'));
-      console.error(error);
+      logger.error('--- LIBRARIAN CRASHED ---');
+      logger.error(error);
       process.exit(1);
     });
   })();
 }
 
 module.exports = { runLibrarian };
+

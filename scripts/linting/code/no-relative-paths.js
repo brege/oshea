@@ -10,8 +10,11 @@ const {
   lintingConfigPath,
   formattersPath,
   projectRoot,
-  fileDiscoveryPath
+  fileDiscoveryPath,
+  loggerPath
 } = require('@paths');
+
+const logger = require(loggerPath);
 
 const {
   loadLintSection,
@@ -46,7 +49,7 @@ function classifyRequireLine(line) {
 }
 
 function scanFileForRelativePaths(filePath, debug = false) {
-  if (debug) console.log(`[DEBUG] Scanning file: ${path.relative(projectRoot, filePath)}`);
+  if (debug) logger.debug(`[DEBUG] Scanning file: ${path.relative(projectRoot, filePath)}`);
   const issues = [];
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
@@ -59,7 +62,7 @@ function scanFileForRelativePaths(filePath, debug = false) {
       const prevLine = lines[index - 1].trim();
       if (prevLine.startsWith('//') && prevLine.includes(LINT_DISABLE_TAG)) {
         if (debug) {
-          console.log(`[DEBUG] Skipping line ${index + 1} due to lint-disable-next-line`);
+          logger.debug(`[DEBUG] Skipping line ${index + 1} due to lint-disable-next-line`);
         }
         return;
       }
@@ -116,7 +119,7 @@ function runLinter(options = {}) {
   } = options;
 
   if (debug) {
-    console.log('[DEBUG] Running no-relative-paths linter with options:', { targets, excludes });
+    logger.debug('[DEBUG] Running no-relative-paths linter with options:', { targets, excludes });
   }
 
   const allIssues = [];

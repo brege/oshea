@@ -1,578 +1,238 @@
 # md-to-pdf - Markdown to PDF Converter
 
 A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs. It features a powerful, extensible plugin system, making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports. `md-to-pdf` is built on:
+[markdown-it](https://github.com/markdown-it/markdown-it) for Markdown parsing, and
+[puppeteer](https://pptr.dev/) for high-quality PDF generation.
 
-  - [`markdown-it`](https://github.com/markdown-it/markdown-it) for Markdown parsing.
-  - [Puppeteer](https://pptr.dev/) for high-quality PDF generation.
+---
+
+**The rise of AI tooling has brought enormous growth to universal Markdown usage. `md-to-pdf` is ideal for anyone who writes in Markdown but needs polished, professional, reproducible output for resumes, reports, presentations, and more.**
+
+---
+
+### Quick Start
+
+```bash
+# Convert a basic markdown file
+md-to-pdf my-document.md
+
+# Use a built-in plugin for styling
+md-to-pdf my-resume.md --plugin cv
+
+# Create a cover letter with professional formatting
+md-to-pdf my-letter.md --plugin cover-letter
+```
 
 ---
 
 ### Examples
 
-See `md-to-pdf` in action\! These examples showcase the visual capabilities of some of the bundled plugins.
+This tool allows you to produce high-quality and re-usable, aesthetic documents.
 
 | [CV Layout](plugins/cv) | [Cover Letter Layout](plugins/cover-letter) | [Recipe Layout](plugins/recipe) |
-| :-----------------------: | :------------------------: | :-----------------------: |
+| :---------------: | :----------------: | :---------------: |
 | <img src="docs/images/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="docs/images/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="docs/images/screenshots/example-recipe.png" alt="Recipe Screenshot" width="300"/> |
 | [**Business Card**](plugins/advanced-card) | [**Restaurant Menu**](https://github.com/brege/md-to-pdf-plugins/tree/main/restaurant-menu) | [**D3.js Slide**](https://github.com/brege/md-to-pdf-plugins/tree/main/d3-histogram-slide) |
 | <img src="docs/images/screenshots/advanced-business-card.png" alt="Business Card" width="300"/> | <img src="docs/images/screenshots/restaurant-menu.png" alt="Restaurant Menu" width="300"/>  | <img src="docs/images/screenshots/d3-histogram-slide.png" alt="D3.js Slide" width="300"/> | 
+
 ---
 
-## Features
+### Installation
 
-`md-to-pdf` empowers you with powerful features, especially for managing your document types.
-
-### Integrated Plugin & Collection Management (CLI-Centric)
-
-A cornerstone of `md-to-pdf` is its ability to directly manage plugins and plugin collections right from your command line. This makes customizing and extending the tool incredibly straightforward.
-
-  * **Add Collections** \
-    Easily incorporate new sets of plugins from remote Git repositories or local directories.
-    ```bash
-    md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins
-    ```
-  * **List What's Available** \
-    See all discoverable plugins and managed collections on your system.
-    ```bash
-    md-to-pdf collection list
-    md-to-pdf plugin list --available
-    ```
-  * **Update & Synchronize** \
-    Keep your collections up-to-date with a simple command.
-    ```bash
-    md-to-pdf collection update my-plugins
-    ```
-  * **Enable/Disable Plugins** \
-    Control which plugins are active for your projects.
-    ```bash
-    md-to-pdf plugin disable cv
-    md-to-pdf plugin enable cv
-    ```
-  * **Create New Plugins** \
-    Generate a boilerplate for a new plugin from scratch or archetype from an existing one, providing a unique and highly efficient way to start custom document types.
-    ```bash
-    md-to-pdf plugin create my-report
-    md-to-pdf plugin create my-custom-cv --from cv
-    ```
-  * **Remove Collections** \
-    Cleanly remove unwanted plugin collections or singletons.
-    ```bash
-    md-to-pdf collection remove my-old-collection
-    md-to-pdf plugin remove my-standalone-plugin # TODO: Singleton removal and purging in next version
-    ```
-
-This direct, CLI-based approach simplifies what could also be a manual configuration process.
-Indeed, `md-to-pdf` was built with a custom, multi-layered configuration system.
-Some magic can be applied via detection of like-named configuration files, through front matter, or through CLI overrides. 
-
-
-### Extensible Plugin System
-
-Plugins are the heart of `md-to-pdf`, allowing you to define entirely new document types or customize existing ones with specific configurations, processing logic, and styling.
-
-  * **Tailored Outputs** \
-    Plugins enable specialized outputs for diverse needs—from professional CVs and cover letters to structured recipes or technical reports.
-  * **Custom Processing** \
-    Each plugin can include a handler script (`index.js`) to implement custom Node.js logic for advanced Markdown parsing, dynamic content generation, or bespoke HTML structures.
-  * **Scoped Configuration & Styling** \
-    Plugins bundle their own default configuration (`<plugin-name>.config.yaml`) and CSS files, ensuring self-contained behavior and appearance, all of which can be overridden.
-  * **Bundled Plugins** \
-    Get started quickly with a resume or cover letter with `md-to-pdf`: 
-      
-      - [`default`](plugins/default)
-      - [`cv`](plugins/cv)
-      - [`recipe`](plugins/recipe)
-      - [`cover-letter`](plugins/cover-letter)
-      - [`recipe-book`](plugins/recipe-book)
-    
-
-### Versatility
-
-  * **Singletons/One-Offs** -- Convert individual Markdown files to PDF. The tool intelligently determines the plugin to use based on CLI arguments, front matter, or local configuration files.
-  * **Collections/Books** -- Generate combined PDF documents like recipe books with optional covers and tables of contents, using plugins like `recipe-book`.
-  * **Batch Exports (books/slides)** -- For processing multiple individual Markdown files (e.g., from content directories), `md-to-pdf` encourages the use of external scripts that call the `md-to-pdf convert` command. See the [Batch Processing Guide](docs/batch-processing-guide.md) for examples.
-
-### Configurability
-
-`md-to-pdf` uses a layered system for settings, enabling base configurations, personal defaults, and project-specific overrides. While the new CLI commands handle much of the plugin management,
-[`config.yaml`](advanced-configuration.md)
-files still offer granular control.
-
-  * **Layered Settings** -- Control plugin appearance and behavior through a multi-tier configuration system.
-
-  * **Front Matter** -- Use YAML front matter within Markdown files for document-specific data, self-activating plugins, and placeholders.
-  
-  * **Local Overrides** -- Utilize a local `<plugin-name>.config.yaml` for document-specific plugin choice and high-precedence settings overrides.
-  
-  * **Inspect Configuration** -- Use 
-    ```bash
-    md-to-pdf config
-    ```
-    to see your *effective* configuration to understand the active global settings, or `md-to-pdf config --plugin cv` to see the final merged settings for a specific plugin.
-
-[`config.example.yaml`](config.example.yaml)
-
-### Watch Mode
-
-Use the `--watch` flag with `convert` and `generate` commands to automatically re-generate PDFs when source Markdown, plugin configurations, or plugin CSS files are modified.
-
+Install `md-to-pdf` globally with `npm install -g md-to-pdf`, or locally.
 ```bash
-md-to-pdf convert examples/example-recipe.md --plugin recipe --watch
-```
-
-### [LaTeX](https://en.wikipedia.org/wiki/LaTeX) Math Rendering
-
-Displays mathematical notation using [KaTeX](https://katex.org/). Inline math is supported with `$...$` and display math with `$$...$$`, if you need it. See [`config.example.yaml`](config.example.yaml) for an example.
-
-```bash
-md-to-pdf convert examples/example-math.md # --plugin default
+git clone https://github.com/brege/md-to-pdf.git
+cd md-to-pdf
+npm install
+npm link
 ```
 
 ---
 
-## Quick Start: What it's like to use
+### Working with Plugins
 
-Get started swiftly with `md-to-pdf`.
-
-**Convert a Markdown file to PDF**
+Use any plugin with your markdown files:
 
 ```bash
-md-to-pdf examples/example-cv.md
+md-to-pdf convert my-resume.md --plugin cv
 ```
 
-**Specify a plugin**
+Take a look at the [Bundled Plugins](plugins/index.md) page for more examples.
+
+**Watch mode:** `md-to-pdf` can watch for changes to your markdown and plugin files with `md-to-pdf --watch`.
+
+> **Note:** The `convert` command is implicit when a markdown file is provided. For generators (like building recipe books), the distinction between `convert` and `generate` becomes important.
+
+---
+
+### Creating Custom Plugins
+
+To customize layouts, you can archetype from existing plugins or create a new one from scratch.
+```bash
+md-to-pdf plugin create --from cover-letter my-better-letter --target-dir 'my-plugins'
+```
+
+This creates a complete plugin structure:
+```bash
+my-plugins/my-better-letter
+├── .contract                       # schema and in-situ testing
+├── my-better-letter.config.yaml    # plugin configuration (page size, versioning, etc)
+├── my-better-letter.css            # custom CSS properties
+├── my-better-letter-example.md     # example file
+├── index.js                        # handler
+└── README.md                       # plugin description (embedded --help text)
+```
+
+---
+
+This allows for great flexibility and re-usability. Plugins are portable and can be shared across projects.
+
+---
+
+### Creating Plugins with AI
+
+Use the [helper script](scripts/ai/ai-context-generator.js) to build a context package for an AI prompt.
 
 ```bash
-md-to-pdf convert examples/example-cv.md --plugin cv
+node scripts/ai/ai-context-generator.js --plugin default --filename ai-context.txt
 ```
 
-**Add a new plugin collection from GitHub**
+See the [**AI Assisted Plugin Development Guide**](docs/ai/ai-assisted-plugin-development-guide.md) for more information. This uses built-in assets like the [**Plugin Contract**](docs/refs/plugin-contract.md), appends all plugin files, and [an interaction spec](docs/ai/interaction-spec.md) to guide the AI.
 
+The command above specifies a base plugin to archetype from, the "default" plugin, although any plugin will work. [This is how the D3.js Slide was created.](https://github.com/brege/md-to-pdf-plugins/tree/main/d3-histogram-slide).
+
+---
+
+### Collections -- Managing Plugins
+
+The collections manager makes it easy to manage plugins and collections of plugins.
 ```bash
-md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins 
+md-to-pdf collection add my-plugins
+# or add individual plugins
+md-to-pdf plugin add my-plugins/my-better-letter
 ```
 
-**Create a new plugin from an existing template (e.g., `cv`)**
-
+Enable plugins for use anywhere:
 ```bash
-md-to-pdf plugin create my-custom-cv --from cv
+md-to-pdf plugin enable my-plugins/my-better-letter
+# or enable entire collections
+md-to-pdf collection enable my-plugins
 ```
+
+This workflow lets you maintain a development repository with a self-activating testing area while providing production copies for use anywhere.
 
 ---
 
 ### Documentation
 
-#### Table of Contents
+Many workflows and walkthroughs are available:
 
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [Commands](#commands-overview)
-  - [Configuration (Advanced)](#configuration----advanced-details)
-  - [Plugins](#plugins---the-heart-of-md-to-pdf)
-  - [Developers](#development--project-tracking)
+* [Walkthrough: A Plugin's Full Lifecycle](docs/walkthroughs/full-lifecycle.md)
+* [Walkthrough: Customizing a Plugin with Archetyping](docs/walkthroughs/archetyping-a-plugin.md)
+* [Walkthrough: Updating and Syncing Plugins](docs/walkthroughs/updating-plugins.md)
+* [Walkthrough: Creating a Deck of Digital Notecards](docs/walkthroughs/generate-mobile-study-cards.md)
 
-#### Reference Guides
+Other guides:
 
-  - [Cheat Sheet](docs/cheat-sheet.md) - a quick reference guide to commands and options
-  - [Plugin Development Guide](docs/plugin-development.md) - how to develop, manage, and customize plugins, including advanced configuration details
-  - [Batch Processing Guide](docs/batch-processing-guide.md) - how to process multiple files using external scripts
-  - [Project Roadmap](docs/roadmap.md) - changelog and the future of `md-to-pdf`
+* [Batch Processing](docs/guides/batch-processing-guide.md) - Creating a set of PDFs from a directory of markdown files.
+Alternatively, the `generate` command is used to generate one PDF from a set of markdown files.
+
+* [Plugin Development Guide](docs/guides/plugin-development.md) - Manual configurations and complex workflows.
+* [Configuration Hierarchies](docs/guides/configuration-hierarchies.md) - Nitty-gritty details on the config hierarchy and how it's used.
 
 ---
 
-## Prerequisites
+### Usage & Commands
 
-  * **Node.js:** Version 18.0.0 or higher. See [nodejs.org](https://nodejs.org/).
-  * **npm (Node Package Manager):** Usually included with Node.js.
+**Cheatsheet:** [`docs/refs/cheat-sheet.md`](docs/refs/cheat-sheet.md)
 
-##### Verify Installation
+**Dynamic Tab-completion:**
+```bash
+echo 'source <(md-to-pdf completion)' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Plugin Management Commands:**
+```bash
+md-to-pdf plugin help cv              # Plugin-specific help
+md-to-pdf plugin list                 # List all plugins (add --short for brief)
+md-to-pdf plugin validate my-plugin   # Validate plugin structure and tests
+```
+
+**Collection Commands:**
+```bash
+md-to-pdf collection list                                          # List collections
+md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins # Add remote collection
+md-to-pdf update                                                   # Update plugins/collections
+```
+
+---
+
+### Project Structure
+
+The project and all its documentation (and many supporting files) is all indexed by [the librarian](scripts/linting/docs/update-project-indices.js).
+Each directory below has a mini-README (cf. main [`index.md`](docs/index.md)) that links to **all** documentation within the directory.
+
+The librarian, together with the [**postman**](scripts/linting/docs/postman.js), ensures all documentation is properly indexed and linked.
+
+**Docs** - [[`docs/`](docs/index.md)] - Documentation index (guides, reference, walkthroughs, vision, development sequence)
+
+**Linting** - [[`linting/`](scripts/linting/index.md)] - Scripts to improve code quality and document indexes and interlinking
+
+**Paths** - [[`paths/`](paths/index.md)] - The centralized path registry used by all app, test and auxiliary modules
+
+**Plugins** - [[`plugins/`](plugins/index.md)] - Bundled plugins, and a higher level plugin overview
+
+**Scripts** - [[`scripts/`](scripts/index.md)] - Utility scripts (using AI, batch processing, project management, etc.)
+
+**Tests** - [[`test/`](test/index.md)] - Unit, integration and end-to-end tests. Life cycle, smoke, and linting tests. The test framework and how to use [mocha](https://mochajs.org/)
+
+---
+
+### Development & Testing
+
+**Config precedence:** `--config` flag > user `~/.config/md-to-pdf/config.yaml` > `config.example.yaml`
+
+**Plugin precedence:** `--plugin` flag > front matter > local `*.config.yaml` > default
+
+[[`test/`](test/index.md)] - [[`linting/`](scripts/linting/index.md)] - [[`.mocharc.js`](.mocharc.js)]
+
+This project has a rich testing framework. In addition to the in-situ tests bundled with each plugin, there are over 300 tests, ranging from unit, integration, end-to-end, and lifecycle tests, in a declarative, manifest-driven harness and factory mocking system. The best place to start is the [Test Index](test/index.md).
 
 ```bash
-node -v
-npm -v
+npm test
+npm test -- --group collections
 ```
 
-## Installation
+You can run the last tests that failed `npm run test:last-fails`. You can use the `npm run test:watch` command, which runs the tests in watch mode as well.
 
-1.  **Clone the repository:**
-
-    ```bash
-    git clone https://github.com/brege/md-to-pdf
-    cd md-to-pdf
-    ```
-
-2.  **Install dependencies:**
-
-    ```bash
-    npm install
-    ```
-
-    This installs required packages and downloads a standalone version of Chromium (for [Puppeteer](https://pptr.dev/) to render intermediate HTML to PDF), and [Chokidar](https://github.com/paulmillr/chokidar) for auto-refreshing your PDF viewer.
-
-3.  **(Optional) Make the CLI globally available:**
-    To run `md-to-pdf` from any directory:
-
-    ```bash
-    npm link
-    ```
-
----
-
-## Usage
-
-The primary interface is [`cli.js`](cli.js). If globally linked, use `md-to-pdf`. Otherwise, from the project root, use `node ./cli.js`.
-
-**Lazy Loading**
-
-Quickly check the rendering of a Markdown file without explicitly using a plugin/template.
-
+Plugins are easy to test.
 ```bash
-md-to-pdf examples/example-recipe.md
+md-to-pdf plugin validate my-plugins/my-better-letter
 ```
+This checks if your plugin is self-activating, if the in-situ tests pass, and if the plugin's directory structure is valid, among other verifications.
 
-Output is saved to a temporary directory by default. Use `--outdir` and `--filename` to specify the output directory and file name.
+**Development history.**
 
-```bash
-md-to-pdf examples/example-recipe.md --outdir ./ --filename "example-recipe.pdf"
-```
+[ [`v0.10`](docs/archive/v0.10/) ]
+[ [polish](docs/archive/v0.10/polish-checklist.md) ] ←
+[ [linting](docs/archive/v0.10/linting-checklist.md) ] ←
+[ [release candidate](docs/archive/v0.10/rc-checklist.md) ] ←
+[ [refactor.index](docs/archive/v0.10/scripts.refactor.index.md) ] ←
+[ [reorg](docs/archive/v0.10/reorganization-planner.md) ]
+⋅ [ [`v0.9`](docs/archive/v0.9/) ]
+[ [dream-board](docs/archive/v0.9/dream-board-v0.9.md) ]
 
-**Through Plugins**
-
-The power is in the plugins.
-
-```bash
-md-to-pdf convert examples/example-recipe.md --plugin recipe
-```
-
-**Global Options**
-
-  * `--config <path_to_config.yaml>`
-
-    Specify a custom path to your main project-specific YAML configuration file. This file can register project-local plugins and override settings. 
-    Useful for scripting multiple files in a batch.
-
-  * `--outdir <directory>` (for `convert` and `generate`)
-
-    Specifies the output directory for the PDF. 
-    For the `convert` command (and the lazy load usage above), if this is not provided, the PDF will be saved to a system temporary directory (e.g., `/tmp/md-to-pdf-output/`), and the full path will be logged.
-
-  * `--plugin <pluginNameOrPath>`
-
-    Explicitly specify the plugin to use by its registered name or by a direct path to its configuration file or directory. This overrides plugin choices from front matter or local config files.
-
-  * `--factory-defaults`
-
-    Use only bundled default configurations and plugins, ignoring user (XDG) and project (`--config`) configurations. Useful for debugging or getting a "vanilla" output.
-
-  * `--watch`
-
-    Watch the source Markdown file for changes and re-convert it to PDF. Only applies to `convert` command.
-
-  * `--help`, `convert --help`, `config --plugin cv --help`
-
-    Display help for a specific command or plugin.
-
-### Commands Overview
-
-`md-to-pdf` has several commands for different conversion and management tasks:
-
-  * **Default Command (Lazy Load Convert)**
-
-    If you provide a Markdown file as the first argument without a specific command (like `convert` or `generate`), `md-to-pdf` implicitly acts like the `convert` command.
-
-    ```bash
-    md-to-pdf examples/example-cv.md # [--outdir ./output]
-    ```
-
-    It intelligently tries to determine the plugin to use (see [Plugin Specification & Precedence](docs/plugin-development.md#plugin-specification-and-precedence)).
-
-  * **`convert <markdownFile>`**
-
-    For converting single Markdown files to PDF.
-
-      * Requires a `<markdownFile>` argument.
-      * Can explicitly specify a plugin using `--plugin <pluginNameOrPath>`.
-      * If `--outdir` is not specified, output defaults to a system temporary directory.
-    
-    ```bash
-    md-to-pdf convert examples/example-recipe.md --plugin recipe
-    md-to-pdf convert examples/example-cover-letter.md --plugin cover-letter --watch
-    ```
-
-  * **`generate <pluginName>`**
-
-    For plugins that require more complex inputs or generate documents from sources other than a single Markdown file (e.g., recipe books).
-
-    ```bash
-    md-to-pdf generate recipe-book --recipes-base-dir examples/hugo-example # [--filename "FamilyCookbook.pdf"]
-    ```
-
-  * **`collection`** -- A group of subcommands for managing plugin collections.
-
-      * `collection add <source>` - Adds a plugin collection from a Git repository URL or local directory.
-        ```bash
-        md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins  --name brege-plugins
-        md-to-pdf collection add ./my-custom-plugins
-        ```
-      * `collection list` - Lists all registered plugin collections.
-        ```bash
-        md-to-pdf collection list
-        ```
-      * `collection update [name]` - Updates a specific collection (if Git-sourced) or all collections.
-        ```bash
-        md-to-pdf collection update my-plugins-repo
-        md-to-pdf collection update           # Updates all collections -- git, local
-        ```
-      * `collection remove <name>` - Removes a registered plugin collection.
-        ```bash
-        md-to-pdf collection remove my-plugins-repo
-        ```
-
-  * **`plugin`** -- A group of subcommands for managing individual plugins.
-
-      * `plugin list` - Lists all discoverable plugins.
-        ```bash
-        md-to-pdf plugin list
-        md-to-pdf plugin list --available     # List all plugins, including disabled ones
-        md-to-pdf plugin list --enabled       # List only enabled plugins
-        md-to-pdf plugin list --disabled      # List only disabled plugins
-        ```
-      * `plugin create <pluginName>` - Generates a boilerplate for a new plugin, optionally based on an existing one.
-        ```bash
-        md-to-pdf plugin create my-invoice    # Creates a basic new plugin
-        md-to-pdf plugin create my-custom-cv --from cv # Archetypes from the 'cv' plugin
-        ```
-      * `plugin enable <pluginName>` - Enables a specific plugin.
-        ```bash
-        md-to-pdf plugin enable my-invoice
-        ```
-      * `plugin disable <pluginName>` - Disables a specific plugin.
-        ```bash
-        md-to-pdf plugin disable my-invoice
-        ```
-      * `plugin remove <pluginName>` - Removes a registered plugin 
-        [**TODO:** Must consider all cases for **safety** here.] 
-        Collection-based plugin removal is handled by `collection remove`.
-        ```bash
-        md-to-pdf plugin remove my-standalone-plugin # TODO: Singleton removal and purging
-        ```
-      * `plugin help <pluginName>` - Displays detailed help for a specific plugin.
-        ```bash
-        md-to-pdf plugin help cv
-        ```
-
-  * **`config`** -- Subcommand to inspect the active configuration settings.
-
-    ```bash
-    md-to-pdf config
-    md-to-pdf config --plugin cv
-    md-to-pdf config --plugin cv --pure
-    ```
-
-For detailed syntax, all available options, and more examples for each command, refer to the [**Cheat Sheet**](docs/cheat-sheet.md#core-commands--common-use-cases). For processing multiple files in a batch, see the [**Batch Processing Guide**](docs/batch-processing-guide.md).
+[ [`v0.8`](docs/archive/v0.8/) ]
+[ [dream-board](docs/archive/v0.8/dream-board-v0.8.md) ]
+[ [changelog](docs/archive/v0.8/changelog-v0.8.md) ]
+⋅ [ [`v0.7`](docs/archive/v0.7/) ]
+[ [dream-board](docs/archive/v0.7/dream-board-v0.7.md) ]
+[ [changelog](docs/archive/v0.7/changelog-v0.7.md) ]
+⋅ [ [`v0.6` (and earlier)](docs/archive/v0.6/) ]
+[ [roadmap](docs/archive/v0.6/roadmap.md)]
 
 ---
-
-## Configuration -- Advanced Details
-
-`md-to-pdf` uses a layered system for settings, allowing you to have base settings, personal defaults, and project-specific changes. For an in-depth explanation of configuration layers, plugin registration via `config.yaml`, settings overrides, and placeholder data, please see the [**Plugin Development Guide**](docs/plugin-development.md#plugin-discovery-and-registration).
-
-### Verifying Your Configuration
-
-To understand the active global settings or the final merged settings for a specific plugin, use the `md-to-pdf config` command. This is very helpful for debugging.
-
-```bash
-md-to-pdf config
-md-to-pdf config --plugin cv
-```
-
-See the [**Cheat Sheet**](docs/cheat-sheet.md#configuration-inspection) for more examples.
-
-#### Config Example
-
-**`md-to-pdf config --pure`**
-
-```yaml
-pdf_viewer: xdg-open
-global_pdf_options:
-  format: Letter
-  printBackground: true
-  margin:
-    top: 1in
-    right: 1in
-    bottom: 1in
-    left: 1in
-global_remove_shortcodes:
-  - ''
-
-# --- TODO: consider doing this on a per-plugin basis, like Hugo does ---
-math:
-  enabled: true
-  engine: katex
-  katex_options:
-    throwOnError: false
-    trust: false
-
-# --- TODO: redo these next two based on new collection management system ---
-plugin_directory_aliases:
-  core: ~/path/to/md-to-pdf/plugins/
-  examples: ~/path/to/md-to-pdf/examples/
-  tests: ~/path/to/md-to-pdf/test/custom_plugins/
-  community: ~/path/to/md-to-pdf/community_plugins/
-plugins:
-  default: core:default/default.config.yaml
-  cv: core:cv/cv.config.yaml
-  cover-letter: core:cover-letter/cover-letter.config.yaml
-  recipe: core:recipe/recipe.config.yaml
-  recipe-book: core:recipe-book/recipe-book.config.yaml
-  advanced-card: examples:custom_plugin_showcase/advanced-card/advanced-card.config.yaml
-```
-
----
-
-## Plugins - The Heart of `md-to-pdf`
-
-The flexibility of `md-to-pdf` lies in its extensible plugin system. Plugins allow you to define entirely new document types or customize existing ones, each with its own specific configuration, processing logic, and styling.
-
-This allows you (and chatbots) to create reproducible document types for all 
-distribution needs in familiar JavaScript, CSS, and Markdown.
-
-#### What Plugins Do
-
-  * **Tailored Outputs:** Plugins enable specialized outputs for different needs, such as CVs, recipes, cover letters, technical reports, or even unique formats like presentation slides or business cards.
-  * **Custom Processing:** Each plugin has a handler script (usually `index.js`) that can implement custom Node.js logic to parse Markdown, process data, generate dynamic content, or construct entirely custom HTML structures.
-  * **Scoped Configuration & Styling:** Every plugin bundles its own default configuration (`<plugin-name>.config.yaml`) and CSS files, ensuring that its behavior and appearance are self-contained yet overridable.
-
-#### Core Capabilities
-
-  * **Bundled Plugins** -- `md-to-pdf` comes with several [built-in plugins](plugins#readme) like `default`, `cv`, `recipe`, `cover-letter`, and `recipe-book` to get you started.
-  
-  * **Custom Plugin Creation** -- You can easily scaffold and develop your own plugins to perfectly match your document requirements using the `md-to-pdf plugin create <your-plugin-name>` command.
-  
-  * **Flexible Configuration** -- Plugin settings, including PDF options, CSS, math rendering, and even custom parameters (`params`), can be defined within the plugin and further customized via the global, user, or project-level configuration layers.
-  
-  * [**Advanced Handling**](docs/plugin-development.md) -- For complex scenarios, plugins can bypass the standard Markdown-to-HTML processing and directly use core utilities to generate highly specific HTML layouts, as demonstrated by the `advanced-card` example.
-
-This plugin architecture makes `md-to-pdf` not just a converter, but a versatile platform for producing a wide array of structured PDF documents.
-
-**Dive Deeper**
-
-  * To learn about the bundled plugins, see the [**Bundled Plugins Overview**](plugins/README.md).
-  * For a complete guide on creating and managing your own plugins, including integrating community plugins and detailed configuration, refer to the [**Plugin Development Guide**](docs/plugin-development.md).
-
-### Configuration Hierarchy: Inclusive vs. Exclusive
-
-`md-to-pdf` uses two different models for applying configurations, and understanding the distinction is key to mastering the tool.
-
-#### Inclusive (Merging) Hierarchy: For Plugin Settings
-
-When determining the final settings for a specific plugin (e.g., its `pdf_options` or `params`), `md-to-pdf` uses an **inclusive, merging hierarchy**.
-
-Think of it like applying layers of paint. The system starts with the plugin's base defaults, then applies your user-global settings on top, and finally layers your project-specific settings over that. The final configuration is a composite of all these layers.
-
-> **Example:**
-> 1. The base `cv` plugin defines `format: A4`.
-> 2. Your user config (`~/.config/md-to-pdf/config.yaml`) defines `margin: { top: "0.8in" }` for the `cv` plugin.
->
-> The result is an effective configuration that includes **both** `format: A4` and the `0.8in` top margin. The user config *adds to* the base config without replacing it entirely.
-
-#### Exclusive (Overriding) Hierarchy: For the Collections Root
-
-In contrast, the location of your plugin collections (`collRoot`) is handled with an **exclusive, either-or hierarchy**.
-
-Think of this like choosing which library to visit. You can only be in one at a time. When you specify a collections root, `md-to-pdf` looks in that single location and **ignores all others**.
-
-The precedence is:
-1.  `--coll-root <path>` (CLI Flag)
-2.  Environment Variable
-3.  `collections_root:` key in your `config.yaml`
-4.  Default XDG Path (`~/.local/share/md-to-pdf/collections`)
-
-> **Example:**
-> 1. Your default `collRoot` contains `plugin-A`.
-> 2. You run a command with `--coll-root /tmp/other_plugins`, and that directory contains `plugin-B`.
->
-> For that one command, the application will **only** see `plugin-B`. It will act as if `plugin-A` doesn't exist. This allows you to safely and temporarily switch your entire plugin context without altering your persistent configuration.
-
-### Batch Processing 'Eaches'
-
-To process multiple Markdown files in a batch job (e.g., converting all recipes in a directory to individual PDFs, or all weeks of a physics lab manual), example external scripts that call the `md-to-pdf convert` command for each file can be found in [`scripts/`](scripts/). 
-The [**Batch Processing Guide**](docs/batch-processing-guide.md) provides examples of how to do this with a Node.js wrapper and through a fairly simple bash script.
-
----
-
-## Tab Completion
-
-To enable tab completion for Bash or Zsh, run:
-
-    source <(md-to-pdf completion)
-
-To enable it permanently, add the above line to your ~/.bashrc or ~/.zshrc.
-
-For more details, see [Tab Completion in the yargs docs](https://yargs.js.org/docs/#api-reference-completion).
-
-
----
-
-## Testing
-
-The project includes an integration test suite: **`npm test`**.  For more details, see [**`test/README.md`**](test#readme).
-
-Example commands to run tests more granularly:
-
-```bash
-npm test                        # all tests
-npm test -- --group level1      # module integration tests
-npm test -- --group level3      # end-to-end tests
-npm test -- 'test/e2e/plugin-create.test.js'      # single end-to-end test
-npm test -- 'test/integration/**/*.test.1.?.1.js' # first level1 test of each module
-```
-
-The tests rely on [`mocha`](https://mochajs.org/) and are organized in [`.mocharc.js`](.mocharc.js).
-
-The **CI** file [`.ci.yml`](.github/workflows/ci.yml) provides automatic testing and deployment to [github.com/brege/md-to-pdf/actions](https://github.com/brege/md-to-pdf/actions).
-
-For tests that are currently *not* mapped by the CI, see the [**QA Dashboard**](test/docs/qa-dashboard.md).
-
-
----
-
-## Development & Project Tracking
-
-**A complete [index](docs/index.md) of all documentation is available at [docs/index.md](docs/index.md).**
-
-For ongoing development, historical changes, and future plans, please refer to the following documents.
-
-**[Changelogs](#) -- `docs/changelog-vX.Y.md`** \
-Detailed records of changes, new features, and bug fixes for each version series, starting with `changelog-v0.7.md`, are the primary source for understanding what has been implemented. \
-[v0.7](docs/changelog-v0.7.md) 
-·
-[v0.8](docs/changelog-v0.8.md)
-
-**[Dream Board](docs/dream-board-v0.8.md) -- `docs/dream-board-vX.Y.md`** \
-This document captures broader, high-level ideas, potential future epochs, and long-term aspirations for `md-to-pdf` that are not yet concrete enough for a specific version proposal. \
-[v0.7](docs/dream-board-v0.7.md) 
-· 
-[v0.8](docs/dream-board-v0.8.md)
-· 
-[v0.9](docs/dream-board-v0.9.md)
-
-**[Roadmap - Historical Overview](docs/roadmap.md) -- `docs/roadmap.md`**  
-The `docs/roadmap.md` file now serves primarily as a **historical overview** of major features and milestones completed prior to v0.7.0. For current and future planning, please refer to the changelogs and dream board.  
-[v0.1](https://github.com/brege/md-to-pdf/blob/b0b9fd026d4bebfb65edba4c07ab5a779f15bfff/ROADMAP.md)
-·
-[v0.2](https://github.com/brege/md-to-pdf/blob/32c448d17e2db25dbf1f47cb9d9a6fcc4361f723/ROADMAP.md)
-·
-[v0.3](https://github.com/brege/md-to-pdf/blob/4f947918755baffefe7aa29fc519a2f61970e102/ROADMAP.md)
-·
-[v0.4](https://github.com/brege/md-to-pdf/blob/9cde4a45726f8ad88041a68017309b79a16a27b9/docs/roadmap.md)
-·
-[v0.5](https://github.com/brege/md-to-pdf/blob/0c3eb2684ac71a02b73a0882a198a59b5b016e45/docs/roadmap.md)
-·
-[v0.6](https://github.com/brege/md-to-pdf/blob/fb0ef9bcd8555cdc5400599d6c99b4cdbf950702/docs/roadmap.md)
-
----
-
 
 ## License
 

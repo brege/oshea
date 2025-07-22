@@ -134,7 +134,7 @@ Ergonomics and user-friendliness.
 - [x] `--list`: print all available steps (labels), optionally filtered
 - [x] `--dry-run`: show what would run without executing
 - [x] `--skip `: skip a specific step by label or alias
-- [ ] Aggregate results: collect and summarize pass/fail as a report [ *partially implemented* ]
+- [x] Aggregate results: collect and summarize pass/fail as a report [ *partially implemented* ]
 
 **Meta-Linter.** \
 Validation and quality control.

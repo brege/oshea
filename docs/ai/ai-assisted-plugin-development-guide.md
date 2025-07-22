@@ -1,4 +1,4 @@
-> ## Draft: [`docs/ai/ai-assisted-plugin-development-guide.md`](ai-assisted-plugin-development-guide.md)
+> #### Draft: [`docs/ai/ai-assisted-plugin-development-guide.md`](ai-assisted-plugin-development-guide.md)
 
 # AI-Assisted Plugin Development: A How-To Guide
 
@@ -14,13 +14,13 @@ Instead of trying to explain the entire `md-to-pdf` project to an AI, we provide
 2. **The Plugin Contract**: The required file structure and metadata.
 3. **A Base Plugin Example**: The full source code of a simple, working plugin (like `default` or `cv`) to use as a starting point.
 
-A helper script, `[`scripts/ai/ai-context-generator.js`](../../scripts/ai/ai-context-generator.js)`, gathers all this information and combines it into a single text file for you.
+A helper script, [`scripts/ai/ai-context-generator.js`](../../scripts/ai/ai-context-generator.js), gathers all this information and combines it into a single text file for you.
 
 ---
 
 ### Step 1: Generate the Context Package
 
-Run the `[`ai-context-generator.js`](../../scripts/ai/ai-context-generator.js)` script from the project root to create your context package. It's best to use an existing, simple plugin as the base for the AI to modify.
+Run the [`ai-context-generator.js`](../../scripts/ai/ai-context-generator.js) script from the project root to create your context package. It's best to use an existing, simple plugin as the base for the AI to modify.
 
 **Command:**
 
@@ -41,7 +41,7 @@ You now have a complete, self-contained brief for the AI in one file.
 
 The "Master Prompt" is a template you will use to instruct the AI. It is structured so that you can write your specific request first, then paste the large context package at the end.
 
-**How to Use:**
+**How to Use**
 
 1. **Start a new chat** with your AI assistant.
 2. **Copy the Master Prompt Template** from below into the chat window.
@@ -49,7 +49,7 @@ The "Master Prompt" is a template you will use to instruct the AI. It is structu
 4. **Open `ai-context.txt`**, copy its entire contents, and paste it into the `[ PASTE THE ENTIRE CONTENTS OF ai-context.txt HERE ]` section at the bottom.
 5. **Send the prompt.**
 
-**Master Prompt Template:**
+**Master Prompt Template**
 
 ```markdown
 You are an expert Node.js developer who specializes in creating plugins for the `md-to-pdf` command-line tool. Your task is to help me create a new plugin based on my request below.
@@ -60,11 +60,13 @@ You must follow these rules:
 3. Our workflow is as follows: I will use the `md-to-pdf` tool to scaffold the plugin files, then you will provide the code to modify them, and finally I will test your code and provide feedback.
 
 ---
+
 ### My Request:
 
 **[BRIEFLY DESCRIBE YOUR GOAL HERE. For example: "I need to create a plugin for generating simple meeting minutes. It should have fields for attendees, agenda, and action items."]**
 
 ---
+
 ### Technical Context & Rules:
 
 [ PASTE THE ENTIRE CONTENTS OF `ai-context.txt` HERE ]

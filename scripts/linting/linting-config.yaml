@@ -139,7 +139,6 @@ doc-links:
     - "**/sample.md"
     - "**/index.js"
   excludes:
-    - "README.md"                       # TODO
     - "test/docs/checklist-*.md"
     - "test/docs/audit-log.md"
     - "plugins/recipe-book/README.md"

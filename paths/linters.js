@@ -1,6 +1,6 @@
 // paths/linters.js
 // linters.js - Linting Tools Registry
-// Generated: 2025-07-21T05:38:15.082Z
+// Generated: 2025-07-23T03:08:25.483Z
 // Architecture: Feature-based linting infrastructure
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -53,9 +53,11 @@ const mochaPathValidatorPath = path.join(projectRoot, 'scripts/linting/validator
 
 // Linting Utilities & Helpers
 const libRoot = path.join(projectRoot, 'scripts/linting/lib/');
+const dataAdaptersPath = path.join(projectRoot, 'scripts/linting/lib/data-adapters.js');
 const fileDiscoveryPath = path.join(projectRoot, 'scripts/linting/lib/file-discovery.js');
 const formattersPath = path.join(projectRoot, 'scripts/linting/lib/formatters.js');
 const lintHelpersPath = path.join(projectRoot, 'scripts/linting/lib/lint-helpers.js');
+const visualRenderersPath = path.join(projectRoot, 'scripts/linting/lib/visual-renderers.js');
 
 // ==========================================
 // Exports
@@ -91,8 +93,10 @@ module.exports = {
 
   // --- enhancements & utilities ---
   libRoot,
+  dataAdaptersPath,
   fileDiscoveryPath,
   formattersPath,
   lintHelpersPath,
+  visualRenderersPath,
 
 };

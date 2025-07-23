@@ -256,7 +256,7 @@ if (require.main === module) {
   }
 
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
-  
+
   // Set global debug mode
   logger.setDebugMode(!!flags.debug);
   const finalTargets = targets.length > 0 ? targets : (config.targets || ['.']);

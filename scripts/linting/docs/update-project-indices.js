@@ -279,10 +279,10 @@ async function runLibrarian(options = {}) {
 if (require.main === module) {
   (async () => {
     const { flags, targets } = parseCliArgs(process.argv.slice(2));
-    
+
     // Set global debug mode
     logger.setDebugMode(!!flags.debug);
-    
+
     const group = flags.group || null;
 
     await runLibrarian({

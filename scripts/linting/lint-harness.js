@@ -45,7 +45,7 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
         if (preJsonOutput && !usingJson) {
           logger.info(preJsonOutput);
         }
-        
+
         const jsonString = stdout.substring(jsonStart);
         const parsed = JSON.parse(jsonString);
 

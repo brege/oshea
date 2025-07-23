@@ -20,18 +20,18 @@ function getCachePath() {
 
 function main() {
   try {
-    logger.writeInfo('Generating CLI completion cache...\n');
+    logger.info('Generating CLI completion cache...\n', { format: 'inline' });
     const commandTree = discoverCommandTree(COMMANDS_DIR);
     const cachePath = getCachePath();
 
     fs.mkdirSync(path.dirname(cachePath), { recursive: true });
     fs.writeFileSync(cachePath, JSON.stringify(commandTree, null, 2));
 
-    logger.writeSuccess(`Completion cache successfully written to: ${cachePath}\n`);
+    logger.success(`Completion cache successfully written to: ${cachePath}\n`, { format: 'inline' });
   } catch (error) {
-    logger.writeError(`ERROR: Failed to generate completion cache: ${error.message}\n`);
+    logger.error(`ERROR: Failed to generate completion cache: ${error.message}\n`, { format: 'inline' });
     if (error.stack) {
-      logger.writeError(`${error.stack}\n`);
+      logger.error(`${error.stack}\n`, { format: 'inline' });
     }
     process.exit(1);
   }

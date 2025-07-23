@@ -1,13 +1,24 @@
 // src/utils/formatters/index.js
 // Central registry of all formatters
 require('module-alias/register');
-const { lintFormatterPath } = require('@paths');
+const {
+  appFormatterPath,
+  lintFormatterPath,
+  inlineFormatterPath,
+  pathsFormatterPath,
+  rawFormatterPath,
+} = require('@paths');
 const { formatLint } = require(lintFormatterPath);
+const { formatApp } = require(appFormatterPath);
+const { formatInline } = require(inlineFormatterPath);
+const { formatRaw } = require(rawFormatterPath);
+const { formatPathFinderOutput } = require(pathsFormatterPath);
 
+// Export formatters
 module.exports = {
-  lint: formatLint
-  // Future formatters go here:
-  // inline: formatInline,
-  // debug: formatDebug,
-  // etc.
+  app: formatApp,
+  lint: formatLint,
+  inline: formatInline,
+  raw: formatRaw,
+  paths: formatPathFinderOutput
 };

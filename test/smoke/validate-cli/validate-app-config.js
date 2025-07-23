@@ -48,7 +48,7 @@ const scenarios = [
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  logger.info('Smoke Test: Validating `config` command...');
+  logger.info('Smoke Test: Validating `config` command...\n', { format: 'inline' });
 
   let failedScenarios = [];
 
@@ -57,7 +57,7 @@ async function runSmokeTest() {
     const commandDisplay = `md-to-pdf ${scenario.commandArgs}`;
 
     // This prints '  Testing: ... ' (gray, no newline)
-    logger.writeDetail(`  Testing: ${commandDisplay} ... `);
+    logger.detail(`  Testing: ${commandDisplay} ... `, { format: 'inline' });
 
     try {
       const stdout = await new Promise((resolve, reject) => {
@@ -66,35 +66,35 @@ async function runSmokeTest() {
             return reject({ error, stdout, stderr });
           }
           if (stderr) {
-            logger.warn(`    Warning (stderr): ${stderr.trim()}`);
+            logger.warn(`    Warning (stderr): ${stderr.trim()}`, { format: 'inline' });
           }
           resolve(stdout);
         });
       });
 
       if (scenario.validate(stdout)) {
-        logger.writeSuccess('✓ OK\n');
+        logger.success('✓ OK\n', { format: 'inline' });
       } else {
         failedScenarios.push({ command: commandDisplay, reason: 'Validation function returned false.' });
-        logger.writeError('✗ FAIL\n');
+        logger.error('✗ FAIL\n', { format: 'inline' });
       }
 
     } catch (result) {
       failedScenarios.push({ command: commandDisplay, reason: result.error.message.split('\n')[0] });
-      logger.writeError('✗ FAIL\n');
+      logger.error('✗ FAIL\n', { format: 'inline' });
     }
   }
 
   if (failedScenarios.length > 0) {
-    logger.error('\n--- Smoke Test Failed ---');
-    logger.error(`${failedScenarios.length} config scenario(s) failed:`);
+    logger.error('\n--- Smoke Test Failed ---', { format: 'inline' });
+    logger.error(`${failedScenarios.length} config scenario(s) failed:`, { format: 'inline' });
     failedScenarios.forEach(({ command, reason }) => {
-      logger.detail(`  - ${command}`);
-      logger.detail(`    Reason: ${reason}`);
+      logger.detail(`  - ${command}`, { format: 'inline' });
+      logger.detail(`    Reason: ${reason}`, { format: 'inline' });
     });
     process.exit(1);
   } else {
-    logger.success('\n✓ Smoke Test Passed: All `config` commands executed successfully.');
+    logger.success('\n✓ Smoke Test Passed: All `config` commands executed successfully.\n', { format: 'inline' });
     process.exit(0);
   }
 }

@@ -120,10 +120,10 @@ function runLinter(options = {}) {
 
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
-  
-  // Set global debug mode  
+
+  // Set global debug mode
   logger.setDebugMode(!!flags.debug);
-  
+
   const loggingConfig = loadLintSection('logging', lintingConfigPath) || {};
   const configTargets = loggingConfig.targets || [];
   const configExcludes = loggingConfig.excludes || [];

@@ -85,17 +85,63 @@ const {
 // ... 
 ```
 
+As a companion to [`scripts/shared/path-finder.js`](../scripts/shared/path-finder.js),
+the following files can be used to generate the dependency tree from the pathing registry:
+
+- [ [`dep-tree.js`](dep-tree.js) ]
+  -- The main dependency tree runner.
+
+  **Command.**
+  ```bash
+  node paths/dep-tree.js src/cli/commands/collection.command.js --tree
+  ```
+  **Output.**
+  ```txt
+
+  Tracing dependencies for: src/cli/commands/collection.command.js
+  ============================================================
+
+  Dependency Tree:
+  ----------------------------------------
+  └── src/cli/commands/collection.command.js (collectionCommandPath)
+      ├── paths/index.js (pathsPath)
+      │   ├── paths/scripts.js 
+      │   ├── paths/linters.js 
+      │   └── paths/tests.js 
+      ├── src/cli/commands/collection/add.command.js (collectionsAddCommandPath)
+      │   ├── paths/index.js  (collapsed)
+      │   └── src/utils/logger.js (loggerPath)
+      │       ├── paths/index.js  (collapsed)
+      │       └── src/utils/formatters/index.js (formattersIndexPath)
+      │           ├── paths/index.js  (collapsed)
+      │           ├── src/utils/formatters/lint-formatter.js (lintFormatterPath)
+      │           ├── src/utils/formatters/app-formatter.js (appFormatterPath)
+      │           ├── src/utils/formatters/inline-formatter.js (inlineFormatterPath)
+      │           ├── src/utils/formatters/raw-formatter.js (rawFormatterPath)
+      │           └── src/utils/formatters/paths-formatter.js (pathsFormatterPath)
+      ├── src/cli/commands/collection/list.command.js (collectionsListCommandPath)
+      │   ├── paths/index.js  (collapsed)
+      │   └── src/utils/logger.js  (collapsed)
+      ├── src/cli/commands/collection/remove.command.js (collectionsRemoveCommandPath)
+      │   ├── paths/index.js  (collapsed)
+      │   └── src/utils/logger.js  (collapsed)
+      └── src/cli/commands/collection/update.command.js (collectionsUpdateCommandPath)
+          ├── paths/index.js  (collapsed)
+          └── src/utils/logger.js  (collapsed)
+  ```
+  **Usage.**
+  ```bash
+  node paths/dep-tree.js <file ...> [--export <dir>] [--include <path ...> | -P <path ...>] [options]
+  ```
+  These files construct the dependency graph and render it as a tree diagram, respectively.
+    - [ [`dependency-tracer.js`](lib/dependency-tracer.js) ]
+    - [ [`tree-renderer.js`](lib/tree-renderer.js) ]
 
 <details> 
 <summary>Untracked Files</summary>
 
 <!-- uncategorized-start -->
 
-- [dep-tree.js](dep-tree.js)
-
-- [dependency-tracer.js](lib/dependency-tracer.js)
-
-- [tree-renderer.js](lib/tree-renderer.js)
 <!-- uncategorized-end -->
 
 </details>

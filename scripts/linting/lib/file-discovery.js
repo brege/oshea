@@ -125,7 +125,7 @@ function findFiles(options = {}) {
     respectDocignore = false,
     docignoreRoot = projectRoot,
     skipTag = null,
-    debug = false,
+    debug = false, // eslint-disable-line no-unused-vars
   } = options;
 
   logger.debug(`[findFiles:Debug] Received targets: ${JSON.stringify(targets)}`);

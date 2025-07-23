@@ -38,7 +38,7 @@ const scenarios = [
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  logger.info('Smoke Test: Validating `plugin list` command...');
+  logger.info('Smoke Test: Validating `plugin list` command...\n', { format: 'inline' });
 
   let failedScenarios = [];
 
@@ -46,7 +46,7 @@ async function runSmokeTest() {
     const fullCommand = `node "${cliPath}" ${scenario.commandArgs}`;
     const commandDisplay = `md-to-pdf ${scenario.commandArgs}`;
 
-    logger.writeDetail(`  Testing: ${commandDisplay} ... `);
+    logger.detail(`  Testing: ${commandDisplay} ... `, { format: 'inline' });
 
     try {
       const stdout = await new Promise((resolve, reject) => {
@@ -55,35 +55,35 @@ async function runSmokeTest() {
             return reject({ error, stdout, stderr });
           }
           if (stderr) {
-            logger.warn(`\n    Warning (stderr): ${stderr.trim()}`);
+            logger.warn(`\n    Warning (stderr): ${stderr.trim()}`, { format: 'inline' });
           }
           resolve(stdout);
         });
       });
 
       if (scenario.validate(stdout)) {
-        logger.writeSuccess('✓ OK\n');
+        logger.success('✓ OK\n', { format: 'inline' });
       } else {
         failedScenarios.push({ command: commandDisplay, reason: 'Validation function returned false. Output did not contain expected text.' });
-        logger.writeError('✗ FAIL\n');
+        logger.error('✗ FAIL\n', { format: 'inline' });
       }
 
     } catch (result) {
       failedScenarios.push({ command: commandDisplay, reason: result.error.message.split('\n')[0] });
-      logger.writeError('✗ FAIL\n');
+      logger.error('✗ FAIL\n', { format: 'inline' });
     }
   }
 
   if (failedScenarios.length > 0) {
-    logger.error('\n--- Smoke Test Failed ---');
-    logger.error(`${failedScenarios.length} 'plugin list' scenario(s) failed:`);
+    logger.error('\n--- Smoke Test Failed ---', { format: 'inline' });
+    logger.error(`${failedScenarios.length} 'plugin list' scenario(s) failed:`, { format: 'inline' });
     failedScenarios.forEach(({ command, reason }) => {
-      logger.detail(`\n  - ${command}`);
-      logger.detail(`    Reason: ${reason}`);
+      logger.detail(`\n  - ${command}`, { format: 'inline' });
+      logger.detail(`    Reason: ${reason}`, { format: 'inline' });
     });
     process.exit(1);
   } else {
-    logger.success('\n✓ Smoke Test Passed: All `plugin list` commands executed successfully.');
+    logger.success('\n✓ Smoke Test Passed: All `plugin list` commands executed successfully.\n', { format: 'inline' });
     process.exit(0);
   }
 }

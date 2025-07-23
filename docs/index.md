@@ -169,8 +169,5 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 *This list is automatically updated by [`scripts/linting/docs/update-project-indices.js`](../scripts/linting/docs/update-project-indices.js)*
 
 <!-- uncategorized-start -->
-
-
-- [logger-renderer-adapter-before-and-after.md](logger-renderer-adapter-before-and-after.md)
 <!-- uncategorized-end -->
 

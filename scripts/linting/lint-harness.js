@@ -4,8 +4,8 @@ require('module-alias/register');
 
 const { spawnSync } = require('child_process');
 const { resolve } = require('path');
-const { projectRoot, eslintPath, formattersPath, loggerPath } = require('@paths');
-const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath); // eslint-disable-line
+const { projectRoot, eslintPath, dataAdaptersPath, loggerPath } = require('@paths');
+const { adaptRawIssuesToEslintFormat } = require(dataAdaptersPath);
 const logger = require(loggerPath);
 
 // Accept userArgs (for display only) and the usingJson flag
@@ -66,7 +66,7 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
     if (issues.length > 0) {
       const isEslintResult = command === eslintPath;
       const adaptedIssues = isEslintResult ? issues : adaptRawIssuesToEslintFormat(issues);
-      const { transformToStructuredData } = require(formattersPath.replace('formatters.js', 'data-adapters.js'));
+      const { transformToStructuredData } = require(dataAdaptersPath);
       const structuredData = transformToStructuredData(adaptedIssues);
       logger.formatLint(structuredData);
     } else if (stdout && !stepSummary) {

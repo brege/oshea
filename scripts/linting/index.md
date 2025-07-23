@@ -50,8 +50,10 @@ See [the test index](../../test/index.md) for more details.
   -- The file discovery utility, allowing globbing, directory traversal, and walking.
 - [ [`lint-helpers.js`](lib/lint-helpers.js) ]
   -- Common patterns used by most be-spoke lints, as well as a lint-skipper.
-- [ [`formatters.js`](lib/formatters.js) ]
-  -- The formatter of the linting output (ESlint, JSON, etc.).
+- [ [`data-adapters.js`](lib/data-adapters.js) ]
+  -- Pure data transformation functions for linting output (no styling or console output).
+- [ [`visual-renderers.js`](lib/visual-renderers.js) ]
+  -- Visual formatting and console output functions for linting results.
 
 **Code Standards [`code/`](code/)**
 - [ [`standardize-js-line-one-all.js`](code/standardize-js-line-one-all.js) ]
@@ -80,8 +82,4 @@ See [the test index](../../test/index.md) for more details.
 
 ### Uncategorized Test Scripts
 <!-- uncategorized-start -->
-
-- [data-adapters.js](lib/data-adapters.js)
-
-- [visual-renderers.js](lib/visual-renderers.js)
 <!-- uncategorized-end -->

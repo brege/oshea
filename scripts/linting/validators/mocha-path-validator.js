@@ -9,12 +9,12 @@ const {
   mocharcPath,
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   loggerPath
 } = require('@paths');
 
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 const logger = require(loggerPath);
 

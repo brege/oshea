@@ -1,24 +1,23 @@
 #!/usr/bin/env node
 // scripts/linting/lint-harness.js
-
 require('module-alias/register');
 
 const { spawnSync } = require('child_process');
-const chalk = require('chalk');
 const { resolve } = require('path');
-const { projectRoot, eslintPath, formattersPath } = require('@paths');
-const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath);
+const { projectRoot, eslintPath, formattersPath, loggerPath } = require('@paths');
+const { formatLintResults, adaptRawIssuesToEslintFormat } = require(formattersPath); // eslint-disable-line
+const logger = require(loggerPath);
 
 // Accept userArgs (for display only) and the usingJson flag
 function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun = false, usingJson = false }) {
   // Only print step info if not in JSON mode
   if (!usingJson) {
-    console.log(chalk.blue(`\n--- Running: ${label} ---`));
+    logger.info(`--- Running: ${label} ---`);
     const printableArgs = Array.isArray(userArgs) ? userArgs : args;
-    console.log(chalk.gray(`> ${command} ${printableArgs.join(' ')}`));
+    logger.detail(`> ${command} ${printableArgs.join(' ')}`);
 
     if (dryRun) {
-      console.log(chalk.gray('[dry-run] Executing with dry-run flag (writes disabled)'));
+      logger.detail('[dry-run] Executing with dry-run flag (writes disabled)');
     }
   }
 
@@ -67,21 +66,22 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
     if (issues.length > 0) {
       const isEslintResult = command === eslintPath;
       const adaptedIssues = isEslintResult ? issues : adaptRawIssuesToEslintFormat(issues);
-      const formattedIssues = formatLintResults(adaptedIssues);
-      console.log(formattedIssues);
+      const { transformToStructuredData } = require(formattersPath.replace('formatters.js', 'data-adapters.js'));
+      const structuredData = transformToStructuredData(adaptedIssues);
+      logger.formatLint(structuredData);
     } else if (stdout && !stepSummary) {
-      console.log(stdout);
+      logger.info(stdout);
     } else if (issues.length === 0 && stepSummary && stepSummary.fixedCount === 0) {
-      console.log(chalk.green('✔ No problems found.'));
+      logger.success('✔ No problems found.');
     }
 
-    if (stderr) console.error(chalk.red(stderr));
+    if (stderr) logger.error(stderr);
   }
 
 
   if (result.error) {
     // Always report catastrophic errors
-    console.error(chalk.red(`\n--- ERROR: Failed to spawn ${command}: ${result.error.message}`));
+    logger.error(`--- ERROR: Failed to spawn ${command}: ${result.error.message}`);
     return { stepPassed: false };
   }
 
@@ -94,7 +94,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
   const usingJson = globalFlags.json === true;
 
   if (!usingJson) {
-    console.log(chalk.bold.yellow('Starting unified linting process via harness...'));
+    logger.info('Starting unified linting process via harness...');
   }
 
   const steps = config.steps || [];
@@ -121,7 +121,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
                         alias.toLowerCase() === globalFlags.skip.toLowerCase());
 
     if (!shouldRun || shouldSkip) {
-      if (!usingJson && shouldSkip) console.log(chalk.yellow(`\n--- SKIPPED: ${label} ---`));
+      if (!usingJson && shouldSkip) logger.warn(`--- SKIPPED: ${label} ---`);
       continue;
     }
 
@@ -172,7 +172,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       }
     } else {
       if (!usingJson) {
-        console.error(chalk.red(`\n--- ERROR: Step '${label}' missing both 'command' and 'scriptPath'.`));
+        logger.error(`--- ERROR: Step '${label}' missing both 'command' and 'scriptPath'.`);
       }
       allPassed = false;
       continue;
@@ -204,8 +204,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
           }, null, 2) + '\n');
           process.exit(1);
         } else {
-          console.error(chalk.red.bold('\nHarness exiting early due to failure.'));
-          process.exit(1);
+          logger.fatal('Harness exiting early due to failure.');
         }
       }
     }
@@ -234,7 +233,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
   }
 
   // Pretty/CLI output mode:
-  console.log('\n' + chalk.bold.underline('Lint Summary') + '\n');
+  logger.info('Lint Summary');
   let totalErrors = 0;
   let totalWarnings = 0;
   let totalFixed = 0;
@@ -247,48 +246,34 @@ function runHarness(config, globalFlags, targets = [], only = '') {
     totalWarnings += warningCount;
     totalFixed += fixedCount;
 
-    const symbol = errorCount > 0 ? chalk.red('✖')
-      : warningCount > 0 ? chalk.yellow('!')
-        : chalk.green('✔');
+    const symbol = errorCount > 0 ? '✖' : warningCount > 0 ? '!' : '✔';
+    const fixText = fixedCount > 0 ? ` (${fixedCount} fixed)` : '';
+    const logLevel = errorCount > 0 ? 'error' : warningCount > 0 ? 'warn' : 'success';
 
-    const fixText = fixedCount > 0
-      ? chalk.gray(` (${fixedCount} fixed)`)
-      : '';
-
-    console.log(`${symbol} ${step.label}${fixText}`);
+    logger[logLevel](`${symbol} ${step.label}${fixText}`);
   }
 
+  // Simple summary - future: move to formatters/lint-summary.js for proper CI integration
   const totalProblems = totalErrors + totalWarnings;
   if (totalProblems > 0) {
-    let problemColor;
-    if (totalErrors > 0) {
-      problemColor = chalk.bold.red;
-    } else if (totalWarnings > 0) {
-      problemColor = chalk.bold.yellow;
-    } else {
-      problemColor = chalk.bold.green;
-    }
-
-    const summaryText =
-      `✖ ${totalProblems} problem${totalProblems === 1 ? '' : 's'} `
-      + `(${totalErrors} error${totalErrors === 1 ? '' : 's'}, `
-      + `${totalWarnings} warning${totalWarnings === 1 ? '' : 's'})`;
-
-    console.log('\n' + problemColor(summaryText));
+    const summaryText = `✖ ${totalProblems} problem${totalProblems === 1 ? '' : 's'} (${totalErrors} error${totalErrors === 1 ? '' : 's'}, ${totalWarnings} warning${totalWarnings === 1 ? '' : 's'})`;
+    const summaryLevel = totalErrors > 0 ? 'error' : 'warn';
+    logger[summaryLevel](summaryText);
   }
 
   if (totalFixed > 0 && totalProblems === 0) {
-    console.log(chalk.bold.green('\nAll fixable issues have been addressed.'));
+    logger.success('All fixable issues have been addressed.');
   }
 
-  if (allPassed && totalErrors === 0 && totalWarnings === 0) {
-    console.log(chalk.bold.green('\nUnified linting process completed successfully.\n'));
+  if (allPassed && totalErrors === 0) {
+    if (totalWarnings === 0) {
+      logger.success('Unified linting process completed successfully.');
+    } else {
+      logger.warn('Unified linting process completed with warnings.');
+    }
     process.exit(0);
-  } else if (totalErrors === 0 && totalWarnings > 0) {
-    console.log(chalk.bold.yellow('\nUnified linting process completed with warnings.\n'));
-    process.exit(1);
   } else {
-    console.log(chalk.bold.red('\nUnified linting process completed with errors.\n'));
+    logger.error('Unified linting process completed with errors.');
     process.exit(1);
   }
 }

@@ -33,9 +33,11 @@ logging:
     - "."
   excludes: # []
     - scripts/linting/lib/formatters.js
+    - scripts/linting/lib/visual-renderers.js
     - scripts/linting/lint-harness.js
-    - scripts/trees
-
+    - src/utils/formatters/lint-formatter.js
+    - paths/lib               # in development
+    - paths/dep-tree.js       # in development
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:
   alias: line-one
@@ -138,6 +140,7 @@ doc-links:
     - "test/docs/checklist-*.md"
     - "test/docs/audit-log.md"
     - "plugins/recipe-book/README.md"
+    - "docs/logger-*.md"      # in development
 
 # --- Harness Configuration ---
 harness:

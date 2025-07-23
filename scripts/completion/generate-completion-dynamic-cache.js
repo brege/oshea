@@ -12,12 +12,12 @@ const logger = require(loggerPath);
 const {
   projectRoot,
   pluginRegistryBuilderPath,
-  indexPath,
+  collectionsIndexPath,
   mainConfigLoaderPath,
 } = require('@paths');
 
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
-const CollectionsManager = require(indexPath);
+const CollectionsManager = require(collectionsIndexPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
 
 function getCachePath() {

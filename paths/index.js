@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-21T05:38:15.026Z
+// Generated: 2025-07-23T04:32:58.664Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -111,7 +111,7 @@ const validatorPath = path.join(projectRoot, 'src/plugins/validator.js');
 const collectionsRoot = path.join(projectRoot, 'src/collections/');
 const cmUtilsPath = path.join(projectRoot, 'src/collections/cm-utils.js');
 const constantsPath = path.join(projectRoot, 'src/collections/constants.js');
-const indexPath = path.join(projectRoot, 'src/collections/index.js');
+const collectionsIndexPath = path.join(projectRoot, 'src/collections/index.js');
 const addSingletonPath = path.join(projectRoot, 'src/collections/commands/add-singleton.js');
 const addPath = path.join(projectRoot, 'src/collections/commands/add.js');
 const disablePath = path.join(projectRoot, 'src/collections/commands/disable.js');
@@ -139,6 +139,8 @@ const trackerPath = path.join(projectRoot, 'src/completion/tracker.js');
 const utilsRoot = path.join(projectRoot, 'src/utils/');
 const assetResolverPath = path.join(projectRoot, 'src/utils/asset-resolver.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
+const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
+const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint-formatter.js');
 
 // ==========================================
 // Exports
@@ -221,7 +223,7 @@ module.exports = {
   collectionsRoot,
   cmUtilsPath,
   constantsPath,
-  indexPath,
+  collectionsIndexPath,
   addSingletonPath,
   addPath,
   disablePath,
@@ -243,6 +245,8 @@ module.exports = {
   utilsRoot,
   assetResolverPath,
   loggerPath,
+  formattersIndexPath,
+  lintFormatterPath,
 
   // --- Imported Registries ---
   ...scriptsPaths,

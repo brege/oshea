@@ -1,5 +1,7 @@
 // scripts/linting/lib/visual-renderers.js
 // Visual formatting and console output functions
+require('module-alias/register');
+const { dataAdaptersPath, loggerPath } = require('@paths');
 
 const chalk = require('chalk');
 
@@ -16,17 +18,17 @@ function highlightMatch(line, matchedText) {
 // Apply style formatting to text
 function applyStyle(text, style, severity = null) {
   switch (style) {
-    case 'dim':
-      return chalk.gray(text);
-    case 'underline':
-      return chalk.underline(text);
-    case 'bold':
-      return chalk.bold(text);
-    default:
-      if (severity !== null) {
-        return severity === 2 ? chalk.red(text) : chalk.yellow(text);
-      }
-      return text;
+  case 'dim':
+    return chalk.gray(text);
+  case 'underline':
+    return chalk.underline(text);
+  case 'bold':
+    return chalk.bold(text);
+  default:
+    if (severity !== null) {
+      return severity === 2 ? chalk.red(text) : chalk.yellow(text);
+    }
+    return text;
   }
 }
 
@@ -101,27 +103,26 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
 
   if (flags.quiet && summary.errorCount === 0) return;
 
-  const { adaptRawIssuesToEslintFormat, transformToStructuredData } = require('./data-adapters');
-  
+  const { adaptRawIssuesToEslintFormat, transformToStructuredData } = require(dataAdaptersPath);
+  const logger = require(loggerPath);
+
   const adaptedIssues = adaptRawIssuesToEslintFormat(issues);
   const structuredData = transformToStructuredData(adaptedIssues);
-  const rendered = renderLintResults(structuredData);
-  
-  if (rendered) {
-    console.log(rendered);
-  }
+
+  // Use logger's formatLint method
+  logger.formatLint(structuredData);
 
   const { fixedCount = 0, errorCount = 0, warningCount = 0 } = summary;
   if (fixedCount > 0) {
-    console.log(chalk.green(`\n✔ ${fixedCount} issue${fixedCount > 1 ? 's' : ''} auto-fixed.`));
+    logger.success(`✔ ${fixedCount} issue${fixedCount > 1 ? 's' : ''} auto-fixed.`);
   }
 
   const totalProblems = errorCount + warningCount;
 
   if (issues.length === 0 && fixedCount === 0) {
-    console.log(chalk.green('✔ No problems found.'));
+    logger.success('✔ No problems found.');
   } else if (totalProblems === 0 && fixedCount > 0) {
-    console.log(chalk.green('✔ All fixable issues addressed.'));
+    logger.success('✔ All fixable issues addressed.');
   }
 
   printDebugResults(results, flags);

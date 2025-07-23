@@ -3,6 +3,8 @@
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
+const { formattersIndexPath } = require('@paths');
+const formatters = require(formattersIndexPath);
 
 // Ensure log directory exists
 const logDir = path.join(process.cwd(), 'logs');
@@ -81,6 +83,26 @@ const writeFatal     = (msg, meta) => write('fatal', msg, meta);
 const writeDebug     = (msg, meta) => write('debug', msg, meta);
 const writeValidation= (msg, meta) => write('validation', msg, meta);
 
+// Specialized formatter methods
+function formatLint(structuredData, meta = {}) {
+  if (process.env.LOG_MODE === 'json') {
+    const entry = {
+      level: 'info',
+      type: 'lint-output',
+      data: structuredData,
+      ...meta,
+      timestamp: new Date().toISOString()
+    };
+    fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+    return;
+  }
+
+  const formatted = formatters.lint(structuredData);
+  if (formatted) {
+    console.log(formatted);
+  }
+}
+
 module.exports = {
   log,
   write,
@@ -100,5 +122,7 @@ module.exports = {
   writeFatal,
   writeDebug,
   writeValidation,
+  // Specialized formatters
+  formatLint
 };
 

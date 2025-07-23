@@ -1,5 +1,9 @@
 // paths/lib/tree-renderer.js
 
+require('module-alias/register');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
+
 class TreeRenderer {
   constructor(trees) {
     this.trees = trees;
@@ -26,11 +30,11 @@ class TreeRenderer {
     }
 
     if (visited.has(nodeLabel) && !node.isPreset) {
-      console.log(`${prefix}${nodeLabel} ${varLabel} (collapsed)`);
+      logger.detail(`${prefix}${nodeLabel} ${varLabel} (collapsed)\n`, { format: 'inline' });
       return;
     }
 
-    console.log(`${prefix}${nodeLabel} ${varLabel}`);
+    logger.info(`${prefix}${nodeLabel} ${varLabel}\n`, { format: 'inline' });
     visited.add(nodeLabel);
 
     if (Array.isArray(node.dependencies)) {

@@ -6,7 +6,9 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 **Active Documents and Checklists** \
 *For convenience, these are symlinks to the latest version of each document below.*
 
-- [**Polish Checklist**](polish-checklist.md): **Polishing.**
+- [**Polish Checklist**](archive/v0.10/polish-checklist.md):
+  **Polishing.** Aggregates all loose ends from previous checklists.
+  The [[symlink](polish-checklist.md)] provided in the `docs/` root is purely for my convenience.
 
 There are also several indexes for the main components of the project.
 

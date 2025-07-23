@@ -1,4 +1,4 @@
-> ## Draft: [`docs/ai/interaction-spec.md`](interaction-spec.md)
+> #### Draft: [`docs/ai/interaction-spec.md`](interaction-spec.md)
 
 # AI Interaction Specification for `md-to-pdf` Plugins
 

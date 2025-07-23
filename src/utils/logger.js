@@ -83,27 +83,56 @@ const writeFatal     = (msg, meta) => write('fatal', msg, meta);
 const writeDebug     = (msg, meta) => write('debug', msg, meta);
 const writeValidation= (msg, meta) => write('validation', msg, meta);
 
-// Specialized formatter methods
-function formatLint(structuredData, meta = {}) {
-  if (process.env.LOG_MODE === 'json') {
-    const entry = {
-      level: 'info',
-      type: 'lint-output',
-      data: structuredData,
-      ...meta,
-      timestamp: new Date().toISOString()
-    };
-    fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+// Unified logger interface with CSS-like format parameter
+function logger(message, options = {}) {
+  const { format = 'default', level = 'info', meta = {} } = options;
+
+  if (format === 'default') {
+    // Standard logging behavior - just like logger.info(), etc.
+    log(level, message, meta);
     return;
   }
 
-  const formatted = formatters.lint(structuredData);
-  if (formatted) {
-    console.log(formatted);
+  if (format === 'lint') {
+    // Specialized lint formatting
+    if (process.env.LOG_MODE === 'json') {
+      const entry = {
+        level: 'info',
+        type: 'lint-output',
+        data: message,
+        ...meta,
+        timestamp: new Date().toISOString()
+      };
+      fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+      return;
+    }
+
+    const formatted = formatters.lint(message);
+    if (formatted) {
+      console.log(formatted);
+    }
+    return;
   }
+
+  if (format === 'inline') {
+    // Inline writing (no newline) - for validators/smoke tests
+    write(level, message, meta);
+    return;
+  }
+
+  // Fallback to default if unknown format
+  log(level, message, meta);
+}
+
+// Legacy specialized formatter methods (maintained for backward compatibility)
+function formatLint(structuredData, meta = {}) {
+  return logger(structuredData, { format: 'lint', meta });
 }
 
 module.exports = {
+  // Unified interface
+  logger,
+  // Core logging functions
   log,
   write,
   info,
@@ -122,7 +151,7 @@ module.exports = {
   writeFatal,
   writeDebug,
   writeValidation,
-  // Specialized formatters
+  // Legacy specialized formatters (backward compatibility)
   formatLint
 };
 

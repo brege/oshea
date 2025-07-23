@@ -37,7 +37,7 @@ function runValidator(options = {}) {
   const issues = [];
   const results = [];
 
-  if (debug) logger.writeDebug(`[DEBUG] Checking for .mocharc.js at: ${mocharcPath}`);
+  logger.debug(`[DEBUG] Checking for .mocharc.js at: ${mocharcPath}`);
 
   if (!fs.existsSync(mocharcPath)) {
     issues.push({
@@ -53,12 +53,12 @@ function runValidator(options = {}) {
   try {
     mochaConfig = require(mocharcPath);
   } catch (e) {
-    if (debug) logger.writeDebug(`[DEBUG] Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`);
+    logger.debug(`[DEBUG] Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`);
     try {
       const content = fs.readFileSync(mocharcPath, 'utf8');
       mochaConfig = eval(`(() => (${content.replace(/^module\.exports\s*=\s*/, '')}))()`);
     } catch (evalError) {
-      if (debug) logger.writeDebug(`[DEBUG] Manual parsing of .mocharc.js failed. Error: ${evalError.message}`);
+      logger.debug(`[DEBUG] Manual parsing of .mocharc.js failed. Error: ${evalError.message}`);
       mochaConfig = {};
     }
   }
@@ -68,7 +68,7 @@ function runValidator(options = {}) {
     pattern => !excludes.some(ex => pattern.includes(ex))
   );
 
-  if (debug) logger.writeDebug(`[DEBUG] Found ${patterns.length} patterns to validate.`);
+  logger.debug(`[DEBUG] Found ${patterns.length} patterns to validate.`);
 
   for (const pattern of patterns) {
     if (pattern.includes('*')) {
@@ -113,6 +113,17 @@ if (require.main === module) {
   const config = loadLintSection('validate-mocha', lintingConfigPath) || {};
 
   const { summary, results, issues } = runValidator({ config, debug: !!flags.debug });
+
+  // Show debug output if --debug flag is set
+  if (flags.debug && results.length > 0) {
+    const chalk = require('chalk');
+    logger.info('\n[DEBUG] Validated patterns extracted from .mocharc.js:\n');
+    for (const r of results) {
+      const symbol = r.type === 'found' ? chalk.green('[✓]') : chalk.red('[✗]');
+      const trail = r.count ? chalk.gray(`→ ${r.count} file(s) matched`) : (r.type === 'missing' ? chalk.gray('→ NOT FOUND') : '');
+      logger.info(`  ${symbol} ${r.pattern} ${trail}`);
+    }
+  }
 
   renderLintOutput({ issues, summary, results, flags });
 

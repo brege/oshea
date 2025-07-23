@@ -20,6 +20,7 @@
 remove-jsdoc:
   group: code
   alias: jsdoc
+  filetypes: [".js"]
   targets:
     - "."
   excludes: []
@@ -59,6 +60,7 @@ remove-ws:
 no-relative-paths:
   alias: paths
   group: code
+  filetypes: [".js"]
   targets: ["."]
   excludes:
     - paths

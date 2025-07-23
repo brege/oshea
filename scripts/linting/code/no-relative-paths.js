@@ -49,7 +49,7 @@ function classifyRequireLine(line) {
 }
 
 function scanFileForRelativePaths(filePath, debug = false) {
-  if (debug) logger.debug(`[DEBUG] Scanning file: ${path.relative(projectRoot, filePath)}`);
+  logger.debug(`[DEBUG] Scanning file: ${path.relative(projectRoot, filePath)}`);
   const issues = [];
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
@@ -61,9 +61,7 @@ function scanFileForRelativePaths(filePath, debug = false) {
     if (index > 0) {
       const prevLine = lines[index - 1].trim();
       if (prevLine.startsWith('//') && prevLine.includes(LINT_DISABLE_TAG)) {
-        if (debug) {
-          logger.debug(`[DEBUG] Skipping line ${index + 1} due to lint-disable-next-line`);
-        }
+        logger.debug(`[DEBUG] Skipping line ${index + 1} due to lint-disable-next-line`);
         return;
       }
     }
@@ -118,9 +116,7 @@ function runLinter(options = {}) {
     filetypes = undefined
   } = options;
 
-  if (debug) {
-    logger.debug('[DEBUG] Running no-relative-paths linter with options:', { targets, excludes });
-  }
+  logger.debug('[DEBUG] Running no-relative-paths linter with options:', { targets, excludes });
 
   const allIssues = [];
 
@@ -159,6 +155,10 @@ if (require.main === module) {
     flags,
     targets
   } = parseCliArgs(process.argv.slice(2));
+  
+  // Set global debug mode
+  logger.setDebugMode(!!flags.debug && !flags.json);
+  
   const config = loadLintSection('no-relative-paths', lintingConfigPath) || {};
   const configTargets = config.targets || [];
   const configExcludes = config.excludes || [];

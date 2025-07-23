@@ -1,79 +1,15 @@
 // scripts/linting/lib/visual-renderers.js
 // Visual formatting and console output functions
 require('module-alias/register');
-const { dataAdaptersPath, loggerPath } = require('@paths');
+const { dataAdaptersPath, loggerPath, formattersIndexPath } = require('@paths');
 const logger = require(loggerPath);
-
-const chalk = require('chalk');
-
-function highlightMatch(line, matchedText) {
-  if (!line || !matchedText) return line;
-  // Escape any regex special chars in matchedText
-  const safe = matchedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return line.replace(
-    new RegExp(safe, 'g'),
-    chalk.bgYellow.black(matchedText)
-  );
-}
-
-// Apply style formatting to text
-function applyStyle(text, style, severity = null) {
-  switch (style) {
-  case 'dim':
-    return chalk.gray(text);
-  case 'underline':
-    return chalk.underline(text);
-  case 'bold':
-    return chalk.bold(text);
-  default:
-    if (severity !== null) {
-      return severity === 2 ? chalk.red(text) : chalk.yellow(text);
-    }
-    return text;
-  }
-}
-
-// Render structured lint data to console
-function renderLintResults(structuredData) {
-  if (structuredData.type === 'empty') {
-    return '';
-  }
-
-  let output = '';
-
-  // Render sections
-  for (const section of structuredData.sections) {
-    output += `\n${applyStyle(section.header.text, section.header.style)}\n`;
-
-    for (const msg of section.messages) {
-      const locationStr = applyStyle(msg.location.text, msg.location.style);
-      const levelStr = applyStyle(msg.level.text, null, msg.level.severity);
-      const ruleStr = applyStyle(msg.rule.text, msg.rule.style);
-
-      output += `  ${locationStr} ${levelStr} ${msg.message} ${ruleStr}\n`;
-
-      if (msg.sourceLine) {
-        output += '       ' + highlightMatch(msg.sourceLine.text, msg.sourceLine.highlight) + '\n';
-      }
-    }
-  }
-
-  // Render summary
-  if (structuredData.summary.hasSummary) {
-    const { totalErrors, totalWarnings, totalProblems } = structuredData.summary;
-    output += '\n';
-    const x = totalErrors > 0 ? chalk.red.bold('✖') : chalk.yellow.bold('✖');
-    output += `${x} ${totalProblems} problem${totalProblems !== 1 ? 's' : ''} (${totalErrors} error${totalErrors !== 1 ? 's' : ''}, ${totalWarnings} warning${totalWarnings !== 1 ? 's' : ''})`;
-  }
-
-  return output.trim();
-}
+const formatters = require(formattersIndexPath);
 
 
 function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} }, formatter = 'stylish') {
   // If called by harness but in debug mode, allow debug output to flow first
   if (process.env.CALLED_BY_HARNESS && !flags.debug) {
-    console.log(JSON.stringify({ issues, summary, results }));
+    logger.info(JSON.stringify({ issues, summary, results }), { format: 'raw' });
     return;
   } else if (process.env.CALLED_BY_HARNESS && flags.debug) {
     // In debug mode: show formatted output AND return JSON for harness
@@ -82,7 +18,7 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
   
   // If user explicitly requested JSON, output formatted JSON
   if (flags.json) {
-    logger.writeInfo(JSON.stringify({ issues, summary, results }, null, 2) + '\n');
+    logger.info(JSON.stringify({ issues, summary, results }, null, 2) + '\n', { format: 'inline' });
     return;
   }
 
@@ -117,13 +53,10 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
   
   // If called by harness in debug mode, output JSON for parsing after debug output
   if (process.env.CALLED_BY_HARNESS && flags.debug) {
-    console.log(JSON.stringify({ issues, summary, results }));
+    logger.info(JSON.stringify({ issues, summary, results }), { format: 'raw' });
   }
 }
 
 module.exports = {
-  highlightMatch,
-  applyStyle,
-  renderLintResults,
   renderLintOutput
 };

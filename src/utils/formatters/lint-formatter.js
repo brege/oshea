@@ -20,12 +20,23 @@ function applyStyle(text, style, severity = null) {
   }
 }
 
-// Process highlight markers in text
+// Process highlight markers in text using placeholders
 function processHighlights(text) {
   if (!text || typeof text !== 'string') return text;
   return text.replace(/<<HIGHLIGHT>>(.*?)<<ENDHIGHLIGHT>>/g, (match, content) => {
     return chalk.bgYellow.black(content);
   });
+}
+
+// Highlight matched text using regex replacement (for direct text highlighting)
+function highlightMatch(line, matchedText) {
+  if (!line || !matchedText) return line;
+  // Escape any regex special chars in matchedText
+  const safe = matchedText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return line.replace(
+    new RegExp(safe, 'g'),
+    chalk.bgYellow.black(matchedText)
+  );
 }
 
 // Format structured lint data for console output
@@ -50,7 +61,16 @@ function formatLint(structuredData) {
       if (msg.sourceLine) {
         const sourceText = msg.sourceLine.text || msg.sourceLine;
         const highlight = msg.sourceLine.highlight;
-        output += '       ' + (highlight ? processHighlights(sourceText) : sourceText) + '\n';
+        // Support both placeholder-based highlights and direct text highlighting
+        if (highlight && typeof highlight === 'string') {
+          // Direct text highlighting (used by visual-renderers)
+          output += '       ' + highlightMatch(sourceText, highlight) + '\n';
+        } else if (highlight) {
+          // Placeholder-based highlighting
+          output += '       ' + processHighlights(sourceText) + '\n';
+        } else {
+          output += '       ' + sourceText + '\n';
+        }
       }
     }
   }
@@ -67,5 +87,8 @@ function formatLint(structuredData) {
 }
 
 module.exports = {
-  formatLint
+  formatLint,
+  applyStyle,
+  highlightMatch,
+  processHighlights
 };

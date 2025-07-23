@@ -134,6 +134,23 @@ function logger(message, options = {}) {
     return;
   }
 
+  if (format === 'raw') {
+    // Raw output without any formatting or coloring (for JSON/structured data)
+    if (process.env.LOG_MODE === 'json') {
+      const entry = {
+        level,
+        type: 'raw-output',
+        data: message,
+        ...meta,
+        timestamp: new Date().toISOString()
+      };
+      fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+      return;
+    }
+    process.stdout.write(message);
+    return;
+  }
+
   // Fallback to default if unknown format
   log(level, message, meta);
 }

@@ -83,7 +83,7 @@ function findVariablesForTargets(targets) {
 if (require.main === module) {
   let rawTargets = process.argv.slice(2);
   if (!rawTargets.length) {
-    logger.error('Usage: node scripts/shared/path-finder.js <file|dir|glob> [...]');
+    logger.error('Usage: node scripts/shared/path-finder.js <file|dir|glob> [...]', { format: 'inline' });
     process.exit(1);
   }
   // If the last argument is --exports, print exports for each file
@@ -104,38 +104,32 @@ if (require.main === module) {
   }
 
   if (variableSet.size > 0) {
-    // Colorized 'require'
-    logger.writeInfo('require');
-    logger.writeInfo('(');
-    logger.writeDetail('\'module-alias/register\'');
-    logger.info(');');
-    // Colorized destructured require line
+    let output = '';
+
+    output += 'require(\'module-alias/register\');\n';
+
     const varsSorted = Array.from(variableSet).sort();
-    const coloredVars = varsSorted.map(v => v).join(',\n  ');
-    logger.writeInfo('const ');
-    logger.writeInfo('{ \n  ' + coloredVars + '\n} = ');
-    logger.writeInfo('require(');
-    logger.writeDetail('\'@paths\'');
-    logger.info(');\n');
-    // Per-file exports if requested
+    const coloredVars = varsSorted.join(',\n  ');
+    output += `const {\n  ${coloredVars}\n} = require('@paths');\n`;
+
     if (showExports) {
       for (const { file, variable } of fileVariables) {
         const exportsArr = getFileExports(file);
         if (exportsArr.length > 0) {
-          const exportsString = exportsArr.map(e => e).join(',\n  ');
-          logger.writeInfo('const ');
-          logger.writeInfo('{\n  ' + exportsString + '\n} = require(' + variable + ');');
-          logger.detail(' // File: ' + file);
+          const exportsString = exportsArr.join(',\n  ');
+          output += `const {\n  ${exportsString}\n} = require(${variable}); // File: ${file}\n`;
         }
       }
     } else {
       for (const { file } of fileVariables) {
-        logger.detail('// File: ' + file);
+        output += `// File: ${file}\n`;
       }
     }
+
+    logger.info(output, { format: 'paths' });
   } else {
     for (const file of fileList) {
-      logger.error(`No variable found for path: ${path.resolve(file)}`);
+      logger.detail(`No variable found for path: ${path.resolve(file)}\n`, { format: 'inline' });
     }
     process.exit(1);
   }

@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-23T04:32:58.664Z
+// Generated: 2025-07-23T22:33:31.437Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -139,8 +139,12 @@ const trackerPath = path.join(projectRoot, 'src/completion/tracker.js');
 const utilsRoot = path.join(projectRoot, 'src/utils/');
 const assetResolverPath = path.join(projectRoot, 'src/utils/asset-resolver.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
+const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app-formatter.js');
 const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
+const inlineFormatterPath = path.join(projectRoot, 'src/utils/formatters/inline-formatter.js');
 const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint-formatter.js');
+const pathsFormatterPath = path.join(projectRoot, 'src/utils/formatters/paths-formatter.js');
+const rawFormatterPath = path.join(projectRoot, 'src/utils/formatters/raw-formatter.js');
 
 // ==========================================
 // Exports
@@ -245,8 +249,12 @@ module.exports = {
   utilsRoot,
   assetResolverPath,
   loggerPath,
+  appFormatterPath,
   formattersIndexPath,
+  inlineFormatterPath,
   lintFormatterPath,
+  pathsFormatterPath,
+  rawFormatterPath,
 
   // --- Imported Registries ---
   ...scriptsPaths,

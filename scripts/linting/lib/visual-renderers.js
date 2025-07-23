@@ -1,9 +1,8 @@
 // scripts/linting/lib/visual-renderers.js
 // Visual formatting and console output functions
 require('module-alias/register');
-const { dataAdaptersPath, loggerPath, formattersIndexPath } = require('@paths');
+const { dataAdaptersPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
-const formatters = require(formattersIndexPath);
 
 
 function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} }, formatter = 'stylish') {
@@ -15,7 +14,7 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
     // In debug mode: show formatted output AND return JSON for harness
     // Let the debug output flow through below, then output JSON at the end
   }
-  
+
   // If user explicitly requested JSON, output formatted JSON
   if (flags.json) {
     logger.info(JSON.stringify({ issues, summary, results }, null, 2) + '\n', { format: 'inline' });
@@ -50,7 +49,7 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
   } else if (totalProblems === 0 && fixedCount > 0) {
     success('✔ All fixable issues addressed.');
   }
-  
+
   // If called by harness in debug mode, output JSON for parsing after debug output
   if (process.env.CALLED_BY_HARNESS && flags.debug) {
     logger.info(JSON.stringify({ issues, summary, results }), { format: 'raw' });

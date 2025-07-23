@@ -46,7 +46,7 @@ function discoverCommands(dir, prefixParts = []) {
 
 // --- Main Execution Logic ---
 async function runSmokeTest() {
-  logger.info('Smoke Test: Validating all --help commands...');
+  logger.info('Smoke Test: Validating all --help commands...\n', { format: 'inline' });
 
   const commandPartsList = discoverCommands(cliCommandsPath);
   commandPartsList.push([]); // Add the root command
@@ -58,7 +58,7 @@ async function runSmokeTest() {
     const fullCommand = `node "${cliPath}" ${cmdParts} --help`;
     const commandDisplay = `md-to-pdf ${cmdParts} --help`.trim();
 
-    logger.writeDetail(`  Testing: ${commandDisplay} ... `);
+    logger.detail(`  Testing: ${commandDisplay} ... `, { format: 'inline' });
 
     try {
       await new Promise((resolve, reject) => {
@@ -69,26 +69,26 @@ async function runSmokeTest() {
           resolve({ stdout, stderr });
         });
       });
-      logger.writeSuccess('✓ OK\n');
+      logger.success('✓ OK\n', { format: 'inline' });
     } catch (result) {
       failedCommands.push({ command: commandDisplay, error: result.error, stderr: result.stderr });
-      logger.writeError('✗ FAIL\n');
+      logger.error('✗ FAIL\n', { format: 'inline' });
     }
   }
 
   if (failedCommands.length > 0) {
-    logger.error('\n--- Smoke Test Failed ---');
-    logger.error(`${failedCommands.length} command(s) failed to execute with --help:`);
+    logger.error('\n--- Smoke Test Failed ---', { format: 'inline' });
+    logger.error(`${failedCommands.length} command(s) failed to execute with --help:`, { format: 'inline' });
     failedCommands.forEach(({ command, error, stderr }) => {
-      logger.detail(`\n  - ${command}`);
-      logger.detail(`    Error: ${error.message.split('\n')[0]}`);
+      logger.detail(`\n  - ${command}`, { format: 'inline' });
+      logger.detail(`    Error: ${error.message.split('\n')[0]}`, { format: 'inline' });
       if (stderr) {
-        logger.detail(`    Stderr: ${stderr.trim()}`);
+        logger.detail(`    Stderr: ${stderr.trim()}`, { format: 'inline' });
       }
     });
     process.exit(1);
   } else {
-    logger.success('\n✓ Smoke Test Passed: All --help commands executed successfully.');
+    logger.success('\n✓ Smoke Test Passed: All --help commands executed successfully.\n', { format: 'inline' });
     process.exit(0);
   }
 }

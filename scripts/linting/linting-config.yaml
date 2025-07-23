@@ -33,12 +33,10 @@ logging:
   targets:
     - "."
   excludes: # []
-    - scripts/linting/lib/formatters.js
-    - scripts/linting/lib/visual-renderers.js
-    - scripts/linting/lint-harness.js
-    - src/utils/formatters/lint-formatter.js
-    - paths/lib               # in development
-    - paths/dep-tree.js       # in development
+    - src/utils/formatters
+    - paths/lib              # in development TODO
+    - paths/dep-tree.js      # in development
+
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:
   alias: line-one

@@ -155,10 +155,10 @@ if (require.main === module) {
     flags,
     targets
   } = parseCliArgs(process.argv.slice(2));
-  
+
   // Set global debug mode
   logger.setDebugMode(!!flags.debug && !flags.json);
-  
+
   const config = loadLintSection('no-relative-paths', lintingConfigPath) || {};
   const configTargets = config.targets || [];
   const configExcludes = config.excludes || [];

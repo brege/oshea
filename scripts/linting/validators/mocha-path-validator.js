@@ -33,7 +33,7 @@ function* extractJsPatterns(obj) {
 }
 
 function runValidator(options = {}) {
-  const { config = {}, debug = false } = options;
+  const { config = {}, debug = false } = options; // eslint-disable-line no-unused-vars
   const issues = [];
   const results = [];
 
@@ -121,7 +121,7 @@ if (require.main === module) {
       const symbol = r.type === 'found' ? '[✓]' : '[✗]';
       const trail = r.count ? `→ ${r.count} file(s) matched` : (r.type === 'missing' ? '→ NOT FOUND' : '');
       const message = `  ${symbol} ${r.pattern} ${trail}`;
-      
+
       // Use appropriate log level based on result type
       if (r.type === 'found') {
         logger.success(message);

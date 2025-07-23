@@ -39,7 +39,7 @@ function loadLintConfig(configPath = lintingConfigPath) {
 }
 
 function findFilesArray(inputs, opts = {}) {
-  const { debug = false } = opts;
+  const { debug = false } = opts; // eslint-disable-line no-unused-vars
   logger.debug(`[findFilesArray:Debug] Received inputs: ${JSON.stringify(inputs)}`);
 
   const files = new Set();

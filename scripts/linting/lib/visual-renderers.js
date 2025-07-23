@@ -104,25 +104,25 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
   if (flags.quiet && summary.errorCount === 0) return;
 
   const { adaptRawIssuesToEslintFormat, transformToStructuredData } = require(dataAdaptersPath);
-  const logger = require(loggerPath);
+  const { logger, success } = require(loggerPath);
 
   const adaptedIssues = adaptRawIssuesToEslintFormat(issues);
   const structuredData = transformToStructuredData(adaptedIssues);
 
-  // Use logger's formatLint method
-  logger.formatLint(structuredData);
+  // Use unified logger interface with lint formatting
+  logger(structuredData, { format: 'lint' });
 
   const { fixedCount = 0, errorCount = 0, warningCount = 0 } = summary;
   if (fixedCount > 0) {
-    logger.success(`✔ ${fixedCount} issue${fixedCount > 1 ? 's' : ''} auto-fixed.`);
+    success(`✔ ${fixedCount} issue${fixedCount > 1 ? 's' : ''} auto-fixed.`);
   }
 
   const totalProblems = errorCount + warningCount;
 
   if (issues.length === 0 && fixedCount === 0) {
-    logger.success('✔ No problems found.');
+    success('✔ No problems found.');
   } else if (totalProblems === 0 && fixedCount > 0) {
-    logger.success('✔ All fixable issues addressed.');
+    success('✔ All fixable issues addressed.');
   }
 
   printDebugResults(results, flags);

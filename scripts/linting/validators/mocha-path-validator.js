@@ -116,12 +116,20 @@ if (require.main === module) {
 
   // Show debug output if --debug flag is set
   if (flags.debug && results.length > 0) {
-    const chalk = require('chalk');
     logger.info('\n[DEBUG] Validated patterns extracted from .mocharc.js:\n');
     for (const r of results) {
-      const symbol = r.type === 'found' ? chalk.green('[✓]') : chalk.red('[✗]');
-      const trail = r.count ? chalk.gray(`→ ${r.count} file(s) matched`) : (r.type === 'missing' ? chalk.gray('→ NOT FOUND') : '');
-      logger.info(`  ${symbol} ${r.pattern} ${trail}`);
+      const symbol = r.type === 'found' ? '[✓]' : '[✗]';
+      const trail = r.count ? `→ ${r.count} file(s) matched` : (r.type === 'missing' ? '→ NOT FOUND' : '');
+      const message = `  ${symbol} ${r.pattern} ${trail}`;
+      
+      // Use appropriate log level based on result type
+      if (r.type === 'found') {
+        logger.success(message);
+      } else if (r.type === 'missing') {
+        logger.warn(message);
+      } else {
+        logger.info(message);
+      }
     }
   }
 

@@ -43,7 +43,7 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
         // Extract debug output that comes before JSON (when in debug mode)
         const preJsonOutput = stdout.substring(0, jsonStart).trim();
         if (preJsonOutput && !usingJson) {
-          console.log(preJsonOutput);
+          logger.info(preJsonOutput);
         }
         
         const jsonString = stdout.substring(jsonStart);
@@ -200,7 +200,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       if (!config.continueOnError) {
         if (usingJson) {
           // Output partial JSON, abort
-          logger.writeInfo(JSON.stringify({
+          logger.info(JSON.stringify({
             ok: false,
             aborted: true,
             steps: stepSummaries,
@@ -208,7 +208,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
             totalWarnings: stepSummaries.reduce((t, s) => t + (s.warningCount || 0), 0),
             totalFixed: stepSummaries.reduce((t, s) => t + (s.fixedCount || 0), 0),
             message: 'Unified linting harness aborted due to step failure.'
-          }, null, 2) + '\n');
+          }, null, 2) + '\n', { format: 'inline' });
           process.exit(1);
         } else {
           logger.fatal('Harness exiting early due to failure.');
@@ -226,7 +226,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
     const totalErrors = stepSummaries.reduce((t, s) => t + (s.errorCount || 0), 0);
     const totalWarnings = stepSummaries.reduce((t, s) => t + (s.warningCount || 0), 0);
     const totalFixed = stepSummaries.reduce((t, s) => t + (s.fixedCount || 0), 0);
-    logger.writeInfo(JSON.stringify({
+    logger.info(JSON.stringify({
       ok: totalErrors === 0,
       steps: stepSummaries,
       totalErrors,
@@ -235,7 +235,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       result: totalErrors > 0 ? 'errors'
         : totalWarnings > 0 ? 'warnings'
           : 'ok'
-    }, null, 2) + '\n');
+    }, null, 2) + '\n', { format: 'inline' });
     process.exit(totalErrors === 0 ? 0 : 1);
   }
 

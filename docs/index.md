@@ -168,5 +168,7 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 
 <!-- uncategorized-start -->
 
+
+- [logger-renderer-adapter-before-and-after.md](logger-renderer-adapter-before-and-after.md)
 <!-- uncategorized-end -->
 

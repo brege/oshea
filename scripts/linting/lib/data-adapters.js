@@ -86,7 +86,7 @@ function transformToStructuredData(results) {
     totalWarnings += warningCount;
 
     const relPath = path.relative(process.cwd(), filePath);
-    
+
     const section = {
       header: {
         text: relPath,
@@ -130,7 +130,7 @@ function transformToStructuredData(results) {
   }
 
   const totalProblems = totalErrors + totalWarnings;
-  
+
   return {
     type: 'stylish',
     sections,

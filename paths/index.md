@@ -90,6 +90,12 @@ const {
 <summary>Untracked Files</summary>
 
 <!-- uncategorized-start -->
+
+- [dep-tree.js](dep-tree.js)
+
+- [dependency-tracer.js](lib/dependency-tracer.js)
+
+- [tree-renderer.js](lib/tree-renderer.js)
 <!-- uncategorized-end -->
 
 </details>

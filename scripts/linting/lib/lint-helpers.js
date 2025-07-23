@@ -129,8 +129,8 @@ function parseCliArgs(args) {
     } else if (arg.startsWith('--')) {
       const eqIdx = arg.indexOf('=');
       if (eqIdx !== -1) {
-        const key = arg.slice(2, eqIdx);      
-        const value = arg.slice(eqIdx + 1);   
+        const key = arg.slice(2, eqIdx);
+        const value = arg.slice(eqIdx + 1);
         flags[key] = value;
       } else {
         const flagName = arg.replace(/^--/, '');

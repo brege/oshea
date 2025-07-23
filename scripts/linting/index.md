@@ -80,4 +80,8 @@ See [the test index](../../test/index.md) for more details.
 
 ### Uncategorized Test Scripts
 <!-- uncategorized-start -->
+
+- [data-adapters.js](lib/data-adapters.js)
+
+- [visual-renderers.js](lib/visual-renderers.js)
 <!-- uncategorized-end -->

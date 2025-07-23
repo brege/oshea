@@ -1,7 +1,7 @@
 // test/integration/collections/collections-manager.test.js
 require('module-alias/register');
 const {
-  indexPath,
+  collectionsIndexPath,
   cmUtilsPath,
   constantsPath,
   captureLogsPath,
@@ -87,7 +87,7 @@ describe('CollectionsManager (Hybrid Integration Tests)', function() {
       }
     };
 
-    const collectionsManagerModule = proxyquire(indexPath, {
+    const collectionsManagerModule = proxyquire(collectionsIndexPath, {
       'fs': mockDependencies.fss,
       'fs/promises': mockDependencies.fs,
       'fs-extra': mockDependencies.fsExtra,

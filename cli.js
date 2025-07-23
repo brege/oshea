@@ -13,7 +13,7 @@ const {
   pluginManagerPath,
   watchHandlerPath,
   pluginDeterminerPath,
-  indexPath,
+  collectionsIndexPath,
   mainConfigLoaderPath,
   markdownUtilsPath,
   configCommandPath,
@@ -75,7 +75,7 @@ const ConfigResolver = require(configResolverPath);
 const PluginManager = require(pluginManagerPath);
 const { setupWatch } = require(watchHandlerPath);
 const { determinePluginToUse } = require(pluginDeterminerPath);
-const CollectionsManager = require(indexPath);
+const CollectionsManager = require(collectionsIndexPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
 const markdownUtils = require(markdownUtilsPath);
 const yaml = require('js-yaml');

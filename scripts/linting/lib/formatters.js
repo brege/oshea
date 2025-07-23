@@ -1,18 +1,20 @@
 // scripts/linting/lib/formatters.js
 // Backward compatibility layer - delegates to split architecture
+require('module-alias/register');
+const { dataAdaptersPath, visualRenderersPath } = require('@paths');
 
-const { 
-  padRight, 
-  createLintResult, 
-  adaptRawIssuesToEslintFormat, 
-  transformToStructuredData 
-} = require('./data-adapters');
+const {
+  padRight,
+  createLintResult,
+  adaptRawIssuesToEslintFormat,
+  transformToStructuredData
+} = require(dataAdaptersPath);
 
-const { 
-  highlightMatch, 
-  renderLintResults, 
-  renderLintOutput 
-} = require('./visual-renderers');
+const {
+  highlightMatch,
+  renderLintResults,
+  renderLintOutput
+} = require(visualRenderersPath);
 
 // Legacy formatters object for backward compatibility
 const formatters = {

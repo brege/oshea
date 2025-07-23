@@ -112,6 +112,9 @@ registries:
         collections/commands: "collections_remove"
       update:
         collections/commands: "collections_update"
+      "index.js":
+        src/collections: "collections_index"
+        src/utils/formatters: "formatters_index"
 
   # Scripts registry (generates paths/scripts.js)
   scripts:

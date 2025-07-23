@@ -8,7 +8,7 @@ const path = require('path');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   projectRoot,
   fileDiscoveryPath,
   findLitterRulesPath,
@@ -19,7 +19,7 @@ const logger = require(loggerPath);
 
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
 const { findFiles } = require(fileDiscoveryPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 const TYPE_RE = /^\[(\w+):(\w+):([\w*,.]+)\]\s+(.+)$/i;
 const WHITELIST_RE = /^\[whitelist:(\w+):([\w*,.]+)\]$/i;

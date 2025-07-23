@@ -9,13 +9,13 @@ const { minimatch } = require('minimatch');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   fileDiscoveryPath,
   projectRoot
 } = require('@paths');
 
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 const { findFiles, findCandidates } = require(fileDiscoveryPath);
 
 const LINT_SKIP_TAG = 'lint-skip-postman';

@@ -8,7 +8,7 @@ const path = require('path');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   fileDiscoveryPath,
   projectRoot,
   loggerPath,
@@ -22,7 +22,7 @@ const {
 } = require(lintHelpersPath);
 
 const { findFiles } = require(fileDiscoveryPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 function runLinter(options = {}) {
   const {

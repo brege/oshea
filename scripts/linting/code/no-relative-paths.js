@@ -8,7 +8,7 @@ const path = require('path');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   projectRoot,
   fileDiscoveryPath,
   loggerPath
@@ -22,7 +22,7 @@ const {
 } = require(lintHelpersPath);
 
 const { findFiles } = require(fileDiscoveryPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 const LINT_DISABLE_TAG = 'lint-disable-next-line';
 const LINT_DISABLE_LINE = 'lint-disable-line no-relative-paths';

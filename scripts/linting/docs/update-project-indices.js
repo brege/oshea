@@ -9,7 +9,7 @@ const yaml = require('js-yaml');
 const {
   lintingConfigPath,
   lintHelpersPath,
-  formattersPath,
+  visualRenderersPath,
   fileDiscoveryPath,
   projectRoot,
   loggerPath
@@ -19,7 +19,7 @@ const logger = require(loggerPath);
 
 const { findFiles } = require(fileDiscoveryPath);
 const { parseCliArgs } = require(lintHelpersPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 const START_MARKER = 'uncategorized-start';
 const END_MARKER = 'uncategorized-end';

@@ -8,7 +8,7 @@ const path = require('path');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   fileDiscoveryPath,
   projectRoot
 } = require('@paths');
@@ -19,7 +19,7 @@ const {
 } = require(lintHelpersPath);
 
 const { findFiles } = require(fileDiscoveryPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 const BLOCK_COMMENT_REGEX = /\/\*\*[\r\n][\s\S]*?\*\//g;
 

@@ -8,7 +8,7 @@ const path = require('path');
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   projectRoot,
   fileDiscoveryPath
 } = require('@paths');
@@ -19,7 +19,7 @@ const {
 } = require(lintHelpersPath);
 
 const { findFiles } = require(fileDiscoveryPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;

@@ -1,10 +1,13 @@
 // paths/lib/dependency-tracer.js
 
+require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const acorn = require('acorn');
 const walk = require('acorn-walk');
 const { TreeRenderer } = require('./tree-renderer');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 class DependencyTreeTracer {
   constructor(options = {}) {
@@ -19,38 +22,39 @@ class DependencyTreeTracer {
   }
 
   run(targetFiles, options = {}) {
-    console.log(`\nTracing dependencies for: ${targetFiles.join(', ')}`);
+    logger.info(`\nTracing dependencies for: ${targetFiles.join(', ')}`);
     if (this.presetContextFiles.length > 4) {
-      console.log(`Including custom presets: ${this.presetContextFiles.slice(4).join(', ')}`);
+      logger.info(`Including custom presets: ${this.presetContextFiles.slice(4).join(', ')}`);
     }
-    console.log('='.repeat(60));
+    logger.info('='.repeat(60));
 
     const contextPackage = this._buildContextPackage(targetFiles);
 
     if (options.showImports) {
-      console.log('\nImport Statement:');
-      console.log('-'.repeat(40));
-      console.log(this._generateImportStatement(contextPackage));
+      logger.info('\nImport Statement:');
+      logger.info('-'.repeat(40));
+      const importStatement = this._generateImportStatement(contextPackage);
+      logger.info(importStatement, { format: 'paths' });
     }
 
     if (options.showTree) {
-      console.log('\nDependency Tree:');
-      console.log('-'.repeat(40));
+      logger.info('\nDependency Tree:');
+      logger.info('-'.repeat(40));
       const renderer = new TreeRenderer(contextPackage.trees);
       renderer.render();
     }
 
     if (options.showStats) {
-      console.log('\nStatistics:');
-      console.log('-'.repeat(40));
-      console.log(`Total files in context: ${contextPackage.stats.totalFiles}`);
-      console.log(`Registered files: ${contextPackage.stats.registeredFiles}`);
-      console.log(`Unregistered files: ${contextPackage.stats.unregisteredFiles}`);
+      logger.info('\nStatistics:');
+      logger.info('-'.repeat(40));
+      logger.info(`Total files in context: ${contextPackage.stats.totalFiles}\n`);
+      logger.info(`Registered files: ${contextPackage.stats.registeredFiles}\n`);
+      logger.info(`Unregistered files: ${contextPackage.stats.unregisteredFiles}\n`);
     }
 
     if (options.showFiles) {
-      console.log('\nAll Files in Context:');
-      console.log('-'.repeat(40));
+      logger.info('\nAll Files in Context:');
+      logger.info('-'.repeat(40));
       contextPackage.files.forEach(file => {
         const varName = this.reverseRegistry.get(file);
         const isPreset = this.presetContextSet.has(file.replace(/\/$/, '')) || this.presetContextSet.has(path.dirname(file));
@@ -60,7 +64,7 @@ class DependencyTreeTracer {
         } else if (!isPreset) {
           label = '(unregistered)';
         }
-        console.log(`${file} ${label}`);
+        logger.info(`${file} ${label}`);
       });
     }
     return contextPackage;
@@ -309,7 +313,7 @@ class DependencyTreeTracer {
     lines.push('} = require(\'@paths\');');
     lines.push('');
     lines.push(`// Entry points: ${entryPoints.join(', ')}`);
-    lines.push(`// Total files in context: ${stats.totalFiles}`);
+    lines.push(`// Total files in context: ${stats.totalFiles}\n`);
     return lines.join('\n');
   }
 }

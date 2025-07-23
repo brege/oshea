@@ -6,12 +6,14 @@ const fs = require('fs');
 const path = require('path');
 const { DependencyTreeTracer } = require('./lib/dependency-tracer');
 const { findFilesArray } = require('../scripts/shared/file-helpers');
+const { loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 
 function exportContextPackage(contextPackage, exportPath, projectRoot) {
-  console.log(`\nExporting context package to: ${exportPath}`);
+  logger.info(`\nExporting context package to: ${exportPath}`);
   if (fs.existsSync(exportPath)) {
-    console.log('Warning: Directory already exists. Overwriting files.');
+    logger.warn('Warning: Directory already exists. Overwriting files.');
   } else {
     fs.mkdirSync(exportPath, { recursive: true });
   }
@@ -30,10 +32,10 @@ function exportContextPackage(contextPackage, exportPath, projectRoot) {
         fs.copyFileSync(sourcePath, destPath);
       }
     } catch (err) {
-      console.error(`Failed to copy ${file}: ${err.message}`);
+      logger.error(`Failed to copy ${file}: ${err.message}`);
     }
   });
-  console.log(`Successfully exported ${contextPackage.files.length} files.`);
+  logger.success(`Successfully exported ${contextPackage.files.length} files.`);
 }
 
 function parseArgs(args) {
@@ -79,7 +81,7 @@ function parseArgs(args) {
 
 function main() {
   if (process.argv.length <= 2) {
-    console.error('Usage: node paths/dep-tree.js <file ...> [--export <dir>] [--include <path ...> | -P <path ...>] [options]');
+    logger.error('Usage: node paths/dep-tree.js <file ...> [--export <dir>] [--include <path ...> | -P <path ...>] [options]');
     process.exit(1);
   }
 
@@ -104,9 +106,9 @@ function main() {
     }
 
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    logger.error(`Error: ${error.message}`);
     if (options.verbose) {
-      console.error(error.stack);
+      logger.error(error.stack);
     }
     process.exit(1);
   }

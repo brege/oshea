@@ -35,6 +35,7 @@ function formatApp(level, message, meta = {}) {
     };
     fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
   } else {
+    // lint-skip-logger
     console.log(colorForLevel(level, message));
   }
 

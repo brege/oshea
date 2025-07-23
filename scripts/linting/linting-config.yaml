@@ -34,8 +34,6 @@ logging:
     - "."
   excludes: # []
     - src/utils/formatters
-    - paths/lib              # in development TODO
-    - paths/dep-tree.js      # in development
 
 # scripts/linting/code/standardize-js-line-one-all.js
 standardize-line-one:

@@ -210,14 +210,10 @@ function scanFileForLitter(filePath, config) {
 function runLinter(options = {}) {
   const { targets = [], excludes = [], rulesPath, debug = false, filetypes } = options;
 
-  if (debug) {
-    logger.debug(`[DEBUG] Loading rules from: ${rulesPath}`);
-  }
+  logger.debug(`[DEBUG] Loading rules from: ${rulesPath}`);
   const litterConfig = parseRulesFile(rulesPath);
 
-  if (debug) {
-    logger.debug(`[DEBUG] Loaded ${litterConfig.rules.length} rules`);
-  }
+  logger.debug(`[DEBUG] Loaded ${litterConfig.rules.length} rules`);
 
   const allIssues = [];
 
@@ -260,6 +256,9 @@ if (require.main === module) {
   }
 
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
+  
+  // Set global debug mode
+  logger.setDebugMode(!!flags.debug);
   const finalTargets = targets.length > 0 ? targets : (config.targets || ['.']);
   const excludes = flags.force ? [] : (config.excludes || []);
   const filetypes = config.filetypes;
@@ -270,9 +269,7 @@ if (require.main === module) {
         'assets/litter-list.txt';
 
   const absRulesPath = path.resolve(process.cwd(), rulesPathToUse);
-  if (flags.debug) {
-    logger.debug('[DEBUG] Using rules file:', absRulesPath);
-  }
+  logger.debug('[DEBUG] Using rules file:', absRulesPath);
 
   const { issues, summary } = runLinter({
     targets: finalTargets,

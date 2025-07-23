@@ -40,28 +40,28 @@ function loadLintConfig(configPath = lintingConfigPath) {
 
 function findFilesArray(inputs, opts = {}) {
   const { debug = false } = opts;
-  if (debug) logger.debug(`[findFilesArray:Debug] Received inputs: ${JSON.stringify(inputs)}`);
+  logger.debug(`[findFilesArray:Debug] Received inputs: ${JSON.stringify(inputs)}`);
 
   const files = new Set();
   const inputsArray = Array.isArray(inputs) ? inputs : [inputs];
 
   for (const input of inputsArray) {
-    if (debug) logger.debug(`[findFilesArray:Debug] Processing input: '${input}'`);
+    logger.debug(`[findFilesArray:Debug] Processing input: '${input}'`);
     if (fs.existsSync(input) && fs.statSync(input).isDirectory()) {
-      if (debug) logger.debug(`[findFilesArray:Debug] Input '${input}' is a directory, walking it recursively...`);
+      logger.debug(`[findFilesArray:Debug] Input '${input}' is a directory, walking it recursively...`);
       for (const file of findFiles(input, opts)) {
         files.add(file);
       }
     } else {
-      if (debug) logger.debug(`[findFilesArray:Debug] Input '${input}' is being treated as a glob pattern.`);
+      logger.debug(`[findFilesArray:Debug] Input '${input}' is being treated as a glob pattern.`);
       const { glob } = require('glob');
       const matches = glob.sync(input, { nodir: true, ignore: opts.ignores || [], dot: true, absolute: true, cwd: projectRoot });
-      if (debug) logger.debug(`[findFilesArray:Debug] Glob '${input}' matched ${matches.length} files.`);
+      logger.debug(`[findFilesArray:Debug] Glob '${input}' matched ${matches.length} files.`);
       matches.forEach(file => files.add(file));
     }
   }
   const finalFiles = Array.from(files);
-  if (debug) logger.debug(`[findFilesArray:Debug] Finished, returning ${finalFiles.length} unique files.`);
+  logger.debug(`[findFilesArray:Debug] Finished, returning ${finalFiles.length} unique files.`);
   return finalFiles;
 }
 
@@ -141,9 +141,7 @@ function parseCliArgs(args) {
     }
   }
 
-  if (flags.debug) {
-    logger.debug('Parsed CLI args:', { flags, targets, only });
-  }
+  logger.debug('Parsed CLI args:', { flags, targets, only });
 
   return {
     flags,

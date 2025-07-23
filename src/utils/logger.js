@@ -13,6 +13,14 @@ if (process.env.LOG_MODE === 'json' && !fs.existsSync(logDir)) {
 }
 const logFilePath = path.join(logDir, 'app.log');
 
+// Global debug mode state
+let debugMode = false;
+
+// Set debug mode globally
+function setDebugMode(enabled) {
+  debugMode = enabled;
+}
+
 // Returns a colored string for the given level.
 function colorForLevel(level, message) {
   if (level === 'error' || level === 'fatal') return chalk.red(message);
@@ -27,7 +35,7 @@ function colorForLevel(level, message) {
 
 // Normal logger
 function log(level, message, meta = {}) {
-  if (level === 'debug' && !process.env.MD2PDF_DEBUG) return;
+  if (level === 'debug' && !debugMode) return;
   if (process.env.LOG_MODE === 'json') {
     const entry = {
       level,
@@ -46,7 +54,7 @@ function log(level, message, meta = {}) {
 
 // Logger with NO newline (for prompts/results on same line).
 function write(level, message, meta = {}) {
-  if (level === 'debug' && !process.env.MD2PDF_DEBUG) return;
+  if (level === 'debug' && !debugMode) return;
   if (process.env.LOG_MODE === 'json') {
     const entry = {
       level,
@@ -63,27 +71,33 @@ function write(level, message, meta = {}) {
   }
 }
 
-// Aliases for each level with newline
-const info      = (msg, meta) => log('info', msg, meta);
-const warn      = (msg, meta) => log('warn', msg, meta);
-const error     = (msg, meta) => log('error', msg, meta);
-const success   = (msg, meta) => log('success', msg, meta);
-const detail    = (msg, meta) => log('detail', msg, meta);
-const fatal     = (msg, meta) => log('fatal', msg, meta);
-const debug     = (msg, meta) => log('debug', msg, meta);
-const validation= (msg, meta) => log('validation', msg, meta);
+// Aliases for each level with newline - enhanced to support format options
+const info      = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'info' }) : log('info', msg, meta);
+const warn      = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'warn' }) : log('warn', msg, meta);
+const error     = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'error' }) : log('error', msg, meta);
+const success   = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'success' }) : log('success', msg, meta);
+const detail    = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'detail' }) : log('detail', msg, meta);
+const fatal     = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'fatal' }) : log('fatal', msg, meta);
+const debug     = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'debug' }) : log('debug', msg, meta);
+const validation= (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'validation' }) : log('validation', msg, meta);
 
-// Aliases for each level, NO newline
-const writeInfo      = (msg, meta) => write('info', msg, meta);
-const writeWarn      = (msg, meta) => write('warn', msg, meta);
-const writeError     = (msg, meta) => write('error', msg, meta);
-const writeSuccess   = (msg, meta) => write('success', msg, meta);
-const writeDetail    = (msg, meta) => write('detail', msg, meta);
-const writeFatal     = (msg, meta) => write('fatal', msg, meta);
-const writeDebug     = (msg, meta) => write('debug', msg, meta);
-const writeValidation= (msg, meta) => write('validation', msg, meta);
+// Aliases for each level, NO newline - enhanced to support format options
+const writeInfo      = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'info', format: 'inline' }) : write('info', msg, meta);
+const writeWarn      = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'warn', format: 'inline' }) : write('warn', msg, meta);
+const writeError     = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'error', format: 'inline' }) : write('error', msg, meta);
+const writeSuccess   = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'success', format: 'inline' }) : write('success', msg, meta);
+const writeDetail    = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'detail', format: 'inline' }) : write('detail', msg, meta);
+const writeFatal     = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'fatal', format: 'inline' }) : write('fatal', msg, meta);
+const writeDebug     = (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'debug', format: 'inline' }) : write('debug', msg, meta);
+const writeValidation= (msg, meta = {}) => meta.format ? logger(msg, { ...meta, level: 'validation', format: 'inline' }) : write('validation', msg, meta);
 
 // Unified logger interface with CSS-like format parameter
+// Usage examples:
+//   logger('message')                                    // same as logger.info('message')  
+//   logger('message', { level: 'debug' })                // same as logger.debug('message')
+//   logger(lintData, { format: 'lint' })                 // lint formatting with info level
+//   logger('debug msg', { level: 'debug', format: 'lint' }) // lint formatting with debug level
+//   logger('inline', { format: 'inline' })               // no newline, same as writeInfo()
 function logger(message, options = {}) {
   const { format = 'default', level = 'info', meta = {} } = options;
 
@@ -130,8 +144,8 @@ function formatLint(structuredData, meta = {}) {
 }
 
 module.exports = {
-  // Unified interface
-  logger,
+  // Debug mode control
+  setDebugMode,
   // Core logging functions
   log,
   write,

@@ -11,12 +11,14 @@ const {
   lintingConfigPath,
   visualRenderersPath,
   fileDiscoveryPath,
-  projectRoot
+  projectRoot,
+  loggerPath
 } = require('@paths');
 
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const { renderLintOutput } = require(visualRenderersPath);
 const { findFiles, findCandidates } = require(fileDiscoveryPath);
+const logger = require(loggerPath);
 
 const LINT_SKIP_TAG = 'lint-skip-postman';
 const DISABLE_MARKER = 'lint-disable-links';
@@ -238,6 +240,10 @@ async function runLinter(options = {}) {
 if (require.main === module) {
   (async () => {
     const { flags, targets } = parseCliArgs(process.argv.slice(2));
+    
+    // Set global debug mode
+    logger.setDebugMode(!!flags.debug);
+    
     const config = loadLintSection('doc-links', lintingConfigPath) || {};
 
     const { issues, summary } = await runLinter({

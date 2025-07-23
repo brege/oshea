@@ -2,6 +2,7 @@
 // Visual formatting and console output functions
 require('module-alias/register');
 const { dataAdaptersPath, loggerPath } = require('@paths');
+const logger = require(loggerPath);
 
 const chalk = require('chalk');
 
@@ -68,49 +69,38 @@ function renderLintResults(structuredData) {
   return output.trim();
 }
 
-function printDebugResults(results = [], options = {}) {
-  if (!options.debug || results.length === 0) return;
-
-  const isMochaPattern = results[0] && 'pattern' in results[0];
-
-  if (isMochaPattern) {
-    console.log('\n[DEBUG] Validated patterns extracted from .mocharc.js:\n');
-    for (const r of results) {
-      const symbol = r.type === 'found' ? chalk.green('[✓]') : chalk.red('[✗]');
-      const trail = r.count ? chalk.gray(`→ ${r.count} file(s) matched`) : (r.type === 'missing' ? chalk.gray('→ NOT FOUND') : '');
-      console.log(`  ${symbol} ${r.pattern} ${trail}`);
-    }
-    return;
-  }
-
-  // Default output for paths-js-validator results
-  console.log('\n[DEBUG] Validated registry entries:\n');
-  const maxKeyLength = Math.max(...results.map(r => (r.name || '').length));
-  for (const entry of results) {
-    const symbol = entry.type === 'found' ? chalk.green('[✓]') : entry.type === 'missing' ? chalk.red('[✗]') : chalk.gray('[–]');
-    const trail = entry.type === 'missing' ? chalk.gray('→ NOT FOUND') : (entry.type === 'ignored' ? chalk.gray('→ IGNORED') : '');
-    console.log(`  ${symbol} ${(entry.name || '').padEnd(maxKeyLength)} → ${entry.filePath} ${trail}`);
-  }
-  console.log('');
-}
 
 function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} }, formatter = 'stylish') {
-  // Always output the full JSON blob first if requested, then exit.
+  // If called by harness but in debug mode, allow debug output to flow first
+  if (process.env.CALLED_BY_HARNESS && !flags.debug) {
+    console.log(JSON.stringify({ issues, summary, results }));
+    return;
+  } else if (process.env.CALLED_BY_HARNESS && flags.debug) {
+    // In debug mode: show formatted output AND return JSON for harness
+    // Let the debug output flow through below, then output JSON at the end
+  }
+  
+  // If user explicitly requested JSON, output formatted JSON
   if (flags.json) {
-    process.stdout.write(JSON.stringify({ issues, summary, results }, null, 2) + '\n');
+    logger.writeInfo(JSON.stringify({ issues, summary, results }, null, 2) + '\n');
     return;
   }
 
   if (flags.quiet && summary.errorCount === 0) return;
 
   const { adaptRawIssuesToEslintFormat, transformToStructuredData } = require(dataAdaptersPath);
-  const { logger, success } = require(loggerPath);
+  const { success } = require(loggerPath);
 
   const adaptedIssues = adaptRawIssuesToEslintFormat(issues);
   const structuredData = transformToStructuredData(adaptedIssues);
 
+  // When called by harness in debug mode, suppress summary to avoid duplicate summary output
+  if (process.env.CALLED_BY_HARNESS && flags.debug) {
+    structuredData.summary.hasSummary = false;
+  }
+
   // Use unified logger interface with lint formatting
-  logger(structuredData, { format: 'lint' });
+  logger.info(structuredData, { format: 'lint' });
 
   const { fixedCount = 0, errorCount = 0, warningCount = 0 } = summary;
   if (fixedCount > 0) {
@@ -124,14 +114,16 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
   } else if (totalProblems === 0 && fixedCount > 0) {
     success('✔ All fixable issues addressed.');
   }
-
-  printDebugResults(results, flags);
+  
+  // If called by harness in debug mode, output JSON for parsing after debug output
+  if (process.env.CALLED_BY_HARNESS && flags.debug) {
+    console.log(JSON.stringify({ issues, summary, results }));
+  }
 }
 
 module.exports = {
   highlightMatch,
   applyStyle,
   renderLintResults,
-  printDebugResults,
   renderLintOutput
 };

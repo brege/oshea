@@ -128,26 +128,26 @@ function findFiles(options = {}) {
     debug = false,
   } = options;
 
-  if (debug) logger.debug(`[findFiles:Debug] Received targets: ${JSON.stringify(targets)}`);
+  logger.debug(`[findFiles:Debug] Received targets: ${JSON.stringify(targets)}`);
 
   const eslintIgnores = getEslintIgnorePatterns();
   const combinedIgnores = [...new Set([...CORE_IGNORES, ...eslintIgnores, ...ignores])];
 
   if (respectDocignore) {
     const docIgnores = getDocignorePatterns(docignoreRoot);
-    if (debug && docIgnores.length > 0) {
+    if (docIgnores.length > 0) {
       logger.debug(`[findFiles:Debug] Applying .docignore patterns: ${JSON.stringify(docIgnores)}`);
     }
     combinedIgnores.push(...docIgnores);
   }
-  if (debug) logger.debug(`[findFiles:Debug] Using combined ignore patterns: ${JSON.stringify(combinedIgnores)}`);
+  logger.debug(`[findFiles:Debug] Using combined ignore patterns: ${JSON.stringify(combinedIgnores)}`);
 
   const matchedFiles = new Set();
   const allTargets = Array.isArray(targets) ? targets : [targets];
 
   for (const target of allTargets) {
     if (isGlobPattern(target)) {
-      if (debug) logger.debug(`[findFiles:Debug] Processing '${target}' as a glob pattern.`);
+      logger.debug(`[findFiles:Debug] Processing '${target}' as a glob pattern.`);
       const matches = glob.sync(target, {
         cwd: projectRoot,
         absolute: true,
@@ -159,28 +159,28 @@ function findFiles(options = {}) {
         if (hasAllowedExt(m, filetypes)) matchedFiles.add(m);
       });
     } else if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
-      if (debug) logger.debug(`[findFiles:Debug] Processing '${target}' as a directory.`);
+      logger.debug(`[findFiles:Debug] Processing '${target}' as a directory.`);
       for (const file of walkDir(target, { ignores: combinedIgnores, fileFilter, filetypes })) {
         matchedFiles.add(file);
       }
     } else if (fs.existsSync(target)) {
-      if (debug) logger.debug(`[findFiles:Debug] Processing '${target}' as a direct file path.`);
+      logger.debug(`[findFiles:Debug] Processing '${target}' as a direct file path.`);
       if (hasAllowedExt(target, filetypes)) matchedFiles.add(path.resolve(target));
-    } else if (debug) {
+    } else {
       logger.debug(`[findFiles:Debug] Target '${target}' does not exist and is not a valid glob. Skipping.`);
     }
   }
-  if (debug) logger.debug(`[findFiles:Debug] Total unique paths found: ${matchedFiles.size}`);
+  logger.debug(`[findFiles:Debug] Total unique paths found: ${matchedFiles.size}`);
 
   const finalFiles = [];
   for (const file of matchedFiles) {
     const relPath = path.relative(projectRoot, file).replace(/\\/g, '/');
     if (combinedIgnores.some(pattern => minimatch(relPath, pattern, { dot: true }))) {
-      if (debug) logger.debug(`[findFiles:Debug] Skipping file matching combined ignore pattern: ${relPath}`);
+      logger.debug(`[findFiles:Debug] Skipping file matching combined ignore pattern: ${relPath}`);
       continue;
     }
     if (skipTag && fileHasSkipTag(file, skipTag)) {
-      if (debug) logger.debug(`[findFiles:Debug] Skipping file with tag '${skipTag}': ${relPath}`);
+      logger.debug(`[findFiles:Debug] Skipping file with tag '${skipTag}': ${relPath}`);
       continue;
     }
     if (fileFilter(file) && hasAllowedExt(file, filetypes)) {
@@ -188,7 +188,7 @@ function findFiles(options = {}) {
     }
   }
 
-  if (debug) logger.debug(`[findFiles:Debug] Returning ${finalFiles.length} files after all filtering.`);
+  logger.debug(`[findFiles:Debug] Returning ${finalFiles.length} files after all filtering.`);
   return finalFiles;
 }
 

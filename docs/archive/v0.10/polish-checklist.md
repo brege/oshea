@@ -119,7 +119,7 @@ In general, **total coverage** means the following:
 | `remove-ws`            | ✔ | `.` for `!.md`                 | ✔ | none                            |
 | `no-relative-paths`    | ✔ | `.` for `.js`                  | ✔ | `paths/`                        |
 | **validation**         |   |                                |   |                                 |
-| `validate-mocha`       | ✔ | [`.mocharc.js`](../.mocharc.js)                  | ✔ | none                            |
+| `validate-mocha`       | ✔ | `.mocharc.js`                  | ✔ | none                            |
 | **docs**               |   |                                |   |                                 |
 | `find-litter`          | ✔ | `.` for `.*`                   | ✔ | none                            |
 | `update-indices`       | ○ | `.` for `.md`                  | ○ | plugin's `{index,*-example}.md` |
@@ -131,8 +131,8 @@ In general, **total coverage** means the following:
 
 **Main issues.**
 - [ ] [**logging**] **`scripts/linting`** replace all `console.*` logging with the centrallogger
-- [ ] [**postman**] **`README.md`** has dozens of broken links
-- [ ] [**librarian**] does **`README.md`** need to "index" all ALLCAPS.md files (`CONTRIBUTING.md`, `LICENSE`)?
+- [x] [**postman**] **`README.md`** has dozens of broken links
+- [x] [**librarian**] does **`README.md`** need to "index" all ALLCAPS.md files (`CONTRIBUTING.md`, `LICENSE`)?  Answer: **No**.
 <!-- lint-enable-links -->
 
 ---

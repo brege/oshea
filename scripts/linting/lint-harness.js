@@ -25,7 +25,7 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
     stdio: 'pipe',
     encoding: 'utf-8',
     cwd: projectRoot,
-    env: { ...process.env, FORCE_COLOR: '1' },
+    env: { ...process.env, FORCE_COLOR: '1', CALLED_BY_HARNESS: '1' },
   });
 
   const stdout = result.stdout.trim();
@@ -37,8 +37,15 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
   if (stdout) {
     try {
       // ESLint returns an array, our scripts return an object.
-      const jsonStart = stdout.startsWith('[') ? stdout.indexOf('[') : stdout.indexOf('{');
+      // Look for JSON object start, but skip ANSI color codes by looking for {"issues"
+      const jsonStart = stdout.startsWith('[') ? stdout.indexOf('[') : stdout.indexOf('{"issues"');
       if (jsonStart !== -1) {
+        // Extract debug output that comes before JSON (when in debug mode)
+        const preJsonOutput = stdout.substring(0, jsonStart).trim();
+        if (preJsonOutput && !usingJson) {
+          console.log(preJsonOutput);
+        }
+        
         const jsonString = stdout.substring(jsonStart);
         const parsed = JSON.parse(jsonString);
 
@@ -68,7 +75,7 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
       const adaptedIssues = isEslintResult ? issues : adaptRawIssuesToEslintFormat(issues);
       const { transformToStructuredData } = require(dataAdaptersPath);
       const structuredData = transformToStructuredData(adaptedIssues);
-      logger.formatLint(structuredData);
+      logger.info(structuredData, { format: 'lint' });
     } else if (stdout && !stepSummary) {
       logger.info(stdout);
     } else if (issues.length === 0 && stepSummary && stepSummary.fixedCount === 0) {
@@ -135,8 +142,8 @@ function runHarness(config, globalFlags, targets = [], only = '') {
 
     if (step.scriptPath) {
       command = 'node';
-      // For backend: always add --json for parsing to get the summary
-      commandArgs = [resolve(step.scriptPath), '--json'];
+      // Individual linters should always return structured data to harness
+      commandArgs = [resolve(step.scriptPath)];
 
       if (targets.length > 0) commandArgs.push(...targets);
       for (const flag of flagList) {
@@ -193,7 +200,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       if (!config.continueOnError) {
         if (usingJson) {
           // Output partial JSON, abort
-          process.stdout.write(JSON.stringify({
+          logger.writeInfo(JSON.stringify({
             ok: false,
             aborted: true,
             steps: stepSummaries,
@@ -219,7 +226,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
     const totalErrors = stepSummaries.reduce((t, s) => t + (s.errorCount || 0), 0);
     const totalWarnings = stepSummaries.reduce((t, s) => t + (s.warningCount || 0), 0);
     const totalFixed = stepSummaries.reduce((t, s) => t + (s.fixedCount || 0), 0);
-    process.stdout.write(JSON.stringify({
+    logger.writeInfo(JSON.stringify({
       ok: totalErrors === 0,
       steps: stepSummaries,
       totalErrors,

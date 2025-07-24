@@ -28,13 +28,13 @@ describe('CV Plugin E2E Test', function () {
   this.timeout(20000);
 
   before(async () => {
-    logger.debug('[cv-e2e] Setting up test directory...');
+    logger.debug('Setting up test directory...', { context: 'cv-e2e' });
     await setupTestDirectory(TEST_OUTPUT_DIR);
   });
 
   after(async () => {
     const keepOutput = process.env.KEEP_OUTPUT === 'true';
-    logger.debug(`[cv-e2e] Cleaning up test directory. KEEP_OUTPUT: ${keepOutput}`);
+    logger.debug('Cleaning up test directory', { context: 'cv-e2e', keepOutput });
     await cleanupTestDirectory(TEST_OUTPUT_DIR, keepOutput);
   });
 
@@ -47,12 +47,12 @@ describe('CV Plugin E2E Test', function () {
       '--no-open',
     ];
 
-    logger.debug(`[cv-e2e] Running CLI command: node ${cliPath} ${commandArgs.join(' ')}`);
+    logger.debug('Running CLI command', { context: 'cv-e2e', command: `node ${cliPath} ${commandArgs.join(' ')}` });
     const result = await runCliCommand(commandArgs, cliPath, projectRoot);
 
     if (!result.success) {
       const errorMessage = result.stderr || result.error?.message || 'Unknown error';
-      logger.error(`[cv-e2e] CLI command failed: ${errorMessage}`);
+      logger.error('CLI command failed', { context: 'cv-e2e', error: errorMessage });
       throw new Error(`CLI command failed: ${errorMessage}`);
     }
 

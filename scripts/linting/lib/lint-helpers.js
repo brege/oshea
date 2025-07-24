@@ -40,28 +40,28 @@ function loadLintConfig(configPath = lintingConfigPath) {
 
 function findFilesArray(inputs, opts = {}) {
   const { debug = false } = opts; // eslint-disable-line no-unused-vars
-  logger.debug(`[findFilesArray:Debug] Received inputs: ${JSON.stringify(inputs)}`);
+  logger.debug(` Received inputs: ${JSON.stringify(inputs)}`, { context: 'LintHelpers' });
 
   const files = new Set();
   const inputsArray = Array.isArray(inputs) ? inputs : [inputs];
 
   for (const input of inputsArray) {
-    logger.debug(`[findFilesArray:Debug] Processing input: '${input}'`);
+    logger.debug(` Processing input: '${input}'`, { context: 'LintHelpers' });
     if (fs.existsSync(input) && fs.statSync(input).isDirectory()) {
-      logger.debug(`[findFilesArray:Debug] Input '${input}' is a directory, walking it recursively...`);
+      logger.debug(` Input '${input}' is a directory, walking it recursively...`, { context: 'LintHelpers' });
       for (const file of findFiles(input, opts)) {
         files.add(file);
       }
     } else {
-      logger.debug(`[findFilesArray:Debug] Input '${input}' is being treated as a glob pattern.`);
+      logger.debug(` Input '${input}' is being treated as a glob pattern.`, { context: 'LintHelpers' });
       const { glob } = require('glob');
       const matches = glob.sync(input, { nodir: true, ignore: opts.ignores || [], dot: true, absolute: true, cwd: projectRoot });
-      logger.debug(`[findFilesArray:Debug] Glob '${input}' matched ${matches.length} files.`);
+      logger.debug(` Glob '${input}' matched ${matches.length} files.`, { context: 'LintHelpers' });
       matches.forEach(file => files.add(file));
     }
   }
   const finalFiles = Array.from(files);
-  logger.debug(`[findFilesArray:Debug] Finished, returning ${finalFiles.length} unique files.`);
+  logger.debug(` Finished, returning ${finalFiles.length} unique files.`, { context: 'LintHelpers' });
   return finalFiles;
 }
 

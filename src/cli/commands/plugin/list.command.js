@@ -60,10 +60,7 @@ function displayShortPluginEntry(plugin, statusColWidth, nameColWidth) {
     S_CM_ORIGIN = `${plugin.cmCollection}/${plugin.cmPluginId}`;
   }
 
-  const plainStatus = stripAnsi(S_STATUS);
-  const plainName = stripAnsi(S_NAME);
-
-  logger.info(`  ${S_STATUS.padEnd(statusColWidth + (S_STATUS.length - plainStatus.length))} | ${S_NAME.padEnd(nameColWidth + (S_NAME.length - plainName.length))} | ${S_CM_ORIGIN}`);
+  logger.info('Plugin list entry', { status: S_STATUS, name: S_NAME, origin: S_CM_ORIGIN, format: 'inline' });
 }
 
 module.exports = {

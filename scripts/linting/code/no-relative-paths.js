@@ -60,7 +60,7 @@ async function scanFileForRelativePaths(filePath, debug = false) {
       return [];
     }
 
-    logger.debug(`[DEBUG] Scanning file: ${path.relative(projectRoot, filePath)}`);
+    logger.debug(`Scanning file: ${path.relative(projectRoot, filePath)}`, { context: 'PathValidator' });
     const issues = [];
     const content = await fs.readFile(filePath, 'utf8');
     const lines = content.split('\n');
@@ -125,7 +125,7 @@ async function runLinter(options = {}) {
     filetypes = undefined
   } = options;
 
-  logger.debug('[DEBUG] Running no-relative-paths linter with options:', { targets, excludes });
+  logger.debug('Running no-relative-paths linter with options:', { context: 'PathValidator', targets, excludes });
 
   const allIssues = [];
 

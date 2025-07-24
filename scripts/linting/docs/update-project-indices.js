@@ -77,7 +77,7 @@ function scanGroup(name, config, opts = {}) {
   } = config;
 
   if (typeof indexFile !== 'string' || !indexFile) {
-    logger.debug(`[Debug] Skipping group '${name}': 'indexFile' not configured.`);
+    logger.debug(`Skipping group '${name}': 'indexFile' not configured.`, { context: 'Librarian' });
     return { issues: [], fixedCount: 0 };
   }
 
@@ -98,7 +98,7 @@ function scanGroup(name, config, opts = {}) {
     return { issues, fixedCount };
   }
 
-  logger.debug(`[Debug] Reading index file: ${path.relative(projectRoot, indexAbsPath)}`);
+  logger.debug(`Reading index file: ${path.relative(projectRoot, indexAbsPath)}`, { context: 'Librarian' });
 
   const content = fs.readFileSync(indexAbsPath, 'utf8');
   const lines = content.split('\n');
@@ -107,7 +107,7 @@ function scanGroup(name, config, opts = {}) {
   let filesToIndex;
 
   if (targets.length > 0 && !force) {
-    logger.debug(`[Debug] Using CLI target '${targets[0]}' to generate specific glob.`);
+    logger.debug(`Using CLI target '${targets[0]}' to generate specific glob.`, { context: 'Librarian' });
     const target = targets[0];
     const extPattern = filetypes.length > 1
       ? `{${filetypes.map(e => e.replace(/^\./, '')).join(',')}}`
@@ -176,10 +176,10 @@ function scanGroup(name, config, opts = {}) {
   }
 
   if (missingInIndex.length > 0) {
-    logger.debug('[Debug] Missing file(s) from index:');
+    logger.debug('Missing file(s) from index:', { context: 'Librarian' });
     missingInIndex.forEach(file => logger.debug(`  - ${file}`));
   } else {
-    logger.debug(`[Debug] Found ${missingInIndex.length} files missing from the index for group '${name}'.`);
+    logger.debug(`Found ${missingInIndex.length} files missing from the index for group '${name}'.`, { context: 'Librarian' });
   }
 
   for (const rel of missingInIndex) {
@@ -248,20 +248,20 @@ async function runLibrarian(options = {}) {
   let groupsToRun = [];
 
   if (targets.length > 0) {
-    logger.debug('[Debug] CLI targets provided. Determining relevant group(s)...');
+    logger.debug('CLI targets provided. Determining relevant group(s)...', { context: 'Librarian' });
     const targetPath = path.resolve(targets[0]);
     for (const [groupName, groupConfig] of Object.entries(groups)) {
       if (typeof groupConfig !== 'object' || !groupConfig.scanRoot) continue;
       const scanRoots = Array.isArray(groupConfig.scanRoot) ? groupConfig.scanRoot : [groupConfig.scanRoot];
       if (scanRoots.some(root => root && targetPath.startsWith(path.resolve(root)))) {
         groupsToRun.push(groupName);
-        logger.debug(`[Debug] Target '${targets[0]}' matches scan root for group '${groupName}'.`);
+        logger.debug(`Target '${targets[0]}' matches scan root for group '${groupName}'.`, { context: 'Librarian' });
       }
     }
     if (groupsToRun.length === 0) {
-      logger.debug('[Debug] No matching groups found for CLI target. Falling back to manual target processing.');
+      logger.debug('No matching groups found for CLI target. Falling back to manual target processing.', { context: 'Librarian' });
     } else {
-      logger.info(`[Debug] No matching group found for target '${targets[0]}'.`);
+      logger.info(`No matching group found for target '${targets[0]}'.`, { context: 'Librarian' });
     }
   } else {
     groupsToRun = group ? [group] : Object.keys(groups);

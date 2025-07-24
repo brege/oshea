@@ -2,7 +2,7 @@
 
 This document outlines the formal contract that all plugins for `md-to-pdf` must adhere to. It serves as a guide for plugin developers, ensuring that plugins are reliable, predictable, and integrate smoothly with the core application.
 
-The contract is enforced at runtime by a validation system (`[`src/plugins/validator.js`](../../src/plugins/validator.js)`) that uses JSON Schemas. Every plugin's configuration is checked against a base schema, and optionally against its own specific schema.
+The contract is enforced at runtime by a validation system ([`src/plugins/validator.js`](../../src/plugins/validator.js)) that uses JSON Schemas. Every plugin's configuration is checked against a base schema, and optionally against its own specific schema.
 
 ## Standard Directory Structure
 

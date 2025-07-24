@@ -62,7 +62,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(1);
-      expect(stdout).to.match(/Plugin 'poorly-formed-plugin' is INVALID/i);
+      expect(stdout).to.match(/Plugin is invalid/i);
       expect((stderr + stdout)).to.match(/Missing required file: 'index.js'/i);
     },
   },

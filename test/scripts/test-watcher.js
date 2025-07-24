@@ -68,14 +68,14 @@ function buildTestMap() {
 
 function runTests(testPathsInfo) {
   if (!testPathsInfo || testPathsInfo.length === 0) {
-    logger.warn('[Watcher] No tests found for the changed file.\n', { format: 'inline' });
+    logger.warn('No tests found for the changed file.\n', { context: 'Watcher', format: 'inline' });
     return;
   }
   const testPaths = testPathsInfo.map(info => info.path);
-  logger.info(`\n[Watcher] Running tests:\n  - ${testPaths.join('\n  - ')}\n`, { format: 'inline' });
+  logger.info(`\nRunning tests:\n  - ${testPaths.join('\n  - ')}\n`, { context: 'Watcher', format: 'inline' });
   const mocha = spawn('npx', ['mocha', ...testPaths], { stdio: 'inherit', cwd: projectRoot });
   mocha.on('close', (code) => {
-    logger.info(`[Watcher] Mocha process exited with code ${code}. Watching for next change...\n`, { format: 'inline' });
+    logger.info(`Mocha process exited with code ${code}. Watching for next change...\n`, { context: 'Watcher', format: 'inline' });
   });
 }
 
@@ -97,7 +97,7 @@ function printInstrumentation(map) {
 }
 
 function main() {
-  logger.info('[Watcher] Initializing...\n', { format: 'inline' });
+  logger.info('Initializing...\n', { context: 'Watcher', format: 'inline' });
   const targetToTestPathsMap = buildTestMap();
 
   printInstrumentation(targetToTestPathsMap);
@@ -109,11 +109,11 @@ function main() {
   });
 
   watcher
-    .on('ready', () => logger.info('[Watcher] Ready. Watching for file changes...\n', { format: 'inline' }))
+    .on('ready', () => logger.info('Ready. Watching for file changes...\n', { context: 'Watcher', format: 'inline' }))
     .on('change', (filePath) => {
       const relativePath = path.relative(projectRoot, filePath);
       const baseName = path.basename(filePath, '.js');
-      logger.warn(`\n[Watcher] File changed: ${relativePath} (Basename: ${baseName})\n`, { format: 'inline' });
+      logger.warn(`\nFile changed: ${relativePath} (Basename: ${baseName})\n`, { context: 'Watcher', format: 'inline' });
       const testPathsInfo = targetToTestPathsMap.get(baseName);
       runTests(testPathsInfo);
     });

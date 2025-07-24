@@ -52,7 +52,7 @@ describe(`E2E Test for ${PLUGIN_NAME} Plugin`, function() {
 
     if (!result.success) {
       const errorMessage = result.stderr || (result.error ? result.error.message : 'Unknown error');
-      logger.error(`[${PLUGIN_NAME}-e2e] CLI command failed: ${errorMessage}`);
+      logger.error('CLI command failed', { context: `${PLUGIN_NAME}-e2e`, error: errorMessage });
       throw new Error(`CLI command failed for ${PLUGIN_NAME}:\n${errorMessage}`);
     }
 

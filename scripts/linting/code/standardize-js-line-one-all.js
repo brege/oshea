@@ -119,7 +119,7 @@ if (require.main === module) {
   const filetypes = config.filetypes;
 
   if (!filetypes) {
-    logger.warn('[WARN] No filetypes specified! Using file-discovery safe defaults.');
+    logger.warn('No filetypes specified! Using file-discovery safe defaults.', { context: 'HeaderValidator' });
   }
 
   const { issues, summary } = runLinter({

@@ -92,8 +92,8 @@ function main() {
     runHarness(config, flags, targets, only);
 
   } catch (error) {
-    logger.error('Error running lint harness: ' + error.message);
-    logger.error('Stack: ' + error.stack);
+    logger.error(`Error running lint harness: ${error.message}`);
+    logger.error(`Stack: ${error.stack}`);
     process.exit(1);
   }
 }

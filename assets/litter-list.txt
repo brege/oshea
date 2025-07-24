@@ -27,6 +27,11 @@
 [string:medium:md] robustify
 [string:medium:md] robustly
 
+# logger anti-patterns - prevent regression to hardcoded prefixes
+[string:high:js,ts] logger\.(error|warn|info|debug)\(`\[*\]
+[string:high:js,ts] logger\.(error|warn|info|debug)\('\[*\]
+[string:medium:js,ts] logger\.(error|warn|info|debug)\([^,]+\s*\+\s*[^,)]+
+
 # custom patterns 
 
 # emoji whitelist 

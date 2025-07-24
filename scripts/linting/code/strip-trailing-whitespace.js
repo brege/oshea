@@ -92,7 +92,7 @@ if (require.main === module) {
   const filetypes = config.filetypes;
 
   if (!filetypes) {
-    logger.warn('[WARN] No filetypes specified! Using file-discovery safe defaults (common text/code files).');
+    logger.warn('No filetypes specified! Using file-discovery safe defaults (common text/code files).', { context: 'WhitespaceValidator' });
   }
 
   const { issues, summary } = runLinter({

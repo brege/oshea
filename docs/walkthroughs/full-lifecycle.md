@@ -2,7 +2,7 @@
 
 This guide demonstrates a complete, real-world workflow for managing plugins in `md-to-pdf`. You will add a plugin collection from a remote Git repository, enable a specific plugin, use it to convert a document, and then clean up by disabling the plugin and removing the collection.
 
-This entire process is automated and verified by the test at `[`test/e2e/workflow-lifecycle.test.js`](../../test/e2e/workflow-lifecycle.test.js)`.
+This entire process is automated and verified by the test at [`test/e2e/workflow-lifecycle.test.js`](../../test/e2e/workflow-lifecycle.test.js).
 
 ### Prerequisites
 

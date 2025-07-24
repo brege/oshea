@@ -48,7 +48,7 @@ function parseRulesFile(filename) {
   let customWhitelists = new Map();
 
   if (!fs.existsSync(filename)) {
-    logger.warn(`[WARN] Rules file not found: ${filename}`);
+    logger.warn(`Rules file not found: ${filename}`, { context: 'FindLitter' });
     return { rules, emojiFiletypes: ['*'], emojiWhitelist, customWhitelists, commentCapsWhitelist: [] };
   }
 
@@ -242,10 +242,10 @@ function scanFileForLitter(filePath, config) {
 function runLinter(options = {}) {
   const { targets = [], excludes = [], rulesPath, debug = false, filetypes } = options;
 
-  logger.debug(`[DEBUG] Loading rules from: ${rulesPath}`);
+  logger.debug(`Loading rules from: ${rulesPath}`, { context: 'FindLitter' });
   const litterConfig = parseRulesFile(rulesPath);
 
-  logger.debug(`[DEBUG] Loaded ${litterConfig.rules.length} rules`);
+  logger.debug(`Loaded ${litterConfig.rules.length} rules`, { context: 'FindLitter' });
 
   const allIssues = [];
 
@@ -283,7 +283,7 @@ if (require.main === module) {
     config = loadLintSection('find-litter', lintingConfigPath) || {};
   } catch (e) {
     if (!e.message.includes('Section \'find-litter\' not found')) {
-      logger.warn(`[WARN] Could not load linting config: ${e.message}`);
+      logger.warn(`Could not load linting config: ${e.message}`, { context: 'FindLitter' });
     }
   }
 
@@ -301,7 +301,7 @@ if (require.main === module) {
         'assets/litter-list.txt';
 
   const absRulesPath = path.resolve(process.cwd(), rulesPathToUse);
-  logger.debug('[DEBUG] Using rules file:', absRulesPath);
+  logger.debug('Using rules file:', { context: 'FindLitter', path: absRulesPath });
 
   const { issues, summary } = runLinter({
     targets: finalTargets,

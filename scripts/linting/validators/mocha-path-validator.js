@@ -37,7 +37,7 @@ function runValidator(options = {}) {
   const issues = [];
   const results = [];
 
-  logger.debug(`[DEBUG] Checking for .mocharc.js at: ${mocharcPath}`);
+  logger.debug(`Checking for .mocharc.js at: ${mocharcPath}`, { context: 'MochaValidator' });
 
   if (!fs.existsSync(mocharcPath)) {
     issues.push({
@@ -53,12 +53,12 @@ function runValidator(options = {}) {
   try {
     mochaConfig = require(mocharcPath);
   } catch (e) {
-    logger.debug(`[DEBUG] Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`);
+    logger.debug(`Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`, { context: 'MochaValidator' });
     try {
       const content = fs.readFileSync(mocharcPath, 'utf8');
       mochaConfig = eval(`(() => (${content.replace(/^module\.exports\s*=\s*/, '')}))()`);
     } catch (evalError) {
-      logger.debug(`[DEBUG] Manual parsing of .mocharc.js failed. Error: ${evalError.message}`);
+      logger.debug(`Manual parsing of .mocharc.js failed. Error: ${evalError.message}`, { context: 'MochaValidator' });
       mochaConfig = {};
     }
   }
@@ -68,7 +68,7 @@ function runValidator(options = {}) {
     pattern => !excludes.some(ex => pattern.includes(ex))
   );
 
-  logger.debug(`[DEBUG] Found ${patterns.length} patterns to validate.`);
+  logger.debug(`Found ${patterns.length} patterns to validate.`, { context: 'MochaValidator' });
 
   for (const pattern of patterns) {
     if (pattern.includes('*')) {

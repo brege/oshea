@@ -151,8 +151,8 @@ scripts/
 
 **Redundancy with ESLint**
 
-- `[`standardize-js-line-one-all.js`](../scripts/linting/standardize-js-line-one-all.js)`: Partial overlap; ESLint can enforce some header rules.
-- `[`strip-trailing-whitespace.js`](../scripts/linting/strip-trailing-whitespace.js)`: ESLint can enforce, but this script actively fixes them.
+- [`standardize-js-line-one-all.js`](../scripts/linting/standardize-js-line-one-all.js): Partial overlap; ESLint can enforce some header rules.
+- [`strip-trailing-whitespace.js`](../scripts/linting/strip-trailing-whitespace.js): ESLint can enforce, but this script actively fixes them.
 
 **Probable approach**
 
@@ -310,9 +310,9 @@ Use Mocha's native watch mode with explicit watch paths.
 }
 ```
 
-**`tt5` - Organize e2e tests into groups in `[`.mocharc.js`](../.mocharc.js)`**  
+**`tt5` - Organize e2e tests into groups in [`.mocharc.js`](../.mocharc.js)**  
    
-Define e2e test groups in `[`.mocharc.js`](../.mocharc.js)` for targeted runs.  
+Define e2e test groups in [`.mocharc.js`](../.mocharc.js) for targeted runs.  
 ```js
 // .mocharc.js
 module.exports = {

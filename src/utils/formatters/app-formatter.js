@@ -25,8 +25,25 @@ function colorForLevel(level, message) {
   return message;
 }
 
+// Format context prefix based on configuration
+function formatContext(context, config = {}) {
+  if (!context || !config.showContext) return '';
+
+  const timestamp = config.showTimestamp ? ` ${new Date().toISOString()}` : '';
+
+  if (config.contextStyle === 'prefix') {
+    return `[${context}${timestamp}] `;
+  } else if (config.contextStyle === 'suffix') {
+    return ` [${context}${timestamp}]`;
+  }
+
+  return '';
+}
+
 // Format with default app theme (newline)
 function formatApp(level, message, meta = {}) {
+  const { context, config = {} } = meta;
+
   if (process.env.LOG_MODE === 'json') {
     const entry = {
       level,
@@ -36,7 +53,12 @@ function formatApp(level, message, meta = {}) {
     };
     fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
   } else {
-    console.log(colorForLevel(level, message));
+    const contextPrefix = formatContext(context, config);
+    const formattedMessage = config.contextStyle === 'suffix'
+      ? message + formatContext(context, config)
+      : contextPrefix + message;
+
+    console.log(colorForLevel(level, formattedMessage));
   }
 
   if (level === 'fatal') {

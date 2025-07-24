@@ -65,7 +65,7 @@ function readFileOrWarn(filePath) {
   if (fs.existsSync(filePath)) {
     return fs.readFileSync(filePath, 'utf8');
   } else {
-    logger.warn(`[WARN] Missing file: ${filePath}`);
+    logger.warn(`Missing file: ${filePath}`, { context: 'AIContext' });
     return '';
   }
 }
@@ -97,7 +97,7 @@ function readFileOrWarn(filePath) {
   }
 
   if (!fs.existsSync(pluginDir) || !fs.lstatSync(pluginDir).isDirectory()) {
-    logger.error(`[ERROR] Plugin directory not found: ${pluginDir}`);
+    logger.error(`Plugin directory not found: ${pluginDir}`, { context: 'AIContext' });
     process.exit(1);
   }
 

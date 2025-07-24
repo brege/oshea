@@ -143,10 +143,10 @@ function validate(pluginIdentifier) {
     if (validationResult.warnings.length === 0) {
       logger.success(`[✔] Plugin '${pluginName}' is VALID.`, { module: 'src/plugins/validator.js' });
     } else {
-      logger.warn(`[!] Plugin '${pluginName}' is USABLE (with warnings).`, { module: 'src/plugins/validator.js' });
+      logger.warn('Plugin is usable with warnings', { context: 'PluginValidator', plugin: pluginName, module: 'src/plugins/validator.js' });
     }
   } else {
-    logger.error(`[✖] Plugin '${pluginName}' is INVALID.`, { module: 'src/plugins/validator.js' });
+    logger.error('Plugin is invalid', { context: 'PluginValidator', plugin: pluginName, module: 'src/plugins/validator.js' });
   }
 
   if (validationResult.errors.length > 0) {

@@ -7,6 +7,23 @@ const formatters = require(formattersIndexPath);
 // Global debug mode state
 let debugMode = false;
 
+// Logger formatting configuration
+const loggerConfig = {
+  showContext: true,      // Show context in formatted output
+  showTimestamp: false,   // Show timestamp in formatted output
+  contextStyle: 'prefix'  // 'prefix', 'suffix', 'none'
+};
+
+// Configure logger formatting
+function configureLogger(config = {}) {
+  Object.assign(loggerConfig, config);
+}
+
+// Get current logger configuration
+function getLoggerConfig() {
+  return { ...loggerConfig };
+}
+
 // Set debug mode globally
 function setDebugMode(enabled) {
   debugMode = enabled;
@@ -21,7 +38,11 @@ function setDebugMode(enabled) {
 //   logger('debug msg', { level: 'debug', format: 'lint' }) // lint formatting with debug level
 //   logger('inline', { format: 'inline' })               // no newline, same as writeInfo()
 function logger(message, options = {}) {
-  const { format = 'default', level = 'info', meta = {} } = options;
+  const { format = 'default', level = 'info', context, meta = {} } = options;
+
+  // Enrich meta with context and config
+  meta.context = context;
+  meta.config = loggerConfig;
 
   // Debug mode filtering
   if (level === 'debug' && !debugMode) return;
@@ -72,14 +93,15 @@ function logger(message, options = {}) {
 }
 
 // Convenience aliases for each level (backward compatibility)
-const info      = (msg, meta = {}) => logger(msg, { ...meta, level: 'info' });
-const warn      = (msg, meta = {}) => logger(msg, { ...meta, level: 'warn' });
-const error     = (msg, meta = {}) => logger(msg, { ...meta, level: 'error' });
-const success   = (msg, meta = {}) => logger(msg, { ...meta, level: 'success' });
-const detail    = (msg, meta = {}) => logger(msg, { ...meta, level: 'detail' });
-const fatal     = (msg, meta = {}) => logger(msg, { ...meta, level: 'fatal' });
-const debug     = (msg, meta = {}) => logger(msg, { ...meta, level: 'debug' });
-const validation= (msg, meta = {}) => logger(msg, { ...meta, level: 'validation' });
+// Now support context: logger.info('message', { context: 'MyContext' })
+const info      = (msg, options = {}) => logger(msg, { ...options, level: 'info' });
+const warn      = (msg, options = {}) => logger(msg, { ...options, level: 'warn' });
+const error     = (msg, options = {}) => logger(msg, { ...options, level: 'error' });
+const success   = (msg, options = {}) => logger(msg, { ...options, level: 'success' });
+const detail    = (msg, options = {}) => logger(msg, { ...options, level: 'detail' });
+const fatal     = (msg, options = {}) => logger(msg, { ...options, level: 'fatal' });
+const debug     = (msg, options = {}) => logger(msg, { ...options, level: 'debug' });
+const validation= (msg, options = {}) => logger(msg, { ...options, level: 'validation' });
 
 // writeFunction aliases removed - all migrated to { format: 'inline' } pattern
 
@@ -91,6 +113,9 @@ function formatLint(structuredData, meta = {}) {
 module.exports = {
   // Debug mode control
   setDebugMode,
+  // Logger configuration
+  configureLogger,
+  getLoggerConfig,
   // Main logger interface
   logger,
   // Convenience aliases for each level (backward compatibility)

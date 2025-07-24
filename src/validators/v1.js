@@ -99,10 +99,10 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
     logger.error('    [✖] In-situ test failed.', { module: 'src/validators/v1.js' });
     logger.error('\n--- Begin In-Situ Test Error Output ---', { module: 'src/validators/v1.js' });
     if (e.stdout && e.stdout.length > 0) {
-      logger.error('[stdout]\n' + e.stdout.toString(), { module: 'src/validators/v1.js' });
+      logger.error('Command stdout', { context: 'validator', output: e.stdout.toString(), module: 'src/validators/v1.js' });
     }
     if (e.stderr && e.stderr.length > 0) {
-      logger.error('[stderr]\n' + e.stderr.toString(), { module: 'src/validators/v1.js' });
+      logger.error('Command stderr', { context: 'validator', output: e.stderr.toString(), module: 'src/validators/v1.js' });
     }
     if ((!e.stdout || e.stdout.length === 0) && (!e.stderr || e.stderr.length === 0)) {
       logger.error('No output captured from test process.', { module: 'src/validators/v1.js' });

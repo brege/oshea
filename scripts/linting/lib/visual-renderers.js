@@ -17,7 +17,7 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
 
   // If user explicitly requested JSON, output formatted JSON
   if (flags.json) {
-    logger.info(JSON.stringify({ issues, summary, results }, null, 2) + '\n', { format: 'inline' });
+    logger.info(`${JSON.stringify({ issues, summary, results }, null, 2)}\n`, { format: 'inline' });
     return;
   }
 

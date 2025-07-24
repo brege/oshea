@@ -42,7 +42,7 @@ function getEslintIgnorePatterns() {
         });
     } catch (e) {
       if (process.env.DEBUG) {
-        logger.warn(`[WARN] Could not read .eslintignore file: ${e.message}`);
+        logger.warn(`Could not read .eslintignore file: ${e.message}`, { context: 'FileDiscovery' });
       }
       return [];
     }
@@ -131,7 +131,7 @@ function findFiles(options = {}) {
     debug = false, // eslint-disable-line no-unused-vars
   } = options;
 
-  logger.debug(`[findFiles:Debug] Received targets: ${JSON.stringify(targets)}`);
+  logger.debug(` Received targets: ${JSON.stringify(targets)}`, { context: 'FileDiscovery' });
 
   const eslintIgnores = getEslintIgnorePatterns();
   const combinedIgnores = [...new Set([...CORE_IGNORES, ...eslintIgnores, ...ignores])];
@@ -139,18 +139,18 @@ function findFiles(options = {}) {
   if (respectDocignore) {
     const docIgnores = getDocignorePatterns(docignoreRoot);
     if (docIgnores.length > 0) {
-      logger.debug(`[findFiles:Debug] Applying .docignore patterns: ${JSON.stringify(docIgnores)}`);
+      logger.debug(` Applying .docignore patterns: ${JSON.stringify(docIgnores)}`, { context: 'FileDiscovery' });
     }
     combinedIgnores.push(...docIgnores);
   }
-  logger.debug(`[findFiles:Debug] Using combined ignore patterns: ${JSON.stringify(combinedIgnores)}`);
+  logger.debug(` Using combined ignore patterns: ${JSON.stringify(combinedIgnores)}`, { context: 'FileDiscovery' });
 
   const matchedFiles = new Set();
   const allTargets = Array.isArray(targets) ? targets : [targets];
 
   for (const target of allTargets) {
     if (isGlobPattern(target)) {
-      logger.debug(`[findFiles:Debug] Processing '${target}' as a glob pattern.`);
+      logger.debug(` Processing '${target}' as a glob pattern.`, { context: 'FileDiscovery' });
       const matches = glob.sync(target, {
         cwd: projectRoot,
         absolute: true,
@@ -162,28 +162,28 @@ function findFiles(options = {}) {
         if (hasAllowedExt(m, filetypes)) matchedFiles.add(m);
       });
     } else if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
-      logger.debug(`[findFiles:Debug] Processing '${target}' as a directory.`);
+      logger.debug(` Processing '${target}' as a directory.`, { context: 'FileDiscovery' });
       for (const file of walkDir(target, { ignores: combinedIgnores, fileFilter, filetypes })) {
         matchedFiles.add(file);
       }
     } else if (fs.existsSync(target)) {
-      logger.debug(`[findFiles:Debug] Processing '${target}' as a direct file path.`);
+      logger.debug(` Processing '${target}' as a direct file path.`, { context: 'FileDiscovery' });
       if (hasAllowedExt(target, filetypes)) matchedFiles.add(path.resolve(target));
     } else {
-      logger.debug(`[findFiles:Debug] Target '${target}' does not exist and is not a valid glob. Skipping.`);
+      logger.debug(` Target '${target}' does not exist and is not a valid glob. Skipping.`, { context: 'FileDiscovery' });
     }
   }
-  logger.debug(`[findFiles:Debug] Total unique paths found: ${matchedFiles.size}`);
+  logger.debug(` Total unique paths found: ${matchedFiles.size}`, { context: 'FileDiscovery' });
 
   const finalFiles = [];
   for (const file of matchedFiles) {
     const relPath = path.relative(projectRoot, file).replace(/\\/g, '/');
     if (combinedIgnores.some(pattern => minimatch(relPath, pattern, { dot: true }))) {
-      logger.debug(`[findFiles:Debug] Skipping file matching combined ignore pattern: ${relPath}`);
+      logger.debug(` Skipping file matching combined ignore pattern: ${relPath}`, { context: 'FileDiscovery' });
       continue;
     }
     if (skipTag && fileHasSkipTag(file, skipTag)) {
-      logger.debug(`[findFiles:Debug] Skipping file with tag '${skipTag}': ${relPath}`);
+      logger.debug(` Skipping file with tag '${skipTag}': ${relPath}`, { context: 'FileDiscovery' });
       continue;
     }
     if (fileFilter(file) && hasAllowedExt(file, filetypes)) {
@@ -191,7 +191,7 @@ function findFiles(options = {}) {
     }
   }
 
-  logger.debug(`[findFiles:Debug] Returning ${finalFiles.length} files after all filtering.`);
+  logger.debug(` Returning ${finalFiles.length} files after all filtering.`, { context: 'FileDiscovery' });
   return finalFiles;
 }
 

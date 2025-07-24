@@ -31,7 +31,16 @@ const EMOJI_REGEX = /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\u{1F3FB}
 // Using centralized skip system - no more hardcoded constants needed
 const CAPS_COMMENT_REGEX = /\b[A-Z]{3,}\b/;
 
+// Cache parsed rules to avoid re-parsing the same file
+let rulesCache = null;
+let rulesCacheFilepath = null;
+
 function parseRulesFile(filename) {
+  // Return cached rules if same file
+  if (rulesCache && rulesCacheFilepath === filename) {
+    return rulesCache;
+  }
+
   const rules = [];
   let currentMode = null;
   let emojiFiletypes = null;
@@ -74,12 +83,17 @@ function parseRulesFile(filename) {
         flags = '';
         pattern = pattern.replace(/\$match-case\s*$/, '').trim();
       }
+      const filetypeList = ftypes.split(',').map(ft => ft.trim().toLowerCase());
       rules.push({
         type: type.toLowerCase(),
         severity: severity.toLowerCase(),
-        filetypes: ftypes.split(',').map(ft => ft.trim().toLowerCase()),
+        filetypes: filetypeList,
         pattern,
+        // Pre-compile regex once during parsing
         regex: new RegExp(pattern.replace(/\*/g, '.*').replace(/\^/g, '\\b'), flags),
+        // Pre-compute filetype matching for faster lookups
+        matchesAllFiles: filetypeList.includes('*'),
+        filetypeSet: new Set(filetypeList)
       });
       currentMode = null;
       continue;
@@ -97,19 +111,25 @@ function parseRulesFile(filename) {
     if (!set) return [];
     return [...set].map(
       pattern => {
-        if (pattern.match(/[*.^$|+?()[\]\\]/)) return new RegExp(pattern);
-        return new RegExp(`\\b${pattern}\\b`);
+        if (pattern.match(/[*.^$|+?()[\]\\]/)) return new RegExp(pattern, 'i');
+        return new RegExp(`\\b${pattern}\\b`, 'i');
       }
     );
   }
 
-  return {
+  const result = {
     rules,
     emojiFiletypes: emojiFiletypes || ['*'],
     emojiWhitelist,
     customWhitelists,
     commentCapsWhitelist: makeWhitelistRegexes(customWhitelists.get('comment'))
   };
+
+  // Cache the parsed result
+  rulesCache = result;
+  rulesCacheFilepath = filename;
+
+  return result;
 }
 
 function scanFileForLitter(filePath, config) {
@@ -124,8 +144,9 @@ function scanFileForLitter(filePath, config) {
   const lines = content.split('\n');
   const ext = path.extname(filePath).replace(/^\./, '').toLowerCase();
 
+  // Use pre-computed filetype matching for faster filtering
   const rulesForExt = rules.filter(rule =>
-    rule.filetypes.includes('*') || rule.filetypes.includes(ext)
+    rule.matchesAllFiles || rule.filetypeSet.has(ext)
   );
   const emojiEnabled = emojiFiletypes.includes('*') || emojiFiletypes.includes(ext);
 

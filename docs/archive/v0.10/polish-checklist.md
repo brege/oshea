@@ -58,35 +58,13 @@ Previous checklist/roadmap documents:
 
 #### Linting Rules
 
-- [ ] Unified skipping logic, using alias/groups as tags:
-  ``` js
-  // lint-disable-next-line logging
-  console.log('hello')
-
-  y = x + 1 // lint-disable-line code
-  ```
+- [x] Unified skipping logic, using alias/groups as tags:
   
-  ```html
-  <!-- lint-disable-begin postman -->
-  | uncooperating/table.js | AST should be skipping this, yet it's not |  
-  <!-- lint-disable-end postman -->
-  ```
-
-  ```yaml
-  # .lintignore file to skip a directory
-  postman
-  code
-  ```
-
-  ```js
-  // lint-skip-file no-relative-paths logging 
-  console.log('hello')
-  ```
-
   Each linter is currently implementing its own skipping logic, making it difficult to find
   and turn off skipping logic during debugging. We should abstract this into [`lint-helpers.js`](../scripts/linting/lib/lint-helpers.js)
   for central management.
   
+  Logic moved to **[`scripts/linting/index.md`](../scripts/linting/index.md)**
 
 #### Linting Reporting
 
@@ -130,10 +108,12 @@ In general, **total coverage** means the following:
 ---
 
 **Main issues.**
-- [ ] [**logging**] **`scripts/linting`** replace all `console.*` logging with the centrallogger
+- [x] [**logging**] **`scripts/linting`** replace all `console.*` logging with the centrallogger
 - [x] [**postman**] **`README.md`** has dozens of broken links
 - [x] [**librarian**] does **`README.md`** need to "index" all ALLCAPS.md files (`CONTRIBUTING.md`, `LICENSE`)?  Answer: **No**.
 <!-- lint-enable-links -->
+
+**Status: Complete.**
 
 ---
 

@@ -18,11 +18,88 @@ const {
 
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const { renderLintOutput } = require(visualRenderersPath);
-const { findFiles, findCandidates } = require(fileDiscoveryPath);
+const { findFiles } = require(fileDiscoveryPath);
 const logger = require(loggerPath);
 const { shouldSkipFile } = require(skipSystemPath);
 
 // Using centralized skip system - no more hardcoded constants needed
+
+// File registry for fast lookup instead of repeated filesystem scans
+class FileRegistry {
+  constructor() {
+    this.filesByBasename = new Map(); // basename -> [full paths]
+    this.filesByPath = new Map();     // relative path -> full path
+    this.built = false;
+  }
+
+  build(filetypes, rootDirs = ['.', 'src', 'plugins', 'scripts', 'test']) {
+    if (this.built) return;
+
+    const allFiles = findFiles({
+      targets: rootDirs,
+      fileFilter: name => filetypes.some(ext => name.endsWith(ext)),
+    });
+
+    for (const file of allFiles) {
+      const relPath = path.relative(projectRoot, file).replace(/\\/g, '/');
+      const basename = path.basename(relPath);
+
+      // Index by basename
+      if (!this.filesByBasename.has(basename)) {
+        this.filesByBasename.set(basename, []);
+      }
+      this.filesByBasename.get(basename).push(file);
+
+      // Index by relative path
+      this.filesByPath.set(relPath, file);
+    }
+
+    this.built = true;
+  }
+
+  findCandidates(ref) {
+    const normRef = ref.replace(/\\/g, '/');
+    const candidates = new Set();
+
+    // Check exact relative path match
+    if (this.filesByPath.has(normRef)) {
+      candidates.add(this.filesByPath.get(normRef));
+    }
+
+    // Check basename match
+    const basename = path.basename(normRef);
+    if (this.filesByBasename.has(basename)) {
+      for (const file of this.filesByBasename.get(basename)) {
+        const relPath = path.relative(projectRoot, file).replace(/\\/g, '/');
+        if (relPath.endsWith(normRef)) {
+          candidates.add(file);
+        }
+      }
+    }
+
+    return Array.from(candidates);
+  }
+}
+
+// Global file registry instance
+let fileRegistry = null;
+
+// Cache remark imports to avoid repeated dynamic imports
+let remarkModule = null;
+let visitParentsModule = null;
+
+// Initialize remark modules once
+async function initializeRemark() {
+  if (!remarkModule || !visitParentsModule) {
+    const [{ remark }, { visitParents }] = await Promise.all([
+      import('remark'),
+      import('unist-util-visit-parents')
+    ]);
+    remarkModule = remark;
+    visitParentsModule = visitParents;
+  }
+  return { remark: remarkModule, visitParents: visitParentsModule };
+}
 
 function isReferenceExcluded(ref, rules) {
   const rel = ref.replace(/\\/g, '/');
@@ -79,10 +156,7 @@ async function probeMarkdownFile(mdFile, rules) {
     return [];
   }
 
-  const [{ remark }, { visitParents }] = await Promise.all([
-    import('remark'),
-    import('unist-util-visit-parents')
-  ]);
+  const { remark, visitParents } = await initializeRemark();
 
   const content = fs.readFileSync(mdFile, 'utf8');
   const lines = content.split('\n');
@@ -156,6 +230,12 @@ async function runLinter(options = {}) {
   const rules = config;
   const sourceExts = ['.md', '.markdown'];
 
+  // Build file registry once at startup
+  if (!fileRegistry) {
+    fileRegistry = new FileRegistry();
+    fileRegistry.build(rules.filetypes || ['.js', '.md', '.json', '.yaml']);
+  }
+
   const mdFiles = findFiles({
     targets: targets.length > 0 ? targets : (rules.targets || []),
     fileFilter: (filename) => sourceExts.some(ext => filename.endsWith(ext)),
@@ -177,7 +257,7 @@ async function runLinter(options = {}) {
 
       if (!isAllowedExtension(r.target, rules)) continue;
 
-      const candidates = findCandidates(r.target, rules.filetypes, ['.', 'src', 'plugins', 'scripts', 'test']);
+      const candidates = fileRegistry.findCandidates(r.target);
       const relCandidates = candidates.map(c =>
         path.relative(path.dirname(file), c).replace(/\\/g, '/')
       );

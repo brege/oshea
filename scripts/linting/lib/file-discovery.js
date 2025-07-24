@@ -9,6 +9,9 @@ const { projectRoot, fileHelpersPath, loggerPath } = require('@paths');
 const { isGlobPattern } = require(fileHelpersPath);
 const logger = require(loggerPath);
 
+// Cache for findCandidates to avoid repeated filesystem scans
+const candidatesCache = new Map();
+
 // Hardcoded core directories to always exclude from linting.
 const CORE_IGNORES = [
   '**/node_modules/**',
@@ -193,6 +196,13 @@ function findFiles(options = {}) {
 }
 
 function findCandidates(ref, allowedExts, rootDirs = ['.']) {
+  // Create cache key from parameters
+  const cacheKey = `${ref}:${allowedExts.join(',')}:${rootDirs.join(',')}`;
+
+  if (candidatesCache.has(cacheKey)) {
+    return candidatesCache.get(cacheKey);
+  }
+
   const normRef = ref.replace(/\\/g, '/');
   const candidates = new Set();
   const allFiles = findFiles({
@@ -207,7 +217,10 @@ function findCandidates(ref, allowedExts, rootDirs = ['.']) {
       candidates.add(file);
     }
   }
-  return Array.from(candidates);
+
+  const result = Array.from(candidates);
+  candidatesCache.set(cacheKey, result);
+  return result;
 }
 
 module.exports = { findFiles, findCandidates };

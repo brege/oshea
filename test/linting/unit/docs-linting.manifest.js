@@ -28,12 +28,12 @@ module.exports = [
     scriptPath: findLitterPath,
     sandboxPrefix: 'litter-',
     setup: async (sandboxDir) => {
-      await fs.writeFile(path.join(sandboxDir, 'bad-file.md'), 'This has a forbidden emoji: ❌'); // lint-skip-litter
+      await fs.writeFile(path.join(sandboxDir, 'bad-file.md'), 'This has a forbidden emoji: ❌'); // lint-skip-line litter
     },
     args: (sandboxDir) => [sandboxDir],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Disallowed emoji\(s\) found: ❌/i); // lint-skip-litter
+      expect(stdout).to.match(/Disallowed emoji\(s\) found: ❌/i); // lint-skip-line litter
     },
   },
   {

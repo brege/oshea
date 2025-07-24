@@ -13,7 +13,7 @@ My reliance on string matching patterns in CLI output was naively brittle and ha
 
 ## Refactor Timeline
 
-<!-- lint-disable-links -->
+<!-- lint-disable postman -->
 
 |      | Step/Module            | Diff. | M/H/F   | Logger | Notes                                                                          |
 |------|:-----------------------|:-----:|:-------:|:------:|:-------------------------------------------------------------------------------|
@@ -47,7 +47,7 @@ My reliance on string matching patterns in CLI output was naively brittle and ha
 - M/H/F: Manifest, Harness, Factory test refactor; refresh = partially modernized, new = entirely
 - Logger: ✔ = Logger modernization complete, ✗ = Not yet modernized
 
-<!-- lint-enable-links -->
+<!-- lint-enable postman -->
 
 ## Takeaways
 

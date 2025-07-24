@@ -11,6 +11,7 @@ const {
   lintHelpersPath,
   visualRenderersPath,
   fileDiscoveryPath,
+  skipSystemPath,
   projectRoot,
   loggerPath
 } = require('@paths');
@@ -20,11 +21,12 @@ const logger = require(loggerPath);
 const { findFiles } = require(fileDiscoveryPath);
 const { parseCliArgs } = require(lintHelpersPath);
 const { renderLintOutput } = require(visualRenderersPath);
+const { shouldSkipFile } = require(skipSystemPath);
 
 const START_MARKER = 'uncategorized-start';
 const END_MARKER = 'uncategorized-end';
 
-const LINT_SKIP_TAG = 'lint-skip-index';
+// Using centralized skip system - no more hardcoded constants needed
 const THIS_SCRIPT = path.resolve(__filename);
 
 function getExistingLinks(content, baseDir) {
@@ -121,7 +123,7 @@ function scanGroup(name, config, opts = {}) {
       filetypes,
       respectDocignore: true,
       docignoreRoot: projectRoot,
-      skipTag: LINT_SKIP_TAG,
+      skipTag: 'lint-skip-file librarian',
       debug,
     });
 
@@ -141,7 +143,7 @@ function scanGroup(name, config, opts = {}) {
       filetypes,
       respectDocignore: true,
       docignoreRoot: projectRoot,
-      skipTag: LINT_SKIP_TAG,
+      skipTag: 'lint-skip-file librarian',
       debug,
     });
   }
@@ -161,6 +163,12 @@ function scanGroup(name, config, opts = {}) {
   const missingInIndex = [];
   for (const file of filesToIndex) {
     if (path.resolve(file) === THIS_SCRIPT) continue;
+
+    // Check if file should be skipped based on .skipignore files
+    if (shouldSkipFile(file, 'librarian')) {
+      continue;
+    }
+
     const rel = path.relative(indexDir, file).replace(/\\/g, '/');
     if (!allLinks.has(rel) && !uncatLinks.has(rel)) {
       missingInIndex.push(rel);

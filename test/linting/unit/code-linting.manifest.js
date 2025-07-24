@@ -1,5 +1,5 @@
 // test/linting/unit/code-linting.manifest.js
-// lint-skip-logger
+// lint-skip-file logging
 const fs = require('fs-extra');
 const path = require('path');
 const {
@@ -16,7 +16,7 @@ module.exports = [
     scriptPath: loggingLintPath,
     sandboxPrefix: 'logging-lint-',
     setup: async (sandboxDir) => {
-      // lint-disable-line logging
+      // lint-skip-line logging
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), 'console.log("bad");');
     },
     args: (sandboxDir) => [path.join(sandboxDir, 'bad-file.js')],
@@ -69,7 +69,7 @@ module.exports = [
     scriptPath: noRelativePathsPath,
     sandboxPrefix: 'relative-path-',
     setup: async (sandboxDir) => {
-      // lint-disable-next-line
+      // lint-skip-next-line no-relative-paths
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), 'const x = require("../bad");');
     },
     args: (sandboxDir) => [path.join(sandboxDir, 'bad-file.js')],

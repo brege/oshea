@@ -12,6 +12,7 @@ const {
   projectRoot,
   fileDiscoveryPath,
   findLitterRulesPath,
+  skipSystemPath,
   loggerPath
 } = require('@paths');
 
@@ -20,13 +21,14 @@ const logger = require(loggerPath);
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
 const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(visualRenderersPath);
+const { shouldSkipLine, shouldSkipFile } = require(skipSystemPath);
 
 const TYPE_RE = /^\[(\w+):(\w+):([\w*,.]+)\]\s+(.+)$/i;
 const WHITELIST_RE = /^\[whitelist:(\w+):([\w*,.]+)\]$/i;
 const EMOJI_RULE = /^\[emoji:([\w*,.]+)\]$/i;
 const EMOJI_REGEX = /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\u{1F3FB}-\u{1F3FF}|\u{1F9B0}-\u{1F9B3})/gu;
 
-const LINT_SKIP_TAG = 'lint-skip-litter';
+// Using centralized skip system - no more hardcoded constants needed
 const CAPS_COMMENT_REGEX = /\b[A-Z]{3,}\b/;
 
 function parseRulesFile(filename) {
@@ -111,6 +113,11 @@ function parseRulesFile(filename) {
 }
 
 function scanFileForLitter(filePath, config) {
+  // Check if file should be skipped based on .skipignore files
+  if (shouldSkipFile(filePath, 'find-litter')) {
+    return [];
+  }
+
   const { rules, emojiFiletypes, emojiWhitelist, customWhitelists, commentCapsWhitelist } = config;
   const issues = [];
   const content = fs.readFileSync(filePath, 'utf8');
@@ -123,7 +130,11 @@ function scanFileForLitter(filePath, config) {
   const emojiEnabled = emojiFiletypes.includes('*') || emojiFiletypes.includes(ext);
 
   lines.forEach((line, index) => {
-    if (line.includes(LINT_SKIP_TAG)) return;
+    if (line.includes('lint-skip-file litter')) return;
+
+    // Check for line-level and next-line skips
+    const prevLine = index > 0 ? lines[index - 1] : '';
+    if (shouldSkipLine(line, prevLine, 'find-litter')) return;
 
     for (const rule of rulesForExt) {
       let subject = '';
@@ -222,7 +233,7 @@ function runLinter(options = {}) {
     ignores: excludes,
     filetypes,
     respectDocignore: true,
-    skipTag: LINT_SKIP_TAG,
+    skipTag: 'lint-skip-file litter',
     debug: debug
   });
 

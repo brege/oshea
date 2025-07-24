@@ -1,0 +1,107 @@
+# Smoke test manifest - all CLI smoke tests
+name: "Validate config command"
+base_command: "md-to-pdf"
+scenarios:
+  - description: "Global config (default)"
+    args: "config"
+    expect:
+      contains: "pdf_viewer:"
+
+  - description: "Global config (--pure)"
+    args: "config --pure"
+    expect:
+      yaml_has_key: "pdf_viewer"
+
+  - description: "Plugin config (default)"
+    args: "config --plugin cv"
+    expect:
+      contains_all: ["handler_script:", "Plugin Base Path:"]
+
+  - description: "Plugin config (--pure)"
+    args: "config --plugin cv --pure"
+    expect:
+      yaml_has_key: "handler_script"
+
+---
+name: "Validate help commands"
+base_command: "md-to-pdf"
+discovery:
+  type: "cli_commands"
+  source: "src/cli/commands"
+  exclude: ["$0", "plugin", "collection"]
+scenarios:
+  - description: "Help for {command}"
+    args: "{command} --help"
+    expect:
+      executes: true
+
+---
+name: "Validate bundled plugins"
+base_command: "md-to-pdf"
+discovery:
+  type: "directory_scan"
+  source: "plugins"
+  filter: "directories"
+scenarios:
+  - description: "Validate plugin {item}"
+    args: "plugin validate {item}"
+    expect:
+      executes: true
+
+---
+name: "Validate plugin list command"
+base_command: "md-to-pdf"
+scenarios:
+  - description: "List plugins (default)"
+    args: "plugin list"
+    expect:
+      contains: "usable by md-to-pdf"
+
+  - description: "List enabled plugins"
+    args: "plugin list --enabled"
+    expect:
+      contains: "Enabled plugins"
+
+  - description: "List available plugins"
+    args: "plugin list --available"
+    expect:
+      contains: "Available CM-managed plugins"
+
+  - description: "List disabled plugins"
+    args: "plugin list --disabled"
+    expect:
+      contains: "Disabled (but available) CM-managed plugins"
+
+  - description: "List plugins (--short)"
+    args: "plugin list --short"
+    expect:
+      contains_all: ["NAME/INVOKE KEY", "CM ORIGIN"]
+
+---
+name: "Validate collection list command"
+base_command: "md-to-pdf"
+scenarios:
+  - description: "List collection names (short)"
+    args: "collection list names --short"
+    expect:
+      contains_all: ["NAME", "TYPE", "SOURCE"]
+
+  - description: "List downloaded collections (default)"
+    args: "collection list names"
+    expect:
+      contains: "Downloaded plugin collections:"
+
+  - description: "List available plugins from collections"
+    args: "collection list available"
+    expect:
+      contains: "Available plugins"
+
+  - description: "List enabled plugins from collections"
+    args: "collection list enabled"
+    expect:
+      contains_any: ["Enabled plugins", "No enabled plugins found"]
+
+  - description: "List all plugins (alias for available)"
+    args: "collection list all"
+    expect:
+      contains: "Available plugins"

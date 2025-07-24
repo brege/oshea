@@ -1,6 +1,6 @@
 {
   "name": "md-to-pdf",
-  "version": "0.10.41",
+  "version": "0.10.42",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -12,6 +12,8 @@
     "generate": "node cli.js generate",
     "paths": "node paths/generator.js",
     "test": "mocha",
+    "test:smoke": "node test/smoke/smoke-test-runner.js",
+    "test:all": "npm run test && npm run test:smoke",
     "test:last-fails": "node test/scripts/run-last-fails.js",
     "test:report": "MOCHA_JSON_REPORT_FILE=./test-report.json mocha",
     "test:watch": "node test/scripts/test-watcher.js",

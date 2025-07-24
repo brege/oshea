@@ -1,7 +1,7 @@
 // src/cli/config-display.js
 const fs = require('fs');
 const yaml = require('js-yaml');
-const path = 'path';
+const path = require('path');
 
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);

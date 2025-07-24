@@ -227,7 +227,7 @@ registries:
       # Rank 0: Core Test Operations
       smoke:
         comment: "Smoke Tests - Basic Application Validation"
-        pattern: "test/smoke/**/*.js"
+        pattern: "test/smoke/**/*.{js,yaml}"
         rank: 0
 
       core_integration:
@@ -338,6 +338,12 @@ registries:
       # Linting tests
       "all-linting-unit.test.js":
         "test/linting/unit": "allLintingUnitTest"
+
+      # Smoke tests
+      "smoke-tests.yaml":
+        "test/smoke": "smokeTestsManifest"
+      "smoke-test-runner.js":
+        "test/smoke": "smokeTestRunner"
 
 rank_definitions:
   0: "user-facing interfaces"

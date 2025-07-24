@@ -1,6 +1,6 @@
 // paths/tests.js
 // tests.js - Test Suite Registry
-// Generated: 2025-07-21T05:38:15.085Z
+// Generated: 2025-07-24T06:03:53.129Z
 // Architecture: Multi-layered testing infrastructure with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -45,11 +45,8 @@ const hugoExampleFixturePath = path.join(fixturesDir, 'hugo-example');
 
 // Smoke Tests - Basic Application Validation
 const smokeRoot = path.join(projectRoot, 'test/smoke/');
-const validateAppConfigPath = path.join(projectRoot, 'test/smoke/validate-cli/validate-app-config.js');
-const validateAppHelpPath = path.join(projectRoot, 'test/smoke/validate-cli/validate-app-help.js');
-const validateBundledPluginsPath = path.join(projectRoot, 'test/smoke/validate-cli/validate-bundled-plugins.js');
-const validateCollectionListPath = path.join(projectRoot, 'test/smoke/validate-cli/validate-collection-list.js');
-const validatePluginListPath = path.join(projectRoot, 'test/smoke/validate-cli/validate-plugin-list.js');
+const smokeTestRunnerPath = path.join(projectRoot, 'test/smoke/smoke-test-runner.js');
+const smokeTestsManifestPath = path.join(projectRoot, 'test/smoke/smoke-tests.yaml');
 
 // Core Module Integration Tests
 const coreIntegrationRoot = path.join(projectRoot, 'test/integration/core/');
@@ -202,11 +199,8 @@ module.exports = {
 
   // --- user-facing interfaces ---
   smokeRoot,
-  validateAppConfigPath,
-  validateAppHelpPath,
-  validateBundledPluginsPath,
-  validateCollectionListPath,
-  validatePluginListPath,
+  smokeTestRunnerPath,
+  smokeTestsManifestPath,
   coreIntegrationRoot,
   defaultHandlerFactoryPath,
   defaultHandlerManifestPath,

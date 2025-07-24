@@ -19,7 +19,7 @@ const {
 } = require(testFileHelpersPath);
 
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'cover-letter-plugin-e2e');
-const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-disable-line no-relative-paths
+const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'cover-letter-example.md');
 
 describe('Cover Letter Plugin E2E', function() {

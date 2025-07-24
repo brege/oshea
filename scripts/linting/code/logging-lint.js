@@ -11,6 +11,7 @@ const {
   visualRenderersPath,
   projectRoot,
   fileDiscoveryPath,
+  skipSystemPath,
   loggerPath
 } = require('@paths');
 
@@ -22,12 +23,17 @@ const {
 const logger = require(loggerPath);
 const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(visualRenderersPath);
+const { shouldSkipLine, shouldSkipFile } = require(skipSystemPath);
 
 const CONSOLE_REGEX = /console\.(log|error|warn|info|debug|trace)\s*\(/g;
 const CHALK_REGEX = /chalk\.(\w+)/g;
-const LINT_SKIP_MARKER = 'lint-skip-logger';
 
 function scanFile(filePath) {
+  // Check if file should be skipped based on .skipignore files
+  if (shouldSkipFile(filePath, 'logging')) {
+    return null;
+  }
+
   let content;
   try {
     content = fs.readFileSync(filePath, 'utf8');
@@ -61,9 +67,7 @@ function scanFile(filePath) {
   hits.forEach(hit => {
     const lineContent = lines[hit.line - 1];
     const prevLine = lines[hit.line - 2] || '';
-    hit.ignore =
-      lineContent.includes('lint-disable-line logging') ||
-      prevLine.includes('lint-disable-next-line logging');
+    hit.ignore = shouldSkipLine(lineContent, prevLine, 'logging');
   });
 
   return hits.length ? { file: filePath, hits } : null;
@@ -83,7 +87,7 @@ function runLinter(options = {}) {
     targets: targets,
     ignores: excludes,
     filetypes,
-    skipTag: LINT_SKIP_MARKER,
+    skipTag: 'lint-skip-file logging',
     debug: debug
   });
 

@@ -1,5 +1,5 @@
 // src/utils/logger.js
-// lint-skip-logger
+// lint-skip-file logging
 // Slim routing layer - all formatting logic delegated to formatters/
 const { formattersIndexPath } = require('@paths');
 const formatters = require(formattersIndexPath);

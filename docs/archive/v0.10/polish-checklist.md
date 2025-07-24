@@ -33,7 +33,7 @@ Previous checklist/roadmap documents:
 
 ### Linting Framework
 
-- [ ] **Replace all linter scripts' `console.*` logging with the centralized logger**
+- [x] **Replace all linter scripts' `console.*` logging with the centralized logger**
 
 #### Config and Rules
 
@@ -122,8 +122,8 @@ In general, **total coverage** means the following:
 | `validate-mocha`       | ✔ | `.mocharc.js`                  | ✔ | none                            |
 | **docs**               |   |                                |   |                                 |
 | `find-litter`          | ✔ | `.` for `.*`                   | ✔ | none                            |
-| `update-indices`       | ○ | `.` for `.md`                  | ○ | plugin's `{index,*-example}.md` |
-| `doc-links`            | ✔ | `.` for `.md, .js`             | ○ | other `index.md`'s              |
+| `update-indices`       | ✔ | `.` for `.md`                  | ✔ | plugin's `{index,*-example}.md` |
+| `doc-links`            | ✔ | `.` for `.md, .js`             | ✔ | other `index.md`'s              |
 | **third-party**        |   |                                |   |                                 |
 | `eslint`               | ✔ | `.` for `.*`                   | ✔ |                                 |
 

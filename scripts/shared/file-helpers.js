@@ -1,5 +1,5 @@
 // scripts/shared/file-helpers.js
-// lint-skip-logger
+// lint-skip-file logging
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');

@@ -11,6 +11,7 @@ const {
   visualRenderersPath,
   projectRoot,
   fileDiscoveryPath,
+  skipSystemPath,
   loggerPath
 } = require('@paths');
 
@@ -23,9 +24,9 @@ const {
 
 const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(visualRenderersPath);
+const { shouldSkipLine, shouldSkipFile } = require(skipSystemPath);
 
-const LINT_DISABLE_TAG = 'lint-disable-next-line';
-const LINT_DISABLE_LINE = 'lint-disable-line no-relative-paths';
+// Using centralized skip system - no more hardcoded constants needed
 
 function classifyRequireLine(line) {
   const code = line.replace(/\/\/.*$/, '').trim();
@@ -49,6 +50,11 @@ function classifyRequireLine(line) {
 }
 
 function scanFileForRelativePaths(filePath, debug = false) {
+  // Check if file should be skipped based on .skipignore files
+  if (shouldSkipFile(filePath, 'no-relative-paths')) {
+    return [];
+  }
+
   logger.debug(`[DEBUG] Scanning file: ${path.relative(projectRoot, filePath)}`);
   const issues = [];
   const content = fs.readFileSync(filePath, 'utf8');
@@ -58,22 +64,16 @@ function scanFileForRelativePaths(filePath, debug = false) {
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
 
-    if (index > 0) {
-      const prevLine = lines[index - 1].trim();
-      if (prevLine.startsWith('//') && prevLine.includes(LINT_DISABLE_TAG)) {
-        logger.debug(`[DEBUG] Skipping line ${index + 1} due to lint-disable-next-line`);
-        return;
-      }
-    }
     if (trimmedLine.startsWith('//')) return;
 
-    const hasDisableLine = line.includes(LINT_DISABLE_LINE);
+    const prevLine = index > 0 ? lines[index - 1].trim() : '';
+    const hasSkip = shouldSkipLine(line, prevLine, 'no-relative-paths');
 
     if (trimmedLine.includes('require(')) {
       const classification = classifyRequireLine(trimmedLine);
       if (classification && classification.type === 'pathlike') {
         if (relativePathRegex.test(`'${classification.requiredPath}'`)) {
-          if (!hasDisableLine) {
+          if (!hasSkip) {
             issues.push({
               line: index + 1,
               column: line.indexOf(classification.requiredPath) + 1,
@@ -91,7 +91,7 @@ function scanFileForRelativePaths(filePath, debug = false) {
         const args = match[2].split(',').map(arg => arg.trim());
         args.forEach(arg => {
           if (relativePathRegex.test(arg)) {
-            if (!hasDisableLine) {
+            if (!hasSkip) {
               issues.push({
                 line: index + 1,
                 column: line.indexOf(arg) + 1,

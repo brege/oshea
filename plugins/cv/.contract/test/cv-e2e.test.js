@@ -19,7 +19,7 @@ const {
   cleanupTestDirectory,
 } = require(testFileHelpersPath);
 
-const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-disable-line no-relative-paths
+const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'cv-plugin-e2e');
 const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'cv-example.md');
 const MIN_PDF_SIZE = 1000;

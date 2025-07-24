@@ -11,6 +11,7 @@ const {
   lintingConfigPath,
   visualRenderersPath,
   fileDiscoveryPath,
+  skipSystemPath,
   projectRoot,
   loggerPath
 } = require('@paths');
@@ -19,10 +20,9 @@ const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
 const { renderLintOutput } = require(visualRenderersPath);
 const { findFiles, findCandidates } = require(fileDiscoveryPath);
 const logger = require(loggerPath);
+const { shouldSkipFile } = require(skipSystemPath);
 
-const LINT_SKIP_TAG = 'lint-skip-postman';
-const DISABLE_MARKER = 'lint-disable-links';
-const ENABLE_MARKER = 'lint-enable-links';
+// Using centralized skip system - no more hardcoded constants needed
 
 function isReferenceExcluded(ref, rules) {
   const rel = ref.replace(/\\/g, '/');
@@ -59,8 +59,8 @@ function resolveReference(mdFile, ref, allowedExts) {
 function buildLinksEnabledMap(lines) {
   let enabled = true;
   return lines.map(line => {
-    if (line.includes(DISABLE_MARKER)) enabled = false;
-    if (line.includes(ENABLE_MARKER)) enabled = true;
+    if (line.includes('lint-disable postman')) enabled = false;
+    if (line.includes('lint-enable postman')) enabled = true;
     return enabled;
   });
 }
@@ -74,6 +74,11 @@ function isLineAlreadyLinked(line, rel) {
 }
 
 async function probeMarkdownFile(mdFile, rules) {
+  // Check if file should be skipped based on .skipignore files
+  if (shouldSkipFile(mdFile, 'postman')) {
+    return [];
+  }
+
   const [{ remark }, { visitParents }] = await Promise.all([
     import('remark'),
     import('unist-util-visit-parents')
@@ -156,7 +161,7 @@ async function runLinter(options = {}) {
     fileFilter: (filename) => sourceExts.some(ext => filename.endsWith(ext)),
     ignores: rules.excludes || [],
     respectDocignore: true,
-    skipTag: LINT_SKIP_TAG,
+    skipTag: 'lint-skip-file postman',
     debug: debug
   });
 

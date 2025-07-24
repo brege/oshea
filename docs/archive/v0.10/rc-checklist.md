@@ -5,7 +5,7 @@
 
 **State** is interpreted as *Urgency*, *Difficulty*, or *Completeness*
 
-<!-- lint-disable-links -->
+<!-- lint-disable postman -->
 
 | ● | State   | Document                                | Notes                                 |
 |:-:|:--------|:----------------------------------------|---------------------------------------|
@@ -32,7 +32,7 @@
 | ✔ | Finish  | `scripts/docs/postman.mjs`              | Ensure link-ticks are valid           |
 | ‖ | Finish  | **`README.md`**                         | **Update for v0.10**                  |
 
-<!-- lint-enable-links -->
+<!-- lint-enable postman -->
 At the onset of the above task table, all documents were in a v0.9.00 state, needing huge rewrites to v0.10.x feature state. The main README should wait until v0.10 has stabilized.
 
 ---
@@ -97,7 +97,7 @@ These are internal, code-hygienic tasks.
 ---
 
 [**Testing, Debugging, and Telemetry**](#testing-debugging-and-telemetry)
-<!-- lint-disable-links -->
+<!-- lint-disable postman -->
 
 | ● | `tt`| Task Description                                                 |
 |:-:|:----|:-----------------------------------------------------------------|
@@ -111,7 +111,7 @@ These are internal, code-hygienic tasks.
 | ✔ |`tt8`| Unify app-code console.logs and debugging to shrink line-char    |
 | ○ |`tt9`| Add remainder of walkthroughs as `level4` tests.                 | 
 
-<!-- lint-enable-links -->
+<!-- lint-enable postman -->
 cf. [Test Suite Refactor Impact Report](../test/docs/refactor-impact.md)
 
 *Status: In Progress*

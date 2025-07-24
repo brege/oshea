@@ -1,5 +1,6 @@
 // src/utils/formatters/app-formatter.js
 // Default app theme formatter with colored output
+// lint-skip-file logging
 
 const chalk = require('chalk');
 const fs = require('fs');
@@ -35,7 +36,6 @@ function formatApp(level, message, meta = {}) {
     };
     fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
   } else {
-    // lint-skip-logger
     console.log(colorForLevel(level, message));
   }
 

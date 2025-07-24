@@ -138,7 +138,6 @@ doc-links:
     - "test/docs/checklist-*.md"
     - "test/docs/audit-log.md"
     - "plugins/recipe-book/README.md"
-    - "docs/logger-*.md"      # in development
 
 # --- Harness Configuration ---
 harness:

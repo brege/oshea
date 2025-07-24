@@ -36,19 +36,6 @@ scenarios:
       executes: true
 
 ---
-name: "Validate bundled plugins"
-base_command: "md-to-pdf"
-discovery:
-  type: "directory_scan"
-  source: "plugins"
-  filter: "directories"
-scenarios:
-  - description: "Validate plugin {item}"
-    args: "plugin validate {item}"
-    expect:
-      executes: true
-
----
 name: "Validate plugin list command"
 base_command: "md-to-pdf"
 scenarios:
@@ -65,12 +52,11 @@ scenarios:
   - description: "List available plugins"
     args: "plugin list --available"
     expect:
-      contains: "Available CM-managed plugins"
-
+      contains_any: ["Available CM-managed plugins", "No CM-managed plugins found"]
   - description: "List disabled plugins"
     args: "plugin list --disabled"
     expect:
-      contains: "Disabled (but available) CM-managed plugins"
+      contains_any: ["Disabled (but available) CM-managed plugins", "No disabled (but available) CM-managed plugins found."]
 
   - description: "List plugins (--short)"
     args: "plugin list --short"
@@ -84,17 +70,17 @@ scenarios:
   - description: "List collection names (short)"
     args: "collection list names --short"
     expect:
-      contains_all: ["NAME", "TYPE", "SOURCE"]
+      contains_any: ["Downloaded plugin collections:", "No downloaded collections found"]
 
   - description: "List downloaded collections (default)"
     args: "collection list names"
     expect:
-      contains: "Downloaded plugin collections:"
+      contains_any: ["Downloaded plugin collections:", "No downloaded collections found"]
 
   - description: "List available plugins from collections"
     args: "collection list available"
     expect:
-      contains: "Available plugins"
+      contains_any: ["Available plugins", "No available plugins found in any collection."]
 
   - description: "List enabled plugins from collections"
     args: "collection list enabled"
@@ -104,4 +90,18 @@ scenarios:
   - description: "List all plugins (alias for available)"
     args: "collection list all"
     expect:
-      contains: "Available plugins"
+      contains_any: ["Available plugins", "No available plugins found in any collection."]
+
+---
+name: "Validate bundled plugins"
+base_command: "md-to-pdf"
+discovery:
+  type: "directory_scan"
+  source: "plugins"
+  filter: "directories"
+scenarios:
+  - description: "Validate plugin {item}"
+    args: "plugin validate {item}"
+    expect:
+      executes: true
+

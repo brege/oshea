@@ -8,11 +8,20 @@ const yaml = require('js-yaml');
 const { lintingConfigPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
+// Performance caches
+let configCache = null;
+let markersCache = null;
+
 // Load linter configuration to build skip markers
 function loadLinterConfig() {
+  if (configCache) {
+    return configCache;
+  }
+
   try {
     const configContent = fs.readFileSync(lintingConfigPath, 'utf8');
-    return yaml.load(configContent);
+    configCache = yaml.load(configContent);
+    return configCache;
   } catch (error) {
     logger.error(`Failed to load linting config: ${error.message}`);
     return {};
@@ -21,6 +30,10 @@ function loadLinterConfig() {
 
 // Generate standardized skip markers from config
 function generateSkipMarkers() {
+  if (markersCache) {
+    return markersCache;
+  }
+
   const config = loadLinterConfig();
   const markers = {};
 
@@ -71,6 +84,7 @@ function generateSkipMarkers() {
     };
   });
 
+  markersCache = markers;
   return markers;
 }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/linting/docs/find-litter.js
+// scripts/linting/docs/janitor.js
 
 require('module-alias/register');
 
@@ -48,7 +48,7 @@ function parseRulesFile(filename) {
   let customWhitelists = new Map();
 
   if (!fs.existsSync(filename)) {
-    logger.warn(`Rules file not found: ${filename}`, { context: 'FindLitter' });
+    logger.warn(`Rules file not found: ${filename}`, { context: 'Janitor' });
     return { rules, emojiFiletypes: ['*'], emojiWhitelist, customWhitelists, commentCapsWhitelist: [] };
   }
 
@@ -134,7 +134,7 @@ function parseRulesFile(filename) {
 
 function scanFileForLitter(filePath, config) {
   // Check if file should be skipped based on .skipignore files
-  if (shouldSkipFile(filePath, 'find-litter')) {
+  if (shouldSkipFile(filePath, 'janitor')) {
     return [];
   }
 
@@ -151,11 +151,11 @@ function scanFileForLitter(filePath, config) {
   const emojiEnabled = emojiFiletypes.includes('*') || emojiFiletypes.includes(ext);
 
   lines.forEach((line, index) => {
-    if (line.includes('lint-skip-file litter')) return;
+    if (line.includes('lint-skip-file janitor')) return;
 
     // Check for line-level and next-line skips
     const prevLine = index > 0 ? lines[index - 1] : '';
-    if (shouldSkipLine(line, prevLine, 'find-litter')) return;
+    if (shouldSkipLine(line, prevLine, 'janitor')) return;
 
     for (const rule of rulesForExt) {
       let subject = '';
@@ -194,7 +194,7 @@ function scanFileForLitter(filePath, config) {
             line: index + 1,
             column: match ? (line.indexOf(match[0]) + 1) : 1,
             message: `Found '${rule.pattern}' in a ${rule.type}.`,
-            rule: `find-litter/${rule.type}`,
+            rule: `janitor/${rule.type}`,
             severity: rule.severity === 'high' ? 2 : 1,
             sourceLine: line,
             matchedText: match ? match[0] : null
@@ -212,7 +212,7 @@ function scanFileForLitter(filePath, config) {
           line: index + 1,
           column: commentIdx + 3,
           message: `ALL CAPS comment detected (not whitelisted): "${subject}"`,
-          rule: 'find-litter/all-caps-comment',
+          rule: 'janitor/all-caps-comment',
           severity: 1,
           sourceLine: line,
           matchedText: subject.match(CAPS_COMMENT_REGEX)[0]
@@ -242,10 +242,10 @@ function scanFileForLitter(filePath, config) {
 function runLinter(options = {}) {
   const { targets = [], excludes = [], rulesPath, debug = false, filetypes } = options;
 
-  logger.debug(`Loading rules from: ${rulesPath}`, { context: 'FindLitter' });
-  const litterConfig = parseRulesFile(rulesPath);
+  logger.debug(`Loading rules from: ${rulesPath}`, { context: 'Janitor' });
+  const janitorConfig = parseRulesFile(rulesPath);
 
-  logger.debug(`Loaded ${litterConfig.rules.length} rules`, { context: 'FindLitter' });
+  logger.debug(`Loaded ${janitorConfig.rules.length} rules`, { context: 'Janitor' });
 
   const allIssues = [];
 
@@ -254,12 +254,12 @@ function runLinter(options = {}) {
     ignores: excludes,
     filetypes,
     respectDocignore: true,
-    skipTag: 'lint-skip-file litter',
+    skipTag: 'lint-skip-file janitor',
     debug: debug
   });
 
   for (const file of files) {
-    const fileIssues = scanFileForLitter(file, litterConfig);
+    const fileIssues = scanFileForLitter(file, janitorConfig);
     if (fileIssues.length > 0) {
       allIssues.push(...fileIssues.map(issue => ({
         file: path.relative(projectRoot, file),
@@ -280,10 +280,10 @@ function runLinter(options = {}) {
 if (require.main === module) {
   let config = {};
   try {
-    config = loadLintSection('find-litter', lintingConfigPath) || {};
+    config = loadLintSection('janitor', lintingConfigPath) || {};
   } catch (e) {
-    if (!e.message.includes('Section \'find-litter\' not found')) {
-      logger.warn(`Could not load linting config: ${e.message}`, { context: 'FindLitter' });
+    if (!e.message.includes('Section \'janitor\' not found')) {
+      logger.warn(`Could not load linting config: ${e.message}`, { context: 'Janitor' });
     }
   }
 
@@ -301,7 +301,7 @@ if (require.main === module) {
         'assets/litter-list.txt';
 
   const absRulesPath = path.resolve(process.cwd(), rulesPathToUse);
-  logger.debug('Using rules file:', { context: 'FindLitter', path: absRulesPath });
+  logger.debug('Using rules file:', { context: 'Janitor', path: absRulesPath });
 
   const { issues, summary } = runLinter({
     targets: finalTargets,

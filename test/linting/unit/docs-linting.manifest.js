@@ -3,8 +3,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const {
   postmanPath,
-  updateProjectIndicesPath,
-  findLitterPath
+  librarianPath,
+  janitorPath
 } = require('@paths');
 
 module.exports = [
@@ -24,22 +24,22 @@ module.exports = [
     },
   },
   {
-    describe: 'M.0.2.2 find-litter should warn on disallowed emojis',
-    scriptPath: findLitterPath,
-    sandboxPrefix: 'litter-',
+    describe: 'M.0.2.2 janitor linter should warn on disallowed emojis',
+    scriptPath: janitorPath,
+    sandboxPrefix: 'docs-janitor-',
     setup: async (sandboxDir) => {
-      await fs.writeFile(path.join(sandboxDir, 'bad-file.md'), 'This has a forbidden emoji: ❌'); // lint-skip-line litter
+      await fs.writeFile(path.join(sandboxDir, 'bad-file.md'), 'This has a forbidden emoji: ❌'); // lint-skip-line janitor
     },
     args: (sandboxDir) => [sandboxDir],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Disallowed emoji\(s\) found: ❌/i); // lint-skip-line litter
+      expect(stdout).to.match(/Disallowed emoji\(s\) found: ❌/i); // lint-skip-line janitor
     },
   },
   {
-    describe: 'M.0.2.3 librarian warns for dummy .js not listed in local scripts/index.md',
-    scriptPath: updateProjectIndicesPath,
-    sandboxPrefix: 'librarian-dummy-',
+    describe: 'M.0.2.3 librarian linter should warn for dummy .js not listed in local scripts/index.md',
+    scriptPath: librarianPath,
+    sandboxPrefix: 'docs-librarian-dummy-',
     setup: async (sandboxDir) => {
       const scriptsDir = path.join(sandboxDir, 'scripts');
       await fs.mkdir(scriptsDir, { recursive: true });

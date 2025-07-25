@@ -61,7 +61,7 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
   }
 
   const suggestions = getSuggestions(completionArgv, currentWord);
-  // lint-skip-next-line logging
+  // lint-skip-next-line no-console
   console.log(suggestions.join('\n'));
   process.exit(0);
 }

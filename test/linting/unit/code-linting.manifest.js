@@ -1,22 +1,22 @@
 // test/linting/unit/code-linting.manifest.js
-// lint-skip-file logging
+// lint-skip-file no-console
 const fs = require('fs-extra');
 const path = require('path');
 const {
-  loggingLintPath,
-  removeJsdocPath,
-  stripTrailingWhitespacePath,
-  standardizeJsLineOneAllPath,
+  noConsolePath,
+  noJsdocPath,
+  noTrailingWhitespacePath,
+  noBadHeadersPath,
   noRelativePathsPath,
 } = require('@paths');
 
 module.exports = [
   {
-    describe: 'M.0.1.1 logging-lint should fail on console.log usage',
-    scriptPath: loggingLintPath,
-    sandboxPrefix: 'logging-lint-',
+    describe: 'M.0.1.1 no-console should fail on console.log usage',
+    scriptPath: noConsolePath,
+    sandboxPrefix: 'no-console-',
     setup: async (sandboxDir) => {
-      // lint-skip-line logging
+      // lint-skip-line no-console
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), 'console.log("bad");');
     },
     args: (sandboxDir) => [path.join(sandboxDir, 'bad-file.js')],
@@ -26,9 +26,9 @@ module.exports = [
     },
   },
   {
-    describe: 'M.0.1.2 remove-jsdoc should report jsdoc comment blocks',
-    scriptPath: removeJsdocPath,
-    sandboxPrefix: 'jsdoc-',
+    describe: 'M.0.1.2 no-jsdoc should report jsdoc comment blocks',
+    scriptPath: noJsdocPath,
+    sandboxPrefix: 'no-jsdoc-',
     setup: async (sandboxDir) => {
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), '/**\n * @jsdoc\n */');
     },
@@ -39,9 +39,9 @@ module.exports = [
     },
   },
   {
-    describe: 'M.0.1.3 strip-trailing-whitespace should report trailing whitespace',
-    scriptPath: stripTrailingWhitespacePath,
-    sandboxPrefix: 'whitespace-',
+    describe: 'M.0.1.3 no-trailing-whitespace should report trailing whitespace',
+    scriptPath: noTrailingWhitespacePath,
+    sandboxPrefix: 'no-trailing-whitespace-',
     setup: async (sandboxDir) => {
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), 'const x = 1;  ');
     },
@@ -52,9 +52,9 @@ module.exports = [
     },
   },
   {
-    describe: 'M.0.1.4 standardize-js-line-one-all should report incorrect header',
-    scriptPath: standardizeJsLineOneAllPath,
-    sandboxPrefix: 'header-',
+    describe: 'M.0.1.4 no-bad-headers should report incorrect header',
+    scriptPath: noBadHeadersPath,
+    sandboxPrefix: 'no-bad-headers-',
     setup: async (sandboxDir) => {
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), '// incorrect/path/to/file.js');
     },
@@ -67,7 +67,7 @@ module.exports = [
   {
     describe: 'M.0.1.5 no-relative-paths should report relative require()',
     scriptPath: noRelativePathsPath,
-    sandboxPrefix: 'relative-path-',
+    sandboxPrefix: 'no-relative-path-',
     setup: async (sandboxDir) => {
       // lint-skip-next-line no-relative-paths
       await fs.writeFile(path.join(sandboxDir, 'bad-file.js'), 'const x = require("../bad");');

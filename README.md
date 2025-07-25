@@ -170,7 +170,7 @@ md-to-pdf update                                                   # Update plug
 
 ### Project Structure
 
-The project and all its documentation (and many supporting files) is all indexed by [the librarian](scripts/linting/docs/update-project-indices.js).
+The project and all its documentation (and many supporting files) is all indexed by [the librarian](scripts/linting/docs/librarian.js).
 Each directory below has a mini-README (cf. main [`index.md`](docs/index.md)) that links to **all** documentation within the directory.
 
 The librarian, together with the [**postman**](scripts/linting/docs/postman.js), ensures all documentation is properly indexed and linked.

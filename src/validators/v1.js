@@ -94,14 +94,14 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
   });
   const requiredFiles = ['index.js', `${pluginName}.config.yaml`, `${pluginName}-example.md`, 'README.md'];
   let allRequiredFound = true;
-  
+
   for (const file of requiredFiles) {
     if (!fs.existsSync(path.join(pluginDirectoryPath, file))) {
       errors.push(`Missing required file: '${file}'.`);
       allRequiredFound = false;
     }
   }
-  
+
   if (allRequiredFound) {
     logger.success('✓ OK\n', {
       context: 'V1Validator',
@@ -115,11 +115,11 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
       plugin: pluginName
     });
   }
-  
+
   // Show detailed file results
   for (const file of requiredFiles) {
     if (fs.existsSync(path.join(pluginDirectoryPath, file))) {
-      logger.success(`    ✓ Found required file: `, {
+      logger.success('    ✓ Found required file: ', {
         context: 'V1Validator',
         format: 'inline',
         plugin: pluginName,
@@ -129,7 +129,7 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
       // This is a direct string concatenation.
       process.stdout.write(`'${file}'\n`);
     } else {
-      logger.error(`    ✗ Missing required file: `, {
+      logger.error('    ✗ Missing required file: ', {
         context: 'V1Validator',
         format: 'inline',
         plugin: pluginName,
@@ -139,7 +139,7 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
       process.stdout.write(`'${file}'\n`);
     }
   }
-  
+
   logger.info('  Checking for optional files... ', {
     context: 'V1Validator',
     format: 'inline',
@@ -149,11 +149,11 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
   const testDir = path.join(contractDir, 'test');
   const schemaFileName = `${pluginName}.schema.json`;
   const schemaPath = path.join(contractDir, schemaFileName);
-  
+
   let optionalCount = 0;
   if (fs.existsSync(testDir)) optionalCount++;
   if (fs.existsSync(schemaPath)) optionalCount++;
-  
+
   if (optionalCount === 2) {
     logger.success('✓ OK\n', {
       context: 'V1Validator',
@@ -173,25 +173,25 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
       plugin: pluginName
     });
   }
-  
+
   // Show detailed optional file results
   if (fs.existsSync(testDir)) {
-    logger.success("    ✓ Found optional '.contract/test/' directory.\n", {
+    logger.success('    ✓ Found optional \'.contract/test/\' directory.\n', {
       context: 'V1Validator',
       format: 'inline',
       plugin: pluginName,
       directory: '.contract/test/'
     });
   } else {
-    warnings.push("Missing optional '.contract/test/' directory.");
-    logger.warn("    ⚠ Missing optional '.contract/test/' directory.\n", {
+    warnings.push('Missing optional \'.contract/test/\' directory.');
+    logger.warn('    ⚠ Missing optional \'.contract/test/\' directory.\n', {
       context: 'V1Validator',
       format: 'inline',
       plugin: pluginName,
       directory: '.contract/test/'
     });
   }
-  
+
   if (fs.existsSync(schemaPath)) {
     logger.success(`    ✓ Plugin has a schema file ('${schemaFileName}').\n`, {
       context: 'V1Validator',
@@ -259,19 +259,19 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
       format: 'inline',
       plugin: pluginName
     });
-    
+
     // Show clean test results using inline format
     if (result && result.length > 0) {
       const testOutput = result.toString().trim();
       const lines = testOutput.split('\n');
-      
+
       for (const line of lines) {
         const trimmedLine = line.trim();
         if (!trimmedLine) continue;
-        
+
         // Test suite headers
         if (trimmedLine.match(/^\s*[A-Z].*Test\s*$/)) {
-          logger.info(`      Test Suite: `, {
+          logger.info('      Test Suite: ', {
             context: 'V1Validator',
             format: 'inline',
             plugin: pluginName,
@@ -280,11 +280,11 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
           process.stdout.write(`${trimmedLine}\n`); // Direct print for exact formatting
           continue;
         }
-        
+
         // Test result lines
         if (trimmedLine.includes('✔') || trimmedLine.includes('✓')) {
           const testName = trimmedLine.replace(/^\s*✔?\s*/, '').replace(/\s*\(\d+ms\)$/, '');
-          logger.success(`        ✓ `, {
+          logger.success('        ✓ ', {
             context: 'V1Validator',
             format: 'inline',
             plugin: pluginName,
@@ -293,10 +293,10 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
           process.stdout.write(`${testName}\n`); // Direct print for exact formatting
           continue;
         }
-        
+
         // Test summary
         if (trimmedLine.match(/^\d+\s+passing/)) {
-          logger.success(`      `, {
+          logger.success('      ', {
             context: 'V1Validator',
             format: 'inline',
             plugin: pluginName,
@@ -305,12 +305,12 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
           process.stdout.write(`${trimmedLine}\n`); // Direct print for exact formatting
           continue;
         }
-        
+
         // Other meaningful output
-        if (trimmedLine.includes('Successfully created') || 
+        if (trimmedLine.includes('Successfully created') ||
             trimmedLine.includes('Generated') ||
             trimmedLine.startsWith('[')) {
-          logger.info(`      `, {
+          logger.info('      ', {
             context: 'V1Validator',
             format: 'inline',
             plugin: pluginName,
@@ -332,7 +332,7 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
       format: 'inline',
       plugin: pluginName
     });
-    
+
     if (e.stdout && e.stdout.length > 0) {
       logger.error('      Test stdout:\n', {
         context: 'V1Validator',

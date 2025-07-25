@@ -10,6 +10,7 @@ module.exports = [
       methodArgs: ['myAlias', '~/some/path', '/fake/config-base'],
       expectResult: path.join('/fake/home', 'some/path'),
       expectHomedirCall: true,
+      // No expectLogs parameter for this positive test, will use generic smoke test in factory.
     }),
   },
   {
@@ -22,6 +23,7 @@ module.exports = [
         resolve: '/path/to/config/dir/relative/path',
       },
       expectResult: '/path/to/config/dir/relative/path',
+      // No expectLogs parameter for this positive test, will use generic smoke test in factory.
     }),
   },
   {
@@ -30,6 +32,7 @@ module.exports = [
     ...makeResolveAliasScenario({
       methodArgs: ['my-alias', null, '/some/base'],
       expectResult: null,
+      expectLogs: [/Invalid alias value for resolution/], // Specific warning expected.
     }),
   },
   {
@@ -38,6 +41,7 @@ module.exports = [
     ...makeResolveAliasScenario({
       methodArgs: ['my-alias', '   ', '/some/base'],
       expectResult: null,
+      expectLogs: [/Invalid alias value for resolution/], // Specific warning expected.
     }),
   },
   {
@@ -47,7 +51,7 @@ module.exports = [
       methodArgs: ['my-alias', './relative/path', null],
       pathMocks: { isAbsolute: false },
       expectResult: null,
-      expectLogs: [/Cannot resolve relative alias target '.\/relative\/path' for alias 'my-alias'/]
+      expectLogs: [/Cannot resolve relative alias target, base path unknown/], // Specific warning expected.
     }),
   },
 ];

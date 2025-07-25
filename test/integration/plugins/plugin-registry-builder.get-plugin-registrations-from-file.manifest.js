@@ -15,6 +15,9 @@ module.exports = [
       mainConfigPath: FAKE_CONFIG_PATH,
       yamlContent: null,
       expectResult: {},
+      expectLogs: [
+        /Main config file for plugin registrations not found/ // Updated to match structured log message
+      ],
     }),
   },
   {
@@ -25,7 +28,7 @@ module.exports = [
       mainConfigPath: FAKE_CONFIG_PATH,
       yamlError: new Error('YAML parse error'),
       expectResult: {},
-      expectLogs: [/Error reading plugin registrations from '\/fake\/config.yaml': YAML parse error/],
+      expectLogs: [/Error reading plugin registrations from file/], // Updated to match structured log message
     }),
   },
   {
@@ -38,6 +41,12 @@ module.exports = [
       resolvedPaths: { './plugin.config.yaml': '/fake/plugin.config.yaml' },
       fileSystem: { '/fake/plugin.config.yaml': { exists: true, isFile: true } },
       expectResult: { 'test-plugin': { configPath: '/fake/plugin.config.yaml', definedIn: FAKE_CONFIG_PATH, sourceType: 'Test' } },
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Plugin config path resolved to an existing file/,
+        /Registered plugin from config file/,
+        /Plugin registrations from file complete/
+      ],
     }),
   },
   {
@@ -57,7 +66,18 @@ module.exports = [
           definedIn: FAKE_CONFIG_PATH,
           sourceType: 'Aliased Config'
         }
-      }
+      },
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Attempting to resolve alias/,
+        /Alias resolution successful/,
+        /Registered plugin directory alias/,
+        /Attempting to resolve plugin config path/,
+        /Resolved plugin path using alias/,
+        /Plugin config path resolved to an existing file/,
+        /Registered plugin from config file/,
+        /Plugin registrations from file complete/
+      ],
     })
   },
   {
@@ -73,7 +93,10 @@ module.exports = [
       resolvedPaths: { 'bad-alias:plugin.config.yaml': '/fake/bad-alias:plugin.config.yaml' },
       fileSystem: { '/fake/bad-alias:plugin.config.yaml': { exists: false } },
       expectResult: {},
-      expectLogs: [/Plugin configuration path 'bad-alias:plugin.config.yaml' \(resolved to '\/fake\/bad-alias:plugin.config.yaml'\) does not exist/],
+      expectLogs: [
+        /Invalid alias value/, // This warning comes from _resolveAlias
+        /Plugin configuration path does not exist/ // When alias fails, it falls back to relative path resolution, then warns about missing file
+      ],
     })
   },
   {
@@ -86,7 +109,13 @@ module.exports = [
       resolvedPaths: { './nonexistent.config.yaml': '/fake/nonexistent.config.yaml' },
       fileSystem: { '/fake/nonexistent.config.yaml': { exists: false } },
       expectResult: {},
-      expectLogs: [/Plugin configuration path '.\/nonexistent.config.yaml' \(resolved to '\/fake\/nonexistent.config.yaml'\) does not exist\. Skipping registration for this entry\./]
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Attempting to resolve plugin config path/,
+        /Resolved plugin path as relative to main config base path/,
+        /Plugin configuration path does not exist/, // Updated to match structured log message
+        /Plugin registrations from file complete/
+      ],
     }),
   },
   {
@@ -97,6 +126,10 @@ module.exports = [
       mainConfigPath: FAKE_CONFIG_PATH,
       yamlContent: {}, // Empty config
       expectResult: {},
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Plugin registrations from file complete/
+      ],
     }),
   },
   {
@@ -112,7 +145,13 @@ module.exports = [
         '/fake/bad-dir/bad-dir.config.yaml': { exists: false }
       },
       expectResult: {},
-      expectLogs: [/Plugin configuration path '.\/bad-dir' \(resolved to directory '\/fake\/bad-dir'\) does not contain a suitable \*\.config\.yaml file\. Skipping registration\./]
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Attempting to resolve plugin config path/,
+        /Resolved plugin path as relative to main config base path/,
+        /Plugin configuration path \(directory\) does not contain a suitable config file/, // Updated to match structured log message
+        /Plugin registrations from file complete/
+      ],
     }),
   },
   {
@@ -129,7 +168,14 @@ module.exports = [
         '/fake/alt-dir/alt.config.yaml': { exists: true, isFile: true }
       },
       expectResult: { 'alt-plugin': { configPath: '/fake/alt-dir/alt.config.yaml', definedIn: FAKE_CONFIG_PATH, sourceType: 'Test' } },
-      expectLogs: [/Using 'alt.config.yaml' as config for plugin directory specified by '.\/alt-dir' \(resolved to '\/fake\/alt-dir'\)\./]
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Attempting to resolve plugin config path/,
+        /Resolved plugin path as relative to main config base path/,
+        /Using alternative config file for plugin directory/, // Updated to match structured log message
+        /Registered plugin from config file/,
+        /Plugin registrations from file complete/
+      ],
     }),
   },
   {
@@ -149,7 +195,18 @@ module.exports = [
           definedIn: FAKE_CONFIG_PATH,
           sourceType: 'Aliases Only Config'
         }
-      }
+      },
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Attempting to resolve alias/,
+        /Alias resolution successful/,
+        /Registered plugin directory alias/,
+        /Attempting to resolve plugin config path/,
+        /Resolved plugin path using alias/,
+        /Plugin config path resolved to an existing file/,
+        /Registered plugin from config file/,
+        /Plugin registrations from file complete/
+      ],
     })
   },
   {
@@ -160,6 +217,10 @@ module.exports = [
       mainConfigPath: FAKE_CONFIG_PATH,
       yamlContent: { someOtherSetting: true },
       expectResult: {},
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Plugin registrations from file complete/
+      ],
     })
   },
   {
@@ -170,6 +231,10 @@ module.exports = [
       mainConfigPath: FAKE_CONFIG_PATH,
       yamlContent: { plugins: {} },
       expectResult: {},
+      expectLogs: [
+        /Attempting to get plugin registrations from file/,
+        /Plugin registrations from file complete/
+      ],
     })
   },
 ];

@@ -42,7 +42,7 @@ function formatContext(context, config = {}) {
 
 // Format with default app theme (newline)
 function formatApp(level, message, meta = {}) {
-  const { context, config = {} } = meta;
+  const { context, config = {}, caller, stack, errorCategory, hint } = meta;
 
   if (process.env.LOG_MODE === 'json') {
     const entry = {
@@ -54,11 +54,33 @@ function formatApp(level, message, meta = {}) {
     fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
   } else {
     const contextPrefix = formatContext(context, config);
-    const formattedMessage = config.contextStyle === 'suffix'
+    let formattedMessage = config.contextStyle === 'suffix'
       ? message + formatContext(context, config)
       : contextPrefix + message;
 
+    // Add enhanced debugging information
+    if (caller) {
+      formattedMessage += chalk.gray(` (${caller})`);
+    }
+
+    if (errorCategory && errorCategory !== 'general') {
+      formattedMessage += chalk.blue(` [${errorCategory}]`);
+    }
+
     console.log(colorForLevel(level, formattedMessage));
+
+    // Display hint on next line if available
+    if (hint) {
+      console.log(chalk.gray(`  Hint: ${hint}`));
+    }
+
+    // Display stack trace if available
+    if (stack && Array.isArray(stack)) {
+      console.log(chalk.gray('  Stack trace:'));
+      stack.forEach(line => {
+        console.log(chalk.gray(`    ${line.trim()}`));
+      });
+    }
   }
 
   if (level === 'fatal') {

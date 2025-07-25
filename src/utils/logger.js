@@ -1,7 +1,7 @@
 // src/utils/logger.js
 // lint-skip-file no-console
 // Slim routing layer - all formatting logic delegated to formatters/
-const { formattersIndexPath } = require('@paths');
+const { formattersIndexPath, loggerEnhancerPath } = require('@paths');
 const formatters = require(formattersIndexPath);
 
 // Global debug mode state
@@ -11,8 +11,17 @@ let debugMode = false;
 const loggerConfig = {
   showContext: true,      // Show context in formatted output
   showTimestamp: false,   // Show timestamp in formatted output
-  contextStyle: 'prefix'  // 'prefix', 'suffix', 'none'
+  contextStyle: 'prefix', // 'prefix', 'suffix', 'none'
+  // Enhanced debugging features
+  showCaller: false,      // Show file:line caller info
+  showStack: false,       // Show stack traces for errors
+  enrichErrors: false,    // Auto-categorize errors and add hints
+  stackDepth: 3           // Number of stack frames to show
 };
+
+// Error categorization - TODO: populate from paths/paths-config.yaml
+// Stubbed until path-based error registry is implemented
+const errorPatterns = {}; // eslint-disable-line no-unused-vars
 
 // Configure logger formatting
 function configureLogger(config = {}) {
@@ -29,6 +38,9 @@ function setDebugMode(enabled) {
   debugMode = enabled;
 }
 
+// Import enhancement utilities
+const { enhanceMessage } = require(loggerEnhancerPath);
+
 // Unified logger interface with CSS-like format parameter
 // Pure routing - delegates all formatting to formatters/
 // Usage examples:
@@ -43,6 +55,12 @@ function logger(message, options = {}) {
   // Enrich meta with context and config
   meta.context = context;
   meta.config = loggerConfig;
+
+  // Apply enhanced debugging if any enhancement features are enabled
+  if (loggerConfig.showCaller || loggerConfig.showStack || loggerConfig.enrichErrors) {
+    const enhanced = enhanceMessage(message, options, level, loggerConfig);
+    Object.assign(meta, enhanced);
+  }
 
   // Debug mode filtering
   if (level === 'debug' && !debugMode) return;

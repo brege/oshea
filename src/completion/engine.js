@@ -55,7 +55,7 @@ function findNode(tree, parts) {
 function getSuggestions(argv, current) {
   const rawArgv = argv._.filter(Boolean);
   const cache = loadCache();
-  const commandPathParts = getCommandPath(cache, rawArgv); // Use the new helper
+  const commandPathParts = getCommandPath(cache, rawArgv);
 
   let suggestions = [];
 

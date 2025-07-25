@@ -78,8 +78,8 @@ module.exports = [
     assertion: async (loader, mocks, constants, expect, logs) => {
       await loader._initialize();
       expect(loader.primaryConfig).to.deep.equal({});
-      expect(loader.primaryConfigLoadReason).to.equal('none found');
-      expect(logs.some(log => log.level === 'warn' && log.msg.includes('provided but file does not exist'))).to.be.true;
+      expect(loader.primaryConfigLoadReason).to.equal('factory default fallback');
+      expect(logs.some(log => log.level === 'warn' && log.msg.includes('Project manifest not found at provided path'))).to.be.true;
     },
   }),
   makeMainConfigLoaderScenario({
@@ -90,7 +90,7 @@ module.exports = [
     assertion: async (loader, mocks, constants, expect, logs) => {
       await loader._initialize();
       expect(loader.primaryConfig).to.deep.equal({});
-      expect(logs.some(log => log.level === 'error' && log.msg.includes('loading primary main configuration'))).to.be.true;
+      expect(logs.some(log => log.level === 'error' && log.msg.includes('Failed to load primary main configuration'))).to.be.true;
     },
   }),
   makeMainConfigLoaderScenario({
@@ -148,7 +148,7 @@ module.exports = [
     assertion: async (loader, mocks, constants, expect, logs) => {
       await loader._initialize();
       expect(loader.projectConfigContents).to.deep.equal({});
-      expect(logs.some(log => log.level === 'warn' && log.msg.includes('Project manifest config path provided but file does not exist'))).to.be.true;
+      expect(logs.some(log => log.level === 'warn' && log.msg.includes('Project manifest not found at provided path'))).to.be.true;
     },
   }),
   makeMainConfigLoaderScenario({
@@ -164,7 +164,7 @@ module.exports = [
       await loader._initialize();
       expect(loader.primaryConfig).to.deep.equal({});
       expect(loader.projectConfigContents).to.deep.equal({});
-      expect(logs.some(log => log.level === 'error' && log.msg.includes('loading primary main configuration'))).to.be.true;
+      expect(logs.some(log => log.level === 'error' && log.msg.includes('Failed to load primary main configuration'))).to.be.true;
     },
   }),
   makeMainConfigLoaderScenario({

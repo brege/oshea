@@ -39,7 +39,11 @@ class PluginConfigLoader {
     }
 
     if (!configFilePath || !this.fs.existsSync(configFilePath)) {
-      this.logger.warn(`Config file path not provided or does not exist: ${configFilePath} for plugin ${pluginName}.`, { module: 'plugin_config_loader'});
+      this.logger.warn('Config file path not provided or does not exist', {
+        context: 'PluginConfigLoader',
+        file: configFilePath,
+        plugin: pluginName
+      });
       return null;
     }
     try {
@@ -58,7 +62,12 @@ class PluginConfigLoader {
       this._rawPluginYamlCache[cacheKey] = result;
       return result;
     } catch (error) {
-      this.logger.error(`loading plugin configuration layer from '${configFilePath}' for ${pluginName}: ${error.message}`, { module: 'plugin_config_loader'});
+      this.logger.error('Failed to load plugin configuration layer', {
+        context: 'PluginConfigLoader',
+        file: configFilePath,
+        plugin: pluginName,
+        error: error.message
+      });
       return { rawConfig: {}, resolvedCssPaths: [], inheritCss: false, actualPath: null };
     }
   }
@@ -140,7 +149,12 @@ class PluginConfigLoader {
             contributingPaths.push(`${projectOverrideAbsPath} (empty or no effective overrides)`);
           }
         } else if (projectOverrideRelPath && projectOverrideAbsPath !== layer0ConfigData.actualPath) {
-          this.logger.warn(`Project-specific settings override for plugin '${pluginName}' in project main config points to non-existent file: '${projectOverrideRelPath}' (resolved to '${projectOverrideAbsPath || projectOverrideRelPath}')`, { module: 'plugin_config_loader'});
+          this.logger.warn('Project-specific override path not found', {
+            context: 'PluginConfigLoader',
+            plugin: pluginName,
+            path: projectOverrideRelPath,
+            resolvedPath: projectOverrideAbsPath || projectOverrideRelPath
+          });
         }
       }
 

@@ -130,7 +130,7 @@ module.exports = [
     fsExistsStubs: { '/xdg/base/missing-plugin/missing-plugin.config.yaml': false, '/proj/base/configs/missing.config.yaml': false },
     pathStubs: { 'isAbsolute': { 'configs/missing.config.yaml': false }, 'resolve': { '/proj/base,configs/missing.config.yaml': '/proj/base/configs/missing.config.yaml' } },
     assertion: async (result, loader, mocks, constants, expect, logs) => {
-      expect(logs.some(log => log.level === 'warn' && log.msg.includes('points to non-existent file'))).to.be.true;
+      expect(logs.some(log => log.level === 'warn' && log.msg.includes('Project-specific override path not found'))).to.be.true;
     },
   }),
   makePluginConfigLoaderScenario({

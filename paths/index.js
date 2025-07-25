@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-23T22:33:31.437Z
+// Generated: 2025-07-25T05:52:06.193Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -138,6 +138,7 @@ const trackerPath = path.join(projectRoot, 'src/completion/tracker.js');
 // Utilities & Helpers
 const utilsRoot = path.join(projectRoot, 'src/utils/');
 const assetResolverPath = path.join(projectRoot, 'src/utils/asset-resolver.js');
+const loggerEnhancerPath = path.join(projectRoot, 'src/utils/logger-enhancer.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
 const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app-formatter.js');
 const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
@@ -248,6 +249,7 @@ module.exports = {
   trackerPath,
   utilsRoot,
   assetResolverPath,
+  loggerEnhancerPath,
   loggerPath,
   appFormatterPath,
   formattersIndexPath,

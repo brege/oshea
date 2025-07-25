@@ -26,6 +26,7 @@ const {
 } = require('@paths');
 const logger = require(loggerPath);
 
+
 const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
 
@@ -269,16 +270,44 @@ async function main() {
       describe: 'overrides the main collection directory',
       type: 'string',
       normalize: true,
+    })
+    .option('debug', {
+      describe: 'enable detailed debug output with enhanced logging (use --debug=stack for stack traces)',
+      type: 'string',
+      default: false,
+      coerce: (value) => {
+        // Handle --debug (boolean) and --debug=value (string)
+        if (value === true || value === 'true' || value === '') return true;
+        return value;
+      }
     });
 
   argvBuilder.middleware(async (argv) => {
+    // Configure enhanced debugging if --debug flag is used
+    if (argv.debug) {
+      logger.setDebugMode(true);
+
+      const debugConfig = {
+        showCaller: true,
+        enrichErrors: true,
+        showStack: false
+      };
+
+      // Enable stack traces for --debug=stack
+      if (argv.debug === 'stack' || argv.debug === 'trace') {
+        debugConfig.showStack = true;
+      }
+
+      logger.configureLogger(debugConfig);
+    }
+
     const mainConfigLoader = new MainConfigLoader(path.resolve(__dirname, '..'), argv.config, argv.factoryDefaults);
     const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
     const collRootFromMainConfig = primaryConfig.config.collections_root || null;
     const collRootCliOverride = argv['coll-root'] || null;
 
     managerInstance = new CollectionsManager({
-      debug: process.env.DEBUG_CM === 'true',
+      debug: argv.debug || process.env.DEBUG_CM === 'true',
       collRootFromMainConfig: collRootFromMainConfig,
       collRootCliOverride: collRootCliOverride
     });

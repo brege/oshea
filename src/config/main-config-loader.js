@@ -65,14 +65,20 @@ class MainConfigLoader {
       try {
         this.primaryConfig = await this.loadYamlConfig(configPathToLoad);
       } catch (error) {
-        logger.error(`ERROR (MainConfigLoader): loading primary main configuration from '${configPathToLoad}': ${error.message}`);
+        logger.error('Failed to load primary main configuration', {
+          context: 'MainConfigLoader',
+          path: configPathToLoad,
+          error: error.message
+        });
         this.primaryConfig = {};
       }
     } else {
       this.primaryConfig = {};
-      this.primaryConfigLoadReason = 'none found';
+      this.primaryConfigLoadReason = 'factory default fallback';
       this.primaryConfigPath = null;
-      logger.warn('WARN (MainConfigLoader): Primary main configuration file could not be identified or loaded. Using empty global settings.');
+      logger.warn('Primary main configuration not found, using empty global settings', {
+        context: 'MainConfigLoader'
+      });
     }
     this.primaryConfig = this.primaryConfig || {};
 
@@ -85,7 +91,11 @@ class MainConfigLoader {
             this.xdgConfigContents = await this.loadYamlConfig(this.xdgGlobalConfigPath);
           }
         } catch (e) {
-          logger.warn(`WARN (MainConfigLoader): Could not load XDG main config from ${this.xdgGlobalConfigPath}: ${e.message}`);
+          logger.warn('Could not load XDG main config', {
+            context: 'MainConfigLoader',
+            path: this.xdgGlobalConfigPath,
+            error: e.message
+          });
           this.xdgConfigContents = {};
         }
       } else {
@@ -100,11 +110,18 @@ class MainConfigLoader {
             this.projectConfigContents = await this.loadYamlConfig(this.projectManifestConfigPath);
           }
         } catch (e) {
-          logger.warn(`WARN (MainConfigLoader): Could not load project manifest from ${this.projectManifestConfigPath}: ${e.message}`);
+          logger.warn('Could not load project manifest', {
+            context: 'MainConfigLoader',
+            path: this.projectManifestConfigPath,
+            error: e.message
+          });
           this.projectConfigContents = {};
         }
       } else if (this.projectManifestConfigPath) {
-        logger.warn(`WARN (MainConfigLoader): Project manifest config path provided but file does not exist: ${this.projectManifestConfigPath}`);
+        logger.warn('Project manifest not found at provided path', {
+          context: 'MainConfigLoader',
+          path: this.projectManifestConfigPath
+        });
         this.projectConfigContents = {};
       }
       else {

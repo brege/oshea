@@ -169,7 +169,12 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
         }
       }
     } catch (error) {
-      logger.error(`ERROR during rebuild triggered by ${filePathTrigger} (${event}): ${error.message}`, { module: 'src/core/watch_handler.js', error });
+      logger.error('Rebuild failed triggered by', {
+        module: 'src/core/watch_handler.js',
+        filePathTrigger: filePathTrigger,
+        event: event,
+        error: error.message
+      });
       if (error.stack) logger.error(error.stack, { module: 'src/core/watch_handler.js' });
     } finally {
       isProcessing = false;
@@ -192,7 +197,10 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
     const initialConfigResolver = new ConfigResolver(args.config, args.factoryDefaults);
     watchedPaths = await collectWatchablePaths(initialConfigResolver, args);
   } catch (e) {
-    logger.error(`Failed to collect initial paths for watcher: ${e.message}`, { module: 'src/core/watch_handler.js' });
+    logger.error('Failed to collect initial paths for watcher', {
+        module: 'src/core/watch_handler.js',
+        error: e.message
+      });
     watchedPaths = [];
     if (args.markdownFile && fs.existsSync(args.markdownFile)) {
       watchedPaths.push(path.resolve(args.markdownFile));
@@ -204,7 +212,10 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
     try {
       await commandExecutor(args);
     } catch(e) {
-      logger.error(`ERROR during single execution in watch mode (no files watched): ${e.message}`, { module: 'src/core/watch_handler.js' });
+      logger.error('Single execution failed in watch mode (no files watched):', {
+        module: 'src/core/watch_handler.js',
+        error: e.message
+      });
     }
     return;
   }
@@ -228,13 +239,19 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
         rebuild(event, filePath);
       }
     })
-    .on('error', error => logger.error(`Watcher error: ${error}`, { module: 'src/core/watch_handler.js' }));
-
+    .on('error', error =>
+      logger.error('Watcher error:', {
+        module: 'src/core/watch_handler.js',
+        error: error.message
+      }));
   try {
     logger.info('Performing initial build for watch mode...', { module: 'src/core/watch_handler.js' });
     await commandExecutor(args);
   } catch (e) {
-    logger.error(`ERROR during initial build in watch mode: ${e.message}`, { module: 'src/core/watch_handler.js' });
+    logger.error('Initial build failed in watch mode:', {
+      module: 'src/core/watch_handler.js',
+      error: e.message
+    });
   }
 }
 

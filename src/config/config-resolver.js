@@ -1,7 +1,7 @@
 // src/config/config-resolver.js
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
+const os =require('os');
 const Ajv = require('ajv');
 const {
   configUtilsPath,
@@ -58,7 +58,9 @@ class ConfigResolver {
       const baseSchema = JSON.parse(this.dependencies.fs.readFileSync(basePluginSchemaPath, 'utf8'));
       this.ajv.addSchema(baseSchema, 'base-plugin.schema.json');
     } else {
-      logger.error('CRITICAL: Base plugin schema not found. Validation will not work.', { module: 'src/config/ConfigResolver.js' });
+      logger.error('CRITICAL: Base plugin schema not found. Validation will not work.', {
+        context: 'ConfigResolver'
+      });
     }
   }
 
@@ -94,7 +96,11 @@ class ConfigResolver {
       try {
         specificSchema = JSON.parse(this.dependencies.fs.readFileSync(pluginSchemaPath, 'utf8'));
       } catch (e) {
-        logger.warn(`Could not read or parse schema file at ${pluginSchemaPath}. Error: ${e.message}`, { module: 'src/config/ConfigResolver.js' });
+        logger.warn('Could not read or parse plugin schema file', {
+          context: 'ConfigResolver',
+          path: pluginSchemaPath,
+          error: e.message
+        });
       }
     }
 
@@ -117,19 +123,37 @@ class ConfigResolver {
       const otherErrors = validate.errors.filter(e => e.keyword !== 'additionalProperties');
 
       if (typoErrors.length > 0) {
-        logger.warn(`Configuration for plugin '${pluginName}' has possible typos or unknown properties:`, { module: 'src/config/ConfigResolver.js' });
+        logger.warn('Configuration has possible typos or unknown properties', {
+          context: 'ConfigResolver',
+          plugin: pluginName
+        });
         typoErrors.forEach(err => {
           const property = err.params.additionalProperty;
           const path = err.instancePath ? `${err.instancePath.substring(1)}.${property}`.replace(/\//g, '.') : property;
-          logger.warn(`  - Unknown property '${path}' found in '${pluginConfigPath}'.`, { module: 'src/config/ConfigResolver.js' });
+          logger.warn('Unknown property found in configuration', {
+            context: 'ConfigResolver',
+            property: path,
+            file: pluginConfigPath
+          });
         });
-        logger.warn(`  INFO: To see the final applied settings, run 'md-to-pdf config --plugin ${pluginName}'`, { module: 'src/config/ConfigResolver.js' });
+        logger.info('To see final applied settings, run the config command', {
+          context: 'ConfigResolver',
+          plugin: pluginName,
+          command: `md-to-pdf config --plugin ${pluginName}`
+        });
       }
 
       if (otherErrors.length > 0) {
-        logger.warn(`Configuration for plugin '${pluginName}' has validation errors:`, { module: 'src/config/ConfigResolver.js' });
+        logger.warn('Configuration has validation errors', {
+          context: 'ConfigResolver',
+          plugin: pluginName
+        });
         otherErrors.forEach(err => {
-          logger.warn(`  - Path '${err.instancePath || '/'}': ${err.message}`, { module: 'src/config/ConfigResolver.js' });
+          logger.warn('Validation error detail', {
+            context: 'ConfigResolver',
+            path: err.instancePath || '/',
+            message: err.message
+          });
         });
       }
     }
@@ -188,7 +212,11 @@ class ConfigResolver {
       return this.pluginConfigLoader._rawPluginYamlCache[cacheKey];
     }
     if (!configFilePath || !this.dependencies.fs.existsSync(configFilePath)) {
-      logger.warn(`WARN (ConfigResolver): Base config file path not provided or does not exist: ${configFilePath} for plugin ${pluginName}.`, { module: 'src/config/ConfigResolver.js' });
+      logger.warn('Base config file path not provided or does not exist', {
+        context: 'ConfigResolver',
+        file: configFilePath,
+        plugin: pluginName
+      });
       return null;
     }
     try {
@@ -205,7 +233,12 @@ class ConfigResolver {
       this.pluginConfigLoader._rawPluginYamlCache[cacheKey] = result;
       return result;
     } catch (error) {
-      logger.error(`ERROR (ConfigResolver): loading plugin base configuration from '${configFilePath}' for ${pluginName}: ${error.message}`, { module: 'src/config/ConfigResolver.js' });
+      logger.error('Failed to load plugin base configuration', {
+        context: 'ConfigResolver',
+        configFile: configFilePath,
+        plugin: pluginName,
+        error: error.message
+      });
       return { rawConfig: {}, resolvedCssPaths: [], inheritCss: false, actualPath: null };
     }
   }
@@ -225,7 +258,11 @@ class ConfigResolver {
           resolvedPathSpec = this.dependencies.path.join(this.dependencies.os.homedir(), resolvedPathSpec.substring(2));
         } else {
           if (markdownFilePath && (pluginSpec.startsWith('./') || pluginSpec.startsWith('../'))) {
-            logger.warn(`WARN (ConfigResolver): Plugin path spec '${pluginSpec}' is relative. Resolving from CWD. It should ideally be absolute if from front matter or local config.`, { module: 'src/config/ConfigResolver.js' });
+            logger.warn('Relative plugin path spec provided; resolving from CWD', {
+              context: 'ConfigResolver',
+              pathSpec: pluginSpec,
+              suggestion: 'Path should ideally be absolute if from front matter or local config.'
+            });
             resolvedPathSpec = this.dependencies.path.resolve(pluginSpec);
           } else if (!this.dependencies.path.isAbsolute(resolvedPathSpec)) {
             throw new Error(`Relative plugin path specification '${pluginSpec}' must be resolved to an absolute path before calling getEffectiveConfig if not from CLI CWD, or use a registered plugin name.`);
@@ -354,7 +391,12 @@ class ConfigResolver {
 
     const handlerScriptPath = this.dependencies.path.resolve(actualPluginBasePath, currentMergedConfig.handler_script);
     if (!this.dependencies.fs.existsSync(handlerScriptPath)) {
-      throw new Error(`Handler script '${handlerScriptPath}' not found for plugin '${nominalPluginNameForLookup}'.`);
+      logger.error('Handler script not found', {
+        context: 'ConfigResolver',
+        plugin: nominalPluginNameForLookup,
+        handlerPath: handlerScriptPath
+      });
+      throw new Error('Handler script not found.');
     }
 
     const effectiveDetails = {

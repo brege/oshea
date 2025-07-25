@@ -54,7 +54,7 @@ module.exports = [
     fsExistsStubs: { '/path/to/non-existent.config.yaml': false },
     assertion: async (result, loader, mocks, constants, expect, logs) => {
       expect(result).to.be.null;
-      expect(logs.some(log => log.level === 'warn' && log.msg.includes('not provided or does not exist'))).to.be.true;
+      expect(logs.some(log => log.level === 'warn' && log.msg.includes('Config file path not provided or does not exist'))).to.be.true;
     },
   }),
   makePluginConfigLoaderScenario({
@@ -64,11 +64,11 @@ module.exports = [
     methodArgs: [null, '/path/to', 'null-path-plugin'],
     assertion: async (result, loader, mocks, constants, expect, logs) => {
       expect(result).to.be.null;
-      expect(logs.some(log => log.level === 'warn' && log.msg.includes('not provided or does not exist: null'))).to.be.true;
+      expect(logs.some(log => log.level === 'warn' && log.msg.includes('Config file path not provided or does not exist'))).to.be.true;
 
       const resultUndefined = await loader._loadSingleConfigLayer(undefined, '/path/to', 'undefined-path-plugin');
       expect(resultUndefined).to.be.null;
-      expect(logs.some(log => log.level === 'warn' && log.msg.includes('not provided or does not exist: undefined'))).to.be.true;
+      expect(logs.some(log => log.level === 'warn' && log.msg.includes('Config file path not provided or does not exist'))).to.be.true;
     },
   }),
   makePluginConfigLoaderScenario({
@@ -80,7 +80,7 @@ module.exports = [
     loadYamlConfigStubs: { '/path/to/bad.config.yaml': new Error('YAML Parse Error') },
     assertion: async (result, loader, mocks, constants, expect, logs) => {
       expect(result).to.deep.equal({ rawConfig: {}, resolvedCssPaths: [], inheritCss: false, actualPath: null });
-      expect(logs.some(log => log.level === 'error' && log.msg.includes('loading plugin configuration layer'))).to.be.true;
+      expect(logs.some(log => log.level === 'error' && log.msg.includes('Failed to load plugin configuration layer'))).to.be.true;
     },
   }),
 ];

@@ -7,13 +7,20 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
 
   const collectionPath = path.join(this.collRoot, collectionName);
   if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
-    logger.error(`Collection "${collectionName}" not found at ${collectionPath}.`, { module: 'src/collections/commands/enableAll.js' });
+    logger.error('Collection not found', {
+      context: 'CollectionEnableAll',
+      collectionName: collectionName,
+      collectionPath: collectionPath
+    });
     return { success: false, messages: [`Collection "${collectionName}" not found.`] };
   }
 
   const availablePlugins = await this.listAvailablePlugins(collectionName); // Uses bound method
   if (!availablePlugins || availablePlugins.length === 0) {
-    logger.warn(`No available plugins found in collection "${collectionName}".`, { module: 'src/collections/commands/enableAll.js' });
+    logger.warn('No available plugins found in collection', {
+      context: 'CollectionEnableAll',
+      collectionName: collectionName
+    });
     return { success: true, messages: [`No available plugins found in "${collectionName}".`] };
   }
 
@@ -32,7 +39,12 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
       } else if (/^(http(s)?:\/\/|git@)/.test(source)) {
         defaultPrefixToUse = `${collectionName}-`;
         if (!options.isCliCall) {
-          logger.warn(`Could not extract username from Git URL "${source}". Using collection name "${collectionName}" as prefix.`, { module: 'src/collections/commands/enableAll.js' });
+          logger.warn('Could not extract username from Git URL', {
+            context: 'CollectionEnableAll',
+            source: source,
+            collectionName: collectionName,
+            usedPrefix: collectionName
+          });
         }
       }
     }
@@ -60,12 +72,22 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
 
       if (!validationResult.isValid) {
         allSucceeded = false;
-        const errorMessages = validationResult.errors.join('\n  - ');
+        const errorMessages = validationResult.errors.join('\n - '); // Changed from '   - ' to '- ' for cleaner message
         results.push({ plugin: collectionPluginId, invoke_name: invokeName, status: 'failed', message: `Validation failed: ${errorMessages}` });
-        logger.warn(`Failed to enable ${collectionPluginId} as ${invokeName}: Validation failed.`, { module: 'src/collections/commands/enableAll.js' });
+        logger.warn('Failed to enable plugin: Validation failed', {
+          context: 'CollectionEnableAll',
+          plugin: collectionPluginId,
+          invokeName: invokeName
+        });
         // Log validator's output as it's typically more detailed
-        validationResult.errors.forEach(e => logger.error(`    - ${e}`, { module: 'src/collections/commands/enableAll.js' }));
-        validationResult.warnings.forEach(w => logger.warn(`    - ${w}`, { module: 'src/collections/commands/enableAll.js' }));
+        validationResult.errors.forEach(e => logger.error('Validation error detail', {
+          context: 'CollectionEnableAll',
+          errorDetail: e
+        }));
+        validationResult.warnings.forEach(w => logger.warn('Validation warning detail', {
+          context: 'CollectionEnableAll',
+          warningDetail: w
+        }));
         continue; // Continue to the next plugin in the batch
       }
     }
@@ -78,17 +100,39 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
     } catch (error) {
       allSucceeded = false;
       results.push({ plugin: collectionPluginId, invoke_name: invokeName, status: 'failed', message: error.message });
-      logger.warn(`Failed to enable ${collectionPluginId} as ${invokeName}: ${error.message}`, { module: 'src/collections/commands/enableAll.js' });
+      logger.warn('Failed to enable plugin', {
+        context: 'CollectionEnableAll',
+        plugin: collectionPluginId,
+        invokeName: invokeName,
+        error: error.message
+      });
     }
   }
 
   const summaryMessage = `Batch enablement for collection "${collectionName}": ${countEnabled} of ${availablePlugins.length} plugins enabled.`;
-  logger.info(summaryMessage, { module: 'src/collections/commands/enableAll.js' });
+  logger.info('Batch enablement complete', {
+    context: 'CollectionEnableAll',
+    collectionName: collectionName,
+    enabledCount: countEnabled,
+    totalPlugins: availablePlugins.length,
+    summary: summaryMessage
+  });
   results.forEach(r => {
     if (r.status === 'enabled') {
-      logger.success(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status}`, { module: 'src/collections/commands/enableAll.js' });
+      logger.success('Plugin enabled successfully in batch', {
+        context: 'CollectionEnableAll',
+        invokeName: r.invoke_name,
+        originalPluginId: r.plugin,
+        status: r.status
+      });
     } else {
-      logger.warn(`  - ${r.invoke_name} (from ${r.plugin}) : ${r.status} - ${r.message}`, { module: 'src/collections/commands/enableAll.js' });
+      logger.warn('Plugin enablement failed in batch', {
+        context: 'CollectionEnableAll',
+        invokeName: r.invoke_name,
+        originalPluginId: r.plugin,
+        status: r.status,
+        message: r.message
+      });
     }
   });
 

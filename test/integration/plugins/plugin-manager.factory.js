@@ -82,7 +82,7 @@ function makePluginManagerScenario({
       expect(errorLog, 'Expected an error log').to.not.be.undefined;
       expect(errorLog.msg).to.include(expectedError);
     } else if (expectedLog) {
-      const logEntry = logs.find(log => log.level === 'warn' || log.level === 'info');
+      const logEntry = logs.find(log => log.level === 'warn');
       expect(logEntry, 'Expected a log entry').to.not.be.undefined;
       if (typeof expectedLog === 'string') {
         expect(logEntry.msg).to.equal(expectedLog);

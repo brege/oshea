@@ -1,4 +1,5 @@
 // test/integration/core/default-handler.factory.js
+const path = require('path'); // Ensure path is required for path.resolve
 
 function makeDefaultHandlerScenario({
   description,
@@ -12,7 +13,7 @@ function makeDefaultHandlerScenario({
   stubs = {},
   expectedResult,
   expectedError,
-  expectedLogs = [],
+  expectedLogs = [], // New parameter to specify detailed log expectations
 }) {
   const setup = (DefaultHandler, mockStubs) => {
     // File system stubs
@@ -76,22 +77,32 @@ function makeDefaultHandlerScenario({
       expect(result).to.be.null;
       const errorLog = logs.find(log => log.level === 'error');
       expect(errorLog, 'Expected an error log').to.not.be.undefined;
-      expect(errorLog.msg).to.include(expectedError);
+      // *** MODIFICATION from previous turn, now correct for all cases ***
+      expect(errorLog.msg).to.equal('Document generation failed'); // The catch block's main message
+      expect(errorLog.data.error).to.include(expectedError); // The original specific error message
+      expect(errorLog.data.context).to.equal('DefaultHandler');
     } else {
       expect(result).to.equal(expectedResult);
     }
 
-    if (stubs.expectations) {
-      stubs.expectations(mockStubs, expect);
-    }
-
+    // This block handles the new `expectedLogs` array for more precise log assertions
     if (expectedLogs.length > 0) {
+      expect(logs.length).to.equal(expectedLogs.length, 'Number of captured logs must match expected number');
       logs.forEach((log, i) => {
         if (expectedLogs[i]) {
-          expect(log.level).to.equal(expectedLogs[i].level);
-          expect(log.msg).to.match(expectedLogs[i].msg);
+          expect(log.level).to.equal(expectedLogs[i].level, `Log ${i}: Level mismatch`);
+          expect(log.msg).to.equal(expectedLogs[i].msg, `Log ${i}: Message mismatch`);
+          if (expectedLogs[i].data) {
+            expect(log.data).to.deep.include(expectedLogs[i].data, `Log ${i}: Data mismatch`);
+          } else {
+            expect(log.data).to.be.null; // If no data is expected
+          }
         }
       });
+    }
+
+    if (stubs.expectations) {
+      stubs.expectations(mockStubs, expect);
     }
   };
 
@@ -109,4 +120,3 @@ function makeDefaultHandlerScenario({
 }
 
 module.exports = { makeDefaultHandlerScenario };
-

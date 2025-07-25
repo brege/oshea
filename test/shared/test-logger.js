@@ -3,6 +3,6 @@ module.exports = {
   info: () => {},
   warn: () => {},
   error: () => {},
-  detail: () => {},
+  debug: () => {},
   success: () => {},
 };

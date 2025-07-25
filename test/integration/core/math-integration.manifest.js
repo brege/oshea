@@ -71,6 +71,7 @@ module.exports = [
       expect(mockFsSync.existsSync.calledWith(constants.KATEX_CSS_PATH)).to.be.true;
       expect(mockFsPromises.readFile.calledWith(constants.KATEX_CSS_PATH, 'utf8')).to.be.true;
       expect(result).to.deep.equal(['/* mock css */']);
+      expect(logs.some(l => l.level === 'debug' && l.msg === 'Checking for KaTeX CSS')).to.be.true;
       expect(logs.some(l => l.level === 'warn')).to.be.false;
       expect(logs.some(l => l.level === 'error')).to.be.false;
     },
@@ -108,7 +109,7 @@ module.exports = [
       const result = await mathIntegration.getMathCssContent(mathConfig);
       expect(mockFsSync.existsSync.calledWith(constants.KATEX_CSS_PATH)).to.be.true;
       expect(result).to.deep.equal([]);
-      expect(logs.some(l => l.level === 'warn' && l.msg.includes('KaTeX CSS file not found at expected path'))).to.be.true;
+      expect(logs.some(l => l.level === 'warn' && l.msg === 'KaTeX CSS file not found' && l.data.resource === constants.KATEX_CSS_PATH)).to.be.true;
       expect(logs.some(l => l.level === 'error')).to.be.false;
     },
   }),
@@ -127,29 +128,29 @@ module.exports = [
       expect(mockFsSync.existsSync.calledWith(constants.KATEX_CSS_PATH)).to.be.true;
       expect(mockFsPromises.readFile.calledWith(constants.KATEX_CSS_PATH, 'utf8')).to.be.true;
       expect(result).to.deep.equal([]);
-      expect(logs.some(l => l.level === 'warn' && l.msg.includes('Could not read KaTeX CSS file from'))).to.be.true;
+      expect(logs.some(l => l.level === 'warn' && l.msg === 'Could not read KaTeX CSS file' && l.data.error === 'Permission denied')).to.be.true;
       expect(logs.some(l => l.level === 'error')).to.be.false;
     },
   }),
+
 
   makeMathIntegrationScenario({
     test_id: '1.7.4',
     description: 'logs an error and returns if @vscode/markdown-it-katex cannot be required or is not a valid plugin function',
     scenario: {
-      katexPluginModule: null // We'll use this to simulate a require failure in the factory
+      katexPluginModule: null
     },
     assertion: async (mocks, constants, expect, logs) => {
       const { mathIntegration, mdInstance, mathConfig } = mocks;
       mathIntegration.configureMarkdownItForMath(mdInstance, mathConfig);
 
-      // Should not call mdInstance.use at all
       expect(mdInstance.use.called).to.be.false;
 
-      // Should log an error about the plugin
       expect(logs.some(
         l => l.level === 'error' &&
-      l.msg.includes('The resolved KaTeX plugin') &&
-      l.msg.includes('Cannot apply to markdown-it')
+        l.msg === 'KaTeX plugin is not a function' &&
+        l.data.context === 'MathIntegration' &&
+        l.data.error.includes('Resolved KaTeX plugin or its .default is not a function')
       )).to.be.true;
     },
   }),

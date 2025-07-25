@@ -526,7 +526,6 @@ md_to_pdf_plugin: ${fmPluginName}
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
     assert: async (result, args, mocks, constants, expect, logs) => {
-      const fmPluginName = 'fm-test-plugin';
 
       expect(result.pluginSpec).to.equal(args.plugin);
       expect(result.source).to.equal('CLI option');

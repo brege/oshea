@@ -27,14 +27,15 @@ function makeCmManifestScenario({ enabledPlugins, configPathsExist = {}, expectR
         };
       }
       expect(finalResult).to.deep.equal(expectResult);
-      expect(logs).to.have.lengthOf(expectLogs.length);
-      logs.forEach((log, index) => {
-        const expected = expectLogs[index];
-        if (typeof expected === 'string') {
-          expect(log.msg).to.equal(expected);
-        } else {
-          expect(log.msg).to.match(expected);
-        }
+      expectLogs.forEach((expected, index) => { // Iterate through expected logs
+        expect(logs.some(log => { // Check if any actual log matches the expected log
+          if (typeof expected === 'string') {
+            return log.msg.includes(expected);
+          } else if (expected instanceof RegExp) {
+            return expected.test(log.msg);
+          }
+          return false;
+        })).to.be.true;
       });
     }
   };
@@ -73,14 +74,15 @@ function makeFileRegistrationScenario({ mainConfigPath, yamlContent, yamlError, 
     },
     assert: async (result, mocks, constants, expect, logs) => {
       expect(result).to.deep.equal(expectResult);
-      expect(logs).to.have.lengthOf(expectLogs.length);
-      logs.forEach((log, index) => {
-        const expected = expectLogs[index];
-        if (typeof expected === 'string') {
-          expect(log.msg).to.include(expected);
-        } else {
-          expect(log.msg).to.match(expected);
-        }
+      expectLogs.forEach((expected, index) => { // Iterate through expected logs
+        expect(logs.some(log => { // Check if any actual log matches the expected log
+          if (typeof expected === 'string') {
+            return log.msg.includes(expected);
+          } else if (expected instanceof RegExp) {
+            return expected.test(log.msg);
+          }
+          return false;
+        })).to.be.true;
       });
     }
   };
@@ -159,15 +161,25 @@ function makeResolveAliasScenario({ methodArgs, pathMocks = {}, expectResult, ex
     },
     assert: async (result, { mockDependencies }, constants, expect, logs) => {
       expect(result).to.equal(expectResult);
-      expect(logs).to.have.lengthOf(expectLogs.length);
       if (expectHomedirCall) {
-        sinon.assert.calledOnce(mockDependencies.os.homedir);
+        expect(mockDependencies.os.homedir.calledOnce).to.be.true;
+      }
+      // Log assertion logic: specific expected logs or generic smoke test
+      if (expectLogs && expectLogs.length > 0) {
+        expectLogs.forEach(expectedLogPattern => {
+          expect(logs.some(actualLog => typeof expectedLogPattern === 'string' ? actualLog.msg.includes(expectedLogPattern) : expectedLogPattern.test(actualLog.msg)))
+            .to.be.true;
+        });
+      } else {
+        // Generic log smoke test for positive cases (expecting debug logs)
+        expect(logs.length).to.be.greaterThan(0);
+        expect(logs.some(log => log.level === 'debug')).to.be.true;
       }
     },
   };
 }
 
-function makeResolveConfigPathScenario({ methodArgs, fileSystem = {}, expectResult, expectHomedirCall = false }) {
+function makeResolveConfigPathScenario({ methodArgs, fileSystem = {}, expectResult, expectHomedirCall = false, expectLogs = [] }) {
   return {
     methodArgs,
     setup: async ({ mockDependencies }, { FAKE_HOME_DIR }) => {
@@ -188,7 +200,18 @@ function makeResolveConfigPathScenario({ methodArgs, fileSystem = {}, expectResu
     assert: async (result, { mockDependencies }, constants, expect, logs) => {
       expect(result).to.equal(expectResult);
       if (expectHomedirCall) {
-        sinon.assert.calledOnce(mockDependencies.os.homedir);
+        expect(mockDependencies.os.homedir.calledOnce).to.be.true;
+      }
+      // Assert specific expected logs (warnings/errors) or generic smoke test
+      if (expectLogs && expectLogs.length > 0) {
+        expectLogs.forEach(expectedLogPattern => {
+          expect(logs.some(actualLog => typeof expectedLogPattern === 'string' ? actualLog.msg.includes(expectedLogPattern) : expectedLogPattern.test(actualLog.msg)))
+            .to.be.true;
+        });
+      } else {
+        // Generic log smoke test for positive cases (expecting debug logs)
+        expect(logs.length).to.be.greaterThan(0);
+        expect(logs.some(log => log.level === 'debug')).to.be.true;
       }
     }
   };

@@ -65,8 +65,12 @@ module.exports = [
     stubs: { launchRejects: 'Mock Puppeteer launch error' },
     assertion: (result, mocks, constants, expect, logs) => {
       expect(result).to.be.an('error');
+      const errorLog = logs.find(log => log.level === 'error');
+      expect(errorLog, 'Expected an error log for Puppeteer launch failure').to.not.be.undefined;
+      expect(errorLog.msg).to.equal('Error during PDF generation');
+      expect(errorLog.data.context).to.equal('PDFGenerator');
+      expect(errorLog.data.error).to.include('Mock Puppeteer launch error');
       expect(result.message).to.include('Mock Puppeteer launch error');
-      expect(logs.some(log => log.level === 'error' && log.msg.includes('Mock Puppeteer launch error'))).to.be.true;
     },
   }),
 
@@ -75,8 +79,12 @@ module.exports = [
     stubs: { setContentRejects: 'Mock page.setContent error' },
     assertion: (result, mocks, constants, expect, logs) => {
       expect(result).to.be.an('error');
+      const errorLog = logs.find(log => log.level === 'error');
+      expect(errorLog, 'Expected an error log for setContent failure').to.not.be.undefined;
+      expect(errorLog.msg).to.equal('Error during PDF generation');
+      expect(errorLog.data.context).to.equal('PDFGenerator');
+      expect(errorLog.data.error).to.include('Mock page.setContent error');
       expect(result.message).to.include('Mock page.setContent error');
-      expect(logs.some(log => log.level === 'error' && log.msg.includes('Mock page.setContent error'))).to.be.true;
     },
   }),
 
@@ -85,8 +93,12 @@ module.exports = [
     stubs: { pdfRejects: 'Mock PDF generation error' },
     assertion: (result, mocks, constants, expect, logs) => {
       expect(result).to.be.an('error');
+      const errorLog = logs.find(log => log.level === 'error');
+      expect(errorLog, 'Expected an error log for PDF generation failure').to.not.be.undefined;
+      expect(errorLog.msg).to.equal('Error during PDF generation');
+      expect(errorLog.data.context).to.equal('PDFGenerator');
+      expect(errorLog.data.error).to.include('Mock PDF generation error');
       expect(result.message).to.include('Mock PDF generation error');
-      expect(logs.some(log => log.level === 'error' && log.msg.includes('Mock PDF generation error'))).to.be.true;
     },
   }),
 

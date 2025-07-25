@@ -23,13 +23,22 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
 
       if (currentArgs.markdownFile && fs.existsSync(currentArgs.markdownFile)) {
         files.add(path.resolve(currentArgs.markdownFile));
+        logger.debug('Added markdown file to watch list', {
+          context: 'WatchHandler',
+          file: path.resolve(currentArgs.markdownFile)
+        });
       }
 
       // Add plugin-declared watch_sources
       if (pluginSpecificConfig && Array.isArray(pluginSpecificConfig.watch_sources)) {
         for (const sourceEntry of pluginSpecificConfig.watch_sources) {
           if (!sourceEntry || typeof sourceEntry !== 'object') {
-            logger.warn(`Invalid entry in watch_sources for plugin '${currentArgs.plugin || currentArgs.pluginName}'. Skipping.`, { module: 'src/core/watch_handler.js' });
+            logger.warn('Invalid entry in watch_sources for plugin', {
+              context: 'WatchHandler',
+              plugin: currentArgs.plugin || currentArgs.pluginName,
+              entry: sourceEntry,
+              suggestion: 'Skipping invalid watch source entry.'
+            });
             continue;
           }
 
@@ -40,7 +49,12 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
             if (cliValue && typeof cliValue === 'string') {
               resolvedPathToAdd = path.resolve(cliValue);
             } else {
-              logger.warn(`CLI argument '${sourceEntry.path_from_cli_arg}' not found or invalid for watch_sources in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`, { module: 'src/core/watch_handler.js' });
+              logger.warn('CLI argument not found or invalid for watch_sources', {
+                context: 'WatchHandler',
+                cliArgument: sourceEntry.path_from_cli_arg,
+                plugin: currentArgs.plugin || currentArgs.pluginName,
+                suggestion: `Verify the CLI argument '${sourceEntry.path_from_cli_arg}' is provided and valid.`
+              });
             }
           } else if (sourceEntry.path && typeof sourceEntry.path === 'string') {
             // Placeholder substitution for paths like "{{ cliArgs.someDir }}/data.json"
@@ -52,13 +66,19 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
               if (currentArgs[argName] !== undefined) {
                 pathValue = pathValue.replace(match[0], currentArgs[argName]);
               } else {
-                logger.warn(`CLI argument '${argName}' in placeholder not found for watch_sources path '${sourceEntry.path}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`, { module: 'src/core/watch_handler.js' });
+                logger.warn('CLI argument in placeholder not found for watch_sources path', {
+                  context: 'WatchHandler',
+                  cliArgument: argName,
+                  sourcePath: sourceEntry.path,
+                  plugin: currentArgs.plugin || currentArgs.pluginName,
+                  suggestion: `Ensure CLI argument '${argName}' is provided.`
+                });
               }
             }
             resolvedPathToAdd = path.resolve(pluginBasePath, pathValue);
           } else if (sourceEntry.type === 'glob' && sourceEntry.pattern && typeof sourceEntry.pattern === 'string') {
             let globPattern = sourceEntry.pattern;
-            let globBase = pluginBasePath; // Default base path
+            let globBase = pluginBasePath;
 
             if (sourceEntry.base_path_from_cli_arg && currentArgs[sourceEntry.base_path_from_cli_arg]) {
               globBase = path.resolve(currentArgs[sourceEntry.base_path_from_cli_arg]);
@@ -72,7 +92,13 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
               if (currentArgs[argName] !== undefined) {
                 globPattern = globPattern.replace(match[0], currentArgs[argName]);
               } else {
-                logger.warn(`CLI argument '${argName}' in placeholder not found for watch_sources glob pattern '${sourceEntry.pattern}' in plugin '${currentArgs.plugin || currentArgs.pluginName}'.`, { module: 'src/core/watch_handler.js' });
+                logger.warn('CLI argument in placeholder not found for watch_sources glob pattern', {
+                  context: 'WatchHandler',
+                  cliArgument: argName,
+                  globPattern: sourceEntry.pattern,
+                  plugin: currentArgs.plugin || currentArgs.pluginName,
+                  suggestion: `Ensure CLI argument '${argName}' is provided.`
+                });
               }
             }
             // Note: globBase itself could also contain placeholders if we decide to support that,
@@ -85,16 +111,29 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
             }
           }
 
-
           if (resolvedPathToAdd) {
             if (sourceEntry.type !== 'glob' && !fs.existsSync(resolvedPathToAdd)) {
-              logger.warn(`Declared watch path does not exist: ${resolvedPathToAdd} (from plugin '${currentArgs.plugin || currentArgs.pluginName}')`, { module: 'src/core/watch_handler.js' });
+              logger.warn('Declared watch path does not exist', {
+                context: 'WatchHandler',
+                resource: resolvedPathToAdd,
+                plugin: currentArgs.plugin || currentArgs.pluginName,
+                suggestion: 'Verify the path specified in plugin configuration exists.'
+              });
             } else {
               files.add(resolvedPathToAdd);
-              logger.info(`Added to watch list from plugin '${currentArgs.plugin || currentArgs.pluginName}': ${resolvedPathToAdd}`, { module: 'src/core/watch_handler.js' });
+              logger.info('Added to watch list from plugin', {
+                context: 'WatchHandler',
+                file: resolvedPathToAdd,
+                plugin: currentArgs.plugin || currentArgs.pluginName
+              });
             }
           } else if (sourceEntry.type !== 'glob') {
-            logger.warn(`Could not resolve path for a watch_sources entry in plugin '${currentArgs.plugin || currentArgs.pluginName}': ${JSON.stringify(sourceEntry)}`, { module: 'src/core/watch_handler.js' });
+            logger.warn('Could not resolve path for a watch_sources entry in plugin', {
+              context: 'WatchHandler',
+              plugin: currentArgs.plugin || currentArgs.pluginName,
+              sourceEntry: JSON.stringify(sourceEntry),
+              suggestion: 'Check the format and values of the watch_sources entry.'
+            });
           }
         }
       }
@@ -103,20 +142,45 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
 
       if (configSources.mainConfigPath && fs.existsSync(configSources.mainConfigPath)) {
         files.add(configSources.mainConfigPath);
+        logger.debug('Added main config file to watch list', {
+          context: 'WatchHandler',
+          file: configSources.mainConfigPath
+        });
       }
       configSources.pluginConfigPaths.forEach(p => {
-        if (p && fs.existsSync(p)) files.add(p);
+        if (p && fs.existsSync(p)) {
+          files.add(p);
+          logger.debug('Added plugin config file to watch list', {
+            context: 'WatchHandler',
+            file: p
+          });
+        }
       });
       configSources.cssFiles.forEach(cssPath => {
-        if (fs.existsSync(cssPath)) files.add(cssPath);
+        if (fs.existsSync(cssPath)) {
+          files.add(cssPath);
+          logger.debug('Added CSS file to watch list', {
+            context: 'WatchHandler',
+            file: cssPath
+          });
+        }
       });
 
       if (effectiveConfig.handlerScriptPath && fs.existsSync(effectiveConfig.handlerScriptPath)) {
         files.add(effectiveConfig.handlerScriptPath);
+        logger.debug('Added handler script to watch list', {
+          context: 'WatchHandler',
+          file: effectiveConfig.handlerScriptPath
+        });
       }
 
     } catch (error) {
-      logger.warn(`Could not determine all paths to watch for plugin '${currentArgs.plugin || currentArgs.pluginName}': ${error.message}`, { module: 'src/core/watch_handler.js' });
+      logger.warn('Could not determine all paths to watch for plugin', {
+        context: 'WatchHandler',
+        plugin: currentArgs.plugin || currentArgs.pluginName,
+        error: error.message,
+        suggestion: 'Falling back to watch Markdown and config files if they exist.'
+      });
       if (currentArgs.markdownFile && fs.existsSync(currentArgs.markdownFile)) {
         files.add(path.resolve(currentArgs.markdownFile));
       }
@@ -127,9 +191,17 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
 
     if (configResolver.defaultMainConfigPath && fs.existsSync(configResolver.defaultMainConfigPath)) {
       files.add(configResolver.defaultMainConfigPath);
+      logger.debug('Added default main config path to watch list', {
+        context: 'WatchHandler',
+        file: configResolver.defaultMainConfigPath
+      });
     }
     if (configResolver.xdgGlobalConfigPath && fs.existsSync(configResolver.xdgGlobalConfigPath)) {
       files.add(configResolver.xdgGlobalConfigPath);
+      logger.debug('Added XDG global config path to watch list', {
+        context: 'WatchHandler',
+        file: configResolver.xdgGlobalConfigPath
+      });
     }
 
     return Array.from(files).filter(p => p);
@@ -138,14 +210,27 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
   const rebuild = async (event, filePathTrigger) => {
     if (isProcessing) {
       needsRebuild = true;
+      logger.debug('Rebuild already in progress, queuing new rebuild', {
+        context: 'WatchHandler',
+        triggeredByEvent: event,
+        triggeredByFile: filePathTrigger
+      });
       return;
     }
     isProcessing = true;
     needsRebuild = false;
-    logger.info(`\nDetected ${event} in: ${filePathTrigger}. Rebuilding...`, { module: 'src/core/watch_handler.js' });
+    logger.info('Detected change, rebuilding...', {
+      context: 'WatchHandler',
+      event: event,
+      filePath: filePathTrigger
+    });
 
     try {
       await commandExecutor(args);
+      logger.success('Rebuild completed successfully', {
+        context: 'WatchHandler',
+        triggeredByFile: filePathTrigger
+      });
 
       const newConfigResolverForPaths = new ConfigResolver(args.config, args.factoryDefaults);
       const newWatchedPaths = await collectWatchablePaths(newConfigResolverForPaths, args);
@@ -156,39 +241,60 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
       if (watcher) {
         if (pathsToRemove.length > 0) {
           watcher.unwatch(pathsToRemove);
+          logger.debug('Unwatched paths', {
+            context: 'WatchHandler',
+            paths: pathsToRemove
+          });
         }
         if (pathsToAdd.length > 0) {
           watcher.add(pathsToAdd);
+          logger.debug('Added new paths to watch', {
+            context: 'WatchHandler',
+            paths: pathsToAdd
+          });
         }
       }
       watchedPaths = newWatchedPaths;
+      logger.info('Watcher paths updated', {
+        context: 'WatchHandler',
+        totalWatchedPaths: watchedPaths.length
+      });
+
 
       if (event === 'unlink' && watchedPaths.includes(filePathTrigger)) {
         if (fs.existsSync(filePathTrigger)) {
           if (watcher) watcher.add(filePathTrigger);
+          logger.debug('Re-added unlinked file back to watch list because it re-appeared', {
+            context: 'WatchHandler',
+            file: filePathTrigger
+          });
         }
       }
     } catch (error) {
-      logger.error('Rebuild failed triggered by', {
-        module: 'src/core/watch_handler.js',
+      logger.error('Rebuild failed', {
+        context: 'WatchHandler',
         filePathTrigger: filePathTrigger,
         event: event,
-        error: error.message
+        error: error.message,
+        stack: error.stack
       });
-      if (error.stack) logger.error(error.stack, { module: 'src/core/watch_handler.js' });
     } finally {
       isProcessing = false;
       if (needsRebuild) {
-        logger.info('Executing queued rebuild...', { module: 'src/core/watch_handler.js' });
+        logger.info('Executing queued rebuild...', {
+          context: 'WatchHandler'
+        });
         setTimeout(() => {
           if (!isProcessing) {
             rebuild('queued', 'queued changes');
           } else {
             needsRebuild = true;
           }
-        }, 250);
+        }, 250); // Small delay to avoid rapid re-triggering
       } else {
-        logger.info('Watching for further changes...', { module: 'src/core/watch_handler.js' });
+        logger.info('Watching for further changes...', {
+          context: 'WatchHandler'
+        });
       }
     }
   };
@@ -196,33 +302,58 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
   try {
     const initialConfigResolver = new ConfigResolver(args.config, args.factoryDefaults);
     watchedPaths = await collectWatchablePaths(initialConfigResolver, args);
+    logger.info('Initial paths for watcher collected', {
+      context: 'WatchHandler',
+      pathsCount: watchedPaths.length
+    });
   } catch (e) {
     logger.error('Failed to collect initial paths for watcher', {
-        module: 'src/core/watch_handler.js',
-        error: e.message
-      });
+      context: 'WatchHandler',
+      error: e.message,
+      stack: e.stack,
+      suggestion: 'Watcher might be limited to markdown and config files.'
+    });
     watchedPaths = [];
     if (args.markdownFile && fs.existsSync(args.markdownFile)) {
       watchedPaths.push(path.resolve(args.markdownFile));
+      logger.debug('Added markdown file to watch list as fallback', {
+        context: 'WatchHandler',
+        file: path.resolve(args.markdownFile)
+      });
+    }
+    if (args.config && fs.existsSync(args.config)) {
+      watchedPaths.push(path.resolve(args.config));
+      logger.debug('Added config file to watch list as fallback', {
+        context: 'WatchHandler',
+        file: path.resolve(args.config)
+      });
     }
   }
 
   if (watchedPaths.length === 0) {
-    logger.warn('Watch mode activated, but no files could be identified to watch. Executing command once.', { module: 'src/core/watch_handler.js' });
+    logger.warn('Watch mode activated, but no files could be identified to watch', {
+      context: 'WatchHandler',
+      suggestion: 'Executing command once as no files are being monitored for changes.'
+    });
     try {
       await commandExecutor(args);
-    } catch(e) {
-      logger.error('Single execution failed in watch mode (no files watched):', {
-        module: 'src/core/watch_handler.js',
-        error: e.message
+    } catch (e) {
+      logger.error('Single execution failed in watch mode (no files watched)', {
+        context: 'WatchHandler',
+        error: e.message,
+        stack: e.stack
       });
     }
     return;
   }
 
-  logger.info('\nWatch mode active. Initially monitoring:', { module: 'src/core/watch_handler.js' });
-  watchedPaths.forEach(f => logger.detail(`  - ${f}`, { module: 'src/core/watch_handler.js' }));
-  logger.info('Press Ctrl+C to exit.', { module: 'src/core/watch_handler.js' });
+  logger.info('Watch mode active. Initially monitoring these files and directories:', {
+    context: 'WatchHandler',
+    fileCount: watchedPaths.length
+  });
+  watchedPaths.forEach(f => logger.info('  - ' + f, { context: 'WatchHandler', type: 'watched_path' }));
+  logger.info('Press Ctrl+C to exit.', { context: 'WatchHandler' });
+
 
   watcher = chokidar.watch(watchedPaths, {
     persistent: true,
@@ -240,17 +371,24 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
       }
     })
     .on('error', error =>
-      logger.error('Watcher error:', {
-        module: 'src/core/watch_handler.js',
-        error: error.message
+      logger.error('Watcher error', {
+        context: 'WatchHandler',
+        error: error.message,
+        stack: error.stack
       }));
   try {
-    logger.info('Performing initial build for watch mode...', { module: 'src/core/watch_handler.js' });
+    logger.info('Performing initial build for watch mode...', {
+      context: 'WatchHandler'
+    });
     await commandExecutor(args);
+    logger.success('Initial build completed for watch mode', {
+      context: 'WatchHandler'
+    });
   } catch (e) {
-    logger.error('Initial build failed in watch mode:', {
-      module: 'src/core/watch_handler.js',
-      error: e.message
+    logger.error('Initial build failed in watch mode', {
+      context: 'WatchHandler',
+      error: e.message,
+      stack: e.stack
     });
   }
 }

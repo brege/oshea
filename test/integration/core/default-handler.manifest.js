@@ -147,22 +147,18 @@ module.exports = [
     pluginSpecificConfig: { html_template_path: 'my-template.html' },
     pluginBasePath: '/plugins/my-plugin',
     stubs: {
-      // Provide the necessary front matter stubs for filename generation
       extractFrontMatter: { data: { title: 'Template Test' }, content: 'Content' },
       substituteAllPlaceholders: { processedFmData: { title: 'Template Test' }, processedContent: 'Content' },
       removeShortcodes: 'Content',
       ensureAndPreprocessHeading: '# Template Test\n\nContent',
       renderMarkdownToHtml: '<p>Content</p>',
-      // Provide the slug for the title that will be used
       generateSlug: { 'Template Test': 'template-test' },
-      // Mock the template file itself
       fileMocks: [
         {
           path: '/plugins/my-plugin/my-template.html',
           content: '<html>{{{body}}}</html>'
         }
       ],
-      // Assert that the correct template content is passed
       expectations: (stubs, expect) => {
         const templateContent = '<html>{{{body}}}</html>';
         expect(stubs.generatePdfStub.calledOnce).to.be.true;
@@ -310,6 +306,23 @@ module.exports = [
       existsSync: false,
     },
     expectedError: 'Input Markdown file not found',
+    expectedLogs: [
+      {
+        level: 'error',
+        msg: 'Input Markdown file not found',
+        data: { context: 'DefaultHandler', file: '/path/to/test.md', operation: 'document generation' }
+      },
+      {
+        level: 'error',
+        msg: 'Document generation failed',
+        data: {
+          context: 'DefaultHandler',
+          error: 'Input Markdown file not found: /path/to/test.md',
+          operation: 'document generation',
+          file: '/path/to/test.md'
+        }
+      }
+    ],
   }),
 
   makeDefaultHandlerScenario({

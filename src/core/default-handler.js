@@ -3,7 +3,6 @@ const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');
 
-// --- Imports from Path Registry ---
 const {
   markdownUtilsPath,
   pdfGeneratorPath,
@@ -31,12 +30,33 @@ class DefaultHandler {
 
     try {
       if (!markdownFilePath || !fss.existsSync(markdownFilePath)) {
-        throw new Error(`Input Markdown file not found: ${markdownFilePath}`);
+        const errorMessage = `Input Markdown file not found: ${markdownFilePath}`;
+        logger.error('Document generation failed', {
+          context: 'DefaultHandler',
+          file: markdownFilePath,
+          operation: 'document generation',
+          error: errorMessage
+        });
+        throw new Error(errorMessage);
       }
+      logger.info('Starting document generation', {
+        context: 'DefaultHandler',
+        markdownFilePath: markdownFilePath,
+        outputDir: outputDir
+      });
+
       await fs.mkdir(outputDir, { recursive: true });
+      logger.debug('Output directory ensured', {
+        context: 'DefaultHandler',
+        outputDir: outputDir
+      });
 
       const rawMarkdownContent = await fs.readFile(markdownFilePath, 'utf8');
       const { data: initialFrontMatter, content: contentWithoutFm } = extractFrontMatter(rawMarkdownContent);
+      logger.debug('Front matter extracted', {
+        context: 'DefaultHandler',
+        markdownFilePath: markdownFilePath
+      });
 
       const contextForPlaceholders = {
         ...(globalConfig.params || {}),
@@ -45,13 +65,21 @@ class DefaultHandler {
       };
 
       const { processedFmData, processedContent: contentAfterFMSubst } =
-                substituteAllPlaceholders(contentWithoutFm, contextForPlaceholders);
+        substituteAllPlaceholders(contentWithoutFm, contextForPlaceholders);
+      logger.debug('Placeholders substituted', {
+        context: 'DefaultHandler',
+        file: markdownFilePath
+      });
 
       const patternsToRemove = [
         ...(globalConfig.global_remove_shortcodes || []),
         ...(pluginSpecificConfig.remove_shortcodes_patterns || [])
       ];
       const cleanedContent = removeShortcodes(contentAfterFMSubst, patternsToRemove);
+      logger.debug('Shortcodes removed', {
+        context: 'DefaultHandler',
+        count: patternsToRemove.length
+      });
 
       let finalOutputFilename = outputFilenameOpt;
       if (!finalOutputFilename) {
@@ -67,11 +95,24 @@ class DefaultHandler {
         ];
 
         finalOutputFilename = nameParts.filter(Boolean).join('-') + '.pdf';
+        logger.debug('Generated output filename', {
+          context: 'DefaultHandler',
+          filename: finalOutputFilename,
+          source: 'auto-generated'
+        });
       }
       if (!finalOutputFilename.toLowerCase().endsWith('.pdf')) {
         finalOutputFilename += '.pdf';
+        logger.debug('Appended .pdf extension to filename', {
+          context: 'DefaultHandler',
+          filename: finalOutputFilename
+        });
       }
       const outputPdfPath = path.join(outputDir, finalOutputFilename);
+      logger.info('Determined output PDF path', {
+        context: 'DefaultHandler',
+        outputPath: outputPdfPath
+      });
 
       let markdownToRender = cleanedContent;
       if (pluginSpecificConfig.inject_fm_title_as_h1 && !pluginSpecificConfig.omit_title_heading && processedFmData.title) {
@@ -80,6 +121,10 @@ class DefaultHandler {
           String(processedFmData.title),
           !!pluginSpecificConfig.aggressiveHeadingCleanup
         );
+        logger.debug('Injected front matter title as H1', {
+          context: 'DefaultHandler',
+          title: processedFmData.title
+        });
       }
 
       const mergedPdfOptions = {
@@ -90,6 +135,9 @@ class DefaultHandler {
           ...((pluginSpecificConfig.pdf_options || {}).margin || {}),
         }
       };
+      logger.debug('Merged PDF options', {
+        context: 'DefaultHandler'
+      });
 
       const htmlBodyContent = renderMarkdownToHtml(
         markdownToRender,
@@ -100,21 +148,40 @@ class DefaultHandler {
         pluginSpecificConfig.markdown_it_options,
         pluginSpecificConfig.markdown_it_plugins
       );
+      logger.debug('Markdown rendered to HTML', {
+        context: 'DefaultHandler'
+      });
 
       const cssFileContentsArray = [];
       if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) {
         const mathCssStrings = await mathIntegration.getMathCssContent(pluginSpecificConfig.math);
         cssFileContentsArray.push(...mathCssStrings);
+        logger.debug('Math CSS content retrieved', {
+          context: 'DefaultHandler',
+          mathConfig: pluginSpecificConfig.math
+        });
       }
 
       for (const cssFile of (pluginSpecificConfig.css_files || [])) {
         const cssFilePath = path.resolve(pluginBasePath, cssFile);
         if (fss.existsSync(cssFilePath)) {
           cssFileContentsArray.push(await fs.readFile(cssFilePath, 'utf8'));
+          logger.debug('CSS file loaded', {
+            context: 'DefaultHandler',
+            file: cssFilePath
+          });
         } else if (path.isAbsolute(cssFile) && fss.existsSync(cssFile)) {
           cssFileContentsArray.push(await fs.readFile(cssFile, 'utf8'));
+          logger.debug('Absolute CSS file loaded', {
+            context: 'DefaultHandler',
+            file: cssFile
+          });
         } else {
-          logger.warn(`WARN: CSS file not found: ${cssFilePath}`, { module: 'src/core/default_handler.js' });
+          logger.warn('CSS file not found', {
+            context: 'DefaultHandler',
+            resource: cssFilePath,
+            suggestion: 'Configure pdf_viewer in settings'
+          });
         }
       }
 
@@ -127,6 +194,14 @@ class DefaultHandler {
 
       const templatePath = pluginSpecificConfig.html_template_path ? path.resolve(pluginBasePath, pluginSpecificConfig.html_template_path) : null;
       const htmlTemplateContent = templatePath && fss.existsSync(templatePath) ? await fs.readFile(templatePath, 'utf8') : null;
+      if (templatePath) {
+        logger.debug('HTML template path resolved', {
+          context: 'DefaultHandler',
+          templatePath: templatePath,
+          found: !!htmlTemplateContent
+        });
+      }
+
 
       await generatePdf(
         htmlBodyContent,
@@ -137,9 +212,20 @@ class DefaultHandler {
         injectionPoints
       );
 
+      logger.success('PDF generated successfully', {
+        context: 'DefaultHandler',
+        outputPath: outputPdfPath,
+        operation: 'document generation'
+      });
       return outputPdfPath;
     } catch (error) {
-      logger.error(`Error during document generation: ${error.message}`, { module: 'src/core/default_handler.js', error });
+      logger.error('Document generation failed', {
+        context: 'DefaultHandler',
+        error: error.message,
+        operation: 'document generation',
+        file: markdownFilePath,
+        stack: error.stack
+      });
       return null;
     }
   }

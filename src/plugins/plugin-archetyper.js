@@ -18,9 +18,9 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
 
   const idParts = sourcePluginIdentifier.split('/');
   const isPotentiallyCmIdentifier = idParts.length === 2 && idParts[0] && idParts[1] &&
-                                 !sourcePluginIdentifier.startsWith('.') &&
-                                 !sourcePluginIdentifier.startsWith('~') &&
-                                 !path.isAbsolute(sourcePluginIdentifier);
+                                   !sourcePluginIdentifier.startsWith('.') &&
+                                   !sourcePluginIdentifier.startsWith('~') &&
+                                   !path.isAbsolute(sourcePluginIdentifier);
 
   if (isPotentiallyCmIdentifier) {
     const [sourceCollectionName, sourcePluginId] = idParts;
@@ -52,7 +52,11 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
       const sourceConfigContent = await fs.readFile(sourcePluginInfo.config_path, 'utf8');
       sourcePluginInfo.description = yaml.load(sourceConfigContent).description || `Plugin from path: ${sourcePluginIdForReplacement}`;
     } catch {
-      logger.warn('WARN: Could not read description from direct path source config.');
+      logger.warn('Could not read description from direct path source config.', {
+        context: 'PluginArchetyper',
+        configPath: sourcePluginInfo.config_path,
+        suggestion: 'Ensure the config file is a valid YAML format.'
+      });
     }
   }
 
@@ -174,7 +178,12 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
     }
   }
 
-  logger.success(`Archetype '${newArchetypeName}' created successfully from '${sourcePluginIdentifier}'.`, { module: 'src/plugins/plugin_archetyper.js' });
+  logger.success('Archetype created successfully.', {
+    context: 'PluginArchetyper',
+    archetypeName: newArchetypeName,
+    sourcePlugin: sourcePluginIdentifier,
+    result: archetypePath
+  });
   return { success: true, message: `Archetype '${newArchetypeName}' created successfully.`, archetypePath };
 }
 

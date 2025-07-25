@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/linting/code/standardize-js-line-one-all.js
+// scripts/linting/code/no-bad-headers.js
 
 require('module-alias/register');
 
@@ -112,7 +112,7 @@ function runLinter(options = {}) {
 
 if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
-  const config = loadLintSection('standardize-line-one', lintingConfigPath) || {};
+  const config = loadLintSection('no-bad-headers', lintingConfigPath) || {};
 
   const finalTargets = targets.length > 0 ? targets : (config.targets || []);
   const ignores = config.excludes || [];

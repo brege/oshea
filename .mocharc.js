@@ -9,7 +9,7 @@ const hasFiles = argv._ && argv._.length > 0;
 const group = argv.group || (hasFiles ? 'custom' : 'all');
 
 if (require.main === module) {
-  // lint-skip-next-line logging
+  // lint-skip-next-line no-console
   console.log(`[Mocha] Running test group: '${group}'`);
 }
 function flattenSpecs(spec) {

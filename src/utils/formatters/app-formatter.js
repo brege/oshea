@@ -1,6 +1,6 @@
 // src/utils/formatters/app-formatter.js
 // Default app theme formatter with colored output
-// lint-skip-file logging
+// lint-skip-file no-console
 
 const chalk = require('chalk');
 const fs = require('fs');

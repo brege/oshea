@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/linting/code/remove-jsdoc.js
+// scripts/linting/code/no-jsdoc.js
 
 require('module-alias/register');
 
@@ -114,7 +114,7 @@ if (require.main === module) {
   // Set global debug mode
   logger.setDebugMode(!!flags.debug);
 
-  const config = loadLintSection('remove-jsdoc', lintingConfigPath) || {};
+  const config = loadLintSection('no-jsdoc', lintingConfigPath) || {};
   const configTargets = config.targets || [];
   const configExcludes = config.excludes || [];
   const filetypes = config.filetypes;

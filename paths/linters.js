@@ -1,6 +1,6 @@
 // paths/linters.js
 // linters.js - Linting Tools Registry
-// Generated: 2025-07-24T01:54:54.255Z
+// Generated: 2025-07-24T23:59:06.235Z
 // Architecture: Feature-based linting infrastructure
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -31,17 +31,17 @@ const lintPath = path.join(projectRoot, 'scripts/linting/lint.js');
 
 // Code Quality Linters
 const codeRoot = path.join(projectRoot, 'scripts/linting/code/');
-const loggingLintPath = path.join(projectRoot, 'scripts/linting/code/logging-lint.js');
+const noBadHeadersPath = path.join(projectRoot, 'scripts/linting/code/no-bad-headers.js');
+const noConsolePath = path.join(projectRoot, 'scripts/linting/code/no-console.js');
+const noJsdocPath = path.join(projectRoot, 'scripts/linting/code/no-jsdoc.js');
 const noRelativePathsPath = path.join(projectRoot, 'scripts/linting/code/no-relative-paths.js');
-const removeJsdocPath = path.join(projectRoot, 'scripts/linting/code/remove-jsdoc.js');
-const standardizeJsLineOneAllPath = path.join(projectRoot, 'scripts/linting/code/standardize-js-line-one-all.js');
-const stripTrailingWhitespacePath = path.join(projectRoot, 'scripts/linting/code/strip-trailing-whitespace.js');
+const noTrailingWhitespacePath = path.join(projectRoot, 'scripts/linting/code/no-trailing-whitespace.js');
 
 // Documentation Linters
 const docsRoot = path.join(projectRoot, 'scripts/linting/docs/');
-const findLitterPath = path.join(projectRoot, 'scripts/linting/docs/find-litter.js');
+const janitorPath = path.join(projectRoot, 'scripts/linting/docs/janitor.js');
+const librarianPath = path.join(projectRoot, 'scripts/linting/docs/librarian.js');
 const postmanPath = path.join(projectRoot, 'scripts/linting/docs/postman.js');
-const updateProjectIndicesPath = path.join(projectRoot, 'scripts/linting/docs/update-project-indices.js');
 
 // --- Rank 2: supportive operations ---
 
@@ -78,15 +78,15 @@ module.exports = {
 
   // --- essential operations ---
   codeRoot,
-  loggingLintPath,
+  noBadHeadersPath,
+  noConsolePath,
+  noJsdocPath,
   noRelativePathsPath,
-  removeJsdocPath,
-  standardizeJsLineOneAllPath,
-  stripTrailingWhitespacePath,
+  noTrailingWhitespacePath,
   docsRoot,
-  findLitterPath,
+  janitorPath,
+  librarianPath,
   postmanPath,
-  updateProjectIndicesPath,
 
   // --- supportive operations ---
   validatorsRoot,

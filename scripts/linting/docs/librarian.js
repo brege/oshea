@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/linting/docs/update-project-indices.js
+// scripts/linting/docs/librarian.js
 
 require('module-alias/register');
 
@@ -239,7 +239,7 @@ async function runLibrarian(options = {}) {
   const { group = null, debug = false, targets = [], force = false } = options; // eslint-disable-line no-unused-vars
   const configYaml = fs.readFileSync(lintingConfigPath, 'utf8');
   const parsedConfig = yaml.load(configYaml);
-  const groups = parsedConfig['update-indices'] || {};
+  const groups = parsedConfig['librarian'] || {};
   let allIssues = [];
   let totalFixed = 0;
 

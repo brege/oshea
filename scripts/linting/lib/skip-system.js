@@ -91,13 +91,14 @@ function generateSkipMarkers() {
 // Get simplified alias for common linters
 function getSimplifiedAlias(linterKey) {
   const aliases = {
-    'doc-links': 'postman',
-    'update-indices': 'librarian',
-    'find-litter': 'litter',
+    'postman': 'links',
+    'janitor': 'litter',
+    'librarian': 'index',
+    'no-bad-headers': 'header',
+    'no-console': 'logs',
+    'no-jsdoc': 'jsdoc',
     'no-relative-paths': 'paths',
-    'remove-jsdoc': 'jsdoc',
-    'standardize-line-one': 'headers',
-    'remove-ws': 'whitespace',
+    'no-trailing-whitespace': 'ws',
     'validate-mocha': 'mocha'
   };
 
@@ -286,13 +287,14 @@ function extractLinterFromMarker(marker) {
 
       // Handle aliases and convert back to linter keys
       const aliasToKey = {
-        'postman': 'doc-links',
-        'librarian': 'update-indices',
-        'litter': 'find-litter',
+        'links': 'postman',
+        'index': 'librarian',
+        'litter': 'janitor',
         'paths': 'no-relative-paths',
-        'jsdoc': 'remove-jsdoc',
-        'headers': 'standardize-line-one',
-        'whitespace': 'remove-ws',
+        'jsdoc': 'no-jsdoc',
+        'header': 'no-bad-headers',
+        'ws': 'no-trailing-whitespace',
+        'logs': 'no-console',
         'mocha': 'validate-mocha'
       };
 

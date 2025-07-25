@@ -329,7 +329,7 @@ if (require.main === module) {
     // Set global debug mode
     logger.setDebugMode(!!flags.debug);
 
-    const config = loadLintSection('doc-links', lintingConfigPath) || {};
+    const config = loadLintSection('postman', lintingConfigPath) || {};
 
     const { issues, summary } = await runLinter({
       targets: targets.length > 0 ? targets : config.targets,

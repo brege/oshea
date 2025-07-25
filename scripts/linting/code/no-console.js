@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/linting/code/logging-lint.js
+// scripts/linting/code/no-console.js
 
 require('module-alias/register');
 
@@ -30,7 +30,7 @@ const CHALK_REGEX = /chalk\.(\w+)/g;
 
 function scanFile(filePath) {
   // Check if file should be skipped based on .skipignore files
-  if (shouldSkipFile(filePath, 'logging')) {
+  if (shouldSkipFile(filePath, 'no-console')) {
     return null;
   }
 
@@ -67,7 +67,7 @@ function scanFile(filePath) {
   hits.forEach(hit => {
     const lineContent = lines[hit.line - 1];
     const prevLine = lines[hit.line - 2] || '';
-    hit.ignore = shouldSkipLine(lineContent, prevLine, 'logging');
+    hit.ignore = shouldSkipLine(lineContent, prevLine, 'no-console');
   });
 
   return hits.length ? { file: filePath, hits } : null;
@@ -87,7 +87,7 @@ function runLinter(options = {}) {
     targets: targets,
     ignores: excludes,
     filetypes,
-    skipTag: 'lint-skip-file logging',
+    skipTag: 'lint-skip-file no-console',
     debug: debug
   });
 
@@ -128,10 +128,10 @@ if (require.main === module) {
   // Set global debug mode
   logger.setDebugMode(!!flags.debug);
 
-  const loggingConfig = loadLintSection('logging', lintingConfigPath) || {};
-  const configTargets = loggingConfig.targets || [];
-  const configExcludes = loggingConfig.excludes || [];
-  const filetypes = loggingConfig.filetypes;
+  const noConsoleConfig = loadLintSection('no-console', lintingConfigPath) || {};
+  const configTargets = noConsoleConfig.targets || [];
+  const configExcludes = noConsoleConfig.excludes || [];
+  const filetypes = noConsoleConfig.filetypes;
 
   const finalTargets = targets.length ? targets : configTargets;
   const excludes = flags.force ? [] : configExcludes;
@@ -139,7 +139,7 @@ if (require.main === module) {
   const { issues, summary } = runLinter({
     targets: finalTargets,
     excludes,
-    config: loggingConfig,
+    config: noConsoleConfig,
     filetypes,
     debug: !!flags.debug,
   });

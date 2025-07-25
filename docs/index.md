@@ -21,7 +21,7 @@ There are also several indexes for the main components of the project.
 [ [**Tests**](../test/index.md) ]
 
 These indices are automatically managed by
-[**the librarian**](../scripts/linting/docs/update-project-indices.js)
+[**the librarian**](../scripts/linting/docs/librarian.js)
 and configured via
 [`scripts/linting/linting-config.yaml`](../scripts/linting/linting-config.yaml)
 at the project root.
@@ -166,7 +166,7 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 
 ## Uncategorized Documents
 *A dynamically generated list of documents that have not yet been categorized.* \
-*This list is automatically updated by [`scripts/linting/docs/update-project-indices.js`](../scripts/linting/docs/update-project-indices.js)*
+*This list is automatically updated by [`scripts/linting/docs/librarian.js`](../scripts/linting/docs/librarian.js)*
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

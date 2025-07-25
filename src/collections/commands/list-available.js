@@ -6,6 +6,8 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
 
   const availablePlugins = [];
   if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
+    // No logger call here, as it's an internal helper and the calling function
+    // is expected to handle the outer level logging for non-existent paths.
     return [];
   }
 
@@ -44,6 +46,9 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
           pluginInfoBase.description = pluginConfigData.description || 'Plugin description not available.';
         } catch (e) {
           pluginInfoBase.description = `Error loading plugin config: ${e.message.substring(0, 50)}...`;
+          // No logger call here; this is an internal detail property being set.
+          // The calling function (e.g., listAvailablePlugins which calls this)
+          // or a higher level is responsible for reporting these details to the user.
         }
 
         if (collectionName === USER_ADDED_PLUGINS_DIR_NAME && _readCollectionMetadataFunc) {
@@ -57,6 +62,7 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
             }
           } catch (metaError) {
             pluginInfoBase.metadata_error = `Metadata unreadable: ${metaError.message.substring(0,30)}...`;
+            // No logger call here; this is an internal detail property being set.
           }
         }
         if (pluginInfoBase.is_singleton && pluginInfoBase.original_source) {
@@ -73,6 +79,9 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
 
 module.exports = async function listAvailablePlugins(dependencies, collectionNameFilter = null) {
   const { fss, fs, path } = dependencies;
+  // No logger calls here, as this function is usually called by other commands
+  // like 'enable-all' or 'list' that handle the user-facing logging.
+  // This function focuses on data retrieval.
 
   let allAvailablePlugins = [];
   if (!fss.existsSync(this.collRoot)) {

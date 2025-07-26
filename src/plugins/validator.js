@@ -58,7 +58,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     protocol: { value: undefined, source: undefined },
   };
 
-  logger.info('Resolving plugin metadata for plugin', {
+  logger.debug('Resolving plugin metadata for plugin', {
     context: 'PluginValidator',
     pluginName: pluginName,
     pluginDirectoryPath: pluginDirectoryPath
@@ -193,7 +193,7 @@ function validate(pluginIdentifier) {
   // Ensure plugin_name derived from metadata matches the directory name for core consistency
   if (pluginMetadata.plugin_name.value !== pluginName) {
     const nameMismatchError = `Resolved 'plugin_name' ('${pluginMetadata.plugin_name.value}') does not match plugin directory name ('${pluginName}'). This is a critical mismatch.`;
-    logger.error('✗ Plugin is INVALID: Plugin name mismatch', { // Modernized symbol
+    logger.error('✗ Plugin is INVALID: Plugin name mismatch', {
       context: 'PluginValidator',
       resolvedPluginName: pluginMetadata.plugin_name.value,
       directoryName: pluginName,
@@ -225,7 +225,7 @@ function validate(pluginIdentifier) {
   default:
   {
     const errorMsg = `Unsupported plugin protocol '${pluginMetadata.protocol.value}' for plugin '${pluginName}'.`;
-    logger.error('✗ Plugin is INVALID: Unsupported protocol', { // Modernized symbol
+    logger.error('✗ Plugin is INVALID: Unsupported protocol', {
       context: 'PluginValidator',
       pluginName: pluginName,
       protocol: pluginMetadata.protocol.value,
@@ -242,16 +242,17 @@ function validate(pluginIdentifier) {
   // Final validity is true only if no errors accumulated anywhere
   validationResult.isValid = validationResult.isValid && (errors.length === 0);
 
-  logger.info('--- Validation Summary ---', {
-    context: 'PluginValidator',
+  logger.validation('--- Validation Summary ---', {
+    //context: 'PluginValidator',
     pluginName: pluginName,
     isValid: validationResult.isValid,
     errorCount: validationResult.errors.length,
     warningCount: validationResult.warnings.length
+
   });
   if (validationResult.isValid) {
     if (validationResult.warnings.length === 0) {
-      logger.success(`✓ Plugin '${pluginName}' is VALID.`, { // Modernized symbol and kept dynamic content in msg for this specific output
+      logger.success(`✓ Plugin '${pluginName}' is VALID.`, {
         context: 'PluginValidator',
         pluginName: pluginName,
         status: 'valid'
@@ -280,10 +281,10 @@ function validate(pluginIdentifier) {
       errorCount: validationResult.errors.length
     });
     validationResult.errors.forEach((error) => {
-      logger.error(`✗ ${error}`, { // Modernized symbol, kept dynamic content in msg for list formatting
+      logger.error(`✗ ${error}`, {
         context: 'PluginValidator',
         pluginName: pluginName,
-        format: 'inline_list_item' // Custom format for detailed lists
+        format: 'inline_list_item'
       });
     });
   }
@@ -295,15 +296,15 @@ function validate(pluginIdentifier) {
       warningCount: validationResult.warnings.length
     });
     validationResult.warnings.forEach((warning) => {
-      logger.warn(`⚠ ${warning}`, { // Modernized symbol, kept dynamic content in msg for list formatting
+      logger.warn(`⚠ ${warning}`, {
         context: 'PluginValidator',
         pluginName: pluginName,
-        format: 'inline_list_item' // Custom format for detailed lists
+        format: 'inline_list_item'
       });
     });
   } else if (validationResult.isValid) {
-    logger.success('No warnings found.', {
-      context: 'PluginValidator',
+    logger.validation('No warnings found.', {
+      //context: 'PluginValidator',
       pluginName: pluginName
     });
   }

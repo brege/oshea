@@ -3,14 +3,12 @@
 module.exports = async function addCollection(dependencies, source, options = {}) {
   const { fs, fss, path, fsExtra, cmUtils, logger } = dependencies;
 
-  logger.info('Adding collection from source', {
-    context: 'AddCollectionCommand',
-    source: source
+  logger.info(`Adding collection from source: ${source}`, {
+    context: 'AddCollectionCommand'
   });
   if (options.name) {
-    logger.info('Requested local name', {
-      context: 'AddCollectionCommand',
-      name: options.name
+    logger.debug(`Requested local name: ${options.name}`, {
+      context: 'AddCollectionCommand'
     });
   }
 
@@ -32,13 +30,11 @@ module.exports = async function addCollection(dependencies, source, options = {}
   }
   const targetPath = path.join(this.collRoot, collectionName);
 
-  logger.info('Target collection name', {
-    context: 'AddCollectionCommand',
-    collectionName: collectionName
+  logger.debug(`Target collection name: ${collectionName}`, {
+    context: 'AddCollectionCommand'
   });
-  logger.info('Target path', {
-    context: 'AddCollectionCommand',
-    targetPath: targetPath
+  logger.debug(`Target path: ${targetPath}`, {
+    context: 'AddCollectionCommand'
   });
 
   if (fss.existsSync(targetPath)) {
@@ -60,50 +56,39 @@ module.exports = async function addCollection(dependencies, source, options = {}
 
   if (/^(http(s)?:\/\/|git@)/.test(source) || (typeof source === 'string' && source.endsWith('.git') && fss.existsSync(path.resolve(source)))) {
     const sourceToClone = /^(http(s)?:\/\/|git@)/.test(source) ? source : path.resolve(source);
-    logger.info('Source is a Git repository, attempting to clone', {
-      context: 'AddCollectionCommand',
-      source: sourceToClone,
-      operation: 'git clone'
+    logger.info(`Source is a Git repository, attempting to clone: ${sourceToClone}`, {
+      context: 'AddCollectionCommand'
     });
     await this._spawnGitProcess(['clone', sourceToClone, targetPath], this.collRoot, `cloning ${collectionName}`);
-    logger.success('Successfully cloned repository', {
-      context: 'AddCollectionCommand',
-      source: sourceToClone,
-      targetPath: targetPath
+    logger.success(`Successfully cloned repository: ${sourceToClone} -> ${targetPath}`, {
+      context: 'AddCollectionCommand'
     });
     await this._writeCollectionMetadata(collectionName, createInitialMetadata());
     return targetPath;
   } else {
     const absoluteSourcePath = path.resolve(source);
-    logger.info('Source is a non-Git local path, attempting to copy', {
-      context: 'AddCollectionCommand',
-      source: absoluteSourcePath,
-      operation: 'copy directory'
+    logger.info(`Source is a non-Git local path, attempting to copy: ${absoluteSourcePath}`, {
+      context: 'AddCollectionCommand'
     });
     if (!fss.existsSync(absoluteSourcePath)) {
       const errMsg = `Local source path does not exist: ${absoluteSourcePath}`;
-      logger.error('Local source path does not exist', {
-        context: 'AddCollectionCommand',
-        source: absoluteSourcePath,
-        error: errMsg
+      logger.error(`Local source path does not exist: ${absoluteSourcePath}`, {
+        context: 'AddCollectionCommand'
       });
       throw new Error(errMsg);
     }
     try {
       await fsExtra.copy(absoluteSourcePath, targetPath);
-      logger.success('Successfully copied local source', {
-        context: 'AddCollectionCommand',
-        source: absoluteSourcePath,
-        targetPath: targetPath
+      logger.success(`Successfully copied local source: ${absoluteSourcePath} -> ${targetPath}`, {
+        context: 'AddCollectionCommand'
       });
       await this._writeCollectionMetadata(collectionName, createInitialMetadata());
       return targetPath;
     } catch (error) {
-      logger.error('Failed to copy local source', {
+      logger.error(`Failed to copy local source: ${error.message}`, {
         context: 'AddCollectionCommand',
         source: absoluteSourcePath,
         targetPath: targetPath,
-        error: error.message,
         stack: error.stack
       });
       throw error;

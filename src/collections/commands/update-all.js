@@ -4,7 +4,7 @@ module.exports = async function updateAllCollections(dependencies) {
   const { fss, fs, path, constants, logger } = dependencies;
   const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
 
-  logger.info('Initiating update for all collections', {
+  logger.debug('Initiating update for all collections', {
     context: 'UpdateAllCollectionsCommand'
   });
 
@@ -21,14 +21,14 @@ module.exports = async function updateAllCollections(dependencies) {
     return { success: true, messages: ['No collections downloaded.']};
   }
 
-  logger.info('Processing updates for downloaded collections', {
+  logger.debug('Processing updates for downloaded collections', {
     context: 'UpdateAllCollectionsCommand',
     totalCollections: downloadedCollectionInfos.length
   });
 
   for (const collectionInfo of downloadedCollectionInfos) {
     const collectionName = collectionInfo.name;
-    logger.info('Processing collection for update', {
+    logger.debug('Processing collection for update', {
       context: 'UpdateAllCollectionsCommand',
       collectionName: collectionName
     });
@@ -64,9 +64,8 @@ module.exports = async function updateAllCollections(dependencies) {
                     message: result.message
                   });
                 } else {
-                  logger.info('Singleton plugin updated successfully', {
+                  logger.info(`Singleton plugin updated successfully: ${singletonPluginId}`, {
                     context: 'UpdateAllCollectionsCommand',
-                    pluginId: singletonPluginId,
                     collectionIdentifier: singletonCollectionNameForUpdate
                   });
                 }
@@ -84,9 +83,8 @@ module.exports = async function updateAllCollections(dependencies) {
             }
           }
         } else {
-          logger.info('User-added plugins directory does not exist or is not a directory, skipping.', {
-            context: 'UpdateAllCollectionsCommand',
-            path: singletonsBasePath
+          logger.info(`User-added plugins directory does not exist: ${singletonsBasePath}, skipping.`, {
+            context: 'UpdateAllCollectionsCommand'
           });
         }
       } catch (error) {
@@ -115,7 +113,7 @@ module.exports = async function updateAllCollections(dependencies) {
           message: result.message
         });
       } else {
-        logger.info('Collection updated successfully', {
+        logger.debug('Collection updated successfully', {
           context: 'UpdateAllCollectionsCommand',
           collectionName: collectionName
         });
@@ -132,7 +130,7 @@ module.exports = async function updateAllCollections(dependencies) {
       allOverallSuccess = false;
     }
   }
-  logger.info('Finished attempting to update all collections.', {
+  logger.debug('Finished attempting to update all collections.', {
     context: 'UpdateAllCollectionsCommand',
     overallSuccess: allOverallSuccess
   });

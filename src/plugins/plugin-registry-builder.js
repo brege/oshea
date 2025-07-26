@@ -134,7 +134,7 @@ class PluginRegistryBuilder {
         }
       }
     }
-    logger.info('Bundled plugins registration complete', {
+    logger.debug('Bundled plugins registration complete', {
       context: 'PluginRegistryBuilder',
       registeredCount: Object.keys(registrations).length
     });
@@ -381,7 +381,7 @@ class PluginRegistryBuilder {
           }
         }
       }
-      logger.info('Plugin registrations from file complete', {
+      logger.debug('Plugin registrations from file complete', {
         context: 'PluginRegistryBuilder',
         sourceFile: mainConfigFilePath,
         registeredCount: Object.keys(registrations).length
@@ -457,7 +457,7 @@ class PluginRegistryBuilder {
           }
         }
       }
-      logger.info('Plugin registrations from CM manifest complete', {
+      logger.debug('Plugin registrations from CM manifest complete', {
         context: 'PluginRegistryBuilder',
         sourceFile: cmEnabledManifestPath,
         registeredCount: Object.keys(registrations).length
@@ -482,7 +482,7 @@ class PluginRegistryBuilder {
       return this._builtRegistry.registry;
     }
 
-    logger.info('Building new plugin registry', {
+    logger.debug('Building new plugin registry', {
       context: 'PluginRegistryBuilder',
       useFactoryDefaultsOnly: this.useFactoryDefaultsOnly
     });
@@ -543,7 +543,7 @@ class PluginRegistryBuilder {
       primaryMainConfigLoadReason: this.primaryMainConfigLoadReason,
       collectionsManagerInstance: this.collectionsManager
     };
-    logger.info('Plugin registry built successfully', {
+    logger.debug('Plugin registry built successfully', {
       context: 'PluginRegistryBuilder',
       totalPlugins: Object.keys(registry).length,
       builtWithFactoryDefaults: this.useFactoryDefaultsOnly
@@ -553,7 +553,7 @@ class PluginRegistryBuilder {
 
   async getAllPluginDetails() {
     const { fs, path, loadYamlConfig } = this.dependencies;
-    logger.info('Retrieving all plugin details', {
+    logger.debug('Retrieving all plugin details', {
       context: 'PluginRegistryBuilder'
     });
 
@@ -683,7 +683,7 @@ class PluginRegistryBuilder {
           }
         }
       }
-      logger.info('Finished processing Collections Manager plugin details', {
+      logger.debug('Finished processing Collections Manager plugin details', {
         context: 'PluginRegistryBuilder',
         cmAvailableCount: cmAvailable.length,
         cmEnabledCount: cmEnabled.length

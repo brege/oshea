@@ -9,7 +9,7 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
   let browser = null;
   let page = null;
   try {
-    logger.info('Launching Puppeteer browser', {
+    logger.debug('Launching Puppeteer browser', {
       context: 'PDFGenerator'
     });
     browser = await puppeteer.launch({
@@ -112,7 +112,7 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
     });
 
     await page.pdf(finalPdfOptions);
-    logger.info('PDF successfully generated', {
+    logger.debug('PDF successfully generated', {
       context: 'PDFGenerator',
       outputPath: outputPdfPath
     });

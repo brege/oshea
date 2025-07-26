@@ -4,7 +4,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
   const { fss, fs, path, fsExtra, constants, logger } = dependencies;
   const { METADATA_FILENAME } = constants;
 
-  logger.info('Attempting to update collection', {
+  logger.debug('Attempting to update collection', {
     context: 'UpdateCollectionCommand',
     collectionName: collectionName
   });
@@ -53,10 +53,9 @@ module.exports = async function updateCollection(dependencies, collectionName) {
 
   // Check if it's a Git source
   if (/^(http(s)?:\/\/|git@)/.test(originalSourcePath) || (typeof originalSourcePath === 'string' && originalSourcePath.endsWith('.git'))) {
-    logger.info('Updating collection from Git source', {
+    logger.info(`Updating collection from Git source: ${originalSourcePath}`, {
       context: 'UpdateCollectionCommand',
-      collectionName: collectionName,
-      source: originalSourcePath
+      collectionName: collectionName
     });
 
     let defaultBranchName = null;
@@ -185,9 +184,8 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       }
 
       await this._spawnGitProcess(['reset', '--hard', `origin/${defaultBranchName}`], collectionPath, `resetting ${collectionName}`);
-      logger.success('Successfully updated collection via Git reset', {
+      logger.success(`Successfully updated collection via Git reset: ${collectionName}`, {
         context: 'UpdateCollectionCommand',
-        collectionName: collectionName,
         branch: defaultBranchName,
         source: originalSourcePath
       });
@@ -210,10 +208,8 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       return { success: false, message: `Git update failed for ${collectionName}: ${error.message}` };
     }
   } else { // Handle local path source
-    logger.info('Attempting to re-sync collection from local source', {
-      context: 'UpdateCollectionCommand',
-      collectionName: collectionName,
-      source: originalSourcePath
+    logger.info(`Attempting to re-sync collection from local source: ${collectionName} from ${originalSourcePath}`, {
+      context: 'UpdateCollectionCommand'
     });
     if (!fss.existsSync(originalSourcePath)) {
       logger.error('Original local source path for collection no longer exists, cannot update', {
@@ -262,10 +258,8 @@ module.exports = async function updateCollection(dependencies, collectionName) {
           return true;
         }
       });
-      logger.success('Successfully re-synced collection from local source', {
+      logger.success(`Successfully re-synced collection from local source: ${collectionName} from ${originalSourcePath}`, {
         context: 'UpdateCollectionCommand',
-        collectionName: collectionName,
-        source: originalSourcePath,
         targetPath: collectionPath
       });
 

@@ -119,24 +119,15 @@ const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) =
   // Show detailed file results
   for (const file of requiredFiles) {
     if (fs.existsSync(path.join(pluginDirectoryPath, file))) {
-      logger.success('    ✓ Found required file: ', {
+      logger.success(`    ✓ Found required file: '${file}'`, {
         context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName,
-        file: file
+        plugin: pluginName
       });
-      // Appending file name directly to message because of the specific output request.
-      // This is a direct string concatenation.
-      process.stdout.write(`'${file}'\n`);
     } else {
-      logger.error('    ✗ Missing required file: ', {
+      logger.error(`    ✗ Missing required file: '${file}'`, {
         context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName,
-        file: file
+        plugin: pluginName
       });
-      // Appending file name directly to message because of the specific output request.
-      process.stdout.write(`'${file}'\n`);
     }
   }
 

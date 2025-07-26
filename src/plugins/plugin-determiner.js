@@ -17,7 +17,7 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
   let markdownFilePathAbsolute = null;
   let localConfigFileNameForLogging = null;
 
-  logger.info('Starting plugin determination process', {
+  logger.debug('Starting plugin determination process', {
     context: 'PluginDeterminer',
     cliPluginArg: cliPluginArg,
     markdownFile: args.markdownFile || 'N/A'
@@ -210,7 +210,7 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
     determinationSource += ' (resolved relative path)';
   }
 
-  logger.info('Final plugin determination', {
+  logger.debug('Final plugin determination', {
     context: 'PluginDeterminer',
     pluginSpec: pluginSpec,
     source: determinationSource

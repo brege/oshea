@@ -5,7 +5,7 @@ const { validate: pluginValidator } = require(validatorPath);
 module.exports = async function enablePlugin(dependencies, collectionPluginId, options = {}) {
   const { fss, logger } = dependencies;
 
-  logger.info('Attempting to enable plugin', {
+  logger.debug('Attempting to enable plugin', {
     context: 'EnablePluginCommand',
     collectionPluginId: collectionPluginId,
     options: options
@@ -60,7 +60,7 @@ module.exports = async function enablePlugin(dependencies, collectionPluginId, o
 
 
   if (!options.bypassValidation) {
-    logger.info('Running validation for plugin before enabling', {
+    logger.debug('Running validation for plugin before enabling', {
       context: 'EnablePluginCommand',
       pluginId: pluginId
     });

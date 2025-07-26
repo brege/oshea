@@ -32,7 +32,7 @@ async function loadConfig(configPath) {
       });
       throw new Error(`Configuration file '${configPath}' is empty or invalid.`);
     }
-    logger.info('Configuration file loaded', {
+    logger.debug('Configuration file loaded', {
       context: 'MarkdownUtils',
       file: configPath
     });
@@ -91,7 +91,7 @@ function getTypeConfig(fullConfig, docType) {
   if (!Array.isArray(resolvedShortcodePatterns) || resolvedShortcodePatterns.length === 0) {
     resolvedShortcodePatterns = fullConfig.global_remove_shortcodes || [];
   }
-  logger.info('Resolved type configuration', {
+  logger.debug('Resolved type configuration', {
     context: 'MarkdownUtils',
     documentType: docType
   });
@@ -167,7 +167,7 @@ function removeShortcodes(content, patterns) {
         });
       }
     });
-    logger.info('Shortcode removal completed', {
+    logger.debug('Shortcode removal completed', {
       context: 'MarkdownUtils',
       patternsCount: patterns.length
     });
@@ -260,7 +260,7 @@ function renderMarkdownToHtml(markdownContent, tocOptions = { enabled: false }, 
   }
 
   const htmlOutput = md.render(markdownContent);
-  logger.info('Markdown content rendered to HTML', {
+  logger.debug('Markdown content rendered to HTML', {
     context: 'MarkdownUtils',
     contentLength: markdownContent.length,
     htmlLength: htmlOutput.length
@@ -443,7 +443,7 @@ function substituteAllPlaceholders(mainContent, initialContextData) {
   // Substitute placeholders in the main Markdown content using the fully processed context
   const { newContent: processedMainContent } = substitutePlaceholdersInString(mainContent, processingContext, 'main content');
 
-  logger.info('All placeholders substituted', {
+  logger.debug('All placeholders substituted', {
     context: 'MarkdownUtils'
   });
   return { processedFmData: processingContext, processedContent: processedMainContent };

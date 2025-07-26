@@ -29,7 +29,7 @@ module.exports = {
     }
     const manager = args.manager;
 
-    logger.info('md-to-pdf collection: Attempting to remove collection...');
+    logger.debug('md-to-pdf collection: Attempting to remove collection...');
     logger.detail(`  Collection Name: ${args.collection_name}`);
     if (args.force) {
       logger.warn('  Force option is enabled. Will attempt to disable plugins from this collection first.');

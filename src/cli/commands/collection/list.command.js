@@ -2,6 +2,32 @@
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
+// Helper function to determine collection type
+function getCollectionType(collection) {
+  if (collection.special_type === 'singleton_container') return 'Managed Dir';
+  if (collection.source && (collection.source.startsWith('http') || collection.source.endsWith('.git'))) return 'Git';
+  return 'Local Path';
+}
+
+// Helper function for --short display using table formatter
+function displayShortCollectionTable(collections) {
+  logger.info('\nDownloaded plugin collections:');
+
+  const rows = collections.map(coll => ({
+    name: coll.name,
+    type: getCollectionType(coll),
+    source: coll.source || 'N/A'
+  }));
+
+  const columns = [
+    { key: 'name', header: 'NAME' },
+    { key: 'type', header: 'TYPE' },
+    { key: 'source', header: 'SOURCE' }
+  ];
+
+  logger.info('', { format: 'table', meta: { rows, columns } });
+}
+
 module.exports = {
   command: 'list [type] [collection_name]',
   describe: 'list downloaded collections or plugins',
@@ -62,25 +88,7 @@ module.exports = {
         }
 
         if (args.short) {
-          logger.info('\nDownloaded plugin collections:');
-          let maxNameWidth = 'NAME'.length;
-          let maxTypeWidth = 'TYPE'.length;
-          results.forEach(coll => {
-            if (coll.name.length > maxNameWidth) maxNameWidth = coll.name.length;
-            let typeStr = 'Local Path';
-            if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
-            else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
-            if (typeStr.length > maxTypeWidth) maxTypeWidth = typeStr.length;
-          });
-          logger.info(`  ${'NAME'.padEnd(maxNameWidth)} | ${'TYPE'.padEnd(maxTypeWidth)} | SOURCE`);
-          logger.info(`  ${'-'.repeat(maxNameWidth)} | ${'-'.repeat(maxTypeWidth)} | ${'-'.repeat('SOURCE'.length)}`);
-          results.forEach(coll => {
-            let typeStr = 'Local Path';
-            if (coll.special_type === 'singleton_container') typeStr = 'Managed Dir';
-            else if (coll.source && (coll.source.startsWith('http') || coll.source.endsWith('.git'))) typeStr = 'Git';
-
-            logger.info(`  ${coll.name.padEnd(maxNameWidth)} | ${typeStr.padEnd(maxTypeWidth)} | ${coll.source || 'N/A'}`);
-          });
+          displayShortCollectionTable(results);
         } else {
           logger.info('\nDownloaded plugin collections:');
           results.forEach(collection => {

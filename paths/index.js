@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-25T05:52:06.193Z
+// Generated: 2025-07-25T22:07:22.189Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -146,6 +146,7 @@ const inlineFormatterPath = path.join(projectRoot, 'src/utils/formatters/inline-
 const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint-formatter.js');
 const pathsFormatterPath = path.join(projectRoot, 'src/utils/formatters/paths-formatter.js');
 const rawFormatterPath = path.join(projectRoot, 'src/utils/formatters/raw-formatter.js');
+const tableFormatterPath = path.join(projectRoot, 'src/utils/formatters/table-formatter.js');
 
 // ==========================================
 // Exports
@@ -257,6 +258,7 @@ module.exports = {
   lintFormatterPath,
   pathsFormatterPath,
   rawFormatterPath,
+  tableFormatterPath,
 
   // --- Imported Registries ---
   ...scriptsPaths,

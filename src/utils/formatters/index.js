@@ -7,12 +7,14 @@ const {
   inlineFormatterPath,
   pathsFormatterPath,
   rawFormatterPath,
+  tableFormatterPath,
 } = require('@paths');
 const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
 const { formatInline } = require(inlineFormatterPath);
 const { formatRaw } = require(rawFormatterPath);
 const { formatPathFinderOutput } = require(pathsFormatterPath);
+const { formatTable } = require(tableFormatterPath);
 
 // Export formatters
 module.exports = {
@@ -20,5 +22,6 @@ module.exports = {
   lint: formatLint,
   inline: formatInline,
   raw: formatRaw,
-  paths: formatPathFinderOutput
+  paths: formatPathFinderOutput,
+  table: formatTable
 };

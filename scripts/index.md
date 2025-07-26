@@ -49,6 +49,8 @@ This module has its own index file at [**the test index**](../test/index.md) for
   - [ [`file-helpers.js`](shared/file-helpers.js) ] -- Makes the rest of the Node.js scripts easier to point and shoot at file(s) and directories.
   - [ [path-finder.js](shared/path-finder.js) ]
     -- A helper tool that turns a script path in to a variable name.
+  - [ [logger-surfacer.js](shared/logger-surfacer.js) ]
+    -- Useful for surfacing how console output is being formed, without syntax distractions.
 
     `node scripts/shared/path-finder.js scripts/shared/file-helpers.js`
     ```js
@@ -65,7 +67,7 @@ This module has its own index file at [**the test index**](../test/index.md) for
 ### Uncategorized Scripts
 
 New scripts or new script locations will appear below after running
-**`node scripts/linting/docs/update-project-indices.js`**.
+**`node scripts/linting/docs/librarian.js`**.
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

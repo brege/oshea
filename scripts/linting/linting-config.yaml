@@ -124,6 +124,12 @@ librarian:
     scanRoot: paths
     filetypes: [".js", ".yaml"]
     excludePatterns: []
+  utils:
+    marker: "utils"
+    indexFile: src/utils/index.md
+    scanRoot: src/utils
+    filetypes: [".js"]
+    excludePatterns: []
 
 # scripts/linting/docs/postman.js
 postman:

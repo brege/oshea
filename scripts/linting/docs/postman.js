@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // scripts/linting/docs/postman.js
+// consider having postman also try to use the path-registry to restore links
 
 require('module-alias/register');
 

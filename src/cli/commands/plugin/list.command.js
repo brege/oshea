@@ -2,7 +2,6 @@
 const { pluginRegistryBuilderPath, projectRoot, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
-const stripAnsi = require('strip-ansi');
 
 // Helper function for detailed display
 function displayPluginEntry(plugin) {

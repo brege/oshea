@@ -10,6 +10,18 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
   **Polishing.** Aggregates all loose ends from previous checklists.
   The [[symlink](polish-checklist.md)] provided in the `docs/` root is purely for my convenience.
 
+**Next-gen Features** \
+*These are the core documents for the next-gen features of the project.*
+- [Task Checklist of Logger Enhancements](v0.11/checklist-logger.md):
+  Maintains the list of tasks surrounding v0.11 for the logger framework. 
+- [Task Checklist of non-Logger Work](v0.11/checklist-non-logger.md):
+  Broader project tasks (e.g. linter renaming, auxillary scripts, etc.) that may have wider appeal.
+- [Planning for ErrorManager Groups via Paths Registry](v0.11/error-group-registry-from-paths.md):
+  Plans for the ErrorManager framework to be refactored to use the Paths Registry.
+- [The Logger-Renderer-Adapter Model](v0.11/logger-renderer-adapter.md):
+  Graphical overview of how the architecture in [`src/utils/`](../src/utils/) changed from v0.10 to v0.11.
+
+
 There are also several indexes for the main components of the project.
 
 **Indexes** -
@@ -169,5 +181,6 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 *This list is automatically updated by [`scripts/linting/docs/librarian.js`](../scripts/linting/docs/librarian.js)*
 
 <!-- uncategorized-start -->
+
 <!-- uncategorized-end -->
 

@@ -1,21 +1,9 @@
 // src/utils/formatters/table-formatter.js
-// Table formatter for user-facing CLI outputs
 
+// Table formatter for user-facing CLI outputs
+// Formats tabular data for CLI display with proper column alignment
 const stripAnsi = require('strip-ansi');
 
-/**
- * Formats tabular data for CLI display with proper column alignment
- * @param {string} level - Log level (info, success, etc.)
- * @param {string} message - Main message (ignored for table format)
- * @param {Object} meta - Table metadata
- * @param {Array<Object>} meta.rows - Array of row objects
- * @param {Array<string>} meta.columns - Column definitions with headers
- * @param {string} [meta.title] - Optional table title
- * @param {boolean} [meta.showBorders=true] - Whether to show table borders
- * @param {string} [meta.separator='|'] - Column separator
- * @param {number} [meta.padding=1] - Column padding
- * @returns {void}
- */
 function formatTable(level, message, meta = {}) {
   const {
     rows = [],
@@ -23,7 +11,6 @@ function formatTable(level, message, meta = {}) {
     title,
     showBorders = true,
     separator = '|',
-    padding = 1
   } = meta;
 
   if (rows.length === 0 || columns.length === 0) {
@@ -42,7 +29,6 @@ function formatTable(level, message, meta = {}) {
     return Math.max(headerWidth, maxDataWidth);
   });
 
-  const paddingStr = ' '.repeat(padding);
   const prefixPadding = '  '; // Standard CLI indentation
 
   // Display title if provided

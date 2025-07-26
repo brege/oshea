@@ -34,7 +34,7 @@ function createMathIntegration(dependencies = {}) {
 
       try {
         mdInstance.use(pluginFunction, currentKatexOptions);
-        logger.info('KaTeX math rendering enabled', {
+        logger.debug('KaTeX math rendering enabled', {
           context: 'MathIntegration',
           status: 'md.use successful',
           options: currentKatexOptions
@@ -59,7 +59,7 @@ function createMathIntegration(dependencies = {}) {
       if (fss.existsSync(KATEX_CSS_PATH)) {
         try {
           const cssContent = await fsPromises.readFile(KATEX_CSS_PATH, 'utf8');
-          logger.info('KaTeX CSS loaded', {
+          logger.debug('KaTeX CSS loaded', {
             context: 'MathIntegration',
             file: KATEX_CSS_PATH
           });

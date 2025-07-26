@@ -27,7 +27,7 @@ module.exports = {
 
     try {
       if (args.collection_name) {
-        logger.info(`Attempting to update collection '${args.collection_name}' (via md-to-pdf ${args.$0})...`);
+        logger.debug(`Attempting to update collection '${args.collection_name}' (via md-to-pdf ${args.$0})...`);
         const result = await manager.updateCollection(args.collection_name);
 
         if (!result.success) {
@@ -35,7 +35,7 @@ module.exports = {
           commandShouldFailHard = true;
         }
       } else {
-        logger.info(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`);
+        logger.debug(`Attempting to update all Git-based collections (via md-to-pdf ${args.$0})...`);
         const results = await manager.updateAllCollections();
         if (results && !results.success) {
           logger.warn('\nSome collections may not have updated successfully or were skipped. Please check output above.');

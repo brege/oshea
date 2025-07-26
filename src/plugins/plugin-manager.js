@@ -15,7 +15,7 @@ const coreUtils = {
 class PluginManager {
   constructor() {
     // No setup needed here as ConfigResolver handles config.
-    logger.info('PluginManager initialized', {
+    logger.debug('PluginManager initialized', {
       context: 'PluginManager'
     });
   }
@@ -28,7 +28,7 @@ class PluginManager {
       handlerScriptPath
     } = effectiveConfig;
 
-    logger.info('Invoking handler for plugin', {
+    logger.debug('Invoking handler for plugin', {
       context: 'PluginManager',
       plugin: pluginName,
       handlerScriptPath: handlerScriptPath
@@ -101,7 +101,7 @@ class PluginManager {
         outputFilenameOpt,
         pluginBasePath
       );
-      logger.info('Plugin handler execution completed', {
+      logger.debug('Plugin handler execution completed', {
         context: 'PluginManager',
         plugin: pluginName,
         handlerPath: handlerScriptPath,

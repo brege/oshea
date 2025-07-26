@@ -110,7 +110,7 @@ module.exports = async function enableAllPluginsInCollection(dependencies, colle
   }
 
   const summaryMessage = `Batch enablement for collection "${collectionName}": ${countEnabled} of ${availablePlugins.length} plugins enabled.`;
-  logger.info('Batch enablement complete', {
+  logger.debug('Batch enablement complete', {
     context: 'CollectionEnableAll',
     collectionName: collectionName,
     enabledCount: countEnabled,

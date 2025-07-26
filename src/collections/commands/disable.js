@@ -2,7 +2,7 @@
 module.exports = async function disablePlugin(dependencies, invokeName) {
   const { logger } = dependencies;
 
-  logger.info('Attempting to disable plugin', {
+  logger.debug('Attempting to disable plugin', {
     context: 'DisablePluginCommand',
     invokeName: invokeName
   });

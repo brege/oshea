@@ -4,7 +4,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
   const { fss, fs, path, constants, logger } = dependencies;
   const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
 
-  logger.info('Attempting to list collections', {
+  logger.debug('Attempting to list collections', {
     context: 'ListCollectionsCommand',
     listType: type,
     filter: collectionNameFilter || 'none'
@@ -62,7 +62,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
         }
       }
       collectionInfos.sort((a,b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
-      logger.info('Successfully listed downloaded collections', {
+      logger.debug('Successfully listed downloaded collections', {
         context: 'ListCollectionsCommand',
         count: collectionInfos.length
       });
@@ -115,7 +115,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
       processedEnabledPlugins.push(pluginEntry);
     }
     processedEnabledPlugins.sort((a,b) => (a.invoke_name || '').toLowerCase().localeCompare((b.invoke_name || '').toLowerCase()));
-    logger.info('Successfully listed enabled plugins', {
+    logger.debug('Successfully listed enabled plugins', {
       context: 'ListCollectionsCommand',
       count: processedEnabledPlugins.length
     });

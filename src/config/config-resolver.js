@@ -136,7 +136,7 @@ class ConfigResolver {
             file: pluginConfigPath
           });
         });
-        logger.info('To see final applied settings, run the config command', {
+        logger.debug('To see final applied settings, run the config command', {
           context: 'ConfigResolver',
           plugin: pluginName,
           command: `md-to-pdf config --plugin ${pluginName}`

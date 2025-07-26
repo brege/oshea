@@ -3,7 +3,7 @@
 module.exports = async function addSingletonPlugin(dependencies, sourcePluginPath, options = {}) {
   const { fss, path, cmUtils, fs, fsExtra, constants, logger } = dependencies;
 
-  logger.info('Attempting to add singleton plugin', {
+  logger.debug('Attempting to add singleton plugin', {
     context: 'AddSingletonPluginCommand',
     sourcePluginPath: sourcePluginPath,
     options: options
@@ -115,7 +115,7 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
   // 4. Copy plugin contents
   try {
     await fsExtra.copy(sourcePluginPath, targetPluginDir);
-    logger.info('Plugin files copied successfully', {
+    logger.debug('Plugin files copied successfully', {
       context: 'AddSingletonPluginCommand',
       source: sourcePluginPath,
       target: targetPluginDir
@@ -156,11 +156,9 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
 
   try {
     await this.enablePlugin(collectionPluginIdForEnable, { name: invokeName });
-    logger.success('Singleton plugin added and enabled', {
+    logger.success(`Singleton plugin added and enabled: ${pluginId} as ${invokeName}`, {
       context: 'AddSingletonPluginCommand',
-      pluginId: pluginId,
       source: sourcePluginPath,
-      invokeName: invokeName,
       outputPath: targetPluginDir
     });
     return {

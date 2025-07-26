@@ -39,7 +39,7 @@ class DefaultHandler {
         });
         throw new Error(errorMessage);
       }
-      logger.info('Starting document generation', {
+      logger.debug('Starting document generation', {
         context: 'DefaultHandler',
         markdownFilePath: markdownFilePath,
         outputDir: outputDir
@@ -109,7 +109,7 @@ class DefaultHandler {
         });
       }
       const outputPdfPath = path.join(outputDir, finalOutputFilename);
-      logger.info('Determined output PDF path', {
+      logger.debug('Determined output PDF path', {
         context: 'DefaultHandler',
         outputPath: outputPdfPath
       });

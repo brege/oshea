@@ -1,12 +1,12 @@
 // src/collections/index.js
 const fs = require('fs').promises;
-const fss = require('fs'); // For synchronous checks like existsSync
+const fss = require('fs');
 const path = require('path');
 const os = require('os');
 const { spawn } = require('child_process');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
-const matter = 'gray-matter'; // This is a string, not a require, seems intentional.
+const matter = require('gray-matter');
 const {
   cmUtilsPath,
   constantsPath,
@@ -52,7 +52,7 @@ class CollectionsManager {
     this.dependencies = { ...defaultDependencies, ...dependencies };
 
     this.collRoot = this.determineCollRoot(options.collRootCliOverride, options.collRootFromMainConfig);
-    logger.info('CollectionsManager initialized', {
+    logger.debug('CollectionsManager initialized', {
       context: 'CollectionsManager',
       collectionsRoot: this.collRoot
     });
@@ -126,7 +126,7 @@ class CollectionsManager {
         const loadedData = yaml.load(manifestContent);
         if (loadedData && Array.isArray(loadedData.enabled_plugins)) {
           enabledManifest = loadedData;
-          logger.info('Enabled manifest loaded successfully', {
+          logger.debug('Enabled manifest loaded successfully', {
             context: 'CollectionsManager',
             path: enabledManifestPath,
             pluginCount: loadedData.enabled_plugins.length
@@ -139,7 +139,7 @@ class CollectionsManager {
           });
         }
       } else {
-        logger.info('Enabled manifest file not found', {
+        logger.debug('Enabled manifest file not found', {
           context: 'CollectionsManager',
           path: enabledManifestPath,
           suggestion: 'Starting with a new, empty manifest.'
@@ -167,7 +167,7 @@ class CollectionsManager {
       await fs.mkdir(this.collRoot, { recursive: true });
       const yamlString = yaml.dump(manifestData, { sortKeys: true });
       await fs.writeFile(enabledManifestPath, yamlString);
-      logger.info('Enabled manifest written successfully', {
+      logger.debug('Enabled manifest written successfully', {
         context: 'CollectionsManager',
         path: enabledManifestPath,
         pluginCount: manifestData.enabled_plugins ? manifestData.enabled_plugins.length : 0
@@ -203,7 +203,7 @@ class CollectionsManager {
     try {
       const metaContent = await fs.readFile(metadataPath, 'utf8');
       const metadata = yaml.load(metaContent);
-      logger.info('Collection metadata loaded successfully', {
+      logger.debug('Collection metadata loaded successfully', {
         context: 'CollectionsManager',
         collection: collectionName,
         path: metadataPath
@@ -234,7 +234,7 @@ class CollectionsManager {
       await fs.mkdir(collectionPath, { recursive: true });
       const yamlString = yaml.dump(metadataContent);
       await fs.writeFile(metadataPath, yamlString);
-      logger.info('Collection metadata written successfully', {
+      logger.debug('Collection metadata written successfully', {
         context: 'CollectionsManager',
         collection: collectionName,
         path: metadataPath
@@ -253,14 +253,14 @@ class CollectionsManager {
   }
 
   async disableAllPluginsFromCollection(collectionIdentifier) {
-    const { path, constants, logger } = this.dependencies; // Ensure logger is explicitly destructured
+    const { path, constants, logger } = this.dependencies;
     const manifest = await this._readEnabledManifest();
     const initialCount = manifest.enabled_plugins.length;
     let userFriendlyName = collectionIdentifier;
     let actualCollectionNameForFilter = collectionIdentifier;
     let specificPluginIdForFilter = null;
 
-    logger.info('Attempting to disable plugins from collection', {
+    logger.debug('Attempting to disable plugins from collection', {
       context: 'CollectionsManager',
       collectionIdentifier: collectionIdentifier
     });
@@ -294,7 +294,6 @@ class CollectionsManager {
       }
       if (matchesCriteriaForRemoval) {
         if (!disabledInvokeNames.has(pluginEntry.invoke_name)) {
-          // Changed logger.detail to logger.debug
           logger.debug('Disabling plugin instance', {
             context: 'CollectionsManager',
             invokeName: pluginEntry.invoke_name,
@@ -328,7 +327,7 @@ class CollectionsManager {
   }
 
   _spawnGitProcess(gitArgs, cwd, operationDescription) {
-    const { spawn, process, logger } = this.dependencies; // Ensure logger is explicitly destructured
+    const { spawn, process, logger } = this.dependencies;
     return new Promise((resolve, reject) => {
       const spawnOptions = {
         cwd,
@@ -342,7 +341,7 @@ class CollectionsManager {
       gitProcess.stdout.on('data', (data) => {
         const dataStr = data.toString();
         stdout += dataStr;
-        logger.debug('Git stdout', { // Changed from logger.detail to logger.debug
+        logger.debug('Git stdout', {
           context: 'CollectionsManager',
           operation: operationDescription,
           output: dataStr.trim()
@@ -351,8 +350,7 @@ class CollectionsManager {
       gitProcess.stderr.on('data', (data) => {
         const dataStr = data.toString();
         stderr += dataStr;
-        // This is debug-level info, using detail.
-        logger.debug('Git stderr', { // Changed from logger.detail to logger.debug
+        logger.debug('Git stderr', {
           context: 'CollectionsManager',
           operation: operationDescription,
           output: dataStr.trim()
@@ -360,7 +358,7 @@ class CollectionsManager {
       });
       gitProcess.on('close', (code) => {
         if (code === 0) {
-          logger.info('Git operation completed successfully', {
+          logger.debug('Git operation completed successfully', {
             context: 'CollectionsManager',
             command: gitArgs.join(' '),
             operation: operationDescription,

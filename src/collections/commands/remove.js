@@ -3,7 +3,7 @@
 module.exports = async function removeCollection(dependencies, collectionName, options = {}) {
   const { fss, path, fsExtra, constants, logger } = dependencies;
 
-  logger.info('Attempting to remove collection', {
+  logger.debug('Attempting to remove collection', {
     context: 'RemoveCollectionCommand',
     collectionName: collectionName,
     options: options

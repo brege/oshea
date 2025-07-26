@@ -10,7 +10,7 @@ const yaml = require('js-yaml');
 
 async function displayPluginHelp(pluginName, manager, cliArgs) {
 
-  logger.info(`Attempting to display help for plugin: ${pluginName}`);
+  logger.debug(`Attempting to display help for plugin: ${pluginName}`);
 
   try {
     const { projectRoot } = require('@paths');

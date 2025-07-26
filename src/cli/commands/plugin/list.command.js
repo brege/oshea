@@ -51,16 +51,23 @@ function displayPluginEntry(plugin) {
   logger.info('  ---');
 }
 
-// Helper function for --short display
-function displayShortPluginEntry(plugin, statusColWidth, nameColWidth) {
-  const S_STATUS = plugin.status || 'N/A';
-  const S_NAME = plugin.name;
-  let S_CM_ORIGIN = 'n/a';
-  if (plugin.cmCollection && plugin.cmPluginId) {
-    S_CM_ORIGIN = `${plugin.cmCollection}/${plugin.cmPluginId}`;
-  }
+// Helper function for --short display using table formatter
+function displayShortPluginTable(plugins) {
+  const rows = plugins.map(plugin => ({
+    status: plugin.status || 'N/A',
+    name: plugin.name,
+    origin: (plugin.cmCollection && plugin.cmPluginId)
+      ? `${plugin.cmCollection}/${plugin.cmPluginId}`
+      : 'n/a'
+  }));
 
-  logger.info('Plugin list entry', { status: S_STATUS, name: S_NAME, origin: S_CM_ORIGIN, format: 'inline' });
+  const columns = [
+    { key: 'status', header: 'STATUS' },
+    { key: 'name', header: 'NAME/INVOKE KEY' },
+    { key: 'origin', header: 'CM ORIGIN' }
+  ];
+
+  logger.info('', { format: 'table', meta: { rows, columns } });
 }
 
 module.exports = {
@@ -170,17 +177,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
       if (results.length > 0) {
         logger.info(headerMessage);
         if (args.short) {
-          let maxStatusWidth = 'STATUS'.length;
-          let maxNameWidth = 'NAME/INVOKE KEY'.length;
-          results.forEach(p => {
-            const plainStatus = stripAnsi(p.status || 'N/A');
-            if (plainStatus.length > maxStatusWidth) maxStatusWidth = plainStatus.length;
-            const plainName = stripAnsi(p.name);
-            if (plainName.length > maxNameWidth) maxNameWidth = plainName.length;
-          });
-          logger.info(`  ${'STATUS'.padEnd(maxStatusWidth)} | ${'NAME/INVOKE KEY'.padEnd(maxNameWidth)} | CM ORIGIN`);
-          logger.info(`  ${'-'.repeat(maxStatusWidth)} | ${'-'.repeat(maxNameWidth)} | ${'-'.repeat('CM ORIGIN'.length)}`);
-          results.forEach(plugin => displayShortPluginEntry(plugin, maxStatusWidth, maxNameWidth));
+          displayShortPluginTable(results);
         } else {
           results.forEach(plugin => displayPluginEntry(plugin));
         }

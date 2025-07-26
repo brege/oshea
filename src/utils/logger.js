@@ -52,8 +52,12 @@ const { enhanceMessage } = require(loggerEnhancerPath);
 function logger(message, options = {}) {
   const { format = 'default', level = 'info', context, meta = {} } = options;
 
-  // Enrich meta with context and config
-  meta.context = context;
+  // Suppress context for user-facing commands unless debug mode
+  if (!debugMode && (level === 'info' || level === 'success')) {
+    meta.context = undefined; // Suppress context for clean user output
+  } else {
+    meta.context = context; // Preserve context for debug/warn/error levels
+  }
   meta.config = loggerConfig;
 
   // Apply enhanced debugging if any enhancement features are enabled
@@ -104,6 +108,10 @@ function logger(message, options = {}) {
 
   if (format === 'paths') {
     return formatters.paths(level, message, meta);
+  }
+
+  if (format === 'table') {
+    return formatters.table(level, message, meta);
   }
 
   // Fallback to default formatter

@@ -10,7 +10,7 @@ const os = require('os');
 class TestHarness {
   constructor() {
     this.sandboxDir = '';
-    this.collRootDir = ''; // To store the path to the sandboxed collections root
+    this.collRootDir = '';
   }
 
 

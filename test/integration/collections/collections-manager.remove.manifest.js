@@ -11,7 +11,6 @@ module.exports = [
     methodName: 'removeCollection',
     methodArgs: [COLLECTION_TO_REMOVE],
     isNegativeTest: true,
-    // Adjust this regex to match the actual thrown message if needed
     expectedErrorMessage: /has enabled plugins[\s\S]*disable them first[\s\S]*--force/,
     stubs: {
       fss: { existsSync: { returns: true }, lstatSync: { returns: { isDirectory: () => true } } },
@@ -48,7 +47,7 @@ module.exports = [
     methodName: 'removeCollection',
     methodArgs: ['non-existent-collection'],
     stubs: {
-      fss: { existsSync: { returns: false } }, // Key stub for this test
+      fss: { existsSync: { returns: false } },
       internal: {
         _readEnabledManifest: { resolves: { enabled_plugins: [] } },
       },
@@ -66,7 +65,7 @@ module.exports = [
     expectedErrorMessage: 'EPERM: permission denied',
     stubs: {
       fss: { existsSync: { returns: true }, lstatSync: { returns: { isDirectory: () => true } } },
-      fsExtra: { rm: { rejects: 'EPERM: permission denied' } }, // Key stub
+      fsExtra: { rm: { rejects: 'EPERM: permission denied' } },
       internal: {
         _readEnabledManifest: { resolves: { enabled_plugins: [] } },
       },

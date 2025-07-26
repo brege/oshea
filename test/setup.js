@@ -11,7 +11,8 @@ const {
   pdfGeneratorPath,
   mathIntegrationPath,
   defaultHandlerPath,
-  captureLogsPath
+  captureLogsPath,
+  loggerPath
 } = require('@paths');
 
 // Require all modules that will be stubbed globally
@@ -21,6 +22,13 @@ const createMathIntegration = require(mathIntegrationPath);
 
 // Import the test logger for capturing logs
 const { testLogger } = require(captureLogsPath);
+
+// Configure debug mode if enabled via environment variable
+if (process.env.MD_TO_PDF_DEBUG === 'true') {
+  const logger = require(loggerPath);
+  logger.setDebugMode(true);
+  logger.debug('Debug mode enabled - logger will show debug-level messages and context');
+}
 
 // Make these globally available in the test context
 global.expect = expect;

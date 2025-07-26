@@ -2,7 +2,6 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-// Helper to check for the existence of a list of files in a directory
 async function checkFilesExist(baseDir, files, expect) {
   for (const file of files) {
     const filePath = path.join(baseDir, file);
@@ -14,9 +13,7 @@ async function checkFilesExist(baseDir, files, expect) {
 module.exports = [
   {
     describe: '3.5.1: (Happy Path) Successfully creates a new plugin directory with boilerplate files',
-    setup: async (sandboxDir) => {
-      // No setup needed, as we are creating from the bundled template.
-    },
+    setup: async (sandboxDir) => {},
     args: (sandboxDir) => [
       'plugin',
       'create',
@@ -39,7 +36,6 @@ module.exports = [
   {
     describe: '3.5.2: (Key Option) Successfully archetypes a new plugin from a source with --from',
     setup: async (sandboxDir) => {
-      // Create a simple source plugin to archetype from
       const sourcePluginDir = path.join(sandboxDir, 'source-plugin');
       await fs.ensureDir(sourcePluginDir);
       await fs.writeFile(path.join(sourcePluginDir, 'index.js'), 'module.exports = {};');
@@ -57,10 +53,9 @@ module.exports = [
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
       const pluginDir = path.join(sandboxDir, 'my-archetyped-plugin');
-      // Check that files were copied and renamed correctly
       await checkFilesExist(pluginDir, [
         'index.js',
-        'my-archetyped-plugin.config.yaml', // Was renamed
+        'my-archetyped-plugin.config.yaml',
       ], expect);
     },
   },
@@ -76,7 +71,6 @@ module.exports = [
         '--target-dir',
         sandboxDir
       ]);
-      // If the prerequisite command fails, throw an error to halt the test.
       if (createResult.exitCode !== 0) {
         throw new Error(`Setup for 3.5.3 failed: 'plugin create' exited with code ${createResult.exitCode}.\nStderr: ${createResult.stderr}`);
       }
@@ -93,13 +87,12 @@ module.exports = [
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Plugin 'temp-valid-plugin' is VALID/i);
-      expect(stderr).to.not.match(/error/i); // No errors should be reported
+      expect(stderr).to.not.match(/error/i);
     },
   },
   {
     describe: '3.5.4: (Happy Path) A plugin archetyped from a valid bundled plugin passes validation',
     setup: async (sandboxDir, harness) => {
-      // The setup runs the prerequisite 'plugin create --from' command.
       const newPluginName = 'archetype-from-bundled-plugin';
       const newPluginDir = path.join(sandboxDir, newPluginName);
       const createResult = await harness.runCli([
@@ -111,7 +104,6 @@ module.exports = [
         '--target-dir',
         sandboxDir
       ]);
-      // If the prerequisite command fails, throw an error to halt the test.
       if (createResult.exitCode !== 0) {
         throw new Error(`Setup for 3.5.4 failed: 'plugin create --from cv' exited with code ${createResult.exitCode}.\nStderr: ${createResult.stderr}`);
       }
@@ -128,7 +120,7 @@ module.exports = [
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Plugin 'archetype-from-bundled-plugin' is VALID/i);
-      expect(stderr).to.not.match(/error/i); // No errors should be reported
+      expect(stderr).to.not.match(/error/i);
     },
   },
 ];

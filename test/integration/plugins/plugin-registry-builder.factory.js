@@ -27,8 +27,8 @@ function makeCmManifestScenario({ enabledPlugins, configPathsExist = {}, expectR
         };
       }
       expect(finalResult).to.deep.equal(expectResult);
-      expectLogs.forEach((expected, index) => { // Iterate through expected logs
-        expect(logs.some(log => { // Check if any actual log matches the expected log
+      expectLogs.forEach((expected, index) => {
+        expect(logs.some(log => {
           if (typeof expected === 'string') {
             return log.msg.includes(expected);
           } else if (expected instanceof RegExp) {
@@ -74,8 +74,8 @@ function makeFileRegistrationScenario({ mainConfigPath, yamlContent, yamlError, 
     },
     assert: async (result, mocks, constants, expect, logs) => {
       expect(result).to.deep.equal(expectResult);
-      expectLogs.forEach((expected, index) => { // Iterate through expected logs
-        expect(logs.some(log => { // Check if any actual log matches the expected log
+      expectLogs.forEach((expected, index) => {
+        expect(logs.some(log => {
           if (typeof expected === 'string') {
             return log.msg.includes(expected);
           } else if (expected instanceof RegExp) {
@@ -164,14 +164,12 @@ function makeResolveAliasScenario({ methodArgs, pathMocks = {}, expectResult, ex
       if (expectHomedirCall) {
         expect(mockDependencies.os.homedir.calledOnce).to.be.true;
       }
-      // Log assertion logic: specific expected logs or generic smoke test
       if (expectLogs && expectLogs.length > 0) {
         expectLogs.forEach(expectedLogPattern => {
           expect(logs.some(actualLog => typeof expectedLogPattern === 'string' ? actualLog.msg.includes(expectedLogPattern) : expectedLogPattern.test(actualLog.msg)))
             .to.be.true;
         });
       } else {
-        // Generic log smoke test for positive cases (expecting debug logs)
         expect(logs.length).to.be.greaterThan(0);
         expect(logs.some(log => log.level === 'debug')).to.be.true;
       }
@@ -202,14 +200,12 @@ function makeResolveConfigPathScenario({ methodArgs, fileSystem = {}, expectResu
       if (expectHomedirCall) {
         expect(mockDependencies.os.homedir.calledOnce).to.be.true;
       }
-      // Assert specific expected logs (warnings/errors) or generic smoke test
       if (expectLogs && expectLogs.length > 0) {
         expectLogs.forEach(expectedLogPattern => {
           expect(logs.some(actualLog => typeof expectedLogPattern === 'string' ? actualLog.msg.includes(expectedLogPattern) : expectedLogPattern.test(actualLog.msg)))
             .to.be.true;
         });
       } else {
-        // Generic log smoke test for positive cases (expecting debug logs)
         expect(logs.length).to.be.greaterThan(0);
         expect(logs.some(log => log.level === 'debug')).to.be.true;
       }

@@ -147,10 +147,10 @@ module.exports = [
     assertion: async (resolver, mocks) => {
       // Ensure the registry is set for both calls
       resolver.mergedPluginRegistry = { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } };
-      await resolver.getEffectiveConfig(FAKE_PLUGIN_NAME, { some: 'override' }); // First call
+      await resolver.getEffectiveConfig(FAKE_PLUGIN_NAME, { some: 'override' });
       // Set registry again, in case it's cleared/reset
       resolver.mergedPluginRegistry = { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } };
-      await resolver.getEffectiveConfig(FAKE_PLUGIN_NAME, { some: 'override' }); // Second call
+      await resolver.getEffectiveConfig(FAKE_PLUGIN_NAME, { some: 'override' });
       const { mockPluginConfigLoaderInstance } = mocks;
       expect(mockPluginConfigLoaderInstance.applyOverrideLayers.callCount).to.equal(1);
     },

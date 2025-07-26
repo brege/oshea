@@ -2,7 +2,6 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-// Helper to create a dummy plugin that is fully compliant with the v1 contract
 async function createWellFormedPlugin(pluginDir, pluginName) {
   await fs.ensureDir(path.join(pluginDir, 'test'));
 

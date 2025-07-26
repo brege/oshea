@@ -38,7 +38,6 @@ const testSuites = [
   { name: 'sad paths', manifest: sadPathsManifestPath }
 ];
 
-// Dynamically create all test suites
 for (const { name, manifest, options } of testSuites) {
   createE2eTestRunner(name, manifest, options);
 }

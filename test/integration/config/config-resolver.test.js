@@ -137,7 +137,6 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
           resolver.primaryMainConfig = scenarioConfig.primaryMainConfig;
         }
       } else {
-        // Manifest/factory-driven: do normal setup/init
         if (!isNegativeTest) {
           if (
             !scenarioConfig.mainConfigStubs ||

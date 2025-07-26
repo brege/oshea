@@ -7,10 +7,16 @@ const path = require('path');
 const argv = yargs(hideBin(process.argv)).argv;
 const hasFiles = argv._ && argv._.length > 0;
 const group = argv.group || (hasFiles ? 'custom' : 'all');
+const debugMode = argv.debug || false;
+
+// Set environment variable for app code to detect debug mode
+if (debugMode) {
+  process.env.MD_TO_PDF_DEBUG = 'true';
+}
 
 if (require.main === module) {
   // lint-skip-next-line no-console
-  console.log(`[Mocha] Running test group: '${group}'`);
+  console.log(`[Mocha] Running test group: '${group}'${debugMode ? ' (debug mode enabled)' : ''}`);
 }
 function flattenSpecs(spec) {
   if (Array.isArray(spec)) return spec.flat(Infinity);

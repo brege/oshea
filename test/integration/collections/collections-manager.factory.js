@@ -15,7 +15,6 @@ function makeCollectionsManagerScenario({
   const setup = (mocks) => {
     const { mockDependencies } = mocks;
 
-    // File system stubs (sync)
     if (stubs.fss) {
       for (const [func, behavior] of Object.entries(stubs.fss)) {
         if (behavior.returns !== undefined) mockDependencies.fss[func].returns(behavior.returns);
@@ -27,7 +26,6 @@ function makeCollectionsManagerScenario({
       }
     }
 
-    // File system stubs (async)
     if (stubs.fs) {
       for (const [func, behavior] of Object.entries(stubs.fs)) {
         if (behavior.resolves !== undefined) mockDependencies.fs[func].resolves(behavior.resolves);
@@ -35,7 +33,6 @@ function makeCollectionsManagerScenario({
       }
     }
 
-    // fs-extra stubs
     if (stubs.fsExtra) {
       for (const [func, behavior] of Object.entries(stubs.fsExtra)) {
         if (behavior.rejects) {
@@ -46,13 +43,11 @@ function makeCollectionsManagerScenario({
       }
     }
 
-    // cmUtils stubs
     if (stubs.cmUtils) {
       for (const [func, returns] of Object.entries(stubs.cmUtils)) {
         mockDependencies.cmUtils[func].returns(returns);
       }
     }
-    // No internal stubbing here!
   };
 
   const assert = async (result, mocks, constants, expect, logs) => {

@@ -16,7 +16,7 @@ module.exports = [
       yamlContent: null,
       expectResult: {},
       expectLogs: [
-        /Main config file for plugin registrations not found/ // Updated to match structured log message
+        /Main config file for plugin registrations not found/
       ],
     }),
   },
@@ -28,7 +28,7 @@ module.exports = [
       mainConfigPath: FAKE_CONFIG_PATH,
       yamlError: new Error('YAML parse error'),
       expectResult: {},
-      expectLogs: [/Error reading plugin registrations from file/], // Updated to match structured log message
+      expectLogs: [/Error reading plugin registrations from file/],
     }),
   },
   {
@@ -94,8 +94,8 @@ module.exports = [
       fileSystem: { '/fake/bad-alias:plugin.config.yaml': { exists: false } },
       expectResult: {},
       expectLogs: [
-        /Invalid alias value/, // This warning comes from _resolveAlias
-        /Plugin configuration path does not exist/ // When alias fails, it falls back to relative path resolution, then warns about missing file
+        /Invalid alias value/,
+        /Plugin configuration path does not exist/
       ],
     })
   },
@@ -113,7 +113,7 @@ module.exports = [
         /Attempting to get plugin registrations from file/,
         /Attempting to resolve plugin config path/,
         /Resolved plugin path as relative to main config base path/,
-        /Plugin configuration path does not exist/, // Updated to match structured log message
+        /Plugin configuration path does not exist/,
         /Plugin registrations from file complete/
       ],
     }),
@@ -124,7 +124,7 @@ module.exports = [
     methodArgs: [FAKE_CONFIG_PATH, FAKE_BASE_DIR, 'Test'],
     ...makeFileRegistrationScenario({
       mainConfigPath: FAKE_CONFIG_PATH,
-      yamlContent: {}, // Empty config
+      yamlContent: {},
       expectResult: {},
       expectLogs: [
         /Attempting to get plugin registrations from file/,
@@ -149,7 +149,7 @@ module.exports = [
         /Attempting to get plugin registrations from file/,
         /Attempting to resolve plugin config path/,
         /Resolved plugin path as relative to main config base path/,
-        /Plugin configuration path \(directory\) does not contain a suitable config file/, // Updated to match structured log message
+        /Plugin configuration path \(directory\) does not contain a suitable config file/,
         /Plugin registrations from file complete/
       ],
     }),
@@ -172,7 +172,7 @@ module.exports = [
         /Attempting to get plugin registrations from file/,
         /Attempting to resolve plugin config path/,
         /Resolved plugin path as relative to main config base path/,
-        /Using alternative config file for plugin directory/, // Updated to match structured log message
+        /Using alternative config file for plugin directory/,
         /Registered plugin from config file/,
         /Plugin registrations from file complete/
       ],

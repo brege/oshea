@@ -28,12 +28,10 @@ function buildMocks(scenario, constants) {
     dirname: path.dirname,
   };
 
-  // Math config
   const mathConfig = scenario.mathConfig !== undefined
     ? scenario.mathConfig
     : { enabled: true, engine: 'katex', katex_options: { throwOnError: false } };
 
-  // CSS file existence/content/error simulation
   const cssExists = scenario.cssExists !== undefined ? scenario.cssExists : false;
   const cssContent = scenario.cssContent !== undefined ? scenario.cssContent : '';
   if (cssExists) {
@@ -48,11 +46,9 @@ function buildMocks(scenario, constants) {
     mockFsPromises.readFile.resolves('');
   }
 
-  // KaTeX plugin stub: simulate valid, missing, or invalid plugin
   let mockKatexPluginFunction = sinon.stub();
   let mockKatexPluginModule;
   if (scenario.katexPluginModule === null) {
-    // Simulate require failure or invalid plugin (not a function, no .default)
     mockKatexPluginModule = {};
   } else if (scenario.katexPluginModule !== undefined) {
     mockKatexPluginModule = scenario.katexPluginModule;
@@ -60,7 +56,6 @@ function buildMocks(scenario, constants) {
     mockKatexPluginModule = { default: mockKatexPluginFunction };
   }
 
-  // Proxyquire mathIntegration with loggerPath for log capturing
   const mathIntegrationFactory = proxyquire('../../../src/core/math-integration', {
     '@vscode/markdown-it-katex': mockKatexPluginModule,
     '@paths': { loggerPath: constants.TEST_LOGGER_PATH },
@@ -73,7 +68,6 @@ function buildMocks(scenario, constants) {
     katexPluginModule: mockKatexPluginModule,
   });
 
-  // Markdown-it instance (always stubbed for use assertions)
   const mdInstance = scenario.mdInstance || {
     use: sinon.stub(),
     render: sinon.stub().returns(''),

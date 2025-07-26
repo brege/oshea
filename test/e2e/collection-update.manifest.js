@@ -24,7 +24,7 @@ async function setupLocalGitCollection(sandboxDir, harness, collectionName) {
   await harness.runCli(['collection', 'add', remoteRepoPath, '--name', collectionName]);
 
   // 4. Update the "remote" with a new version
-  execSync('git pull origin main', { cwd: initialClonePath }); // Ensure it's up to date
+  execSync('git pull origin main', { cwd: initialClonePath });
   await fs.writeFile(path.join(initialClonePath, 'v2.txt'), 'version 2');
   execSync('git add . && git commit -m "v2"', { cwd: initialClonePath });
   execSync('git push origin main', { cwd: initialClonePath });
@@ -77,7 +77,7 @@ module.exports = [
       await setupLocalGitCollection(sandboxDir, harness, 'collection-to-update-alias');
     },
     args: (sandboxDir) => [
-      'update', // Use the alias
+      'update',
       'collection-to-update-alias',
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {

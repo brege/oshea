@@ -13,7 +13,7 @@ function makeDefaultHandlerScenario({
   stubs = {},
   expectedResult,
   expectedError,
-  expectedLogs = [], // New parameter to specify detailed log expectations
+  expectedLogs = [],
 }) {
   const setup = (DefaultHandler, mockStubs) => {
     // File system stubs
@@ -84,7 +84,6 @@ function makeDefaultHandlerScenario({
       expect(result).to.equal(expectedResult);
     }
 
-    // This block handles the new `expectedLogs` array for more precise log assertions
     if (expectedLogs.length > 0) {
       expect(logs.length).to.equal(expectedLogs.length, 'Number of captured logs must match expected number');
       logs.forEach((log, i) => {
@@ -94,7 +93,7 @@ function makeDefaultHandlerScenario({
           if (expectedLogs[i].data) {
             expect(log.data).to.deep.include(expectedLogs[i].data, `Log ${i}: Data mismatch`);
           } else {
-            expect(log.data).to.be.null; // If no data is expected
+            expect(log.data).to.be.null;
           }
         }
       });

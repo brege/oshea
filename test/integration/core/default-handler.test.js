@@ -48,14 +48,9 @@ describe(`default-handler (Subsystem Integration Tests) ${path.relative(projectR
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
 
     it_(testCase.description, async function () {
-      // Collect stubs from the Mocha context for this test
       const stubs = collectStubs(this);
-
-      // Set up stubs for this test case
       testCase.setup(DefaultHandler, stubs);
-
       const defaultHandler = new DefaultHandler();
-
       const result = await defaultHandler.generate(
         testCase.data,
         testCase.pluginSpecificConfig,

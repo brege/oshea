@@ -24,9 +24,9 @@ module.exports = [
         }
       },
       expectLogs: [
-        /Invalid entry in CM manifest/, // Updated to match simplified structured log message
-        /Invalid entry in CM manifest/, // Updated to match simplified structured log message
-        /Invalid entry in CM manifest/, // Updated to match simplified structured log message
+        /Invalid entry in CM manifest/,
+        /Invalid entry in CM manifest/,
+        /Invalid entry in CM manifest/,
       ]
     })
   },
@@ -39,7 +39,7 @@ module.exports = [
       configPathsExist: { '/path/to/missing/config.yaml': false },
       expectResult: {},
       expectLogs: [
-        /Config path for CM-enabled plugin does not exist/ // Updated to match simplified structured log message
+        /Config path for CM-enabled plugin does not exist/
       ]
     })
   },

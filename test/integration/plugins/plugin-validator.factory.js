@@ -9,17 +9,14 @@ function setupPluginScenario({
   exec = {},
 }) {
   return (pluginDir, pluginName, { mockFs, mockYaml, mockExecSync }) => {
-    // Setup file existence and contents
     Object.entries(files).forEach(([file, value]) => {
       const fullPath = path.join(pluginDir, file);
       if (typeof value === 'object' && value !== null) {
-        // { exists: true, content: "..." }
         mockFs.existsSync.withArgs(fullPath).returns(value.exists);
         if (value.exists && value.content !== undefined) {
           mockFs.readFileSync.withArgs(fullPath, 'utf8').returns(value.content);
         }
       } else {
-        // true/false for existence, dummy content if true
         mockFs.existsSync.withArgs(fullPath).returns(!!value);
         if (value) {
           mockFs.readFileSync.withArgs(fullPath, 'utf8').returns('dummy content');
@@ -27,7 +24,6 @@ function setupPluginScenario({
       }
     });
 
-    // Setup YAML loads
     Object.entries(yaml).forEach(([file, value]) => {
       if (value instanceof Error) {
         mockYaml.load.withArgs(sinon.match.any).throws(value);
@@ -36,7 +32,6 @@ function setupPluginScenario({
       }
     });
 
-    // Setup execSync
     if (exec.throws) {
       mockExecSync.throws(new Error(exec.throws));
     } else if (exec.returns !== undefined) {
@@ -74,7 +69,6 @@ function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mo
   });
   mockYaml.load.withArgs(sinon.match(/cli_help/)).returns({ cli_help: 'Help text' });
 
-  // Mock the self-activation and in-situ test commands to succeed
   mockExecSync.returns('');
 }
 
@@ -101,7 +95,6 @@ function makeValidatorScenario({
     if (expectedResult) {
       expect(result.isValid).to.equal(expectedResult.isValid);
 
-      // Check for presence (not exact match) of expected errors
       if (expectedResult.errors) {
         expectedResult.errors.forEach(expectedErr => {
           expect(
@@ -115,7 +108,6 @@ function makeValidatorScenario({
         });
       }
 
-      // Check for presence (not exact match) of expected warnings
       if (expectedResult.warnings) {
         expectedResult.warnings.forEach(expectedWarn => {
           expect(
@@ -130,7 +122,6 @@ function makeValidatorScenario({
       }
     }
 
-    // Still allow exact matching for logs if you want
     if (expectedLogs.length > 0) {
       const relevantLogs = logs.map(l => ({ level: l.level, msg: l.msg }));
       expectedLogs.forEach(log =>

@@ -11,7 +11,6 @@ const yaml = require('js-yaml');
 const { cliPath, cliCommandsPath, projectRoot, loggerPath, smokeTestsManifestPath } = require('@paths');
 const logger = require(loggerPath);
 
-// Execute a shell command and return result
 function executeCommand(command) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
@@ -48,7 +47,7 @@ const validators = {
     }
   },
 
-  executes: () => () => true, // Just needs to execute without error
+  executes: () => () => true,
 
   matches_regex: (pattern) => (stdout) => new RegExp(pattern).test(stdout)
 };
@@ -91,7 +90,7 @@ const discoverers = {
     }
 
     const commandPartsList = discoverCommands(cliCommandsPath);
-    commandPartsList.push([]); // Add root command
+    commandPartsList.push([]);
 
     return Array.from(new Set(commandPartsList.map(p => p.join(' ')))).sort();
   },
@@ -137,7 +136,6 @@ function expandScenarios(testSuite) {
   return expandedScenarios;
 }
 
-// Run a single test suite
 async function runTestSuite(testSuite) {
   logger.info(`Smoke Test: ${testSuite.name}...\n`, { format: 'inline' });
 
@@ -220,7 +218,6 @@ async function runAllSmokeTests(yamlFile = null) {
 
   const totalFailed = allResults.reduce((sum, result) => sum + result.failedCount, 0);
 
-  // Final summary
   if (totalFailed > 0) {
     logger.error('\n--- Smoke Tests Failed ---', { format: 'inline' });
     logger.error(`${totalFailed} scenario(s) failed across ${allResults.length} test suites:`, { format: 'inline' });

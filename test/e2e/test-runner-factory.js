@@ -9,7 +9,6 @@ function createE2eTestRunner(commandName, manifestPath, options = {}) {
   const { timeout = 15000 } = options;
   const testManifest = require(manifestPath);
 
-  // Map command names to their source file paths
   const commandSourceMap = {
     'collection add': 'src/cli/commands/collection/add.command.js',
     'collection list': 'src/cli/commands/collection/list.command.js',
@@ -18,7 +17,7 @@ function createE2eTestRunner(commandName, manifestPath, options = {}) {
     'config': 'src/cli/commands/config.command.js',
     'convert': 'src/cli/commands/convert.command.js',
     'generate': 'src/cli/commands/generate.command.js',
-    'global flags': 'cli.js', // Global flags are handled in main CLI
+    'global flags': 'cli.js',
     'plugin add': 'src/cli/commands/plugin/add.command.js',
     'plugin create': 'src/cli/commands/plugin/create.command.js',
     'plugin disable': 'src/cli/commands/plugin/disable.command.js',
@@ -48,7 +47,6 @@ function createE2eTestRunner(commandName, manifestPath, options = {}) {
           }
 
           const args = testCase.args(sandboxDir);
-          // Pass options to runCli, allowing test case to override defaults
           const cliOptions = { useFactoryDefaults: testCase.useFactoryDefaults !== false };
           const result = await harness.runCli(args, cliOptions);
 

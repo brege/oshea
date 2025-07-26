@@ -45,9 +45,7 @@ module.exports = [
   },
   {
     describe: '3.2.2: (Sad Path) Fails with a non-zero exit code if required plugin-specific options are missing',
-    setup: async (sandboxDir) => {
-    // No setup needed, as the command should fail before accessing any files.
-    },
+    setup: async (sandboxDir) => { },
     args: (sandboxDir) => [
       'generate',
       'recipe-book',

@@ -30,7 +30,6 @@ module.exports = [
     args: (sandboxDir) => ['this-is-not-a-command'],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(1);
-      // Robust: check both streams for the error message
       expect((stderr + stdout)).to.match(/unknown command/i);
     },
   },

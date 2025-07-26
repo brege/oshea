@@ -17,7 +17,6 @@ module.exports = [
     },
     args: (sandboxDir) => ['test-doc.md'],
     assert: async ({ exitCode, stdout }) => {
-      // Exits 1 for error per your linter convention
       expect(exitCode).to.equal(1);
       expect(stdout).to.match(/orphan reference: '\.\/non-existent\.md' not found/i);
       expect(stdout).to.match(/orphan-link/);
@@ -54,7 +53,6 @@ module.exports = [
           '<!-- uncategorized-end -->',
         ].join('\n')
       );
-      // This test is designed to run against the main project config
     },
     //args: (sandboxDir) => ['--group=scripts'],
     args: (sandboxDir) => [path.join(sandboxDir, 'scripts')],

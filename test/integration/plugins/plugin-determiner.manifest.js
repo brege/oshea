@@ -37,7 +37,6 @@ md_to_pdf_plugin: ${fmPluginName}
       expect(result.localConfigOverrides).to.deep.equal({ someOverride: 'value' });
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, true);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -76,7 +75,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, true);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -107,7 +105,6 @@ md_to_pdf_plugin: ${fmPluginName}
       expect(result.localConfigOverrides).to.deep.equal({ anotherSetting: 'anotherValue' });
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, true);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -139,7 +136,6 @@ some_other_key: some_value
       expect(result.localConfigOverrides).to.deep.equal({ someOtherConfig: true });
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, true);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -177,7 +173,6 @@ some_other_fm_key: fm_value
       });
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, true);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -206,7 +201,6 @@ some_other_fm_key: fm_value
       expect(mocks.mockMarkdownUtils.extractFrontMatter.called).to.be.false;
       expect(mocks.mockYaml.load.called).to.be.false;
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -249,7 +243,6 @@ some_other_fm_key: fm_value
       expect(mocks.mockFsPromises.readFile.calledWith(constants.DUMMY_LOCAL_CONFIG_FILE_PATH, 'utf8')).to.be.false;
       expect(mocks.mockYaml.load.called).to.be.false;
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -292,7 +285,6 @@ some_other_key: some_value
       expect(mocks.mockFsPromises.readFile.calledWith(constants.DUMMY_LOCAL_CONFIG_FILE_PATH, 'utf8')).to.be.true;
       expect(mocks.mockYaml.load.calledOnce).to.be.true;
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -335,7 +327,6 @@ md_to_pdf_plugin: ${pluginName}
       expect(mocks.mockFsSync.existsSync.calledWith(expectedSubdirPath)).to.be.true;
       expect(mocks.mockFsSync.statSync.calledWith(expectedSubdirPath)).to.be.true;
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -382,7 +373,6 @@ md_to_pdf_plugin: ${pluginName}
       expect(mocks.mockFsSync.existsSync.calledWith(expectedDirectPath)).to.be.true;
       expect(mocks.mockFsSync.statSync.calledWith(expectedDirectPath)).to.be.true;
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -426,7 +416,6 @@ md_to_pdf_plugin: ${pluginName}
       expect(mocks.mockFsSync.existsSync.calledWith(expectedSubdirPath)).to.be.true;
       expect(mocks.mockFsSync.existsSync.calledWith(expectedDirectPath)).to.be.true;
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -461,7 +450,6 @@ md_to_pdf_plugin: ${relativePluginPath}
 
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, false);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -469,7 +457,7 @@ md_to_pdf_plugin: ${relativePluginPath}
     describe: '1.3.13: Should resolve a relative pluginSpec from CLI against process.cwd() when markdownFile is not present',
     args: {
       plugin: './cli-relative-plugin',
-      markdownFile: undefined, // No markdown file
+      markdownFile: undefined,
     },
     defaultPluginName: 'default',
     setup: async (args, mocks, constants) => {
@@ -485,7 +473,6 @@ md_to_pdf_plugin: ${relativePluginPath}
 
       assertCommonFileAndParsingInteractions(mocks, constants, args, false, false);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
@@ -520,14 +507,13 @@ md_to_pdf_plugin: ${fmPluginName}
 
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, false);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },
   {
     describe: '1.3.14.2: Should not log final determination if isLazyLoad and determinationSource is default (redundant)',
     args: {
-      markdownFile: undefined, // No markdown file
+      markdownFile: undefined,
       isLazyLoad: true,
     },
     defaultPluginName: 'default',
@@ -539,7 +525,6 @@ md_to_pdf_plugin: ${fmPluginName}
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.be.null;
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
 
       assertCommonFileAndParsingInteractions(mocks, constants, args, false, false);
@@ -577,7 +562,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       assertCommonFileAndParsingInteractions(mocks, constants, args, true, false);
 
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
     },
   },

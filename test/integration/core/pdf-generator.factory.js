@@ -4,7 +4,7 @@ function makePdfGeneratorScenario({
   description,
   stubs = {},
   assertion,
-  constants, // Allow per-test-case constants
+  constants,
 }) {
   const setup = (mocks, constantsArg) => {
     const { mockPuppeteer } = mocks;

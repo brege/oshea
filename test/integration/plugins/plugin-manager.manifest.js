@@ -12,7 +12,7 @@ module.exports = [
   makePluginManagerScenario({
     description: '1.5.2: should correctly pass coreUtils to a class-based plugin constructor',
     pluginType: 'class',
-    expectedResult: { success: true, coreUtilsReceived: true }, // Expect the property to exist
+    expectedResult: { success: true, coreUtilsReceived: true },
   }),
   makePluginManagerScenario({
     description: '1.5.3: should correctly pass all arguments to the plugin\'s generate method',

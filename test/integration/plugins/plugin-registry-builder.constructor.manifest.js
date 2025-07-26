@@ -23,7 +23,6 @@ module.exports = [
       expect(builder.projectManifestConfigPath).to.equal(constants.FAKE_MANIFEST_PATH);
       expect(builder.projectManifestBaseDir).to.equal(constants.FAKE_MANIFEST_DIR);
       expect(builder.xdgBaseDir).to.equal(`${constants.FAKE_HOME_DIR}/.config/md-to-pdf`);
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some(log => log.level === 'debug')).to.be.true;
     },
@@ -43,7 +42,6 @@ module.exports = [
     assert: async (builder, mocks, constants, expect, logs) => {
       const FAKE_XDG_CONFIG_HOME = '/fake/xdg_config';
       expect(builder.xdgBaseDir).to.equal(`${FAKE_XDG_CONFIG_HOME}/md-to-pdf`);
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some(log => log.level === 'debug')).to.be.true;
     },
@@ -56,7 +54,6 @@ module.exports = [
     isNegativeTest: true,
     expectedErrorMessage: 'PluginRegistryBuilder: projectRoot must be a valid path string.',
     assert: async (builder, mocks, constants, expect, logs) => {
-      // No log assertion for this negative test, as it primarily checks for a thrown error.
     },
   },
   {
@@ -67,7 +64,6 @@ module.exports = [
     isNegativeTest: true,
     expectedErrorMessage: 'PluginRegistryBuilder: projectRoot must be a valid path string.',
     assert: async (builder, mocks, constants, expect, logs) => {
-      // No log assertion for this negative test.
     },
   },
   {
@@ -78,7 +74,6 @@ module.exports = [
     isNegativeTest: true,
     expectedErrorMessage: 'PluginRegistryBuilder: projectRoot must be a valid path string.',
     assert: async (builder, mocks, constants, expect, logs) => {
-      // No log assertion for this negative test.
     },
   },
   {
@@ -89,7 +84,6 @@ module.exports = [
     setup: async (mocks, constants) => {},
     assert: async (builder, mocks, constants, expect, logs) => {
       expect(builder.cmCollRoot).to.equal(constants.FAKE_COLL_ROOT);
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some(log => log.level === 'debug')).to.be.true;
     },
@@ -104,7 +98,6 @@ module.exports = [
     },
     assert: async (builder, mocks, constants, expect, logs) => {
       expect(builder.cmCollRoot).to.equal(constants.FAKE_COLL_ROOT);
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some(log => log.level === 'debug')).to.be.true;
     },
@@ -119,7 +112,6 @@ module.exports = [
     },
     assert: async (builder, mocks, constants, expect, logs) => {
       expect(builder.cmCollRoot).to.equal(constants.FAKE_COLL_ROOT);
-      // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some(log => log.level === 'debug')).to.be.true;
     },

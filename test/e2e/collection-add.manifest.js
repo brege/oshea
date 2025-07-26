@@ -2,7 +2,6 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-// Helper from previous manifests
 async function createDummyPlugin(pluginDir, pluginName) {
   await fs.ensureDir(pluginDir);
   await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
@@ -12,9 +11,7 @@ async function createDummyPlugin(pluginDir, pluginName) {
 module.exports = [
   {
     describe: '3.10.1: (Happy Path) Successfully adds a collection from a git URL',
-    setup: async (sandboxDir) => {
-      // No setup needed, will clone from a live public repository.
-    },
+    setup: async (sandboxDir) => {},
     args: (sandboxDir) => [
       'collection',
       'add',
@@ -28,7 +25,6 @@ module.exports = [
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
       const collectionPath = path.join(collRootDir, 'brege-plugins-test');
-      // A more robust check: verify that the .git directory was created by the clone.
       const gitConfigPath = path.join(collectionPath, '.git', 'config');
 
       const collectionExists = await fs.pathExists(collectionPath);

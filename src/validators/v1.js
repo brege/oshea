@@ -224,7 +224,6 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
     });
     return;
   }
-  // Continue inline without premature OK status - we'll show it after the test runs
   try {
     logger.info('\n  Running in-situ E2E test...', {
       context: 'V1Validator',
@@ -268,7 +267,7 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
             plugin: pluginName,
             suite: trimmedLine
           });
-          process.stdout.write(`${trimmedLine}\n`); // Direct print for exact formatting
+          process.stdout.write(`${trimmedLine}\n`);
           continue;
         }
 
@@ -281,7 +280,7 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
             plugin: pluginName,
             test: testName
           });
-          process.stdout.write(`${testName}\n`); // Direct print for exact formatting
+          process.stdout.write(`${testName}\n`);
           continue;
         }
 
@@ -293,7 +292,7 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
             plugin: pluginName,
             summary: trimmedLine
           });
-          process.stdout.write(`${trimmedLine}\n`); // Direct print for exact formatting
+          process.stdout.write(`${trimmedLine}\n`);
           continue;
         }
 
@@ -307,7 +306,7 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
             plugin: pluginName,
             outputLine: trimmedLine
           });
-          process.stdout.write(`${trimmedLine}\n`); // Direct print for exact formatting
+          process.stdout.write(`${trimmedLine}\n`);
         }
       }
     }
@@ -330,11 +329,11 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
         format: 'inline',
         plugin: pluginName
       });
-      logger.error('', { // Empty message, all content in data
+      logger.error('', {
         context: 'V1Validator',
         format: 'inline',
         plugin: pluginName,
-        output: e.stdout.toString() + '\n' // Include newline in data for specific output
+        output: e.stdout.toString() + '\n'
       });
     }
     if (e.stderr && e.stderr.length > 0) {
@@ -343,11 +342,11 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
         format: 'inline',
         plugin: pluginName
       });
-      logger.error('', { // Empty message, all content in data
+      logger.error('', {
         context: 'V1Validator',
         format: 'inline',
         plugin: pluginName,
-        output: e.stderr.toString() + '\n' // Include newline in data for specific output
+        output: e.stderr.toString() + '\n'
       });
     }
     if ((!e.stdout || e.stdout.length === 0) && (!e.stderr || e.stderr.length === 0)) {
@@ -431,11 +430,11 @@ const runSelfActivation = (pluginDirectoryPath, pluginName, errors) => {
         format: 'inline',
         plugin: pluginName
       });
-      logger.error('', { // Empty message, all content in data
+      logger.error('', {
         context: 'V1Validator',
         format: 'inline',
         plugin: pluginName,
-        output: e.stderr.toString() + '\n' // Include newline in data for specific output
+        output: e.stderr.toString() + '\n'
       });
     }
   } finally {
@@ -464,7 +463,7 @@ function validateV1(pluginDirectoryPath, pluginMetadata) {
   const readmePath = path.join(pluginDirectoryPath, 'README.md');
   checkReadmeFrontMatterV1(readmePath, pluginName, warnings);
   if (errors.length === 0) {
-    runSelfActivation(pluginDirectoryPath, pluginName, errors); // Removed warnings arg as it's not used by runSelfActivation
+    runSelfActivation(pluginDirectoryPath, pluginName, errors);
   } else {
     warnings.push('Skipping self-activation check due to prior critical errors.');
     logger.info('  Performing self-activation sanity check... ', {

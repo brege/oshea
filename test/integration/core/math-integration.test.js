@@ -1,6 +1,8 @@
 // test/integration/core/math-integration.test.js
 require('module-alias/register');
 const {
+  projectRoot,
+  mathIntegrationPath,
   mathIntegrationFactoryPath,
   mathIntegrationManifestPath,
   katexPath,
@@ -17,7 +19,7 @@ const commonTestConstants = {
   TEST_LOGGER_PATH: testLoggerPath
 };
 
-describe('math-integration (Module Integration Tests)', function() {
+describe(`math-integration (Module Integration Tests) ${path.relative(projectRoot, mathIntegrationPath)}`, function() {
   beforeEach(function() {
     clearLogs();
   });

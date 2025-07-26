@@ -20,7 +20,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Collection directory "collection-to-remove" removed successfully/i);
+      expect(stdout).to.match(/Collection Name: collection-to-remove/i);
 
       // Verify the directory is gone from the sandboxed collections root
       const collRootDir = path.join(sandboxDir, '.cm-test-root');

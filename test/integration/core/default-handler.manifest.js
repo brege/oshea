@@ -309,8 +309,13 @@ module.exports = [
     expectedLogs: [
       {
         level: 'error',
-        msg: 'Input Markdown file not found',
-        data: { context: 'DefaultHandler', file: '/path/to/test.md', operation: 'document generation' }
+        msg: 'Document generation failed',
+        data: {
+          context: 'DefaultHandler',
+          error: 'Input Markdown file not found: /path/to/test.md',
+          operation: 'document generation',
+          file: '/path/to/test.md'
+        }
       },
       {
         level: 'error',

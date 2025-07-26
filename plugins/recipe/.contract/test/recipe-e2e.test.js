@@ -22,7 +22,7 @@ const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'recipe-example.md');
 
-describe('Recipe Plugin E2E', function() {
+describe('plugins/recipe (in-situ Self-Activation Test) .contract/test/recipe-e2e.test.js', function() {
   this.timeout(15000);
 
   before(async () => {
@@ -33,7 +33,7 @@ describe('Recipe Plugin E2E', function() {
     await cleanupTestDirectory(TEST_OUTPUT_DIR);
   });
 
-  it('should convert the example markdown using self-activation', async () => {
+  it('in-situ: should convert the example markdown using self-activation', async () => {
     const { success, stdout, stderr } = await runCliCommand(
       ['convert', EXAMPLE_MD, '--outdir', TEST_OUTPUT_DIR, '--no-open'],
       cliPath,

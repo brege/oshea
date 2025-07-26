@@ -1,6 +1,7 @@
 // test/integration/config/main-config-loader.test.js
 require('module-alias/register');
 const {
+  projectRoot,
   mainConfigLoaderPath,
   defaultConfigPath,
   factoryDefaultConfigPath,
@@ -34,7 +35,7 @@ const commonTestConstants = {
   FACTORY_DEFAULT_CONFIG_PATH: factoryDefaultConfigPath,
 };
 
-describe('MainConfigLoader (Integration Tests)', function() {
+describe(`main-config-loader (Module Integration Tests) ${path.relative(projectRoot, mainConfigLoaderPath)}`, function() {
   let mockDependencies;
   let MainConfigLoader;
 

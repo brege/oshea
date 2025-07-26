@@ -30,7 +30,7 @@ const paths = {
   main_config_loader:     'test/integration/config/main-config-loader.*.js',          // Rank 2
   plugin_config_loader:   'test/integration/config/plugin-config-loader.*.js',        // Rank 2
 
-  plugin_determiner:      'test/integration/plugins/plugin_determiner.*.js',          // Rank 1
+  plugin_determiner:      'test/integration/plugins/plugin-determiner.*.js',          // Rank 1
   plugin_manager:         'test/integration/plugins/plugin-manager.*.js',             // Rank 2
   plugin_registry_builder:'test/integration/plugins/plugin-registry-builder.*.js',    // Rank 2
   plugin_validator:       'test/integration/plugins/plugin-validator.*.js',           // Rank 2
@@ -52,9 +52,6 @@ const paths = {
 
   // --- Linting ---
   linting_units:          'test/linting/unit/all-linting-unit.test.js',
-
-  // --- Smoke Tests ---
-  //smoke:                  'test/smoke/smoke.test.js'
 
 };
 

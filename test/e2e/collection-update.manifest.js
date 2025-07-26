@@ -43,7 +43,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Successfully updated collection "collection-to-update-all"/i);
+      expect(stdout).to.match(/Attempting to update all Git-based collections/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
       const updatedFile = path.join(collRootDir, 'collection-to-update-all', 'v2.txt');
@@ -63,7 +63,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Successfully updated collection "collection-to-update-one"/i);
+      expect(stdout).to.match(/Attempting to update collection.*collection-to-update-one/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
       const updatedFile = path.join(collRootDir, 'collection-to-update-one', 'v2.txt');
@@ -82,7 +82,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Successfully updated collection "collection-to-update-alias"/i);
+      expect(stdout).to.match(/Updating collection from Git source:/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
       const updatedFile = path.join(collRootDir, 'collection-to-update-alias', 'v2.txt');

@@ -24,7 +24,7 @@ const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'cv-plug
 const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'cv-example.md');
 const MIN_PDF_SIZE = 1000;
 
-describe('CV Plugin E2E Test', function () {
+describe('plugins/cv (in-situ Self-Activation Test) .contract/test/cv-e2e.test.js', function () {
   this.timeout(20000);
 
   before(async () => {
@@ -38,7 +38,7 @@ describe('CV Plugin E2E Test', function () {
     await cleanupTestDirectory(TEST_OUTPUT_DIR, keepOutput);
   });
 
-  it('should convert cv-example.md to PDF using the cv plugin and generate a non-empty PDF', async () => {
+  it('in-situ: should convert the example resume using self-activation', async () => {
     const commandArgs = [
       'convert',
       `"${EXAMPLE_MD_PATH}"`,
@@ -69,7 +69,6 @@ describe('CV Plugin E2E Test', function () {
       throw new Error(`Generated PDF is too small: ${matchingFiles[0]} (${stat.size} bytes)`);
     }
 
-    logger.success(`[cv-e2e] Successfully created and verified: ${matchingFiles[0]}`);
   });
 });
 

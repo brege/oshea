@@ -1,6 +1,7 @@
 // test/integration/core/pdf-generator.test.js
 require('module-alias/register');
 const {
+  projectRoot,
   pdfGeneratorPath,
   captureLogsPath,
   pdfGeneratorManifestPath,
@@ -12,7 +13,7 @@ const { logs, clearLogs } = require(captureLogsPath);
 const testManifest = require(pdfGeneratorManifestPath);
 const proxyquire = require('proxyquire');
 
-describe('pdf_generator (Integration Tests)', function () {
+describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoot, pdfGeneratorPath)}`, function() {
   let generatePdf;
   let mockPuppeteer;
   let sandbox;

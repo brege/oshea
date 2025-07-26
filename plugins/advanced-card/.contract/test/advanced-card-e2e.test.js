@@ -26,7 +26,7 @@ const EXAMPLE_MD = path.join(PLUGIN_ROOT, `${PLUGIN_NAME}-example.md`);
 const EXPECTED_PDF_BASENAME = 'dr-eleanor-vance.pdf';
 const MIN_PDF_SIZE = 1000;
 
-describe(`E2E Test for ${PLUGIN_NAME} Plugin`, function() {
+describe('plugins/advanced-card (in-situ Self-Activation Test) .contract/test/advanced-card-e2e.test.js', function() {
   this.timeout(20000);
 
   before(async () => {
@@ -37,7 +37,7 @@ describe(`E2E Test for ${PLUGIN_NAME} Plugin`, function() {
     await cleanupTestDirectory(TEST_OUTPUT_DIR);
   });
 
-  it('should successfully convert its own example markdown file', async () => {
+  it('in-situ: should successfully convert its own example markdown file', async () => {
     const commandArgs = [
       'convert',
       EXAMPLE_MD,

@@ -1,6 +1,7 @@
 // test/integration/plugins/plugin-registry-builder.test.js
 require('module-alias/register');
 const {
+  projectRoot,
   pluginRegistryBuilderPath,
   captureLogsPath,
   pluginRegistryBuilderConstructorManifestPath,
@@ -53,7 +54,7 @@ const commonTestConstants = {
   DUMMY_MARKDOWN_FILENAME: 'my-document.md',
 };
 
-describe('PluginRegistryBuilder (Integration Tests)', function() {
+describe(`plugin-registry-builder (Module Integration Tests) ${path.relative(projectRoot, pluginRegistryBuilderPath)}`, function() {
 
   let mockDependencies;
   let originalPathsModule;

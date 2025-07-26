@@ -1,6 +1,7 @@
 // test/integration/collections/collections-manager.test.js
 require('module-alias/register');
 const {
+  projectRoot,
   collectionsIndexPath,
   cmUtilsPath,
   constantsPath,
@@ -40,7 +41,7 @@ const allTestCases = [
 
 const FAKE_COLL_ROOT = '/fake/collRoot';
 
-describe('CollectionsManager (Hybrid Integration Tests)', function() {
+describe(`collections-manager (Subsystem Integration Tests) ${path.relative(projectRoot, collectionsIndexPath)}`, function() {
   let mockDependencies;
   let CollectionsManager;
 

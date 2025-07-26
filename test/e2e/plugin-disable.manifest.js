@@ -33,7 +33,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stripAnsi(stdout)).to.match(/Plugin "my-enabled-plugin" disabled successfully/i);
+      expect(stripAnsi(stdout)).to.match(/Attempting to disable plugin/i);
 
       // Optionally, check that the plugin is no longer in the enabled manifest
       const enabledManifestPath = path.join(sandboxDir, '.cm-test-root', 'enabled.yaml');

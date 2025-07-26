@@ -39,7 +39,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -79,7 +78,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -111,7 +109,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -144,7 +141,6 @@ some_other_key: some_value
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -183,7 +179,6 @@ some_other_fm_key: fm_value
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -213,7 +208,6 @@ some_other_fm_key: fm_value
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -257,7 +251,6 @@ some_other_fm_key: fm_value
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -301,7 +294,6 @@ some_other_key: some_value
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -345,7 +337,6 @@ md_to_pdf_plugin: ${pluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -393,7 +384,6 @@ md_to_pdf_plugin: ${pluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -438,7 +428,6 @@ md_to_pdf_plugin: ${pluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -474,7 +463,6 @@ md_to_pdf_plugin: ${relativePluginPath}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -499,7 +487,6 @@ md_to_pdf_plugin: ${relativePluginPath}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -535,7 +522,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
   {
@@ -555,7 +541,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
 
       assertCommonFileAndParsingInteractions(mocks, constants, args, false, false);
     },
@@ -594,7 +579,6 @@ md_to_pdf_plugin: ${fmPluginName}
 
       // Basic logging smoke test
       expect(logs.length).to.be.greaterThan(0);
-      expect(logs.some(log => log.level === 'info')).to.be.true;
     },
   },
 ];

@@ -3,7 +3,8 @@ require('module-alias/register');
 const {
   pluginManagerPath,
   pluginManagerManifestPath,
-  captureLogsPath
+  captureLogsPath,
+  projectRoot
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -13,7 +14,7 @@ const os = require('os');
 const { logs, clearLogs } = require(captureLogsPath);
 const testManifest = require(pluginManagerManifestPath);
 
-describe('PluginManager Tests (1.5.x)', function() {
+describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot, pluginManagerPath)}`, function() {
   let tempDir;
   let originalPathsModule;
   let PluginManager;

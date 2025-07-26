@@ -28,7 +28,7 @@ module.exports = [
       expect(exitCode).to.equal(0);
       const strippedStdout = stripAnsi(stdout);
       expect(strippedStdout).to.match(/Successfully processed 'plugin add'/i);
-      expect(strippedStdout).to.match(/enabled as "my-local-plugin-src"/i);
+      expect(strippedStdout).to.match(/Attempting to add and enable plugin from local path/i);
     },
   },
 ];

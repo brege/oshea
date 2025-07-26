@@ -23,7 +23,7 @@ const {
 const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-book-e2e');
 const HUGO_EXAMPLE_PATH = path.join(fixturesDir, 'hugo-example');
 
-describe('Recipe Book Plugin E2E', function () {
+describe('plugins/recipe-book (in-situ Self-Activation Test) .contract/test/recipe-book-e2e.test.js', function () {
   this.timeout(20000);
 
   before(async () => {
@@ -34,7 +34,7 @@ describe('Recipe Book Plugin E2E', function () {
     await cleanupTestDirectory(TEST_OUTPUT_DIR);
   });
 
-  it('should generate a recipe book from a directory of recipes', async () => {
+  it('in-situ: should generate a recipe book from a directory of recipes', async () => {
     const commandArgs = [
       'generate',
       'recipe-book',

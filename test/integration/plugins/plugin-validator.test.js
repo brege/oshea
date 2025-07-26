@@ -2,6 +2,7 @@
 require('module-alias/register');
 const {
   captureLogsPath,
+  projectRoot,
   pluginValidatorManifestPath,
   validatorPath,
   v1Path
@@ -19,7 +20,7 @@ const fs = require('fs');
 
 const proxyquire = require('proxyquire');
 
-describe('Plugin Validator (Integration Tests)', function() {
+describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(projectRoot, validatorPath)}`, function() {
   this.timeout(5000);
   let tempDir;
   let mockFs, mockExecSync, mockYaml, mockOs;

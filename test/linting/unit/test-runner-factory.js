@@ -10,7 +10,7 @@ function createUnitTestRunner(suiteName, manifestPath, options = {}) {
   const { timeout = 20000 } = options;
   const testManifest = require(manifestPath);
 
-  describe(`Unit Tests - ${suiteName}`, function() {
+  describe(`${suiteName} (Unit Tests) scripts/linting/${suiteName === 'Code Linters' ? 'code/' : 'docs/'}`, function() {
     this.timeout(timeout);
 
     for (const testCase of testManifest) {

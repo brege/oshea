@@ -12,7 +12,7 @@ const {
 
 const testSuites = [
   { name: 'Code Linters', manifest: codeLintingManifestPath },
-  { name: 'Doc Linters', manifest: docsLintingManifestPath },
+  { name: 'Docs Linters', manifest: docsLintingManifestPath },
 ];
 
 

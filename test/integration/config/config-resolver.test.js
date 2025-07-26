@@ -1,6 +1,7 @@
 // test/integration/config/config-resolver.test.js
 require('module-alias/register');
 const {
+  projectRoot,
   configResolverPath,
   captureLogsPath,
   configResolverConstructorManifestPath,
@@ -29,7 +30,7 @@ const allTestCases = [
   ...getEffectiveConfigManifest,
 ];
 
-describe('ConfigResolver (Integration Tests)', function () {
+describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot, configResolverPath)}`, function () {
   let mockDependencies;
   let mockMainConfigLoaderInstance;
   let mockPluginConfigLoaderInstance;

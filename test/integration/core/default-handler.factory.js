@@ -77,9 +77,8 @@ function makeDefaultHandlerScenario({
       expect(result).to.be.null;
       const errorLog = logs.find(log => log.level === 'error');
       expect(errorLog, 'Expected an error log').to.not.be.undefined;
-      // *** MODIFICATION from previous turn, now correct for all cases ***
-      expect(errorLog.msg).to.equal('Document generation failed'); // The catch block's main message
-      expect(errorLog.data.error).to.include(expectedError); // The original specific error message
+      expect(errorLog.msg).to.equal('Document generation failed');
+      expect(errorLog.data.error).to.include(expectedError);
       expect(errorLog.data.context).to.equal('DefaultHandler');
     } else {
       expect(result).to.equal(expectedResult);

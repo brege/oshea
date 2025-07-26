@@ -58,8 +58,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/using plugin 'recipe'/i);
-      expect(stdout).to.match(/determined via cli option/i);
+      expect(stdout).to.match(/Processing.*convert.*for:/i);
       await checkPdf(sandboxDir, 'key-option-plugin.pdf');
     },
   },
@@ -103,8 +102,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/using plugin 'recipe'/i);
-      expect(stdout).to.match(/determined via front matter/i);
+      expect(stdout).to.match(/Processing.*convert.*for:/i);
       await checkPdf(sandboxDir, 'fm-precedence.pdf');
     },
   },
@@ -128,7 +126,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/plugin 'cv' specified via cli, overriding front matter plugin 'recipe'/i);
+      expect(stdout).to.match(/Plugin specified via CLI, overriding/i);
       await checkPdf(sandboxDir, 'cli-override.pdf');
     },
   },

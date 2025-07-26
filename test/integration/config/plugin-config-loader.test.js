@@ -1,6 +1,7 @@
 // test/integration/config/plugin-config-loader.test.js
 require('module-alias/register');
 const {
+  projectRoot,
   pluginConfigLoaderPath,
   captureLogsPath,
   allPaths,
@@ -32,7 +33,7 @@ const commonTestConstants = {
   PROJECT_MAIN_CONFIG_PATH: '/mock/project/config.yaml',
 };
 
-describe('PluginConfigLoader (Integration Tests)', function() {
+describe(`plugin-config-loader (Module Integration Tests) ${path.relative(projectRoot, pluginConfigLoaderPath)}`, function() {
   let mockDependencies;
   let PluginConfigLoader;
 

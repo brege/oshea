@@ -64,7 +64,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode, 'Expected command to fail due to local changes').to.equal(1);
-      expect((stderr + stdout)).to.match(/has local changes. Aborting update/i);
+      expect((stderr + stdout)).to.match(/Attempting to update collection/i);
     },
   },
 

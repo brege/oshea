@@ -9,7 +9,30 @@ function createE2eTestRunner(commandName, manifestPath, options = {}) {
   const { timeout = 15000 } = options;
   const testManifest = require(manifestPath);
 
-  describe(`E2E - ${commandName} Command`, function() {
+  // Map command names to their source file paths
+  const commandSourceMap = {
+    'collection add': 'src/cli/commands/collection/add.command.js',
+    'collection list': 'src/cli/commands/collection/list.command.js',
+    'collection remove': 'src/cli/commands/collection/remove.command.js',
+    'collection update': 'src/cli/commands/collection/update.command.js',
+    'config': 'src/cli/commands/config.command.js',
+    'convert': 'src/cli/commands/convert.command.js',
+    'generate': 'src/cli/commands/generate.command.js',
+    'global flags': 'cli.js', // Global flags are handled in main CLI
+    'plugin add': 'src/cli/commands/plugin/add.command.js',
+    'plugin create': 'src/cli/commands/plugin/create.command.js',
+    'plugin disable': 'src/cli/commands/plugin/disable.command.js',
+    'plugin enable': 'src/cli/commands/plugin/enable.command.js',
+    'plugin list': 'src/cli/commands/plugin/list.command.js',
+    'plugin validate': 'src/cli/commands/plugin/validate.command.js',
+    'sad paths': 'src/plugins/'
+  };
+
+  const sourcePath = commandSourceMap[commandName] || 'cli.js';
+  const testType = commandName === 'sad paths' ? 'Workflow Test' : 'End-to-End Test';
+  const describeTitle = `${commandName} (${testType}) ${sourcePath}`;
+
+  describe(describeTitle, function() {
     this.timeout(timeout);
 
     testManifest.forEach(testCase => {

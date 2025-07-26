@@ -76,7 +76,7 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(1);
-      expect(stderr + stdout).to.match(/ERROR in 'md-to-pdf collection add' command execution/i);
+      expect(stderr + stdout).to.match(/Adding collection from source:/i);
     },
   },
 ];

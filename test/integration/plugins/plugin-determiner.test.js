@@ -4,7 +4,8 @@ require('module-alias/register');
 const {
   captureLogsPath,
   pluginDeterminerPath,
-  pluginDeterminerManifestPath
+  pluginDeterminerManifestPath,
+  projectRoot
 } = require('@paths');
 const { logs, clearLogs } = require(captureLogsPath);
 const testLoggerPath = captureLogsPath;
@@ -14,7 +15,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 
-describe('determinePluginToUse (Module Integration Tests)', function() {
+describe(`plugin-determiner (Module Integration Tests) ${path.relative(projectRoot, pluginDeterminerPath)}`, function() {
   let determinePluginToUse;
   let mockFsPromises;
   let mockFsSync;

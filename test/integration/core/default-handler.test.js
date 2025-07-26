@@ -1,6 +1,7 @@
 // test/integration/core/default-handler.test.js
 require('module-alias/register');
 const {
+  projectRoot,
   defaultHandlerManifestPath,
   defaultHandlerPath,
   allPaths,
@@ -30,7 +31,7 @@ function collectStubs(ctx) {
   };
 }
 
-describe('DefaultHandler (Integration Tests)', function () {
+describe(`default-handler (Subsystem Integration Tests) ${path.relative(projectRoot, defaultHandlerPath)}`, function () {
   let DefaultHandler;
 
   beforeEach(function () {

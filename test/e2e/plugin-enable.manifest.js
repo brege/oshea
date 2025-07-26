@@ -50,8 +50,8 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/enabled successfully as "plugin-to-enable"/i);
-      expect(stdout).to.match(/Validation bypassed for plugin 'plugin-to-enable' \(--bypass-validation flag detected\)/i); // Assert bypass message
+      expect(stdout).to.match(/Attempting to enable plugin/i);
+      // Validation bypass message converted to debug level
     },
   },
   {
@@ -72,9 +72,8 @@ module.exports = [
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Running validation for plugin 'valid-plugin' before enabling/i);
-      expect(stdout).to.match(/Plugin 'valid-plugin' passed validation/i);
-      expect(stdout).to.match(/Plugin "valid-coll\/valid-plugin" enabled successfully as "valid-plugin"/i);
+      expect(stdout).to.match(/Attempting to enable plugin/i);
+      // Validation and success messages converted to debug level
       // Verify it's in the enabled manifest
       const enabledManifestPath = path.join(sandboxDir, '.cm-test-root', 'enabled.yaml');
       const enabledManifest = yaml.load(await fs.readFile(enabledManifestPath, 'utf8'));

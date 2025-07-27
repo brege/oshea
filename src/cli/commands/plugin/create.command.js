@@ -30,8 +30,8 @@ module.exports = {
         alias: 'f',
         completionKey: 'usablePlugins'
       })
-      .option('target-dir', {
-        alias: 't',
+      .option('outdir', {
+        alias: 'o',
         describe: 'directory to create the new plugin in',
         type: 'string',
         normalize: true
@@ -41,7 +41,7 @@ module.exports = {
         type: 'boolean',
         default: false
       })
-      .epilogue('If --from is omitted, a default template is used.\nIf --target-dir is omitted, defaults to the current directory.');
+      .epilogue('If --from is omitted, a default template is used.\nIf --outdir is omitted, defaults to the current directory.');
   },
   handler: async (args) => {
     const newPluginName = args.pluginName;
@@ -74,7 +74,7 @@ module.exports = {
       }
 
       const options = {
-        targetDir: args.targetDir,
+        targetDir: args.outdir,
         force: args.force
       };
 

@@ -110,12 +110,19 @@ librarian:
     scanRoot: scripts/linting
     filetypes: [".js", ".yaml"]
     excludePatterns: []
-  test-scripts:
-    marker: "test-scripts"
+  test:
+    marker: "test"
     indexFile: test/index.md
     scanRoot:
-      - test/docs
-      - test/scripts
+      - test/analytics
+      - test/config
+    filetypes: [".js", ".json", ".yaml"]
+    excludePatterns:
+      - "test/archive/**"
+  test-archive:
+    marker: "test-archive"
+    indexFile: test/archive/index.md
+    scanRoot: test/archive
     filetypes: [".js", ".md"]
     excludePatterns: []
   paths:
@@ -144,8 +151,8 @@ postman:
     - "**/sample.md"
     - "**/index.js"
   excludes:
-    - "test/docs/checklist-*.md"
-    - "test/docs/audit-log.md"
+    - "test/archive/docs/checklist-*.md"
+    - "test/archive/docs/audit-log.md"
     - "plugins/recipe-book/README.md"
 
 # --- Harness Configuration ---

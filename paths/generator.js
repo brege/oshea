@@ -1,9 +1,23 @@
 #!/usr/bin/env node
 // paths/generator.js
-
-require('module-alias/register');
-const { loggerPath } = require('@paths');
-const logger = require(loggerPath);
+// lint-skip-file no-console
+// Bootstrap logger with fallback for when @paths doesn't exist yet
+let logger;
+try {
+  require('module-alias/register');
+  const { loggerPath } = require('@paths');
+  logger = require(loggerPath);
+} catch (err) {
+  // Minimal bootstrap logger when @paths system doesn't exist
+  logger = {
+    info: (msg) => console.log(`[INFO] ${msg}`),
+    warn: (msg) => console.warn(`[WARN] ${msg}`),
+    error: (msg) => console.error(`[ERROR] ${msg}`),
+    success: (msg) => console.log(`[SUCCESS] ${msg}`),
+    debug: (msg) => console.log(`[DEBUG] ${msg}`),
+    detail: (msg) => console.log(`[DETAIL] ${msg}`)
+  };
+}
 
 const fs = require('fs');
 const path = require('path');
@@ -328,7 +342,7 @@ class DeclarativePathsGenerator {
     return content.join('\n');
   }
 
-  writeRegistry(registryName, registryConfig, dryRun = false) {
+  writeRegistry(registryName, registryConfig, dryRun = false, force = false) {
     const newContent = this.generateRegistry(registryName, registryConfig);
     const outputPath = path.join(this.projectRoot, registryConfig.output_file);
 
@@ -346,7 +360,7 @@ class DeclarativePathsGenerator {
     }
 
     let shouldUpdate = true;
-    if (fs.existsSync(outputPath)) {
+    if (fs.existsSync(outputPath) && !force) {
       // Extract variable names from old and new content
       const oldVariables = this.extractVariableNames(fs.readFileSync(outputPath, 'utf8'));
       const newVariables = this.extractVariableNames(newContent);
@@ -361,6 +375,8 @@ class DeclarativePathsGenerator {
         const newItems = newVariables.filter(varName => !oldVariables.includes(varName));
         logger.info(`New items detected in ${registryName}: ${newItems.join(', ')}`);
       }
+    } else if (force && fs.existsSync(outputPath)) {
+      logger.info(`Force update enabled for ${registryName} registry`);
     }
 
     if (shouldUpdate) {
@@ -389,7 +405,7 @@ class DeclarativePathsGenerator {
     return variables;
   }
 
-  run(dryRun = false) {
+  run(dryRun = false, force = false) {
     logger.info(`\nGenerating path registries from: ${this.configPath}`);
     logger.info(`Project root: ${this.projectRoot}\n`);
 
@@ -405,7 +421,7 @@ class DeclarativePathsGenerator {
 
     for (const [registryName, registryConfig] of Object.entries(registries)) {
       try {
-        this.writeRegistry(registryName, registryConfig, dryRun);
+        this.writeRegistry(registryName, registryConfig, dryRun, force);
       } catch (error) {
         logger.error(`Error generating ${registryName}: ${error.message}`);
         logger.detail(error.stack);
@@ -439,6 +455,7 @@ if (require.main === module) {
   const configPath = process.argv.find(arg => arg.startsWith('--config='))?.split('=')[1];
   const dryRun = process.argv.includes('--dry-run');
   const validate = process.argv.includes('--validate');
+  const force = process.argv.includes('--force');
 
   try {
     const generator = new DeclarativePathsGenerator(configPath);
@@ -455,7 +472,7 @@ if (require.main === module) {
       }
     }
 
-    generator.run(dryRun);
+    generator.run(dryRun, force);
   } catch (error) {
     logger.error(`Fatal error: ${error.message}`);
     logger.detail(error.stack);

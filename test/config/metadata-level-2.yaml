@@ -889,6 +889,7 @@ tests:
       - rank0
     app_files:
       - src/core/pdf-generator.js
+      - src/validation/v1.js
   2.4.1:
     description: >-
       Verify a fully compliant v1 plugin (all files, passing tests, successful self-activation) is
@@ -906,6 +907,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.2:
     description: >-
       Test that a plugin with an unsupported protocol (e.g., `v2`) is reported as `INVALID` with a
@@ -923,6 +925,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.3:
     description: >-
       Verify that a plugin whose directory name does not match the `plugin_name` in its metadata is
@@ -940,6 +943,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.4:
     description: >-
       Test the metadata resolution precedence: `protocol` from `.schema.json` should be used even if
@@ -956,6 +960,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.5:
     description: >-
       Test that a plugin missing a `protocol` in all its metadata files defaults to `v1` and is
@@ -973,6 +978,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.6:
     description: Verify that a plugin with a missing required file (e.g., `index.js`) is reported as `INVALID`.
     commands:
@@ -988,6 +994,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.7:
     description: >-
       Test that a plugin with a missing optional file (e.g., `test/cv-e2e.test.js` or
@@ -1005,6 +1012,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.8:
     description: Verify that a plugin whose co-located E2E test fails when executed is reported as `INVALID`.
     commands:
@@ -1020,6 +1028,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.9:
     description: >-
       Test that a plugin whose self-activation sanity check fails (e.g., the CLI command returns an
@@ -1037,6 +1046,7 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js
   2.4.10:
     description: >-
       Test a plugin with malformed YAML in its `README.md` front matter, which should result in a
@@ -1054,3 +1064,4 @@ tests:
       - rank2
     app_files:
       - src/plugins/validator.js
+      - src/validation/v1.js

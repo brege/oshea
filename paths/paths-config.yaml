@@ -38,7 +38,7 @@ registries:
           src_root: "path.join(projectRoot, 'src')"
           assets_root: "path.join(projectRoot, 'assets')"
           scripts_root: "path.join(projectRoot, 'scripts')"
-          test_root: "path.join(projectRoot, 'test')"
+          test_root: "path.join(projectRoot, 'test', 'runners')"
           cli_commands_path: "path.join(srcRoot, 'cli', 'commands')"
           collections_commands_root: "path.join(srcRoot, 'collections', 'commands')"
           scripts_shared_root: "path.join(scriptsRoot, 'shared')"
@@ -193,7 +193,7 @@ registries:
         comment: "Test Infrastructure Foundation"
         items:
           project_root: "path.resolve(__dirname, '..')"
-          test_root: "path.join(projectRoot, 'test')"
+          test_root: "path.join(projectRoot, 'test/runners')"
           setup_file: "path.join(testRoot, 'setup.js')"
 
       directories:
@@ -227,123 +227,123 @@ registries:
       # Rank 0: Core Test Operations
       smoke:
         comment: "Smoke Tests - Basic Application Validation"
-        pattern: "test/smoke/**/*.{js,yaml}"
+        pattern: "test/runners/smoke/**/*.{js,yaml}"
         rank: 0
 
       core_integration:
         comment: "Core Module Integration Tests"
-        pattern: "test/integration/core/**/*.js"
+        pattern: "test/runners/integration/core/**/*.js"
         rank: 0
 
       # Rank 1: Essential Operations
       config_integration:
         comment: "Configuration System Integration Tests"
-        pattern: "test/integration/config/**/*.js"
+        pattern: "test/runners/integration/config/**/*.js"
         rank: 1
 
       plugins_integration:
         comment: "Plugin System Integration Tests"
-        pattern: "test/integration/plugins/**/*.js"
+        pattern: "test/runners/integration/plugins/**/*.js"
         rank: 1
 
       collections_integration:
         comment: "Collections System Integration Tests"
-        pattern: "test/integration/collections/**/*.js"
+        pattern: "test/runners/integration/collections/**/*.js"
         rank: 1
 
       e2e_core:
         comment: "End-to-End Core Workflow Tests"
-        pattern: "test/e2e/all-e2e.test.js"
+        pattern: "test/runners/e2e/all-e2e.test.js"
         rank: 1
 
       # Rank 2: Supportive Operations
       e2e_manifests:
         comment: "E2E Manifest Tests"
-        pattern: "test/e2e/*.manifest.js"
+        pattern: "test/runners/e2e/*.manifest.js"
         rank: 2
 
       e2e_workflows:
         comment: "E2E Workflow Lifecycle Tests"
-        pattern: "test/e2e/workflow-lifecycle.test.js"
+        pattern: "test/runners/e2e/workflow-lifecycle.test.js"
         rank: 2
 
       linting_tests:
         comment: "Linting Unit Tests"
-        pattern: "test/linting/unit/**/*.js"
+        pattern: "test/runners/linting/unit/**/*.js"
         rank: 2
 
       # Rank 3: Enhancements & Utilities
       test_scripts:
         comment: "Test Support Scripts"
-        pattern: "test/scripts/**/*.js"
+        pattern: "test/runners/scripts/**/*.js"
         rank: 3
 
       shared_utilities:
         comment: "Shared Test Utilities & Helpers"
-        pattern: "test/shared/**/*.js"
+        pattern: "test/runners/shared/**/*.js"
         rank: 3
 
     contextual_naming:
       # E2E test naming
       "all-e2e.test.js":
-        "test/e2e": "allE2eTest"
+        "test/runners/e2e": "allE2eTest"
       "workflow-lifecycle.test.js":
-        "test/e2e": "workflowLifecycleTest"
+        "test/runners/e2e": "workflowLifecycleTest"
       "e2e-harness.js":
-        "test/e2e": "e2eHarness"
+        "test/runners/e2e": "e2eHarness"
 
       # Integration test naming patterns
       "config-resolver.test.js":
-        "test/integration/config": "configResolverIntegrationTest"
+        "test/runners/integration/config": "configResolverIntegrationTest"
       "main-config-loader.test.js":
-        "test/integration/config": "mainConfigLoaderIntegrationTest"
+        "test/runners/integration/config": "mainConfigLoaderIntegrationTest"
       "plugin-config-loader.test.js":
-        "test/integration/config": "pluginConfigLoaderIntegrationTest"
+        "test/runners/integration/config": "pluginConfigLoaderIntegrationTest"
 
       "plugin-manager.test.js":
-        "test/integration/plugins": "pluginManagerIntegrationTest"
+        "test/runners/integration/plugins": "pluginManagerIntegrationTest"
       "plugin-determiner.test.js":
-        "test/integration/plugins": "pluginDeterminerIntegrationTest"
+        "test/runners/integration/plugins": "pluginDeterminerIntegrationTest"
       "plugin-registry-builder.test.js":
-        "test/integration/plugins": "pluginRegistryBuilderIntegrationTest"
+        "test/runners/integration/plugins": "pluginRegistryBuilderIntegrationTest"
       "plugin-validator.test.js":
-        "test/integration/plugins": "pluginValidatorIntegrationTest"
+        "test/runners/integration/plugins": "pluginValidatorIntegrationTest"
 
       "collections-manager.test.js":
-        "test/integration/collections": "collectionsManagerIntegrationTest"
+        "test/runners/integration/collections": "collectionsManagerIntegrationTest"
       "cm-utils.test.js":
-        "test/integration/collections": "cmUtilsIntegrationTest"
+        "test/runners/integration/collections": "cmUtilsIntegrationTest"
 
       "default-handler.test.js":
-        "test/integration/core": "defaultHandlerIntegrationTest"
+        "test/runners/integration/core": "defaultHandlerIntegrationTest"
       "pdf-generator.test.js":
-        "test/integration/core": "pdfGeneratorIntegrationTest"
+        "test/runners/integration/core": "pdfGeneratorIntegrationTest"
       "math-integration.test.js":
-        "test/integration/core": "mathIntegrationTest"
+        "test/runners/integration/core": "mathIntegrationTest"
 
       # Factory and manifest naming
       ".factory.js":
-        "test/integration": "factory"
+        "test/runners/integration": "factory"
       ".manifest.js":
-        "test/": "manifest"
+        "test/runners": "manifest"
 
       # Shared utilities
       "test-helpers.js":
-        "test/shared": "testHelpers"
+        "test/runners/shared": "testHelpers"
       "test-logger.js":
-        "test/shared": "testLogger"
+        "test/runners/shared": "testLogger"
       "capture-logs.js":
-        "test/shared": "captureLogs"
+        "test/runners/shared": "captureLogs"
 
       # Linting tests
       "all-linting-unit.test.js":
-        "test/linting/unit": "allLintingUnitTest"
+        "test/runners/linting/unit": "allLintingUnitTest"
 
       # Smoke tests
       "smoke-tests.yaml":
-        "test/smoke": "smokeTestsManifest"
+        "test/runners/smoke": "smokeTestsManifest"
       "smoke-test-runner.js":
-        "test/smoke": "smokeTestRunner"
+        "test/runners/smoke": "smokeTestRunner"
 
 rank_definitions:
   0: "user-facing interfaces"

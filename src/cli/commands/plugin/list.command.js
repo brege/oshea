@@ -3,70 +3,55 @@ const { pluginRegistryBuilderPath, projectRoot, loggerPath } = require('@paths')
 const logger = require(loggerPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 
-// Helper function for detailed display
-function displayPluginEntry(plugin) {
-  logger.success(`  Name: ${plugin.name}`);
-
-  let statusText = plugin.status || 'N/A';
-  if (plugin.status === 'Enabled (CM)') {
-    statusText = plugin.status;
-  } else if (plugin.status && plugin.status.startsWith('Registered')) {
-    statusText = plugin.status;
-  } else if (plugin.status === 'Available (CM)') {
-    statusText = plugin.status;
-  }
-  logger.info(`    Status: ${statusText}`);
-
-  if (plugin.cmCollection || plugin.cmOriginalCollection) {
-    const collection = plugin.cmCollection || plugin.cmOriginalCollection;
-    const pluginId = plugin.cmPluginId || plugin.cmOriginalPluginId;
-    if (collection && pluginId) {
-      logger.detail(`    CM Origin: ${collection}/${pluginId}`);
-    }
-    if (plugin.cmInvokeName && plugin.cmInvokeName !== plugin.name && plugin.status === 'Enabled (CM)') {
-      logger.detail(`    CM Invoke Name: ${plugin.cmInvokeName}`);
-    }
-  }
-
-  logger.detail(`    Description: ${plugin.description}`);
-  let sourceDisplayMessage = plugin.registrationSourceDisplay;
-  if (plugin.status === 'Enabled (CM)' && plugin.cmCollection && plugin.cmPluginId) {
-    sourceDisplayMessage = `CollectionsManager (CM: ${plugin.cmCollection}/${plugin.cmPluginId})`;
-  } else if (plugin.registrationSourceDisplay && plugin.registrationSourceDisplay.includes('(CM:')) {
-    const parts = plugin.registrationSourceDisplay.split('(CM:');
-    const cmDetails = parts[1].replace(')','').split('/');
-    const cmCollectionName = cmDetails[0];
-    const cmPluginIdName = cmDetails.slice(1).join('/');
-    sourceDisplayMessage = `${parts[0].trim()} (CM:${cmCollectionName}/${cmPluginIdName})`;
-  } else {
-    sourceDisplayMessage = plugin.registrationSourceDisplay;
-  }
-  logger.detail(`    Source: ${sourceDisplayMessage}`);
-  logger.detail(`    Config Path: ${plugin.configPath}`);
-
-  if (plugin.cmAddedOn && plugin.status === 'Enabled (CM)') {
-    logger.detail(`    CM Enabled On: ${plugin.cmAddedOn}`);
-  }
-  logger.info('  ---');
+// Determine list type from args
+function determineListType(args) {
+  if (args.enabled) return 'enabled';
+  if (args.available) return 'available';
+  if (args.disabled) return 'disabled';
+  return 'all';
 }
 
-// Helper function for --short display using table formatter
-function displayShortPluginTable(plugins) {
-  const rows = plugins.map(plugin => ({
-    status: plugin.status || 'N/A',
-    name: plugin.name,
-    origin: (plugin.cmCollection && plugin.cmPluginId)
-      ? `${plugin.cmCollection}/${plugin.cmPluginId}`
-      : 'n/a'
-  }));
-
-  const columns = [
-    { key: 'status', header: 'Status' },
-    { key: 'name', header: 'Name/Invoke Key' },
-    { key: 'origin', header: 'CM Origin' }
-  ];
-
-  logger.info('', { format: 'table', meta: { rows, columns } });
+// Apply filters to plugin list based on args
+function filterPlugins(allPlugins, args) {
+  const listType = determineListType(args);
+  const collectionFilter = args.collection_name_filter;
+  
+  if (listType === 'enabled') {
+    return allPlugins.filter(p => {
+      const isEnabledCM = p.status === 'Enabled (CM)';
+      const isRegisteredTraditional = p.status && p.status.startsWith('Registered');
+      if (collectionFilter && isEnabledCM) return p.cmCollection === collectionFilter;
+      if (collectionFilter && isRegisteredTraditional) return false;
+      return isEnabledCM || isRegisteredTraditional;
+    });
+  }
+  
+  if (listType === 'available') {
+    return allPlugins.filter(p =>
+      (p.status === 'Enabled (CM)' || p.status === 'Available (CM)') &&
+      p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
+    );
+  }
+  
+  if (listType === 'disabled') {
+    return allPlugins.filter(p =>
+      p.status === 'Available (CM)' &&
+      p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
+    );
+  }
+  
+  // Default/all type
+  let results = allPlugins.filter(p =>
+    (p.status && p.status.startsWith('Registered')) || 
+    p.status === 'Enabled (CM)' || 
+    (args.short && p.status === 'Available (CM)')
+  );
+  
+  if (collectionFilter && args.short) {
+    results = results.filter(p => p.cmCollection === collectionFilter || !p.cmCollection);
+  }
+  
+  return results;
 }
 
 module.exports = {
@@ -116,71 +101,27 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
   },
   handler: async (args) => {
     try {
+      // 1. Fetch data
       const builderInstance = new PluginRegistryBuilder(
         projectRoot, null, args.config, args.factoryDefaults,
         args.isLazyLoadMode || false, null, args.manager,
         { collRoot: args.manager.collRoot }
       );
-
       const allPluginDetails = await builderInstance.getAllPluginDetails();
-      let results = [];
-      const collectionFilter = args.collection_name_filter;
-      const inCollectionMsg = collectionFilter ? ` in collection "${collectionFilter}"` : '';
-      let headerMessage = '';
-
-      if (args.enabled) {
-        headerMessage = `\nEnabled plugins${collectionFilter ? ` (filtered for CM collection '${collectionFilter}')` : ''}\n`;
-        results = allPluginDetails.filter(p => {
-          const isEnabledCM = p.status === 'Enabled (CM)';
-          const isRegisteredTraditional = p.status && p.status.startsWith('Registered');
-          if (collectionFilter && isEnabledCM) return p.cmCollection === collectionFilter;
-          if (collectionFilter && isRegisteredTraditional) return false;
-          return isEnabledCM || isRegisteredTraditional;
-        });
-        if (results.length === 0) logger.warn(`No plugins are currently enabled${collectionFilter ? ` matching filter '${collectionFilter}'` : ''}.`);
-
-      } else if (args.available) {
-        headerMessage = `\nAvailable CM-managed plugins${inCollectionMsg}:`;
-        results = allPluginDetails.filter(p =>
-          (p.status === 'Enabled (CM)' || p.status === 'Available (CM)') &&
-          p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
-        );
-        if (results.length === 0) logger.warn(`No CM-managed plugins found${inCollectionMsg}.`);
-
-      } else if (args.disabled) {
-        headerMessage = `\nDisabled (but available) CM-managed plugins${inCollectionMsg}\n`;
-        results = allPluginDetails.filter(p =>
-          p.status === 'Available (CM)' &&
-          p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
-        );
-        if (results.length === 0) logger.warn(`No disabled (but available) CM-managed plugins found${inCollectionMsg}.`);
-
-      } else {
-        results = allPluginDetails.filter(p =>
-          (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)' || (args.short && p.status === 'Available (CM)')
-        );
-        if (collectionFilter && args.short) {
-          results = results.filter(p => p.cmCollection === collectionFilter || !(p.cmCollection)) ;
-        }
-
-        if (!args.short) {
-          const usablePluginsCount = results.filter(p => (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)').length;
-          headerMessage = `\nFound ${usablePluginsCount} plugin(s) usable by md-to-pdf\n`;
-        } else {
-          const collectionContext = collectionFilter ? `CM plugins in collection "${collectionFilter}"` : 'all known plugins';
-          headerMessage = `\nSummary for ${collectionContext}\n`;
-        }
-        if (results.length === 0) logger.warn('No plugins found or registered as usable.');
-      }
-
-      if (results.length > 0) {
-        logger.info(headerMessage);
-        if (args.short) {
-          displayShortPluginTable(results);
-        } else {
-          results.forEach(plugin => displayPluginEntry(plugin));
-        }
-      }
+      
+      // 2. Apply business logic filters
+      const filteredPlugins = filterPlugins(allPluginDetails, args);
+      
+      // 3. Build structured data for formatter
+      const listData = {
+        type: determineListType(args),
+        format: args.short ? 'table' : 'detailed',
+        filter: args.collection_name_filter,
+        plugins: filteredPlugins
+      };
+      
+      // 4. Send to formatter
+      logger.info(listData, { format: 'plugin-list' });
 
     } catch (error) {
       logger.error(`ERROR listing plugins: ${error.message}`);

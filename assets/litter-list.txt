@@ -45,6 +45,7 @@
 ➜ 
 ↔
 ⚠
+ℹ
 
 # --- whitelist: allowed ALL CAPS in comments ---
 # pattern examples: TOC, LINT_*, ESLint
@@ -76,4 +77,4 @@ URL
 VALID
 XDG
 YAML
-
+ANSI

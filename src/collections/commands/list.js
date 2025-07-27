@@ -77,13 +77,13 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
       throw error;
     }
   } else if (type === 'available' || type === 'all') {
-    logger.info('Listing available plugins', {
+    logger.debug('Listing available plugins', {
       context: 'ListCollectionsCommand',
       filter: collectionNameFilter || 'none'
     });
     return await this.listAvailablePlugins(collectionNameFilter);
   } else if (type === 'enabled') {
-    logger.info('Listing enabled plugins', {
+    logger.debug('Listing enabled plugins', {
       context: 'ListCollectionsCommand',
       filter: collectionNameFilter || 'none'
     });

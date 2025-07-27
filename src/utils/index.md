@@ -254,5 +254,7 @@ New scripts or new script locations will appear below after running
 **`node scripts/linting/docs/librarian.js`**.
 
 <!-- uncategorized-start -->
+
+- [color-theme.js](formatters/color-theme.js)
 <!-- uncategorized-end -->
 

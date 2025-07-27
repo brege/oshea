@@ -70,4 +70,6 @@ New scripts or new script locations will appear below after running
 **`node scripts/linting/docs/librarian.js`**.
 
 <!-- uncategorized-start -->
+
+- [formatter-playground.js](playground/formatter-playground.js)
 <!-- uncategorized-end -->

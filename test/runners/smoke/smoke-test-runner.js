@@ -20,7 +20,7 @@ function executeCommand(command) {
       }
 
       if (stderr && stderr.trim()) {
-        logger.warn(`    Warning (stderr): ${stderr.trim()}`, { format: 'inline' });
+        logger.warn({ stderr }, { format: 'smoke-warning' });
       }
 
       resolve({ stdout, stderr });
@@ -137,7 +137,7 @@ function expandScenarios(testSuite) {
 }
 
 async function runTestSuite(testSuite) {
-  logger.info(`Smoke Test: ${testSuite.name}...\n`, { format: 'inline' });
+  logger.info({ suiteName: testSuite.name }, { format: 'smoke-suite' });
 
   const scenarios = expandScenarios(testSuite);
   const results = [];
@@ -147,7 +147,8 @@ async function runTestSuite(testSuite) {
     const fullCommand = `node "${cliPath}" ${scenario.args}`;
     const commandDisplay = `${testSuite.base_command || 'md-to-pdf'} ${scenario.args}`.trim();
 
-    logger.detail(`  Testing: ${commandDisplay} ... `, { format: 'inline' });
+    // Start scenario test
+    logger.info({ command: commandDisplay, status: 'testing' }, { format: 'smoke-scenario' });
 
     try {
       const result = await executeCommand(fullCommand);
@@ -162,7 +163,7 @@ async function runTestSuite(testSuite) {
       }
 
       if (validator(expectValue)(result.stdout)) {
-        logger.success('✓ OK\n', { format: 'inline' });
+        logger.info({ command: commandDisplay, status: 'passed' }, { format: 'smoke-scenario' });
         results.push({ scenario: scenario.description, passed: true });
       } else {
         const failure = {
@@ -172,7 +173,7 @@ async function runTestSuite(testSuite) {
         };
         failedScenarios.push(failure);
         results.push({ scenario: scenario.description, passed: false, failure });
-        logger.error('✗ FAIL\n', { format: 'inline' });
+        logger.info({ command: commandDisplay, status: 'failed' }, { format: 'smoke-scenario' });
       }
 
     } catch (error) {
@@ -184,7 +185,7 @@ async function runTestSuite(testSuite) {
       };
       failedScenarios.push(failure);
       results.push({ scenario: scenario.description, passed: false, failure });
-      logger.error('✗ FAIL\n', { format: 'inline' });
+      logger.info({ command: commandDisplay, status: 'failed' }, { format: 'smoke-scenario' });
     }
   }
 
@@ -203,12 +204,10 @@ async function runAllSmokeTests(yamlFile = null) {
   const yamlContent = fs.readFileSync(yamlPath, 'utf8');
   const testSuites = yaml.loadAll(yamlContent);
 
-  logger.info('='.repeat(60));
-  logger.info('CLI Smoke Tests');
-  logger.info('='.repeat(60));
-  logger.info('');
+  // Display smoke test header
+  logger.info('', { format: 'smoke-header' });
 
-  // Run test suites sequentially for clean output, but scenarios within each suite can be parallel
+  // Run test suites sequentially for clean output
   const allResults = [];
 
   for (const testSuite of testSuites) {
@@ -218,36 +217,18 @@ async function runAllSmokeTests(yamlFile = null) {
 
   const totalFailed = allResults.reduce((sum, result) => sum + result.failedCount, 0);
 
-  if (totalFailed > 0) {
-    logger.error('\n--- Smoke Tests Failed ---', { format: 'inline' });
-    logger.error(`${totalFailed} scenario(s) failed across ${allResults.length} test suites:`, { format: 'inline' });
+  // Display final results using structured data
+  logger.info({ 
+    allResults, 
+    totalFailed 
+  }, { format: 'smoke-results' });
 
-    allResults.forEach(result => {
-      if (result.failedCount > 0) {
-        logger.error(`\n${result.suiteName}: ${result.failedCount} failures`, { format: 'inline' });
-        result.failedScenarios.forEach(({ scenario, command, reason, stderr }) => {
-          logger.detail(`  - ${scenario}`, { format: 'inline' });
-          logger.detail(`    Command: ${command}`, { format: 'inline' });
-          logger.detail(`    Reason: ${reason}`, { format: 'inline' });
-          if (stderr) {
-            logger.detail(`    Stderr: ${stderr.trim()}`, { format: 'inline' });
-          }
-        });
-      }
-    });
-
-    return false;
-  } else {
-    const totalScenarios = allResults.reduce((sum, r) => sum + r.results.length, 0);
-    logger.success(`\n✓ All Smoke Tests Passed: ${totalScenarios} scenarios across ${allResults.length} test suites executed successfully.\n`, { format: 'inline' });
-    return true;
-  }
+  return totalFailed === 0;
 }
 
 // CLI execution
 if (require.main === module) {
-  const yamlFile = smokeTestsManifestPath;
-  runAllSmokeTests(yamlFile).then(success => {
+  runAllSmokeTests().then(success => {
     process.exit(success ? 0 : 1);
   }).catch(error => {
     logger.error('Smoke test runner crashed:', error.message);

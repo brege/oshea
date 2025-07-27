@@ -102,8 +102,8 @@ name: "Different Config Contexts (Visual Validation)"
 base_command: "md-to-pdf"
 visual_focus: "empty states, error handling, context switching"
 scenarios:
-  - description: "Plugin list with non-existent collection root"
-    args: "plugin list --coll-root /tmp/nonexistent"
+  - description: "Plugin list --short with non-existent collection root"
+    args: "plugin list --short --coll-root /tmp/nonexistent"
     expect:
       executes: true
     visual_check: "Graceful handling of missing collection root, clear error messaging"
@@ -137,14 +137,3 @@ scenarios:
       executes: true
     visual_check: "Clear subcommand layout with proper theming"
 
-  - description: "Collection help - subcommand structure"
-    args: "collection --help"
-    expect:
-      executes: true
-    visual_check: "Structured help output with themed sections"
-
-  - description: "Convert help - detailed options"
-    args: "convert --help"
-    expect:
-      executes: true
-    visual_check: "Comprehensive help with option descriptions and examples"

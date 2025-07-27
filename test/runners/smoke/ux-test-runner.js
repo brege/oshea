@@ -79,12 +79,12 @@ async function runVisualTestSuite(testSuite) {
   const results = [];
 
   // Display test suite header
-  logger.info('\n' + '='.repeat(80));
+  logger.info('\n' + '-'.repeat(80));
   logger.info(`${testSuite.name}`);
   if (testSuite.visual_focus) {
     logger.info(`Focus: ${testSuite.visual_focus}`);
   }
-  logger.info('='.repeat(80));
+  logger.info('-'.repeat(80));
 
   for (const scenario of scenarios) {
     const fullCommand = `node "${cliPath}" ${scenario.args}`;
@@ -103,7 +103,6 @@ async function runVisualTestSuite(testSuite) {
       const result = await executeCommandWithColors(fullCommand);
 
       // Display the actual output with preserved colors
-      logger.info('\nOUTPUT:');
       if (result.stdout) {
         // Use raw console.log to preserve ANSI colors
         console.log(result.stdout); // lint-skip-line no-console
@@ -158,12 +157,11 @@ async function runUXTests(yamlFile = null) {
   const testSuites = yaml.loadAll(yamlContent);
 
   // Display header
-  logger.info('\n' + '='.repeat(60));
-  logger.info('MD-to-PDF UX/Visual Validation Tests');
-  logger.info('='.repeat(60));
+  logger.info('\n' + '-'.repeat(60));
+  logger.info('md-to-pd` UX/Visual Validation Tests');
+  logger.info('-'.repeat(60));
   logger.info('\nPurpose: Visual inspection of CLI theming, formatting, and user experience');
   logger.info('Review each section for: colors, alignment, readability, error handling');
-  logger.info('');
 
   const allResults = [];
 
@@ -177,9 +175,9 @@ async function runUXTests(yamlFile = null) {
   const totalScenarios = allResults.reduce((sum, r) => sum + r.totalScenarios, 0);
   const totalSuites = allResults.length;
 
-  logger.info('\n' + '='.repeat(60));
+  logger.info('\n' + '-'.repeat(60));
   logger.info('UX Test Run Complete');
-  logger.info('='.repeat(60));
+  logger.info('-'.repeat(60));
   logger.info(`\nSummary: ${totalScenarios} scenarios across ${totalSuites} test suites executed`);
   logger.info('\nVisual Review Checklist:');
   logger.info('  - Colors are consistent with gruvbox theme');

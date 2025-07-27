@@ -1,10 +1,11 @@
 // src/cli/commands/plugin/add.command.js
 const path = require('path');
 const fss = require('fs');
-const { loggerPath, cliPath } = require('@paths');
+const { loggerPath, cliPath, colorThemePath } = require('@paths');
 const { execSync } = require('child_process');
 
 const logger = require(loggerPath);
+const { theme } = require(colorThemePath);
 
 module.exports = {
   command: 'add <path_to_plugin_dir>',
@@ -49,28 +50,28 @@ module.exports = {
     const invokeNameAttempt = args.name || derivedPluginId;
 
     logger.info('md-to-pdf plugin: Attempting to add and enable plugin from local path...');
-    logger.detail(`  Source Path: ${absolutePluginPath}`);
-    logger.detail(`  Requested Invoke Name: ${invokeNameAttempt}`);
+    logger.info(`  Source Path: ${theme.path(absolutePluginPath)}`);
+    logger.info(`  Requested Invoke Name: ${theme.value(invokeNameAttempt)}`);
 
     try {
       const addSingletonOptions = { name: args.name, bypassValidation: args.bypassValidation };
       const result = await args.manager.addSingletonPlugin(absolutePluginPath, addSingletonOptions);
 
       if (result && result.success) {
-        logger.success(`\nSuccessfully processed 'plugin add' for '${result.invoke_name}'.`);
+        logger.success(`\nSuccessfully processed 'plugin add' for '${theme.value(result.invoke_name)}'.`);
 
-        logger.info('Important Notes:');
-        logger.detail(`  - A copy of your plugin from '${absolutePluginPath}' is now managed by md-to-pdf at:`);
-        logger.detail(`    ${result.path}`);
-        logger.detail('  - For future development, it\'s recommended to edit your original plugin at:');
-        logger.detail(`    ${absolutePluginPath}`);
-        logger.detail('  - To sync any changes from your original plugin into the managed version, run:');
-        logger.info('    md-to-pdf collection update _user_added_plugins');
+        logger.info('\nImportant Notes:');
+        logger.info(`  • A copy of your plugin from ${theme.path(absolutePluginPath)} is now managed by md-to-pdf at:`);
+        logger.info(`    ${theme.path(result.path)}`);
+        logger.info('  • For future development, it\'s recommended to edit your original plugin at:');
+        logger.info(`    ${theme.path(absolutePluginPath)}`);
+        logger.info('  • To sync any changes from your original plugin into the managed version, run:');
+        logger.info(`    ${theme.highlight('md-to-pdf collection update _user_added_plugins')}`);
         logger.detail('    (This command re-syncs all locally added plugins from their original sources)');
 
         logger.info('\nNext Steps:');
-        logger.detail('  - List active plugins: md-to-pdf plugin list');
-        logger.detail(`  - Use your new plugin: md-to-pdf convert mydoc.md --plugin ${result.invoke_name}`);
+        logger.info(`  • List active plugins: ${theme.highlight('md-to-pdf plugin list')}`);
+        logger.info(`  • Use your new plugin: ${theme.highlight('md-to-pdf convert mydoc.md --plugin ' + result.invoke_name)}`);
       } else if (result && !result.success) {
         logger.error(`Plugin add operation reported as unsuccessful. Message: ${result.message || 'No specific message.'}`);
       }

@@ -1,7 +1,7 @@
 // src/utils/formatters/collection-list-formatter.js
 // Collection list formatter - handles table and detailed views for collections
 
-const { colorThemePath } = require('@paths');
+const { colorThemePath, tableFormatterPath } = require('@paths');
 const { theme } = require(colorThemePath);
 
 // Helper function to determine collection type
@@ -94,15 +94,15 @@ function generateContextMessage(listData) {
   const { type, filter } = listData;
 
   if (type === 'downloaded') {
-    return 'Downloaded plugin collections:';
+    return 'Downloaded plugin collections';
   }
 
   if (type === 'available' || type === 'all') {
-    return `Available plugins${filter ? ` in collection "${filter}"` : ''}:`;
+    return `Available plugins${filter ? ` in collection "${filter}"` : ''}`;
   }
 
   if (type === 'enabled') {
-    return `Enabled plugins${filter ? ` in collection "${filter}"` : ''}:`;
+    return `Enabled plugins${filter ? ` in collection "${filter}"` : ''}`;
   }
 
   return 'Collections:';
@@ -113,18 +113,18 @@ function generateEmptyMessage(listData) {
   const { type, filter } = listData;
 
   if (type === 'downloaded') {
-    return 'No downloaded collections found.';
+    return 'No downloaded collections found';
   }
 
   if (type === 'available' || type === 'all') {
-    return `No available plugins found ${filter ? `in collection "${filter}"` : 'in any collection'}.`;
+    return `No available plugins found ${filter ? `in collection "${filter}"` : 'in any collection'}`;
   }
 
   if (type === 'enabled') {
-    return `No enabled plugins found${filter ? ` in collection "${filter}"` : ''}.`;
+    return `No enabled plugins found${filter ? ` in collection "${filter}"` : ''}`;
   }
 
-  return 'No results found.';
+  return 'No results found';
 }
 
 // Main formatter function
@@ -143,11 +143,6 @@ function formatCollectionList(level, message, meta = {}) {
     return;
   }
 
-  // Display context header
-  const contextMsg = generateContextMessage(listData);
-  console.log(''); // spacing
-  console.log(theme.info(contextMsg));
-
   // Format based on type and display format
   if (listData.type === 'downloaded') {
     if (listData.format === 'table') {
@@ -159,27 +154,48 @@ function formatCollectionList(level, message, meta = {}) {
       }));
 
       const columns = [
-        { key: 'name', header: 'NAME' },
-        { key: 'type', header: 'TYPE' },
-        { key: 'source', header: 'SOURCE' }
+        { key: 'name', header: 'Name' },
+        { key: 'type', header: 'Type' },
+        { key: 'source', header: 'Source' }
       ];
 
-      const tableFormatter = require('./table-formatter');
-      tableFormatter.formatTable(level, '', { rows, columns, showBorders: true });
+      const tableFormatter = require(tableFormatterPath);
+      const tableTitle = generateContextMessage(listData);
+      tableFormatter.formatTable(level, '', { 
+        rows, 
+        columns, 
+        showBorders: true,
+        title: tableTitle
+      });
     } else {
-      // Detailed collection view
+      // Detailed collection view - show context header for non-table format
+      const contextMsg = generateContextMessage(listData);
+      console.log(''); // spacing
+      console.log(theme.info(contextMsg));
+      console.log(''); // spacing after header
+      
       listData.items.forEach(collection => {
         console.log(''); // spacing between entries
         console.log(formatCollectionEntry(collection));
       });
     }
   } else if (listData.type === 'available' || listData.type === 'all') {
-    // Available plugins detailed view
+    // Available plugins detailed view - show context header
+    const contextMsg = generateContextMessage(listData);
+    console.log(''); // spacing
+    console.log(theme.info(contextMsg));
+    console.log(''); // spacing after header
+    
     listData.items.forEach(plugin => {
       console.log(formatAvailablePluginEntry(plugin));
     });
   } else if (listData.type === 'enabled') {
-    // Enabled plugins detailed view
+    // Enabled plugins detailed view - show context header
+    const contextMsg = generateContextMessage(listData);
+    console.log(''); // spacing
+    console.log(theme.info(contextMsg));
+    console.log(''); // spacing after header
+    
     listData.items.forEach(plugin => {
       console.log(formatEnabledPluginEntry(plugin));
     });

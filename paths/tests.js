@@ -1,6 +1,6 @@
 // paths/tests.js
 // tests.js - Test Suite Registry
-// Generated: 2025-07-27T08:46:27.650Z
+// Generated: 2025-07-27T19:54:06.392Z
 // Architecture: Multi-layered testing infrastructure with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -47,6 +47,7 @@ const hugoExampleFixturePath = path.join(fixturesDir, 'hugo-example');
 const smokeRoot = path.join(projectRoot, 'test/runners/smoke/');
 const smokeTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/smoke-test-runner.js');
 const smokeTestsManifestPath = path.join(projectRoot, 'test/runners/smoke/smoke-tests.yaml');
+const toySmokeRunnerPath = path.join(projectRoot, 'test/runners/smoke/toy-smoke-runner.js');
 const uxTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/ux-test-runner.js');
 const uxTestsYamlPath = path.join(projectRoot, 'test/runners/smoke/ux-tests.yaml');
 
@@ -193,6 +194,7 @@ module.exports = {
   smokeRoot,
   smokeTestRunnerPath,
   smokeTestsManifestPath,
+  toySmokeRunnerPath,
   uxTestRunnerPath,
   uxTestsYamlPath,
   coreIntegrationRoot,

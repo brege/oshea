@@ -11,6 +11,7 @@ const {
   pluginListFormatterPath,
   collectionListFormatterPath,
   smokeTestFormatterPath,
+  validationFormatterPath,
 } = require('@paths');
 const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
@@ -27,6 +28,12 @@ const {
   formatSmokeResults,
   formatSmokeHeader
 } = require(smokeTestFormatterPath);
+const {
+  formatValidationHeader,
+  formatValidationStep,
+  formatValidationTest,
+  formatValidationSummary
+} = require(validationFormatterPath);
 
 // Export formatters
 module.exports = {
@@ -42,5 +49,9 @@ module.exports = {
   'smoke-suite': formatSuiteHeader,
   'smoke-scenario': formatScenarioProgress,
   'smoke-warning': formatScenarioWarning,
-  'smoke-results': formatSmokeResults
+  'smoke-results': formatSmokeResults,
+  'validation-header': formatValidationHeader,
+  'validation-step': formatValidationStep,
+  'validation-test': formatValidationTest,
+  'validation-summary': formatValidationSummary
 };

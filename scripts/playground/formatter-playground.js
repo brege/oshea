@@ -37,7 +37,7 @@ function showLogLevels() {
 
   console.log(theme.success('✓ Plugin validation passed'));
   console.log(theme.info('ℹ Processing convert command for example.md'));
-  console.log(theme.warn('⚠ Missing optional schema file'));
+  console.log(theme.warn('○ Missing optional schema file'));
   console.log(theme.error('✗ Handler script not found'));
   console.log(theme.debug(' Cache hit for plugin registry'));
   console.log(theme.validation('--- Validation Summary ---'));
@@ -62,7 +62,7 @@ function showValidatorOutput() {
   console.log(theme.success('✓ OK'));
   console.log(theme.success('    ✓ Found required file: index.js'));
   console.log(theme.success('    ✓ Found required file: cv.config.yaml'));
-  console.log(theme.warn('    ⚠ Missing optional file: cv.schema.json'));
+  console.log(theme.warn('    ○ Missing optional file: cv.schema.json'));
   console.log('');
 
   console.log(theme.info('  Running in-situ E2E test... '));

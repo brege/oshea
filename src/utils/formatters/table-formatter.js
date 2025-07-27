@@ -12,7 +12,7 @@ function formatTable(level, message, meta = {}) {
     columns = [],
     title,
     showBorders = true,
-    separator = '|',
+    separator = '',
   } = meta;
 
   if (rows.length === 0 || columns.length === 0) {
@@ -24,7 +24,14 @@ function formatTable(level, message, meta = {}) {
     const headerWidth = stripAnsi(col.header || col).length;
     const maxDataWidth = Math.max(
       ...rows.map(row => {
-        const value = row[col.key || col] || '';
+        const key = col.key || col;
+        const value = row[key] || '';
+        
+        // For status column, account for Unicode indicator that will be prepended
+        if (key === 'status' && row.statusType && row.statusType !== 'unknown') {
+          return stripAnsi(`● ${String(value)}`).length; // ● and ○ are same width
+        }
+        
         return stripAnsi(String(value)).length;
       })
     );
@@ -35,7 +42,17 @@ function formatTable(level, message, meta = {}) {
 
   // Display title if provided
   if (title) {
-    console.log(`\n${theme.highlight(title)}:`);
+    console.log(''); // spacing before title
+    console.log(`${prefixPadding}${theme.info(title)}`);
+  }
+
+  // Calculate total table width for full-width borders
+  const totalTableWidth = columnWidths.reduce((sum, width) => sum + width, 0) + 
+                           (columns.length - 1) * 1;
+
+  // Display top border
+  if (showBorders) {
+    console.log(`${prefixPadding}${theme.border('─'.repeat(totalTableWidth))}`);
   }
 
   // Display header
@@ -44,13 +61,12 @@ function formatTable(level, message, meta = {}) {
       const header = col.header || col;
       const paddedHeader = header.padEnd(columnWidths[index]);
       return theme.header(paddedHeader);
-    }).join(` ${theme.border(separator)} `);
+    }).join(` ${theme.border('')} `);
 
     console.log(`${prefixPadding}${headerRow}`);
 
-    // Display separator line
-    const separatorRow = columnWidths.map(width => theme.border('-'.repeat(width))).join(` ${theme.border(separator)} `);
-    console.log(`${prefixPadding}${separatorRow}`);
+    // Display header separator line
+    console.log(`${prefixPadding}${theme.border('─'.repeat(totalTableWidth))}`);
   }
 
   // Display data rows with semantic coloring
@@ -61,23 +77,40 @@ function formatTable(level, message, meta = {}) {
       const displayValue = col.transform ? col.transform(value, row) : String(value);
       const paddedValue = displayValue.padEnd(columnWidths[index]);
 
-      // Apply semantic colors based on column type and value
+      // Apply semantic colors and indicators based on column type and status
       if (key === 'status') {
-        if (displayValue.includes('Enabled') || displayValue.includes('Registered')) {
-          return theme.enabled(paddedValue);
-        } else if (displayValue.includes('Available')) {
-          return theme.pending(paddedValue);
-        } else if (displayValue.includes('Disabled')) {
-          return theme.disabled(paddedValue);
+        const statusType = row.statusType || 'unknown';
+        let statusIndicator = '';
+        let coloredStatus = displayValue;
+        
+        if (statusType === 'enabled') {
+          statusIndicator = '●';
+          coloredStatus = theme.enabled(`${statusIndicator} ${displayValue}`);
+        } else if (statusType === 'registered') {
+          statusIndicator = '●';
+          coloredStatus = theme.registered(`${statusIndicator} ${displayValue}`);
+        } else if (statusType === 'available') {
+          statusIndicator = '○';
+          coloredStatus = theme.disabled(`${statusIndicator} ${displayValue}`);
         }
+        
+        // Calculate padding based on text length without colors, then apply colors
+        const rawLength = stripAnsi(`${statusIndicator} ${displayValue}`).length;
+        const paddingNeeded = Math.max(0, columnWidths[index] - rawLength);
+        return coloredStatus + ' '.repeat(paddingNeeded);
       }
 
       // Default: no coloring for data content
       return paddedValue;
-    }).join(` ${separator} `);
+    }).join(` ${theme.border('')} `);
 
     console.log(`${prefixPadding}${dataRow}`);
   });
+
+  // Display bottom border
+  if (showBorders) {
+    console.log(`${prefixPadding}${theme.border('─'.repeat(totalTableWidth))}`);
+  }
 }
 
 module.exports = {

@@ -1,7 +1,7 @@
 // src/utils/formatters/plugin-list-formatter.js
 // Plugin list formatter - handles both table and detailed views
 
-const { colorThemePath } = require('@paths');
+const { colorThemePath, tableFormatterPath } = require('@paths');
 const { theme } = require(colorThemePath);
 
 // Format detailed plugin entry (card view)
@@ -63,28 +63,28 @@ function generateContextMessage(listData) {
 
   if (type === 'enabled') {
     const filterMsg = filter ? ` (filtered for CM collection '${filter}')` : '';
-    return `Enabled plugins${filterMsg}:`;
+    return `Enabled plugins${filterMsg}`;
   }
 
   if (type === 'available') {
     const filterMsg = filter ? ` in collection "${filter}"` : '';
-    return `Available CM-managed plugins${filterMsg}:`;
+    return `Available CM-managed plugins${filterMsg}`;
   }
 
   if (type === 'disabled') {
     const filterMsg = filter ? ` in collection "${filter}"` : '';
-    return `Disabled (but available) CM-managed plugins${filterMsg}:`;
+    return `Disabled (but available) CM-managed plugins${filterMsg}`;
   }
 
   // Default/all type
   if (listData.format === 'table') {
     const context = filter ? `CM plugins in collection "${filter}"` : 'all known plugins';
-    return `Summary for ${context}:`;
+    return `Summary for ${context}`;
   } else {
     const usableCount = plugins.filter(p =>
       (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)'
     ).length;
-    return `Found ${usableCount} plugin(s) usable by md-to-pdf:`;
+    return `Found ${usableCount} plugin(s) usable by md-to-pdf`;
   }
 }
 
@@ -126,33 +126,45 @@ function formatPluginList(level, message, meta = {}) {
     return;
   }
 
-  // Display context header
-  const contextMsg = generateContextMessage(listData);
-  console.log(''); // spacing
-  console.log(theme.info(contextMsg));
-
   // Format based on display type
   if (listData.format === 'table') {
     // Use existing table formatter with structured data
-    const rows = listData.plugins.map(plugin => ({
-      status: plugin.status || 'N/A',
-      name: plugin.name,
-      origin: (plugin.cmCollection && plugin.cmPluginId)
-        ? `${plugin.cmCollection}/${plugin.cmPluginId}`
-        : 'n/a'
-    }));
+    const rows = listData.plugins.map(plugin => {
+      return {
+        status: plugin.status || 'N/A',
+        statusType: plugin.status === 'Enabled (CM)' ? 'enabled' 
+                  : plugin.status && plugin.status.startsWith('Registered') ? 'registered'
+                  : plugin.status === 'Available (CM)' ? 'available'
+                  : 'unknown',
+        name: plugin.name,
+        origin: (plugin.cmCollection && plugin.cmPluginId)
+          ? `${plugin.cmCollection}/${plugin.cmPluginId}`
+          : 'n/a'
+      };
+    });
 
     const columns = [
-      { key: 'status', header: 'STATUS' },
-      { key: 'name', header: 'NAME/INVOKE KEY' },
-      { key: 'origin', header: 'CM ORIGIN' }
+      { key: 'status', header: 'Status' },
+      { key: 'name', header: 'Name/Invoke Key' },
+      { key: 'origin', header: 'CM Origin' }
     ];
 
-    const tableFormatter = require('./table-formatter');
-    tableFormatter.formatTable(level, '', { rows, columns, showBorders: true });
+    const tableFormatter = require(tableFormatterPath);
+    const tableTitle = generateContextMessage(listData);
+    tableFormatter.formatTable(level, '', { 
+      rows, 
+      columns, 
+      showBorders: true,
+      title: tableTitle
+    });
 
   } else {
-    // Detailed card view
+    // Detailed card view - show context header for non-table format
+    const contextMsg = generateContextMessage(listData);
+    console.log(''); // spacing
+    console.log(theme.info(contextMsg));
+    console.log(''); // spacing after header
+    
     listData.plugins.forEach(plugin => {
       console.log(formatPluginEntry(plugin));
     });

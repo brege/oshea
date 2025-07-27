@@ -15,7 +15,7 @@ function determineListType(args) {
 function filterPlugins(allPlugins, args) {
   const listType = determineListType(args);
   const collectionFilter = args.collection_name_filter;
-  
+
   if (listType === 'enabled') {
     return allPlugins.filter(p => {
       const isEnabledCM = p.status === 'Enabled (CM)';
@@ -25,32 +25,32 @@ function filterPlugins(allPlugins, args) {
       return isEnabledCM || isRegisteredTraditional;
     });
   }
-  
+
   if (listType === 'available') {
     return allPlugins.filter(p =>
       (p.status === 'Enabled (CM)' || p.status === 'Available (CM)') &&
       p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
     );
   }
-  
+
   if (listType === 'disabled') {
     return allPlugins.filter(p =>
       p.status === 'Available (CM)' &&
       p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
     );
   }
-  
+
   // Default/all type
   let results = allPlugins.filter(p =>
-    (p.status && p.status.startsWith('Registered')) || 
-    p.status === 'Enabled (CM)' || 
+    (p.status && p.status.startsWith('Registered')) ||
+    p.status === 'Enabled (CM)' ||
     (args.short && p.status === 'Available (CM)')
   );
-  
+
   if (collectionFilter && args.short) {
     results = results.filter(p => p.cmCollection === collectionFilter || !p.cmCollection);
   }
-  
+
   return results;
 }
 
@@ -108,10 +108,10 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
         { collRoot: args.manager.collRoot }
       );
       const allPluginDetails = await builderInstance.getAllPluginDetails();
-      
+
       // 2. Apply business logic filters
       const filteredPlugins = filterPlugins(allPluginDetails, args);
-      
+
       // 3. Build structured data for formatter
       const listData = {
         type: determineListType(args),
@@ -119,7 +119,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
         filter: args.collection_name_filter,
         plugins: filteredPlugins
       };
-      
+
       // 4. Send to formatter
       logger.info(listData, { format: 'plugin-list' });
 

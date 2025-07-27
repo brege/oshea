@@ -1,0 +1,1918 @@
+'# Level 1 - Test Metadata Registry': null
+'# Central registry connecting test metadata, commands, files, and documentation': null
+metadata:
+  level: 1
+  scope: Level 1 test scenarios
+  type: Module Integration Tests
+  description: >-
+    Module integration tests verifying core components work correctly in isolation - configuration
+    resolution, plugin management, registry building, and utility functions
+tests:
+  1.1.1:
+    description: >-
+      Verify that `_initializeResolverIfNeeded` correctly loads and merges primary, XDG, and project
+      main configurations, and sets `primaryMainConfig`, `primaryMainConfigPathActual`, and
+      `resolvedCollRoot`.
+    commands: []
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.2:
+    description: >-
+      Test that `_initializeResolverIfNeeded` correctly rebuilds the `mergedPluginRegistry` when
+      `useFactoryDefaultsOnly` or `isLazyLoadMode` changes, or when `primaryMainConfigLoadReason`
+      changes.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.3:
+    description: >-
+      Test `_loadPluginBaseConfig` for a valid plugin config file, ensuring it loads the raw YAML
+      and resolves initial CSS paths, returning `rawConfig`, `resolvedCssPaths`, `inherit_css`, and
+      `actualPath`.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.load-plugin-base-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.4:
+    description: >-
+      Test `getEffectiveConfig` with a registered plugin name, ensuring it resolves the correct
+      `pluginOwnConfigPath` and `actualPluginBasePath` from the `mergedPluginRegistry`.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.5:
+    description: >-
+      Verify `getEffectiveConfig` correctly handles a plugin specified by an absolute directory
+      path, identifying its config file (`.config.yaml`).
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.6:
+    description: >-
+      Verify `getEffectiveConfig` correctly handles a plugin specified by an absolute file path to
+      its config file.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.7:
+    description: >-
+      Test `getEffectiveConfig` throws an error if a path-specified plugin is neither a file nor a
+      directory.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.8:
+    description: >-
+      Test `getEffectiveConfig` throws an error if a registered plugin's `configPath` does not exist
+      at the registered path.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.9:
+    description: >-
+      Ensure `getEffectiveConfig` correctly applies XDG, Local (plugin file), and Project overrides
+      by `pluginConfigLoader.applyOverrideLayers`.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.10:
+    description: >-
+      Test `getEffectiveConfig` applies `localConfigOverrides` (from front matter or local config)
+      on top of existing configurations, including `css_files` resolution relative to
+      `markdownFilePath`.
+    commands: []
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.11:
+    description: >-
+      Ensure `getEffectiveConfig` merges `primaryMainConfig.global_pdf_options` into
+      `pluginSpecificConfig.pdf_options` correctly, including nested `margin` properties.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.12:
+    description: >-
+      Verify `getEffectiveConfig` merges `primaryMainConfig.math` and `pluginSpecificConfig.math`
+      correctly, including `katex_options`.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.13:
+    description: >-
+      Test `getEffectiveConfig` correctly consolidates and filters `css_files` paths, ensuring only
+      existing and unique paths are included.
+    commands: []
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.14:
+    description: >-
+      Verify `getEffectiveConfig` throws an error if the `handler_script` specified in the plugin's
+      configuration does not exist at the resolved `handlerScriptPath`.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.1.15:
+    description: >-
+      Verify `getEffectiveConfig` utilizes the internal cache (`loadedPluginConfigsCache`) to return
+      previously resolved configurations for the same plugin specification and overrides.
+    commands:
+      - plugin
+    runner: test/integration/config/config-resolver.test.js
+    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/config/config-resolver.js
+  1.2.1:
+    description: >-
+      Verify the constructor correctly initializes `projectRoot`, `xdgBaseDir`,
+      `projectManifestConfigPath`, and related path properties, handling `XDG_CONFIG_HOME`
+      environment variable.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.2:
+    description: Test the constructor throws an error if `projectRoot` is not provided or is invalid.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.3:
+    description: >-
+      Verify the constructor correctly determines `cmCollRoot` based on `XDG_DATA_HOME` or
+      OS-specific default paths.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.4:
+    description: >-
+      Test `_resolveAlias` resolves a tilde-prefixed alias value to an absolute path in the user's
+      home directory.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.5:
+    description: >-
+      Verify `_resolveAlias` resolves a relative alias value correctly against the provided
+      `basePathDefiningAlias`.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.6:
+    description: >-
+      Test `_resolveAlias` returns `null` for invalid or empty `aliasValue` or if
+      `basePathDefiningAlias` is missing for a relative path.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.7:
+    description: >-
+      Verify `_resolvePluginConfigPath` correctly resolves an alias-prefixed raw path (e.g.,
+      `myAlias:path/to/plugin`) using provided `currentAliases`.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.8:
+    description: >-
+      Test `_resolvePluginConfigPath` resolves a tilde-prefixed raw path to an absolute path in the
+      user's home directory.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.9:
+    description: >-
+      Verify `_resolvePluginConfigPath` resolves a relative raw path correctly against
+      `basePathForMainConfig`.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.10:
+    description: >-
+      Test `_resolvePluginConfigPath` correctly identifies the conventional config file
+      (`dirname.config.yaml`) when a directory path is provided.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.11:
+    description: >-
+      Verify `_resolvePluginConfigPath` finds an alternative `*.config.yaml` file in a directory if
+      the conventional name is not present.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.12:
+    description: >-
+      Test `_resolvePluginConfigPath` returns `null` if the resolved path (file or directory) does
+      not exist.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.13:
+    description: >-
+      Verify `_resolvePluginConfigPath` returns `null` and logs a warning if a directory is provided
+      but no `*.config.yaml` file is found within it.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.14:
+    description: >-
+      Test `_getPluginRegistrationsFromFile` successfully loads aliases and plugin registrations
+      from a valid YAML config file.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: >-
+      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.15:
+    description: >-
+      Verify `_getPluginRegistrationsFromFile` returns an empty object if the specified config file
+      does not exist or is empty.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: >-
+      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.16:
+    description: >-
+      Test `_getPluginRegistrationsFromFile` handles invalid YAML format gracefully and returns an
+      empty object.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: >-
+      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.17:
+    description: >-
+      Verify aliases defined within the config file are correctly resolved and used when resolving
+      plugin paths.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: >-
+      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.18:
+    description: >-
+      Test `_getPluginRegistrationsFromCmManifest` correctly loads enabled plugins from a valid
+      `enabled.yaml` manifest, enriching their details.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.19:
+    description: >-
+      Verify `_getPluginRegistrationsFromCmManifest` returns an empty object if the CM manifest file
+      does not exist.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.20:
+    description: >-
+      Test `_getPluginRegistrationsFromCmManifest` handles invalid entries in the CM manifest (e.g.,
+      missing `invoke_name` or `config_path`) by skipping them and logging a warning.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.21:
+    description: >-
+      Verify `_getPluginRegistrationsFromCmManifest` skips CM-enabled plugins whose `config_path`
+      does not exist on the file system.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.22:
+    description: >-
+      Test `buildRegistry` correctly merges plugin registrations from Factory Defaults (or Bundled
+      Definitions) when `useFactoryDefaultsOnly` is true.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.23:
+    description: >-
+      Verify `buildRegistry` correctly merges registrations from Bundled Definitions, then XDG
+      Global, then Project Manifest when `useFactoryDefaultsOnly` is false.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.24:
+    description: >-
+      Test `buildRegistry`'s caching mechanism, ensuring it returns a cached registry if relevant
+      build parameters haven't changed.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.25:
+    description: >-
+      Verify `buildRegistry` includes CM-enabled plugins from `enabled.yaml` when
+      `collectionsManager` is *not* provided to the constructor.
+    commands:
+      - plugin
+      - collection
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.26:
+    description: >-
+      Test `buildRegistry` handles missing `factoryDefaultMainConfigPath` or `bundledMainConfigPath`
+      gracefully without crashing.
+    commands: []
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.27:
+    description: >-
+      Verify `getAllPluginDetails` correctly combines plugins from traditional config files and
+      CM-enabled plugins (when `collectionsManager` is provided), providing comprehensive details.
+    commands:
+      - plugin
+      - collection
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.28:
+    description: >-
+      Test `getAllPluginDetails` correctly retrieves and includes the `description` from each
+      plugin's config file.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.29:
+    description: >-
+      Verify `getAllPluginDetails` correctly sets `status` and `registrationSourceDisplay` for
+      plugins registered via traditional configs.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.30:
+    description: >-
+      Test `getAllPluginDetails` correctly distinguishes between 'Enabled (CM)' and 'Available (CM)'
+      plugins when `collectionsManager` is provided.
+    commands:
+      - plugin
+      - collection
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.31:
+    description: >-
+      Verify `getAllPluginDetails` handles multiple enabled instances of the same CM plugin (via
+      different invoke names) and lists them separately.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.2.32:
+    description: >-
+      Test that `getAllPluginDetails` returns the list of plugins sorted alphabetically by their
+      `name` property.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-registry-builder.js
+  1.3.1:
+    description: >-
+      Verify `determinePluginToUse` correctly prioritizes a plugin specified via the CLI argument
+      (`args.plugin`) over all other sources.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.2:
+    description: >-
+      Test `determinePluginToUse` correctly prioritizes a plugin specified in the Markdown file's
+      front matter (`frontMatter.md_to_pdf_plugin`) when no CLI argument is present.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.3:
+    description: >-
+      Verify `determinePluginToUse` correctly prioritizes a plugin specified in the local
+      `.config.yaml` file (next to the Markdown file) when neither CLI nor front matter specify a
+      plugin.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.4:
+    description: >-
+      Test `determinePluginToUse` returns the `defaultPluginName` when no plugin is specified via
+      CLI, front matter, or local config.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.5:
+    description: >-
+      Verify `determinePluginToUse` correctly extracts and returns `localConfigOverrides` from the
+      local `.config.yaml` file, excluding the `plugin` field.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.6:
+    description: >-
+      Test `determinePluginToUse` handles a non-existent `args.markdownFile` by not attempting to
+      read front matter or local config and defaulting appropriately.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.7:
+    description: >-
+      Verify `determinePluginToUse` gracefully handles errors (e.g., malformed YAML) when reading
+      front matter from the Markdown file.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.8:
+    description: >-
+      Test `determinePluginToUse` gracefully handles errors (e.g., malformed YAML) when reading the
+      local `.config.yaml` file.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.9:
+    description: >-
+      Verify "self-activation" logic: a plugin specified by name (from FM or local config) is
+      resolved to a path within a subdirectory of the markdown file (e.g.,
+      `markdownDir/pluginName/pluginName.config.yaml`).
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.10:
+    description: >-
+      Test "self-activation" logic: if no subdirectory, a plugin specified by name is resolved to a
+      path directly in the markdown file's directory (e.g., `markdownDir/pluginName.config.yaml`).
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.11:
+    description: >-
+      Verify that if a plugin specified by name (from FM or local config) cannot be self-activated,
+      its original name (not a path) is retained for resolution by `ConfigResolver`.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.12:
+    description: >-
+      Test `determinePluginToUse` correctly resolves a relative `pluginSpec` (e.g., `./plugin-path`)
+      against the `markdownFilePathAbsolute` when present.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.13:
+    description: >-
+      Verify `determinePluginToUse` correctly resolves a relative `pluginSpec` against the current
+      working directory (`process.cwd()`) if `markdownFilePathAbsolute` is not available.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.3.14:
+    description: >-
+      Test the logging mechanism correctly reports the determination source and avoids redundant log
+      messages when an override occurs.
+    commands: []
+    runner: test/integration/plugins/plugin-determiner.test.js
+    manifest: test/integration/plugins/plugin-determiner.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank1
+    app_files:
+      - src/plugins/plugin-determiner.js
+  1.4.1:
+    description: >-
+      Verify the constructor correctly initializes `projectRoot`, `defaultMainConfigPath`, and
+      `factoryDefaultMainConfigPath` based on the provided `projectRoot`.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.2:
+    description: >-
+      Test the constructor correctly determines `xdgBaseDir` and `xdgGlobalConfigPath` using
+      `XDG_CONFIG_HOME` environment variable if `xdgBaseDir` parameter is null.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.3:
+    description: Verify the constructor correctly uses the provided `xdgBaseDir` parameter when it's not null.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.4:
+    description: >-
+      Test the constructor correctly sets `projectManifestConfigPath` and `useFactoryDefaultsOnly`
+      from constructor arguments.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.5:
+    description: >-
+      Verify `_initialize` correctly selects `factoryDefaultMainConfigPath` as primary when
+      `useFactoryDefaultsOnly` is true.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.6:
+    description: >-
+      Test `_initialize` correctly prioritizes `projectManifestConfigPath` (from CLI) if it exists
+      and `useFactoryDefaultsOnly` is false.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.7:
+    description: >-
+      Verify `_initialize` correctly prioritizes `xdgGlobalConfigPath` if it exists and neither CLI
+      config nor `useFactoryDefaultsOnly` applies.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.8:
+    description: >-
+      Test `_initialize` correctly prioritizes `defaultMainConfigPath` (bundled) if it exists and no
+      higher-priority config is found.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.9:
+    description: >-
+      Verify `_initialize` falls back to `factoryDefaultMainConfigPath` if no other primary main
+      configuration file is found.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.10:
+    description: >-
+      Test `_initialize` loads the selected primary config file correctly and sets `primaryConfig`,
+      `primaryConfigPath`, and `primaryConfigLoadReason`.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.11:
+    description: >-
+      Verify `_initialize` sets `primaryConfig` to an empty object if the determined
+      `configPathToLoad` does not exist or fails to load.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.12:
+    description: >-
+      Test `_initialize` loads `xdgConfigContents` from `xdgGlobalConfigPath` if it exists and is
+      not the primary config.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.13:
+    description: >-
+      Verify `_initialize` sets `xdgConfigContents` to an empty object if `xdgGlobalConfigPath` does
+      not exist or loading fails.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.14:
+    description: >-
+      Test `_initialize` loads `projectConfigContents` from `projectManifestConfigPath` if it exists
+      and is not the primary config.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.15:
+    description: >-
+      Verify `_initialize` sets `projectConfigContents` to an empty object if
+      `projectManifestConfigPath` does not exist or loading fails.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.16:
+    description: Test `_initialize` correctly sets `_initialized` to true after completion.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.17:
+    description: >-
+      Verify `getPrimaryMainConfig` returns the primary configuration object, including the added
+      `projectRoot` property, along with its path, base directory, and load reason.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.getters.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.18:
+    description: >-
+      Test `getXdgMainConfig` returns the XDG global configuration object, including the added
+      `projectRoot` property, along with its path and base directory.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.getters.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.4.19:
+    description: >-
+      Verify `getProjectManifestConfig` returns the project manifest configuration object, including
+      the added `projectRoot` property, along with its path and base directory.
+    commands: []
+    runner: test/integration/config/main-config-loader.test.js
+    manifest: test/integration/config/main-config-loader.getters.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/main-config-loader.js
+  1.5.1:
+    description: >-
+      Verify that the `PluginManager` constructor initializes without throwing errors and sets no
+      significant internal state, reflecting its simple design.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.2:
+    description: >-
+      Test `invokeHandler` successfully loads and invokes a class-based plugin handler, ensuring
+      `coreUtils` are correctly passed to its constructor.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.3:
+    description: >-
+      Verify `invokeHandler` correctly passes `data`, `pluginSpecificConfig`, `mainConfig`,
+      `outputDir`, `outputFilenameOpt`, and `pluginBasePath` to the plugin's `generate` method.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.4:
+    description: >-
+      Test `invokeHandler` successfully loads and invokes an object-based plugin handler that
+      exports a `generate` function directly, logging a warning about constructor injection.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.5:
+    description: >-
+      Verify `invokeHandler` throws an error if `effectiveConfig.handlerScriptPath` is missing or
+      undefined.
+    commands: []
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.6:
+    description: >-
+      Test `invokeHandler` throws an error if the loaded handler module does not export a class or a
+      `generate` function.
+    commands: []
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.7:
+    description: >-
+      Verify `invokeHandler` throws an error if the handler instance (either class or object) does
+      not have a `generate` method.
+    commands: []
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.8:
+    description: >-
+      Test `invokeHandler` catches and logs errors thrown by the plugin's `generate` method and
+      returns `null`.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.5.9:
+    description: >-
+      Verify `invokeHandler` returns the promise resolution (e.g., path to PDF) from the
+      successfully invoked plugin's `generate` method.
+    commands:
+      - plugin
+    runner: test/integration/plugins/plugin-manager.test.js
+    manifest: test/integration/plugins/plugin-manager.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - plugins
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/plugin-manager.js
+  1.6.1:
+    description: >-
+      Verify the constructor correctly initializes `xdgBaseDir`, `xdgMainConfig`, `projectBaseDir`,
+      `projectMainConfig`, and `useFactoryDefaultsOnly` from arguments, setting defaults for configs
+      if null.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.constructor.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.2:
+    description: >-
+      Test `_loadSingleConfigLayer` successfully loads a valid YAML config file and resolves initial
+      CSS paths using `AssetResolver.resolveAndMergeCss`.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.3:
+    description: >-
+      Verify `_loadSingleConfigLayer` caches loaded config data and returns the cached result on
+      subsequent calls with the same parameters.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.4:
+    description: >-
+      Test `_loadSingleConfigLayer` returns `null` if the `configFilePath` is not provided or the
+      file does not exist.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.5:
+    description: >-
+      Verify `_loadSingleConfigLayer` handles errors during YAML parsing or file reading gracefully,
+      returning an empty config object.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.6:
+    description: >-
+      Test `applyOverrideLayers` returns the original `layer0ConfigData` unchanged when
+      `useFactoryDefaultsOnly` is true.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.7:
+    description: >-
+      Verify `applyOverrideLayers` correctly applies overrides from an XDG-specific plugin config
+      file (`~/.config/md-to-pdf/pluginName/pluginName.config.yaml`) if it exists.
+    commands:
+      - plugin
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.8:
+    description: >-
+      Test `applyOverrideLayers` correctly applies inline overrides from the `xdgMainConfig` (e.g.,
+      `xdgMainConfig.pluginName: { ... }`).
+    commands:
+      - plugin
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.9:
+    description: >-
+      Verify `applyOverrideLayers` correctly applies overrides from a project-specific plugin config
+      file referenced in `projectMainConfig.plugins[pluginName]`.
+    commands:
+      - plugin
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.10:
+    description: >-
+      Test `applyOverrideLayers` correctly applies inline overrides from the `projectMainConfig`
+      (e.g., `projectMainConfig.pluginName: { ... }`).
+    commands:
+      - plugin
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.11:
+    description: >-
+      Verify `applyOverrideLayers` correctly merges CSS files and respects `inherit_css` across all
+      override layers, using `AssetResolver.resolveAndMergeCss`.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.12:
+    description: >-
+      Test `applyOverrideLayers` correctly resolves relative and tilde-prefixed paths within XDG and
+      Project file-based overrides.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.13:
+    description: >-
+      Verify `applyOverrideLayers` accurately updates `contributingPaths` with the paths of all
+      applied override layers.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.14:
+    description: >-
+      Test `applyOverrideLayers` gracefully handles non-existent XDG or Project override files/paths
+      by skipping them and logging warnings.
+    commands: []
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.6.15:
+    description: >-
+      Verify the precedence of overrides: project overrides (file then inline) take precedence over
+      XDG overrides (file then inline), which take precedence over the base plugin config (Layer 0).
+    commands:
+      - plugin
+    runner: test/integration/config/plugin-config-loader.test.js
+    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - config
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/config/plugin-config-loader.js
+  1.7.1:
+    description: >-
+      Verify `configureMarkdownItForMath` successfully applies the `@vscode/markdown-it-katex`
+      plugin to the `MarkdownIt` instance when math is enabled and engine is 'katex'.
+    commands:
+      - plugin
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.7.2:
+    description: >-
+      Test `configureMarkdownItForMath` passes `mathConfig.katex_options` correctly to the KaTeX
+      plugin.
+    commands:
+      - plugin
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.7.3:
+    description: >-
+      Verify `configureMarkdownItForMath` does nothing if math is not enabled or the engine is not
+      'katex'.
+    commands: []
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.7.4:
+    description: >-
+      Test `configureMarkdownItForMath` logs an error and returns if `@vscode/markdown-it-katex`
+      cannot be `require`d or is not a valid plugin function.
+    commands:
+      - plugin
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.7.5:
+    description: >-
+      Verify `getMathCssContent` returns the content of `katex.min.css` as a string within an array
+      when math is enabled and the file exists.
+    commands: []
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.7.6:
+    description: >-
+      Test `getMathCssContent` returns an empty array if math is not enabled or the engine is not
+      'katex'.
+    commands: []
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.7.7:
+    description: >-
+      Verify `getMathCssContent` returns an empty array and logs a warning if `katex.min.css` file
+      does not exist at the expected path.
+    commands: []
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.7.8:
+    description: >-
+      Test `getMathCssContent` returns an empty array and logs a warning if there's an error reading
+      `katex.min.css` file.
+    commands: []
+    runner: test/integration/core/math-integration.test.js
+    manifest: test/integration/core/math-integration.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - core
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/core/math-integration.js
+  1.8.1:
+    description: Verify `deriveCollectionName` correctly sanitizes a URL or path.
+    commands:
+      - collection
+    runner: test/integration/collections/cm-utils.test.js
+    manifest: test/integration/collections/cm-utils.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - collections
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/collections/cm-utils.js
+  1.8.2:
+    description: Test `toPascalCase` correctly converts various hyphenated strings to PascalCase.
+    commands:
+      - convert
+    runner: test/integration/collections/cm-utils.test.js
+    manifest: test/integration/collections/cm-utils.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - collections
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/collections/cm-utils.js
+  1.8.3:
+    description: Verify `isValidPluginName` correctly validates plugin names.
+    commands:
+      - plugin
+    runner: test/integration/collections/cm-utils.test.js
+    manifest: test/integration/collections/cm-utils.manifest.js
+    reference: test/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - collections
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/collections/cm-utils.js

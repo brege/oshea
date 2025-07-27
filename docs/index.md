@@ -12,6 +12,9 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 **Next-gen Features** \
 *These are the core documents for the next-gen features of the project.*
+
+- [Next-Generation Test Framework](v0.11/next-generation-testing.md):
+  Improving the separation of static testing metadata from dynamic test-job results.
 - [Task Checklist of Logger Enhancements](v0.11/checklist-logger.md):
   Maintains the list of tasks surrounding v0.11 for the logger framework. 
 - [Task Checklist of non-Logger Work](v0.11/checklist-non-logger.md):
@@ -181,6 +184,7 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 *This list is automatically updated by [`scripts/linting/docs/librarian.js`](../scripts/linting/docs/librarian.js)*
 
 <!-- uncategorized-start -->
+
 
 <!-- uncategorized-end -->
 

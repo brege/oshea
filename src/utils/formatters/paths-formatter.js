@@ -2,21 +2,23 @@
 // Rudimentary syntax highlighting for path-finder shell output
 
 const chalk = require('chalk');
+const { colorThemePath } = require('@paths');
+const { theme } = require(colorThemePath);
 
 function formatLine(line) {
   if (!line || typeof line !== 'string') return line;
 
-  // Highlight `require` keyword (cyan, bold)
-  line = line.replace(/\brequire\b/g, chalk.cyan.bold('require'));
+  // Highlight `require` keyword
+  line = line.replace(/\brequire\b/g, theme.highlight('require'));
 
-  // Highlight string literals (single quotes) in yellow
-  line = line.replace(/'([^']+)'/g, (match) => chalk.yellow(match));
+  // Highlight string literals (single quotes)
+  line = line.replace(/'([^']+)'/g, (match) => theme.value(match));
 
-  // Highlight comments (start with //) in gray
-  line = line.replace(/\/\/.*/g, (match) => chalk.gray(match));
+  // Highlight comments (start with //)
+  line = line.replace(/\/\/.*/g, (match) => theme.debug(match));
 
-  // Highlight destructuring variables in green, e.g. { var1, var2 }
-  line = line.replace(/\{([^}]+)\}/g, (match) => chalk.green(match));
+  // Highlight destructuring variables, e.g. { var1, var2 }
+  line = line.replace(/\{([^}]+)\}/g, (match) => theme.success(match));
 
   return line;
 }

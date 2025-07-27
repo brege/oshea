@@ -4,6 +4,8 @@
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
+const { colorThemePath } = require('@paths');
+const { theme } = require(colorThemePath);
 
 // Ensure log directory exists
 const logDir = path.join(process.cwd(), 'logs');
@@ -12,15 +14,15 @@ if (process.env.LOG_MODE === 'json' && !fs.existsSync(logDir)) {
 }
 const logFilePath = path.join(logDir, 'app.log');
 
-// Returns a colored string for the given level
+// Returns a colored string for the given level using gruvbox theme
 function colorForLevel(level, message) {
-  if (level === 'error' || level === 'fatal') return chalk.red(message);
-  if (level === 'warn') return chalk.yellow(message);
-  if (level === 'success') return chalk.green(message);
-  if (level === 'info') return chalk.cyan(message);
-  if (level === 'validation') return chalk.magentaBright(message); // custom validation color
-  if (level === 'detail') return chalk.gray(message);
-  if (level === 'debug') return chalk.magenta(message);
+  if (level === 'error' || level === 'fatal') return theme.error(message);
+  if (level === 'warn') return theme.warn(message);
+  if (level === 'success') return theme.success(message);
+  if (level === 'info') return theme.info(message);
+  if (level === 'validation') return theme.validation(message);
+  if (level === 'detail') return theme.detail(message);
+  if (level === 'debug') return theme.debug(message);
   return message;
 }
 

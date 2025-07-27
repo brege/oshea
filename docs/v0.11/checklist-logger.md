@@ -9,6 +9,7 @@ This checklist includes tasks directly related to the implementation, testing, a
   - [ ] Add error pattern recognition (filesystem, plugin, config categories)
   - [ ] Add stack trace injection on demand
   - [ ] Add structured context display formatting
+  - [ ] Add `logger.for(context)` convenience method for pre-configured loggers
 - **Fix Linter Output Streams**
   - [ ] Ensure consistent formatting across all validation output
   - [ ] Test that output formatting remains correct

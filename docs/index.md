@@ -8,7 +8,6 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 - [**Polish Checklist**](archive/v0.10/polish-checklist.md):
   **Polishing.** Aggregates all loose ends from previous checklists.
-  The [[symlink](polish-checklist.md)] provided in the `docs/` root is purely for my convenience.
 
 **Next-gen Features** \
 *These are the core documents for the next-gen features of the project.*
@@ -34,6 +33,7 @@ There are also several indexes for the main components of the project.
 [ [**Plugins**](../plugins/index.md) ]
 [ [**Scripts**](../scripts/index.md) ]
 [ [**Tests**](../test/index.md) ]
+[ [**Utils**](../src/utils/index.md) ]
 
 These indices are automatically managed by
 [**the librarian**](../scripts/linting/docs/librarian.js)
@@ -181,5 +181,7 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 <!-- uncategorized-start -->
 
 
+
+- [theming-v0.11.md](theming-v0.11.md)
 <!-- uncategorized-end -->
 

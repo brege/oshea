@@ -691,7 +691,7 @@ class PluginRegistryBuilder {
     }
 
     const finalDetails = Array.from(pluginDetailsMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    logger.info('Successfully retrieved all plugin details', {
+    logger.debug('Successfully retrieved all plugin details', {
       context: 'PluginRegistryBuilder',
       totalDetailsCount: finalDetails.length
     });

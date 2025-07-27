@@ -2,19 +2,21 @@
 // Lint-specific formatting logic
 
 const chalk = require('chalk');
+const { colorThemePath } = require('@paths');
+const { theme } = require(colorThemePath);
 
 // Apply style formatting to text
 function applyStyle(text, style, severity = null) {
   switch (style) {
   case 'dim':
-    return chalk.gray(text);
+    return theme.debug(text);
   case 'underline':
     return chalk.underline(text);
   case 'bold':
     return chalk.bold(text);
   default:
     if (severity !== null) {
-      return severity === 2 ? chalk.red(text) : chalk.yellow(text);
+      return severity === 2 ? theme.error(text) : theme.warn(text);
     }
     return text;
   }
@@ -79,7 +81,7 @@ function formatLint(structuredData) {
   if (structuredData.summary && structuredData.summary.hasSummary) {
     const { totalErrors, totalWarnings, totalProblems } = structuredData.summary;
     output += '\n';
-    const x = totalErrors > 0 ? chalk.red.bold('✖') : chalk.yellow.bold('✖');
+    const x = totalErrors > 0 ? theme.error('✖') : theme.warn('✖');
     output += `${x} ${totalProblems} problem${totalProblems !== 1 ? 's' : ''} (${totalErrors} error${totalErrors !== 1 ? 's' : ''}, ${totalWarnings} warning${totalWarnings !== 1 ? 's' : ''})`;
   }
 

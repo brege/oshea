@@ -61,9 +61,9 @@ function displayShortPluginTable(plugins) {
   }));
 
   const columns = [
-    { key: 'status', header: 'STATUS' },
-    { key: 'name', header: 'NAME/INVOKE KEY' },
-    { key: 'origin', header: 'CM ORIGIN' }
+    { key: 'status', header: 'Status' },
+    { key: 'name', header: 'Name/Invoke Key' },
+    { key: 'origin', header: 'CM Origin' }
   ];
 
   logger.info('', { format: 'table', meta: { rows, columns } });
@@ -129,7 +129,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
       let headerMessage = '';
 
       if (args.enabled) {
-        headerMessage = `\nEnabled plugins${collectionFilter ? ` (filtered for CM collection '${collectionFilter}')` : ''}:`;
+        headerMessage = `\nEnabled plugins${collectionFilter ? ` (filtered for CM collection '${collectionFilter}')` : ''}\n`;
         results = allPluginDetails.filter(p => {
           const isEnabledCM = p.status === 'Enabled (CM)';
           const isRegisteredTraditional = p.status && p.status.startsWith('Registered');
@@ -148,7 +148,7 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
         if (results.length === 0) logger.warn(`No CM-managed plugins found${inCollectionMsg}.`);
 
       } else if (args.disabled) {
-        headerMessage = `\nDisabled (but available) CM-managed plugins${inCollectionMsg}:`;
+        headerMessage = `\nDisabled (but available) CM-managed plugins${inCollectionMsg}\n`;
         results = allPluginDetails.filter(p =>
           p.status === 'Available (CM)' &&
           p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
@@ -165,10 +165,10 @@ For a list of collection names, use 'md-to-pdf collection list'.`);
 
         if (!args.short) {
           const usablePluginsCount = results.filter(p => (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)').length;
-          headerMessage = `\nFound ${usablePluginsCount} plugin(s) usable by md-to-pdf:`;
+          headerMessage = `\nFound ${usablePluginsCount} plugin(s) usable by md-to-pdf\n`;
         } else {
           const collectionContext = collectionFilter ? `CM plugins in collection "${collectionFilter}"` : 'all known plugins';
-          headerMessage = `\nSummary for ${collectionContext}:`;
+          headerMessage = `\nSummary for ${collectionContext}\n`;
         }
         if (results.length === 0) logger.warn('No plugins found or registered as usable.');
       }

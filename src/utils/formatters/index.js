@@ -10,6 +10,7 @@ const {
   tableFormatterPath,
   pluginListFormatterPath,
   collectionListFormatterPath,
+  smokeTestFormatterPath,
 } = require('@paths');
 const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
@@ -19,6 +20,13 @@ const { formatPathFinderOutput } = require(pathsFormatterPath);
 const { formatTable } = require(tableFormatterPath);
 const { formatPluginList } = require(pluginListFormatterPath);
 const { formatCollectionList } = require(collectionListFormatterPath);
+const { 
+  formatSuiteHeader,
+  formatScenarioProgress,
+  formatScenarioWarning,
+  formatSmokeResults,
+  formatSmokeHeader
+} = require(smokeTestFormatterPath);
 
 // Export formatters
 module.exports = {
@@ -28,6 +36,11 @@ module.exports = {
   raw: formatRaw,
   paths: formatPathFinderOutput,
   table: formatTable,
-  pluginList: formatPluginList,
-  collectionList: formatCollectionList
+  'plugin-list': formatPluginList,
+  'collection-list': formatCollectionList,
+  'smoke-header': formatSmokeHeader,
+  'smoke-suite': formatSuiteHeader,
+  'smoke-scenario': formatScenarioProgress,
+  'smoke-warning': formatScenarioWarning,
+  'smoke-results': formatSmokeResults
 };

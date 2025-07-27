@@ -115,11 +115,32 @@ function logger(message, options = {}) {
   }
 
   if (format === 'plugin-list') {
-    return formatters.pluginList(level, message, meta);
+    return formatters['plugin-list'](level, message, meta);
   }
 
   if (format === 'collection-list') {
-    return formatters.collectionList(level, message, meta);
+    return formatters['collection-list'](level, message, meta);
+  }
+
+  // Smoke test formatters
+  if (format === 'smoke-header') {
+    return formatters['smoke-header'](level, message, meta);
+  }
+
+  if (format === 'smoke-suite') {
+    return formatters['smoke-suite'](level, message, meta);
+  }
+
+  if (format === 'smoke-scenario') {
+    return formatters['smoke-scenario'](level, message, meta);
+  }
+
+  if (format === 'smoke-warning') {
+    return formatters['smoke-warning'](level, message, meta);
+  }
+
+  if (format === 'smoke-results') {
+    return formatters['smoke-results'](level, message, meta);
   }
 
   // Fallback to default formatter

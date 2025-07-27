@@ -30,12 +30,28 @@ module.exports = {
       if (isPath) {
         pluginDirectoryPath = resolvedIdentifier;
       } else {
+        // First try bundled plugins directory
         pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
 
         if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
-          logger.error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`);
-          process.exit(1);
-          return;
+          // Not found in bundled plugins, check if it's a user-added plugin via manager
+          if (!argv.manager || !argv.configResolver) {
+            logger.error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`);
+            process.exit(1);
+            return;
+          }
+
+          const configResolver = argv.configResolver;
+          await configResolver._initializeResolverIfNeeded();
+          const pluginRegistryEntry = configResolver.mergedPluginRegistry[pluginIdentifier];
+
+          if (pluginRegistryEntry && pluginRegistryEntry.configPath) {
+            pluginDirectoryPath = path.dirname(pluginRegistryEntry.configPath);
+          } else {
+            logger.error(`Error: Plugin '${pluginIdentifier}' not found. Checked bundled plugins and user-added plugins.`);
+            process.exit(1);
+            return;
+          }
         }
       }
 

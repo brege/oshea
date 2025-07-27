@@ -41,7 +41,7 @@ module.exports = {
         type: 'boolean',
         default: false
       })
-      .epilogue('If --from is omitted, a default template is used.\nIf --outdir is omitted, defaults to the current directory.');
+      .epilogue('If --from is omitted, a default template is used.\nIf --outdir is omitted, creates a \'my-plugins\' directory in your project for development.');
   },
   handler: async (args) => {
     const newPluginName = args.pluginName;
@@ -74,7 +74,7 @@ module.exports = {
       }
 
       const options = {
-        targetDir: args.outdir,
+        targetDir: args.outdir, // Will be undefined if not specified, allowing archetyper to use its default
         force: args.force
       };
 
@@ -90,7 +90,9 @@ module.exports = {
         logger.success(`\nPlugin '${newPluginName}' created successfully.`);
         logger.info('Next steps:');
         logger.detail(`  1. Customize the generated files in: ${result.archetypePath}`);
-        logger.detail('  2. Register your new plugin in a main config file.');
+        logger.detail(`  2. Add your plugin to md-to-pdf:`);
+        logger.detail(`     md-to-pdf plugin add "${result.archetypePath}"`);
+        logger.detail('  3. Test your plugin: md-to-pdf convert mydoc.md --plugin ' + newPluginName);
       }
 
       try {

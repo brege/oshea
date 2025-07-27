@@ -7,9 +7,9 @@ const { theme } = require(colorThemePath);
 // Format detailed plugin entry (card view)
 function formatPluginEntry(plugin) {
   const lines = [];
-  
+
   lines.push(`  ${theme.success('Name:')} ${plugin.name}`);
-  
+
   let statusText = plugin.status || 'N/A';
   if (plugin.status === 'Enabled (CM)') {
     statusText = plugin.status;
@@ -32,7 +32,7 @@ function formatPluginEntry(plugin) {
   }
 
   lines.push(`    ${theme.detail('Description:')} ${plugin.description}`);
-  
+
   let sourceDisplayMessage = plugin.registrationSourceDisplay;
   if (plugin.status === 'Enabled (CM)' && plugin.cmCollection && plugin.cmPluginId) {
     sourceDisplayMessage = `CollectionsManager (CM: ${plugin.cmCollection}/${plugin.cmPluginId})`;
@@ -51,37 +51,37 @@ function formatPluginEntry(plugin) {
   if (plugin.cmAddedOn && plugin.status === 'Enabled (CM)') {
     lines.push(`    ${theme.detail('CM Enabled On:')} ${plugin.cmAddedOn}`);
   }
-  
+
   lines.push(`  ${theme.info('---')}`);
-  
+
   return lines.join('\n');
 }
 
 // Generate context message based on list type and filter
 function generateContextMessage(listData) {
   const { type, filter, plugins } = listData;
-  
+
   if (type === 'enabled') {
     const filterMsg = filter ? ` (filtered for CM collection '${filter}')` : '';
     return `Enabled plugins${filterMsg}:`;
   }
-  
+
   if (type === 'available') {
     const filterMsg = filter ? ` in collection "${filter}"` : '';
     return `Available CM-managed plugins${filterMsg}:`;
   }
-  
+
   if (type === 'disabled') {
     const filterMsg = filter ? ` in collection "${filter}"` : '';
     return `Disabled (but available) CM-managed plugins${filterMsg}:`;
   }
-  
+
   // Default/all type
   if (listData.format === 'table') {
     const context = filter ? `CM plugins in collection "${filter}"` : 'all known plugins';
     return `Summary for ${context}:`;
   } else {
-    const usableCount = plugins.filter(p => 
+    const usableCount = plugins.filter(p =>
       (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)'
     ).length;
     return `Found ${usableCount} plugin(s) usable by md-to-pdf:`;
@@ -91,46 +91,46 @@ function generateContextMessage(listData) {
 // Generate empty state message
 function generateEmptyMessage(listData) {
   const { type, filter } = listData;
-  
+
   if (type === 'enabled') {
     const filterMsg = filter ? ` matching filter '${filter}'` : '';
     return `No plugins are currently enabled${filterMsg}.`;
   }
-  
+
   if (type === 'available') {
     const filterMsg = filter ? ` in collection "${filter}"` : '';
     return `No CM-managed plugins found${filterMsg}.`;
   }
-  
+
   if (type === 'disabled') {
     const filterMsg = filter ? ` in collection "${filter}"` : '';
     return `No disabled (but available) CM-managed plugins found${filterMsg}.`;
   }
-  
+
   return 'No plugins found or registered as usable.';
 }
 
 // Main formatter function
 function formatPluginList(level, message, meta = {}) {
   const listData = message; // Structured data from command
-  
+
   if (!listData || !listData.plugins) {
     console.log(theme.warn('No plugin data provided'));
     return;
   }
-  
+
   // Handle empty state
   if (listData.plugins.length === 0) {
     const emptyMsg = generateEmptyMessage(listData);
     console.log(theme.warn(emptyMsg));
     return;
   }
-  
+
   // Display context header
   const contextMsg = generateContextMessage(listData);
   console.log(''); // spacing
   console.log(theme.info(contextMsg));
-  
+
   // Format based on display type
   if (listData.format === 'table') {
     // Use existing table formatter with structured data
@@ -150,7 +150,7 @@ function formatPluginList(level, message, meta = {}) {
 
     const tableFormatter = require('./table-formatter');
     tableFormatter.formatTable(level, '', { rows, columns, showBorders: true });
-    
+
   } else {
     // Detailed card view
     listData.plugins.forEach(plugin => {

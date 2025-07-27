@@ -143,6 +143,23 @@ function logger(message, options = {}) {
     return formatters['smoke-results'](level, message, meta);
   }
 
+  // Validation formatters
+  if (format === 'validation-header') {
+    return formatters['validation-header'](level, message, meta);
+  }
+
+  if (format === 'validation-step') {
+    return formatters['validation-step'](level, message, meta);
+  }
+
+  if (format === 'validation-test') {
+    return formatters['validation-test'](level, message, meta);
+  }
+
+  if (format === 'validation-summary') {
+    return formatters['validation-summary'](level, message, meta);
+  }
+
   // Fallback to default formatter
   return formatters.app(level, message, meta);
 }

@@ -8,228 +8,118 @@ const { projectRoot, cliPath, mochaPath, nodeModulesPath, loggerPath } = require
 const logger = require(loggerPath);
 
 
-function checkReadmeFrontMatterV1(readmePath, pluginName, warnings) {
-  logger.info('  Checking README.md front matter... ', {
-    context: 'V1Validator',
-    format: 'inline',
-    plugin: pluginName,
-    readmePath: readmePath
-  });
+function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
+  const readmePath = path.join(pluginDirectoryPath, 'README.md');
+  
   if (!fs.existsSync(readmePath)) {
-    logger.warn('⚠ SKIP\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      reason: 'README.md not found'
-    });
-    return;
+    return {
+      status: 'skipped',
+      details: [{ type: 'info', message: 'README.md not found' }]
+    };
   }
+
   const readmeContent = fs.readFileSync(readmePath, 'utf8');
   const frontMatterDelimiter = '---';
   const parts = readmeContent.split(frontMatterDelimiter);
+  
   if (parts.length < 3 || parts[0].trim() !== '') {
     warnings.push(`README.md for '${pluginName}' does not have a valid YAML front matter block.`);
-    logger.warn('⚠ WARN\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.warn('    ⚠ README.md does not have a valid YAML front matter block.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      reason: 'Missing or malformed front matter delimiters.'
-    });
-    return;
+    return {
+      status: 'warning',
+      details: [{ type: 'warn', message: 'README.md does not have a valid YAML front matter block' }]
+    };
   }
+
   try {
     const frontMatter = yaml.load(parts[1]);
     if (!frontMatter || typeof frontMatter !== 'object') {
       warnings.push(`README.md for '${pluginName}' has invalid front matter.`);
-      logger.warn('⚠ WARN\n', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName
-      });
-      logger.warn('    ⚠ README.md has invalid front matter.\n', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName,
-        reason: 'Front matter is empty or not an object.'
-      });
-      return;
+      return {
+        status: 'warning',
+        details: [{ type: 'warn', message: 'README.md has invalid front matter' }]
+      };
     }
-    logger.success('✓ OK\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.success('    ✓ README.md has a valid front matter block.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
+    
+    return {
+      status: 'passed',
+      details: [{ type: 'success', message: 'README.md has a valid front matter block' }]
+    };
   } catch (e) {
-    warnings.push(`Could not parse README.md front matter for '${pluginName}': ${e.message}.`);
-    logger.warn('⚠ WARN\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.warn('    ⚠ Could not parse README.md front matter.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      error: e.message
-    });
+    warnings.push(`README.md for '${pluginName}' has malformed YAML front matter: ${e.message}`);
+    return {
+      status: 'warning',
+      details: [{ type: 'warn', message: `README.md has malformed YAML front matter: ${e.message}` }]
+    };
   }
 }
 
-
-const checkFileStructure = (pluginDirectoryPath, pluginName, errors, warnings) => {
-  logger.info('  Checking plugin file structure... ', {
-    context: 'V1Validator',
-    format: 'inline',
-    plugin: pluginName
-  });
+const checkFileStructureV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
   const requiredFiles = ['index.js', `${pluginName}.config.yaml`, `${pluginName}-example.md`, 'README.md'];
+  const details = [];
   let allRequiredFound = true;
 
   for (const file of requiredFiles) {
-    if (!fs.existsSync(path.join(pluginDirectoryPath, file))) {
+    if (fs.existsSync(path.join(pluginDirectoryPath, file))) {
+      details.push({ type: 'success', message: `Found required file: '${file}'` });
+    } else {
       errors.push(`Missing required file: '${file}'.`);
+      details.push({ type: 'error', message: `Missing required file: '${file}'` });
       allRequiredFound = false;
     }
   }
 
-  if (allRequiredFound) {
-    logger.success('✓ OK\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-  } else {
-    logger.error('✗ FAIL\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-  }
+  return {
+    status: allRequiredFound ? 'passed' : 'failed',
+    details
+  };
+};
 
-  // Show detailed file results
-  for (const file of requiredFiles) {
-    if (fs.existsSync(path.join(pluginDirectoryPath, file))) {
-      logger.success(`    ✓ Found required file: '${file}'`, {
-        context: 'V1Validator',
-        plugin: pluginName
-      });
-    } else {
-      logger.error(`    ✗ Missing required file: '${file}'`, {
-        context: 'V1Validator',
-        plugin: pluginName
-      });
-    }
-  }
-
-  logger.info('  Checking for optional files... ', {
-    context: 'V1Validator',
-    format: 'inline',
-    plugin: pluginName
-  });
+const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
   const contractDir = path.join(pluginDirectoryPath, '.contract');
   const testDir = path.join(contractDir, 'test');
   const schemaFileName = `${pluginName}.schema.json`;
   const schemaPath = path.join(contractDir, schemaFileName);
+  const details = [];
 
   let optionalCount = 0;
-  if (fs.existsSync(testDir)) optionalCount++;
-  if (fs.existsSync(schemaPath)) optionalCount++;
-
-  if (optionalCount === 2) {
-    logger.success('✓ OK\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-  } else if (optionalCount === 1) {
-    logger.warn('⚠ PARTIAL\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-  } else {
-    logger.warn('⚠ NONE\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-  }
-
-  // Show detailed optional file results
+  
   if (fs.existsSync(testDir)) {
-    logger.success('    ✓ Found optional \'.contract/test/\' directory.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      directory: '.contract/test/'
-    });
+    details.push({ type: 'success', message: "Found optional '.contract/test/' directory" });
+    optionalCount++;
   } else {
-    warnings.push('Missing optional \'.contract/test/\' directory.');
-    logger.warn('    ⚠ Missing optional \'.contract/test/\' directory.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      directory: '.contract/test/'
-    });
+    warnings.push("Missing optional '.contract/test/' directory.");
+    details.push({ type: 'warn', message: "Missing optional '.contract/test/' directory" });
   }
 
   if (fs.existsSync(schemaPath)) {
-    logger.success(`    ✓ Plugin has a schema file ('${schemaFileName}').\n`, {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      file: schemaFileName
-    });
+    details.push({ type: 'success', message: `Plugin has a schema file ('${schemaFileName}')` });
+    optionalCount++;
   } else {
-    warnings.push(`Missing optional schema file ('${schemaFileName}') in .contract/ directory.`);
-    logger.warn('    ⚠ Plugin does not have a specific schema file in .contract/ directory.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      file: schemaFileName
-    });
+    warnings.push(`Missing optional schema file ('${schemaFileName}').`);
+    details.push({ type: 'warn', message: `Missing optional schema file ('${schemaFileName}')` });
   }
+
+  const status = optionalCount === 2 ? 'passed' : 'warning';
+  
+  return {
+    status,
+    details
+  };
 };
 
 
-const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
-  logger.info('  Checking plugin\'s test setup... ', {
-    context: 'V1Validator',
-    format: 'inline',
-    plugin: pluginName
-  });
+const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
   const e2eTestPath = path.join(pluginDirectoryPath, '.contract', 'test', `${pluginName}-e2e.test.js`);
+  
   if (!fs.existsSync(e2eTestPath)) {
     warnings.push(`Missing E2E test file, skipping test run: '${path.join('.contract/test', `${pluginName}-e2e.test.js`)}'.`);
-    logger.warn('⚠ SKIP\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.warn('    ⚠ Missing E2E test file, skipping run.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      file: path.join('.contract/test', `${pluginName}-e2e.test.js`)
-    });
-    return;
+    return {
+      status: 'skipped',
+      details: [{ type: 'info', message: 'Missing E2E test file, skipping run' }]
+    };
   }
+
   try {
-    logger.info('\n  Running in-situ E2E test...', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
     const command = `node "${mochaPath}" "${e2eTestPath}" --no-config --no-opts`;
     const result = execSync(command, {
       cwd: projectRoot,
@@ -239,156 +129,60 @@ const runInSituTest = (pluginDirectoryPath, pluginName, errors, warnings) => {
         NODE_PATH: nodeModulesPath
       }
     });
-    logger.success('✓ OK\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.success('    ✓ In-situ test passes.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
 
-    // Show clean test results using inline format
+    const details = [{ type: 'success', message: 'In-situ test passes' }];
+
+    // Parse test output for display
     if (result && result.length > 0) {
       const testOutput = result.toString().trim();
-      const lines = testOutput.split('\n');
-
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (!trimmedLine) continue;
-
-        // Test suite headers
-        if (trimmedLine.match(/^\s*[A-Z].*Test\s*$/)) {
-          logger.info('      Test Suite: ', {
-            context: 'V1Validator',
-            format: 'inline',
-            plugin: pluginName,
-            suite: trimmedLine
-          });
-          process.stdout.write(`${trimmedLine}\n`);
-          continue;
-        }
-
-        // Test result lines
-        if (trimmedLine.includes('✔') || trimmedLine.includes('✓')) {
-          const testName = trimmedLine.replace(/^\s*✔?\s*/, '').replace(/\s*\(\d+ms\)$/, '');
-          logger.success('        ✓ ', {
-            context: 'V1Validator',
-            format: 'inline',
-            plugin: pluginName,
-            test: testName
-          });
-          process.stdout.write(`${testName}\n`);
-          continue;
-        }
-
-        // Test summary
-        if (trimmedLine.match(/^\d+\s+passing/)) {
-          logger.success('      ', {
-            context: 'V1Validator',
-            format: 'inline',
-            plugin: pluginName,
-            summary: trimmedLine
-          });
-          process.stdout.write(`${trimmedLine}\n`);
-          continue;
-        }
-
-        // Other meaningful output
-        if (trimmedLine.includes('Successfully created') ||
-            trimmedLine.includes('Generated') ||
-            trimmedLine.startsWith('[')) {
-          logger.info('      ', {
-            context: 'V1Validator',
-            format: 'inline',
-            plugin: pluginName,
-            outputLine: trimmedLine
-          });
-          process.stdout.write(`${trimmedLine}\n`);
-        }
-      }
+      // Store test output for validation-test formatter
+      details.push({ 
+        type: 'testOutput', 
+        message: testOutput 
+      });
     }
+
+    return {
+      status: 'passed',
+      details
+    };
   } catch (e) {
     errors.push('In-situ E2E test failed');
-    logger.error('✗ FAIL\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.error('    ✗ In-situ test failed.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-
+    
+    const details = [{ type: 'error', message: 'In-situ test failed' }];
+    
     if (e.stdout && e.stdout.length > 0) {
-      logger.error('      Test stdout:\n', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName
-      });
-      logger.error('', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName,
-        output: e.stdout.toString() + '\n'
-      });
+      details.push({ type: 'error', message: `Test stdout: ${e.stdout.toString()}` });
     }
     if (e.stderr && e.stderr.length > 0) {
-      logger.error('      Test stderr:\n', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName
-      });
-      logger.error('', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName,
-        output: e.stderr.toString() + '\n'
-      });
+      details.push({ type: 'error', message: `Test stderr: ${e.stderr.toString()}` });
     }
     if ((!e.stdout || e.stdout.length === 0) && (!e.stderr || e.stderr.length === 0)) {
-      logger.error('      No output captured from test process.\n', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName
-      });
+      details.push({ type: 'error', message: 'No output captured from test process' });
     }
+
+    return {
+      status: 'failed',
+      details
+    };
   }
 };
 
 
-const runSelfActivation = (pluginDirectoryPath, pluginName, errors) => {
-  logger.info('  Performing self-activation sanity check... ', {
-    context: 'V1Validator',
-    format: 'inline',
-    plugin: pluginName
-  });
+const runSelfActivationV1 = (pluginDirectoryPath, pluginName, errors) => {
   const exampleMdPath = path.join(pluginDirectoryPath, `${pluginName}-example.md`);
   const configYamlPath = path.join(pluginDirectoryPath, `${pluginName}.config.yaml`);
+  
   if (!fs.existsSync(exampleMdPath) || !fs.existsSync(configYamlPath)) {
     errors.push('Self-activation failed: The plugin is missing its example.md or config.yaml file.');
-    logger.error('✗ FAIL\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.error('    ✗ Self-activation check failed (missing example/config).\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      missingFiles: [`${pluginName}-example.md`, `${pluginName}.config.yaml`]
-    });
-    return;
+    return {
+      status: 'failed',
+      details: [{ type: 'error', message: 'Self-activation check failed (missing example/config)' }]
+    };
   }
+
   const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), `md-to-pdf-test-${pluginName}-`));
-  logger.debug('Created temporary output directory for self-activation test', {
-    context: 'V1Validator',
-    pluginName: pluginName,
-    tempDir: tempOutputDir
-  });
+  
   try {
     const command = `node "${cliPath}" convert "${exampleMdPath}" --outdir "${tempOutputDir}" --no-open`;
     execSync(command, {
@@ -399,50 +193,26 @@ const runSelfActivation = (pluginDirectoryPath, pluginName, errors) => {
         NODE_PATH: nodeModulesPath
       }
     });
-    logger.success('✓ OK\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.success('    ✓ Self-activation successful.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      exampleFile: exampleMdPath,
-      outputDir: tempOutputDir
-    });
+
+    return {
+      status: 'passed',
+      details: [{ type: 'success', message: 'Self-activation successful' }]
+    };
   } catch (e) {
     errors.push('Self-activation failed: The plugin was unable to convert its own example file.');
-    logger.error('✗ FAIL\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.error('    ✗ Self-activation check failed.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName,
-      error: e.message
-    });
+    
+    const details = [{ type: 'error', message: 'Self-activation check failed' }];
+    
     if (e.stderr) {
-      logger.error('      Self-activation error output:\n', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName
-      });
-      logger.error('', {
-        context: 'V1Validator',
-        format: 'inline',
-        plugin: pluginName,
-        output: e.stderr.toString() + '\n'
-      });
+      details.push({ type: 'error', message: `Self-activation error: ${e.stderr.toString()}` });
     }
+
+    return {
+      status: 'failed',
+      details
+    };
   } finally {
     fs.rmSync(tempOutputDir, { recursive: true, force: true });
-    logger.debug('Cleaned up temporary output directory for self-activation test', {
-      context: 'V1Validator',
-      tempDir: tempOutputDir
-    });
   }
 };
 
@@ -452,36 +222,34 @@ function validateV1(pluginDirectoryPath, pluginMetadata) {
   const warnings = [];
   const pluginName = pluginMetadata.plugin_name.value;
 
-  logger.info('Starting V1 plugin validation checks', {
-    context: 'V1Validator',
-    pluginName: pluginName,
-    pluginDirectoryPath: pluginDirectoryPath
-  });
+  // Display validation header
+  logger.info({ protocol: 'V1', pluginName }, { format: 'validation-header' });
 
-  checkFileStructure(pluginDirectoryPath, pluginName, errors, warnings);
-  runInSituTest(pluginDirectoryPath, pluginName, errors, warnings);
-  const readmePath = path.join(pluginDirectoryPath, 'README.md');
-  checkReadmeFrontMatterV1(readmePath, pluginName, warnings);
+  // Run validation steps with new formatter system
+  const fileStructureResult = checkFileStructureV1(pluginDirectoryPath, pluginName, errors, warnings);
+  displayValidationStep('plugin file structure', fileStructureResult);
+
+  const optionalFilesResult = checkOptionalFilesV1(pluginDirectoryPath, pluginName, warnings);
+  displayValidationStep('for optional files', optionalFilesResult);
+
+  const testResult = runInSituTestV1(pluginDirectoryPath, pluginName, errors, warnings);
+  displayValidationStep('plugin test setup', testResult);
+
+  const readmeResult = checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings);
+  displayValidationStep('README.md front matter', readmeResult);
+
   if (errors.length === 0) {
-    runSelfActivation(pluginDirectoryPath, pluginName, errors);
+    const selfActivationResult = runSelfActivationV1(pluginDirectoryPath, pluginName, errors);
+    displayValidationStep('self-activation sanity check', selfActivationResult);
   } else {
     warnings.push('Skipping self-activation check due to prior critical errors.');
-    logger.info('  Performing self-activation sanity check... ', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.warn('⚠ SKIP\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
-    logger.warn('    ⚠ Skipping self-activation check due to prior errors.\n', {
-      context: 'V1Validator',
-      format: 'inline',
-      plugin: pluginName
-    });
+    const skipResult = {
+      status: 'skipped',
+      details: [{ type: 'info', message: 'Skipping self-activation check due to prior errors' }]
+    };
+    displayValidationStep('self-activation sanity check', skipResult);
   }
+
   return {
     isValid: errors.length === 0,
     errors: errors,
@@ -489,10 +257,24 @@ function validateV1(pluginDirectoryPath, pluginMetadata) {
   };
 }
 
+// Helper function to display validation steps using the new formatter
+function displayValidationStep(stepName, result) {
+  // Start step
+  logger.info({ stepName, status: 'testing' }, { format: 'validation-step' });
+  
+  // Complete step with results
+  logger.info({ 
+    stepName, 
+    status: result.status,
+    details: result.details 
+  }, { format: 'validation-step' });
+}
+
 module.exports = {
   validateV1,
-  checkFileStructure,
-  runInSituTest,
-  runSelfActivation,
+  checkFileStructureV1,
+  runInSituTestV1,
+  runSelfActivationV1,
+  checkOptionalFilesV1,
   checkReadmeFrontMatterV1
 };

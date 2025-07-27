@@ -166,7 +166,7 @@ function validate(pluginIdentifier) {
   const errors = [];
   const warnings = [];
 
-  logger.info('Starting plugin validation for identifier', {
+  logger.debug('Starting plugin validation for identifier', {
     context: 'PluginValidator',
     pluginIdentifier: pluginIdentifier
   });
@@ -296,7 +296,7 @@ function validate(pluginIdentifier) {
       warningCount: validationResult.warnings.length
     });
     validationResult.warnings.forEach((warning) => {
-      logger.warn(`⚠ ${warning}`, {
+      logger.warn(`○ ${warning}`, {
         context: 'PluginValidator',
         pluginName: pluginName,
         format: 'inline_list_item'

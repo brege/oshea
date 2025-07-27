@@ -25,45 +25,45 @@ function flattenSpecs(spec) {
 
 const paths = {
   // --- Integration Test Paths ---
-  integration:            'test/integration/**/*.js',
+  integration:            'test/runners/integration/**/*.js',
 
   // --- Subsystem & Module Integration Test Paths ---
-  default_handler:        'test/integration/core/default-handler.*.js',               // Rank 0
-  pdf_generator:          'test/integration/core/pdf-generator.*.js',                 // Rank 0
-  math_integration:       'test/integration/core/math-integration.*.js',              // Rank 2
+  default_handler:        'test/runners/integration/core/default-handler.*.js',             // Rank 0
+  pdf_generator:          'test/runners/integration/core/pdf-generator.*.js',               // Rank 0
+  math_integration:       'test/runners/integration/core/math-integration.*.js',            // Rank 2
 
-  config_resolver:        'test/integration/config/config-resolver.*.js',             // Rank 1
-  main_config_loader:     'test/integration/config/main-config-loader.*.js',          // Rank 2
-  plugin_config_loader:   'test/integration/config/plugin-config-loader.*.js',        // Rank 2
+  config_resolver:        'test/runners/integration/config/config-resolver.*.js',           // Rank 1
+  main_config_loader:     'test/runners/integration/config/main-config-loader.*.js',        // Rank 2
+  plugin_config_loader:   'test/runners/integration/config/plugin-config-loader.*.js',      // Rank 2
 
-  plugin_determiner:      'test/integration/plugins/plugin-determiner.*.js',          // Rank 1
-  plugin_manager:         'test/integration/plugins/plugin-manager.*.js',             // Rank 2
-  plugin_registry_builder:'test/integration/plugins/plugin-registry-builder.*.js',    // Rank 2
-  plugin_validator:       'test/integration/plugins/plugin-validator.*.js',           // Rank 2
+  plugin_determiner:      'test/runners/integration/plugins/plugin-determiner.*.js',        // Rank 1
+  plugin_manager:         'test/runners/integration/plugins/plugin-manager.*.js',           // Rank 2
+  plugin_registry_builder:'test/runners/integration/plugins/plugin-registry-builder.*.js',  // Rank 2
+  plugin_validator:       'test/runners/integration/plugins/plugin-validator.*.js',         // Rank 2
 
-  collections_manager:    'test/integration/collections/collections-manager.*.js',    // Rank 1
-  cm_utils:               'test/integration/collections/cm-utils.*.js',               // Rank 2
+  collections_manager:    'test/runners/integration/collections/collections-manager.*.js',  // Rank 1
+  cm_utils:               'test/runners/integration/collections/cm-utils.*.js',             // Rank 2
 
   // --- End-to-End Test Paths ---
   e2e: [
-    'test/e2e/all-e2e.test.js',
-    'test/e2e/workflow-lifecycle.test.js'
+    'test/runners/e2e/all-e2e.test.js',
+    'test/runners/e2e/workflow-lifecycle.test.js'
   ],
 
   // --- Workflow / Lifecycle E2E Test Paths ---
-  workflow_lifecycle:     'test/e2e/workflow-lifecycle.test.js',
+  workflow_lifecycle:     'test/runners/e2e/workflow-lifecycle.test.js',
 
   // --- Bundled Plugin In-Situ Test Paths ---
   insitu:                 'plugins/**/.contract/test/*.test.js',
 
   // --- Linting ---
-  linting_units:          'test/linting/unit/all-linting-unit.test.js',
+  linting_units:          'test/runners/linting/unit/all-linting-unit.test.js',
 
 };
 
 // --- By Rank -- Integration Tests ---
 const ranks = {
-  // test/docs/test-generation-priority-order.md
+  // test/archive/docs/test-generation-priority-order.md
   rank0: [ // core operations
     paths.default_handler,
     paths.pdf_generator,
@@ -84,7 +84,7 @@ const ranks = {
 
 // --- By Level ---
 const levels = {
-  // test/docs/checklist-level-1.md
+  // test/config/metadata-level-1.yaml
   level1: [ // module integration tests
     paths.collections_manager,
     paths.cm_utils,
@@ -96,18 +96,18 @@ const levels = {
     paths.plugin_manager,
     paths.plugin_registry_builder,
   ],
-  // test/docs/checklist-level-2.md
+  // test/config/metadata-level-2.yaml
   level2: [ // subsystem integration tests
     paths.default_handler,
     paths.pdf_generator,
     paths.collections_manager,
     paths.plugin_validator,
   ],
-  // test/docs/checklist-level-3.md
+  // test/config/metadata-level-3.yaml
   level3: [ // module E2E tests
     paths.e2e[0], // all-e2e.test.js
   ],
-  // test/docs/checklist-level-4.md
+  // test/config/metadata-level-4.yaml
   level4: [ // workflow E2E tests
     paths.e2e[1],
   ],
@@ -203,8 +203,8 @@ const mochaConfig = {
   timeout: 20000, // Increased timeout for lifecycle tests
   exit: true,
   color: true,
-  require: 'test/setup.js',
-  reporter: path.join(__dirname, 'test', 'scripts', 'log-failures-reporter.js')
+  require: 'test/runners/setup.js',
+  reporter: path.join(__dirname, 'test', 'analytics', 'log-failures-reporter.js')
 };
 
 module.exports = mochaConfig;

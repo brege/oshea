@@ -145,24 +145,19 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 *Documentation that details the project's testing framework, strategy, and metrics that define project quality.*
 
 ### Strategy & Process
+
 * [Test Suite Index](../test/index.md):
   Main entry point for test-related documentation. Details the test harness and adjoins the dynamic QA dashboard.
-* [Test Generation Priority Order](../test/docs/test-generation-priority-order.md):
+* [Test Generation Priority Order](../test/archive/docs/test-generation-priority-order.md):
   Explains the ranked, multi-level testing strategy and the priority for module test implementation.
-* [Audit Log](../test/docs/audit-log.md): 
-  Logs known issues, limitations, and discrepancies discovered during testing and code audits.
 
 ### Technical Reference
-* [Test Suite Checklist Level 1](../test/docs/checklist-level-1.md):
-  Module integration test scenarios.
-* [Test Suite Checklist Level 2](../test/docs/checklist-level-2.md):
-  Subsystem integration test scenarios.
-* [Test Suite Checklist Level 3](../test/docs/checklist-level-3.md):
-  End-to-End CLI test scenarios.
-* [Test Suite Checklist Level 4](../test/docs/checklist-level-4.md):
-  End-to-End lifecycle test scenarios.
-* [Test Suite Checklist Meta Level 0](../test/docs/checklist-level-m0.md):
-  Unit tests for code and documentation linters.
+
+* [Level 1 Tests](config/metadata-level-1.yaml): Module integration scenarios
+* [Level 2 Tests](config/metadata-level-2.yaml): Subsystem integration scenarios  
+* [Level 3 Tests](config/metadata-level-3.yaml): End-to-End CLI scenarios
+* [Level 4 Tests](config/metadata-level-4.yaml): End-to-End lifecycle scenarios
+* [Level M0 Tests](config/metadata-level-m0.yaml): Unit tests for linters and validators
 
 ---
 

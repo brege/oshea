@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-25T22:07:22.189Z
+// Generated: 2025-07-27T02:32:43.714Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -31,7 +31,7 @@ const templateBasicPlugin = path.join(projectRoot, 'plugins', 'template-basic');
 const srcRoot = path.join(projectRoot, 'src');
 const assetsRoot = path.join(projectRoot, 'assets');
 const scriptsRoot = path.join(projectRoot, 'scripts');
-const testRoot = path.join(projectRoot, 'test');
+const testRoot = path.join(projectRoot, 'test', 'runners');
 const cliCommandsPath = path.join(srcRoot, 'cli', 'commands');
 const collectionsCommandsRoot = path.join(srcRoot, 'collections', 'commands');
 const scriptsSharedRoot = path.join(scriptsRoot, 'shared');

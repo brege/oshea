@@ -6,11 +6,11 @@ The paths registry in [`paths/paths-config.yaml`](../../paths/paths-config.yaml)
 I suggest we use this for the "`context: `" field of our error registry.
 
 The hard work of refactoring all tests two months ago by value-propagation
-(cf. [`test/docs/test-generation-priority-order.md`](../../test/docs/test-generation-priority-order.md))
+(cf. [`test/archive/test-generation-priority-order.md`](../../test/archive/docs/test-generation-priority-order.md))
 led to an inherited structure:
 
 1. the implementation and human-focus on which tests to ensure coverage on first
-  [`*-priority-order.md`](../../test/docs/test-generation-priority-order.md)
+  [`*-priority-order.md`](../../test/archive/docs/test-generation-priority-order.md)
 2. the structur in the mocha tests [`.mocharc.js`](../../.mocharc.js)
 3. the re-organization and un-flattening of `src/` 
 4. the pathing registry in `paths/paths-config.yaml`, and

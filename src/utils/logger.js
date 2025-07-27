@@ -114,6 +114,14 @@ function logger(message, options = {}) {
     return formatters.table(level, message, meta);
   }
 
+  if (format === 'plugin-list') {
+    return formatters.pluginList(level, message, meta);
+  }
+
+  if (format === 'collection-list') {
+    return formatters.collectionList(level, message, meta);
+  }
+
   // Fallback to default formatter
   return formatters.app(level, message, meta);
 }

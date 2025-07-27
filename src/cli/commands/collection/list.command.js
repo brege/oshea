@@ -2,30 +2,13 @@
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-// Helper function to determine collection type
-function getCollectionType(collection) {
-  if (collection.special_type === 'singleton_container') return 'Managed Dir';
-  if (collection.source && (collection.source.startsWith('http') || collection.source.endsWith('.git'))) return 'Git';
-  return 'Local Path';
-}
-
-// Helper function for --short display using table formatter
-function displayShortCollectionTable(collections) {
-  logger.info('\nDownloaded plugin collections:');
-
-  const rows = collections.map(coll => ({
-    name: coll.name,
-    type: getCollectionType(coll),
-    source: coll.source || 'N/A'
-  }));
-
-  const columns = [
-    { key: 'name', header: 'NAME' },
-    { key: 'type', header: 'TYPE' },
-    { key: 'source', header: 'SOURCE' }
-  ];
-
-  logger.info('', { format: 'table', meta: { rows, columns } });
+// Normalize list type from args
+function normalizeListType(args) {
+  let listType = args.type.toLowerCase();
+  if (listType === 'names') {
+    listType = 'downloaded';
+  }
+  return listType;
 }
 
 module.exports = {
@@ -64,91 +47,31 @@ module.exports = {
       logger.fatal('FATAL ERROR: CollectionsManager instance not found in CLI arguments.');
       process.exit(1);
     }
-    const manager = args.manager;
-    let listType = args.type.toLowerCase();
-    const collectionFilter = args.collection_name;
-
-    if (listType === 'names') {
-      listType = 'downloaded';
-    }
 
     try {
+      // 1. Fetch data
+      const manager = args.manager;
+      const listType = normalizeListType(args);
+      const collectionFilter = args.collection_name;
       const results = await manager.listCollections(listType, collectionFilter);
 
+      // 2. Handle raw JSON output (bypass formatter)
       if (args.raw) {
-        // Raw JSON output should not be formatted by the logger
         process.stdout.write(JSON.stringify(results, null, 2));
         return;
       }
 
-      if (listType === 'downloaded') {
-        if (results.length === 0) {
-          logger.warn('No downloaded collections found.');
-          return;
-        }
+      // 3. Build structured data for formatter
+      const listData = {
+        type: listType,
+        format: (listType === 'downloaded' && args.short) ? 'table' : 'detailed',
+        filter: collectionFilter,
+        items: results
+      };
 
-        if (args.short) {
-          displayShortCollectionTable(results);
-        } else {
-          logger.info('\nDownloaded plugin collections:');
-          results.forEach(collection => {
-            logger.success(`\n  Collection Name: ${collection.name}`);
-            if (collection.special_type === 'singleton_container') {
-              logger.detail('    Type: Managed Directory (for user-added singleton plugins)');
-              logger.detail(`    Managed Path: ${collection.source}`);
-              logger.detail(`    (To see individual singletons, run: 'md-to-pdf plugin list --available ${collection.name}')`);
-            } else {
-              logger.detail(`    Source: ${collection.source}`);
-              if (collection.added_on && collection.added_on !== 'N/A (Container)') logger.detail(`    Added On: ${new Date(collection.added_on).toLocaleString()}`);
-              if (collection.updated_on) logger.detail(`    Updated On: ${new Date(collection.updated_on).toLocaleString()}`);
-            }
-          });
-        }
+      // 4. Send to formatter
+      logger.info(listData, { format: 'collection-list' });
 
-      } else if (listType === 'available' || listType === 'all') {
-        if (results.length === 0) {
-          logger.warn(`No available plugins found ${collectionFilter ? `in collection "${collectionFilter}"` : 'in any collection'}.`);
-          return;
-        }
-        logger.info(`\nAvailable plugins ${collectionFilter ? `in collection "${collectionFilter}"` : ''}:`);
-        results.forEach(p => {
-          logger.success(`  - Plugin ID: ${p.plugin_id}`);
-          logger.detail(`    Description: ${p.description}`);
-          if (p.is_singleton) {
-            let originalSourceDisplay = p.original_source || 'N/A';
-            if (p.is_original_source_missing) {
-              originalSourceDisplay += ' (MISSING)';
-            }
-            logger.detail(`    Original Source: ${originalSourceDisplay}`);
-            if (p.added_on) logger.detail(`    Added On: ${new Date(p.added_on).toLocaleString()}`);
-            if (p.updated_on) logger.detail(`    Updated On: ${new Date(p.updated_on).toLocaleString()}`);
-          }
-          if (p.config_path) logger.detail(`    Config Path: ${p.config_path}`);
-          if (p.base_path) logger.detail(`    Base Path: ${p.base_path}`);
-          if (p.metadata_error) logger.error(`    Metadata Error: ${p.metadata_error}`);
-        });
-      } else if (listType === 'enabled') {
-        if (results.length === 0) {
-          logger.warn(`No enabled plugins found ${collectionFilter ? `in collection "${collectionFilter}"` : ''}.`);
-          return;
-        }
-        logger.info(`\nEnabled plugins ${collectionFilter ? `in collection "${collectionFilter}"` : ''}:`);
-        results.forEach(p => {
-          logger.success(`  - Invoke Name: ${p.invoke_name}`);
-          logger.detail(`    Plugin ID: ${p.plugin_id}`);
-          logger.detail(`    Collection: ${p.collection_name}`);
-          if (p.is_singleton) {
-            let originalSourceDisplay = p.original_source || 'N/A';
-            if (p.is_original_source_missing) {
-              originalSourceDisplay += ' (MISSING)';
-            }
-            logger.detail(`    Original Source: ${originalSourceDisplay}`);
-            if (p.added_on) logger.detail(`    Added On: ${new Date(p.added_on).toLocaleString()}`);
-            if (p.updated_on) logger.detail(`    Updated On: ${new Date(p.updated_on).toLocaleString()}`);
-          }
-          if (p.config_path) logger.detail(`    Config Path: ${p.config_path}`);
-        });
-      }
     } catch (error) {
       logger.error(`\nERROR in 'collection list' command: ${error.message}`);
       process.exit(1);

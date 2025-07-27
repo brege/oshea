@@ -8,6 +8,8 @@ const {
   pathsFormatterPath,
   rawFormatterPath,
   tableFormatterPath,
+  pluginListFormatterPath,
+  collectionListFormatterPath,
 } = require('@paths');
 const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
@@ -15,6 +17,8 @@ const { formatInline } = require(inlineFormatterPath);
 const { formatRaw } = require(rawFormatterPath);
 const { formatPathFinderOutput } = require(pathsFormatterPath);
 const { formatTable } = require(tableFormatterPath);
+const { formatPluginList } = require(pluginListFormatterPath);
+const { formatCollectionList } = require(collectionListFormatterPath);
 
 // Export formatters
 module.exports = {
@@ -23,5 +27,7 @@ module.exports = {
   inline: formatInline,
   raw: formatRaw,
   paths: formatPathFinderOutput,
-  table: formatTable
+  table: formatTable,
+  pluginList: formatPluginList,
+  collectionList: formatCollectionList
 };

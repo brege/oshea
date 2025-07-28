@@ -179,9 +179,5 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 *This list is automatically updated by [`scripts/linting/docs/librarian.js`](../scripts/linting/docs/librarian.js)*
 
 <!-- uncategorized-start -->
-
-
-
-- [theming-v0.11.md](theming-v0.11.md)
 <!-- uncategorized-end -->
 

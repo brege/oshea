@@ -1,0 +1,50 @@
+# Level 4 Workflow Tests - Unified Plugin Architecture
+# Complete plugin lifecycle testing as one sequential workflow
+---
+name: "4.1.5 Unified Plugin Architecture Complete Workflow"
+base_command: "md-to-pdf"
+scenarios:
+  - description: "Create plugin-A externally using --outdir"
+    args: "plugin create plugin-A --from default --outdir ${OUTDIR}"
+    expect:
+      contains_all: ["created successfully", "plugin-A"]
+
+  - description: "Create plugin-B externally using --outdir"
+    args: "plugin create plugin-B --from default --outdir ${OUTDIR}"
+    expect:
+      contains_all: ["created successfully", "plugin-B"]
+
+  - description: "Add externally created plugin-A to unified architecture"
+    args: "plugin add ${OUTDIR}/plugin-A"
+    expect:
+      contains: "Successfully processed 'plugin add'"
+
+  - description: "Add externally created plugin-B to unified architecture"
+    args: "plugin add ${OUTDIR}/plugin-B"
+    expect:
+      contains: "Successfully processed 'plugin add'"
+
+  - description: "Verify plugins appear in unified manifest"
+    args: "plugin list --short"
+    expect:
+      contains_all: ["plugin-A", "plugin-B"]
+
+  - description: "Disable plugin-A for state management test"
+    args: "plugin disable plugin-A"
+    expect:
+      contains: "Plugin disabled successfully"
+
+  - description: "Enable plugin-A back to active state"
+    args: "plugin enable plugin-A"
+    expect:
+      contains: "Plugin enabled successfully"
+
+  - description: "Remove plugin-A from unified structure"
+    args: "plugin remove plugin-A"
+    expect:
+      contains: "removed successfully"
+
+  - description: "Verify plugin-A no longer in list after removal"
+    args: "plugin list --short"
+    expect_not:
+      contains: "plugin-A"

@@ -64,12 +64,18 @@ This module has its own index file at [**the test index**](../test/index.md) for
     } = require(fileHelpersPath);
     ```
 
+### Console Formatter Toys [ `playground/` ]
+
+Places to test console formatters. cf [`src/utils/index.md`](../src/utils/index.md)
+
+  - [ [`toy-smoke-formatter.js`](playground/toy-smoke-formatter.js) ]
+  - [ [`toy-validation-formatter.js`](playground/toy-validation-formatter.js) ]
+  - [ [`formatter-playground.js`](playground/formatter-playground.js) ]
+
 ### Uncategorized Scripts
 
 New scripts or new script locations will appear below after running
 **`node scripts/linting/docs/librarian.js`**.
 
 <!-- uncategorized-start -->
-
-- [formatter-playground.js](playground/formatter-playground.js)
 <!-- uncategorized-end -->

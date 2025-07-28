@@ -1,0 +1,253 @@
+// test/runners/smoke/test-harness.js
+// Unified test harness for YAML-based tests (smoke tests and workflow tests)
+
+require('module-alias/register');
+
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+const yaml = require('js-yaml');
+const { cliPath, cliCommandsPath, projectRoot, loggerPath } = require('@paths');
+const logger = require(loggerPath);
+
+
+// Execute a shell command and return promise with result
+function executeCommand(command) {
+  return new Promise((resolve, reject) => {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        reject({ error, stdout, stderr, message: error.message });
+        return;
+      }
+
+      if (stderr && stderr.trim()) {
+        logger.warn({ stderr }, { format: 'smoke-warning' });
+      }
+
+      resolve({ stdout, stderr });
+    });
+  });
+}
+
+
+// Validation functions for different expect types
+const validators = {
+  contains: (text) => (stdout) => stdout.includes(text),
+
+  contains_all: (textArray) => (stdout) =>
+    textArray.every(text => stdout.includes(text)),
+
+  contains_any: (textArray) => (stdout) =>
+    textArray.some(text => stdout.includes(text)),
+
+  yaml_has_key: (key) => (stdout) => {
+    try {
+      const doc = yaml.load(stdout);
+      return typeof doc === 'object' && doc !== null && key in doc;
+    } catch (e) {
+      return false;
+    }
+  },
+
+  executes: () => () => true,
+
+  matches_regex: (pattern) => (stdout) => new RegExp(pattern).test(stdout)
+};
+
+
+// Discovery functions for dynamic scenario generation
+const discoverers = {
+  cli_commands: (config) => {
+    function parseBaseCommand(commandDef) {
+      const cmdString = Array.isArray(commandDef) ? commandDef[0] : commandDef;
+      return cmdString.split(' ')[0];
+    }
+
+    function discoverCommands(dir, prefixParts = []) {
+      let commands = [];
+      const entries = fs.readdirSync(dir);
+
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry);
+        if (fs.statSync(fullPath).isDirectory()) {
+          const groupName = path.basename(fullPath);
+          commands.push([...prefixParts, groupName]);
+          commands.push(...discoverCommands(fullPath, [...prefixParts, groupName]));
+        } else if (entry.endsWith('.command.js')) {
+          const commandModule = require(fullPath);
+          if (!commandModule.command) continue;
+
+          let commandDefinition = commandModule.command;
+          if (commandModule.explicitConvert && commandModule.explicitConvert.command) {
+            commandDefinition = commandModule.explicitConvert.command;
+          }
+
+          const commandName = parseBaseCommand(commandDefinition);
+          if (config.exclude && config.exclude.includes(commandName)) {
+            continue;
+          }
+          commands.push([...prefixParts, commandName]);
+        }
+      }
+      return commands;
+    }
+
+    const commandPartsList = discoverCommands(cliCommandsPath);
+    commandPartsList.push([]);
+
+    return Array.from(new Set(commandPartsList.map(p => p.join(' ')))).sort();
+  },
+
+  directory_scan: (config) => {
+    const scanPath = path.resolve(projectRoot, config.source);
+    return fs.readdirSync(scanPath, { withFileTypes: true })
+      .filter(dirent => {
+        if (config.filter === 'directories') return dirent.isDirectory();
+        if (config.filter === 'files') return dirent.isFile();
+        return true;
+      })
+      .map(dirent => dirent.name)
+      .sort();
+  }
+};
+
+
+// Test workspace manager for isolated test environments
+class TestWorkspace {
+  constructor(basePath = '/tmp/md-to-pdf-workspace') {
+    this.basePath = basePath;
+    this.outdir = path.join(basePath, 'outdir');
+    this.collRoot = path.join(basePath, 'coll-root');
+  }
+
+
+  // Create clean workspace directories
+  setup() {
+    for (const dir of [this.outdir, this.collRoot]) {
+      if (fs.existsSync(dir)) {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    logger.debug(`Test workspace setup: OUTDIR=${this.outdir}, COLL_ROOT=${this.collRoot}`, { format: 'workflow-debug' });
+  }
+
+
+  // Clean up workspace directories
+  teardown() {
+    if (fs.existsSync(this.basePath)) {
+      fs.rmSync(this.basePath, { recursive: true, force: true });
+    }
+  }
+
+
+  // Get environment variables for command execution
+  getEnvVars() {
+    return {
+      OUTDIR: this.outdir,
+      COLL_ROOT: this.collRoot
+    };
+  }
+}
+
+
+// Expand scenarios with discovery for dynamic test generation
+function expandScenarios(testSuite) {
+  if (!testSuite.discovery) {
+    return testSuite.scenarios;
+  }
+
+  const discoverer = discoverers[testSuite.discovery.type];
+  if (!discoverer) {
+    throw new Error(`Unknown discovery type: ${testSuite.discovery.type}`);
+  }
+
+  const items = discoverer(testSuite.discovery);
+  const expandedScenarios = [];
+
+  for (const item of items) {
+    for (const scenarioTemplate of testSuite.scenarios) {
+      const scenario = {
+        description: scenarioTemplate.description.replace('{command}', item).replace('{item}', item),
+        args: scenarioTemplate.args.replace('{command}', item).replace('{item}', item),
+        expect: scenarioTemplate.expect
+      };
+      expandedScenarios.push(scenario);
+    }
+  }
+
+  return expandedScenarios;
+}
+
+
+// Process command arguments with variable substitution and workspace isolation
+function processCommandArgs(args, workspace, isWorkflowTest = false) {
+  // Replace workspace variables
+  let processedArgs = args
+    .replace(/\$\{OUTDIR\}/g, workspace.outdir)
+    .replace(/\$\{COLL_ROOT\}/g, workspace.collRoot);
+
+  if (isWorkflowTest) {
+    // For workflow tests, ensure --outdir and --coll-root are properly set
+    if (processedArgs.includes('plugin create')) {
+      if (/--outdir\s+\S+/.test(processedArgs)) {
+        processedArgs = processedArgs.replace(/--outdir\s+\S+/g, `--outdir "${workspace.outdir}"`);
+      } else {
+        processedArgs += ` --outdir "${workspace.outdir}"`;
+      }
+    }
+
+    // Append --coll-root unless already present
+    if (!/--coll-root\s+\S+/.test(processedArgs)) {
+      processedArgs += ` --coll-root "${workspace.collRoot}"`;
+    }
+  }
+
+  return processedArgs;
+}
+
+
+// Validate test result against expected criteria
+function validateResult(result, expectCriteria, expectNotCriteria = null) {
+  let testPassed = true;
+  let failureReason = null;
+
+  // Check normal expectations
+  if (expectCriteria) {
+    for (const [expectType, expectValue] of Object.entries(expectCriteria)) {
+      if (expectType === 'executes') continue;
+
+      const validator = validators[expectType];
+      if (validator && !validator(expectValue)(result.stdout)) {
+        testPassed = false;
+        failureReason = `Validation failed for expect.${expectType}`;
+        break;
+      }
+    }
+  }
+
+  // Check negative expectations
+  if (expectNotCriteria && testPassed) {
+    for (const [expectType, expectValue] of Object.entries(expectNotCriteria)) {
+      const validator = validators[expectType];
+      if (validator && validator(expectValue)(result.stdout)) {
+        testPassed = false;
+        failureReason = `Validation failed for expect_not.${expectType}`;
+        break;
+      }
+    }
+  }
+
+  return { testPassed, failureReason };
+}
+
+module.exports = {
+  executeCommand,
+  validators,
+  discoverers,
+  TestWorkspace,
+  expandScenarios,
+  processCommandArgs,
+  validateResult
+};

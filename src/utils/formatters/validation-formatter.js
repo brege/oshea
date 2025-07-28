@@ -25,7 +25,7 @@ function formatValidationHeader(level, message, meta = {}) {
 // Format validation step progress (inline updates)
 function formatValidationStep(level, message, meta = {}) {
   const { stepName, status, details = [] } = message;
-  
+
   if (status === 'testing') {
     // Start of step - print step name and wait for result
     process.stdout.write(`  ${colorForLevel('info', `Checking ${stepName}...`)} `);
@@ -81,17 +81,17 @@ function formatValidationTest(level, message, meta = {}) {
 
 // Format validation summary and final result
 function formatValidationSummary(level, message, meta = {}) {
-  const { 
-    pluginName, 
-    isValid, 
-    errorCount = 0, 
-    warningCount = 0, 
-    errors = [], 
-    warnings = [] 
+  const {
+    pluginName,
+    isValid,
+    errorCount = 0,
+    warningCount = 0,
+    errors = [],
+    warnings = []
   } = message;
-  
+
   console.log(colorForLevel(level, '--- Validation Summary ---'));
-  
+
   if (isValid) {
     if (warningCount === 0) {
       console.log(colorForLevel('success', `✓ Plugin '${pluginName}' is VALID.`));
@@ -105,11 +105,11 @@ function formatValidationSummary(level, message, meta = {}) {
   } else {
     console.log(colorForLevel('error', `✗ Plugin '${pluginName}' is INVALID.`));
     console.log(colorForLevel('error', `Found ${errorCount} error(s) and ${warningCount} warning(s):`));
-    
+
     errors.forEach(error => {
       console.log(colorForLevel('error', `  ✗ ${error}`));
     });
-    
+
     if (warningCount > 0) {
       warnings.forEach(warning => {
         console.log(colorForLevel('warn', `  ○ ${warning}`));

@@ -13,7 +13,7 @@ function formatSuiteHeader(level, message, meta = {}) {
 // Format individual scenario testing (inline progress)
 function formatScenarioProgress(level, message, meta = {}) {
   const { command, status } = message;
-  
+
   if (status === 'testing') {
     // Start of test - print command and wait for result
     process.stdout.write(`  ${colorForLevel('detail', `Testing: ${command}`)} ... `);
@@ -21,7 +21,7 @@ function formatScenarioProgress(level, message, meta = {}) {
     // Test passed - complete the line
     console.log(colorForLevel('success', '✓ OK'));
   } else if (status === 'failed') {
-    // Test failed - complete the line  
+    // Test failed - complete the line
     console.log(colorForLevel('error', '✗ FAIL'));
   }
 }
@@ -36,19 +36,19 @@ function formatScenarioWarning(level, message, meta = {}) {
 // Format final smoke test results summary
 function formatSmokeResults(level, message, meta = {}) {
   const { allResults = [], totalFailed = 0 } = message;
-  
+
   console.log(''); // spacing before results
-  
+
   if (totalFailed > 0) {
     // Failed results
     console.log(colorForLevel('error', '--- Smoke Tests Failed ---'));
     console.log(colorForLevel('error', `${totalFailed} scenario(s) failed across ${allResults.length} test suites:`));
-    
+
     allResults.forEach(result => {
       if (result.failedCount > 0) {
         console.log(''); // spacing between suites
         console.log(colorForLevel('error', `${result.suiteName}: ${result.failedCount} failures`));
-        
+
         result.failedScenarios.forEach(({ scenario, command, reason, stderr }) => {
           console.log(`  ${theme.context('-')} ${scenario}`);
           console.log(`    ${theme.detail('Command:')} ${theme.path(command)}`);
@@ -65,7 +65,7 @@ function formatSmokeResults(level, message, meta = {}) {
     const totalScenarios = allResults.reduce((sum, r) => sum + r.results.length, 0);
     console.log(colorForLevel('success', `✓ All Smoke Tests Passed: ${totalScenarios} scenarios across ${allResults.length} test suites executed successfully.`));
   }
-  
+
   console.log(''); // spacing after results
 }
 

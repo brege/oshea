@@ -21,7 +21,7 @@ const { formatPathFinderOutput } = require(pathsFormatterPath);
 const { formatTable } = require(tableFormatterPath);
 const { formatPluginList } = require(pluginListFormatterPath);
 const { formatCollectionList } = require(collectionListFormatterPath);
-const { 
+const {
   formatSuiteHeader,
   formatScenarioProgress,
   formatScenarioWarning,

@@ -218,9 +218,9 @@ async function runAllSmokeTests(yamlFile = null) {
   const totalFailed = allResults.reduce((sum, result) => sum + result.failedCount, 0);
 
   // Display final results using structured data
-  logger.info({ 
-    allResults, 
-    totalFailed 
+  logger.info({
+    allResults,
+    totalFailed
   }, { format: 'smoke-results' });
 
   return totalFailed === 0;

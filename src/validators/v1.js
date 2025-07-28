@@ -10,7 +10,7 @@ const logger = require(loggerPath);
 
 function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
   const readmePath = path.join(pluginDirectoryPath, 'README.md');
-  
+
   if (!fs.existsSync(readmePath)) {
     return {
       status: 'skipped',
@@ -21,7 +21,7 @@ function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
   const readmeContent = fs.readFileSync(readmePath, 'utf8');
   const frontMatterDelimiter = '---';
   const parts = readmeContent.split(frontMatterDelimiter);
-  
+
   if (parts.length < 3 || parts[0].trim() !== '') {
     warnings.push(`README.md for '${pluginName}' does not have a valid YAML front matter block.`);
     return {
@@ -39,7 +39,7 @@ function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
         details: [{ type: 'warn', message: 'README.md has invalid front matter' }]
       };
     }
-    
+
     return {
       status: 'passed',
       details: [{ type: 'success', message: 'README.md has a valid front matter block' }]
@@ -82,7 +82,7 @@ const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
   const details = [];
 
   let optionalCount = 0;
-  
+
   if (fs.existsSync(testDir)) {
     details.push({ type: 'success', message: "Found optional '.contract/test/' directory" });
     optionalCount++;
@@ -100,7 +100,7 @@ const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
   }
 
   const status = optionalCount === 2 ? 'passed' : 'warning';
-  
+
   return {
     status,
     details
@@ -110,7 +110,7 @@ const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
 
 const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
   const e2eTestPath = path.join(pluginDirectoryPath, '.contract', 'test', `${pluginName}-e2e.test.js`);
-  
+
   if (!fs.existsSync(e2eTestPath)) {
     warnings.push(`Missing E2E test file, skipping test run: '${path.join('.contract/test', `${pluginName}-e2e.test.js`)}'.`);
     return {
@@ -136,9 +136,9 @@ const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
     if (result && result.length > 0) {
       const testOutput = result.toString().trim();
       // Store test output for validation-test formatter
-      details.push({ 
-        type: 'testOutput', 
-        message: testOutput 
+      details.push({
+        type: 'testOutput',
+        message: testOutput
       });
     }
 
@@ -148,9 +148,9 @@ const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
     };
   } catch (e) {
     errors.push('In-situ E2E test failed');
-    
+
     const details = [{ type: 'error', message: 'In-situ test failed' }];
-    
+
     if (e.stdout && e.stdout.length > 0) {
       details.push({ type: 'error', message: `Test stdout: ${e.stdout.toString()}` });
     }
@@ -172,7 +172,7 @@ const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
 const runSelfActivationV1 = (pluginDirectoryPath, pluginName, errors) => {
   const exampleMdPath = path.join(pluginDirectoryPath, `${pluginName}-example.md`);
   const configYamlPath = path.join(pluginDirectoryPath, `${pluginName}.config.yaml`);
-  
+
   if (!fs.existsSync(exampleMdPath) || !fs.existsSync(configYamlPath)) {
     errors.push('Self-activation failed: The plugin is missing its example.md or config.yaml file.');
     return {
@@ -182,7 +182,7 @@ const runSelfActivationV1 = (pluginDirectoryPath, pluginName, errors) => {
   }
 
   const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), `md-to-pdf-test-${pluginName}-`));
-  
+
   try {
     const command = `node "${cliPath}" convert "${exampleMdPath}" --outdir "${tempOutputDir}" --no-open`;
     execSync(command, {
@@ -200,9 +200,9 @@ const runSelfActivationV1 = (pluginDirectoryPath, pluginName, errors) => {
     };
   } catch (e) {
     errors.push('Self-activation failed: The plugin was unable to convert its own example file.');
-    
+
     const details = [{ type: 'error', message: 'Self-activation check failed' }];
-    
+
     if (e.stderr) {
       details.push({ type: 'error', message: `Self-activation error: ${e.stderr.toString()}` });
     }
@@ -261,12 +261,12 @@ function validateV1(pluginDirectoryPath, pluginMetadata) {
 function displayValidationStep(stepName, result) {
   // Start step
   logger.info({ stepName, status: 'testing' }, { format: 'validation-step' });
-  
+
   // Complete step with results
-  logger.info({ 
-    stepName, 
+  logger.info({
+    stepName,
     status: result.status,
-    details: result.details 
+    details: result.details
   }, { format: 'validation-step' });
 }
 

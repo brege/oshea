@@ -8,6 +8,47 @@ const { execSync } = require('child_process');
 
 const logger = require(loggerPath);
 
+// Handle enabling created plugins by removing them from the disabled list
+async function enableCreatedPlugin(pluginName, manager) {
+  const myPluginsDisabledPath = path.join(path.dirname(manager.collRoot), 'my-plugins', '.disabled.yaml');
+
+  // Check if disabled manifest exists
+  if (!fs.existsSync(myPluginsDisabledPath)) {
+    return false; // Not a disabled created plugin
+  }
+
+  let disabledList = [];
+
+  // Read existing disabled list
+  try {
+    const content = fs.readFileSync(myPluginsDisabledPath, 'utf8');
+    const parsed = yaml.load(content);
+    disabledList = parsed?.disabled_plugins || [];
+  } catch (e) {
+    logger.warn(`Could not read disabled plugins manifest: ${e.message}`);
+    return false;
+  }
+
+  // Check if plugin is in disabled list
+  if (!disabledList.includes(pluginName)) {
+    return false; // Not a disabled created plugin
+  }
+
+  // Remove plugin from disabled list
+  disabledList = disabledList.filter(name => name !== pluginName);
+
+  // Write updated disabled list
+  const disabledManifest = {
+    disabled_plugins: disabledList,
+    last_updated: new Date().toISOString()
+  };
+
+  fs.writeFileSync(myPluginsDisabledPath, yaml.dump(disabledManifest));
+  logger.debug(`Removed '${pluginName}' from created plugins disabled list`);
+
+  return true; // Successfully enabled created plugin
+}
+
 module.exports = {
   command: 'enable <target>',
   describe: 'enable a plugin or all plugins from a collection',
@@ -102,6 +143,18 @@ you must re-run this command to enable any new plugins.`);
         if (args.prefix || args.noPrefix){
           logger.warn('WARN: --prefix and --no-prefix options are ignored when not using --all.');
         }
+
+        // Check if this is a created plugin (no slash in name)
+        if (!args.target.includes('/')) {
+          const enabledCreatedPlugin = await enableCreatedPlugin(args.target, manager);
+          if (enabledCreatedPlugin) {
+            logger.success('Plugin enabled successfully');
+            logger.info(`\nTo use this plugin with md-to-pdf, invoke it as: md-to-pdf convert ... --plugin ${args.target}`);
+            return; // Early return, skip CM-based enabling
+          }
+        }
+
+        // Handle CM-managed plugin enable
         const result = await manager.enablePlugin(args.target, {
           name: args.name,
           bypassValidation: args.bypassValidation

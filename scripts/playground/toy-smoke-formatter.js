@@ -21,17 +21,17 @@ async function demonstrateSmokeFormatters() {
   // Simulate scenarios with 1 second delays
   for (let i = 1; i <= 3; i++) {
     const command = `md-to-pdf test-${i}`;
-    
+
     // Start test
     logger.info({ command, status: 'testing' }, { format: 'smoke-scenario' });
-    
+
     // Wait 1 second
     await sleep(1000);
-    
+
     // Random pass/fail for testing
     const passed = Math.random() > 0.3;
     const status = passed ? 'passed' : 'failed';
-    
+
     logger.info({ command, status }, { format: 'smoke-scenario' });
   }
 
@@ -40,13 +40,13 @@ async function demonstrateSmokeFormatters() {
 
   for (let i = 4; i <= 5; i++) {
     const command = `md-to-pdf plugin test-${i}`;
-    
+
     logger.info({ command, status: 'testing' }, { format: 'smoke-scenario' });
     await sleep(1000);
-    
+
     const passed = Math.random() > 0.5;
     const status = passed ? 'passed' : 'failed';
-    
+
     logger.info({ command, status }, { format: 'smoke-scenario' });
   }
 
@@ -55,9 +55,9 @@ async function demonstrateSmokeFormatters() {
 
   // Simulate final results
   const mockResults = [
-    { 
-      suiteName: 'Basic Commands', 
-      failedCount: 1, 
+    {
+      suiteName: 'Basic Commands',
+      failedCount: 1,
       results: [
         { scenario: 'test-1', passed: true },
         { scenario: 'test-2', passed: false },
@@ -72,9 +72,9 @@ async function demonstrateSmokeFormatters() {
         }
       ]
     },
-    { 
-      suiteName: 'Plugin Commands', 
-      failedCount: 0, 
+    {
+      suiteName: 'Plugin Commands',
+      failedCount: 0,
       results: [
         { scenario: 'test-4', passed: true },
         { scenario: 'test-5', passed: true }
@@ -85,9 +85,9 @@ async function demonstrateSmokeFormatters() {
 
   const totalFailed = mockResults.reduce((sum, r) => sum + r.failedCount, 0);
 
-  logger.info({ 
-    allResults: mockResults, 
-    totalFailed 
+  logger.info({
+    allResults: mockResults,
+    totalFailed
   }, { format: 'smoke-results' });
 
   return totalFailed === 0;

@@ -19,32 +19,46 @@ function filterPlugins(allPlugins, args) {
   if (listType === 'enabled') {
     return allPlugins.filter(p => {
       const isEnabledCM = p.status === 'Enabled (CM)';
+      const isEnabledCreated = p.status === 'Enabled (Created)';
       const isRegisteredTraditional = p.status && p.status.startsWith('Registered');
       if (collectionFilter && isEnabledCM) return p.cmCollection === collectionFilter;
-      if (collectionFilter && isRegisteredTraditional) return false;
-      return isEnabledCM || isRegisteredTraditional;
+      if (collectionFilter && (isRegisteredTraditional || isEnabledCreated)) return false;
+      return isEnabledCM || isRegisteredTraditional || isEnabledCreated;
     });
   }
 
   if (listType === 'available') {
-    return allPlugins.filter(p =>
-      (p.status === 'Enabled (CM)' || p.status === 'Available (CM)') &&
-      p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
-    );
+    return allPlugins.filter(p => {
+      // Include CM-managed available/enabled plugins
+      const isCMPlugin = (p.status === 'Enabled (CM)' || p.status === 'Available (CM)') &&
+        p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter);
+
+      // Include created available plugins (ignoring collection filter for created plugins)
+      const isCreatedAvailable = p.status === 'Available (Created)';
+
+      return isCMPlugin || isCreatedAvailable;
+    });
   }
 
   if (listType === 'disabled') {
-    return allPlugins.filter(p =>
-      p.status === 'Available (CM)' &&
-      p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter)
-    );
+    return allPlugins.filter(p => {
+      // Include CM-managed disabled plugins
+      const isCMDisabled = p.status === 'Available (CM)' &&
+        p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter);
+
+      // Include created disabled plugins
+      const isCreatedDisabled = p.status === 'Available (Created)';
+
+      return isCMDisabled || isCreatedDisabled;
+    });
   }
 
   // Default/all type
   let results = allPlugins.filter(p =>
     (p.status && p.status.startsWith('Registered')) ||
     p.status === 'Enabled (CM)' ||
-    (args.short && p.status === 'Available (CM)')
+    p.status === 'Enabled (Created)' ||
+    (args.short && (p.status === 'Available (CM)' || p.status === 'Available (Created)'))
   );
 
   if (collectionFilter && args.short) {

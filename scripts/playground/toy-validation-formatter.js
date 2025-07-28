@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // scripts/playground/toy-validation-formatter.js
-// Toy validation formatter demonstration  
+// Toy validation formatter demonstration
 // Companion to formatter-playground.js for testing validation formatters
 // lint-skip-file no-console
 
@@ -62,10 +62,10 @@ async function demonstrateValidationFormatters() {
   for (const step of steps) {
     // Start step
     logger.info({ stepName: step.stepName, status: 'testing' }, { format: 'validation-step' });
-    
+
     // Wait to simulate processing
     await sleep(500);
-    
+
     // Complete step based on result
     let status;
     if (step.shouldPass === true) {
@@ -77,16 +77,16 @@ async function demonstrateValidationFormatters() {
     } else if (step.shouldPass === 'skip') {
       status = 'skipped';
     }
-    
-    logger.info({ 
-      stepName: step.stepName, 
+
+    logger.info({
+      stepName: step.stepName,
       status,
-      details: step.details 
+      details: step.details
     }, { format: 'validation-step' });
   }
 
   // Simulate test output
-  logger.info({ 
+  logger.info({
     testOutput: `    ✓ in-situ: should convert the example using self-activation
   1 passing (2s)`
   }, { format: 'validation-test' });

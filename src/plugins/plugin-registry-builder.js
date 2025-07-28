@@ -141,6 +141,87 @@ class PluginRegistryBuilder {
     return registrations;
   }
 
+  async _registerMyPlugins() {
+    const { fs, path, yaml } = this.dependencies;
+    const registrations = {};
+    
+    // Determine my-plugins directory location based on collections manager root
+    const myPluginsPath = this.collectionsManager ? 
+      path.join(path.dirname(this.collectionsManager.collRoot), 'my-plugins') :
+      path.join(path.dirname(this.xdgBaseDir), 'md-to-pdf', 'my-plugins');
+    
+    logger.debug('Attempting to register my-plugins directory', {
+      context: 'PluginRegistryBuilder',
+      myPluginsPath: myPluginsPath
+    });
+
+    if (!fs.existsSync(myPluginsPath)) {
+      logger.debug('My-plugins directory not found', {
+        context: 'PluginRegistryBuilder',
+        path: myPluginsPath,
+        suggestion: 'No development plugins will be registered.'
+      });
+      return registrations;
+    }
+
+    // Read disabled plugins list
+    const disabledPath = path.join(myPluginsPath, '.disabled.yaml');
+    let disabledPlugins = [];
+    if (fs.existsSync(disabledPath)) {
+      try {
+        const content = fs.readFileSync(disabledPath, 'utf8');
+        const parsed = yaml.load(content);
+        disabledPlugins = parsed?.disabled_plugins || [];
+      } catch (e) {
+        logger.warn('Could not read disabled plugins manifest', {
+          context: 'PluginRegistryBuilder',
+          path: disabledPath,
+          error: e.message
+        });
+      }
+    }
+
+    const pluginDirs = await fs.promises.readdir(myPluginsPath);
+    for (const pluginName of pluginDirs) {
+      // Skip hidden files like .disabled.yaml
+      if (pluginName.startsWith('.')) continue;
+      
+      const pluginDir = path.join(myPluginsPath, pluginName);
+      if (fs.statSync(pluginDir).isDirectory()) {
+        const configPath = path.join(pluginDir, `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
+        if (fs.existsSync(configPath)) {
+          const isDisabled = disabledPlugins.includes(pluginName);
+          
+          registrations[pluginName] = {
+            configPath: configPath,
+            definedIn: myPluginsPath,
+            sourceType: 'Created (my-plugins)',
+            isDisabled: isDisabled
+          };
+          logger.debug('Found my-plugins plugin', {
+            context: 'PluginRegistryBuilder',
+            pluginName: pluginName,
+            configPath: configPath,
+            disabled: isDisabled
+          });
+        } else {
+          logger.warn('My-plugins directory found but no config file', {
+            context: 'PluginRegistryBuilder',
+            pluginDir: pluginDir,
+            expectedConfig: `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+            suggestion: 'Skipping registration for this directory.'
+          });
+        }
+      }
+    }
+
+    logger.debug('My-plugins registration complete', {
+      context: 'PluginRegistryBuilder',
+      registeredCount: Object.keys(registrations).length
+    });
+    return registrations;
+  }
+
   _resolveAlias(alias, aliasValue, basePathDefiningAlias) {
     const { path, os } = this.dependencies;
     logger.debug('Attempting to resolve alias', {
@@ -494,6 +575,14 @@ class PluginRegistryBuilder {
       count: Object.keys(registry).length
     });
 
+    // Register my-plugins directory plugins (always available for easy development)
+    const myPluginsRegistrations = await this._registerMyPlugins();
+    Object.assign(registry, myPluginsRegistrations);
+    logger.debug('Registry size after my-plugins', {
+      context: 'PluginRegistryBuilder',
+      count: Object.keys(registry).length
+    });
+
     if (!this.useFactoryDefaultsOnly) {
       const cmEnabledRegistrations = await this._getPluginRegistrationsFromCmManifest(this.cmEnabledManifestPath, 'CollectionsManager');
       Object.assign(registry, cmEnabledRegistrations);
@@ -607,10 +696,23 @@ class PluginRegistryBuilder {
           display: regSourceDisplay
         });
 
+        // Determine status based on plugin type
+        let status;
+        if (regInfo.cmStatus) {
+          // CM-managed plugins use their CM status
+          status = regInfo.cmStatus;
+        } else if (regInfo.sourceType.includes('Created (my-plugins)')) {
+          // Created plugins are enableable/disableable
+          status = regInfo.isDisabled ? 'Available (Created)' : 'Enabled (Created)';
+        } else {
+          // Bundled and other registered plugins
+          status = `Registered (${regInfo.sourceType.split('(')[0].trim()})`;
+        }
+
         pluginDetailsMap.set(pluginName, {
           name: pluginName, description, configPath: regInfo.configPath,
           registrationSourceDisplay: regSourceDisplay,
-          status: regInfo.cmStatus || `Registered (${regInfo.sourceType.split('(')[0].trim()})`,
+          status: status,
           cmCollection: regInfo.cmOriginalCollection, cmPluginId: regInfo.cmOriginalPluginId,
           cmInvokeName: regInfo.cmStatus === 'Enabled (CM)' ? pluginName : undefined,
           cmAddedOn: regInfo.cmAddedOn

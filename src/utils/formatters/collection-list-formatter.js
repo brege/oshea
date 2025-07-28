@@ -161,9 +161,9 @@ function formatCollectionList(level, message, meta = {}) {
 
       const tableFormatter = require(tableFormatterPath);
       const tableTitle = generateContextMessage(listData);
-      tableFormatter.formatTable(level, '', { 
-        rows, 
-        columns, 
+      tableFormatter.formatTable(level, '', {
+        rows,
+        columns,
         showBorders: true,
         title: tableTitle
       });
@@ -173,7 +173,7 @@ function formatCollectionList(level, message, meta = {}) {
       console.log(''); // spacing
       console.log(theme.info(contextMsg));
       console.log(''); // spacing after header
-      
+
       listData.items.forEach(collection => {
         console.log(''); // spacing between entries
         console.log(formatCollectionEntry(collection));
@@ -185,7 +185,7 @@ function formatCollectionList(level, message, meta = {}) {
     console.log(''); // spacing
     console.log(theme.info(contextMsg));
     console.log(''); // spacing after header
-    
+
     listData.items.forEach(plugin => {
       console.log(formatAvailablePluginEntry(plugin));
     });
@@ -195,7 +195,7 @@ function formatCollectionList(level, message, meta = {}) {
     console.log(''); // spacing
     console.log(theme.info(contextMsg));
     console.log(''); // spacing after header
-    
+
     listData.items.forEach(plugin => {
       console.log(formatEnabledPluginEntry(plugin));
     });

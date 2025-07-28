@@ -26,12 +26,12 @@ function formatTable(level, message, meta = {}) {
       ...rows.map(row => {
         const key = col.key || col;
         const value = row[key] || '';
-        
+
         // For status column, account for Unicode indicator that will be prepended
         if (key === 'status' && row.statusType && row.statusType !== 'unknown') {
           return stripAnsi(`● ${String(value)}`).length; // ● and ○ are same width
         }
-        
+
         return stripAnsi(String(value)).length;
       })
     );
@@ -47,7 +47,7 @@ function formatTable(level, message, meta = {}) {
   }
 
   // Calculate total table width for full-width borders
-  const totalTableWidth = columnWidths.reduce((sum, width) => sum + width, 0) + 
+  const totalTableWidth = columnWidths.reduce((sum, width) => sum + width, 0) +
                            (columns.length - 1) * 1;
 
   // Display top border
@@ -82,7 +82,7 @@ function formatTable(level, message, meta = {}) {
         const statusType = row.statusType || 'unknown';
         let statusIndicator = '';
         let coloredStatus = displayValue;
-        
+
         if (statusType === 'enabled') {
           statusIndicator = '●';
           coloredStatus = theme.enabled(`${statusIndicator} ${displayValue}`);
@@ -93,7 +93,7 @@ function formatTable(level, message, meta = {}) {
           statusIndicator = '○';
           coloredStatus = theme.disabled(`${statusIndicator} ${displayValue}`);
         }
-        
+
         // Calculate padding based on text length without colors, then apply colors
         const rawLength = stripAnsi(`${statusIndicator} ${displayValue}`).length;
         const paddingNeeded = Math.max(0, columnWidths[index] - rawLength);

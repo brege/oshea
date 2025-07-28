@@ -82,7 +82,7 @@ function generateContextMessage(listData) {
     return `Summary for ${context}`;
   } else {
     const usableCount = plugins.filter(p =>
-      (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)'
+      (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)' || p.status === 'Enabled (Created)'
     ).length;
     return `Found ${usableCount} plugin(s) usable by md-to-pdf`;
   }
@@ -132,9 +132,11 @@ function formatPluginList(level, message, meta = {}) {
     const rows = listData.plugins.map(plugin => {
       return {
         status: plugin.status || 'N/A',
-        statusType: plugin.status === 'Enabled (CM)' ? 'enabled' 
+        statusType: plugin.status === 'Enabled (CM)' ? 'enabled'
+                  : plugin.status === 'Enabled (Created)' ? 'enabled'
                   : plugin.status && plugin.status.startsWith('Registered') ? 'registered'
                   : plugin.status === 'Available (CM)' ? 'available'
+                  : plugin.status === 'Available (Created)' ? 'available'
                   : 'unknown',
         name: plugin.name,
         origin: (plugin.cmCollection && plugin.cmPluginId)
@@ -151,9 +153,9 @@ function formatPluginList(level, message, meta = {}) {
 
     const tableFormatter = require(tableFormatterPath);
     const tableTitle = generateContextMessage(listData);
-    tableFormatter.formatTable(level, '', { 
-      rows, 
-      columns, 
+    tableFormatter.formatTable(level, '', {
+      rows,
+      columns,
       showBorders: true,
       title: tableTitle
     });
@@ -164,7 +166,7 @@ function formatPluginList(level, message, meta = {}) {
     console.log(''); // spacing
     console.log(theme.info(contextMsg));
     console.log(''); // spacing after header
-    
+
     listData.plugins.forEach(plugin => {
       console.log(formatPluginEntry(plugin));
     });

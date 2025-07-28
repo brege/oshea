@@ -30,6 +30,7 @@ class ConfigResolver {
       PluginRegistryBuilder, MainConfigLoader, PluginConfigLoader, AssetResolver
     };
     this.dependencies = { ...defaultDependencies, ...dependencies };
+    this.collectionsManager = dependencies.collectionsManager || null;
 
     this.projectRoot = require('@paths').projectRoot;
     this._useFactoryDefaultsOnly = useFactoryDefaultsOnly;
@@ -189,7 +190,7 @@ class ConfigResolver {
       this.useFactoryDefaultsOnly,
       this.isLazyLoadMode,
       this.primaryMainConfigLoadReason,
-      null,
+      this.collectionsManager,
       { collRoot: this.resolvedCollRoot }
     );
     this.mergedPluginRegistry = await registryBuilder.buildRegistry();

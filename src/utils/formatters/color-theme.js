@@ -46,22 +46,22 @@ const theme = {
   warn:    chalk.hex(gruvbox.bright_yellow),
   error:   chalk.hex(gruvbox.bright_red),
   debug:   chalk.hex(gruvbox.gray),
-  
+
   // Special log types
   validation: chalk.hex(gruvbox.bright_aqua),
   detail:     chalk.hex(gruvbox.purple),
-  
+
   // UI elements
   highlight:  chalk.hex(gruvbox.bright_orange),  // For emphasis
   path:       chalk.hex(gruvbox.aqua),           // File paths
   value:      chalk.hex(gruvbox.bright_yellow),  // Variable values
   context:    chalk.hex(gruvbox.light_gray),     // Context info
   accent:     chalk.hex(gruvbox.bright_purple),  // Special highlights
-  
+
   // Table formatting
   header:     chalk.hex(gruvbox.fg4).bold,
   border:     chalk.hex(gruvbox.bg4),
-  
+
   // Status indicators
   enabled:    chalk.hex(gruvbox.bright_green).bold,   // For CM-managed plugins
   registered: chalk.hex(gruvbox.bright_aqua),

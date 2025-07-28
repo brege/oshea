@@ -119,7 +119,7 @@ async function commonCommandHandler(args, executorFunction, commandType) {
     if (args.watch) {
       await setupWatch(args, null,
         async (watchedArgs) => {
-          const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults, watchedArgs.isLazyLoad || false, { collRoot: watchedArgs.manager.collRoot });
+          const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults, watchedArgs.isLazyLoad || false, { collRoot: watchedArgs.manager.collRoot, collectionsManager: watchedArgs.manager });
           await executorFunction(watchedArgs, currentConfigResolver);
         }
       );
@@ -318,7 +318,7 @@ async function main() {
       argv.config,
       argv.factoryDefaults,
       false,
-      { collRoot: managerInstance.collRoot }
+      { collRoot: managerInstance.collRoot, collectionsManager: managerInstance }
     );
     argv.configResolver = configResolver;
   });

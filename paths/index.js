@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-27T19:59:28.734Z
+// Generated: 2025-07-28T04:18:12.802Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -77,6 +77,7 @@ const helpCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/help.com
 const collectionsListCommandPath = path.join(projectRoot, 'src/cli/commands/collection/list.command.js');
 const pluginListCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/list.command.js');
 const collectionsRemoveCommandPath = path.join(projectRoot, 'src/cli/commands/collection/remove.command.js');
+const removeCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/remove.command.js');
 const collectionsUpdateCommandPath = path.join(projectRoot, 'src/cli/commands/collection/update.command.js');
 const validateCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/validate.command.js');
 
@@ -208,6 +209,7 @@ module.exports = {
   collectionsListCommandPath,
   pluginListCommandPath,
   collectionsRemoveCommandPath,
+  removeCommandPath,
   collectionsUpdateCommandPath,
   validateCommandPath,
 

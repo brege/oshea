@@ -13,7 +13,7 @@
 [comment:high:js,ts] FIX$match-case
 [comment:high:js,ts] BEGIN$match-case
 [comment:high:js,ts] END$match-case
-[comment:high:js,ts] Added$match-case
+[comment:high:js,ts] ADD$match-case
 [comment:high:js,ts] Removed $match-case
 [comment:high:js,ts] NEW$match-case
 [comment:high:js,ts] <--

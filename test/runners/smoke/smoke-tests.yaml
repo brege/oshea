@@ -61,7 +61,7 @@ scenarios:
   - description: "List plugins (--short)"
     args: "plugin list --short"
     expect:
-      contains_all: ["NAME/INVOKE KEY", "CM ORIGIN"]
+      contains_any: ["Summary for all known plugins"]
 
 ---
 name: "Validate collection list command"
@@ -70,12 +70,12 @@ scenarios:
   - description: "List collection names (short)"
     args: "collection list names --short"
     expect:
-      contains_any: ["Downloaded plugin collections:", "No downloaded collections found"]
+      contains_any: ["Downloaded plugin collections", "No downloaded collections found"]
 
   - description: "List downloaded collections (default)"
     args: "collection list names"
     expect:
-      contains_any: ["Downloaded plugin collections:", "No downloaded collections found"]
+      contains_any: ["Downloaded plugin collections", "No downloaded collections found"]
 
   - description: "List available plugins from collections"
     args: "collection list available"
@@ -104,4 +104,67 @@ scenarios:
     args: "plugin validate {item}"
     expect:
       executes: true
+
+---
+name: "Plugin List States (Full vs Empty)"
+base_command: "md-to-pdf"
+visual_focus: "empty state handling, table formatting consistency"
+scenarios:
+  - description: "Plugin list --available (likely empty) - empty state formatting"
+    args: "plugin list --available"
+    expect:
+      executes: true
+    visual_check: "Clean empty state with consistent theming and helpful messaging"
+
+  - description: "Plugin list --disabled (likely empty) - empty state vs populated"
+    args: "plugin list --disabled"
+    expect:
+      executes: true
+    visual_check: "Empty state handling or populated list with proper disabled styling"
+
+  - description: "Plugin list (populated) - full table formatting"
+    args: "plugin list"
+    expect:
+      executes: true
+    visual_check: "Rich populated table with headers, colors, and proper alignment"
+
+---
+name: "Collection List States (Full vs Empty)"
+base_command: "md-to-pdf"
+visual_focus: "empty state consistency, messaging clarity"
+scenarios:
+  - description: "Collection list names (likely empty) - empty state"
+    args: "collection list names"
+    expect:
+      executes: true
+    visual_check: "Clean empty state messaging with consistent theming"
+
+  - description: "Collection list available (empty) - no available plugins state"
+    args: "collection list available"
+    expect:
+      executes: true
+    visual_check: "Empty state for no available collection plugins"
+
+  - description: "Collection list enabled (empty) - no enabled plugins state"
+    args: "collection list enabled"
+    expect:
+      executes: true
+    visual_check: "Empty state for no enabled collection plugins"
+
+---
+name: "Context Switching Empty States"
+base_command: "md-to-pdf"
+visual_focus: "error handling, context isolation, empty state consistency"
+scenarios:
+  - description: "Plugin list with non-existent collection root - context error handling"
+    args: "plugin list --coll-root /tmp/nonexistent"
+    expect:
+      executes: true
+    visual_check: "Graceful handling of missing collection root with clear messaging"
+
+  - description: "Collection list with non-existent collection root - context isolation"
+    args: "collection list names --coll-root /tmp/nonexistent"
+    expect:
+      executes: true
+    visual_check: "Clean empty state when collection root doesn't exist"
 

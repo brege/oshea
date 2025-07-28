@@ -1,6 +1,6 @@
 ## Logger System Reference Documentation
 
-### Architecture Overview
+### Architecture
 
 The md-to-pdf logging system is a **pure routing layer** that delegates all formatting to specialized formatters. This design separates concerns between message routing, formatting, and output rendering.
 
@@ -8,33 +8,37 @@ The md-to-pdf logging system is a **pure routing layer** that delegates all form
 logger(message, options) → formatter → console/file output
 ```
 
-**Core Components**
-- `logger.js`           - Pure routing and level management
-- `formatters/`         - Specialized output formatting (app, table, inline, etc.)
-- `logger-enhancer.js`  - Optional debugging enhancements (caller info, stack traces)
-
 ### Script Directory
+
+*Core*
 
 - [**`logger.js`**](logger.js)
   -- Pure routing layer for message delegation to formatters.
+- [`formatters/`](formatters/)
+  -- Specialized output formatting (app, table, inline, etc.)
 - [`logger-enhancer.js`](logger-enhancer.js)
   -- Optional debugging enhancements (caller info, stack traces, error categorization).
 
 *Formatters*
-- [`index.js`](formatters/index.js)
-  -- The orchestrator for all formatters.
-- [`app-formatter.js`](formatters/app-formatter.js)
-  -- The main, default output format.
-- [`inline-formatter.js`](formatters/inline-formatter.js)
-  -- No-newline output for prompts and partial messages.
-- [`lint-formatter.js`](formatters/lint-formatter.js)
-  -- Specialized formatting for linting results and validation output.
-- [`paths-formatter.js`](formatters/paths-formatter.js)
-  -- Path-specific formatting for file system operations.
-- [`raw-formatter.js`](formatters/raw-formatter.js)
-  -- Unformatted plain text output.
-- [`table-formatter.js`](formatters/table-formatter.js)
-  -- Aligned column output for structured CLI data.
+
+| Formatter         | Description                        |
+|------------------:|:-----------------------------------|
+| [`index.js`](formatters/index.js) | orchestrator for all formatters |
+| [`color-theme.js`](formatters/color-theme.js) | color palette for CLI output |
+| **App-side**      |                                    |
+| [`app-formatter.js`](formatters/app-formatter.js) | **default output format** |
+| [`inline-formatter.js`](formatters/inline-formatter.js) | --consider pruning-- |
+| [`paths-formatter.js`](formatters/paths-formatter.js) | --consider pruning-- |
+| [`raw-formatter.js`](formatters/raw-formatter.js) | raw unformatted output |
+| [`validation-formatter.js`](formatters/validation-formatter.js) | `plugin validate` |
+| [`plugin-list-formatter.js`](formatters/plugin-list-formatter.js) | `plugin list` |
+| [`table-formatter.js`](formatters/table-formatter.js) | `plugin list --short` |
+| [`collection-list-formatter.js`](formatters/collection-list-formatter.js) | `collection list` |
+| **Test-side**      |                                    |
+| [`lint-formatter.js`](formatters/lint-formatter.js) | `node scripts/linting/lint.js` |
+| [`smoke-test-formatter.js`](formatters/smoke-test-formatter.js) | cf. [`test/runners/smoke/index.md`](../../test/runners/smoke/index.md) |
+
+**see [scripts/playground/](../../scripts/playground/) for examples**
 
 *Others*
 - [`asset-resolver.js`](asset-resolver.js)
@@ -255,6 +259,5 @@ New scripts or new script locations will appear below after running
 
 <!-- uncategorized-start -->
 
-- [color-theme.js](formatters/color-theme.js)
 <!-- uncategorized-end -->
 

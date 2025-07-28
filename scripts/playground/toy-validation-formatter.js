@@ -22,17 +22,17 @@ async function demonstrateValidationFormatters() {
       stepName: 'plugin file structure',
       shouldPass: true,
       details: [
-        { type: 'success', message: "Found required file: 'index.js'" },
-        { type: 'success', message: "Found required file: 'test-plugin.config.yaml'" },
-        { type: 'success', message: "Found required file: 'README.md'" }
+        { type: 'success', message: 'Found required file: \'index.js\'' },
+        { type: 'success', message: 'Found required file: \'test-plugin.config.yaml\'' },
+        { type: 'success', message: 'Found required file: \'README.md\'' }
       ]
     },
     {
       stepName: 'for optional files',
       shouldPass: true,
       details: [
-        { type: 'success', message: "Found optional '.contract/test/' directory" },
-        { type: 'success', message: "Plugin has a schema file ('test-plugin.schema.json')" }
+        { type: 'success', message: 'Found optional \'.contract/test/\' directory' },
+        { type: 'success', message: 'Plugin has a schema file (\'test-plugin.schema.json\')' }
       ]
     },
     {

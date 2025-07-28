@@ -141,71 +141,76 @@ class PluginRegistryBuilder {
     return registrations;
   }
 
-  async _registerMyPlugins() {
+  async _registerUserPlugins() {
     const { fs, path, yaml } = this.dependencies;
     const registrations = {};
-    
-    // Determine my-plugins directory location based on collections manager root
-    const myPluginsPath = this.collectionsManager ? 
-      path.join(path.dirname(this.collectionsManager.collRoot), 'my-plugins') :
-      path.join(path.dirname(this.xdgBaseDir), 'md-to-pdf', 'my-plugins');
-    
-    logger.debug('Attempting to register my-plugins directory', {
+
+    // Determine user-plugins directory location based on collections manager root
+    const userPluginsPath = this.collectionsManager ?
+      path.join(this.collectionsManager.collRoot, 'user-plugins') :
+      path.join(this.xdgBaseDir, 'md-to-pdf', 'user-plugins');
+
+    logger.debug('Attempting to register user-plugins directory', {
       context: 'PluginRegistryBuilder',
-      myPluginsPath: myPluginsPath
+      userPluginsPath: userPluginsPath
     });
 
-    if (!fs.existsSync(myPluginsPath)) {
-      logger.debug('My-plugins directory not found', {
+    if (!fs.existsSync(userPluginsPath)) {
+      logger.debug('User-plugins directory not found', {
         context: 'PluginRegistryBuilder',
-        path: myPluginsPath,
-        suggestion: 'No development plugins will be registered.'
+        path: userPluginsPath,
+        suggestion: 'No user plugins will be registered.'
       });
       return registrations;
     }
 
-    // Read disabled plugins list
-    const disabledPath = path.join(myPluginsPath, '.disabled.yaml');
-    let disabledPlugins = [];
-    if (fs.existsSync(disabledPath)) {
+    // Read plugins manifest
+    const pluginsManifestPath = path.join(userPluginsPath, 'plugins.yaml');
+    let pluginStates = {};
+    if (fs.existsSync(pluginsManifestPath)) {
       try {
-        const content = fs.readFileSync(disabledPath, 'utf8');
+        const content = fs.readFileSync(pluginsManifestPath, 'utf8');
         const parsed = yaml.load(content);
-        disabledPlugins = parsed?.disabled_plugins || [];
+        pluginStates = parsed?.plugins || {};
       } catch (e) {
-        logger.warn('Could not read disabled plugins manifest', {
+        logger.warn('Could not read user plugins manifest', {
           context: 'PluginRegistryBuilder',
-          path: disabledPath,
+          path: pluginsManifestPath,
           error: e.message
         });
       }
     }
 
-    const pluginDirs = await fs.promises.readdir(myPluginsPath);
+    const pluginDirs = await fs.promises.readdir(userPluginsPath);
     for (const pluginName of pluginDirs) {
-      // Skip hidden files like .disabled.yaml
-      if (pluginName.startsWith('.')) continue;
-      
-      const pluginDir = path.join(myPluginsPath, pluginName);
+      // Skip manifest files and hidden files
+      if (pluginName.startsWith('.') || pluginName.endsWith('.yaml')) continue;
+
+      const pluginDir = path.join(userPluginsPath, pluginName);
       if (fs.statSync(pluginDir).isDirectory()) {
         const configPath = path.join(pluginDir, `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
         if (fs.existsSync(configPath)) {
-          const isDisabled = disabledPlugins.includes(pluginName);
-          
+          const pluginState = pluginStates[pluginName] || { enabled: true, type: 'unknown' };
+          const isEnabled = pluginState.enabled !== false;
+          const pluginType = pluginState.type || 'unknown';
+
           registrations[pluginName] = {
             configPath: configPath,
-            definedIn: myPluginsPath,
-            sourceType: 'Created (my-plugins)',
-            isDisabled: isDisabled
+            definedIn: userPluginsPath,
+            sourceType: `User (${pluginType})`,
+            isEnabled: isEnabled,
+            pluginType: pluginType
           };
-          logger.debug('Found my-plugins plugin', {
+
+          logger.debug('Found user plugin', {
             context: 'PluginRegistryBuilder',
             pluginName: pluginName,
             configPath: configPath,
-            disabled: isDisabled
+            enabled: isEnabled,
+            type: pluginType
           });
         } else {
-          logger.warn('My-plugins directory found but no config file', {
+          logger.warn('User plugin directory found but no config file', {
             context: 'PluginRegistryBuilder',
             pluginDir: pluginDir,
             expectedConfig: `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
@@ -215,7 +220,7 @@ class PluginRegistryBuilder {
       }
     }
 
-    logger.debug('My-plugins registration complete', {
+    logger.debug('User-plugins registration complete', {
       context: 'PluginRegistryBuilder',
       registeredCount: Object.keys(registrations).length
     });
@@ -575,10 +580,10 @@ class PluginRegistryBuilder {
       count: Object.keys(registry).length
     });
 
-    // Register my-plugins directory plugins (always available for easy development)
-    const myPluginsRegistrations = await this._registerMyPlugins();
-    Object.assign(registry, myPluginsRegistrations);
-    logger.debug('Registry size after my-plugins', {
+    // Register user-plugins directory plugins (unified created + added plugins)
+    const userPluginsRegistrations = await this._registerUserPlugins();
+    Object.assign(registry, userPluginsRegistrations);
+    logger.debug('Registry size after user-plugins', {
       context: 'PluginRegistryBuilder',
       count: Object.keys(registry).length
     });
@@ -701,9 +706,11 @@ class PluginRegistryBuilder {
         if (regInfo.cmStatus) {
           // CM-managed plugins use their CM status
           status = regInfo.cmStatus;
-        } else if (regInfo.sourceType.includes('Created (my-plugins)')) {
-          // Created plugins are enableable/disableable
-          status = regInfo.isDisabled ? 'Available (Created)' : 'Enabled (Created)';
+        } else if (regInfo.sourceType && regInfo.sourceType.startsWith('User (')) {
+          // User plugins from new unified architecture
+          const isEnabled = regInfo.isEnabled !== false;
+          const pluginType = regInfo.pluginType || 'unknown';
+          status = isEnabled ? `Enabled (${pluginType.charAt(0).toUpperCase() + pluginType.slice(1)})` : `Available (${pluginType.charAt(0).toUpperCase() + pluginType.slice(1)})`;
         } else {
           // Bundled and other registered plugins
           status = `Registered (${regInfo.sourceType.split('(')[0].trim()})`;

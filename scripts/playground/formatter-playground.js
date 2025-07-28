@@ -8,19 +8,6 @@ const { colorThemePath } = require('@paths');
 const { theme, palette, colorize } = require(colorThemePath);
 const chalk = require('chalk');
 
-// Mock the logger formatLint function for testing
-const mockLogger = {
-  formatLint: (data) => {
-    console.log('\n--- Mock Lint Output ---');
-    if (data.title) console.log(theme.highlight(data.title));
-    if (data.files) {
-      data.files.forEach(file => {
-        console.log(`${theme.path(file.path)} ${theme.value(file.issues || 0)} issues`);
-      });
-    }
-  }
-};
-
 function showPalette() {
   console.log(theme.highlight('=== Gruvbox Color Palette ===\n'));
 

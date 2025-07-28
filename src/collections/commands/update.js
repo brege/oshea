@@ -9,7 +9,11 @@ module.exports = async function updateCollection(dependencies, collectionName) {
     collectionName: collectionName
   });
 
-  const collectionPath = path.join(this.collRoot, collectionName);
+  // Look for collections in collections/ subdirectory or directly if collRoot ends with 'collections'
+  const actualCollectionPath = this.collRoot.endsWith('collections') ?
+    path.join(this.collRoot, collectionName) :
+    path.join(this.collRoot, 'collections', collectionName);
+  const collectionPath = actualCollectionPath;
 
   if (!fss.existsSync(collectionPath)) {
     logger.error('Collection not found, cannot update', {
@@ -25,7 +29,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
     collectionPath: collectionPath
   });
 
-  const metadata = await this._readCollectionMetadata(collectionName);
+  const metadata = await this._readCollectionMetadata(this.collRoot.endsWith('collections') ? collectionName : path.join('collections', collectionName));
   if (!metadata) {
     logger.warn('Metadata file not found or unreadable for collection, cannot determine source for update', {
       context: 'UpdateCollectionCommand',

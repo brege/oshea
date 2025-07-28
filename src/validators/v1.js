@@ -84,11 +84,11 @@ const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
   let optionalCount = 0;
 
   if (fs.existsSync(testDir)) {
-    details.push({ type: 'success', message: "Found optional '.contract/test/' directory" });
+    details.push({ type: 'success', message: 'Found optional ".contract/test/" directory' });
     optionalCount++;
   } else {
-    warnings.push("Missing optional '.contract/test/' directory.");
-    details.push({ type: 'warn', message: "Missing optional '.contract/test/' directory" });
+    warnings.push('Missing optional ".contract/test/" directory.');
+    details.push({ type: 'warn', message: 'Missing optional ".contract/test/" directory' });
   }
 
   if (fs.existsSync(schemaPath)) {

@@ -90,7 +90,7 @@ module.exports = {
         logger.success(`\nPlugin '${newPluginName}' created successfully.`);
         logger.info('Next steps:');
         logger.detail(`  1. Customize the generated files in: ${result.archetypePath}`);
-        logger.detail(`  2. Add your plugin to md-to-pdf:`);
+        logger.detail('  2. Add your plugin to md-to-pdf:');
         logger.detail(`     md-to-pdf plugin add "${result.archetypePath}"`);
         logger.detail('  3. Test your plugin: md-to-pdf convert mydoc.md --plugin ' + newPluginName);
       }

@@ -8,45 +8,53 @@ const { execSync } = require('child_process');
 
 const logger = require(loggerPath);
 
-// Handle enabling created plugins by removing them from the disabled list
-async function enableCreatedPlugin(pluginName, manager) {
-  const myPluginsDisabledPath = path.join(path.dirname(manager.collRoot), 'my-plugins', '.disabled.yaml');
+// Handle enabling user plugins by updating their state in the unified manifest
+async function enableUserPlugin(pluginName, manager) {
+  const userPluginsPath = path.join(manager.collRoot, 'user-plugins');
+  const pluginsManifestPath = path.join(userPluginsPath, 'plugins.yaml');
 
-  // Check if disabled manifest exists
-  if (!fs.existsSync(myPluginsDisabledPath)) {
-    return false; // Not a disabled created plugin
+  // Check if user-plugins directory and manifest exist
+  if (!fs.existsSync(userPluginsPath) || !fs.existsSync(pluginsManifestPath)) {
+    return false; // Not a user plugin
   }
 
-  let disabledList = [];
+  let pluginStates = {};
+  let parsed = {};
 
-  // Read existing disabled list
+  // Read existing plugins manifest
   try {
-    const content = fs.readFileSync(myPluginsDisabledPath, 'utf8');
-    const parsed = yaml.load(content);
-    disabledList = parsed?.disabled_plugins || [];
+    const content = fs.readFileSync(pluginsManifestPath, 'utf8');
+    parsed = yaml.load(content);
+    pluginStates = parsed?.plugins || {};
   } catch (e) {
-    logger.warn(`Could not read disabled plugins manifest: ${e.message}`);
+    logger.warn(`Could not read user plugins manifest: ${e.message}`);
     return false;
   }
 
-  // Check if plugin is in disabled list
-  if (!disabledList.includes(pluginName)) {
-    return false; // Not a disabled created plugin
+  // Check if plugin exists in manifest
+  if (!pluginStates[pluginName]) {
+    return false; // Not a user plugin
   }
 
-  // Remove plugin from disabled list
-  disabledList = disabledList.filter(name => name !== pluginName);
+  // Check if plugin is already enabled
+  if (pluginStates[pluginName].enabled !== false) {
+    return false; // Already enabled
+  }
 
-  // Write updated disabled list
-  const disabledManifest = {
-    disabled_plugins: disabledList,
-    last_updated: new Date().toISOString()
+  // Enable the plugin
+  pluginStates[pluginName].enabled = true;
+
+  // Write updated manifest
+  const updatedManifest = {
+    version: '1.0',
+    migrated_on: parsed?.migrated_on,
+    plugins: pluginStates
   };
 
-  fs.writeFileSync(myPluginsDisabledPath, yaml.dump(disabledManifest));
-  logger.debug(`Removed '${pluginName}' from created plugins disabled list`);
+  fs.writeFileSync(pluginsManifestPath, yaml.dump(updatedManifest));
+  logger.debug(`Enabled user plugin '${pluginName}' in unified manifest`);
 
-  return true; // Successfully enabled created plugin
+  return true; // Successfully enabled user plugin
 }
 
 module.exports = {
@@ -144,10 +152,10 @@ you must re-run this command to enable any new plugins.`);
           logger.warn('WARN: --prefix and --no-prefix options are ignored when not using --all.');
         }
 
-        // Check if this is a created plugin (no slash in name)
+        // Check if this is a user plugin (no slash in name)
         if (!args.target.includes('/')) {
-          const enabledCreatedPlugin = await enableCreatedPlugin(args.target, manager);
-          if (enabledCreatedPlugin) {
+          const enabledUserPlugin = await enableUserPlugin(args.target, manager);
+          if (enabledUserPlugin) {
             logger.success('Plugin enabled successfully');
             logger.info(`\nTo use this plugin with md-to-pdf, invoke it as: md-to-pdf convert ... --plugin ${args.target}`);
             return; // Early return, skip CM-based enabling

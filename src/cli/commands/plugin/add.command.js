@@ -65,9 +65,9 @@ module.exports = {
         logger.info(`    ${theme.path(result.path)}`);
         logger.info('  • For future development, it\'s recommended to edit your original plugin at:');
         logger.info(`    ${theme.path(absolutePluginPath)}`);
-        logger.info('  • To sync any changes from your original plugin into the managed version, run:');
-        logger.info(`    ${theme.highlight('md-to-pdf collection update _user_added_plugins')}`);
-        logger.detail('    (This command re-syncs all locally added plugins from their original sources)');
+        logger.info('  • To sync any changes from your original plugin into the managed version:');
+        logger.info(`    ${theme.highlight('md-to-pdf plugin add ' + absolutePluginPath + ' --name ' + result.invoke_name)}`);
+        logger.detail('    (Re-run the add command to sync changes from your original source)');
 
         logger.info('\nNext Steps:');
         logger.info(`  • List active plugins: ${theme.highlight('md-to-pdf plugin list')}`);

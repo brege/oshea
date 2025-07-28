@@ -1,7 +1,7 @@
 // src/collections/commands/add-singleton.js
 
 module.exports = async function addSingletonPlugin(dependencies, sourcePluginPath, options = {}) {
-  const { fss, path, cmUtils, fs, fsExtra, constants, logger } = dependencies;
+  const { fss, path, cmUtils, fs, fsExtra, logger } = dependencies;
 
   logger.debug('Attempting to add singleton plugin', {
     context: 'AddSingletonPluginCommand',
@@ -91,8 +91,8 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
   });
 
 
-  // 3. Target Directory for singletons
-  const singletonsBaseDir = path.join(this.collRoot, constants.USER_ADDED_PLUGINS_DIR_NAME);
+  // 3. Target Directory for singletons - use unified user-plugins structure
+  const singletonsBaseDir = path.join(this.collRoot, 'user-plugins');
   const targetPluginDir = path.join(singletonsBaseDir, pluginId);
 
   if (fss.existsSync(targetPluginDir)) {
@@ -137,50 +137,36 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
     throw new Error(`Failed to copy plugin from "${sourcePluginPath}" to "${targetPluginDir}": ${copyError.message}`);
   }
 
-  const metadataHoldingCollectionName = path.join(constants.USER_ADDED_PLUGINS_DIR_NAME, pluginId);
-  const metadataContent = {
-    name: pluginId,
-    source: path.resolve(sourcePluginPath),
-    type: 'singleton',
-    added_on: new Date().toISOString(),
+  // 5. Create source metadata for the added plugin
+  const sourceMetadata = {
+    source_type: 'added',
+    source_path: path.resolve(sourcePluginPath),
+    source_is_git: false,
+    added_on: new Date().toISOString()
   };
-  await this._writeCollectionMetadata(metadataHoldingCollectionName, metadataContent);
-  logger.debug('Singleton plugin metadata written', {
+  const sourceMetadataPath = path.join(targetPluginDir, '.source.yaml');
+  const yaml = dependencies.yaml || require('js-yaml');
+  await fs.writeFile(sourceMetadataPath, yaml.dump(sourceMetadata));
+
+  logger.debug('Source metadata written for added plugin', {
     context: 'AddSingletonPluginCommand',
-    collectionName: metadataHoldingCollectionName
+    pluginId: pluginId,
+    metadataPath: sourceMetadataPath
   });
 
+  // 6. Add to unified plugins manifest
+  await this._addToUserPluginsManifest(singletonsBaseDir, pluginId, invokeName, sourcePluginPath);
 
-  // 6. Automatically enable the plugin
-  const collectionPluginIdForEnable = `${constants.USER_ADDED_PLUGINS_DIR_NAME}/${pluginId}`;
+  logger.success(`Singleton plugin added and enabled: ${pluginId} as ${invokeName}`, {
+    context: 'AddSingletonPluginCommand',
+    source: sourcePluginPath,
+    outputPath: targetPluginDir
+  });
 
-  try {
-    await this.enablePlugin(collectionPluginIdForEnable, { name: invokeName });
-    logger.success(`Singleton plugin added and enabled: ${pluginId} as ${invokeName}`, {
-      context: 'AddSingletonPluginCommand',
-      source: sourcePluginPath,
-      outputPath: targetPluginDir
-    });
-    return {
-      success: true,
-      message: `Singleton plugin "${pluginId}" added and enabled as "${invokeName}".`,
-      invoke_name: invokeName,
-      collectionPluginId: collectionPluginIdForEnable,
-      path: targetPluginDir
-    };
-  } catch (enableError) {
-    logger.error('Plugin copied but failed to enable', {
-      context: 'AddSingletonPluginCommand',
-      pluginId: pluginId,
-      targetDir: targetPluginDir,
-      invokeName: invokeName,
-      error: enableError.message
-    });
-    logger.warn('Plugin files remain, manual cleanup or re-enable may be needed', {
-      context: 'AddSingletonPluginCommand',
-      directory: targetPluginDir,
-      suggestion: 'You may need to remove them manually or try enabling again with a different invoke name.'
-    });
-    throw new Error(`Plugin copied but failed to enable: ${enableError.message}`);
-  }
+  return {
+    success: true,
+    message: `Singleton plugin "${pluginId}" added and enabled as "${invokeName}".`,
+    invoke_name: invokeName,
+    path: targetPluginDir
+  };
 };

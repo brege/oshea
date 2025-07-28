@@ -64,7 +64,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   const originalSourceConfigFilename = path.basename(sourcePluginInfo.config_path);
   const originalPluginDescriptionFromSource = sourcePluginInfo.description || `Plugin ${sourcePluginIdForReplacement}`;
 
-  const targetBaseDir = options.targetDir ? path.resolve(options.targetDir) : path.join(path.dirname(collRoot), constants.DEFAULT_ARCHETYPE_BASE_DIR_NAME);
+  const targetBaseDir = options.targetDir ? path.resolve(options.targetDir) : path.join(collRoot, constants.DEFAULT_ARCHETYPE_BASE_DIR_NAME);
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
   if (fss.existsSync(archetypePath) && !options.force) {
@@ -178,6 +178,22 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
     }
   }
 
+  // Add to unified plugins manifest if using default location
+  if (!options.targetDir) {
+    await addToUserPluginsManifest(targetBaseDir, newArchetypeName, sourcePluginIdentifier);
+  }
+
+  // Create source metadata for the plugin
+  const sourceMetadata = {
+    source_type: 'created',
+    created_from: sourcePluginIdentifier,
+    archetype_source: isPotentiallyCmIdentifier ? 'collection' : 'bundled',
+    created_on: new Date().toISOString()
+  };
+
+  const sourceMetadataPath = path.join(archetypePath, '.source.yaml');
+  await fs.writeFile(sourceMetadataPath, yaml.dump(sourceMetadata));
+
   logger.success('Archetype created successfully.', {
     context: 'PluginArchetyper',
     archetypeName: newArchetypeName,
@@ -185,6 +201,50 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
     result: archetypePath
   });
   return { success: true, message: `Archetype '${newArchetypeName}' created successfully.`, archetypePath };
+}
+
+// Helper function to add created plugin to unified manifest
+async function addToUserPluginsManifest(userPluginsDir, pluginName, sourceIdentifier) {
+  const pluginsManifestPath = path.join(userPluginsDir, 'plugins.yaml');
+
+  let pluginStates = {};
+
+  // Read existing manifest if it exists
+  if (fss.existsSync(pluginsManifestPath)) {
+    try {
+      const content = await fs.readFile(pluginsManifestPath, 'utf8');
+      const parsed = yaml.load(content);
+      pluginStates = parsed?.plugins || {};
+    } catch (e) {
+      logger.warn('Could not read existing plugins manifest', {
+        context: 'PluginArchetyper',
+        path: pluginsManifestPath,
+        error: e.message
+      });
+    }
+  }
+
+  // Add the new plugin
+  pluginStates[pluginName] = {
+    type: 'created',
+    enabled: true,
+    created_from: sourceIdentifier,
+    created_on: new Date().toISOString()
+  };
+
+  // Write updated manifest
+  const updatedManifest = {
+    version: '1.0',
+    plugins: pluginStates
+  };
+
+  await fs.writeFile(pluginsManifestPath, yaml.dump(updatedManifest));
+
+  logger.debug('Added plugin to unified manifest', {
+    context: 'PluginArchetyper',
+    pluginName: pluginName,
+    manifestPath: pluginsManifestPath
+  });
 }
 
 module.exports = {

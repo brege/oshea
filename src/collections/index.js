@@ -252,6 +252,51 @@ class CollectionsManager {
     }
   }
 
+  async _addToUserPluginsManifest(userPluginsDir, pluginId, invokeName, sourcePath) {
+    const { path, fs, fss, yaml } = this.dependencies;
+    const pluginsManifestPath = path.join(userPluginsDir, 'plugins.yaml');
+
+    let pluginStates = {};
+
+    // Read existing manifest if it exists
+    if (fss.existsSync(pluginsManifestPath)) {
+      try {
+        const content = await fs.readFile(pluginsManifestPath, 'utf8');
+        const parsed = yaml.load(content);
+        pluginStates = parsed?.plugins || {};
+      } catch (e) {
+        logger.warn('Could not read existing plugins manifest', {
+          context: 'CollectionsManager',
+          path: pluginsManifestPath,
+          error: e.message
+        });
+      }
+    }
+
+    // Add the new plugin
+    pluginStates[pluginId] = {
+      type: 'added',
+      enabled: true,
+      added_from: sourcePath,
+      added_on: new Date().toISOString()
+    };
+
+    // Write updated manifest
+    const updatedManifest = {
+      version: '1.0',
+      plugins: pluginStates
+    };
+
+    await fs.writeFile(pluginsManifestPath, yaml.dump(updatedManifest));
+
+    logger.debug('Added plugin to unified manifest', {
+      context: 'CollectionsManager',
+      pluginId: pluginId,
+      invokeName: invokeName,
+      manifestPath: pluginsManifestPath
+    });
+  }
+
   async disableAllPluginsFromCollection(collectionIdentifier) {
     const { path, constants, logger } = this.dependencies;
     const manifest = await this._readEnabledManifest();

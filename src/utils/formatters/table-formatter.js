@@ -12,7 +12,6 @@ function formatTable(level, message, meta = {}) {
     columns = [],
     title,
     showBorders = true,
-    separator = '',
   } = meta;
 
   if (rows.length === 0 || columns.length === 0) {

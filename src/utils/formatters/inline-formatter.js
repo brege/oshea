@@ -1,7 +1,6 @@
 // src/utils/formatters/inline-formatter.js
 // Inline formatter with no newline (for prompts/results on same line)
 
-const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 const { colorThemePath } = require('@paths');

@@ -18,7 +18,7 @@ function colorForLevel(level, message) {
 
 // Format validation session header
 function formatValidationHeader(level, message, meta = {}) {
-  const { protocol, pluginName } = message;
+  const { protocol, pluginName } = message; // eslint-disable-line no-unused-vars
   console.log(colorForLevel(level, `Starting ${protocol} plugin validation checks`));
 }
 

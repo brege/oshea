@@ -21,12 +21,41 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
         });
         return [];
       }
-      const entries = await fs.readdir(this.collRoot, { withFileTypes: true });
+      // Look for collections in collections/ subdirectory or directly if collRoot ends with 'collections'
+      const collectionsPath = this.collRoot.endsWith('collections') ? this.collRoot : path.join(this.collRoot, 'collections');
+      const entries = fss.existsSync(collectionsPath) ? await fs.readdir(collectionsPath, { withFileTypes: true }) : [];
       const collectionInfos = [];
+
+      // Also check for legacy user-added plugins in collRoot (old _user_added_plugins structure)
+      const legacyUserPluginsPath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
+      if (fss.existsSync(legacyUserPluginsPath)) {
+        const singletons = await fs.readdir(legacyUserPluginsPath, { withFileTypes: true });
+        if (singletons.some(sDirent => sDirent.isDirectory())) {
+          collectionInfos.push({
+            name: USER_ADDED_PLUGINS_DIR_NAME,
+            source: legacyUserPluginsPath,
+            special_type: 'singleton_container',
+            added_on: 'N/A (Container)',
+            updated_on: undefined
+          });
+          logger.debug('Added legacy singleton container to list', {
+            context: 'ListCollectionsCommand',
+            containerPath: legacyUserPluginsPath
+          });
+        }
+      }
 
       for (const dirent of entries) {
         if (dirent.isDirectory()) {
           const collectionName = dirent.name;
+          if (collectionName === 'user-plugins') {
+            // Skip user-plugins directory - it's managed separately
+            logger.debug('Skipping user-plugins directory in collection list', {
+              context: 'ListCollectionsCommand',
+              reason: 'user-plugins is managed separately'
+            });
+            continue;
+          }
           if (collectionName === USER_ADDED_PLUGINS_DIR_NAME) {
             const singletonPluginsContainerPath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
             if (fss.existsSync(singletonPluginsContainerPath)) {
@@ -46,7 +75,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
               }
             }
           } else {
-            const metadata = await this._readCollectionMetadata(collectionName);
+            const metadata = await this._readCollectionMetadata(path.join('collections', collectionName));
             collectionInfos.push({
               name: collectionName,
               source: metadata?.source || 'N/A (Metadata missing or unreadable)',

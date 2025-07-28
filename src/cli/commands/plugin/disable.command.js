@@ -7,42 +7,53 @@ const yaml = require('js-yaml');
 
 const logger = require(loggerPath);
 
-// Handle disabling created plugins by tracking them in a disabled manifest
-async function disableCreatedPlugin(pluginName, manager) {
-  const myPluginsDisabledPath = path.join(path.dirname(manager.collRoot), 'my-plugins', '.disabled.yaml');
+// Handle disabling user plugins by updating their state in the unified manifest
+async function disableUserPlugin(pluginName, manager) {
+  const userPluginsPath = path.join(manager.collRoot, 'user-plugins');
+  const pluginsManifestPath = path.join(userPluginsPath, 'plugins.yaml');
 
-  let disabledList = [];
-
-  // Read existing disabled list
-  if (fs.existsSync(myPluginsDisabledPath)) {
-    try {
-      const content = fs.readFileSync(myPluginsDisabledPath, 'utf8');
-      const parsed = yaml.load(content);
-      disabledList = parsed?.disabled_plugins || [];
-    } catch (e) {
-      logger.warn(`Could not read disabled plugins manifest: ${e.message}`);
-    }
+  // Check if user-plugins directory and manifest exist
+  if (!fs.existsSync(userPluginsPath) || !fs.existsSync(pluginsManifestPath)) {
+    return false; // Not a user plugin
   }
 
-  // Add plugin to disabled list if not already there
-  if (!disabledList.includes(pluginName)) {
-    disabledList.push(pluginName);
+  let pluginStates = {};
+  let parsed = {};
 
-    // Create directory if it doesn't exist
-    const myPluginsDir = path.dirname(myPluginsDisabledPath);
-    if (!fs.existsSync(myPluginsDir)) {
-      fs.mkdirSync(myPluginsDir, { recursive: true });
-    }
-
-    // Write updated disabled list
-    const disabledManifest = {
-      disabled_plugins: disabledList,
-      last_updated: new Date().toISOString()
-    };
-
-    fs.writeFileSync(myPluginsDisabledPath, yaml.dump(disabledManifest));
-    logger.debug(`Added '${pluginName}' to created plugins disabled list`);
+  // Read existing plugins manifest
+  try {
+    const content = fs.readFileSync(pluginsManifestPath, 'utf8');
+    parsed = yaml.load(content);
+    pluginStates = parsed?.plugins || {};
+  } catch (e) {
+    logger.warn(`Could not read user plugins manifest: ${e.message}`);
+    return false;
   }
+
+  // Check if plugin exists in manifest
+  if (!pluginStates[pluginName]) {
+    return false; // Not a user plugin
+  }
+
+  // Check if plugin is already disabled
+  if (pluginStates[pluginName].enabled === false) {
+    return false; // Already disabled
+  }
+
+  // Disable the plugin
+  pluginStates[pluginName].enabled = false;
+
+  // Write updated manifest
+  const updatedManifest = {
+    version: '1.0',
+    migrated_on: parsed?.migrated_on,
+    plugins: pluginStates
+  };
+
+  fs.writeFileSync(pluginsManifestPath, yaml.dump(updatedManifest));
+  logger.debug(`Disabled user plugin '${pluginName}' in unified manifest`);
+
+  return true; // Successfully disabled user plugin
 }
 
 module.exports = {
@@ -69,14 +80,18 @@ module.exports = {
     logger.detail(`  Plugin Invoke Name: ${args.invoke_name}`);
 
     try {
-      // First check if it's a created plugin
+      // First check if it's a user plugin
       await configResolver._initializeResolverIfNeeded();
       const pluginRegistryEntry = configResolver.mergedPluginRegistry[args.invoke_name];
 
-      if (pluginRegistryEntry && pluginRegistryEntry.sourceType === 'Created (my-plugins)') {
-        // Handle created plugin disable differently
-        await disableCreatedPlugin(args.invoke_name, manager);
-        logger.success('Plugin disabled successfully');
+      if (pluginRegistryEntry && pluginRegistryEntry.sourceType && pluginRegistryEntry.sourceType.startsWith('User (')) {
+        // Handle user plugin disable using unified architecture
+        const disabledUserPlugin = await disableUserPlugin(args.invoke_name, manager);
+        if (disabledUserPlugin) {
+          logger.success('Plugin disabled successfully');
+        } else {
+          logger.warn('Plugin was not found in user plugins manifest or already disabled');
+        }
       } else {
         // Handle CM-managed plugin disable
         await manager.disablePlugin(args.invoke_name);

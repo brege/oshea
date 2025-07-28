@@ -1,7 +1,6 @@
 // src/utils/formatters/paths-formatter.js
 // Rudimentary syntax highlighting for path-finder shell output
 
-const chalk = require('chalk');
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 

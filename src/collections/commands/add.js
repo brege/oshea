@@ -18,6 +18,14 @@ module.exports = async function addCollection(dependencies, source, options = {}
     root: this.collRoot
   });
 
+  // Ensure collections go into collections/ subdirectory
+  const collectionsDir = this.collRoot.endsWith('collections') ? this.collRoot : path.join(this.collRoot, 'collections');
+  await fs.mkdir(collectionsDir, { recursive: true });
+  logger.debug('Ensured collections subdirectory exists', {
+    context: 'AddCollectionCommand',
+    collectionsDir: collectionsDir
+  });
+
   const collectionName = options.name || cmUtils.deriveCollectionName(source);
   if (!collectionName) {
     logger.error('Could not determine a valid collection name', {
@@ -28,7 +36,7 @@ module.exports = async function addCollection(dependencies, source, options = {}
     });
     throw new Error('Could not determine a valid collection name.');
   }
-  const targetPath = path.join(this.collRoot, collectionName);
+  const targetPath = path.join(collectionsDir, collectionName);
 
   logger.debug(`Target collection name: ${collectionName}`, {
     context: 'AddCollectionCommand'
@@ -82,7 +90,7 @@ module.exports = async function addCollection(dependencies, source, options = {}
       logger.success(`Successfully copied local source: ${absoluteSourcePath} -> ${targetPath}`, {
         context: 'AddCollectionCommand'
       });
-      await this._writeCollectionMetadata(collectionName, createInitialMetadata());
+      await this._writeCollectionMetadata(path.join('collections', collectionName), createInitialMetadata());
       return targetPath;
     } catch (error) {
       logger.error(`Failed to copy local source: ${error.message}`, {

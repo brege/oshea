@@ -2,7 +2,6 @@
 // Default app theme formatter with colored output
 // lint-skip-file no-console
 
-const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 const { colorThemePath } = require('@paths');

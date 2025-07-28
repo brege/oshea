@@ -333,8 +333,14 @@ async function main() {
         .option('coll-root', { type: 'string' });
     },
     handler: (args) => {
-      const { dynamicCompletionScriptPath } = require('@paths');
+      const { dynamicCompletionScriptPath, completionRoot } = require('@paths');
+
       try {
+        // Regenerate static command tree cache
+        const staticCompletionScriptPath = path.join(completionRoot, 'generate-completion-cache.js');
+        execSync(`node "${staticCompletionScriptPath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+
+        // Regenerate dynamic completion data cache
         execSync(`node "${dynamicCompletionScriptPath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
       } catch (error) {
         logger.error(`ERROR: Cache generation failed: ${error.message}`);

@@ -1,4 +1,5 @@
 // src/completion/cli-tree-builder.js
+require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
@@ -30,9 +31,12 @@ function createYargsStub() {
   }, {
     get(target, prop) {
       if (prop in target) return target[prop];
-      if (['command', 'demandCommand', 'epilog', 'help', 'version',
+      const yargsChainableMethods = [
+        'command', 'demandCommand', 'epilog', 'help', 'version',
         'alias', 'strictCommands', 'usage', 'middleware',
-        'completion', 'fail'].includes(prop)) {
+        'completion', 'fail'
+      ];
+      if (yargsChainableMethods.includes(prop)) {
         return (...args) => stub;
       }
       if (prop === 'argv') return {};
@@ -89,10 +93,9 @@ function discoverCommandTree(dir, prefixParts = []) {
       });
     }
 
-    const finalOptionsFor$0 =
-      [...new Set([...globalOptionsList.map(name => ({name})),
-        ...defaultCommandOptions])].sort((a,b) =>
-        a.name.localeCompare(b.name));
+    const globalOptionsFormatted = globalOptionsList.map(name => ({name}));
+    const allOptionsFor$0 = [...new Set([...globalOptionsFormatted, ...defaultCommandOptions])];
+    const finalOptionsFor$0 = allOptionsFor$0.sort((a, b) => a.name.localeCompare(b.name));
     const finalPositionalsFor$0 = [...new Set([...defaultCommandPositionals])];
 
     nodesMap.set('$0', {
@@ -177,13 +180,16 @@ function discoverCommandTree(dir, prefixParts = []) {
         }
       };
 
-      if (
+      const isMultiCommandModule = (
         typeof commandModule === 'object' &&
-                !Array.isArray(commandModule) &&
-                Object.keys(commandModule).length > 0 &&
-                Object.values(commandModule).every(v => v && typeof v === 'object' &&
-                                                 'command' in v)
-      ) {
+        !Array.isArray(commandModule) &&
+        Object.keys(commandModule).length > 0 &&
+        Object.values(commandModule).every(v =>
+          v && typeof v === 'object' && 'command' in v
+        )
+      );
+
+      if (isMultiCommandModule) {
         for (const cmdObj of Object.values(commandModule)) {
           processAndAddCommand(cmdObj);
         }

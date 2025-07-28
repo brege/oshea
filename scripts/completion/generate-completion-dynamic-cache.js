@@ -20,6 +20,28 @@ const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 const CollectionsManager = require(collectionsIndexPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
 
+async function getUserPluginsFromManifest(collRoot) {
+  const yaml = require('js-yaml');
+  const userPluginsPath = path.join(collRoot, 'user-plugins');
+  const pluginsManifestPath = path.join(userPluginsPath, 'plugins.yaml');
+
+  if (!fs.existsSync(pluginsManifestPath)) {
+    return [];
+  }
+
+  try {
+    const content = fs.readFileSync(pluginsManifestPath, 'utf8');
+    const parsed = yaml.load(content);
+    const pluginStates = parsed?.plugins || {};
+
+    // Return all user plugin names (both enabled and disabled for removal completion)
+    return Object.keys(pluginStates);
+  } catch (e) {
+    logger.warn('Could not read user plugins manifest for completion cache:', e.message);
+    return [];
+  }
+}
+
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
   const cacheDir = path.join(xdgCacheHome, 'md-to-pdf');
@@ -49,7 +71,11 @@ async function generateCache() {
     const allCollections = await manager.listCollections('downloaded');
     logger.debug(`Discovered ${allCollections.length} downloaded collections.`);
 
-    // 3. Process the data into simple lists for completion
+    // 3. Get user plugins from unified manifest
+    const userPlugins = await getUserPluginsFromManifest(manager.collRoot);
+    logger.debug(`Discovered ${userPlugins.length} user plugins.`);
+
+    // 4. Process the data into simple lists for completion
     const usablePlugins = allPlugins
       .filter(p => p.status && (p.status.startsWith('Registered') || p.status === 'Enabled (CM)'))
       .map(p => p.name);
@@ -64,18 +90,26 @@ async function generateCache() {
 
     const downloadedCollections = allCollections.map(c => c.name);
 
-    logger.debug(`Cache data will include: usablePlugins(${usablePlugins.length}), enabledPlugins(${enabledPlugins.length}), availablePlugins(${availableFromCM.length}), downloadedCollections(${downloadedCollections.length})`);
+    const cacheStats = [
+      `usablePlugins(${usablePlugins.length})`,
+      `enabledPlugins(${enabledPlugins.length})`,
+      `availablePlugins(${availableFromCM.length})`,
+      `downloadedCollections(${downloadedCollections.length})`,
+      `userPlugins(${userPlugins.length})`
+    ].join(', ');
+    logger.debug(`Cache data will include: ${cacheStats}`);
 
-    // 4. Construct the cache object
+    // 5. Construct the cache object
     const cacheData = {
       usablePlugins,
       enabledPlugins,
       availablePlugins: availableFromCM,
       downloadedCollections,
+      userPlugins,
       lastUpdated: new Date().toISOString(),
     };
 
-    // 5. Write the cache file
+    // 6. Write the cache file
     const cachePath = getCachePath();
     fs.mkdirSync(path.dirname(cachePath), { recursive: true });
     fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));

@@ -1,7 +1,6 @@
 // src/cli/commands/plugin/remove.command.js
 const path = require('path');
 const fs = require('fs');
-const fss = require('fs');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const { loggerPath, cliPath, colorThemePath } = require('@paths');

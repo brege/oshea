@@ -120,7 +120,8 @@ function getSuggestions(argv, current) {
   if (targetChoices) {
     suggestions.push(...targetChoices);
   } else if (targetCompletionKey) {
-    const dynamicSuggestionsFn = completionTracker[`get${targetCompletionKey.charAt(0).toUpperCase() + targetCompletionKey.slice(1)}`];
+    const capitalizedKey = targetCompletionKey.charAt(0).toUpperCase() + targetCompletionKey.slice(1);
+    const dynamicSuggestionsFn = completionTracker[`get${capitalizedKey}`];
     if (typeof dynamicSuggestionsFn === 'function') {
       const dynamicCompletions = dynamicSuggestionsFn();
       suggestions.push(...dynamicCompletions);

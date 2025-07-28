@@ -12,8 +12,8 @@ tests:
     description: (Happy Path) Successfully converts a basic markdown file to PDF using the default plugin.
     commands:
       - convert
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/convert.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -25,8 +25,8 @@ tests:
     description: (Key Option) Successfully converts using a specified plugin via `--plugin`.
     commands:
       - convert --plugin
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/convert.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -40,8 +40,8 @@ tests:
       name with `--filename`.
     commands:
       - convert
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/convert.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -53,8 +53,8 @@ tests:
     description: (Config Precedence) A `md_to_pdf_plugin` key in front matter is correctly used for conversion.
     commands:
       - convert
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/convert.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -68,8 +68,8 @@ tests:
       matter.
     commands:
       - convert --plugin
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/convert.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -81,8 +81,8 @@ tests:
     description: (Sad Path) Fails with a non-zero exit code when the input `<file>` does not exist.
     commands:
       - convert
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/convert.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -96,8 +96,8 @@ tests:
       `--plugin`.
     commands:
       - convert --plugin
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/convert.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -111,8 +111,8 @@ tests:
       `recipe-book`).
     commands:
       - generate recipe-book
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/generate.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/generate.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -124,8 +124,8 @@ tests:
     description: (Sad Path) Fails with a non-zero exit code if required plugin-specific options are missing.
     commands:
       - generate recipe-book
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/generate.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/generate.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -137,8 +137,8 @@ tests:
     description: (Happy Path) Correctly displays the global configuration.
     commands:
       - config
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/config.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/config.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -152,8 +152,8 @@ tests:
       `--plugin`.
     commands:
       - config --plugin
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/config.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/config.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -165,8 +165,8 @@ tests:
     description: (Key Option) Correctly outputs clean YAML when using the `--pure` flag.
     commands:
       - config --pure
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/config.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/config.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -178,8 +178,8 @@ tests:
     description: Correctly lists plugins with the default (`--all`) filter.
     commands:
       - plugin list
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-list.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -192,8 +192,8 @@ tests:
     description: Correctly filters for enabled plugins with `--enabled`.
     commands:
       - plugin list --enabled
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-list.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -206,8 +206,8 @@ tests:
     description: Correctly filters for disabled plugins with `--disabled`.
     commands:
       - plugin list --disabled
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-list.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -220,8 +220,8 @@ tests:
     description: Correctly filters for all available plugins with `--available`.
     commands:
       - plugin list --available
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-list.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -234,8 +234,8 @@ tests:
     description: (Happy Path) Successfully creates a new plugin directory with boilerplate files.
     commands:
       - plugin create
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-create.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -248,8 +248,8 @@ tests:
     description: (Key Option) Successfully archetypes a new plugin from a source with `--from`.
     commands:
       - plugin create
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-create.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -263,8 +263,8 @@ tests:
     commands:
       - plugin create
       - plugin validate
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-create.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -277,8 +277,8 @@ tests:
     description: (Happy Path) A plugin archetyped from a valid bundled plugin passes validation.
     commands:
       - plugin create --from
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-create.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -292,8 +292,8 @@ tests:
     commands:
       - plugin add
       - plugin enable
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-add.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-add.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -306,8 +306,8 @@ tests:
     description: (Happy Path) Successfully enables a plugin from a collection.
     commands:
       - plugin enable --bypass-validation
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-enable.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-enable.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -320,8 +320,8 @@ tests:
     description: (Happy Path) The `plugin enable` command successfully enables a valid plugin.
     commands:
       - plugin enable
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-enable.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-enable.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -336,8 +336,8 @@ tests:
       validation errors.
     commands:
       - plugin enable
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-enable.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-enable.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -350,8 +350,8 @@ tests:
     description: (Happy Path) Successfully disables an enabled plugin.
     commands:
       - plugin disable
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-disable.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-disable.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -364,8 +364,8 @@ tests:
     description: (Happy Path) Successfully validates a well-formed plugin directory.
     commands:
       - plugin validate
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-validate.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-validate.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -378,8 +378,8 @@ tests:
     description: (Sad Path) Fails validation for a poorly-formed plugin directory.
     commands:
       - plugin validate
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/plugin-validate.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-validate.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -392,8 +392,8 @@ tests:
     description: (Happy Path) Successfully adds a collection from a git URL.
     commands:
       - collection add
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-add.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-add.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -406,8 +406,8 @@ tests:
     description: (Input Variation) Successfully adds a collection from a local directory path.
     commands:
       - collection add
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-add.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-add.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -420,8 +420,8 @@ tests:
     description: (Sad Path) Fails with a non-zero exit code when the source is invalid.
     commands:
       - collection add
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-add.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-add.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -434,8 +434,8 @@ tests:
     description: (Happy Path) Correctly lists all added collections.
     commands:
       - collection list
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-list.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-list.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -448,8 +448,8 @@ tests:
     description: (Happy Path) Successfully removes an added collection.
     commands:
       - collection remove
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-remove.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-remove.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -462,8 +462,8 @@ tests:
     description: (Happy Path) Successfully runs the update process on all collections.
     commands:
       - collection update
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-update.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-update.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -476,8 +476,8 @@ tests:
     description: (Key Option) Successfully runs the update process on a single named collection.
     commands:
       - collection update
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-update.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-update.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -490,8 +490,8 @@ tests:
     description: (Alias) The `update` alias successfully runs the collection update process.
     commands:
       - collection update
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/collection-update.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-update.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -504,8 +504,8 @@ tests:
     description: The `--version` flag correctly displays the tool's version.
     commands:
       - '--version'
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/global-flags.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/global-flags.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -517,8 +517,8 @@ tests:
     description: The `--help` flag correctly displays the help text.
     commands:
       - '--help'
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/global-flags.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/global-flags.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -532,8 +532,8 @@ tests:
       message.
     commands:
       - unknown-command
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/global-flags.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/global-flags.manifest.js
     reference: null
     mocha_groups:
       - level3
@@ -548,8 +548,8 @@ tests:
       - config --pure
       - config --plugin cv
       - config --plugin cv --pure
-    runner: test/smoke/smoke-test-runner.js
-    manifest: test/smoke/smoke-tests.yaml
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
     reference: null
     mocha_groups:
       - level3
@@ -577,8 +577,8 @@ tests:
       - plugin list --help
       - plugin validate --help
       - update --help
-    runner: test/smoke/smoke-test-runner.js
-    manifest: test/smoke/smoke-tests.yaml
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
     reference: null
     mocha_groups:
       - level3
@@ -594,8 +594,8 @@ tests:
       - plugin list --available
       - plugin list --disabled
       - plugin list --short
-    runner: test/smoke/smoke-test-runner.js
-    manifest: test/smoke/smoke-tests.yaml
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
     reference: null
     mocha_groups:
       - level3
@@ -611,8 +611,8 @@ tests:
       - collection list available
       - collection list enabled
       - collection list all
-    runner: test/smoke/smoke-test-runner.js
-    manifest: test/smoke/smoke-tests.yaml
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
     reference: null
     mocha_groups:
       - level3
@@ -630,8 +630,8 @@ tests:
       - plugin validate recipe
       - plugin validate recipe-book
       - plugin validate template-basic
-    runner: test/smoke/smoke-test-runner.js
-    manifest: test/smoke/smoke-tests.yaml
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
     reference: null
     mocha_groups:
       - level3

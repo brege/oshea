@@ -13,9 +13,9 @@ tests:
       Verify the constructor correctly initializes file paths (`cmCollRoot`, `cmMainManifestPath`,
       `cmEnabledManifestPath`) based on `projectRoot` and `XDG_DATA_HOME`.
     commands: []
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -30,9 +30,9 @@ tests:
       setting the `collRoot` path over all other methods (environment variables, config files, or
       defaults).
     commands: []
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -47,9 +47,9 @@ tests:
       the collection directory, and updates `cm-main.yaml`.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.add.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.add.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -64,9 +64,9 @@ tests:
       preventing duplication.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.add.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.add.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -81,9 +81,9 @@ tests:
       errors.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.add.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.add.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -98,9 +98,9 @@ tests:
       name.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.add.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.add.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -115,9 +115,9 @@ tests:
       deletes its corresponding directory.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.remove.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.remove.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -130,9 +130,9 @@ tests:
     description: Test `removeCollection` gracefully handles attempts to remove a non-existent collection.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.remove.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.remove.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -147,9 +147,9 @@ tests:
       (e.g., due to permissions), logging an error but still updating the manifest.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.remove.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.remove.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -162,9 +162,9 @@ tests:
     description: Test `updateCollection` successfully pulls updates for a Git-sourced collection.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.update.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.update.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -177,9 +177,9 @@ tests:
     description: Verify `updateCollection` gracefully handles updating a non-existent collection.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.update.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.update.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -194,9 +194,9 @@ tests:
       Git-sourced collection.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.update.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.update.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -211,9 +211,9 @@ tests:
       when `filter` is 'all', including their enabled status from `enabled.yaml`.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -228,9 +228,9 @@ tests:
       is 'enabled'.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -245,9 +245,9 @@ tests:
       `filter` is 'disabled'.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -262,9 +262,9 @@ tests:
       empty.
     commands:
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -281,9 +281,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.enable-disable.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.enable-disable.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -298,9 +298,9 @@ tests:
       `enabled.yaml`.
     commands:
       - plugin
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.enable-disable.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.enable-disable.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -316,9 +316,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.enable-disable.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.enable-disable.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -331,9 +331,9 @@ tests:
     description: Test `enablePlugin` correctly uses `cm-utils.isValidPluginName` to validate the `invokeName`.
     commands:
       - plugin
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.enable-disable.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.enable-disable.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -346,9 +346,9 @@ tests:
     description: Verify `enablePlugin` handles cases where the plugin's resolved config path does not exist.
     commands:
       - plugin
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.enable-disable.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.enable-disable.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -363,9 +363,9 @@ tests:
       `invokeName`.
     commands:
       - plugin
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.enable-disable.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.enable-disable.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -378,9 +378,9 @@ tests:
     description: Verify `disablePlugin` gracefully handles attempts to disable a non-existent `invokeName`.
     commands:
       - plugin
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.enable-disable.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.enable-disable.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -396,9 +396,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -412,9 +412,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -430,9 +430,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -448,9 +448,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -465,9 +465,9 @@ tests:
       configuration file.
     commands:
       - plugin
-    runner: test/integration/collections/collections-manager.test.js
-    manifest: test/integration/collections/collections-manager.list.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/collections-manager.test.js
+    manifest: test/runners/integration/collections/collections-manager.list.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - collections
@@ -481,9 +481,9 @@ tests:
       Verify the `handle` function successfully processes a basic Markdown file, extracts front
       matter, renders HTML, applies default CSS, and generates a PDF.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -495,9 +495,9 @@ tests:
   2.2.2:
     description: Test `handle` correctly removes shortcodes from Markdown content before rendering.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -509,9 +509,9 @@ tests:
   2.2.3:
     description: Verify `handle` correctly substitutes placeholders in Markdown content before rendering.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -526,9 +526,9 @@ tests:
       instance.
     commands:
       - plugin
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -543,9 +543,9 @@ tests:
       `math_integration.configureMarkdownItForMath` and `math_integration.getMathCssContent` when
       configured.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -560,9 +560,9 @@ tests:
       configured in `pluginSpecificConfig`.
     commands:
       - plugin
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -577,9 +577,9 @@ tests:
       `pluginSpecificConfig.markdown_it_plugins`.
     commands:
       - plugin
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -594,9 +594,9 @@ tests:
       `raw_css_files`, injecting them into the HTML output.
     commands:
       - plugin
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -611,9 +611,9 @@ tests:
       `pluginSpecificConfig.html_template_path`.
     commands:
       - plugin
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -628,9 +628,9 @@ tests:
       `pluginSpecificConfig` into the HTML template.
     commands:
       - plugin
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -644,9 +644,9 @@ tests:
       Verify `handle` correctly determines the output filename based on `outputFilenameOpt`, front
       matter, or the input Markdown file name.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -658,9 +658,9 @@ tests:
   2.2.12:
     description: Test `handle` gracefully manages errors during Markdown file reading, returning `null`.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -674,9 +674,9 @@ tests:
       Verify `handle` calls `pdfGenerator.generatePdf` with the correctly prepared HTML content and
       PDF options.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -690,9 +690,9 @@ tests:
       Test `handle` correctly applies the `lang` attribute from front matter to the HTML `<html>`
       tag.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -706,9 +706,9 @@ tests:
       Verify `handle` correctly handles `omit_title_heading` to prevent the title heading from being
       rendered when true.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -722,9 +722,9 @@ tests:
       Test `handle` returns `null` and logs an error if any critical step in the pipeline (e.g.,
       HTML rendering, PDF generation) fails.
     commands: []
-    runner: test/integration/core/default-handler.test.js
-    manifest: test/integration/core/default-handler.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/default-handler.test.js
+    manifest: test/runners/integration/core/default-handler.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -738,9 +738,9 @@ tests:
       Verify `generatePdf` successfully launches Puppeteer, navigates to a blank page, sets HTML
       content, and generates a PDF file to the specified output path.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -754,9 +754,9 @@ tests:
       Test `generatePdf` correctly applies various `pdfOptions` such as `format`, `printBackground`,
       and `scale`.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -770,9 +770,9 @@ tests:
       Verify `generatePdf` correctly applies `margin` options (top, bottom, left, right) from
       `pdfOptions`.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -784,9 +784,9 @@ tests:
   2.3.4:
     description: Test `generatePdf` injects `cssContent` into the generated HTML page before rendering the PDF.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -800,9 +800,9 @@ tests:
       Verify `generatePdf` correctly handles header and footer templates, including dynamic fields,
       when provided in `pdfOptions`.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -816,9 +816,9 @@ tests:
       Test `generatePdf` returns `null` and logs an error if Puppeteer fails to launch (e.g.,
       executable not found).
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -830,9 +830,9 @@ tests:
   2.3.7:
     description: Verify `generatePdf` returns `null` and logs an error if setting page content fails.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -846,9 +846,9 @@ tests:
       Test `generatePdf` returns `null` and logs an error if PDF generation itself fails (e.g.,
       invalid `pdfOptions`).
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -862,9 +862,9 @@ tests:
       Verify `generatePdf` ensures the browser and page are properly closed after PDF generation,
       even if errors occur.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -878,9 +878,9 @@ tests:
       Test `generatePdf` correctly handles empty or null `htmlContent` and `cssContent` without
       crashing.
     commands: []
-    runner: test/integration/core/pdf-generator.test.js
-    manifest: test/integration/core/pdf-generator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/pdf-generator.test.js
+    manifest: test/runners/integration/core/pdf-generator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - core
@@ -896,9 +896,9 @@ tests:
       reported as `VALID` with no errors or warnings.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -914,9 +914,9 @@ tests:
       clear error message.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -932,9 +932,9 @@ tests:
       reported as `INVALID` with a critical mismatch error.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -949,9 +949,9 @@ tests:
       Test the metadata resolution precedence: `protocol` from `.schema.json` should be used even if
       different values exist in `.config.yaml` and `README.md`.
     commands: []
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -967,9 +967,9 @@ tests:
       reported as `USABLE (with warnings)`.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -983,9 +983,9 @@ tests:
     description: Verify that a plugin with a missing required file (e.g., `index.js`) is reported as `INVALID`.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -1001,9 +1001,9 @@ tests:
       `cv.schema.json`) is reported as `USABLE (with warnings)`.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -1017,9 +1017,9 @@ tests:
     description: Verify that a plugin whose co-located E2E test fails when executed is reported as `INVALID`.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -1035,9 +1035,9 @@ tests:
       error) is reported as `INVALID`.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins
@@ -1053,9 +1053,9 @@ tests:
       `USABLE (with warnings)` status, assuming other checks pass.
     commands:
       - plugin validate
-    runner: test/integration/plugins/plugin-validator.test.js
-    manifest: test/integration/plugins/plugin-validator.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-validator.test.js
+    manifest: test/runners/integration/plugins/plugin-validator.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level2
       - plugins

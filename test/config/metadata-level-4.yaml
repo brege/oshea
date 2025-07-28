@@ -17,8 +17,8 @@ tests:
       - convert
       - collection disable
       - collection remove
-    runner: test/e2e/workflow-lifecycle.test.js
-    manifest: test/e2e/workflow-lifecycle.test.js
+    runner: test/runners/e2e/workflow-lifecycle.test.js
+    manifest: test/runners/e2e/workflow-lifecycle.test.js
     reference: docs/walkthroughs/full-lifecycle.md
     mocha_groups:
       - level4
@@ -35,8 +35,8 @@ tests:
       - collection add
       - plugin create --from
       - convert
-    runner: test/e2e/workflow-lifecycle.test.js
-    manifest: test/e2e/workflow-lifecycle.test.js
+    runner: test/runners/e2e/workflow-lifecycle.test.js
+    manifest: test/runners/e2e/workflow-lifecycle.test.js
     reference: docs/walkthroughs/archetyping-a-plugin.md
     mocha_groups:
       - level4
@@ -119,8 +119,8 @@ tests:
       changes.
     commands:
       - collection update
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/sad-paths.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/sad-paths.manifest.js
     reference: null
     mocha_groups:
       - level4
@@ -135,8 +135,8 @@ tests:
       `*.config.yaml` or `index.js`).
     commands:
       - plugin create --from
-    runner: test/e2e/all-e2e.test.js
-    manifest: test/e2e/sad-paths.manifest.js
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/sad-paths.manifest.js
     reference: null
     mocha_groups:
       - level4
@@ -144,3 +144,29 @@ tests:
       - all
     app_files:
       - src/cli/commands/plugin/create.command.js
+  4.1.5:
+    description: >
+      A user can successfully perform the complete unified plugin architecture workflow including
+      adding collections, creating plugins from multiple sources, adding external plugins, managing
+      plugin states (enable/disable), and using plugins for document conversion. This verifies the
+      integrity of the new unified user-plugins structure and separation from collections.
+    commands:
+      - collection add
+      - plugin create --from
+      - plugin add
+      - plugin enable
+      - plugin disable
+      - plugin list
+      - convert
+      - collection update
+    runner: test/runners/e2e/unified-plugin-workflow.test.js
+    manifest: test/runners/e2e/unified-plugin-workflow.test.js
+    reference: null
+    mocha_groups:
+      - level4
+      - e2e
+      - all
+    app_files:
+      - src/collections/
+      - src/plugins/
+      - src/cli/commands/plugin/

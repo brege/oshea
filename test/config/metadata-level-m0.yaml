@@ -13,8 +13,8 @@ tests:
     commands:
       - node scripts/linting/code/no-console.js
       - node scripts/linting/lint.js --only "no-console"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/code-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/code-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting
@@ -26,8 +26,8 @@ tests:
     commands:
       - node scripts/linting/code/no-jsdoc.js
       - node scripts/linting/lint.js --only "no-jsdoc"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/code-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/code-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting
@@ -39,8 +39,8 @@ tests:
     commands:
       - node scripts/linting/code/no-trailing-whitespace.js
       - node scripts/linting/lint.js --only "no-trailing-whitespace"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/code-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/code-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting
@@ -52,8 +52,8 @@ tests:
     commands:
       - node scripts/linting/code/no-bad-headers.js
       - node scripts/linting/lint.js --only "no-bad-headers"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/code-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/code-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting
@@ -65,8 +65,8 @@ tests:
     commands:
       - node scripts/linting/code/no-relative-paths.js
       - node scripts/linting/lint.js --only "no-relative-paths"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/code-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/code-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting
@@ -80,8 +80,8 @@ tests:
     commands:
       - node scripts/linting/docs/postman.js
       - node scripts/linting/lint.js --only "postman"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/docs-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/docs-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting
@@ -95,8 +95,8 @@ tests:
     commands:
       - node scripts/linting/docs/janitor.js
       - node scripts/linting/lint.js --only "janitor"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/docs-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/docs-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting
@@ -109,8 +109,8 @@ tests:
     commands:
       - node scripts/linting/docs/librarian.js
       - node scripts/linting/lint.js --only "librarian"
-    runner: test/linting/all-linting-unit.test.js
-    manifest: test/linting/docs-linting.manifest.js
+    runner: test/runners/linting/all-linting-unit.test.js
+    manifest: test/runners/linting/docs-linting.manifest.js
     references: scripts/linting/index.md
     mocha_groups:
       - linting

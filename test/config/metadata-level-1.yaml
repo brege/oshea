@@ -14,9 +14,9 @@ tests:
       main configurations, and sets `primaryMainConfig`, `primaryMainConfigPathActual`, and
       `resolvedCollRoot`.
     commands: []
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -32,9 +32,9 @@ tests:
       changes.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -50,9 +50,9 @@ tests:
       `actualPath`.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.load-plugin-base-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.load-plugin-base-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -67,9 +67,9 @@ tests:
       `pluginOwnConfigPath` and `actualPluginBasePath` from the `mergedPluginRegistry`.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -84,9 +84,9 @@ tests:
       path, identifying its config file (`.config.yaml`).
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -101,9 +101,9 @@ tests:
       its config file.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -118,9 +118,9 @@ tests:
       directory.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -135,9 +135,9 @@ tests:
       at the registered path.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -152,9 +152,9 @@ tests:
       by `pluginConfigLoader.applyOverrideLayers`.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -169,9 +169,9 @@ tests:
       on top of existing configurations, including `css_files` resolution relative to
       `markdownFilePath`.
     commands: []
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -186,9 +186,9 @@ tests:
       `pluginSpecificConfig.pdf_options` correctly, including nested `margin` properties.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -203,9 +203,9 @@ tests:
       correctly, including `katex_options`.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -219,9 +219,9 @@ tests:
       Test `getEffectiveConfig` correctly consolidates and filters `css_files` paths, ensuring only
       existing and unique paths are included.
     commands: []
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -236,9 +236,9 @@ tests:
       configuration does not exist at the resolved `handlerScriptPath`.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -253,9 +253,9 @@ tests:
       previously resolved configurations for the same plugin specification and overrides.
     commands:
       - plugin
-    runner: test/integration/config/config-resolver.test.js
-    manifest: test/integration/config/config-resolver.get-effective-config.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/config-resolver.test.js
+    manifest: test/runners/integration/config/config-resolver.get-effective-config.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -270,9 +270,9 @@ tests:
       `projectManifestConfigPath`, and related path properties, handling `XDG_CONFIG_HOME`
       environment variable.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -284,9 +284,9 @@ tests:
   1.2.2:
     description: Test the constructor throws an error if `projectRoot` is not provided or is invalid.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -300,9 +300,9 @@ tests:
       Verify the constructor correctly determines `cmCollRoot` based on `XDG_DATA_HOME` or
       OS-specific default paths.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -316,9 +316,9 @@ tests:
       Test `_resolveAlias` resolves a tilde-prefixed alias value to an absolute path in the user's
       home directory.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -332,9 +332,9 @@ tests:
       Verify `_resolveAlias` resolves a relative alias value correctly against the provided
       `basePathDefiningAlias`.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -348,9 +348,9 @@ tests:
       Test `_resolveAlias` returns `null` for invalid or empty `aliasValue` or if
       `basePathDefiningAlias` is missing for a relative path.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -365,9 +365,9 @@ tests:
       `myAlias:path/to/plugin`) using provided `currentAliases`.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -382,9 +382,9 @@ tests:
       user's home directory.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -399,9 +399,9 @@ tests:
       `basePathForMainConfig`.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -416,9 +416,9 @@ tests:
       (`dirname.config.yaml`) when a directory path is provided.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -433,9 +433,9 @@ tests:
       the conventional name is not present.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -450,9 +450,9 @@ tests:
       not exist.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -467,9 +467,9 @@ tests:
       but no `*.config.yaml` file is found within it.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -484,10 +484,10 @@ tests:
       from a valid YAML config file.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
     manifest: >-
-      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+      test/runners/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -502,10 +502,10 @@ tests:
       does not exist or is empty.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
     manifest: >-
-      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+      test/runners/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -520,10 +520,10 @@ tests:
       empty object.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
     manifest: >-
-      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+      test/runners/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -538,10 +538,10 @@ tests:
       plugin paths.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
     manifest: >-
-      test/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+      test/runners/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -556,9 +556,9 @@ tests:
       `enabled.yaml` manifest, enriching their details.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -573,9 +573,9 @@ tests:
       does not exist.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -590,9 +590,9 @@ tests:
       missing `invoke_name` or `config_path`) by skipping them and logging a warning.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -607,9 +607,9 @@ tests:
       does not exist on the file system.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -624,9 +624,9 @@ tests:
       Definitions) when `useFactoryDefaultsOnly` is true.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -640,9 +640,9 @@ tests:
       Verify `buildRegistry` correctly merges registrations from Bundled Definitions, then XDG
       Global, then Project Manifest when `useFactoryDefaultsOnly` is false.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -656,9 +656,9 @@ tests:
       Test `buildRegistry`'s caching mechanism, ensuring it returns a cached registry if relevant
       build parameters haven't changed.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -674,9 +674,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -690,9 +690,9 @@ tests:
       Test `buildRegistry` handles missing `factoryDefaultMainConfigPath` or `bundledMainConfigPath`
       gracefully without crashing.
     commands: []
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.build-registry.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.build-registry.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -708,9 +708,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -725,9 +725,9 @@ tests:
       plugin's config file.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -742,9 +742,9 @@ tests:
       plugins registered via traditional configs.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -760,9 +760,9 @@ tests:
     commands:
       - plugin
       - collection
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -777,9 +777,9 @@ tests:
       different invoke names) and lists them separately.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -794,9 +794,9 @@ tests:
       `name` property.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-registry-builder.test.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -811,9 +811,9 @@ tests:
       (`args.plugin`) over all other sources.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -828,9 +828,9 @@ tests:
       front matter (`frontMatter.md_to_pdf_plugin`) when no CLI argument is present.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -846,9 +846,9 @@ tests:
       plugin.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -863,9 +863,9 @@ tests:
       CLI, front matter, or local config.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -880,9 +880,9 @@ tests:
       local `.config.yaml` file, excluding the `plugin` field.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -897,9 +897,9 @@ tests:
       read front matter or local config and defaulting appropriately.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -914,9 +914,9 @@ tests:
       front matter from the Markdown file.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -931,9 +931,9 @@ tests:
       local `.config.yaml` file.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -949,9 +949,9 @@ tests:
       `markdownDir/pluginName/pluginName.config.yaml`).
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -966,9 +966,9 @@ tests:
       path directly in the markdown file's directory (e.g., `markdownDir/pluginName.config.yaml`).
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -983,9 +983,9 @@ tests:
       its original name (not a path) is retained for resolution by `ConfigResolver`.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1000,9 +1000,9 @@ tests:
       against the `markdownFilePathAbsolute` when present.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1017,9 +1017,9 @@ tests:
       working directory (`process.cwd()`) if `markdownFilePathAbsolute` is not available.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1033,9 +1033,9 @@ tests:
       Test the logging mechanism correctly reports the determination source and avoids redundant log
       messages when an override occurs.
     commands: []
-    runner: test/integration/plugins/plugin-determiner.test.js
-    manifest: test/integration/plugins/plugin-determiner.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-determiner.test.js
+    manifest: test/runners/integration/plugins/plugin-determiner.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1049,9 +1049,9 @@ tests:
       Verify the constructor correctly initializes `projectRoot`, `defaultMainConfigPath`, and
       `factoryDefaultMainConfigPath` based on the provided `projectRoot`.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1065,9 +1065,9 @@ tests:
       Test the constructor correctly determines `xdgBaseDir` and `xdgGlobalConfigPath` using
       `XDG_CONFIG_HOME` environment variable if `xdgBaseDir` parameter is null.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1079,9 +1079,9 @@ tests:
   1.4.3:
     description: Verify the constructor correctly uses the provided `xdgBaseDir` parameter when it's not null.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1095,9 +1095,9 @@ tests:
       Test the constructor correctly sets `projectManifestConfigPath` and `useFactoryDefaultsOnly`
       from constructor arguments.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1111,9 +1111,9 @@ tests:
       Verify `_initialize` correctly selects `factoryDefaultMainConfigPath` as primary when
       `useFactoryDefaultsOnly` is true.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1127,9 +1127,9 @@ tests:
       Test `_initialize` correctly prioritizes `projectManifestConfigPath` (from CLI) if it exists
       and `useFactoryDefaultsOnly` is false.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1143,9 +1143,9 @@ tests:
       Verify `_initialize` correctly prioritizes `xdgGlobalConfigPath` if it exists and neither CLI
       config nor `useFactoryDefaultsOnly` applies.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1159,9 +1159,9 @@ tests:
       Test `_initialize` correctly prioritizes `defaultMainConfigPath` (bundled) if it exists and no
       higher-priority config is found.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1175,9 +1175,9 @@ tests:
       Verify `_initialize` falls back to `factoryDefaultMainConfigPath` if no other primary main
       configuration file is found.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1191,9 +1191,9 @@ tests:
       Test `_initialize` loads the selected primary config file correctly and sets `primaryConfig`,
       `primaryConfigPath`, and `primaryConfigLoadReason`.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1207,9 +1207,9 @@ tests:
       Verify `_initialize` sets `primaryConfig` to an empty object if the determined
       `configPathToLoad` does not exist or fails to load.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1223,9 +1223,9 @@ tests:
       Test `_initialize` loads `xdgConfigContents` from `xdgGlobalConfigPath` if it exists and is
       not the primary config.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1239,9 +1239,9 @@ tests:
       Verify `_initialize` sets `xdgConfigContents` to an empty object if `xdgGlobalConfigPath` does
       not exist or loading fails.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1255,9 +1255,9 @@ tests:
       Test `_initialize` loads `projectConfigContents` from `projectManifestConfigPath` if it exists
       and is not the primary config.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1271,9 +1271,9 @@ tests:
       Verify `_initialize` sets `projectConfigContents` to an empty object if
       `projectManifestConfigPath` does not exist or loading fails.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1285,9 +1285,9 @@ tests:
   1.4.16:
     description: Test `_initialize` correctly sets `_initialized` to true after completion.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.initialize.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.initialize.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1301,9 +1301,9 @@ tests:
       Verify `getPrimaryMainConfig` returns the primary configuration object, including the added
       `projectRoot` property, along with its path, base directory, and load reason.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.getters.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.getters.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1317,9 +1317,9 @@ tests:
       Test `getXdgMainConfig` returns the XDG global configuration object, including the added
       `projectRoot` property, along with its path and base directory.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.getters.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.getters.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1333,9 +1333,9 @@ tests:
       Verify `getProjectManifestConfig` returns the project manifest configuration object, including
       the added `projectRoot` property, along with its path and base directory.
     commands: []
-    runner: test/integration/config/main-config-loader.test.js
-    manifest: test/integration/config/main-config-loader.getters.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/main-config-loader.test.js
+    manifest: test/runners/integration/config/main-config-loader.getters.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1350,9 +1350,9 @@ tests:
       significant internal state, reflecting its simple design.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1367,9 +1367,9 @@ tests:
       `coreUtils` are correctly passed to its constructor.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1384,9 +1384,9 @@ tests:
       `outputDir`, `outputFilenameOpt`, and `pluginBasePath` to the plugin's `generate` method.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1401,9 +1401,9 @@ tests:
       exports a `generate` function directly, logging a warning about constructor injection.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1417,9 +1417,9 @@ tests:
       Verify `invokeHandler` throws an error if `effectiveConfig.handlerScriptPath` is missing or
       undefined.
     commands: []
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1433,9 +1433,9 @@ tests:
       Test `invokeHandler` throws an error if the loaded handler module does not export a class or a
       `generate` function.
     commands: []
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1449,9 +1449,9 @@ tests:
       Verify `invokeHandler` throws an error if the handler instance (either class or object) does
       not have a `generate` method.
     commands: []
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1466,9 +1466,9 @@ tests:
       returns `null`.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1483,9 +1483,9 @@ tests:
       successfully invoked plugin's `generate` method.
     commands:
       - plugin
-    runner: test/integration/plugins/plugin-manager.test.js
-    manifest: test/integration/plugins/plugin-manager.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/plugins/plugin-manager.test.js
+    manifest: test/runners/integration/plugins/plugin-manager.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - plugins
@@ -1500,9 +1500,9 @@ tests:
       `projectMainConfig`, and `useFactoryDefaultsOnly` from arguments, setting defaults for configs
       if null.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.constructor.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.constructor.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1516,9 +1516,9 @@ tests:
       Test `_loadSingleConfigLayer` successfully loads a valid YAML config file and resolves initial
       CSS paths using `AssetResolver.resolveAndMergeCss`.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1532,9 +1532,9 @@ tests:
       Verify `_loadSingleConfigLayer` caches loaded config data and returns the cached result on
       subsequent calls with the same parameters.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1548,9 +1548,9 @@ tests:
       Test `_loadSingleConfigLayer` returns `null` if the `configFilePath` is not provided or the
       file does not exist.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1564,9 +1564,9 @@ tests:
       Verify `_loadSingleConfigLayer` handles errors during YAML parsing or file reading gracefully,
       returning an empty config object.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.load-single-layer.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.load-single-layer.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1580,9 +1580,9 @@ tests:
       Test `applyOverrideLayers` returns the original `layer0ConfigData` unchanged when
       `useFactoryDefaultsOnly` is true.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1597,9 +1597,9 @@ tests:
       file (`~/.config/md-to-pdf/pluginName/pluginName.config.yaml`) if it exists.
     commands:
       - plugin
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1614,9 +1614,9 @@ tests:
       `xdgMainConfig.pluginName: { ... }`).
     commands:
       - plugin
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1631,9 +1631,9 @@ tests:
       file referenced in `projectMainConfig.plugins[pluginName]`.
     commands:
       - plugin
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1648,9 +1648,9 @@ tests:
       (e.g., `projectMainConfig.pluginName: { ... }`).
     commands:
       - plugin
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1664,9 +1664,9 @@ tests:
       Verify `applyOverrideLayers` correctly merges CSS files and respects `inherit_css` across all
       override layers, using `AssetResolver.resolveAndMergeCss`.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1680,9 +1680,9 @@ tests:
       Test `applyOverrideLayers` correctly resolves relative and tilde-prefixed paths within XDG and
       Project file-based overrides.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1696,9 +1696,9 @@ tests:
       Verify `applyOverrideLayers` accurately updates `contributingPaths` with the paths of all
       applied override layers.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1712,9 +1712,9 @@ tests:
       Test `applyOverrideLayers` gracefully handles non-existent XDG or Project override files/paths
       by skipping them and logging warnings.
     commands: []
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1729,9 +1729,9 @@ tests:
       XDG overrides (file then inline), which take precedence over the base plugin config (Layer 0).
     commands:
       - plugin
-    runner: test/integration/config/plugin-config-loader.test.js
-    manifest: test/integration/config/plugin-config-loader.apply-overrides.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/config/plugin-config-loader.test.js
+    manifest: test/runners/integration/config/plugin-config-loader.apply-overrides.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - config
@@ -1746,9 +1746,9 @@ tests:
       plugin to the `MarkdownIt` instance when math is enabled and engine is 'katex'.
     commands:
       - plugin
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1763,9 +1763,9 @@ tests:
       plugin.
     commands:
       - plugin
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1779,9 +1779,9 @@ tests:
       Verify `configureMarkdownItForMath` does nothing if math is not enabled or the engine is not
       'katex'.
     commands: []
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1796,9 +1796,9 @@ tests:
       cannot be `require`d or is not a valid plugin function.
     commands:
       - plugin
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1812,9 +1812,9 @@ tests:
       Verify `getMathCssContent` returns the content of `katex.min.css` as a string within an array
       when math is enabled and the file exists.
     commands: []
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1828,9 +1828,9 @@ tests:
       Test `getMathCssContent` returns an empty array if math is not enabled or the engine is not
       'katex'.
     commands: []
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1844,9 +1844,9 @@ tests:
       Verify `getMathCssContent` returns an empty array and logs a warning if `katex.min.css` file
       does not exist at the expected path.
     commands: []
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1860,9 +1860,9 @@ tests:
       Test `getMathCssContent` returns an empty array and logs a warning if there's an error reading
       `katex.min.css` file.
     commands: []
-    runner: test/integration/core/math-integration.test.js
-    manifest: test/integration/core/math-integration.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/core/math-integration.test.js
+    manifest: test/runners/integration/core/math-integration.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - core
@@ -1875,9 +1875,9 @@ tests:
     description: Verify `deriveCollectionName` correctly sanitizes a URL or path.
     commands:
       - collection
-    runner: test/integration/collections/cm-utils.test.js
-    manifest: test/integration/collections/cm-utils.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/cm-utils.test.js
+    manifest: test/runners/integration/collections/cm-utils.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - collections
@@ -1890,9 +1890,9 @@ tests:
     description: Test `toPascalCase` correctly converts various hyphenated strings to PascalCase.
     commands:
       - convert
-    runner: test/integration/collections/cm-utils.test.js
-    manifest: test/integration/collections/cm-utils.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/cm-utils.test.js
+    manifest: test/runners/integration/collections/cm-utils.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - collections
@@ -1905,9 +1905,9 @@ tests:
     description: Verify `isValidPluginName` correctly validates plugin names.
     commands:
       - plugin
-    runner: test/integration/collections/cm-utils.test.js
-    manifest: test/integration/collections/cm-utils.manifest.js
-    reference: test/docs/test-generation-priority-order.md
+    runner: test/runners/integration/collections/cm-utils.test.js
+    manifest: test/runners/integration/collections/cm-utils.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
       - collections

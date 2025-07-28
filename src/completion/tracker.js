@@ -77,9 +77,15 @@ function getAvailablePlugins() {
   return data.availablePlugins || [];
 }
 
+function getUserPlugins() {
+  const data = getDynamicData();
+  return data.userPlugins || [];
+}
+
 module.exports = {
   getUsablePlugins,
   getDownloadedCollections,
   getEnabledPlugins,
-  getAvailablePlugins
+  getAvailablePlugins,
+  getUserPlugins
 };

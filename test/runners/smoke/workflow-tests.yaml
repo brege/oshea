@@ -2,51 +2,51 @@
 # Complete plugin lifecycle testing as one sequential workflow
 ---
 name: "4.1.1 Full Plugin Collection Lifecycle"
-tags: [collection, plugin, lifecycle, full]
+tags: [workflow, collection, plugin, git, enable, disable, remove]
 base_command: "md-to-pdf"
 scenarios:
-  - description: "Add plugin collection from GitHub"
+  - description: "4.1.1.1 Add plugin collection from GitHub"
     args: "collection add https://github.com/brege/md-to-pdf-plugins.git --name lifecycle-collection"
     expect:
       contains: "Successfully cloned repository"
 
-  - description: "Enable plugin from collection"
+  - description: "4.1.1.2 Enable plugin from collection"
     args: "plugin enable lifecycle-collection/restaurant-menu"
     expect:
       contains: "Plugin enabled successfully"
 
-  - description: "Convert document using enabled plugin"
+  - description: "4.1.1.3 Convert document using enabled plugin"
     args: "convert ${SIMPLE_MD_FIXTURE} --plugin restaurant-menu --outdir ${OUTDIR} --no-open"
     expect:
       contains: "convert command finished"
       file_exists: "${OUTDIR}/restaurant-menu.pdf"
 
-  - description: "Disable the plugin"
+  - description: "4.1.1.4 Disable the plugin"
     args: "plugin disable restaurant-menu"
     expect:
       contains: "Plugin disabled successfully"
 
-  - description: "Remove the collection"
+  - description: "4.1.1.5 Remove the collection"
     args: "collection remove lifecycle-collection"
     expect:
       contains: "Collection directory not found for physical removal"
 
 ---
 name: "4.1.2 Archetype, Add, and Convert with New Plugin"
-tags: [archetype, plugin, convert, fast]
+tags: [workflow, archetype, plugin, convert, add]
 base_command: "md-to-pdf"
 scenarios:
-  - description: "Create a new archetype plugin from 'cv'"
+  - description: "4.1.2.1 Create a new archetype plugin from 'cv'"
     args: "plugin create my-custom-cv --from cv --outdir ${OUTDIR}"
     expect:
       contains_all: ["created successfully", "my-custom-cv"]
 
-  - description: "Add the new archetype plugin"
+  - description: "4.1.2.2 Add the new archetype plugin"
     args: "plugin add ${OUTDIR}/my-custom-cv"
     expect:
       contains: "Successfully processed 'plugin add'"
 
-  - description: "Convert a markdown document using the new plugin"
+  - description: "4.1.2.3 Convert a markdown document using the new plugin"
     args: "convert ${SIMPLE_MD_FIXTURE} --plugin my-custom-cv --outdir ${OUTDIR} --no-open"
     expect:
       contains: "convert command finished"
@@ -54,49 +54,50 @@ scenarios:
 
 ---
 name: "4.1.5 Unified Plugin Architecture Complete Workflow"
+tags: [workflow, plugin, archetype, enable, removal]
 base_command: "md-to-pdf"
 scenarios:
-  - description: "Create plugin-A externally using --outdir"
+  - description: "4.1.5.1 Create plugin-A externally using --outdir"
     args: "plugin create plugin-A --from default --outdir ${OUTDIR}"
     expect:
       contains_all: ["created successfully", "plugin-A"]
 
-  - description: "Create plugin-B externally using --outdir"
+  - description: "4.1.5.2 Create plugin-B externally using --outdir"
     args: "plugin create plugin-B --from default --outdir ${OUTDIR}"
     expect:
       contains_all: ["created successfully", "plugin-B"]
 
-  - description: "Add externally created plugin-A to unified architecture"
+  - description: "4.1.5.3 Add externally created plugin-A to unified architecture"
     args: "plugin add ${OUTDIR}/plugin-A"
     expect:
       contains: "Successfully processed 'plugin add'"
 
-  - description: "Add externally created plugin-B to unified architecture"
+  - description: "4.1.5.4 Add externally created plugin-B to unified architecture"
     args: "plugin add ${OUTDIR}/plugin-B"
     expect:
       contains: "Successfully processed 'plugin add'"
 
-  - description: "Verify plugins appear in unified manifest"
+  - description: "4.1.5.5 Verify plugins appear in unified manifest"
     args: "plugin list --short"
     expect:
       contains_all: ["plugin-A", "plugin-B"]
 
-  - description: "Disable plugin-A for state management test"
+  - description: "4.1.5.6 Disable plugin-A for state management test"
     args: "plugin disable plugin-A"
     expect:
       contains: "Plugin disabled successfully"
 
-  - description: "Enable plugin-A back to active state"
+  - description: "4.1.5.7 Enable plugin-A back to active state"
     args: "plugin enable plugin-A"
     expect:
       contains: "Plugin enabled successfully"
 
-  - description: "Remove plugin-A from unified structure"
+  - description: "4.1.5.8 Remove plugin-A from unified structure"
     args: "plugin remove plugin-A"
     expect:
       contains: "removed successfully"
 
-  - description: "Verify plugin-A no longer in list after removal"
+  - description: "4.1.5.9 Verify plugin-A no longer in list after removal"
     args: "plugin list --short"
     expect_not:
       contains: "plugin-A"
@@ -112,6 +113,7 @@ scenarios:
 ---
 name: "4.3.1 Collection Update with Uncommitted Changes (Deprecated)"
 base_command: "md-to-pdf"
+tags: [workflow, collection, update, git, sad-path, deprecated]
 scenarios:
   - description: >-
       Original Title: Collection update fails with local uncommitted changes
@@ -128,6 +130,7 @@ scenarios:
 ---
 name: "4.3.2 Plugin Create Invalid Source (Deprecated)"
 base_command: "md-to-pdf"
+tags: [workflow, plugin, create, sad-path, deprecated]
 scenarios:
   - description: >-
       Original Title: Plugin create fails with invalid source

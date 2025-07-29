@@ -12,6 +12,7 @@ const {
   collectionListFormatterPath,
   smokeTestFormatterPath,
   validationFormatterPath,
+  workflowTestFormatterPath,
 } = require('@paths');
 const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
@@ -34,6 +35,14 @@ const {
   formatValidationTest,
   formatValidationSummary
 } = require(validationFormatterPath);
+const {
+  formatWorkflowSuiteHeader,
+  formatWorkflowStep,
+  formatWorkflowHeader,
+  formatWorkflowWarning,
+  formatWorkflowList,
+  formatWorkflowResults
+} = require(workflowTestFormatterPath);
 
 // Export formatters
 module.exports = {
@@ -53,5 +62,11 @@ module.exports = {
   'validation-header': formatValidationHeader,
   'validation-step': formatValidationStep,
   'validation-test': formatValidationTest,
-  'validation-summary': formatValidationSummary
+  'validation-summary': formatValidationSummary,
+  'workflow-header': formatWorkflowHeader,
+  'workflow-suite': formatWorkflowSuiteHeader,
+  'workflow-step': formatWorkflowStep,
+  'workflow-warning': formatWorkflowWarning,
+  'workflow-list': formatWorkflowList,
+  'workflow-results': formatWorkflowResults
 };

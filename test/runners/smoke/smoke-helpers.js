@@ -1,4 +1,4 @@
-// test/runners/smoke/test-harness.js
+// test/runners/smoke/smoke-helpers.js
 // Unified test harness for YAML-based tests (smoke tests and workflow tests)
 
 require('module-alias/register');
@@ -266,10 +266,10 @@ function parseArgs(args, options = {}) {
   if (supportsYamlFile) {
     result.yamlFile = null;
   }
-  
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    
+
     if (arg === '--list') {
       result.listMode = true;
     } else if (arg === '--show') {
@@ -279,7 +279,7 @@ function parseArgs(args, options = {}) {
         result.grepPattern = args[i + 1];
         i++; // Skip next arg since it's the grep pattern
       } else {
-        console.error('Error: --grep requires a pattern argument');
+        logger.error('Error: --grep requires a pattern argument');
         process.exit(1);
       }
     } else if (!arg.startsWith('--')) {
@@ -290,17 +290,101 @@ function parseArgs(args, options = {}) {
       }
     }
   }
-  
+
   return result;
+}
+
+// Enhanced command execution that preserves colors for --show mode
+function executeCommandWithColors(command) {
+  return new Promise((resolve, reject) => {
+    const { exec } = require('child_process');
+    exec(command, {
+      env: { ...process.env, FORCE_COLOR: '1' }, // Ensure colors are preserved
+      maxBuffer: 1024 * 1024 // 1MB buffer for large outputs
+    }, (error, stdout, stderr) => {
+      if (error) {
+        reject({ error, stdout, stderr, message: error.message });
+        return;
+      }
+
+      if (stderr && stderr.trim()) {
+        logger.warn({ stderr }, { format: 'workflow-warning' });
+      }
+
+      resolve({ stdout, stderr });
+    });
+  });
+}
+
+// Grep filtering function - matches against suite name, tags, and scenario descriptions
+function matchesGrep(grepPattern, testSuite) {
+  if (!grepPattern) return true;
+
+  const lowerPattern = grepPattern.toLowerCase();
+
+  // Match against suite name
+  if (testSuite.name && testSuite.name.toLowerCase().includes(lowerPattern)) {
+    return true;
+  }
+
+  // Match against tags
+  if (testSuite.tags && Array.isArray(testSuite.tags)) {
+    if (testSuite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))) {
+      return true;
+    }
+  }
+
+  // Match against scenario descriptions (from expanded scenarios)
+  const scenarios = expandScenarios(testSuite);
+  if (scenarios.some(scenario =>
+    scenario.description && scenario.description.toLowerCase().includes(lowerPattern)
+  )) {
+    return true;
+  }
+
+  return false;
+}
+
+// Unified list function that works with both smoke and workflow tests
+function listTestSuites(yamlFilePath, useWorkflowFormatter = true) {
+  const content = fs.readFileSync(yamlFilePath, 'utf8');
+  const documents = yaml.loadAll(content);
+
+  const blocks = documents
+    .filter(doc => doc && doc.name)
+    .map((doc, index) => ({
+      index: index + 1,
+      name: doc.name,
+      stepCount: doc.scenarios ? doc.scenarios.length : 0,
+      tags: doc.tags || []
+    }));
+
+  if (useWorkflowFormatter) {
+    logger.info({ blocks }, { format: 'workflow-list' });
+  } else {
+    // Legacy console output for backward compatibility
+    console.log('\nAvailable test blocks:\n');
+    blocks.forEach(block => {
+      console.log(`  ${block.index}. ${block.name}`);
+      console.log(`     Steps: ${block.stepCount}`);
+      if (block.tags.length > 0) {
+        console.log(`     Tags: ${block.tags.join(', ')}`);
+      }
+      console.log('');
+    });
+  }
 }
 
 module.exports = {
   executeCommand,
+  executeCommandWithColors,
   validators,
   discoverers,
   TestWorkspace,
   expandScenarios,
   processCommandArgs,
   validateResult,
-  parseArgs
+  parseArgs,
+  matchesGrep,
+  listTestSuites
 };

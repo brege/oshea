@@ -2,8 +2,6 @@
 // test/runners/smoke/smoke-test-runner.js
 // Smoke test runner - run tests defined in a YAML file
 
-// lint-skip-file no-console
-
 require('module-alias/register');
 
 const fs = require('fs');
@@ -12,38 +10,22 @@ const yaml = require('js-yaml');
 const {
   cliPath,
   loggerPath,
+  smokeHelpersPath,
   smokeTestsManifestPath
 } = require('@paths');
 const logger = require(loggerPath);
 const {
   executeCommand,
+  executeCommandWithColors,
   validators,
   discoverers,
   expandScenarios,
-  parseArgs
-} = require('./smoke-helpers');
+  parseArgs,
+  matchesGrep,
+  listTestSuites
+} = require(smokeHelpersPath);
 
-// Enhanced command execution that preserves colors for --show mode
-function executeCommandWithColors(command) {
-  return new Promise((resolve, reject) => {
-    const { exec } = require('child_process');
-    exec(command, {
-      env: { ...process.env, FORCE_COLOR: '1' }, // Ensure colors are preserved
-      maxBuffer: 1024 * 1024 // 1MB buffer for large outputs
-    }, (error, stdout, stderr) => {
-      if (error) {
-        reject({ error, stdout, stderr, message: error.message });
-        return;
-      }
-
-      if (stderr && stderr.trim()) {
-        logger.warn({ stderr }, { format: 'smoke-warning' });
-      }
-
-      resolve({ stdout, stderr });
-    });
-  });
-}
+// executeCommandWithColors now imported from smoke-helpers
 
 
 async function runTestSuite(testSuite, showMode = false) {
@@ -53,7 +35,7 @@ async function runTestSuite(testSuite, showMode = false) {
     logger.info(`${testSuite.name}`);
     logger.info('-'.repeat(80));
   } else {
-    logger.info({ suiteName: testSuite.name }, { format: 'smoke-suite' });
+    logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
   }
 
   const scenarios = expandScenarios(testSuite);
@@ -72,7 +54,7 @@ async function runTestSuite(testSuite, showMode = false) {
       logger.info('-'.repeat(60));
     } else {
       // Start scenario test
-      logger.info({ command: commandDisplay, status: 'testing' }, { format: 'smoke-scenario' });
+      logger.info({ command: commandDisplay, status: 'testing' }, { format: 'workflow-step' });
     }
 
     try {
@@ -81,11 +63,12 @@ async function runTestSuite(testSuite, showMode = false) {
       if (showMode) {
         // Display the actual output with preserved colors for show mode
         if (result.stdout) {
-          console.log(result.stdout); // Use raw console.log to preserve ANSI colors
+          // Use raw console.log to preserve ANSI colors
+          console.log(result.stdout); // lint-skip-line no-console
         }
         if (result.stderr) {
           logger.warn('\nSTDERR:');
-          console.log(result.stderr);
+          console.log(result.stderr); // lint-skip-line no-console
         }
       }
 
@@ -100,7 +83,7 @@ async function runTestSuite(testSuite, showMode = false) {
 
       if (validator(expectValue)(result.stdout)) {
         if (!showMode) {
-          logger.info({ command: commandDisplay, status: 'passed' }, { format: 'smoke-scenario' });
+          logger.info({ command: commandDisplay, status: 'passed' }, { format: 'workflow-step' });
         }
         results.push({ scenario: scenario.description, passed: true });
       } else {
@@ -112,7 +95,7 @@ async function runTestSuite(testSuite, showMode = false) {
         failedScenarios.push(failure);
         results.push({ scenario: scenario.description, passed: false, failure });
         if (!showMode) {
-          logger.info({ command: commandDisplay, status: 'failed' }, { format: 'smoke-scenario' });
+          logger.info({ command: commandDisplay, status: 'failed' }, { format: 'workflow-step' });
         }
       }
 
@@ -120,11 +103,11 @@ async function runTestSuite(testSuite, showMode = false) {
       if (showMode) {
         logger.error(`\nFailed to execute: ${error.message}`);
         if (error.stdout) {
-          console.log(error.stdout);
+          console.log(error.stdout); // lint-skip-line no-console
         }
         if (error.stderr) {
           logger.warn('\nSTDERR:');
-          console.log(error.stderr);
+          console.log(error.stderr); // lint-skip-line no-console
         }
       }
 
@@ -137,7 +120,7 @@ async function runTestSuite(testSuite, showMode = false) {
       failedScenarios.push(failure);
       results.push({ scenario: scenario.description, passed: false, failure });
       if (!showMode) {
-        logger.info({ command: commandDisplay, status: 'failed' }, { format: 'smoke-scenario' });
+        logger.info({ command: commandDisplay, status: 'failed' }, { format: 'workflow-step' });
       }
     }
   }
@@ -151,56 +134,9 @@ async function runTestSuite(testSuite, showMode = false) {
   };
 }
 
-// List available test suites for block selection
-function listTestSuites(yamlFile = null) {
-  const yamlPath = yamlFile ? path.resolve(__dirname, yamlFile) : smokeTestsManifestPath;
-  const content = fs.readFileSync(yamlPath, 'utf8');
-  const documents = yaml.loadAll(content);
+// listTestSuites now imported from smoke-helpers
 
-  console.log('\nAvailable smoke test blocks:\n');
-  documents.forEach((doc, index) => {
-    if (doc && doc.name) {
-      console.log(`  ${index + 1}. ${doc.name}`);
-      console.log(`     Steps: ${doc.scenarios ? doc.scenarios.length : 0}`);
-      
-      // Display tags if they exist
-      if (doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0) {
-        console.log(`     Tags: ${doc.tags.join(', ')}`);
-      }
-      
-      console.log('');
-    }
-  });
-}
-
-// Grep filtering function
-function matchesGrep(grepPattern, testSuite) {
-  if (!grepPattern) return true;
-  
-  const lowerPattern = grepPattern.toLowerCase();
-  
-  // Match against suite name
-  if (testSuite.name && testSuite.name.toLowerCase().includes(lowerPattern)) {
-    return true;
-  }
-  
-  // Match against tags
-  if (testSuite.tags && Array.isArray(testSuite.tags)) {
-    if (testSuite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))) {
-      return true;
-    }
-  }
-  
-  // Match against scenario descriptions (from expanded scenarios)
-  const scenarios = expandScenarios(testSuite);
-  if (scenarios.some(scenario => 
-    scenario.description && scenario.description.toLowerCase().includes(lowerPattern)
-  )) {
-    return true;
-  }
-  
-  return false;
-}
+// matchesGrep now imported from smoke-helpers
 
 // Main runner - load YAML and execute all test suites
 async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock = null, grepPattern = null) {
@@ -214,8 +150,8 @@ async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock =
   if (grepPattern) {
     suitesToRun = testSuites.filter(suite => matchesGrep(grepPattern, suite));
     if (suitesToRun.length === 0) {
-      console.error(`No test suites match grep pattern "${grepPattern}".`);
-      console.error('Use --list to see available test suites, or try a different pattern.');
+      logger.error(`No test suites match grep pattern "${grepPattern}".`);
+      logger.error('Use --list to see available test suites, or try a different pattern.');
       return false;
     }
   }
@@ -233,8 +169,8 @@ async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock =
       if (foundSuite) {
         suitesToRun = [foundSuite];
       } else {
-        const availableOptions = grepPattern ? 
-          `grep-filtered results (${suitesToRun.length} suites)` : 
+        const availableOptions = grepPattern ?
+          `grep-filtered results (${suitesToRun.length} suites)` :
           'available blocks';
         console.error(`Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`);
         return false;
@@ -251,7 +187,7 @@ async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock =
     logger.info('Review each section for: functionality, colors, alignment, error handling');
   } else {
     // Display smoke test header
-    logger.info('', { format: 'smoke-header' });
+    logger.info('', { format: 'workflow-header' });
   }
 
   // Run test suites sequentially for clean output
@@ -268,7 +204,7 @@ async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock =
   logger.info({
     allResults,
     totalFailed
-  }, { format: 'smoke-results' });
+  }, { format: 'workflow-results' });
 
   return totalFailed === 0;
 }
@@ -281,7 +217,8 @@ if (require.main === module) {
   const { showMode, listMode, grepPattern, yamlFile, targetBlock } = parseArgs(args, { supportsYamlFile: true });
 
   if (listMode) {
-    listTestSuites(yamlFile);
+    const yamlPath = yamlFile ? path.resolve(__dirname, yamlFile) : smokeTestsManifestPath;
+    listTestSuites(yamlPath);
   } else {
     runAllSmokeTests(yamlFile, showMode, targetBlock, grepPattern).then(success => {
       process.exit(success ? 0 : 1);

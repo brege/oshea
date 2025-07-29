@@ -160,6 +160,30 @@ function logger(message, options = {}) {
     return formatters['validation-summary'](level, message, meta);
   }
 
+  if (format === 'workflow-header') {
+    return formatters['workflow-header'](level, message, meta);
+  }
+
+  if (format === 'workflow-suite') {
+    return formatters['workflow-suite'](level, message, meta);
+  }
+
+  if (format === 'workflow-step') {
+    return formatters['workflow-step'](level, message, meta);
+  }
+
+  if (format === 'workflow-warning') {
+    return formatters['workflow-warning'](level, message, meta);
+  }
+
+  if (format === 'workflow-list') {
+    return formatters['workflow-list'](level, message, meta);
+  }
+
+  if (format === 'workflow-results') {
+    return formatters['workflow-results'](level, message, meta);
+  }
+
   // Fallback to default formatter
   return formatters.app(level, message, meta);
 }

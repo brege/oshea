@@ -1,6 +1,6 @@
 // src/cli/commands/plugin/create.command.js
 const path = require('path');
-const { cmUtilsPath, pluginArchetyperPath, constantsPath, loggerPath, templateBasicPlugin, cliPath } = require('@paths');
+const { cmUtilsPath, pluginArchetyperPath, loggerPath, templateBasicPlugin, cliPath, collectionsMetadataFilename, collectionsDefaultArchetypeDirname } = require('@paths');
 const { execSync } = require('child_process');
 
 const logger = require(loggerPath);
@@ -13,7 +13,6 @@ const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
 const cmUtils = require(cmUtilsPath);
-const constants = require(constantsPath);
 
 module.exports = {
   command: 'create <pluginName>',
@@ -78,7 +77,7 @@ module.exports = {
         force: args.force
       };
 
-      const dependencies = { chalk: null, cmUtils, constants, fs, fss, fsExtra, yaml, matter, path }; // Pass null for chalk
+      const dependencies = { chalk: null, cmUtils, fs, fss, fsExtra, yaml, matter, path, collectionsMetadataFilename, collectionsDefaultArchetypeDirname }; // Pass null for chalk
       const managerContext = {
         collRoot: args.manager.collRoot,
         listAvailablePlugins: args.manager.listAvailablePlugins.bind(args.manager)

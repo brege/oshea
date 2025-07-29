@@ -1,6 +1,6 @@
 // paths/tests.js
 // tests.js - Test Suite Registry
-// Generated: 2025-07-28T09:45:29.173Z
+// Generated: 2025-07-29T08:49:53.738Z
 // Architecture: Multi-layered testing infrastructure with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -36,6 +36,8 @@ const testRunnerFactoryLinting = path.join(testRoot, 'linting/unit/test-runner-f
 const simpleMdFixture = path.join(fixturesDir, 'markdown/simple.md');
 const simpleMdFixtureWithFm = path.join(fixturesDir, 'markdown/with-front-matter.md');
 const hugoExampleFixturePath = path.join(fixturesDir, 'hugo-example');
+const refreshFixturesPath = path.join(fixturesDir, 'refresh-fixtures.js');
+const createDummyPluginPath = path.join(fixturesDir, 'create-dummy-plugin.js');
 
 // ==========================================
 // Features (by dependency rank)
@@ -48,7 +50,6 @@ const smokeRoot = path.join(projectRoot, 'test/runners/smoke/');
 const smokeTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/smoke-test-runner.js');
 const smokeTestsManifestPath = path.join(projectRoot, 'test/runners/smoke/smoke-tests.yaml');
 const testHarnessPath = path.join(projectRoot, 'test/runners/smoke/test-harness.js');
-const uxTestsYamlPath = path.join(projectRoot, 'test/runners/smoke/ux-tests.yaml');
 const workflowTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/workflow-test-runner.js');
 const workflowTestsYamlPath = path.join(projectRoot, 'test/runners/smoke/workflow-tests.yaml');
 
@@ -143,11 +144,6 @@ const pluginDisableManifestPath = path.join(projectRoot, 'test/runners/e2e/plugi
 const pluginEnableManifestPath = path.join(projectRoot, 'test/runners/e2e/plugin-enable.manifest.js');
 const pluginListManifestPath = path.join(projectRoot, 'test/runners/e2e/plugin-list.manifest.js');
 const pluginValidateManifestPath = path.join(projectRoot, 'test/runners/e2e/plugin-validate.manifest.js');
-const sadPathsManifestPath = path.join(projectRoot, 'test/runners/e2e/sad-paths.manifest.js');
-
-// E2E Workflow Lifecycle Tests
-const e2eWorkflowsRoot = path.join(projectRoot, 'test/runners/e2e/workflow-lifecycle.test.js');
-const workflowLifecycleTestPath = path.join(projectRoot, 'test/runners/e2e/workflow-lifecycle.test.js');
 
 // Linting Unit Tests
 const lintingTestsRoot = path.join(projectRoot, 'test/runners/linting/unit/');
@@ -190,13 +186,14 @@ module.exports = {
   simpleMdFixture,
   simpleMdFixtureWithFm,
   hugoExampleFixturePath,
+  refreshFixturesPath,
+  createDummyPluginPath,
 
   // --- user-facing interfaces ---
   smokeRoot,
   smokeTestRunnerPath,
   smokeTestsManifestPath,
   testHarnessPath,
-  uxTestsYamlPath,
   workflowTestRunnerPath,
   workflowTestsYamlPath,
   coreIntegrationRoot,
@@ -279,9 +276,6 @@ module.exports = {
   pluginEnableManifestPath,
   pluginListManifestPath,
   pluginValidateManifestPath,
-  sadPathsManifestPath,
-  e2eWorkflowsRoot,
-  workflowLifecycleTestPath,
   lintingTestsRoot,
   allLintingUnitTestPath,
   codeLintingManifestPath,

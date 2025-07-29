@@ -71,7 +71,7 @@ module.exports = async function addCollection(dependencies, source, options = {}
     logger.success(`Successfully cloned repository: ${sourceToClone} -> ${targetPath}`, {
       context: 'AddCollectionCommand'
     });
-    await this._writeCollectionMetadata(collectionName, createInitialMetadata());
+    await this._writeCollectionMetadata(path.join('collections', collectionName), createInitialMetadata());
     return targetPath;
   } else {
     const absoluteSourcePath = path.resolve(source);

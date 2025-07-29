@@ -15,7 +15,6 @@ const {
   pluginEnableManifestPath,
   pluginListManifestPath,
   pluginValidateManifestPath,
-  sadPathsManifestPath,
   testRunnerFactoryE2e
 } = require('@paths');
 const { createE2eTestRunner } = require(testRunnerFactoryE2e);
@@ -34,8 +33,7 @@ const testSuites = [
   { name: 'plugin disable', manifest: pluginDisableManifestPath },
   { name: 'plugin enable', manifest: pluginEnableManifestPath },
   { name: 'plugin list', manifest: pluginListManifestPath },
-  { name: 'plugin validate', manifest: pluginValidateManifestPath },
-  { name: 'sad paths', manifest: sadPathsManifestPath }
+  { name: 'plugin validate', manifest: pluginValidateManifestPath }
 ];
 
 for (const { name, manifest, options } of testSuites) {

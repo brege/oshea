@@ -80,7 +80,7 @@ scenarios:
   - description: "List available plugins from collections"
     args: "collection list available"
     expect:
-      contains_any: ["Available plugins", "No available plugins found in any collection."]
+      contains_any: ["Available plugins", "No available plugins found in any collection"]
 
   - description: "List enabled plugins from collections"
     args: "collection list enabled"
@@ -90,7 +90,7 @@ scenarios:
   - description: "List all plugins (alias for available)"
     args: "collection list all"
     expect:
-      contains_any: ["Available plugins", "No available plugins found in any collection."]
+      contains_any: ["Available plugins", "No available plugins found in any collection"]
 
 ---
 name: "Validate bundled plugins"

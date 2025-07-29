@@ -7,7 +7,12 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const yaml = require('js-yaml');
-const { cliPath, cliCommandsPath, projectRoot, loggerPath } = require('@paths');
+const {
+  cliCommandsPath,
+  projectRoot,
+  loggerPath,
+  simpleMdFixture
+} = require('@paths');
 const logger = require(loggerPath);
 
 
@@ -112,7 +117,7 @@ const discoverers = {
 };
 
 
-// Test workspace manager for isolated test environments
+// Test workspace manager for isolated tes/t environments
 class TestWorkspace {
   constructor(basePath = '/tmp/md-to-pdf-workspace') {
     this.basePath = basePath;
@@ -146,7 +151,8 @@ class TestWorkspace {
   getEnvVars() {
     return {
       OUTDIR: this.outdir,
-      COLL_ROOT: this.collRoot
+      COLL_ROOT: this.collRoot,
+      SIMPLE_MD_FIXTURE: simpleMdFixture
     };
   }
 }
@@ -186,7 +192,8 @@ function processCommandArgs(args, workspace, isWorkflowTest = false) {
   // Replace workspace variables
   let processedArgs = args
     .replace(/\$\{OUTDIR\}/g, workspace.outdir)
-    .replace(/\$\{COLL_ROOT\}/g, workspace.collRoot);
+    .replace(/\$\{COLL_ROOT\}/g, workspace.collRoot)
+    .replace(/\$\{SIMPLE_MD_FIXTURE\}/g, simpleMdFixture);
 
   if (isWorkflowTest) {
     // For workflow tests, ensure --outdir and --coll-root are properly set

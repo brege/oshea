@@ -46,7 +46,7 @@ module.exports = [
       expect(stdout).to.match(/Attempting to update all Git-based collections/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
-      const updatedFile = path.join(collRootDir, 'collection-to-update-all', 'v2.txt');
+      const updatedFile = path.join(collRootDir, 'collections', 'collection-to-update-all', 'v2.txt');
       const fileExists = await fs.pathExists(updatedFile);
       expect(fileExists, 'Expected updated file v2.txt to exist').to.be.true;
     },
@@ -66,7 +66,7 @@ module.exports = [
       expect(stdout).to.match(/Attempting to update collection.*collection-to-update-one/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
-      const updatedFile = path.join(collRootDir, 'collection-to-update-one', 'v2.txt');
+      const updatedFile = path.join(collRootDir, 'collections', 'collection-to-update-one', 'v2.txt');
       const fileExists = await fs.pathExists(updatedFile);
       expect(fileExists, 'Expected updated file v2.txt to exist').to.be.true;
     },
@@ -85,7 +85,7 @@ module.exports = [
       expect(stdout).to.match(/Updating collection from Git source:/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
-      const updatedFile = path.join(collRootDir, 'collection-to-update-alias', 'v2.txt');
+      const updatedFile = path.join(collRootDir, 'collections', 'collection-to-update-alias', 'v2.txt');
       const fileExists = await fs.pathExists(updatedFile);
       expect(fileExists, 'Expected updated file v2.txt to exist').to.be.true;
     },

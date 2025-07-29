@@ -24,11 +24,10 @@ function createE2eTestRunner(commandName, manifestPath, options = {}) {
     'plugin enable': 'src/cli/commands/plugin/enable.command.js',
     'plugin list': 'src/cli/commands/plugin/list.command.js',
     'plugin validate': 'src/cli/commands/plugin/validate.command.js',
-    'sad paths': 'src/plugins/'
   };
 
   const sourcePath = commandSourceMap[commandName] || 'cli.js';
-  const testType = commandName === 'sad paths' ? 'Workflow Test' : 'End-to-End Test';
+  const testType = 'End-to-End Test';
   const describeTitle = `${commandName} (${testType}) ${sourcePath}`;
 
   describe(describeTitle, function() {

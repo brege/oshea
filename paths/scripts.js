@@ -1,6 +1,6 @@
 // paths/scripts.js
 // scripts.js - Scripts Path Registry
-// Generated: 2025-07-27T02:32:43.757Z
+// Generated: 2025-07-29T08:49:53.728Z
 // Architecture: Feature-based
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually

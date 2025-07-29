@@ -2,11 +2,9 @@
 const fs = require('fs-extra');
 const path = require('path');
 
-async function createDummyPlugin(pluginDir, pluginName) {
-  await fs.ensureDir(pluginDir);
-  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-}
+require('module-alias/register');
+const { createDummyPluginPath } = require('@paths');
+const { createDummyPlugin } = require(createDummyPluginPath);
 
 module.exports = [
   {
@@ -24,7 +22,7 @@ module.exports = [
       expect(stdout).to.match(/Successfully cloned/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
-      const collectionPath = path.join(collRootDir, 'brege-plugins-test');
+      const collectionPath = path.join(collRootDir, 'collections', 'brege-plugins-test');
       const gitConfigPath = path.join(collectionPath, '.git', 'config');
 
       const collectionExists = await fs.pathExists(collectionPath);
@@ -38,7 +36,10 @@ module.exports = [
     describe: '3.10.2: (Input Variation) Successfully adds a collection from a local directory path',
     setup: async (sandboxDir) => {
       const localCollPath = path.join(sandboxDir, 'my-local-collection-src');
-      await createDummyPlugin(path.join(localCollPath, 'local-plugin'), 'local-plugin');
+      await createDummyPlugin('local-plugin', {
+        destinationDir: localCollPath,
+        baseFixture: 'valid-plugin'
+      });
     },
     args: (sandboxDir) => [
       'collection',
@@ -52,7 +53,7 @@ module.exports = [
       expect(stdout).to.match(/Successfully copied local source/i);
 
       const collRootDir = path.join(sandboxDir, '.cm-test-root');
-      const collectionPath = path.join(collRootDir, 'my-local-collection');
+      const collectionPath = path.join(collRootDir, 'collections', 'my-local-collection');
       const pluginConfigPath = path.join(collectionPath, 'local-plugin', 'local-plugin.config.yaml');
 
       const collectionExists = await fs.pathExists(collectionPath);

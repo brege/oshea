@@ -1,7 +1,7 @@
 // src/collections/commands/remove.js
 
 module.exports = async function removeCollection(dependencies, collectionName, options = {}) {
-  const { fss, path, fsExtra, constants, logger } = dependencies;
+  const { fss, path, fsExtra, logger, collectionsUserPluginsDirname } = dependencies;
 
   logger.debug('Attempting to remove collection', {
     context: 'RemoveCollectionCommand',
@@ -34,10 +34,10 @@ module.exports = async function removeCollection(dependencies, collectionName, o
   let actualCollectionNameForFilterCheck = collectionName;
   let specificPluginIdForFilterCheck = null;
 
-  if (collectionName.startsWith(constants.USER_ADDED_PLUGINS_DIR_NAME + path.sep)) {
+  if (collectionName.startsWith(collectionsUserPluginsDirname + path.sep)) {
     const parts = collectionName.split(path.sep);
-    if (parts.length === 2 && parts[0] === constants.USER_ADDED_PLUGINS_DIR_NAME) {
-      actualCollectionNameForFilterCheck = constants.USER_ADDED_PLUGINS_DIR_NAME;
+    if (parts.length === 2 && parts[0] === collectionsUserPluginsDirname) {
+      actualCollectionNameForFilterCheck = collectionsUserPluginsDirname;
       specificPluginIdForFilterCheck = parts[1];
       logger.debug('Identified as specific user-added plugin for removal', {
         context: 'RemoveCollectionCommand',

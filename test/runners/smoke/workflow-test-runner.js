@@ -2,8 +2,6 @@
 // test/runners/smoke/workflow-test-runner.js
 // Level 4 workflow test runner with block selection support
 
-// lint-skip-file no-console
-
 require('module-alias/register');
 
 const fs = require('fs');
@@ -11,38 +9,22 @@ const path = require('path');
 const yaml = require('js-yaml');
 const {
   cliPath,
-  loggerPath
+  loggerPath,
+  smokeHelpersPath
 } = require('@paths');
 const logger = require(loggerPath);
 const {
   executeCommand,
+  executeCommandWithColors,
   TestWorkspace,
   processCommandArgs,
   validateResult,
-  parseArgs
-} = require('./smoke-helpers');
+  parseArgs,
+  matchesGrep,
+  listTestSuites
+} = require(smokeHelpersPath);
 
-// Enhanced command execution that preserves colors for --show mode
-function executeCommandWithColors(command) {
-  return new Promise((resolve, reject) => {
-    const { exec } = require('child_process');
-    exec(command, {
-      env: { ...process.env, FORCE_COLOR: '1' }, // Ensure colors are preserved
-      maxBuffer: 1024 * 1024 // 1MB buffer for large outputs
-    }, (error, stdout, stderr) => {
-      if (error) {
-        reject({ error, stdout, stderr, message: error.message });
-        return;
-      }
-
-      if (stderr && stderr.trim()) {
-        logger.warn({ stderr }, { format: 'smoke-warning' });
-      }
-
-      resolve({ stdout, stderr });
-    });
-  });
-}
+// executeCommandWithColors now imported from smoke-helpers
 
 const WORKFLOW_TESTS_FILE = path.join(__dirname, 'workflow-tests.yaml');
 
@@ -53,7 +35,7 @@ async function runTestSuite(testSuite, showMode = false) {
     logger.info(`${testSuite.name}`);
     logger.info('─'.repeat(80));
   } else {
-    logger.info({ suiteName: testSuite.name }, { format: 'smoke-suite' });
+    logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
   }
 
   // Setup isolated test workspace
@@ -105,11 +87,12 @@ async function runTestSuite(testSuite, showMode = false) {
       if (showMode) {
         // Display the actual output with preserved colors for show mode
         if (result.stdout) {
-          console.log(result.stdout); // Use raw console.log to preserve ANSI colors
+          // Use raw console.log to preserve ANSI colors
+          console.log(result.stdout); // lint-skip-line no-console
         }
         if (result.stderr) {
           logger.warn('\nSTDERR:');
-          console.log(result.stderr);
+          console.log(result.stderr); // lint-skip-line no-console
         }
       }
 
@@ -162,11 +145,11 @@ async function runTestSuite(testSuite, showMode = false) {
         if (showMode) {
           logger.error(`\nFailed to execute: ${error.message}`);
           if (error.stdout) {
-            console.log(error.stdout);
+            console.log(error.stdout); // lint-skip-line no-console
           }
           if (error.stderr) {
             logger.warn('\nSTDERR:');
-            console.log(error.stderr);
+            console.log(error.stderr); // lint-skip-line no-console
           }
         } else {
           logger.info({ command: commandDisplay, status: 'failed', reason: error.message }, { format: 'smoke-scenario' });
@@ -188,25 +171,7 @@ async function runTestSuite(testSuite, showMode = false) {
   return { results, failedScenarios };
 }
 
-function listTestSuites() {
-  const content = fs.readFileSync(WORKFLOW_TESTS_FILE, 'utf8');
-  const documents = yaml.loadAll(content);
-
-  console.log('\nAvailable workflow test blocks:\n');
-  documents.forEach((doc, index) => {
-    if (doc && doc.name) {
-      console.log(`  ${index + 1}. ${doc.name}`);
-      console.log(`     Steps: ${doc.scenarios ? doc.scenarios.length : 0}`);
-      
-      // Display tags if they exist
-      if (doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0) {
-        console.log(`     Tags: ${doc.tags.join(', ')}`);
-      }
-      
-      console.log('');
-    }
-  });
-}
+// listTestSuites now imported from smoke-helpers
 
 async function runWorkflowTests(targetBlock = null, showMode = false, grepPattern = null) {
   const content = fs.readFileSync(WORKFLOW_TESTS_FILE, 'utf8');
@@ -218,8 +183,8 @@ async function runWorkflowTests(targetBlock = null, showMode = false, grepPatter
   if (grepPattern) {
     suitesToRun = testSuites.filter(suite => matchesGrep(grepPattern, suite));
     if (suitesToRun.length === 0) {
-      console.error(`No test suites match grep pattern "${grepPattern}".`);
-      console.error('Use --list to see available test suites, or try a different pattern.');
+      logger.error(`No test suites match grep pattern "${grepPattern}".`);
+      logger.error('Use --list to see available test suites, or try a different pattern.');
       return;
     }
   }
@@ -237,22 +202,16 @@ async function runWorkflowTests(targetBlock = null, showMode = false, grepPatter
       if (foundSuite) {
         suitesToRun = [foundSuite];
       } else {
-        const availableOptions = grepPattern ? 
-          `grep-filtered results (${suitesToRun.length} suites)` : 
+        const availableOptions = grepPattern ?
+          `grep-filtered results (${suitesToRun.length} suites)` :
           'available blocks';
-        console.error(`Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`);
+        logger.error(`Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`);
         return;
       }
     }
   }
 
-  //console.log('────────────────────────────────────────────────────────────');
-  //console.log('Level 4 Workflow Tests');
-  //console.log('────────────────────────────────────────────────────────────\n');
-
-  logger.info('\n' + '─'.repeat(60));
-  logger.info('Level 4 Workflow Tests');
-  logger.info('─'.repeat(60));
+  logger.info('', { format: 'workflow-header' });
 
   let allFailedScenarios = [];
 
@@ -262,63 +221,14 @@ async function runWorkflowTests(targetBlock = null, showMode = false, grepPatter
     allFailedScenarios.push(...failedScenarios);
   }
 
-  if (allFailedScenarios.length > 0) {
-    console.log('\n--- Workflow Tests Failed ---');
-    console.log(`${allFailedScenarios.length} scenario(s) failed across ${suitesToRun.length} test suite(s):\n`);
-
-    const failuresBySuite = {};
-    allFailedScenarios.forEach(failure => {
-      if (!failuresBySuite[failure.suite]) {
-        failuresBySuite[failure.suite] = [];
-      }
-      failuresBySuite[failure.suite].push(failure);
-    });
-
-    Object.entries(failuresBySuite).forEach(([suiteName, failures]) => {
-      console.log(`${suiteName}: ${failures.length} failures`);
-      failures.forEach(failure => {
-        console.log(`  - ${failure.scenario}`);
-        console.log(`    Command: ${failure.command}`);
-        console.log(`    Reason: ${failure.reason}`);
-      });
-      console.log('');
-    });
-
-    process.exit(1);
-  } else {
-    console.log(`\n✓ All workflow tests passed (${suitesToRun.length} test suite(s))`);
-  }
+  logger.info({
+    suiteCount: suitesToRun.length,
+    failedScenarios: allFailedScenarios
+  }, { format: 'workflow-results' });
 }
 
 // Grep filtering function
-function matchesGrep(grepPattern, testSuite) {
-  if (!grepPattern) return true;
-  
-  const lowerPattern = grepPattern.toLowerCase();
-  
-  // Match against suite name
-  if (testSuite.name && testSuite.name.toLowerCase().includes(lowerPattern)) {
-    return true;
-  }
-  
-  // Match against tags
-  if (testSuite.tags && Array.isArray(testSuite.tags)) {
-    if (testSuite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))) {
-      return true;
-    }
-  }
-  
-  // Match against scenario descriptions
-  if (testSuite.scenarios && Array.isArray(testSuite.scenarios)) {
-    if (testSuite.scenarios.some(scenario => 
-      scenario.description && scenario.description.toLowerCase().includes(lowerPattern)
-    )) {
-      return true;
-    }
-  }
-  
-  return false;
-}
+// matchesGrep now imported from smoke-helpers
 
 // parseArgs is now imported from smoke-helpers.js
 
@@ -326,7 +236,7 @@ const args = process.argv.slice(2);
 const { showMode, listMode, grepPattern, targetBlock } = parseArgs(args);
 
 if (listMode) {
-  listTestSuites();
+  listTestSuites(WORKFLOW_TESTS_FILE);
 } else {
   runWorkflowTests(targetBlock, showMode, grepPattern);
 }

@@ -1,6 +1,6 @@
 // paths/scripts.js
 // scripts.js - Scripts Path Registry
-// Generated: 2025-07-29T08:49:53.728Z
+// Generated: 2025-07-29T23:16:16.601Z
 // Architecture: Feature-based
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -47,6 +47,7 @@ const generateTocPath = path.join(projectRoot, 'scripts/docs/generate-toc.js');
 // Shared Script Utilities
 const sharedRoot = path.join(projectRoot, 'scripts/shared/');
 const fileHelpersPath = path.join(projectRoot, 'scripts/shared/file-helpers.js');
+const functionSurfacerPath = path.join(projectRoot, 'scripts/shared/function-surfacer.js');
 const loggerSurfacerPath = path.join(projectRoot, 'scripts/shared/logger-surfacer.js');
 const pathFinderPath = path.join(projectRoot, 'scripts/shared/path-finder.js');
 
@@ -78,6 +79,7 @@ module.exports = {
   // --- supportive operations ---
   sharedRoot,
   fileHelpersPath,
+  functionSurfacerPath,
   loggerSurfacerPath,
   pathFinderPath,
 

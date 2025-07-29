@@ -1,6 +1,6 @@
 // paths/tests.js
 // tests.js - Test Suite Registry
-// Generated: 2025-07-29T08:49:53.738Z
+// Generated: 2025-07-29T20:37:12.189Z
 // Architecture: Multi-layered testing infrastructure with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -47,9 +47,10 @@ const createDummyPluginPath = path.join(fixturesDir, 'create-dummy-plugin.js');
 
 // Smoke Tests - Basic Application Validation
 const smokeRoot = path.join(projectRoot, 'test/runners/smoke/');
+const smokeHelpersPath = path.join(projectRoot, 'test/runners/smoke/smoke-helpers.js');
 const smokeTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/smoke-test-runner.js');
 const smokeTestsManifestPath = path.join(projectRoot, 'test/runners/smoke/smoke-tests.yaml');
-const testHarnessPath = path.join(projectRoot, 'test/runners/smoke/test-harness.js');
+const workflowCoffeecupTestPath = path.join(projectRoot, 'test/runners/smoke/workflow-coffeecup.test.js');
 const workflowTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/workflow-test-runner.js');
 const workflowTestsYamlPath = path.join(projectRoot, 'test/runners/smoke/workflow-tests.yaml');
 
@@ -191,9 +192,10 @@ module.exports = {
 
   // --- user-facing interfaces ---
   smokeRoot,
+  smokeHelpersPath,
   smokeTestRunnerPath,
   smokeTestsManifestPath,
-  testHarnessPath,
+  workflowCoffeecupTestPath,
   workflowTestRunnerPath,
   workflowTestsYamlPath,
   coreIntegrationRoot,

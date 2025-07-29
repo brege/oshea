@@ -249,6 +249,51 @@ function validateResult(result, expectCriteria, expectNotCriteria = null) {
   return { testPassed, failureReason };
 }
 
+// Shared argument parsing for smoke and workflow test runners
+function parseArgs(args, options = {}) {
+  const {
+    supportsYamlFile = false  // Only smoke-test-runner supports yamlFile
+  } = options;
+
+  const result = {
+    showMode: false,
+    listMode: false,
+    grepPattern: null,
+    targetBlock: null
+  };
+
+  // Add yamlFile support if requested
+  if (supportsYamlFile) {
+    result.yamlFile = null;
+  }
+  
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    
+    if (arg === '--list') {
+      result.listMode = true;
+    } else if (arg === '--show') {
+      result.showMode = true;
+    } else if (arg === '--grep') {
+      if (i + 1 < args.length) {
+        result.grepPattern = args[i + 1];
+        i++; // Skip next arg since it's the grep pattern
+      } else {
+        console.error('Error: --grep requires a pattern argument');
+        process.exit(1);
+      }
+    } else if (!arg.startsWith('--')) {
+      if (supportsYamlFile && arg.endsWith('.yaml')) {
+        result.yamlFile = arg;
+      } else {
+        result.targetBlock = arg;
+      }
+    }
+  }
+  
+  return result;
+}
+
 module.exports = {
   executeCommand,
   validators,
@@ -256,5 +301,6 @@ module.exports = {
   TestWorkspace,
   expandScenarios,
   processCommandArgs,
-  validateResult
+  validateResult,
+  parseArgs
 };

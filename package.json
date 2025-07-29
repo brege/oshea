@@ -12,7 +12,7 @@
     "generate": "node cli.js generate",
     "paths": "node paths/generator.js",
     "test": "mocha",
-    "test:smoke": "node test/runners/smoke/smoke-test-runner.js",
+    "test:smoke": "node test/runners/smoke/*-test-runner.js",
     "test:all": "npm run test && npm run test:smoke",
     "test:last-fails": "node test/analytics/run-last-fails.js",
     "test:report": "MOCHA_JSON_REPORT_FILE=./test-report.json mocha",

@@ -12,16 +12,16 @@ const yaml = require('js-yaml');
 const {
   cliPath,
   loggerPath,
-  smokeTestsManifestPath,
-  testHarnessPath,
+  smokeTestsManifestPath
 } = require('@paths');
 const logger = require(loggerPath);
 const {
   executeCommand,
   validators,
   discoverers,
-  expandScenarios
-} = require(testHarnessPath);
+  expandScenarios,
+  parseArgs
+} = require('./smoke-helpers');
 
 // Enhanced command execution that preserves colors for --show mode
 function executeCommandWithColors(command) {
@@ -161,33 +161,82 @@ function listTestSuites(yamlFile = null) {
   documents.forEach((doc, index) => {
     if (doc && doc.name) {
       console.log(`  ${index + 1}. ${doc.name}`);
-      console.log(`     Scenarios: ${doc.scenarios ? doc.scenarios.length : 0}`);
+      console.log(`     Steps: ${doc.scenarios ? doc.scenarios.length : 0}`);
+      
+      // Display tags if they exist
+      if (doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0) {
+        console.log(`     Tags: ${doc.tags.join(', ')}`);
+      }
+      
       console.log('');
     }
   });
 }
 
+// Grep filtering function
+function matchesGrep(grepPattern, testSuite) {
+  if (!grepPattern) return true;
+  
+  const lowerPattern = grepPattern.toLowerCase();
+  
+  // Match against suite name
+  if (testSuite.name && testSuite.name.toLowerCase().includes(lowerPattern)) {
+    return true;
+  }
+  
+  // Match against tags
+  if (testSuite.tags && Array.isArray(testSuite.tags)) {
+    if (testSuite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))) {
+      return true;
+    }
+  }
+  
+  // Match against scenario descriptions (from expanded scenarios)
+  const scenarios = expandScenarios(testSuite);
+  if (scenarios.some(scenario => 
+    scenario.description && scenario.description.toLowerCase().includes(lowerPattern)
+  )) {
+    return true;
+  }
+  
+  return false;
+}
+
 // Main runner - load YAML and execute all test suites
-async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock = null) {
+async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock = null, grepPattern = null) {
   const yamlPath = yamlFile ? path.resolve(__dirname, yamlFile) : smokeTestsManifestPath;
   const yamlContent = fs.readFileSync(yamlPath, 'utf8');
   const testSuites = yaml.loadAll(yamlContent).filter(doc => doc && doc.name);
 
   let suitesToRun = testSuites;
 
+  // Apply grep filtering first
+  if (grepPattern) {
+    suitesToRun = testSuites.filter(suite => matchesGrep(grepPattern, suite));
+    if (suitesToRun.length === 0) {
+      console.error(`No test suites match grep pattern "${grepPattern}".`);
+      console.error('Use --list to see available test suites, or try a different pattern.');
+      return false;
+    }
+  }
+
+  // Then apply target block filtering
   if (targetBlock) {
     // Find block by name or number
     const blockNum = parseInt(targetBlock);
-    if (!isNaN(blockNum) && blockNum > 0 && blockNum <= testSuites.length) {
-      suitesToRun = [testSuites[blockNum - 1]];
+    if (!isNaN(blockNum) && blockNum > 0 && blockNum <= suitesToRun.length) {
+      suitesToRun = [suitesToRun[blockNum - 1]];
     } else {
-      const foundSuite = testSuites.find(suite =>
+      const foundSuite = suitesToRun.find(suite =>
         suite.name.toLowerCase().includes(targetBlock.toLowerCase())
       );
       if (foundSuite) {
         suitesToRun = [foundSuite];
       } else {
-        console.error(`Block "${targetBlock}" not found. Use --list to see available blocks.`);
+        const availableOptions = grepPattern ? 
+          `grep-filtered results (${suitesToRun.length} suites)` : 
+          'available blocks';
+        console.error(`Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`);
         return false;
       }
     }
@@ -224,20 +273,17 @@ async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock =
   return totalFailed === 0;
 }
 
+// parseArgs is now imported from smoke-helpers.js
+
 // CLI execution
 if (require.main === module) {
   const args = process.argv.slice(2);
+  const { showMode, listMode, grepPattern, yamlFile, targetBlock } = parseArgs(args, { supportsYamlFile: true });
 
-  if (args.includes('--list')) {
-    const yamlFile = args.find(arg => !arg.startsWith('--'));
+  if (listMode) {
     listTestSuites(yamlFile);
   } else {
-    const showMode = args.includes('--show');
-    const nonFlagArgs = args.filter(arg => !arg.startsWith('--'));
-    const yamlFile = nonFlagArgs.find(arg => arg.endsWith('.yaml'));
-    const targetBlock = nonFlagArgs.find(arg => !arg.endsWith('.yaml'));
-
-    runAllSmokeTests(yamlFile, showMode, targetBlock).then(success => {
+    runAllSmokeTests(yamlFile, showMode, targetBlock, grepPattern).then(success => {
       process.exit(success ? 0 : 1);
     }).catch(error => {
       logger.error('Smoke test runner crashed:', error.message);

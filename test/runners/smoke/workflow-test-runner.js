@@ -11,16 +11,16 @@ const path = require('path');
 const yaml = require('js-yaml');
 const {
   cliPath,
-  loggerPath,
-  testHarnessPath
+  loggerPath
 } = require('@paths');
 const logger = require(loggerPath);
 const {
   executeCommand,
   TestWorkspace,
   processCommandArgs,
-  validateResult
-} = require(testHarnessPath);
+  validateResult,
+  parseArgs
+} = require('./smoke-helpers');
 
 // Enhanced command execution that preserves colors for --show mode
 function executeCommandWithColors(command) {
@@ -49,9 +49,9 @@ const WORKFLOW_TESTS_FILE = path.join(__dirname, 'workflow-tests.yaml');
 async function runTestSuite(testSuite, showMode = false) {
   if (showMode) {
     // Display visual test suite header for show mode
-    logger.info('\n' + '-'.repeat(80));
+    logger.info('\n' + '─'.repeat(80));
     logger.info(`${testSuite.name}`);
-    logger.info('-'.repeat(80));
+    logger.info('─'.repeat(80));
   } else {
     logger.info({ suiteName: testSuite.name }, { format: 'smoke-suite' });
   }
@@ -71,10 +71,10 @@ async function runTestSuite(testSuite, showMode = false) {
 
     if (showMode) {
       // Display scenario header for show mode
-      logger.info('\n' + '-'.repeat(60));
+      logger.info('\n' + '─'.repeat(60));
       logger.info(`${scenario.description}`);
       logger.info(`Command: ${commandDisplay}`);
-      logger.info('-'.repeat(60));
+      logger.info('─'.repeat(60));
     } else {
       // Start scenario test
       logger.info({ command: commandDisplay, status: 'testing' }, { format: 'smoke-scenario' });
@@ -196,39 +196,63 @@ function listTestSuites() {
   documents.forEach((doc, index) => {
     if (doc && doc.name) {
       console.log(`  ${index + 1}. ${doc.name}`);
-      console.log(`     Scenarios: ${doc.scenarios ? doc.scenarios.length : 0}`);
+      console.log(`     Steps: ${doc.scenarios ? doc.scenarios.length : 0}`);
+      
+      // Display tags if they exist
+      if (doc.tags && Array.isArray(doc.tags) && doc.tags.length > 0) {
+        console.log(`     Tags: ${doc.tags.join(', ')}`);
+      }
+      
       console.log('');
     }
   });
 }
 
-async function runWorkflowTests(targetBlock = null, showMode = false) {
+async function runWorkflowTests(targetBlock = null, showMode = false, grepPattern = null) {
   const content = fs.readFileSync(WORKFLOW_TESTS_FILE, 'utf8');
   const testSuites = yaml.loadAll(content).filter(doc => doc && doc.name);
 
   let suitesToRun = testSuites;
 
+  // Apply grep filtering first
+  if (grepPattern) {
+    suitesToRun = testSuites.filter(suite => matchesGrep(grepPattern, suite));
+    if (suitesToRun.length === 0) {
+      console.error(`No test suites match grep pattern "${grepPattern}".`);
+      console.error('Use --list to see available test suites, or try a different pattern.');
+      return;
+    }
+  }
+
+  // Then apply target block filtering
   if (targetBlock) {
     // Find block by name or number
     const blockNum = parseInt(targetBlock);
-    if (!isNaN(blockNum) && blockNum > 0 && blockNum <= testSuites.length) {
-      suitesToRun = [testSuites[blockNum - 1]];
+    if (!isNaN(blockNum) && blockNum > 0 && blockNum <= suitesToRun.length) {
+      suitesToRun = [suitesToRun[blockNum - 1]];
     } else {
-      const foundSuite = testSuites.find(suite =>
+      const foundSuite = suitesToRun.find(suite =>
         suite.name.toLowerCase().includes(targetBlock.toLowerCase())
       );
       if (foundSuite) {
         suitesToRun = [foundSuite];
       } else {
-        console.error(`Block "${targetBlock}" not found. Use --list to see available blocks.`);
+        const availableOptions = grepPattern ? 
+          `grep-filtered results (${suitesToRun.length} suites)` : 
+          'available blocks';
+        console.error(`Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`);
         return;
       }
     }
   }
 
-  console.log('============================================================');
-  console.log('Level 4 Workflow Tests');
-  console.log('============================================================\n');
+  //console.log('────────────────────────────────────────────────────────────');
+  //console.log('Level 4 Workflow Tests');
+  //console.log('────────────────────────────────────────────────────────────\n');
+
+  logger.info('\n' + '─'.repeat(60));
+  logger.info('Level 4 Workflow Tests');
+  logger.info('─'.repeat(60));
 
   let allFailedScenarios = [];
 
@@ -266,14 +290,44 @@ async function runWorkflowTests(targetBlock = null, showMode = false) {
   }
 }
 
-// Parse command line arguments
-const args = process.argv.slice(2);
+// Grep filtering function
+function matchesGrep(grepPattern, testSuite) {
+  if (!grepPattern) return true;
+  
+  const lowerPattern = grepPattern.toLowerCase();
+  
+  // Match against suite name
+  if (testSuite.name && testSuite.name.toLowerCase().includes(lowerPattern)) {
+    return true;
+  }
+  
+  // Match against tags
+  if (testSuite.tags && Array.isArray(testSuite.tags)) {
+    if (testSuite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))) {
+      return true;
+    }
+  }
+  
+  // Match against scenario descriptions
+  if (testSuite.scenarios && Array.isArray(testSuite.scenarios)) {
+    if (testSuite.scenarios.some(scenario => 
+      scenario.description && scenario.description.toLowerCase().includes(lowerPattern)
+    )) {
+      return true;
+    }
+  }
+  
+  return false;
+}
 
-if (args.includes('--list')) {
+// parseArgs is now imported from smoke-helpers.js
+
+const args = process.argv.slice(2);
+const { showMode, listMode, grepPattern, targetBlock } = parseArgs(args);
+
+if (listMode) {
   listTestSuites();
 } else {
-  const showMode = args.includes('--show');
-  const targetBlock = args.find(arg => !arg.startsWith('--'));
-  runWorkflowTests(targetBlock, showMode);
+  runWorkflowTests(targetBlock, showMode, grepPattern);
 }
 

@@ -1,22 +1,19 @@
 // test/runners/e2e/plugin-add.manifest.js
-const fs = require('fs-extra');
 const path = require('path');
 const stripAnsi = require('strip-ansi');
 
-async function createDummyPlugin(pluginDir, pluginName) {
-  await fs.ensureDir(pluginDir);
-  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-}
+require('module-alias/register');
+const { createDummyPluginPath } = require('@paths');
+const { createDummyPlugin } = require(createDummyPluginPath);
 
 module.exports = [
   {
     describe: '3.6.1: (Happy Path) Successfully adds and enables a singleton plugin from a local path',
     setup: async (sandboxDir) => {
-      const sourcePluginDir = path.join(sandboxDir, 'my-local-plugin-src');
-      await createDummyPlugin(sourcePluginDir, 'my-local-plugin-src');
+      await createDummyPlugin('my-local-plugin-src', {
+        destinationDir: sandboxDir,
+        baseFixture: 'valid-plugin'
+      });
     },
     args: (sandboxDir) => [
       'plugin',

@@ -46,12 +46,12 @@ const paths = {
 
   // --- End-to-End Test Paths ---
   e2e: [
-    'test/runners/e2e/all-e2e.test.js',
-    'test/runners/e2e/workflow-lifecycle.test.js'
+    'test/runners/e2e/all-e2e.test.js'
+    //'test/runners/e2e/workflow-lifecycle.test.js'
   ],
 
   // --- Workflow / Lifecycle E2E Test Paths ---
-  workflow_lifecycle:     'test/runners/e2e/workflow-lifecycle.test.js',
+  //workflow_lifecycle:     'test/runners/e2e/workflow-lifecycle.test.js',
 
   // --- Bundled Plugin In-Situ Test Paths ---
   insitu:                 'plugins/**/.contract/test/*.test.js',
@@ -108,9 +108,7 @@ const levels = {
     paths.e2e[0], // all-e2e.test.js
   ],
   // test/config/metadata-level-4.yaml
-  level4: [ // workflow E2E tests
-    paths.e2e[1],
-  ],
+  //level4: [ // moved to test/runners/smoke/workflow-test{s.yaml,-runner.js}
 };
 
 // --- By Command ---
@@ -151,7 +149,7 @@ const groups = {
   level1:          levels.level1,   // module
   level2:          levels.level2,   // subsystem
   level3:          levels.level3,   // module e2e
-  level4:          levels.level4,   // workflow e2e
+  //level4:          levels.level4,   // workflow e2e
 
   // Commands -- Integration Tests
   config:          commands.config,

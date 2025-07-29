@@ -1,6 +1,6 @@
 // paths/linters.js
 // linters.js - Linting Tools Registry
-// Generated: 2025-07-27T02:32:43.761Z
+// Generated: 2025-07-29T08:49:53.734Z
 // Architecture: Feature-based linting infrastructure
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually

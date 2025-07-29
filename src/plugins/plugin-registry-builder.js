@@ -2,14 +2,13 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { markdownUtilsPath, loggerPath } = require('@paths');
+const { markdownUtilsPath, loggerPath, collectionsEnabledManifestFilename } = require('@paths');
 const logger = require(loggerPath);
 const { loadConfig: loadYamlConfig } = require(markdownUtilsPath);
 const yaml = require('js-yaml');
 
 const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
-const CM_ENABLED_MANIFEST_FILENAME = 'enabled.yaml';
 
 class PluginRegistryBuilder {
   constructor(
@@ -80,7 +79,7 @@ class PluginRegistryBuilder {
       });
       throw new Error('PluginRegistryBuilder requires a collections root (collRoot) to be provided.');
     }
-    this.cmEnabledManifestPath = this.dependencies.path.join(this.cmCollRoot, CM_ENABLED_MANIFEST_FILENAME);
+    this.cmEnabledManifestPath = this.dependencies.path.join(this.cmCollRoot, collectionsEnabledManifestFilename);
     logger.debug('Collections Manager root and enabled manifest path set', {
       context: 'PluginRegistryBuilder',
       cmCollRoot: this.cmCollRoot,
@@ -146,7 +145,7 @@ class PluginRegistryBuilder {
     const registrations = {};
 
     // Determine user-plugins directory location based on collections manager root
-    const userPluginsPath = this.collectionsManager ?
+    const userPluginsPath = (this.collectionsManager && this.collectionsManager.collRoot) ?
       path.join(this.collectionsManager.collRoot, 'user-plugins') :
       path.join(this.xdgBaseDir, 'md-to-pdf', 'user-plugins');
 
@@ -560,6 +559,88 @@ class PluginRegistryBuilder {
     return registrations;
   }
 
+  async _getPluginRegistrationsFromCollections() {
+    const { fs, fsPromises, path } = this.dependencies;
+    const registrations = {};
+
+    const collectionsDir = path.join(this.cmCollRoot, 'collections');
+    logger.debug('Scanning collections directory for available plugins', {
+      context: 'PluginRegistryBuilder',
+      collectionsDir: collectionsDir
+    });
+
+    if (!fs.existsSync(collectionsDir)) {
+      logger.debug('Collections directory not found', {
+        context: 'PluginRegistryBuilder',
+        path: collectionsDir
+      });
+      return registrations;
+    }
+
+    try {
+      const collections = await fsPromises.readdir(collectionsDir);
+
+      for (const collectionName of collections) {
+        const collectionPath = path.join(collectionsDir, collectionName);
+        const stat = await fsPromises.lstat(collectionPath);
+
+        if (!stat.isDirectory()) continue;
+
+        logger.debug('Scanning collection for plugins', {
+          context: 'PluginRegistryBuilder',
+          collection: collectionName,
+          path: collectionPath
+        });
+
+        const plugins = await fsPromises.readdir(collectionPath);
+
+        for (const pluginDir of plugins) {
+          if (pluginDir.startsWith('.')) continue; // Skip hidden files/dirs
+
+          const pluginPath = path.join(collectionPath, pluginDir);
+          const pluginStat = await fsPromises.lstat(pluginPath);
+
+          if (!pluginStat.isDirectory()) continue;
+
+          // Look for config file
+          const pluginFiles = await fsPromises.readdir(pluginPath);
+          const configFile = pluginFiles.find(file => file.endsWith('.config.yaml'));
+
+          if (configFile) {
+            const configPath = path.join(pluginPath, configFile);
+            const pluginId = `${collectionName}/${pluginDir}`;
+
+            // Don't override already enabled plugins
+            if (!registrations[pluginId]) {
+              registrations[pluginId] = {
+                configPath: configPath,
+                definedIn: collectionsDir,
+                sourceType: `CollectionsManager (CM: ${collectionName}/${pluginDir})`,
+                cmOriginalCollection: collectionName,
+                cmOriginalPluginId: pluginDir,
+                cmStatus: 'Available (CM)'
+              };
+
+              logger.debug('Registered available plugin from collection', {
+                context: 'PluginRegistryBuilder',
+                pluginId: pluginId,
+                configPath: configPath
+              });
+            }
+          }
+        }
+      }
+    } catch (error) {
+      logger.warn('Error scanning collections directory', {
+        context: 'PluginRegistryBuilder',
+        error: error.message,
+        collectionsDir: collectionsDir
+      });
+    }
+
+    return registrations;
+  }
+
   async buildRegistry() {
     if (this._builtRegistry) {
       logger.debug('Returning cached plugin registry', {
@@ -592,6 +673,14 @@ class PluginRegistryBuilder {
       const cmEnabledRegistrations = await this._getPluginRegistrationsFromCmManifest(this.cmEnabledManifestPath, 'CollectionsManager');
       Object.assign(registry, cmEnabledRegistrations);
       logger.debug('Registry size after CM enabled plugins', {
+        context: 'PluginRegistryBuilder',
+        count: Object.keys(registry).length
+      });
+
+      // Register all available plugins from collections (not just enabled ones)
+      const cmAvailableRegistrations = await this._getPluginRegistrationsFromCollections();
+      Object.assign(registry, cmAvailableRegistrations);
+      logger.debug('Registry size after CM available plugins', {
         context: 'PluginRegistryBuilder',
         count: Object.keys(registry).length
       });

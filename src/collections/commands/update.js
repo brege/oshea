@@ -1,8 +1,7 @@
 // src/collections/commands/update.js
 
 module.exports = async function updateCollection(dependencies, collectionName) {
-  const { fss, fs, path, fsExtra, constants, logger } = dependencies;
-  const { METADATA_FILENAME } = constants;
+  const { fss, fs, path, fsExtra, logger, collectionsMetadataFilename } = dependencies;
 
   logger.debug('Attempting to update collection', {
     context: 'UpdateCollectionCommand',
@@ -29,7 +28,10 @@ module.exports = async function updateCollection(dependencies, collectionName) {
     collectionPath: collectionPath
   });
 
-  const metadata = await this._readCollectionMetadata(this.collRoot.endsWith('collections') ? collectionName : path.join('collections', collectionName));
+  // Look for collections in collections/ subdirectory or directly if collRoot ends with 'collections'
+  // This matches the same logic used in other collection commands like list.js
+  const metadataPath = this.collRoot.endsWith('collections') ? collectionName : path.join('collections', collectionName);
+  const metadata = await this._readCollectionMetadata(metadataPath);
   if (!metadata) {
     logger.warn('Metadata file not found or unreadable for collection, cannot determine source for update', {
       context: 'UpdateCollectionCommand',
@@ -135,7 +137,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
       });
 
       const statusOutput = statusResult.stdout.trim();
-      const hasUncommittedChanges = (statusOutput !== '' && statusOutput !== `?? ${METADATA_FILENAME}`);
+      const hasUncommittedChanges = (statusOutput !== '' && statusOutput !== `?? ${collectionsMetadataFilename}`);
 
       let localCommitsAhead = 0;
       if (!hasUncommittedChanges) {
@@ -237,7 +239,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
     try {
       const entries = await fs.readdir(collectionPath);
       for (const entry of entries) {
-        if (entry !== METADATA_FILENAME) {
+        if (entry !== collectionsMetadataFilename) {
           await fsExtra.remove(path.join(collectionPath, entry));
           logger.debug('Removed old entry from collection directory for re-sync', {
             context: 'UpdateCollectionCommand',

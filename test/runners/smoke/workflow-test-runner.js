@@ -12,13 +12,11 @@ const yaml = require('js-yaml');
 const {
   cliPath,
   loggerPath,
-  projectRoot,
   testHarnessPath
 } = require('@paths');
 const logger = require(loggerPath);
 const {
   executeCommand,
-  validators,
   TestWorkspace,
   processCommandArgs,
   validateResult
@@ -235,6 +233,7 @@ async function runWorkflowTests(targetBlock = null, showMode = false) {
   let allFailedScenarios = [];
 
   for (const testSuite of suitesToRun) {
+    // eslint-disable-next-line no-unused-vars
     const { results, failedScenarios } = await runTestSuite(testSuite, showMode);
     allFailedScenarios.push(...failedScenarios);
   }

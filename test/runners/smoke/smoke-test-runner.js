@@ -11,8 +11,6 @@ const path = require('path');
 const yaml = require('js-yaml');
 const {
   cliPath,
-  cliCommandsPath,
-  projectRoot,
   loggerPath,
   smokeTestsManifestPath,
   testHarnessPath,

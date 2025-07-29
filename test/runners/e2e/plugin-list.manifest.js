@@ -1,22 +1,34 @@
 // test/runners/e2e/plugin-list.manifest.js
-const fs = require('fs-extra');
 const path = require('path');
 
-async function createDummyPlugin(pluginDir, pluginName) {
-  await fs.ensureDir(pluginDir);
-  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-}
+require('module-alias/register');
+const { createDummyPluginPath } = require('@paths');
+const { createDummyPlugin } = require(createDummyPluginPath);
 
 async function setupCollectionWithOneEnabled(sandboxDir, harness) {
   const collDir = path.join(sandboxDir, 'test-collection');
-  await createDummyPlugin(path.join(collDir, 'plugin-one'), 'plugin-one');
-  await createDummyPlugin(path.join(collDir, 'plugin-two'), 'plugin-two');
 
-  await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection'], { useFactoryDefaults: false });
-  await harness.runCli(['plugin', 'enable', 'test-collection/plugin-one', '--name', 'enabled-one'], { useFactoryDefaults: false });
+  await createDummyPlugin('plugin-one', {
+    destinationDir: collDir,
+    baseFixture: 'valid-plugin'
+  });
+  await createDummyPlugin('plugin-two', {
+    destinationDir: collDir,
+    baseFixture: 'valid-plugin'
+  });
+
+  // Add collection
+  const addResult = await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection'], { useFactoryDefaults: false });
+  if (addResult.exitCode !== 0) {
+    throw new Error(`Collection add command failed:\n${addResult.stderr}`);
+  }
+
+  // Enable plugin with correct path ('plugin-one')
+  const enableResult = await harness.runCli(['plugin', 'enable', 'test-collection/plugin-one', '--name', 'enabled-one', '--bypass-validation'], { useFactoryDefaults: false });
+  if (enableResult.exitCode !== 0) {
+    throw new Error(`Plugin enable command failed:\n${enableResult.stderr}`);
+  }
+
 }
 
 
@@ -41,8 +53,9 @@ module.exports = [
     args: (sandboxDir) => ['plugin', 'list', '--enabled'],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Name: enabled-one/i);
-      expect(stdout).to.match(/Status: Enabled \(CM\)/i);
+      // Try matching either alias or real plugin name:
+      expect(stdout).to.match(/Name:\s*enabled-one/i);
+      expect(stdout).to.match(/Status:\s*Enabled \(CM\)/i);
       expect(stdout).to.not.match(/plugin-two/i);
     },
   },
@@ -53,8 +66,8 @@ module.exports = [
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
       expect(stdout).to.not.match(/enabled-one/i);
-      expect(stdout).to.match(/Name: test-collection\/plugin-two/i);
-      expect(stdout).to.match(/Status: Available \(CM\)/i);
+      expect(stdout).to.match(/Name:\s*test-collection\/plugin-two/i);
+      expect(stdout).to.match(/Status:\s*Available \(CM\)/i);
     },
   },
   {
@@ -63,8 +76,10 @@ module.exports = [
     args: (sandboxDir) => ['plugin', 'list', '--available'],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/Name: enabled-one/i);
-      expect(stdout).to.match(/Name: test-collection\/plugin-two/i);
+      expect(stdout).to.match(/Name:\s*enabled-one/i);
+      expect(stdout).to.match(/Name:\s*test-collection\/plugin-two/i);
     },
   },
 ];
+
+

@@ -137,7 +137,7 @@ module.exports = [
     expectedResult: {
       isValid: true,
       warnings: [
-        'Missing optional \'.contract/test/\' directory.',
+        'Missing optional ".contract/test/" directory.',
         'Missing optional schema file',
         'Missing E2E test file'
       ]

@@ -1,8 +1,7 @@
 // src/collections/commands/update-all.js
 
 module.exports = async function updateAllCollections(dependencies) {
-  const { fss, fs, path, constants, logger } = dependencies;
-  const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
+  const { fss, fs, path, logger, collectionsUserPluginsDirname } = dependencies;
 
   logger.debug('Initiating update for all collections', {
     context: 'UpdateAllCollectionsCommand'
@@ -33,8 +32,8 @@ module.exports = async function updateAllCollections(dependencies) {
       collectionName: collectionName
     });
 
-    if (collectionName === USER_ADDED_PLUGINS_DIR_NAME) {
-      const singletonsBasePath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
+    if (collectionName === collectionsUserPluginsDirname) {
+      const singletonsBasePath = path.join(this.collRoot, collectionsUserPluginsDirname);
       logger.debug('Processing user-added plugins container', {
         context: 'UpdateAllCollectionsCommand',
         containerPath: singletonsBasePath
@@ -45,7 +44,7 @@ module.exports = async function updateAllCollections(dependencies) {
           for (const dirent of singletonPluginDirs) {
             if (dirent.isDirectory()) {
               const singletonPluginId = dirent.name;
-              const singletonCollectionNameForUpdate = path.join(USER_ADDED_PLUGINS_DIR_NAME, singletonPluginId);
+              const singletonCollectionNameForUpdate = path.join(collectionsUserPluginsDirname, singletonPluginId);
 
               logger.debug('Processing individual singleton plugin for update', {
                 context: 'UpdateAllCollectionsCommand',
@@ -88,10 +87,10 @@ module.exports = async function updateAllCollections(dependencies) {
           });
         }
       } catch (error) {
-        const errMsg = `Error processing directory ${USER_ADDED_PLUGINS_DIR_NAME}: ${error.message}`;
+        const errMsg = `Error processing directory ${collectionsUserPluginsDirname}: ${error.message}`;
         logger.error('Error processing user-added plugins directory', {
           context: 'UpdateAllCollectionsCommand',
-          directory: USER_ADDED_PLUGINS_DIR_NAME,
+          directory: collectionsUserPluginsDirname,
           error: error.message,
           stack: error.stack
         });

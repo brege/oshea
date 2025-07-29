@@ -3,20 +3,23 @@ const fs = require('fs-extra');
 const path = require('path');
 const stripAnsi = require('strip-ansi');
 
-async function createDummyPlugin(pluginDir, pluginName) {
-  await fs.ensureDir(pluginDir);
-  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-}
+require('module-alias/register');
+const { createDummyPluginPath } = require('@paths');
+const { createDummyPlugin } = require(createDummyPluginPath);
 
 module.exports = [
   {
     describe: '3.8.1: (Happy Path) Successfully disables an enabled plugin',
     setup: async (sandboxDir, harness) => {
       const collDir = path.join(sandboxDir, 'test-collection-for-disable');
-      await createDummyPlugin(path.join(collDir, 'plugin-to-disable'), 'plugin-to-disable');
+
+      await createDummyPlugin('plugin-to-disable', {
+        destinationDir: collDir,
+        baseFixture: 'valid-plugin'
+      });
+
       await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection-for-disable']);
+
       await harness.runCli([
         'plugin',
         'enable',
@@ -38,8 +41,8 @@ module.exports = [
       // Optionally, check that the plugin is no longer in the enabled manifest
       const enabledManifestPath = path.join(sandboxDir, '.cm-test-root', 'enabled.yaml');
       if (await fs.pathExists(enabledManifestPath)) {
-        const enabledManifest = await fs.readFile(enabledManifestPath, 'utf8');
-        expect(enabledManifest).to.not.include('my-enabled-plugin');
+        const enabledManifestContent = await fs.readFile(enabledManifestPath, 'utf8');
+        expect(enabledManifestContent).to.not.include('my-enabled-plugin');
       }
     },
   },

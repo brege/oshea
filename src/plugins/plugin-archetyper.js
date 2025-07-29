@@ -10,7 +10,7 @@ const yaml = require('js-yaml');
 const matter = require('gray-matter');
 
 async function createArchetype(dependencies, managerContext, sourcePluginIdentifier, newArchetypeName, options = {}) {
-  const { cmUtils, constants } = dependencies;
+  const { cmUtils, collectionsMetadataFilename, collectionsDefaultArchetypeDirname } = dependencies;
   const { collRoot, listAvailablePlugins } = managerContext;
 
   let sourcePluginInfo = {};
@@ -64,7 +64,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   const originalSourceConfigFilename = path.basename(sourcePluginInfo.config_path);
   const originalPluginDescriptionFromSource = sourcePluginInfo.description || `Plugin ${sourcePluginIdForReplacement}`;
 
-  const targetBaseDir = options.targetDir ? path.resolve(options.targetDir) : path.join(collRoot, constants.DEFAULT_ARCHETYPE_BASE_DIR_NAME);
+  const targetBaseDir = options.targetDir ? path.resolve(options.targetDir) : path.join(collRoot, collectionsDefaultArchetypeDirname);
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
   if (fss.existsSync(archetypePath) && !options.force) {
@@ -76,7 +76,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
 
   await fs.mkdir(targetBaseDir, { recursive: true });
   await fsExtra.copy(sourcePluginBasePath, archetypePath, {
-    filter: (src) => !src.includes(constants.METADATA_FILENAME)
+    filter: (src) => !src.includes(collectionsMetadataFilename)
   });
 
   const sourcePluginIdPascal = cmUtils.toPascalCase(sourcePluginIdForReplacement);

@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-28T04:18:12.802Z
+// Generated: 2025-07-29T08:49:53.687Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -51,6 +51,12 @@ const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schem
 const findLitterRulesPath = path.join(assetsRoot, 'litter-list.txt');
 const lintingConfigPath = path.join(scriptsRoot, 'linting', 'linting-config.yaml');
 const testConfigPath = path.join(testRoot, 'shared', 'config.test.yaml');
+
+// --- Collections System Constants ---
+const collectionsMetadataFilename = '.collection-metadata.yaml';
+const collectionsEnabledManifestFilename = 'enabled.yaml';
+const collectionsUserPluginsDirname = '_user_added_plugins';
+const collectionsDefaultArchetypeDirname = 'user-plugins';
 
 // ==========================================
 // Features (by dependency rank)
@@ -111,7 +117,6 @@ const validatorPath = path.join(projectRoot, 'src/plugins/validator.js');
 // Collections Management
 const collectionsRoot = path.join(projectRoot, 'src/collections/');
 const cmUtilsPath = path.join(projectRoot, 'src/collections/cm-utils.js');
-const constantsPath = path.join(projectRoot, 'src/collections/constants.js');
 const collectionsIndexPath = path.join(projectRoot, 'src/collections/index.js');
 const addSingletonPath = path.join(projectRoot, 'src/collections/commands/add-singleton.js');
 const addPath = path.join(projectRoot, 'src/collections/commands/add.js');
@@ -189,6 +194,10 @@ module.exports = {
   findLitterRulesPath,
   lintingConfigPath,
   testConfigPath,
+  collectionsMetadataFilename,
+  collectionsEnabledManifestFilename,
+  collectionsUserPluginsDirname,
+  collectionsDefaultArchetypeDirname,
 
   // --- user-facing interfaces ---
   cliRoot,
@@ -235,7 +244,6 @@ module.exports = {
   validatorPath,
   collectionsRoot,
   cmUtilsPath,
-  constantsPath,
   collectionsIndexPath,
   addSingletonPath,
   addPath,

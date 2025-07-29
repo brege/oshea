@@ -4,7 +4,6 @@ const {
   projectRoot,
   collectionsIndexPath,
   cmUtilsPath,
-  constantsPath,
   captureLogsPath,
   collectionsManagerAddManifestPath,
   collectionsManagerRemoveManifestPath,
@@ -80,7 +79,6 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
         isValidPluginName: sinon.stub().returns(true),
       },
       yaml: { load: sinon.stub().returns({}) },
-      constants: require(constantsPath),
       chalk: {
         blue: str => str, yellow: str => str, red: str => str,
         magenta: str => str, green: str => str, underline: str => str,
@@ -100,7 +98,6 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
         loggerPath: testLoggerPath,
       },
       [cmUtilsPath]: mockDependencies.cmUtils,
-      [constantsPath]: mockDependencies.constants
     });
     CollectionsManager = collectionsManagerModule;
   });

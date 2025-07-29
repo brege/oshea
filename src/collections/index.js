@@ -9,7 +9,6 @@ const yaml = require('js-yaml');
 const matter = require('gray-matter');
 const {
   cmUtilsPath,
-  constantsPath,
   loggerPath,
   addPath,
   enablePath,
@@ -20,13 +19,16 @@ const {
   updateAllPath,
   listAvailablePath,
   listPath,
-  addSingletonPath
+  addSingletonPath,
+  collectionsMetadataFilename,
+  collectionsEnabledManifestFilename,
+  collectionsUserPluginsDirname,
+  collectionsDefaultArchetypeDirname
 } = require('@paths');
 const logger = require(loggerPath);
 
 // Internal Utilities
 const cmUtils = require(cmUtilsPath);
-const constants = require(constantsPath);
 
 // Command Modules
 const addCollectionCommand = require(addPath);
@@ -45,7 +47,11 @@ class CollectionsManager {
     // Define all default dependencies needed by any command module
     const defaultDependencies = {
       fs, fss, path, os, spawn, fsExtra, yaml, matter,
-      cmUtils, constants, process, logger,
+      cmUtils, process, logger,
+      collectionsMetadataFilename,
+      collectionsEnabledManifestFilename,
+      collectionsUserPluginsDirname,
+      collectionsDefaultArchetypeDirname
     };
 
     // Merge defaults with any injected dependencies for testing
@@ -113,8 +119,8 @@ class CollectionsManager {
   }
 
   async _readEnabledManifest() {
-    const { path, fss, fs, yaml, constants } = this.dependencies;
-    const enabledManifestPath = path.join(this.collRoot, constants.ENABLED_MANIFEST_FILENAME);
+    const { path, fss, fs, yaml } = this.dependencies;
+    const enabledManifestPath = path.join(this.collRoot, collectionsEnabledManifestFilename);
     let enabledManifest = { enabled_plugins: [] };
     logger.debug('Attempting to read enabled manifest', {
       context: 'CollectionsManager',
@@ -157,8 +163,8 @@ class CollectionsManager {
   }
 
   async _writeEnabledManifest(manifestData) {
-    const { path, fs, yaml, constants } = this.dependencies;
-    const enabledManifestPath = path.join(this.collRoot, constants.ENABLED_MANIFEST_FILENAME);
+    const { path, fs, yaml } = this.dependencies;
+    const enabledManifestPath = path.join(this.collRoot, collectionsEnabledManifestFilename);
     logger.debug('Attempting to write enabled manifest', {
       context: 'CollectionsManager',
       path: enabledManifestPath
@@ -184,9 +190,9 @@ class CollectionsManager {
   }
 
   async _readCollectionMetadata(collectionName) {
-    const { path, fss, fs, yaml, constants } = this.dependencies;
+    const { path, fss, fs, yaml } = this.dependencies;
     const collectionPath = path.join(this.collRoot, collectionName);
-    const metadataPath = path.join(collectionPath, constants.METADATA_FILENAME);
+    const metadataPath = path.join(collectionPath, collectionsMetadataFilename);
     logger.debug('Attempting to read collection metadata', {
       context: 'CollectionsManager',
       collection: collectionName,
@@ -222,9 +228,9 @@ class CollectionsManager {
   }
 
   async _writeCollectionMetadata(collectionName, metadataContent) {
-    const { path, fs, yaml, constants } = this.dependencies;
+    const { path, fs, yaml } = this.dependencies;
     const collectionPath = path.join(this.collRoot, collectionName);
-    const metadataPath = path.join(collectionPath, constants.METADATA_FILENAME);
+    const metadataPath = path.join(collectionPath, collectionsMetadataFilename);
     logger.debug('Attempting to write collection metadata', {
       context: 'CollectionsManager',
       collection: collectionName,
@@ -298,7 +304,7 @@ class CollectionsManager {
   }
 
   async disableAllPluginsFromCollection(collectionIdentifier) {
-    const { path, constants, logger } = this.dependencies;
+    const { path, logger } = this.dependencies;
     const manifest = await this._readEnabledManifest();
     const initialCount = manifest.enabled_plugins.length;
     let userFriendlyName = collectionIdentifier;
@@ -310,12 +316,12 @@ class CollectionsManager {
       collectionIdentifier: collectionIdentifier
     });
 
-    if (collectionIdentifier.startsWith(constants.USER_ADDED_PLUGINS_DIR_NAME + path.sep)) {
+    if (collectionIdentifier.startsWith(collectionsUserPluginsDirname + path.sep)) {
       const parts = collectionIdentifier.split(path.sep);
-      if (parts.length >= 2 && parts[0] === constants.USER_ADDED_PLUGINS_DIR_NAME) {
-        actualCollectionNameForFilter = constants.USER_ADDED_PLUGINS_DIR_NAME;
+      if (parts.length >= 2 && parts[0] === collectionsUserPluginsDirname) {
+        actualCollectionNameForFilter = collectionsUserPluginsDirname;
         specificPluginIdForFilter = parts[1];
-        userFriendlyName = `${specificPluginIdForFilter} (from ${constants.USER_ADDED_PLUGINS_DIR_NAME})`;
+        userFriendlyName = `${specificPluginIdForFilter} (from ${collectionsUserPluginsDirname})`;
         logger.debug('Disabling a specific user-added plugin', {
           context: 'CollectionsManager',
           pluginId: specificPluginIdForFilter,

@@ -3,40 +3,21 @@ const fs = require('fs-extra');
 const path = require('path');
 const yaml = require('js-yaml');
 
-// Helper to create a dummy plugin structure for testing CM commands
-async function createDummyPlugin(pluginDir, pluginName) {
-  await fs.ensureDir(pluginDir);
-  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-}
-
-// Helper to create a fully compliant v1 plugin (for 3.7.2 happy path)
-async function createWellFormedPlugin(pluginDir, pluginName) {
-  await fs.ensureDir(path.join(pluginDir, '.contract/test'));
-  await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: Well-formed plugin.`);
-  await fs.writeFile(path.join(pluginDir, 'README.md'), `---\ncli_help: |\n  Plugin: ${pluginName}\n---\n`);
-  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-  await fs.writeFile(path.join(pluginDir, '.contract/test', `${pluginName}-e2e.test.js`), 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));');
-  await fs.writeFile(path.join(pluginDir, '.contract', `${pluginName}.schema.json`), '{}');
-}
-
-// Helper to create a deliberately malformed plugin (for 3.7.3 sad path)
-async function createMalformedPlugin(pluginDir, pluginName) {
-  await fs.ensureDir(pluginDir);
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: Malformed plugin.`);
-  await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
-}
-
+require('module-alias/register');
+const { createDummyPluginPath } = require('@paths');
+const { createDummyPlugin } = require(createDummyPluginPath);
 
 module.exports = [
   {
     describe: '3.7.1: (Happy Path) Successfully enables a plugin from a collection (bypassing validation)',
     setup: async (sandboxDir, harness) => {
       const collDir = path.join(sandboxDir, 'test-collection');
-      await createDummyPlugin(path.join(collDir, 'plugin-to-enable'), 'plugin-to-enable');
+
+      await createDummyPlugin('plugin-to-enable', {
+        destinationDir: collDir,
+        baseFixture: 'valid-plugin'
+      });
+
       await harness.runCli(['collection', 'add', collDir, '--name', 'test-collection']);
     },
     args: (sandboxDir) => [
@@ -57,8 +38,12 @@ module.exports = [
       const collectionName = 'valid-coll';
       const pluginName = 'valid-plugin';
       const collDir = path.join(sandboxDir, collectionName);
-      const pluginDir = path.join(collDir, pluginName);
-      await createWellFormedPlugin(pluginDir, pluginName);
+
+      await createDummyPlugin(pluginName, {
+        destinationDir: collDir,
+        baseFixture: 'valid-plugin'
+      });
+
       await harness.runCli(['collection', 'add', collDir, '--name', collectionName]);
     },
     args: (sandboxDir) => [
@@ -82,8 +67,13 @@ module.exports = [
       const collectionName = 'invalid-coll';
       const pluginName = 'invalid-plugin';
       const collDir = path.join(sandboxDir, collectionName);
-      const pluginDir = path.join(collDir, pluginName);
-      await createMalformedPlugin(pluginDir, pluginName);
+
+      await createDummyPlugin(pluginName, {
+        destinationDir: collDir,
+        baseFixture: 'valid-plugin',
+        breakage: ['missing-handler']
+      });
+
       await harness.runCli(['collection', 'add', collDir, '--name', collectionName]);
     },
     args: (sandboxDir) => [

@@ -18,7 +18,7 @@ module.exports = [
       'plugin',
       'create',
       'my-boilerplate-plugin',
-      '--target-dir',
+      '--outdir',
       sandboxDir
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
@@ -47,7 +47,7 @@ module.exports = [
       'my-archetyped-plugin',
       '--from',
       path.join(sandboxDir, 'source-plugin'),
-      '--target-dir',
+      '--outdir',
       sandboxDir
     ],
     assert: async ({ exitCode, stdout, stderr }, sandboxDir, expect) => {
@@ -68,7 +68,7 @@ module.exports = [
         'plugin',
         'create',
         'temp-valid-plugin',
-        '--target-dir',
+        '--outdir',
         sandboxDir
       ]);
       if (createResult.exitCode !== 0) {
@@ -101,7 +101,7 @@ module.exports = [
         newPluginName,
         '--from',
         'cv',
-        '--target-dir',
+        '--outdir',
         sandboxDir
       ]);
       if (createResult.exitCode !== 0) {

@@ -1,8 +1,7 @@
 // src/collections/commands/list.js
 
 module.exports = async function listCollections(dependencies, type = 'downloaded', collectionNameFilter = null) {
-  const { fss, fs, path, constants, logger } = dependencies;
-  const { USER_ADDED_PLUGINS_DIR_NAME } = constants;
+  const { fss, fs, path, logger, collectionsUserPluginsDirname } = dependencies;
 
   logger.debug('Attempting to list collections', {
     context: 'ListCollectionsCommand',
@@ -27,12 +26,12 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
       const collectionInfos = [];
 
       // Also check for legacy user-added plugins in collRoot (old _user_added_plugins structure)
-      const legacyUserPluginsPath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
+      const legacyUserPluginsPath = path.join(this.collRoot, collectionsUserPluginsDirname);
       if (fss.existsSync(legacyUserPluginsPath)) {
         const singletons = await fs.readdir(legacyUserPluginsPath, { withFileTypes: true });
         if (singletons.some(sDirent => sDirent.isDirectory())) {
           collectionInfos.push({
-            name: USER_ADDED_PLUGINS_DIR_NAME,
+            name: collectionsUserPluginsDirname,
             source: legacyUserPluginsPath,
             special_type: 'singleton_container',
             added_on: 'N/A (Container)',
@@ -56,13 +55,13 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
             });
             continue;
           }
-          if (collectionName === USER_ADDED_PLUGINS_DIR_NAME) {
-            const singletonPluginsContainerPath = path.join(this.collRoot, USER_ADDED_PLUGINS_DIR_NAME);
+          if (collectionName === collectionsUserPluginsDirname) {
+            const singletonPluginsContainerPath = path.join(this.collRoot, collectionsUserPluginsDirname);
             if (fss.existsSync(singletonPluginsContainerPath)) {
               const singletons = await fs.readdir(singletonPluginsContainerPath, { withFileTypes: true });
               if (singletons.some(sDirent => sDirent.isDirectory())) {
                 collectionInfos.push({
-                  name: USER_ADDED_PLUGINS_DIR_NAME,
+                  name: collectionsUserPluginsDirname,
                   source: singletonPluginsContainerPath,
                   special_type: 'singleton_container',
                   added_on: 'N/A (Container)',
@@ -131,7 +130,7 @@ module.exports = async function listCollections(dependencies, type = 'downloaded
     const processedEnabledPlugins = [];
     for (const p of pluginsFromManifest) {
       const pluginEntry = { ...p }; // Clone
-      if (pluginEntry.original_source && pluginEntry.collection_name === USER_ADDED_PLUGINS_DIR_NAME) {
+      if (pluginEntry.original_source && pluginEntry.collection_name === collectionsUserPluginsDirname) {
         if (!fss.existsSync(pluginEntry.original_source)) {
           pluginEntry.is_original_source_missing = true;
           logger.warn('Original source for singleton plugin is missing', {

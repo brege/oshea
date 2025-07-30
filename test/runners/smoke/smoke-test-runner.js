@@ -22,7 +22,8 @@ const {
   expandScenarios,
   parseArgs,
   matchesGrep,
-  listTestSuites
+  listTestSuites,
+  showModeFormatters
 } = require(smokeHelpersPath);
 
 // executeCommandWithColors now imported from smoke-helpers
@@ -30,10 +31,7 @@ const {
 
 async function runTestSuite(testSuite, showMode = false) {
   if (showMode) {
-    // Display visual test suite header for show mode
-    logger.info('\n' + '-'.repeat(80));
-    logger.info(`${testSuite.name}`);
-    logger.info('-'.repeat(80));
+    showModeFormatters.showSuiteHeader(testSuite.name);
   } else {
     logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
   }
@@ -42,16 +40,13 @@ async function runTestSuite(testSuite, showMode = false) {
   const results = [];
   let failedScenarios = [];
 
-  for (const scenario of scenarios) {
+  for (let i = 0; i < scenarios.length; i++) {
+    const scenario = scenarios[i];
     const fullCommand = `node "${cliPath}" ${scenario.args}`;
     const commandDisplay = `${testSuite.base_command || 'md-to-pdf'} ${scenario.args}`.trim();
 
     if (showMode) {
-      // Display scenario header for show mode
-      logger.info('\n' + '-'.repeat(60));
-      logger.info(`${scenario.description}`);
-      logger.info(`Command: ${commandDisplay}`);
-      logger.info('-'.repeat(60));
+      showModeFormatters.showScenario(scenario.description, commandDisplay);
     } else {
       // Start scenario test
       logger.info({ command: commandDisplay, status: 'testing' }, { format: 'workflow-step' });
@@ -61,15 +56,7 @@ async function runTestSuite(testSuite, showMode = false) {
       const result = await (showMode ? executeCommandWithColors(fullCommand) : executeCommand(fullCommand));
 
       if (showMode) {
-        // Display the actual output with preserved colors for show mode
-        if (result.stdout) {
-          // Use raw console.log to preserve ANSI colors
-          console.log(result.stdout); // lint-skip-line no-console
-        }
-        if (result.stderr) {
-          logger.warn('\nSTDERR:');
-          console.log(result.stderr); // lint-skip-line no-console
-        }
+        showModeFormatters.showOutput(result);
       }
 
       // Find and run validator
@@ -101,14 +88,7 @@ async function runTestSuite(testSuite, showMode = false) {
 
     } catch (error) {
       if (showMode) {
-        logger.error(`\nFailed to execute: ${error.message}`);
-        if (error.stdout) {
-          console.log(error.stdout); // lint-skip-line no-console
-        }
-        if (error.stderr) {
-          logger.warn('\nSTDERR:');
-          console.log(error.stderr); // lint-skip-line no-console
-        }
+        showModeFormatters.showError(error);
       }
 
       const failure = {
@@ -122,6 +102,11 @@ async function runTestSuite(testSuite, showMode = false) {
       if (!showMode) {
         logger.info({ command: commandDisplay, status: 'failed' }, { format: 'workflow-step' });
       }
+    }
+
+    // Add separator between scenarios in showMode (but not after the last one)
+    if (showMode && i < scenarios.length - 1) {
+      showModeFormatters.showScenarioSeparator();
     }
   }
 
@@ -179,12 +164,7 @@ async function runAllSmokeTests(yamlFile = null, showMode = false, targetBlock =
   }
 
   if (showMode) {
-    // Display visual test header for show mode
-    logger.info('\n' + '-'.repeat(60));
-    logger.info('md-to-pdf CLI Smoke Tests (--show mode)');
-    logger.info('-'.repeat(60));
-    logger.info('\nPurpose: Visual inspection of CLI commands, outputs, and formatting');
-    logger.info('Review each section for: functionality, colors, alignment, error handling');
+    showModeFormatters.showSessionHeader('Level 3 CLI Smoke Tests');
   } else {
     // Display smoke test header
     logger.info('', { format: 'workflow-header' });

@@ -32,12 +32,13 @@ or whatever location the new E2E base directory's path is defined as.
 - [x] Unified formatting - both runners should use the same formatter
 
 **Mocha integration of smoke-like runners**
-- [ ] Test unified formatting and functionality - Ensure mocha integration works
-- [ ] Fix coffeecup wrapper - Separate data stream from display logic  
-- [ ] Test coffeecup - Ensure mocha integration works  
+- [x] Test unified formatting and functionality - Ensure mocha integration works
+- [x] Fix coffeecup wrapper - Separate data stream from display logic  
+- [x] Test coffeecup - Ensure mocha integration works (on the workflow-pilot) 
 
 **Unify smoke-like runners**
-- [ ] Extract special showMode formatting
+- [x] Extract special showMode formatting
+- [x] Fix overbearing header spamm; color execution command
 - [ ] Unify [`smoke-test-runner.js`](smoke/smoke-test-runner.js) and [`workflow-test-runner.js`](smoke/workflow-test-runner.js)
 
 ---

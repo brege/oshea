@@ -29,8 +29,8 @@ Using YAML allows for tagging and organization of these tests. It makes the mani
 | ○ | `skip`    | `--skip`    | `true` to skip the `test_id` or `tag` |
 | ○ |           | `--only`    | opposite of `skip` |
 | ○ | `order`   | `--order`   | `1` or `2`  (needs to change) |
-| ○ | `test_id` | `--grep`    | similar to mocha's `--grep` |
-| ○ | `tags`    | `--tag`     | run blocks by tag |
+| ✓ | `test_id` | `--grep`    | similar to mocha's `--grep` |
+| ✓ | `tags`    | `--tag`     | run blocks by tag |
 | ○ | `yaml`    | `--yaml`    | run one or more YAML manifest files |
 
 ---
@@ -65,7 +65,7 @@ The framework will support composing complex test sequences from simpler buildin
 | ✓ |      | create test harness (`test-harness.js`)            |
 | ✓ |      | environment isolation with `TestWorkspace` class   |
 | ✓ |      | shared validation and execution functions          |
-| ○ |      | master test runner `unified-smoke-runner.js`       |
+| ✓ |      | master test runner `unified-smoke-runner.js`       |
 | ✓ |      | add `--show` mode support, with colors             |
 | ○ |      | support YAML-level `show: true/false` in config    |
 | ○ |      | sequence selection (run by name/number)            |

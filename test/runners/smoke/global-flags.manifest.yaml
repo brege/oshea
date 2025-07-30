@@ -1,0 +1,49 @@
+name: "--version (End-to-End Test) cli.js"
+base_command: "md-to-pdf"
+tags: [cli, version, smoke]
+scenarios:
+  - description: "3.15.1 --version"
+    args: "--version"
+    expect:
+      executes: true
+
+name: "--help (End-to-End Test) cli.js src/cli/get-help.js"
+base_command: "md-to-pdf"
+tags: [cli, help, smoke]
+discovery:
+  type: "cli_commands"
+  source: "src/cli/commands"
+  exclude: ["$0", "plugin", "collection"]
+scenarios:
+  - description: "3.15.2 Help for {command}"
+    args: "{command} --help"
+    expect:
+      executes: true
+
+#name: "asdf/--asdf (End-to-End Test) cli.js (unknown command/option)"
+#base_command: "md-to-pdf"
+#tags: [cli, smoke, sad-path]
+#scenarios:
+#  - description: "3.15.3 Unrecognized command"
+#    args: "asdf"
+#    expect:
+#      executes: false
+#    visual_check: "Clear messaging for unrecognized command"
+
+---
+name: "Context Switching Empty States"  # new (TODO: where should these go?)
+base_command: "md-to-pdf"
+tags: [cli, smoke, coll-root, sad-path]
+visual_focus: "error handling, context isolation, empty state consistency"
+scenarios:
+  - description: "Plugin list with non-existent collection root - context error handling"
+    args: "plugin list --coll-root /tmp/nonexistent"
+    expect:
+      executes: true
+    visual_check: "Graceful handling of missing collection root with clear messaging"
+
+  - description: "Collection list with non-existent collection root - context isolation"
+    args: "collection list names --coll-root /tmp/nonexistent"
+    expect:
+      executes: true
+    visual_check: "Clean empty state when collection root doesn't exist"

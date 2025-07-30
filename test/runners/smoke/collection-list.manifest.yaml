@@ -1,0 +1,53 @@
+name: "collection list (End-to-End Test) src/cli/commands/collection/list.command.js"
+base_command: "md-to-pdf"
+tags: [cli, smoke, collection, list]
+scenarios:
+  - description: "3.11.1 List downloaded collections (default)"
+    args: "collection list names"
+    expect:
+      contains_any: ["Downloaded plugin collections", "No downloaded collections found"]
+
+  - description: "3.11.2 List collection names (short)"  # new
+    args: "collection list names --short"
+    expect:
+      contains_any: ["Downloaded plugin collections", "No downloaded collections found"]
+
+  - description: "3.11.3 List available plugins from collections" # new
+    args: "collection list available"
+    expect:
+      contains_any: ["Available plugins", "No available plugins found in any collection"]
+
+  - description: "3.11.4 List enabled plugins from collections"  # new
+    args: "collection list enabled"
+    expect:
+      contains_any: ["Enabled plugins", "No enabled plugins found"]
+
+  - description: "3.11.5 List all plugins (alias for available)"  # new
+    args: "collection list all"
+    expect:
+      contains_any: ["Available plugins", "No available plugins found in any collection"]
+
+---
+name: "collection list (End-to-End Test) Collection List States (Full vs Empty)"
+base_command: "md-to-pdf"
+tags: [cli, smoke, collection, list, enable, disable, happy-path, sad-path]
+visual_focus: "empty state consistency, messaging clarity"
+scenarios:
+  - description: "Collection list names (likely empty) - empty state"
+    args: "collection list names"
+    expect:
+      executes: true
+    visual_check: "Clean empty state messaging with consistent theming"
+
+  - description: "Collection list available (empty) - no available plugins state"
+    args: "collection list available"
+    expect:
+      executes: true
+    visual_check: "Empty state for no available collection plugins"
+
+  - description: "Collection list enabled (empty) - no enabled plugins state"
+    args: "collection list enabled"
+    expect:
+      executes: true
+    visual_check: "Empty state for no enabled collection plugins"
+

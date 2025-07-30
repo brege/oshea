@@ -1,0 +1,54 @@
+name: "plugin list (End-to-End Test) src/cli/commands/plugin/list.command.js"
+base_command: "md-to-pdf"
+tags: [cli, smoke, plugin, list]
+scenarios:
+  - description: "3.4.1 List plugins (default)"
+    args: "plugin list"
+    expect:
+      contains: "usable by md-to-pdf"
+
+  - description: "3.4.2 List enabled plugins"
+    args: "plugin list --enabled"
+    expect:
+      contains: "Enabled plugins"
+
+  - description: "3.4.3 List disabled plugins"
+    args: "plugin list --disabled"
+    expect:
+      contains_any: ["Disabled (but available) CM-managed plugins", "No disabled (but available) CM-managed plugins found."]
+
+  - description: "3.4.4 List available plugins"
+    args: "plugin list --available"
+    expect:
+      contains_any: ["Available CM-managed plugins", "No CM-managed plugins found"]
+
+  - description: "3.4.5 List plugins (--short)"  # new
+    args: "plugin list --short"
+    expect:
+      contains_any: ["Summary for all known plugins"]
+
+---
+name: "plugin list (End-to-End Test) Plugin List States (Full vs Empty)"
+base_command: "md-to-pdf"
+tags: [cli, smoke, plugin, list, enable, disable]
+visual_focus: "empty state handling, table formatting consistency"
+scenarios:
+  - description: "Plugin list --available (likely empty) - empty state formatting"
+    args: "plugin list --available"
+    expect:
+      executes: true
+    visual_check: "Clean empty state with consistent theming and helpful messaging"
+
+  - description: "Plugin list --disabled (likely empty) - empty state vs populated"
+    args: "plugin list --disabled"
+    expect:
+      executes: true
+    visual_check: "Empty state handling or populated list with proper disabled styling"
+
+  - description: "Plugin list (populated) - full table formatting"
+    args: "plugin list"
+    expect:
+      executes: true
+    visual_check: "Rich populated table with headers, colors, and proper alignment"
+
+

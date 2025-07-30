@@ -184,6 +184,31 @@ function logger(message, options = {}) {
     return formatters['workflow-results'](level, message, meta);
   }
 
+  // YAML showMode formatters
+  if (format === 'yaml-show-session') {
+    return formatters['yaml-show-session'](level, message, meta);
+  }
+
+  if (format === 'yaml-show-suite') {
+    return formatters['yaml-show-suite'](level, message, meta);
+  }
+
+  if (format === 'yaml-show-scenario') {
+    return formatters['yaml-show-scenario'](level, message, meta);
+  }
+
+  if (format === 'yaml-show-separator') {
+    return formatters['yaml-show-separator'](level, message, meta);
+  }
+
+  if (format === 'yaml-show-output') {
+    return formatters['yaml-show-output'](level, message, meta);
+  }
+
+  if (format === 'yaml-show-error') {
+    return formatters['yaml-show-error'](level, message, meta);
+  }
+
   // Fallback to default formatter
   return formatters.app(level, message, meta);
 }

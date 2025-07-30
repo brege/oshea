@@ -10,9 +10,8 @@ const {
   tableFormatterPath,
   pluginListFormatterPath,
   collectionListFormatterPath,
-  smokeTestFormatterPath,
   validationFormatterPath,
-  workflowTestFormatterPath,
+  yamlTestFormatterPath,
 } = require('@paths');
 const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
@@ -22,13 +21,7 @@ const { formatPathFinderOutput } = require(pathsFormatterPath);
 const { formatTable } = require(tableFormatterPath);
 const { formatPluginList } = require(pluginListFormatterPath);
 const { formatCollectionList } = require(collectionListFormatterPath);
-const {
-  formatSuiteHeader,
-  formatScenarioProgress,
-  formatScenarioWarning,
-  formatSmokeResults,
-  formatSmokeHeader
-} = require(smokeTestFormatterPath);
+// Removed smoke-test-formatter.js - functionality moved to yaml-test-formatter.js
 const {
   formatValidationHeader,
   formatValidationStep,
@@ -41,8 +34,14 @@ const {
   formatWorkflowHeader,
   formatWorkflowWarning,
   formatWorkflowList,
-  formatWorkflowResults
-} = require(workflowTestFormatterPath);
+  formatWorkflowResults,
+  formatYamlShowSession,
+  formatYamlShowSuite,
+  formatYamlShowScenario,
+  formatYamlShowSeparator,
+  formatYamlShowOutput,
+  formatYamlShowError
+} = require(yamlTestFormatterPath);
 
 // Export formatters
 module.exports = {
@@ -54,11 +53,7 @@ module.exports = {
   table: formatTable,
   'plugin-list': formatPluginList,
   'collection-list': formatCollectionList,
-  'smoke-header': formatSmokeHeader,
-  'smoke-suite': formatSuiteHeader,
-  'smoke-scenario': formatScenarioProgress,
-  'smoke-warning': formatScenarioWarning,
-  'smoke-results': formatSmokeResults,
+  // Removed smoke-* formatters - functionality moved to yaml-test-formatter.js
   'validation-header': formatValidationHeader,
   'validation-step': formatValidationStep,
   'validation-test': formatValidationTest,
@@ -68,5 +63,11 @@ module.exports = {
   'workflow-step': formatWorkflowStep,
   'workflow-warning': formatWorkflowWarning,
   'workflow-list': formatWorkflowList,
-  'workflow-results': formatWorkflowResults
+  'workflow-results': formatWorkflowResults,
+  'yaml-show-session': formatYamlShowSession,
+  'yaml-show-suite': formatYamlShowSuite,
+  'yaml-show-scenario': formatYamlShowScenario,
+  'yaml-show-separator': formatYamlShowSeparator,
+  'yaml-show-output': formatYamlShowOutput,
+  'yaml-show-error': formatYamlShowError
 };

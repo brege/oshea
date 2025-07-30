@@ -39,7 +39,56 @@ or whatever location the new E2E base directory's path is defined as.
 **Unify smoke-like runners**
 - [x] Extract special showMode formatting
 - [x] Fix overbearing header spamm; color execution command
-- [ ] Unify [`smoke-test-runner.js`](smoke/smoke-test-runner.js) and [`workflow-test-runner.js`](smoke/workflow-test-runner.js)
+- [x] Rename `workflow-test-formatter.js` to `yaml-test-formatter.js`
+- [x] Remove `smoke-test-formatter.js`
+- [x] Rename `smoke-helpers.js` to `yaml-test-helpers.js`
+- [x] Rename `workflow-coffeecup.test.js` to `yaml-mocha.test.js`
+- [x] Re-generate pathing (name changes)
+- [x] Unify [`smoke-test-runner.js`](smoke/smoke-test-runner.js) and [`workflow-test-runner.js`](smoke/workflow-test-runner.js)
+- [x] Generalize runner for user-extensible workflows (remove smoke/workflow distinction)
+- [x] Add CLI flag pass-through support (--coll-root, --outdir, --base-path)
+- [x] Auto-detect YAML capabilities (discovery, workspace variables, validation types)
+- [x] Add glob support for multiple YAML files using file-helpers.js integration
+
+**User-Extensible Workflow System**
+Transform test runners into user-facing batch processing tools:
+```bash
+# Multi-file glob support with filtering
+node yaml-test-runner.js "test/runners/smoke/*.yaml" --grep plugin
+
+# Validate plugins across collections (auto-detects workspace needs)
+node yaml-test-runner.js bundled-plugins.yaml --coll-root ~/.md-to-pdf/collections/themes
+
+# Custom user workflows (restaurant menus for holidays)  
+node yaml-test-runner.js valentine-menu-workflow.yaml --outdir /tmp/valentine-tests --show
+
+# Mix individual files and globs
+node yaml-test-runner.js smoke-tests.yaml "custom/*.yaml" --grep validation
+
+# Test all YAML files in directory
+node yaml-test-runner.js "test/runners/smoke/*.yaml" --grep plugin
+
+# Test specific patterns across directories
+node yaml-test-runner.js "test/**/*validation*.yaml" --show
+
+```
+
+**Architecture**
+- Auto-detection: Discovers YAML capabilities (discovery vs workspace vs simple tests)
+- CLI pass-through: `--coll-root`, `--outdir`, `--base-path` passed to underlying commands  
+- Glob expansion: Uses file-helpers.js for powerful pattern matching
+- Backward compatibility: Original wrapper files maintained for existing workflows
+- User-extensible: Any YAML file becomes a batch processing workflow tool
+
+Users create declarative YAML workflows instead of complex bash scripts. System respects XDG/config paths by default, allows overrides for power users (themes, localizations, etc.).
+
+**QoL / Errata**
+- [ ] Consider aliasing yaml-test-runner.js into base CLI command
+- [ ] Ensure `--grep` quietly passes through unmatched files (during YAML-globbing)
+- [x] Remove old runner files that are now redundant
+- [ ] Remove console-log debt completely. Mostly: `yaml-test-*.js`
+- [ ] Clean up all relative paths ***before phase 3*** 
+- [ ] Ensure all `test_id`'s are displayed in Mocha output
 
 ---
 
@@ -87,6 +136,22 @@ src/                                test/
 
 ```
 
+**Test-side renaming**
+- [ ] Rename `plugin-*.manifest.js` to `plugin/*.manifest.js`
+- [ ] Remove `test/runners/smoke/` after re-organizing test-tree
+
+**Neo-test YAML's** \
+These should be at the same base as the old manifests.  This means we should rename to match the structure `plugin/*.manifest.js <--> plugin/*.manifest.yaml`, breaking up the YAMLs for the time being.
+
+**App-side consistency**
+- [ ] Move all of `src/cli/commands` into `src/cli` (this way `src/cli/ <--> test/runners/e2e/`)
+- [ ] `mv src/cli/get-help.js src/plugins/plugin-help.js` (this only applies to plugins help-text)
+- [ ] `mv src/plugins/validator.js src/plugins/plugin-validator.js` (consistency)
+- [ ] `mv src/cli/config-display.js src/utils/formatters/config-formatter.js` (consistency)
+- [ ] `mv src/utils/formatters/*-formatter.js src/utile/formatters/*.formatter.js` (good/bad idea?)
+
+This phase is all shell and path registry work. Try not to get distracted.
+
 ---
 
 ## Phase 4: E2E Porting (Next-gen Testing)
@@ -96,6 +161,7 @@ src/                                test/
 - [ ] Port old E2E tests into the new system
   - [ ] Ported ... into the new system at ...
   - [ ] Ported ... into the new system at ...
+- [ ] rename `yaml-*.js` files to `e2e-*.js` files, as old tests are removed and don't conflict with new E2E test files 
 
 ## Phase 5: Unify manifests with documentation
 

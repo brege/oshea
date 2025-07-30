@@ -1,4 +1,4 @@
-// test/runners/smoke/smoke-helpers.js
+// test/runners/smoke/yaml-test-helpers.js
 // Unified test harness for YAML-based tests (smoke tests and workflow tests)
 
 require('module-alias/register');
@@ -119,12 +119,13 @@ const discoverers = {
 };
 
 
-// Test workspace manager for isolated tes/t environments
+// Test workspace manager for isolated test environments
 class TestWorkspace {
-  constructor(basePath = '/tmp/md-to-pdf-workspace') {
+  constructor(basePath = '/tmp/md-to-pdf-workspace', customOutdir = null, customCollRoot = null) {
     this.basePath = basePath;
-    this.outdir = path.join(basePath, 'outdir');
-    this.collRoot = path.join(basePath, 'coll-root');
+    // Allow custom paths for user-specified --outdir and --coll-root
+    this.outdir = customOutdir || path.join(basePath, 'outdir');
+    this.collRoot = customCollRoot || path.join(basePath, 'coll-root');
   }
 
 
@@ -377,58 +378,8 @@ function listTestSuites(yamlFilePath, useWorkflowFormatter = true) {
   }
 }
 
-// ShowMode formatters - clean visual inspection mode with minimal headers
-const showModeFormatters = {
-  // Display session header once (Level 3/4 Tests)
-  showSessionHeader: (title) => {
-    console.log(''); // spacing
-    console.log('─'.repeat(60));
-    console.log(title);
-    console.log('─'.repeat(60));
-  },
-
-  // Display test suite name with minimal separator
-  showSuiteHeader: (suiteName) => {
-    console.log(suiteName);
-    console.log('─'.repeat(38)); // shorter separator
-  },
-
-  // Display scenario with grey command
-  showScenario: (description, commandDisplay) => {
-    console.log(description);
-    // Use theme.detail for grey command styling
-    console.log(`Command: ${theme.detail(commandDisplay)}`);
-    console.log(''); // spacing before output
-  },
-
-  // Display separator between scenarios
-  showScenarioSeparator: () => {
-    console.log('─'.repeat(38));
-  },
-
-  // Display command output with preserved colors (no extra formatting)
-  showOutput: (result) => {
-    if (result.stdout) {
-      console.log(result.stdout); // lint-skip-line no-console
-    }
-    if (result.stderr) {
-      logger.warn('\nSTDERR:');
-      console.log(result.stderr); // lint-skip-line no-console
-    }
-  },
-
-  // Display error information cleanly
-  showError: (error) => {
-    logger.error(`Failed to execute: ${error.message}`);
-    if (error.stdout) {
-      console.log(error.stdout); // lint-skip-line no-console
-    }
-    if (error.stderr) {
-      logger.warn('STDERR:');
-      console.log(error.stderr); // lint-skip-line no-console
-    }
-  }
-};
+// ShowMode formatters moved to src/utils/formatters/yaml-test-formatter.js
+// Use logger.info() with yaml-show-* formats instead
 
 module.exports = {
   executeCommand,
@@ -441,6 +392,5 @@ module.exports = {
   validateResult,
   parseArgs,
   matchesGrep,
-  listTestSuites,
-  showModeFormatters
+  listTestSuites
 };

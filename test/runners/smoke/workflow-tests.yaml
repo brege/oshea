@@ -125,7 +125,7 @@ scenarios:
       than observing git error conditions they should avoid through proper workflow habits.
     args: "collection --help"
     expect:
-      exit_code: 0
+      executes: true
 
 ---
 name: "4.3.2 Plugin Create Invalid Source (Deprecated)"
@@ -142,4 +142,4 @@ scenarios:
       thoroughly covered by the existing smoke test infrastructure.
     args: "plugin create --help"
     expect:
-      exit_code: 0
+      executes: true

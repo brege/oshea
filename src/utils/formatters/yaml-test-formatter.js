@@ -1,5 +1,5 @@
-// src/utils/formatters/workflow-test-formatter.js
-// Workflow test result formatter - extends smoke-test-formatter for Level 4 sequential workflows
+// src/utils/formatters/yaml-test-formatter.js
+// YAML-based test result formatter - unified formatter for smoke tests and workflow tests
 
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
@@ -119,11 +119,76 @@ function colorForLevel(level, message) {
   return message;
 }
 
+// ============================================================================
+// ShowMode Formatters - Clean visual inspection mode with minimal headers
+// ============================================================================
+
+// Format session header once (Level 3/4 Tests)
+function formatYamlShowSession(level, message, meta = {}) {
+  const { title } = message;
+  console.log(''); // spacing
+  console.log('─'.repeat(60));
+  console.log(title);
+  console.log('─'.repeat(60));
+}
+
+// Format test suite name with minimal separator
+function formatYamlShowSuite(level, message, meta = {}) {
+  const { suiteName } = message;
+  console.log(suiteName);
+  console.log('─'.repeat(38)); // shorter separator
+}
+
+// Format scenario with grey command
+function formatYamlShowScenario(level, message, meta = {}) {
+  const { description, command } = message;
+  console.log(description);
+  // Use theme.detail for grey command styling
+  console.log(`Command: ${theme.detail(command)}`);
+  console.log(''); // spacing before output
+}
+
+// Format separator between scenarios
+function formatYamlShowSeparator(level, message, meta = {}) {
+  console.log('─'.repeat(38));
+}
+
+// Format command output with preserved colors (no extra formatting)
+function formatYamlShowOutput(level, message, meta = {}) {
+  const { result } = message;
+  if (result.stdout) {
+    console.log(result.stdout); // lint-skip-line no-console
+  }
+  if (result.stderr) {
+    console.warn('\nSTDERR:'); // lint-skip-line no-console
+    console.log(result.stderr); // lint-skip-line no-console
+  }
+}
+
+// Format error information cleanly
+function formatYamlShowError(level, message, meta = {}) {
+  const { error } = message;
+  console.error(`Failed to execute: ${error.message}`); // lint-skip-line no-console
+  if (error.stdout) {
+    console.log(error.stdout); // lint-skip-line no-console
+  }
+  if (error.stderr) {
+    console.warn('STDERR:'); // lint-skip-line no-console
+    console.log(error.stderr); // lint-skip-line no-console
+  }
+}
+
 module.exports = {
   formatWorkflowSuiteHeader,
   formatWorkflowStep,
   formatWorkflowHeader,
   formatWorkflowWarning,
   formatWorkflowList,
-  formatWorkflowResults
+  formatWorkflowResults,
+  formatYamlShowSession,
+  formatYamlShowSuite,
+  formatYamlShowScenario,
+  formatYamlShowSeparator,
+  formatYamlShowOutput,
+  formatYamlShowError
 };

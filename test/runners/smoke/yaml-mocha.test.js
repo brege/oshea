@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test/runners/smoke/workflow-coffeecup.test.js
+// test/runners/smoke/yaml-mocha.test.js
 // Mocha wrapper around YAML workflow blocks - each block becomes atomic mocha test
 
 require('module-alias/register');
@@ -10,7 +10,7 @@ const yaml = require('js-yaml');
 const { expect } = require('chai');
 const {
   loggerPath,
-  smokeHelpersPath
+  yamlTestHelpersPath
 } = require('@paths');
 const logger = require(loggerPath);
 const {
@@ -18,7 +18,7 @@ const {
   TestWorkspace,
   processCommandArgs,
   validateResult
-} = require(smokeHelpersPath);
+} = require(yamlTestHelpersPath);
 
 const WORKFLOW_TESTS_FILE = path.join(__dirname, 'workflow-tests.yaml');
 

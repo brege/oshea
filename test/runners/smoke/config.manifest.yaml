@@ -1,0 +1,24 @@
+# Smoke test manifest - all CLI smoke tests
+name: "config (End-to-End Test) src/cli/commands/config.command.js"
+base_command: "md-to-pdf"
+tags: [config, pure, cli, smoke]
+scenarios:
+  - description: "3.3.1 Global config (default)"
+    args: "config"
+    expect:
+      contains: "pdf_viewer:"
+
+  - description: "3.3.2 Plugin config (default)"
+    args: "config --plugin default"
+    expect:
+      contains_all: ["handler_script:", "Plugin Base Path:"]
+
+  - description: "3.3.3 Global config (--pure)"
+    args: "config --pure"
+    expect:
+      yaml_has_key: "pdf_viewer"
+
+  - description: "3.3.4 Plugin config (--pure)"  # new
+    args: "config --plugin cv --pure"
+    expect:
+      yaml_has_key: "handler_script"

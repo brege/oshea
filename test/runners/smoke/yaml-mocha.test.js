@@ -61,7 +61,7 @@ async function runSingleYamlBlock(testSuite) {
           failureReason = 'Expected command to fail but it succeeded';
         } else {
           // Use harness validation function
-          const validation = validateResult(result, scenario.expect, scenario.expect_not);
+          const validation = validateResult(result, scenario.expect, scenario.expect_not, workspace);
           testPassed = validation.testPassed;
           failureReason = validation.failureReason;
         }

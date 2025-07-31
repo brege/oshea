@@ -8,11 +8,11 @@ to verify that all functionality works as expected across different scenarios an
 We already have a mocha test suite that covers module and subsystem integration and end-to-end testing.
 The goal here is to make a set of tests that users will understand.
 
-1. **Visual Validation Tests** [ `smoke-tests.yaml` + `smoke-test-runner.js` ]
+1. **Visual Validation Tests** 
 
    This is CLI node study that runs every state-preserving command and if the output finishes without error. These can also surface `--help` text, validate all bundled plugins, suss out empty-state output vs. full-fat content, and build an overview of all output formats used by the CLI.
 
-2. **Workflow Tests** [ `workflow-tests.yaml` + `workflow-test-runner.js` ]
+2. **Workflow Tests**
 
    These are sequential test blocks. For example: **plugin lifecycle**
    

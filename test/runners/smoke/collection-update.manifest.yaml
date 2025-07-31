@@ -1,0 +1,36 @@
+name: "3.13.1 (Happy) Succesfully runs the update process on collections"
+base_command: "md-to-pdf"
+tags: [plugin, enable, cli, smoke, collection, happy-path]
+scenarios:
+  - description: "3.13.1 Update all collections"
+    args: "collection update"
+    expect:
+      executes: true
+      contains_any: ["Nothing to update", "Collection updated"]
+
+---
+name: "3.13.2 (Key Option) Successfully runs the update process on a single named collection"
+base_command: "md-to-pdf"
+tags: [plugin, enable, cli, smoke, collection, happy-path]
+scenarios:
+  - description: "3.13.2.1 Add a collection from a local directory"
+    args: "collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection --name test-collection"
+    expect:
+      executes: true
+      contains: "Successfully"
+
+  - description: "3.13.2.2 Update a single named collection"
+    args: "collection update test-collection"
+    expect:
+      executes: true
+      contains: "Collection updated"
+---
+name: "3.14.1 (Alias) The `update` alias successfully runs the collection update process."
+base_command: "md-to-pdf"
+tags: [plugin, enable, cli, smoke, collection, happy-path]
+scenarios:
+  - description: "3.14.1 Update all collections"
+    args: "update"
+    expect:
+      executes: true
+      contains_any: ["Nothing to update", "Collection updated"]

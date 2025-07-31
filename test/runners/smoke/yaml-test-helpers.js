@@ -12,10 +12,11 @@ const {
   projectRoot,
   loggerPath,
   simpleMdFixture,
-  colorThemePath
+  simpleMdFixtureWithFm,
+  hugoExampleFixturePath,
+  fixturesDir
 } = require('@paths');
 const logger = require(loggerPath);
-const { theme } = require(colorThemePath);
 
 
 // Execute a shell command and return promise with result
@@ -58,7 +59,29 @@ const validators = {
 
   executes: () => () => true,
 
-  matches_regex: (pattern) => (stdout) => new RegExp(pattern).test(stdout)
+  matches_regex: (pattern) => (stdout) => new RegExp(pattern).test(stdout),
+
+  // File validation - TODO: Make this more robust beyond just file size
+  file_exists: (filePath) => () => {
+    try {
+      return fs.existsSync(filePath);
+    } catch (e) {
+      return false;
+    }
+  },
+
+  file_min_size: (filePathAndSize) => () => {
+    try {
+      const [filePath, minSize] = Array.isArray(filePathAndSize) ? filePathAndSize : [filePathAndSize, 1000];
+      if (!fs.existsSync(filePath)) {
+        return false;
+      }
+      const stats = fs.statSync(filePath);
+      return stats.size >= minSize;
+    } catch (e) {
+      return false;
+    }
+  }
 };
 
 
@@ -150,14 +173,7 @@ class TestWorkspace {
   }
 
 
-  // Get environment variables for command execution
-  getEnvVars() {
-    return {
-      OUTDIR: this.outdir,
-      COLL_ROOT: this.collRoot,
-      SIMPLE_MD_FIXTURE: simpleMdFixture
-    };
-  }
+  // Note: Legacy getEnvVars() removed - now using template expansion directly
 }
 
 
@@ -190,13 +206,21 @@ function expandScenarios(testSuite) {
 }
 
 
+// Expand template variables in any string
+function expandTemplates(str, workspace) {
+  if (typeof str !== 'string') return str;
+
+  return str
+    .replace(/\{\{paths\.simpleMdFixture\}\}/g, simpleMdFixture)
+    .replace(/\{\{paths\.simpleMdFixtureWithFm\}\}/g, simpleMdFixtureWithFm)
+    .replace(/\{\{paths\.hugoExampleFixturePath\}\}/g, hugoExampleFixturePath)
+    .replace(/\{\{paths\.fixturesDir\}\}/g, fixturesDir)
+    .replace(/\{\{tmpdir\}\}/g, workspace.outdir);
+}
+
 // Process command arguments with variable substitution and workspace isolation
 function processCommandArgs(args, workspace, isWorkflowTest = false) {
-  // Replace workspace variables
-  let processedArgs = args
-    .replace(/\$\{OUTDIR\}/g, workspace.outdir)
-    .replace(/\$\{COLL_ROOT\}/g, workspace.collRoot)
-    .replace(/\$\{SIMPLE_MD_FIXTURE\}/g, simpleMdFixture);
+  let processedArgs = expandTemplates(args, workspace);
 
   if (isWorkflowTest) {
     // For workflow tests, ensure --outdir and --coll-root are properly set
@@ -219,7 +243,7 @@ function processCommandArgs(args, workspace, isWorkflowTest = false) {
 
 
 // Validate test result against expected criteria
-function validateResult(result, expectCriteria, expectNotCriteria = null) {
+function validateResult(result, expectCriteria, expectNotCriteria = null, workspace = null) {
   let testPassed = true;
   let failureReason = null;
 
@@ -229,10 +253,19 @@ function validateResult(result, expectCriteria, expectNotCriteria = null) {
       if (expectType === 'executes') continue;
 
       const validator = validators[expectType];
-      if (validator && !validator(expectValue)(result.stdout)) {
-        testPassed = false;
-        failureReason = `Validation failed for expect.${expectType}`;
-        break;
+      if (validator) {
+        // Expand templates in expectValue if workspace is provided
+        const expandedValue = workspace ?
+          (Array.isArray(expectValue) ?
+            expectValue.map(v => expandTemplates(v, workspace)) :
+            expandTemplates(expectValue, workspace)
+          ) : expectValue;
+
+        if (!validator(expandedValue)(result.stdout)) {
+          testPassed = false;
+          failureReason = `Validation failed for expect.${expectType}`;
+          break;
+        }
       }
     }
   }
@@ -365,21 +398,18 @@ function listTestSuites(yamlFilePath, useWorkflowFormatter = true) {
   if (useWorkflowFormatter) {
     logger.info({ blocks }, { format: 'workflow-list' });
   } else {
-    // Legacy console output for backward compatibility
-    console.log('\nAvailable test blocks:\n');
+    // Replaced legacy console output with logger.info (format: 'console-legacy')
+    logger.info('\nAvailable test blocks:\n', { format: 'console-legacy' });
     blocks.forEach(block => {
-      console.log(`  ${block.index}. ${block.name}`);
-      console.log(`     Steps: ${block.stepCount}`);
+      logger.info(`  ${block.index}. ${block.name}`, { format: 'console-legacy' });
+      logger.info(`     Steps: ${block.stepCount}`, { format: 'console-legacy' });
       if (block.tags.length > 0) {
-        console.log(`     Tags: ${block.tags.join(', ')}`);
+        logger.info(`     Tags: ${block.tags.join(', ')}`, { format: 'console-legacy' });
       }
-      console.log('');
+      logger.info('', { format: 'console-legacy' });
     });
   }
 }
-
-// ShowMode formatters moved to src/utils/formatters/yaml-test-formatter.js
-// Use logger.info() with yaml-show-* formats instead
 
 module.exports = {
   executeCommand,
@@ -394,3 +424,4 @@ module.exports = {
   matchesGrep,
   listTestSuites
 };
+

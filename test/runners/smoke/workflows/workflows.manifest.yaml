@@ -16,10 +16,10 @@ scenarios:
       contains: "Plugin enabled successfully"
 
   - description: "4.1.1.3 Convert document using enabled plugin"
-    args: "convert ${SIMPLE_MD_FIXTURE} --plugin restaurant-menu --outdir ${OUTDIR} --no-open"
+    args: "convert {{paths.simpleMdFixture}} --plugin restaurant-menu --outdir {{tmpdir}} --no-open"
     expect:
       contains: "convert command finished"
-      file_exists: "${OUTDIR}/restaurant-menu.pdf"
+      file_exists: "{{tmpdir}}/restaurant-menu.pdf"
 
   - description: "4.1.1.4 Disable the plugin"
     args: "plugin disable restaurant-menu"
@@ -29,7 +29,7 @@ scenarios:
   - description: "4.1.1.5 Remove the collection"
     args: "collection remove lifecycle-collection"
     expect:
-      contains: "Collection directory not found for physical removal"
+      contains: "Collection directory removed successfully"
 
 ---
 name: "4.1.2 Archetype, Add, and Convert with New Plugin"
@@ -37,20 +37,20 @@ tags: [workflow, archetype, plugin, convert, add]
 base_command: "md-to-pdf"
 scenarios:
   - description: "4.1.2.1 Create a new archetype plugin from 'cv'"
-    args: "plugin create my-custom-cv --from cv --outdir ${OUTDIR}"
+    args: "plugin create my-custom-cv --from cv --outdir {{tmpdir}}"
     expect:
       contains_all: ["created successfully", "my-custom-cv"]
 
   - description: "4.1.2.2 Add the new archetype plugin"
-    args: "plugin add ${OUTDIR}/my-custom-cv"
+    args: "plugin add {{tmpdir}}/my-custom-cv"
     expect:
       contains: "Successfully processed 'plugin add'"
 
   - description: "4.1.2.3 Convert a markdown document using the new plugin"
-    args: "convert ${SIMPLE_MD_FIXTURE} --plugin my-custom-cv --outdir ${OUTDIR} --no-open"
+    args: "convert {{paths.simpleMdFixture}} --plugin my-custom-cv --outdir {{tmpdir}} --no-open"
     expect:
       contains: "convert command finished"
-      file_exists: "${OUTDIR}/simple.pdf"
+      file_exists: "{{tmpdir}}/simple.pdf"
 
 ---
 name: "4.1.5 Unified Plugin Architecture Complete Workflow"
@@ -58,22 +58,22 @@ tags: [workflow, plugin, archetype, enable, removal]
 base_command: "md-to-pdf"
 scenarios:
   - description: "4.1.5.1 Create plugin-A externally using --outdir"
-    args: "plugin create plugin-A --from default --outdir ${OUTDIR}"
+    args: "plugin create plugin-A --from default --outdir {{tmpdir}}"
     expect:
       contains_all: ["created successfully", "plugin-A"]
 
   - description: "4.1.5.2 Create plugin-B externally using --outdir"
-    args: "plugin create plugin-B --from default --outdir ${OUTDIR}"
+    args: "plugin create plugin-B --from default --outdir {{tmpdir}}"
     expect:
       contains_all: ["created successfully", "plugin-B"]
 
   - description: "4.1.5.3 Add externally created plugin-A to unified architecture"
-    args: "plugin add ${OUTDIR}/plugin-A"
+    args: "plugin add {{tmpdir}}/plugin-A"
     expect:
       contains: "Successfully processed 'plugin add'"
 
   - description: "4.1.5.4 Add externally created plugin-B to unified architecture"
-    args: "plugin add ${OUTDIR}/plugin-B"
+    args: "plugin add {{tmpdir}}/plugin-B"
     expect:
       contains: "Successfully processed 'plugin add'"
 

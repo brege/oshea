@@ -54,7 +54,12 @@ class YamlTestRunner {
       // Check if any scenario uses workspace variables
       if (suite.scenarios) {
         for (const scenario of suite.scenarios) {
-          if (scenario.args && (scenario.args.includes('${OUTDIR}') || scenario.args.includes('${COLL_ROOT}'))) {
+          if (scenario.args && (
+            scenario.args.includes('${OUTDIR}') ||
+            scenario.args.includes('${COLL_ROOT}') ||
+            scenario.args.includes('{{tmpdir}}') ||
+            scenario.args.includes('{{paths.')
+          )) {
             this.needsWorkspace = true;
           }
           // Also check for complex validation (expect_failure, expect_not)
@@ -101,6 +106,16 @@ class YamlTestRunner {
     for (let i = 0; i < scenarios.length; i++) {
       const scenario = scenarios[i];
 
+      // Skip debug scenarios unless debug mode is enabled
+      if (scenario.debug && !this.options.debug) {
+        continue;
+      }
+
+      // Handle breakage setup if specified in scenario
+      if (scenario.breakage && this.needsWorkspace && workspace) {
+        await this.handleBreakage(scenario.breakage, workspace);
+      }
+
       // Process command arguments (with workspace isolation if needed)
       const args = this.needsWorkspace && workspace ?
         processCommandArgs(scenario.args, workspace, true) :
@@ -136,7 +151,7 @@ class YamlTestRunner {
             testPassed = false;
             failureReason = 'Expected command to fail but it succeeded';
           } else {
-            const validation = validateResult(result, scenario.expect, scenario.expect_not);
+            const validation = validateResult(result, scenario.expect, scenario.expect_not, workspace);
             testPassed = validation.testPassed;
             failureReason = validation.failureReason;
           }
@@ -247,6 +262,33 @@ class YamlTestRunner {
     };
   }
 
+  // Handle breakage setup for scenarios that need broken plugins
+  async handleBreakage(breakageConfig, workspace) {
+    const { createDummyPluginPath } = require('@paths');
+    const { createDummyPlugin } = require(createDummyPluginPath);
+
+    const plugin = breakageConfig.plugin;
+    const type = breakageConfig.type;
+    const collection = breakageConfig.collection;
+
+    if (!plugin || !type) {
+      throw new Error('Breakage config requires both plugin and type properties');
+    }
+
+    // Determine destination directory - for collection creation we put it in tmpdir (outdir)
+    const destinationDir = collection ?
+      path.join(workspace.outdir, collection) :
+      workspace.outdir;
+
+    await createDummyPlugin(plugin, {
+      destinationDir,
+      baseFixture: 'valid-plugin',
+      breakage: [type]
+    });
+
+    logger.debug(`Created broken plugin '${plugin}' with breakage '${type}' in ${destinationDir}`, { format: 'workflow-debug' });
+  }
+
   async runAllTests(showMode = false, targetBlock = null, grepPattern = null) {
     // Use the yamlFilePath set in constructor
     const yamlContent = fs.readFileSync(this.yamlFilePath, 'utf8');
@@ -261,8 +303,8 @@ class YamlTestRunner {
     if (grepPattern) {
       suitesToRun = testSuites.filter(suite => matchesGrep(grepPattern, suite));
       if (suitesToRun.length === 0) {
-        logger.error(`No test suites match grep pattern "${grepPattern}".`);
-        logger.error('Use --list to see available test suites, or try a different pattern.');
+        logger.error(`No test suites match grep pattern "${grepPattern}".`, { format: 'console-legacy' });
+        logger.error('Use --list to see available test suites, or try a different pattern.', { format: 'console-legacy' });
         return false;
       }
     }
@@ -282,7 +324,10 @@ class YamlTestRunner {
           const availableOptions = grepPattern ?
             `grep-filtered results (${suitesToRun.length} suites)` :
             'available blocks';
-          console.error(`Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`);
+          logger.error(
+            `Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`,
+            { format: 'console-legacy' }
+          );
           return false;
         }
       }
@@ -349,6 +394,8 @@ if (require.main === module) {
     } else if (arg === '--base-path' && i + 1 < args.length) {
       options.basePath = args[i + 1];
       i++; // Skip next arg
+    } else if (arg === '--debug') {
+      options.debug = true;
     } else if (!arg.startsWith('--') && (arg.endsWith('.yaml') || isGlobPattern(arg))) {
       // Collect all YAML files and glob patterns
       yamlInputs.push(arg);
@@ -375,7 +422,7 @@ if (require.main === module) {
   }
 
   if (yamlFiles.length === 0) {
-    console.error('No YAML files found. Specify YAML files or glob patterns.');
+    logger.error('No YAML files found. Specify YAML files or glob patterns.', { format: 'console-legacy' });
     process.exit(1);
   }
 
@@ -385,12 +432,12 @@ if (require.main === module) {
 
   if (listMode) {
     // List mode: show all test suites from all YAML files
-    console.log(`\nFound ${yamlFiles.length} YAML file(s):\n`);
+    logger.info(`\nFound ${yamlFiles.length} YAML file(s):\n`, { format: 'console-legacy' });
     for (const yamlFile of yamlFiles) {
-      console.log(`=== ${path.basename(yamlFile)} ===`);
+      logger.info(`=== ${path.basename(yamlFile)} ===`, { format: 'console-legacy' });
       const runner = new YamlTestRunner(yamlFile, options);
       runner.listTests();
-      console.log('');
+      logger.info('', { format: 'console-legacy' });
     }
   } else {
     // Run mode: execute tests from all YAML files sequentially
@@ -403,8 +450,8 @@ if (require.main === module) {
           const success = await runner.runAllTests(showMode, targetBlock, grepPattern);
           if (!success) allSuccess = false;
         } catch (error) {
-          console.error(`YAML test runner crashed on ${yamlFile}:`, error.message);
-          console.error('Stack trace:', error.stack);
+          logger.error(`YAML test runner crashed on ${yamlFile}: ${error.message}`, { format: 'console-legacy' });
+          logger.error(`Stack trace: ${error.stack}`, { format: 'console-legacy' });
           allSuccess = false;
         }
       }
@@ -419,3 +466,4 @@ module.exports = {
   validators,
   discoverers
 };
+

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // test/runners/smoke/yaml-test-runner.js
-// Universal YAML test runner for both Level 3 (smoke) and Level 4 (workflow) tests
+// Universal YAML test runner with dynamic capability detection
 
 require('module-alias/register');
 
@@ -10,9 +10,9 @@ const yaml = require('js-yaml');
 const {
   cliPath,
   loggerPath,
-  yamlTestHelpersPath,
-  smokeTestsManifestPath,
-  fileHelpersPath
+  smokeTestDir,
+  fileHelpersPath,
+  yamlTestHelpersPath
 } = require('@paths');
 const { findFilesArray, isGlobPattern } = require(fileHelpersPath);
 const logger = require(loggerPath);
@@ -24,17 +24,16 @@ const {
   TestWorkspace,
   expandScenarios,
   processCommandArgs,
+  createDisplayCommand,
   validateResult,
   parseArgs,
   matchesGrep,
   listTestSuites
 } = require(yamlTestHelpersPath);
 
-const WORKFLOW_TESTS_FILE = path.join(__dirname, 'workflow-tests.yaml');
-
 class YamlTestRunner {
   constructor(yamlFilePath = null, options = {}) {
-    this.yamlFilePath = yamlFilePath || smokeTestsManifestPath; // Default to smoke tests for backward compatibility
+    this.yamlFilePath = yamlFilePath;
     this.options = options;
 
     // Auto-detect capabilities from YAML content (will be set in runAllTests)
@@ -55,8 +54,6 @@ class YamlTestRunner {
       if (suite.scenarios) {
         for (const scenario of suite.scenarios) {
           if (scenario.args && (
-            scenario.args.includes('${OUTDIR}') ||
-            scenario.args.includes('${COLL_ROOT}') ||
             scenario.args.includes('{{tmpdir}}') ||
             scenario.args.includes('{{paths.')
           )) {
@@ -70,17 +67,52 @@ class YamlTestRunner {
       }
     }
 
-    // Set appropriate session title based on detected level
-    if (this.needsWorkspace) {
-      this.sessionTitle = 'Level 4 Workflow Tests';
-    } else if (this.hasDiscovery) {
-      this.sessionTitle = 'Level 3 CLI Smoke Tests';
-    } else {
-      this.sessionTitle = path.basename(this.yamlFilePath, '.yaml') + ' Tests';
+    // Set session title based on path context
+    this.sessionTitle = this.getSessionTitleFromPath();
+  }
+
+  // Get appropriate session title based on file path using registry
+  getSessionTitleFromPath() {
+    const { pathsConfigPath } = require('@paths');
+    const yaml = require('js-yaml');
+    const fs = require('fs');
+    const { minimatch } = require('minimatch');
+
+    // Load paths config and get test features
+    const pathsConfig = yaml.load(fs.readFileSync(pathsConfigPath, 'utf8'));
+    const testFeatures = pathsConfig.registries.tests.features;
+
+    // Find matching pattern and return its comment
+    // eslint-disable-next-line no-unused-vars
+    for (const [featureName, featureConfig] of Object.entries(testFeatures)) {
+      if (featureConfig.pattern && featureConfig.comment) {
+        if (minimatch(this.yamlFilePath, featureConfig.pattern)) {
+          return featureConfig.comment;
+        }
+      }
     }
+
+    // Default fallback
+    return 'YAML Test Runner';
   }
 
   async runTestSuite(testSuite, showMode = false) {
+    // Skip entire test suite if marked with skip: true
+    if (testSuite.skip) {
+      if (showMode) {
+        logger.info({ suiteName: `${testSuite.name} (SKIPPED)` }, { format: 'yaml-show-suite' });
+      } else {
+        logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
+        logger.info({ description: testSuite.name, status: 'skipped' }, { format: 'workflow-step' });
+      }
+      return {
+        failedCount: 0,
+        passedCount: 0,
+        skippedCount: 1,
+        failedScenarios: []
+      };
+    }
+
     if (showMode) {
       logger.info({ suiteName: testSuite.name }, { format: 'yaml-show-suite' });
     } else {
@@ -111,6 +143,27 @@ class YamlTestRunner {
         continue;
       }
 
+      // Skip scenarios marked with skip: true
+      if (scenario.skip) {
+        if (!showMode) {
+          const skipCommandDisplay = createDisplayCommand(
+            testSuite.base_command || 'md-to-pdf',
+            scenario.args,
+            workspace,
+            this.needsWorkspace
+          );
+          // Resolve test_id with inheritance: scenario.test_id || testSuite.test_id
+          const resolvedTestId = scenario.test_id || testSuite.test_id;
+          logger.info({
+            description: scenario.description,
+            command: skipCommandDisplay,
+            status: 'skipped',
+            test_id: resolvedTestId
+          }, { format: 'workflow-step' });
+        }
+        continue;
+      }
+
       // Handle breakage setup if specified in scenario
       if (scenario.breakage && this.needsWorkspace && workspace) {
         await this.handleBreakage(scenario.breakage, workspace);
@@ -122,13 +175,30 @@ class YamlTestRunner {
         scenario.args;
 
       const fullCommand = `node "${cliPath}" ${args}`;
-      const commandDisplay = `${testSuite.base_command || 'md-to-pdf'} ${scenario.args}`.trim();
+      const commandDisplay = createDisplayCommand(
+        testSuite.base_command || 'md-to-pdf',
+        scenario.args,
+        workspace,
+        this.needsWorkspace
+      );
+
+      // Resolve test_id with inheritance: scenario.test_id || testSuite.test_id
+      const resolvedTestId = scenario.test_id || testSuite.test_id;
 
       if (showMode) {
-        logger.info({ description: scenario.description, command: commandDisplay }, { format: 'yaml-show-scenario' });
+        logger.info({
+          description: scenario.description,
+          command: commandDisplay,
+          test_id: resolvedTestId
+        }, { format: 'yaml-show-scenario' });
       } else {
         // Use workflow-step format for all non-show mode output
-        logger.info({ command: commandDisplay, status: 'testing' }, { format: 'workflow-step' });
+        logger.info({
+          description: scenario.description,
+          command: commandDisplay,
+          status: 'testing',
+          test_id: resolvedTestId
+        }, { format: 'workflow-step' });
       }
 
       // Debug instrumentation for complex tests
@@ -177,7 +247,12 @@ class YamlTestRunner {
 
         if (testPassed) {
           if (!showMode) {
-            logger.info({ command: commandDisplay, status: 'passed' }, { format: 'workflow-step' });
+            logger.info({
+              description: scenario.description,
+              command: commandDisplay,
+              status: 'passed',
+              test_id: resolvedTestId
+            }, { format: 'workflow-step' });
           }
           results.push({ scenario: scenario.description, passed: true });
         } else {
@@ -191,7 +266,12 @@ class YamlTestRunner {
           results.push({ scenario: scenario.description, passed: false, failure });
 
           if (!showMode) {
-            logger.info({ command: commandDisplay, status: 'failed' }, { format: 'workflow-step' });
+            logger.info({
+              description: scenario.description,
+              command: commandDisplay,
+              status: 'failed',
+              test_id: resolvedTestId
+            }, { format: 'workflow-step' });
           }
         }
 
@@ -210,9 +290,19 @@ class YamlTestRunner {
           }
 
           if (testPassed) {
-            logger.info({ command: commandDisplay, status: 'passed' }, { format: 'workflow-step' });
+            logger.info({
+              description: scenario.description,
+              command: commandDisplay,
+              status: 'passed',
+              test_id: resolvedTestId
+            }, { format: 'workflow-step' });
           } else {
-            logger.info({ command: commandDisplay, status: 'failed' }, { format: 'workflow-step' });
+            logger.info({
+              description: scenario.description,
+              command: commandDisplay,
+              status: 'failed',
+              test_id: resolvedTestId
+            }, { format: 'workflow-step' });
             failedScenarios.push({
               suite: testSuite.name,
               scenario: scenario.description,
@@ -227,7 +317,12 @@ class YamlTestRunner {
           if (showMode) {
             logger.info({ error }, { format: 'yaml-show-error' });
           } else {
-            logger.info({ command: commandDisplay, status: 'failed' }, { format: 'workflow-step' });
+            logger.info({
+              description: scenario.description,
+              command: commandDisplay,
+              status: 'failed',
+              test_id: resolvedTestId
+            }, { format: 'workflow-step' });
           }
 
           const failure = {
@@ -253,11 +348,16 @@ class YamlTestRunner {
       workspace.teardown();
     }
 
+    const passedCount = results.filter(r => r.success).length;
+    const skippedCount = scenarios.length - results.length; // Scenarios that were skipped at step level
+
     return {
       suiteName: testSuite.name,
       success: failedScenarios.length === 0,
       results,
       failedCount: failedScenarios.length,
+      passedCount,
+      skippedCount: skippedCount,
       failedScenarios
     };
   }
@@ -303,9 +403,15 @@ class YamlTestRunner {
     if (grepPattern) {
       suitesToRun = testSuites.filter(suite => matchesGrep(grepPattern, suite));
       if (suitesToRun.length === 0) {
-        logger.error(`No test suites match grep pattern "${grepPattern}".`, { format: 'console-legacy' });
-        logger.error('Use --list to see available test suites, or try a different pattern.', { format: 'console-legacy' });
-        return false;
+        // During multi-file processing, quietly skip files with no grep matches
+        // Only show error if processing a single file
+        if (this.options.isMultiFile) {
+          logger.debug(`No test suites match grep pattern "${grepPattern}" in ${path.basename(this.yamlFilePath)}, skipping.`);
+          return true; // Success, but no work to do
+        } else {
+          logger.error({ message: `No test suites match grep pattern "${grepPattern}". Use --list to see available test suites, or try a different pattern.` }, { format: 'workflow-warning' });
+          return false;
+        }
       }
     }
 
@@ -326,7 +432,7 @@ class YamlTestRunner {
             'available blocks';
           logger.error(
             `Block "${targetBlock}" not found in ${availableOptions}. Use --list to see available blocks.`,
-            { format: 'console-legacy' }
+            { format: 'workflow-warning' }
           );
           return false;
         }
@@ -336,7 +442,7 @@ class YamlTestRunner {
     if (showMode) {
       logger.info({ title: this.sessionTitle }, { format: 'yaml-show-session' });
     } else {
-      logger.info('', { format: 'workflow-header' });
+      logger.info({ title: this.sessionTitle }, { format: 'workflow-header' });
     }
 
     // Run test suites sequentially for clean output
@@ -412,32 +518,27 @@ if (require.main === module) {
       filter: (name) => name.endsWith('.yaml')
     });
   } else {
-    // Backward compatibility: determine default YAML file from script name
-    const scriptName = path.basename(process.argv[1]);
-    if (scriptName.includes('workflow')) {
-      yamlFiles = [WORKFLOW_TESTS_FILE];
-    } else {
-      yamlFiles = [smokeTestsManifestPath];
-    }
+    // Default to all manifest files in smoke directory if no YAML files specified
+    yamlFiles = findFilesArray([path.join(smokeTestDir, '*.manifest.yaml')], {
+      filter: (name) => name.endsWith('.yaml')
+    });
   }
 
   if (yamlFiles.length === 0) {
-    logger.error('No YAML files found. Specify YAML files or glob patterns.', { format: 'console-legacy' });
+    logger.error({ message: 'No YAML files found. Specify YAML files or glob patterns.' }, { format: 'workflow-warning' });
     process.exit(1);
   }
 
-  const { showMode, listMode, grepPattern, targetBlock } = parseArgs(filteredArgs, {
-    supportsYamlFile: false // No longer needed - YAML files are extracted above
-  });
+  const { showMode, listMode, grepPattern, targetBlock } = parseArgs(filteredArgs);
 
   if (listMode) {
     // List mode: show all test suites from all YAML files
-    logger.info(`\nFound ${yamlFiles.length} YAML file(s):\n`, { format: 'console-legacy' });
+    logger.info({ message: `Found ${yamlFiles.length} YAML file(s):` }, { format: 'workflow-list' });
     for (const yamlFile of yamlFiles) {
-      logger.info(`=== ${path.basename(yamlFile)} ===`, { format: 'console-legacy' });
+      logger.info({ message: `=== ${path.basename(yamlFile)} ===` }, { format: 'workflow-list' });
       const runner = new YamlTestRunner(yamlFile, options);
       runner.listTests();
-      logger.info('', { format: 'console-legacy' });
+      logger.info({ message: '' }, { format: 'workflow-list' });
     }
   } else {
     // Run mode: execute tests from all YAML files sequentially
@@ -445,13 +546,13 @@ if (require.main === module) {
       let allSuccess = true;
 
       for (const yamlFile of yamlFiles) {
-        const runner = new YamlTestRunner(yamlFile, options);
+        const runnerOptions = { ...options, isMultiFile: yamlFiles.length > 1 };
+        const runner = new YamlTestRunner(yamlFile, runnerOptions);
         try {
           const success = await runner.runAllTests(showMode, targetBlock, grepPattern);
           if (!success) allSuccess = false;
         } catch (error) {
-          logger.error(`YAML test runner crashed on ${yamlFile}: ${error.message}`, { format: 'console-legacy' });
-          logger.error(`Stack trace: ${error.stack}`, { format: 'console-legacy' });
+          logger.error({ message: `YAML test runner crashed on ${yamlFile}: ${error.message}`, stack: error.stack }, { format: 'workflow-warning' });
           allSuccess = false;
         }
       }

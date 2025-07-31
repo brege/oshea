@@ -1,37 +1,52 @@
-# Smoke test manifest - plugin create command (End-to-End Test)
-name: "3.5.1 & 3.5.3 (Happy Path) Create plugin from default template and validate"
-base_command: "md-to-pdf"
-tags: [plugin, create, validate, cli, smoke]
+name: "(Happy Path) Create plugin from default template and validate"
+base_command: md-to-pdf
+tags:
+  - plugin
+  - create
+  - validate
+  - cli
+  - smoke
 scenarios:
-  - description: "3.5.1 (Happy Path) Successfully creates a new plugin directory with boilerplate files"
-    args: "plugin create my-boilerplate-plugin --outdir {{tmpdir}}"
+  - description: >-
+      (Happy Path) Successfully creates a new plugin directory with boilerplate
+      files
+    test_id: 3.5.1
+    args: plugin create my-boilerplate-plugin --outdir {{tmpdir}}
     expect:
       executes: true
-      contains: "created successfully"
+      contains: created successfully
       file_exists: "{{tmpdir}}/my-boilerplate-plugin/index.js"
-      # Note: Could add validators for other required files (config.yaml, css, example.md, README.md)
-
-  - description: "3.5.3 (Happy Path) A plugin created from the default template passes validation"
-    args: "plugin validate {{tmpdir}}/my-boilerplate-plugin"
+  - description: (Happy Path) A plugin created from the default template passes validation
+    test_id: 3.5.3
+    args: plugin validate {{tmpdir}}/my-boilerplate-plugin
     expect:
       executes: true
-      contains: "Plugin 'my-boilerplate-plugin' is VALID"
-
+      contains: Plugin 'my-boilerplate-plugin' is VALID
 ---
-name: "3.5.2 & 3.5.4 (Happy Path) Create archetyped plugin and validate"
-base_command: "md-to-pdf"
-tags: [plugin, create, validate, cli, smoke, archetype]
+name: "(Happy Path) Create archetyped plugin and validate"
+base_command: md-to-pdf
+tags:
+  - plugin
+  - create
+  - validate
+  - cli
+  - smoke
+  - archetype
 scenarios:
-  - description: "3.5.2 (Key Option) Successfully archetypes a new plugin from a source with --from"
-    args: "plugin create my-archetyped-plugin --from cv --outdir {{tmpdir}}"
+  - description: >-
+      (Key Option) Successfully archetypes a new plugin from a source with
+      --from
+    test_id: 3.5.2
+    args: plugin create my-archetyped-plugin --from cv --outdir {{tmpdir}}
     expect:
       executes: true
-      contains: "created successfully"
+      contains: created successfully
       file_exists: "{{tmpdir}}/my-archetyped-plugin/index.js"
-      # Note: Could add validators for other archetyped files
-
-  - description: "3.5.4 (Happy Path) A plugin archetyped from a valid bundled plugin passes validation"
-    args: "plugin validate {{tmpdir}}/my-archetyped-plugin"
+  - description: >-
+      (Happy Path) A plugin archetyped from a valid bundled plugin passes
+      validation
+    test_id: 3.5.4
+    args: plugin validate {{tmpdir}}/my-archetyped-plugin
     expect:
       executes: true
-      contains: "Plugin 'my-archetyped-plugin' is VALID"
+      contains: Plugin 'my-archetyped-plugin' is VALID

@@ -17,6 +17,7 @@ const {
   executeCommand,
   TestWorkspace,
   processCommandArgs,
+  createDisplayCommand,
   validateResult
 } = require(yamlTestHelpersPath);
 
@@ -40,13 +41,45 @@ async function runSingleYamlBlock(testSuite) {
 
   try {
     for (const scenario of testSuite.scenarios) {
+      // Skip scenarios marked with skip: true
+      if (scenario.skip) {
+        const skipCommandDisplay = createDisplayCommand(
+          testSuite.base_command || 'md-to-pdf',
+          scenario.args,
+          workspace,
+          true
+        );
+        // Resolve test_id with inheritance: scenario.test_id || testSuite.test_id
+        const resolvedTestId = scenario.test_id || testSuite.test_id;
+        logger.info({
+          description: scenario.description,
+          command: skipCommandDisplay,
+          status: 'skipped',
+          test_id: resolvedTestId
+        }, { format: 'workflow-step' });
+        continue;
+      }
+
       // Process command arguments with workspace isolation
       const args = processCommandArgs(scenario.args, workspace, true);
       const fullCommand = `node "${require('@paths').cliPath}" ${args}`;
-      const commandDisplay = `${testSuite.base_command || 'md-to-pdf'} ${scenario.args}`.trim();
+      const commandDisplay = createDisplayCommand(
+        testSuite.base_command || 'md-to-pdf',
+        scenario.args,
+        workspace,
+        true // This is always a workflow test in Mocha context
+      );
+
+      // Resolve test_id with inheritance: scenario.test_id || testSuite.test_id
+      const resolvedTestId = scenario.test_id || testSuite.test_id;
 
       // Real-time step logging using workflow formatter
-      logger.info({ description: scenario.description, command: commandDisplay, status: 'testing' }, { format: 'workflow-step' });
+      logger.info({
+        description: scenario.description,
+        command: commandDisplay,
+        status: 'testing',
+        test_id: resolvedTestId
+      }, { format: 'workflow-step' });
       try {
         const result = await executeCommand(fullCommand);
         let testPassed = true;
@@ -69,9 +102,20 @@ async function runSingleYamlBlock(testSuite) {
         if (!testPassed) {
           allScenariosPassed = false;
           failureReasons.push(`${scenario.description}: ${failureReason}`);
-          logger.info({ description: scenario.description, command: commandDisplay, status: 'failed', reason: failureReason }, { format: 'workflow-step' });
+          logger.info({
+            description: scenario.description,
+            command: commandDisplay,
+            status: 'failed',
+            reason: failureReason,
+            test_id: resolvedTestId
+          }, { format: 'workflow-step' });
         } else {
-          logger.info({ description: scenario.description, command: commandDisplay, status: 'passed' }, { format: 'workflow-step' });
+          logger.info({
+            description: scenario.description,
+            command: commandDisplay,
+            status: 'passed',
+            test_id: resolvedTestId
+          }, { format: 'workflow-step' });
         }
 
       } catch (error) {
@@ -92,15 +136,32 @@ async function runSingleYamlBlock(testSuite) {
           if (!testPassed) {
             allScenariosPassed = false;
             failureReasons.push(`${scenario.description}: ${failureReason}`);
-            logger.info({ description: scenario.description, command: commandDisplay, status: 'failed', reason: failureReason }, { format: 'workflow-step' });
+            logger.info({
+              description: scenario.description,
+              command: commandDisplay,
+              status: 'failed',
+              reason: failureReason,
+              test_id: resolvedTestId
+            }, { format: 'workflow-step' });
           } else {
-            logger.info({ description: scenario.description, command: commandDisplay, status: 'passed' }, { format: 'workflow-step' });
+            logger.info({
+              description: scenario.description,
+              command: commandDisplay,
+              status: 'passed',
+              test_id: resolvedTestId
+            }, { format: 'workflow-step' });
           }
         } else {
           // Unexpected failure
           allScenariosPassed = false;
           failureReasons.push(`${scenario.description}: ${error.message}`);
-          logger.info({ description: scenario.description, command: commandDisplay, status: 'failed', reason: error.message }, { format: 'workflow-step' });
+          logger.info({
+            description: scenario.description,
+            command: commandDisplay,
+            status: 'failed',
+            reason: error.message,
+            test_id: resolvedTestId
+          }, { format: 'workflow-step' });
         }
       }
     }
@@ -123,7 +184,15 @@ describe('Workflow Tests (YAML-driven)', function() {
   const yamlBlocks = discoverYamlBlocks();
 
   yamlBlocks.forEach(testSuite => {
-    it(testSuite.name, async function() {
+    // Use test_id field for cleaner Mocha output
+    const testName = testSuite.test_id
+      ? `[${testSuite.test_id}] ${testSuite.name}`
+      : testSuite.name;
+
+    // Support block-level skipping with it.skip()
+    const testFunction = testSuite.skip ? it.skip : it;
+
+    testFunction(testName, async function() {
       const result = await runSingleYamlBlock(testSuite);
 
       if (!result.success) {

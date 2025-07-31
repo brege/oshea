@@ -1,6 +1,6 @@
 // paths/linters.js
 // linters.js - Linting Tools Registry
-// Generated: 2025-07-29T08:49:53.734Z
+// Generated: 2025-07-31T10:00:38.792Z
 // Architecture: Feature-based linting infrastructure
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -42,6 +42,7 @@ const docsRoot = path.join(projectRoot, 'scripts/linting/docs/');
 const janitorPath = path.join(projectRoot, 'scripts/linting/docs/janitor.js');
 const librarianPath = path.join(projectRoot, 'scripts/linting/docs/librarian.js');
 const postmanPath = path.join(projectRoot, 'scripts/linting/docs/postman.js');
+const yamlPath = path.join(projectRoot, 'scripts/linting/docs/yaml.js');
 
 // --- Rank 2: supportive operations ---
 
@@ -87,6 +88,7 @@ module.exports = {
   janitorPath,
   librarianPath,
   postmanPath,
+  yamlPath,
 
   // --- supportive operations ---
   validatorsRoot,

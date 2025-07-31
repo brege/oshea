@@ -1,54 +1,85 @@
-name: "plugin list (End-to-End Test) src/cli/commands/plugin/list.command.js"
-base_command: "md-to-pdf"
-tags: [cli, smoke, plugin, list]
+name: plugin list (End-to-End Test) src/cli/commands/plugin/list.command.js
+base_command: md-to-pdf
+tags:
+  - cli
+  - smoke
+  - plugin
+  - list
 scenarios:
-  - description: "3.4.1 List plugins (default)"
-    args: "plugin list"
+  - description: List plugins (default)
+    test_id: 3.4.1
+    args: plugin list
     expect:
-      contains: "usable by md-to-pdf"
-
-  - description: "3.4.2 List enabled plugins"
-    args: "plugin list --enabled"
+      contains: usable by md-to-pdf
+  - description: List enabled plugins
+    test_id: 3.4.2
+    args: plugin list --enabled
     expect:
-      contains: "Enabled plugins"
-
-  - description: "3.4.3 List disabled plugins"
-    args: "plugin list --disabled"
+      contains: Enabled plugins
+  - description: List disabled plugins
+    test_id: 3.4.3
+    args: plugin list --disabled
     expect:
-      contains_any: ["Disabled (but available) CM-managed plugins", "No disabled (but available) CM-managed plugins found."]
-
-  - description: "3.4.4 List available plugins"
-    args: "plugin list --available"
+      contains_any:
+        - Disabled (but available) CM-managed plugins
+        - No disabled (but available) CM-managed plugins found.
+  - description: List available plugins
+    test_id: 3.4.4
+    args: plugin list --available
     expect:
-      contains_any: ["Available CM-managed plugins", "No CM-managed plugins found"]
-
-  - description: "3.4.5 List plugins (--short)"  # new
-    args: "plugin list --short"
+      contains_any:
+        - Available CM-managed plugins
+        - No CM-managed plugins found
+  - description: List plugins (--short)
+    test_id: 3.4.5
+    args: plugin list --short
     expect:
-      contains_any: ["Summary for all known plugins"]
+      contains_any:
+        - Summary for all known plugins
+---
+name: plugin list (End-to-End Test) Plugin List States (Full vs Empty)
+base_command: md-to-pdf
+tags:
+  - cli
+  - smoke
+  - plugin
+  - list
+  - enable
+  - disable
+visual_focus: empty state handling, table formatting consistency
+scenarios:
+  - description: Plugin list --available (likely empty) - empty state formatting
+    test_id: 3.4.6
+    args: plugin list --available
+    expect:
+      executes: true
+    visual_check: Clean empty state with consistent theming and helpful messaging
+  - description: Plugin list --disabled (likely empty) - empty state vs populated
+    test_id: 3.4.7
+    args: plugin list --disabled
+    expect:
+      executes: true
+    visual_check: Empty state handling or populated list with proper disabled styling
+  - description: Plugin list (populated) - full table formatting
+    test_id: 3.4.8
+    args: plugin list
+    expect:
+      executes: true
+    visual_check: Rich populated table with headers, colors, and proper alignment
 
 ---
-name: "plugin list (End-to-End Test) Plugin List States (Full vs Empty)"
-base_command: "md-to-pdf"
-tags: [cli, smoke, plugin, list, enable, disable]
-visual_focus: "empty state handling, table formatting consistency"
+name: Context Switching Empty States
+base_command: md-to-pdf
+tags:
+  - cli
+  - smoke
+  - coll-root
+  - sad-path
+visual_focus: error handling, context isolation, empty state consistency
 scenarios:
-  - description: "Plugin list --available (likely empty) - empty state formatting"
-    args: "plugin list --available"
+  - description: Plugin list with non-existent collection root - context error handling
+    test_id: 3.4.9
+    args: plugin list --coll-root /tmp/nonexistent
     expect:
       executes: true
-    visual_check: "Clean empty state with consistent theming and helpful messaging"
-
-  - description: "Plugin list --disabled (likely empty) - empty state vs populated"
-    args: "plugin list --disabled"
-    expect:
-      executes: true
-    visual_check: "Empty state handling or populated list with proper disabled styling"
-
-  - description: "Plugin list (populated) - full table formatting"
-    args: "plugin list"
-    expect:
-      executes: true
-    visual_check: "Rich populated table with headers, colors, and proper alignment"
-
-
+    visual_check: Graceful handling of missing collection root with clear messaging

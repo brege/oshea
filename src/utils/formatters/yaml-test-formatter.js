@@ -1,5 +1,6 @@
 // src/utils/formatters/yaml-test-formatter.js
 // YAML-based test result formatter - unified formatter for smoke tests and workflow tests
+/* eslint-disable camelcase */
 
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
@@ -7,17 +8,21 @@ const { theme } = require(colorThemePath);
 // Format workflow test suite header
 function formatWorkflowSuiteHeader(level, message, meta = {}) {
   const { suiteName } = message;
-  console.log(colorForLevel(level, `Smoke Test: ${suiteName}...`));
+  console.log(colorForLevel(level, `${suiteName}...`));
 }
 
 // Format individual workflow step (inline progress with atomic numbering)
 function formatWorkflowStep(level, message, meta = {}) {
-  const { description, command, status, reason } = message;
+  const { description, command, status, reason, test_id } = message;
 
   if (status === 'testing') {
-    // Start of step - show atomic number and description
+    // Start of step - show test_id and description
     if (description) {
-      process.stdout.write(`      ${colorForLevel('detail', description)} ... `);
+      if (test_id) {
+        process.stdout.write(`      ${colorForLevel('success', `[${test_id}]`)} ${colorForLevel('detail', description)} ... `);
+      } else {
+        process.stdout.write(`      ${colorForLevel('detail', description)} ... `);
+      }
     } else {
       // Fallback for legacy format
       process.stdout.write(`      ${colorForLevel('detail', `Testing: ${command}`)} ... `);
@@ -31,14 +36,18 @@ function formatWorkflowStep(level, message, meta = {}) {
     if (reason) {
       console.log(`        ${colorForLevel('error', `Reason: ${reason}`)}`);
     }
+  } else if (status === 'skipped') {
+    // Step skipped - complete the line
+    console.log(colorForLevel('warn', '○ SKIP'));
   }
 }
 
 // Format workflow session header
 function formatWorkflowHeader(level, message, meta = {}) {
+  const { title = 'YAML Tests' } = message;
   console.log(''); // spacing before header
   console.log(colorForLevel(level, '─'.repeat(60)));
-  console.log(colorForLevel(level, 'Level 4 Workflow Tests'));
+  console.log(colorForLevel(level, title));
   console.log(colorForLevel(level, '─'.repeat(60)));
   console.log(''); // spacing after header
 }
@@ -72,18 +81,22 @@ function formatWorkflowList(level, message, meta = {}) {
 
 // Format final workflow results summary
 function formatWorkflowResults(level, message, meta = {}) {
-  const { suiteCount, failedScenarios = [] } = message;
+  const { suiteCount, failedScenarios = [], allResults } = message;
+
+  // Handle both data formats
+  const actualSuiteCount = suiteCount !== undefined ? suiteCount : (allResults ? allResults.length : 0);
+  const actualFailedScenarios = failedScenarios.length > 0 ? failedScenarios : [];
 
   console.log(''); // spacing before results
 
-  if (failedScenarios.length > 0) {
+  if (actualFailedScenarios.length > 0) {
     // Failed workflows
     console.log(colorForLevel('error', '--- Workflow Tests Failed ---'));
-    console.log(colorForLevel('error', `${failedScenarios.length} scenario(s) failed across ${suiteCount} test suite(s):`));
+    console.log(colorForLevel('error', `${actualFailedScenarios.length} scenario(s) failed across ${actualSuiteCount} test suite(s):`));
     console.log(''); // spacing
 
     const failuresBySuite = {};
-    failedScenarios.forEach(failure => {
+    actualFailedScenarios.forEach(failure => {
       if (!failuresBySuite[failure.suite]) {
         failuresBySuite[failure.suite] = [];
       }
@@ -103,7 +116,8 @@ function formatWorkflowResults(level, message, meta = {}) {
     process.exit(1);
   } else {
     // Success
-    console.log(colorForLevel('success', `✓ All workflow tests passed (${suiteCount} test suite(s))`));
+    const suiteText = actualSuiteCount === 1 ? 'test suite' : 'test suites';
+    console.log(colorForLevel('success', `✓ All workflow tests passed (${actualSuiteCount} ${suiteText})`));
   }
 }
 
@@ -141,8 +155,15 @@ function formatYamlShowSuite(level, message, meta = {}) {
 
 // Format scenario with grey command
 function formatYamlShowScenario(level, message, meta = {}) {
-  const { description, command } = message;
-  console.log(description);
+  const { description, command, test_id } = message;
+
+  // Show test_id and description
+  if (test_id) {
+    console.log(`${theme.success(`[${test_id}]`)} ${description}`);
+  } else {
+    console.log(description);
+  }
+
   // Use theme.detail for grey command styling
   console.log(`Command: ${theme.detail(command)}`);
   console.log(''); // spacing before output

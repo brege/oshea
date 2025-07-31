@@ -1,19 +1,30 @@
-name: "3.12.1 (Happy) Add a collection from a local directory"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Happy) Add a collection from a local directory
+test_id: 3.12.1
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.12.1.1 Add a collection from a local directory"
-    args: "collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection --name test-collection"
+  - description: Add a collection from a local directory
+    test_id: 3.12.1.1
+    args: >-
+      collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
+      --name test-collection
     expect:
       executes: true
-      contains: "Successfully cloned repository"
-  - description: "3.12.1.debug List the collections"
-    args: "collection list --short names"
+      contains: Successfully cloned repository
+  - description: List the collections
+    test_id: 3.12.1.debug
+    args: collection list --short names
+    expect:
+      executes: true
     debug: true
+  - description: Remove the collection
+    test_id: 3.12.1.2
+    args: collection remove test-collection
     expect:
-      executes: true
-  - description: "3.12.1.2 Remove the collection"
-    args: "collection remove test-collection"
-    expect:
-      contains: "Collection directory removed successfully"
-
+      contains: Collection directory removed successfully

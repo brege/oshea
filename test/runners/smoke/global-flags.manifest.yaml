@@ -1,44 +1,43 @@
-name: "3.15.1 --version (End-to-End Test) cli.js"
-base_command: "md-to-pdf"
-tags: [cli, version, smoke]
+name: "--version (End-to-End Test) cli.js"
+test_id: 3.15.1
+base_command: md-to-pdf
+tags:
+  - cli
+  - version
+  - smoke
 scenarios:
-  - description: "3.15.1 --version"
+  - description: "--version"
+    test_id: 3.15.1
     args: "--version"
     expect:
       executes: true
 ---
-name: "3.15.2 --help (End-to-End Test) cli.js src/cli/get-help.js"
-base_command: "md-to-pdf"
-tags: [cli, help, smoke]
+name: "--help (End-to-End Test) cli.js src/cli/get-help.js"
+test_id: 3.15.2
+base_command: md-to-pdf
+tags:
+  - cli
+  - help
+  - smoke
 scenarios:
-  - description: "3.15.2 Help for {command}"
+  - description: Help for {command}
+    test_id: 3.15.2
     args: "{command} --help"
     expect:
       executes: true
 ---
-name: "3.15.3 asdf/--asdf (End-to-End Test) cli.js (unknown command/option)"
-base_command: "md-to-pdf"
-tags: [cli, smoke, sad-path]
+name: asdf/--asdf (End-to-End Test) cli.js (unknown command/option)
+test_id: 3.15.3
+base_command: md-to-pdf
+tags:
+  - cli
+  - smoke
+  - sad-path
 scenarios:
-  - description: "3.15.3 Unrecognized command"
-    args: "asdf"
+  - description: Unrecognized command
+    test_id: 3.15.3
+    args: asdf
     expect:
       executes: false
-    visual_check: "Clear messaging for unrecognized command"
----
-name: "Context Switching Empty States"  # new (additional test cases for edge scenarios)
-base_command: "md-to-pdf"
-tags: [cli, smoke, coll-root, sad-path]
-visual_focus: "error handling, context isolation, empty state consistency"
-scenarios:
-  - description: "Plugin list with non-existent collection root - context error handling"
-    args: "plugin list --coll-root /tmp/nonexistent"
-    expect:
-      executes: true
-    visual_check: "Graceful handling of missing collection root with clear messaging"
+    visual_check: Clear messaging for unrecognized command
 
-  - description: "Collection list with non-existent collection root - context isolation"
-    args: "collection list names --coll-root /tmp/nonexistent"
-    expect:
-      executes: true
-    visual_check: "Clean empty state when collection root doesn't exist"

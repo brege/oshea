@@ -1,29 +1,45 @@
-# Smoke test manifest - plugin enable command (End-to-End Test)
-name: "3.9.1 (Happy) Successfully validates a well-formed plugin, from a directory"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Happy) Successfully validates a well-formed plugin, from a directory
+test_id: 3.9.1
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.9.1 Successfully validates a well-formed plugin, from a directory"
-    args: "plugin validate {{paths.fixturesDir}}/full-fat-dummies/valid-plugin"
+  - description: Successfully validates a well-formed plugin, from a directory
+    test_id: 3.9.1
+    args: plugin validate {{paths.fixturesDir}}/full-fat-dummies/valid-plugin
     expect:
       executes: true
-      contains: "Successfully"
-  - description: "3.9.1.debug"
-    debug: true # only run this step if debug is true
-    args: "plugin list --enabled --short"
+      contains: Successfully
+  - description: debug list enabled plugins
+    test_id: 3.9.1.debug
+    args: plugin list --enabled --short
     expect:
       executes: true
-
+    debug: true
 ---
-name: "3.9.2 (Sad) Fails validation for a poorly-formed plugin, from a directory"
-base_command: "md-to-pdf"
-tags: [plugin, validate, cli, smoke, sad-path]
+name: (Sad) Fails validation for a poorly-formed plugin, from a directory
+test_id: 3.9.2
+base_command: md-to-pdf
+tags:
+  - plugin
+  - validate
+  - cli
+  - smoke
+  - sad-path
 scenarios:
-  - description: "3.9.2 Create broken plugin and validate it directly"
-    args: "plugin validate {{tmpdir}}/broken-plugin"
-    breakage:
-      plugin: "broken-plugin"
-      type: "missing-handler"
+  - description: Create broken plugin and validate it directly
+    test_id: 3.9.2
+    args: plugin validate {{tmpdir}}/broken-plugin
     expect:
       executes: false
-      contains_all: ["Plugin is invalid", "Missing required file"]
+      contains_all:
+        - Plugin is invalid
+        - Missing required file
+    breakage:
+      plugin: broken-plugin
+      type: missing-handler

@@ -218,6 +218,31 @@ function expandTemplates(str, workspace) {
     .replace(/\{\{tmpdir\}\}/g, workspace.outdir);
 }
 
+// Create a display-friendly command for copy-paste with rendered templates
+function createDisplayCommand(baseCommand, args, workspace, isWorkflowTest = false) {
+  if (!workspace) {
+    return `${baseCommand} ${args}`.trim();
+  }
+
+  // Expand templates for display
+  let displayArgs = expandTemplates(args, workspace);
+
+  if (isWorkflowTest) {
+    // Show the actual --outdir and --coll-root values that would be used
+    if (displayArgs.includes('plugin create')) {
+      if (!/--outdir\s+\S+/.test(displayArgs)) {
+        displayArgs += ` --outdir "${workspace.outdir}"`;
+      }
+    }
+
+    if (!/--coll-root\s+\S+/.test(displayArgs)) {
+      displayArgs += ` --coll-root "${workspace.collRoot}"`;
+    }
+  }
+
+  return `${baseCommand} ${displayArgs}`.trim();
+}
+
 // Process command arguments with variable substitution and workspace isolation
 function processCommandArgs(args, workspace, isWorkflowTest = false) {
   let processedArgs = expandTemplates(args, workspace);
@@ -419,6 +444,7 @@ module.exports = {
   TestWorkspace,
   expandScenarios,
   processCommandArgs,
+  createDisplayCommand,
   validateResult,
   parseArgs,
   matchesGrep,

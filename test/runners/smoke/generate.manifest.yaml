@@ -1,21 +1,47 @@
-name: "3.2.1 (Happy Path) Successfully generates an artifact using a known generator plugin (recipe-book)"
-base_command: "md-to-pdf"
-tags: [generate, cli, smoke, pdf, recipe-book]
+name: >-
+  (Happy Path) Successfully generates an artifact using a known generator plugin
+  (recipe-book)
+test_id: 3.2.1
+base_command: md-to-pdf
+tags:
+  - generate
+  - cli
+  - smoke
+  - pdf
+  - recipe-book
 scenarios:
-  - description: "3.2.1 (Happy Path) Successfully generates an artifact using a known generator plugin (recipe-book)"
-    args: "generate recipe-book --recipes-base-dir {{paths.hugoExampleFixturePath}} --outdir {{tmpdir}} --filename my-recipe-book.pdf --no-open"
+  - description: >-
+      (Happy Path) Successfully generates an artifact using a known generator
+      plugin (recipe-book)
+    test_id: 3.2.1
+    args: >-
+      generate recipe-book --recipes-base-dir {{paths.hugoExampleFixturePath}}
+      --outdir {{tmpdir}} --filename my-recipe-book.pdf --no-open
     expect:
       executes: true
-      contains: "Processing"
+      contains: Processing
       file_exists: "{{tmpdir}}/my-recipe-book.pdf"
-      file_min_size: ["{{tmpdir}}/my-recipe-book.pdf", 20000]
-
+      file_min_size:
+        - "{{tmpdir}}/my-recipe-book.pdf"
+        - 20000
 ---
-name: "3.2.2 (Sad Path) Fails with a non-zero exit code if required plugin-specific options are missing"
-base_command: "md-to-pdf"
-tags: [generate, cli, smoke, pdf, recipe-book, sad-path]
+name: >-
+  (Sad Path) Fails with a non-zero exit code if required plugin-specific options
+  are missing
+test_id: 3.2.2
+base_command: md-to-pdf
+tags:
+  - generate
+  - cli
+  - smoke
+  - pdf
+  - recipe-book
+  - sad-path
 scenarios:
-  - description: "3.2.2 (Sad Path) Fails with a non-zero exit code if required plugin-specific options are missing"
-    args: "generate recipe-book --no-open"
+  - description: >-
+      (Sad Path) Fails with a non-zero exit code if required plugin-specific
+      options are missing
+    test_id: 3.2.2
+    args: generate recipe-book --no-open
     expect_failure:
-      contains: "recipesBaseDir' option was not provided"
+      contains: recipesBaseDir' option was not provided

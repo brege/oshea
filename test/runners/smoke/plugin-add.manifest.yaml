@@ -1,16 +1,27 @@
-# Smoke test manifest - plugin add command (End-to-End Test)
-name: "3.6.1 (Happy Path) Successfully adds and enables a singleton plugin from a local path"
-base_command: "md-to-pdf"
-tags: [plugin, add, cli, smoke]
+name: >-
+  (Happy Path) Successfully adds and enables a singleton plugin from a local
+  path
+test_id: 3.6.1
+base_command: md-to-pdf
+tags:
+  - plugin
+  - add
+  - cli
+  - smoke
 scenarios:
-  - description: "3.6.1.1 Create a plugin to add"
-    args: "plugin create my-local-plugin-src --outdir {{tmpdir}}"
+  - description: Create a plugin to add
+    test_id: 3.6.1.1
+    args: plugin create my-local-plugin-src --outdir {{tmpdir}}
     expect:
       executes: true
-      contains: "created successfully"
-
-  - description: "3.6.1.2 (Happy Path) Successfully adds and enables a singleton plugin from a local path"
-    args: "plugin add {{tmpdir}}/my-local-plugin-src --bypass-validation"
+      contains: created successfully
+  - description: >-
+      (Happy Path) Successfully adds and enables a singleton plugin from
+      a local path
+    test_id: 3.6.1.2
+    args: plugin add {{tmpdir}}/my-local-plugin-src --bypass-validation
     expect:
       executes: true
-      contains_all: ["Successfully processed 'plugin add'", "Attempting to add and enable plugin from local path"]
+      contains_all:
+        - Successfully processed 'plugin add'
+        - Attempting to add and enable plugin from local path

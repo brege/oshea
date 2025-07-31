@@ -84,18 +84,35 @@ Users create declarative YAML workflows instead of complex bash scripts. System 
 
 **QoL / Errata**
 - [ ] Consider aliasing yaml-test-runner.js into base CLI command
-- [ ] Ensure `--grep` quietly passes through unmatched files (during YAML-globbing)
+- [x] Ensure `--grep` quietly passes through unmatched files (during YAML-globbing)
 - [x] Remove old runner files that are now redundant
-- [ ] Remove console-log debt completely. Mostly: `yaml-test-*.js`
-- [ ] Clean up all relative paths ***before phase 3*** 
-- [ ] Ensure all `test_id`'s are displayed in Mocha output
-- [ ] Move `test_id`'s as labels, then formatter can prepend them to the output description
+- [x] Remove console-log debt completely. Mostly: `yaml-test-*.js`
+- [x] Clean up all relative paths ***before phase 4*** 
+- [x] Ensure all `test_id`'s are displayed in Mocha output
+- [x] Move `test_id`'s as labels, then formatter can prepend them to the output description
 - [x] Use `{{template}}` instead of `${TEMPLATE}`
-- [ ] Render `{{template}}` on output, and `--coll-root`, so I can copy-paste the command to test directly
-- [ ] Every header is being displayed as "Level 4 Workflow Tests" (fix this).  This title should originate only from the main declaration in the YAML manifest
-- [ ] Summaries are displaying as "✓ All workflow tests passed (undefined test suite(s))"
-- [ ] Add `skip: true/false` to scenarios to skip them
+- [x] Render `{{template}}` on output, and `--coll-root`, so I can copy-paste the command to test directly
+- [x] Every header is being displayed as "Level 4 Workflow Tests" (fix this).  This title should originate only from the main declaration in the YAML manifest
+- [x] Add `skip: true/false` to scenarios to skip them
 - [x] Add `debug: true/false` to scenarios to debug them (for intermediate workflow steps)
+- [x] Summaries are wildly inconsistent. Some are 0. See output at `./yaml-e2e-output.txt`.
+- [x] Every tests says "Smoke Test: " where is it coming from?
+- [x] More brittleness.
+  ```js
+  // Expand YAML inputs using file-helpers
+  let yamlFiles = [];    
+  if (yamlInputs.length > 0) {
+    yamlFiles = findFilesArray(yamlInputs, {
+      filter: (name) => name.endsWith('.yaml') 
+    });   
+  } else {   
+    // Default to smoke tests manifest if no YAML files specified
+    yamlFiles = [path.join(smokeTestDir, 'smoke-tests.yaml')];  //Why is this here?
+  }
+  ```  
+**New**
+- [x] \*Implement a test file for `plugin remove`.
+
 ---
 
 ## Phase 3: E2E Porting (Next-gen Testing)
@@ -161,9 +178,17 @@ Perhaps mocha produces inefficiency in the old system that could also be present
 
 ## Phase 4: Restructure (Low Priority)
 
-- [ ] Tree restructure  - Reorg test structure to mirror source structure
+**Prep (debt)**
+- [ ] The nested path registries is tripping up LLM's and it's difficult to make
+  progress in tricky parts you desperately need help with.  We'll just flatten the registry into
+  `paths/index.js` instead.  Human's are not supposed to edit it anyway.
+  - [ ] Run all tests one more time on the flattened registry.
+
+**Main**
+- [ ] Tree restructure `test/` - Reorg test structure to mirror source structure
 - [ ] Update path registry - After files move  
 - [ ] Remove old files - After files move
+
 **Reflection Tree**
 ```
 src/                                test/
@@ -245,18 +270,17 @@ Compactly.
 - `...integration/**/*/*.manfest.js`            (no change)
 - `...linters/*-linting.manifest.yaml`          (from `...linters/unit/*-linting.manifest.yaml`)
 - `...workflows/workflows.manifest.yaml`        (from `...smoke/other*/workflow*.yaml`)
-- `...validators/bundled-plugins.manifest.yaml` (from  `...smoke/other*/bundle*.yaml`)
+- `...validators/bundled-plugins.manifest.yaml` (from `...smoke/other*/bundle*.yaml`)
 
 ---
 
 ## Phase 5: Unify manifests with documentation
 
+**Scripting**
 - [ ] `test/config/metadata-level-3.yaml` combine into a complete `<level-3>.yaml` file
 - [ ] `test/config/metadata-level-4.yaml` combine into a complete `<level-4>.yaml` file
 
-
-
-
+How well will this work with the QA tools?
 
 ## Appendix: Checklist of Porting by Manifest and Test ID
 

@@ -1,14 +1,19 @@
-# Smoke test manifest - all CLI smoke tests
-name: "P.3.3 Validate bundled plugins"
-base_command: "md-to-pdf"
-tags: [cli, smoke, plugin, bundled, validate]
-discovery:
-  type: "directory_scan"
-  source: "plugins"
-  filter: "directories"
+name: Validate bundled plugins
+test_id: P.3.3.bundled
+base_command: md-to-pdf
+tags:
+  - cli
+  - smoke
+  - plugin
+  - bundled
+  - validate
 scenarios:
-  - description: "P.3.3.1 Validate plugin {item}"
-    args: "plugin validate {item}"
+  - description: Validate plugin {item}
+    test_id: P.3.3.{item}
+    args: plugin validate {item}
     expect:
       executes: true
-
+discovery:
+  type: directory_scan
+  source: plugins
+  filter: directories

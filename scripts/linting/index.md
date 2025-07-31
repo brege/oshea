@@ -116,6 +116,9 @@ docs
   -- A custodian to check for common LLM debris in code comments and Markdown files.
      - Emojis/graphic icons are whitelist-only and configure in `assets/litter-list.txt`.
      - Checks for `logger.*([HandwrittenBrackets] ... )` in JS files.
+ 
+- [ [`yaml.js`](docs/yaml.js) ]
+  -- A validator for YAML files in the repo (**NEW**).
 
 **Path Validation [`validators/`](validators/)**
 - [ [`mocha-path-validator.js`](validators/mocha-path-validator.js) ]

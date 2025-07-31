@@ -3,11 +3,18 @@ const path = require('path');
 const fs = require('fs');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
-const { loggerPath, cliPath, colorThemePath } = require('@paths');
+const {
+  loggerPath,
+  cliPath,
+  colorThemePath,
+  pluginRegistryBuilderPath,
+  projectRoot
+} = require('@paths');
 const { execSync } = require('child_process');
 
 const logger = require(loggerPath);
 const { theme } = require(colorThemePath);
+const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 
 // Handle removing user plugins by removing their directory and updating the unified manifest
 async function removeUserPlugin(pluginName, manager) {
@@ -145,18 +152,50 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
     logger.detail(`  Plugin Name: ${theme.value(pluginName)}`);
 
     try {
-      // Check if it's a user plugin first
+      // Get all plugin details to check if plugin exists and what type it is
+      const builderInstance = new PluginRegistryBuilder(
+        projectRoot, null, args.config, args.factoryDefaults,
+        args.isLazyLoadMode || false, null, manager,
+        { collRoot: manager.collRoot }
+      );
+      const allPluginDetails = await builderInstance.getAllPluginDetails();
+      const targetPlugin = allPluginDetails.find(p => p.name === pluginName);
+
+      if (targetPlugin) {
+        // Check if it's a bundled plugin (which cannot be removed)
+        if (targetPlugin.source === 'bundled' || (targetPlugin.status && targetPlugin.status.includes('Bundled'))) {
+          logger.error(`Cannot remove '${pluginName}' - it's a bundled plugin.`);
+          logger.info('Only user plugins (created or added plugins) can be removed.');
+          logger.info('Use \'md-to-pdf plugin list\' to see what plugins you have.');
+          process.exit(1);
+          return;
+        }
+
+        // Check if it's a collection-managed plugin (which also cannot be removed this way)
+        if (targetPlugin.source === 'cm') {
+          logger.error(`Cannot remove '${pluginName}' - it's managed by a collection.`);
+          logger.info('Use \'md-to-pdf plugin disable\' to disable it, or remove the entire collection.');
+          logger.info('Use \'md-to-pdf plugin list --enabled\' to see what plugins you have.');
+          process.exit(1);
+          return;
+        }
+      }
+
+      // Check if it's a user plugin
       const result = await removeUserPlugin(pluginName, manager);
 
       if (!result.success) {
         switch (result.reason) {
         case 'no_user_plugins_dir':
-          logger.error(`No user plugins directory found. Plugin '${pluginName}' cannot be removed.`);
-          logger.info('User plugins are stored in the user-plugins/ directory within your collections root.');
-          break;
         case 'plugin_not_found':
-          logger.error(`Plugin '${pluginName}' not found in user plugins directory.`);
-          logger.info('Use \'md-to-pdf plugin list\' to see available user plugins.');
+          if (!targetPlugin) {
+            logger.error(`Plugin '${pluginName}' not found.`);
+            logger.info('This plugin doesn\'t exist in your system.');
+          } else {
+            logger.error(`Plugin '${pluginName}' cannot be removed.`);
+            logger.info('This plugin exists but is not a user-created or user-added plugin.');
+          }
+          logger.info('Use \'md-to-pdf plugin list\' to see what plugins you have.');
           break;
         case 'no_manifest':
           logger.error(`Plugins manifest not found. Cannot remove plugin '${pluginName}'.`);

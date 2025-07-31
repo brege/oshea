@@ -1,36 +1,65 @@
-name: "3.10.1 (Happy) Add a collection from a git URL"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Happy) Add a collection from a git URL
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.10.1.1 Add a collection from a git URL"
-    args: "collection add https://github.com/brege/md-to-pdf-plugins.git --name test-collection"
+  - description: Add a collection from a git URL
+    test_id: 3.10.1
+    args: >-
+      collection add https://github.com/brege/md-to-pdf-plugins.git --name
+      test-collection
     expect:
       executes: true
-      contains: "Successfully"
-
+      contains: Successfully
 ---
-name: "3.10.2 (Happy) Add a collection from a local directory"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Happy) Add a collection from a local directory
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.10.2 Add a collection from a local directory"
-    args: "collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection --name test-collection"
+  - description: Add a collection from a local directory
+    test_id: 3.10.2
+    args: >-
+      collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
+      --name test-collection
     expect:
       executes: true
-      contains: "Successfully"
-
+      contains: Successfully
 ---
-name: "3.10.3 (Sad) Add a collection from an invalid source"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, sad-path]
+name: (Sad) Add a collection from an invalid source
+test_id: 3.10.3
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - sad-path
 scenarios:
-  - description: "3.10.3.1 Add a collection from an invalid directory"
-    args: "collection add {{paths.fixturesDir}}/full-fat-dummies/invalid-collection --name invalid-collection"
+  - description: Add a collection from an invalid directory
+    test_id: 3.10.3.1
+    args: >-
+      collection add {{paths.fixturesDir}}/full-fat-dummies/invalid-collection
+      --name invalid-collection
     expect:
-      contains: "Failed"
+      contains: Failed
       executes: false
-  - description: "3.10.3.2 Add a collection from an invalid git URL"
-    args: "collection add https://github.com/brege/invalid-plugin-repo.git --name invalid-collection"
+  - description: Add a collection from an invalid git URL
+    test_id: 3.10.3.2
+    args: >-
+      collection add https://github.com/brege/invalid-plugin-repo.git --name
+      invalid-collection
     expect:
-      contains: "Failed"
+      contains: Failed
       executes: false

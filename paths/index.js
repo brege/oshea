@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-07-30T00:51:48.189Z
+// Generated: 2025-07-31T10:00:38.747Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -46,6 +46,7 @@ const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
 const dynamicCompletionScriptPath = path.join(scriptsRoot, 'completion', 'generate-completion-dynamic-cache.js');
 
 // --- Key Static File Paths ---
+const pathsConfigPath = path.join(projectRoot, 'paths', 'paths-config.yaml');
 const katexPath = path.join(assetsRoot, 'katex.min.css');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
 const findLitterRulesPath = path.join(assetsRoot, 'litter-list.txt');
@@ -155,7 +156,6 @@ const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint-form
 const pathsFormatterPath = path.join(projectRoot, 'src/utils/formatters/paths-formatter.js');
 const pluginListFormatterPath = path.join(projectRoot, 'src/utils/formatters/plugin-list-formatter.js');
 const rawFormatterPath = path.join(projectRoot, 'src/utils/formatters/raw-formatter.js');
-const smokeTestFormatterPath = path.join(projectRoot, 'src/utils/formatters/smoke-test-formatter.js');
 const tableFormatterPath = path.join(projectRoot, 'src/utils/formatters/table-formatter.js');
 const validationFormatterPath = path.join(projectRoot, 'src/utils/formatters/validation-formatter.js');
 const yamlTestFormatterPath = path.join(projectRoot, 'src/utils/formatters/yaml-test-formatter.js');
@@ -190,6 +190,7 @@ module.exports = {
   fileHelpersPath,
   testFileHelpersPath,
   dynamicCompletionScriptPath,
+  pathsConfigPath,
   katexPath,
   basePluginSchemaPath,
   findLitterRulesPath,
@@ -277,7 +278,6 @@ module.exports = {
   pathsFormatterPath,
   pluginListFormatterPath,
   rawFormatterPath,
-  smokeTestFormatterPath,
   tableFormatterPath,
   validationFormatterPath,
   yamlTestFormatterPath,

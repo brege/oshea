@@ -1,54 +1,88 @@
-# Smoke test manifest - plugin enable command (End-to-End Test)
-name: "3.7.1 (Happy) Successfully enables a plugin from a collection"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Happy) Successfully enables a plugin from a collection
+test_id: 3.7.1
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.7.1.1 Create a collection with a plugin to enable"
-    args: "collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection --name test-collection"
+  - description: Create a collection with a plugin to enable
+    test_id: 3.7.1.1
+    args: >-
+      collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
+      --name test-collection
     expect:
       executes: true
-      contains: "Successfully"
-
-  - description: "3.7.1.2 Successfully enables a plugin from a collection"
-    args: "plugin enable test-collection/valid-collection-plugin-1 --bypass-validation"
+      contains: Successfully
+  - description: Successfully enables a plugin from a collection
+    test_id: 3.7.1.2
+    args: >-
+      plugin enable test-collection/valid-collection-plugin-1
+      --bypass-validation
     expect:
       executes: true
-      contains: "Attempting to enable plugin"
-
+      contains: Attempting to enable plugin
 ---
-name: "3.7.2 (Happy) The plugin enable command successfully enables a valid plugin (with validation)"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, validation, happy-path]
+name: >-
+  (Happy) The plugin enable command successfully enables a valid plugin (with
+  validation)
+test_id: 3.7.2
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - validation
+  - happy-path
 scenarios:
-  - description: "3.7.2.1 Create a collection with a valid plugin"
-    args: "collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection --name valid-coll"
+  - description: Create a collection with a valid plugin
+    test_id: 3.7.2.1
+    args: >-
+      collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
+      --name valid-coll
     expect:
       executes: true
-      contains: "Successfully"
-
-  - description: "3.7.2.2 Successfully enables a valid plugin with validation"
-    args: "plugin enable valid-coll/valid-collection-plugin-1"
+      contains: Successfully
+  - description: Successfully enables a valid plugin with validation
+    test_id: 3.7.2.2
+    args: plugin enable valid-coll/valid-collection-plugin-1
     expect:
       executes: true
-      contains: "Attempting to enable plugin"
-
+      contains: Attempting to enable plugin
 ---
-name: "3.7.3 (Sad) The plugin enable command fails to enable an invalid plugin and reports validation errors"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, validation, sad-path]
+name: >-
+  (Sad) The plugin enable command fails to enable an invalid plugin and reports
+  validation errors
+test_id: 3.7.3
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - validation
+  - sad-path
 scenarios:
-  - description: "3.7.3.1 Create broken collection and add it"
-    args: "collection add {{tmpdir}}/invalid-coll --name invalid-coll"
+  - description: Create broken collection and add it
+    test_id: 3.7.3.1
+    args: collection add {{tmpdir}}/invalid-coll --name invalid-coll
+    expect:
+      executes: true
+      contains: Successfully
     breakage:
-      plugin: "invalid-plugin"
-      type: "missing-handler"
-      collection: "invalid-coll"
-    expect:
-      executes: true
-      contains: "Successfully"
-
-  - description: "3.7.3.2 Fails to enable invalid plugin and reports validation errors"
-    args: "plugin enable invalid-coll/invalid-plugin"
+      plugin: invalid-plugin
+      type: missing-handler
+      collection: invalid-coll
+  - description: Fails to enable invalid plugin and reports validation errors
+    test_id: 3.7.3.2
+    args: plugin enable invalid-coll/invalid-plugin
     expect:
       executes: false
-      contains_all: ["Plugin validation failed", "Missing required file"]
+      contains_all:
+        - Plugin validation failed
+        - Missing required file

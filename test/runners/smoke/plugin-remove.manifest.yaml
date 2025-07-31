@@ -1,0 +1,70 @@
+name: >-
+  (Happy Path) Successfully removes a user plugin from the system
+test_id: 3.9.1
+base_command: md-to-pdf
+tags:
+  - plugin
+  - remove
+  - cli
+  - smoke
+scenarios:
+  - description: Create a plugin to add and remove
+    test_id: 3.9.1.1
+    args: plugin create my-plugin-to-remove --outdir {{tmpdir}}
+    expect:
+      executes: true
+      contains: created successfully
+  - description: Add the plugin to the system
+    test_id: 3.9.1.2
+    args: plugin add {{tmpdir}}/my-plugin-to-remove --bypass-validation
+    expect:
+      executes: true
+      contains: Successfully processed 'plugin add'
+  - description: >-
+      (Happy Path) Successfully removes a user plugin from the system
+    test_id: 3.9.1.3
+    args: plugin remove my-plugin-to-remove --force
+    expect:
+      executes: true
+      contains_all:
+        - removed successfully
+        - Plugin Type
+        - Next Steps
+---
+name: >-
+  (Sad Path) Fails when trying to remove a non-existent plugin
+test_id: 3.9.2
+base_command: md-to-pdf
+tags:
+  - plugin
+  - remove
+  - cli
+  - smoke
+  - error
+scenarios:
+  - description: >-
+      (Sad Path) Fails when trying to remove a non-existent plugin
+    test_id: 3.9.2.1
+    args: plugin remove non-existent-plugin --force
+    expect_failure:
+      exit_code: 1
+      contains: not found
+---
+name: >-
+  (Sad Path) Fails when trying to remove a bundled plugin
+test_id: 3.9.3
+base_command: md-to-pdf
+tags:
+  - plugin
+  - remove
+  - cli
+  - smoke
+  - error
+scenarios:
+  - description: >-
+      (Sad Path) Fails when trying to remove a bundled plugin
+    test_id: 3.9.3.1
+    args: plugin remove cv --force
+    expect_failure:
+      exit_code: 1
+      contains: bundled plugin

@@ -155,6 +155,32 @@ postman:
     - "test/archive/docs/audit-log.md"
     - "plugins/recipe-book/README.md"
 
+# scripts/linting/docs/yaml.js
+yaml:
+  alias: "yaml-format"
+  group: "docs"
+  targets:
+   - "."
+  filetypes: [".yaml"]
+  field_order:
+    # Lower numbers = higher priority (appear first)
+    # Negative numbers for super important fields
+    name: -1
+    test_id: 0
+    base_command: 1
+    tags: 2
+    visual_focus: 3
+    scenarios: 10
+    description: 5
+    args: 6
+    expect: 7
+    expect_failure: 8
+    expect_not: 9
+    visual_check: 11
+    skip: 12
+    debug: 13
+    # Fields not listed get priority 999 (appear last)
+
 # --- Harness Configuration ---
 harness:
   continueOnError: false

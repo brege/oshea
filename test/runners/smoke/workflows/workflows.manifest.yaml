@@ -1,143 +1,182 @@
-# Level 4 Workflow Tests - Unified Plugin Architecture
-# Complete plugin lifecycle testing as one sequential workflow
----
-name: "4.1.1 Full Plugin Collection Lifecycle"
-tags: [workflow, collection, plugin, git, enable, disable, remove]
-base_command: "md-to-pdf"
+name: Full Plugin Collection Lifecycle
+test_id: 4.1.1
+base_command: md-to-pdf
+tags:
+  - workflow
+  - collection
+  - plugin
+  - git
+  - enable
+  - disable
+  - remove
 scenarios:
-  - description: "4.1.1.1 Add plugin collection from GitHub"
-    args: "collection add https://github.com/brege/md-to-pdf-plugins.git --name lifecycle-collection"
+  - description: Add plugin collection from GitHub
+    test_id: 4.1.1.1
+    args: >-
+      collection add https://github.com/brege/md-to-pdf-plugins.git --name
+      lifecycle-collection
     expect:
-      contains: "Successfully cloned repository"
-
-  - description: "4.1.1.2 Enable plugin from collection"
-    args: "plugin enable lifecycle-collection/restaurant-menu"
+      contains: Successfully cloned repository
+  - description: Enable plugin from collection
+    test_id: 4.1.1.2
+    args: plugin enable lifecycle-collection/restaurant-menu
     expect:
-      contains: "Plugin enabled successfully"
-
-  - description: "4.1.1.3 Convert document using enabled plugin"
-    args: "convert {{paths.simpleMdFixture}} --plugin restaurant-menu --outdir {{tmpdir}} --no-open"
+      contains: Plugin enabled successfully
+  - description: Convert document using enabled plugin
+    test_id: 4.1.1.3
+    args: >-
+      convert {{paths.simpleMdFixture}} --plugin restaurant-menu --outdir
+      {{tmpdir}} --no-open
     expect:
-      contains: "convert command finished"
+      contains: convert command finished
       file_exists: "{{tmpdir}}/restaurant-menu.pdf"
-
-  - description: "4.1.1.4 Disable the plugin"
-    args: "plugin disable restaurant-menu"
+  - description: Disable the plugin
+    test_id: 4.1.1.4
+    args: plugin disable restaurant-menu
     expect:
-      contains: "Plugin disabled successfully"
-
-  - description: "4.1.1.5 Remove the collection"
-    args: "collection remove lifecycle-collection"
+      contains: Plugin disabled successfully
+  - description: Remove the collection
+    test_id: 4.1.1.5
+    args: collection remove lifecycle-collection
     expect:
-      contains: "Collection directory removed successfully"
-
+      contains: Collection directory removed successfully
 ---
-name: "4.1.2 Archetype, Add, and Convert with New Plugin"
-tags: [workflow, archetype, plugin, convert, add]
-base_command: "md-to-pdf"
+name: Archetype, Add, and Convert with New Plugin
+test_id: 4.1.2
+base_command: md-to-pdf
+tags:
+  - workflow
+  - archetype
+  - plugin
+  - convert
+  - add
 scenarios:
-  - description: "4.1.2.1 Create a new archetype plugin from 'cv'"
-    args: "plugin create my-custom-cv --from cv --outdir {{tmpdir}}"
+  - description: Create a new archetype plugin from 'cv'
+    test_id: 4.1.2.1
+    args: plugin create my-custom-cv --from cv --outdir {{tmpdir}}
     expect:
-      contains_all: ["created successfully", "my-custom-cv"]
-
-  - description: "4.1.2.2 Add the new archetype plugin"
-    args: "plugin add {{tmpdir}}/my-custom-cv"
+      contains_all:
+        - created successfully
+        - my-custom-cv
+  - description: Add the new archetype plugin
+    test_id: 4.1.2.2
+    args: plugin add {{tmpdir}}/my-custom-cv
     expect:
-      contains: "Successfully processed 'plugin add'"
-
-  - description: "4.1.2.3 Convert a markdown document using the new plugin"
-    args: "convert {{paths.simpleMdFixture}} --plugin my-custom-cv --outdir {{tmpdir}} --no-open"
+      contains: Successfully processed 'plugin add'
+  - description: Convert a markdown document using the new plugin
+    test_id: 4.1.2.3
+    args: >-
+      convert {{paths.simpleMdFixture}} --plugin my-custom-cv --outdir
+      {{tmpdir}} --no-open
     expect:
-      contains: "convert command finished"
+      contains: convert command finished
       file_exists: "{{tmpdir}}/simple.pdf"
-
 ---
-name: "4.1.5 Unified Plugin Architecture Complete Workflow"
-tags: [workflow, plugin, archetype, enable, removal]
-base_command: "md-to-pdf"
+name: Unified Plugin Architecture Complete Workflow
+test_id: 4.1.5
+base_command: md-to-pdf
+tags:
+  - workflow
+  - plugin
+  - archetype
+  - enable
+  - removal
 scenarios:
-  - description: "4.1.5.1 Create plugin-A externally using --outdir"
-    args: "plugin create plugin-A --from default --outdir {{tmpdir}}"
+  - description: Create plugin-A externally using --outdir
+    test_id: 4.1.5.1
+    args: plugin create plugin-A --from default --outdir {{tmpdir}}
     expect:
-      contains_all: ["created successfully", "plugin-A"]
-
-  - description: "4.1.5.2 Create plugin-B externally using --outdir"
-    args: "plugin create plugin-B --from default --outdir {{tmpdir}}"
+      contains_all:
+        - created successfully
+        - plugin-A
+  - description: Create plugin-B externally using --outdir
+    test_id: 4.1.5.2
+    args: plugin create plugin-B --from default --outdir {{tmpdir}}
     expect:
-      contains_all: ["created successfully", "plugin-B"]
-
-  - description: "4.1.5.3 Add externally created plugin-A to unified architecture"
-    args: "plugin add {{tmpdir}}/plugin-A"
+      contains_all:
+        - created successfully
+        - plugin-B
+  - description: Add externally created plugin-A to unified architecture
+    test_id: 4.1.5.3
+    args: plugin add {{tmpdir}}/plugin-A
     expect:
-      contains: "Successfully processed 'plugin add'"
-
-  - description: "4.1.5.4 Add externally created plugin-B to unified architecture"
-    args: "plugin add {{tmpdir}}/plugin-B"
+      contains: Successfully processed 'plugin add'
+  - description: Add externally created plugin-B to unified architecture
+    test_id: 4.1.5.4
+    args: plugin add {{tmpdir}}/plugin-B
     expect:
-      contains: "Successfully processed 'plugin add'"
-
-  - description: "4.1.5.5 Verify plugins appear in unified manifest"
-    args: "plugin list --short"
+      contains: Successfully processed 'plugin add'
+  - description: Verify plugins appear in unified manifest
+    test_id: 4.1.5.5
+    args: plugin list --short
     expect:
-      contains_all: ["plugin-A", "plugin-B"]
-
-  - description: "4.1.5.6 Disable plugin-A for state management test"
-    args: "plugin disable plugin-A"
+      contains_all:
+        - plugin-A
+        - plugin-B
+  - description: Disable plugin-A for state management test
+    test_id: 4.1.5.6
+    args: plugin disable plugin-A
     expect:
-      contains: "Plugin disabled successfully"
-
-  - description: "4.1.5.7 Enable plugin-A back to active state"
-    args: "plugin enable plugin-A"
+      contains: Plugin disabled successfully
+  - description: Enable plugin-A back to active state
+    test_id: 4.1.5.7
+    args: plugin enable plugin-A
     expect:
-      contains: "Plugin enabled successfully"
-
-  - description: "4.1.5.8 Remove plugin-A from unified structure"
-    args: "plugin remove plugin-A"
+      contains: Plugin enabled successfully
+  - description: Remove plugin-A from unified structure
+    test_id: 4.1.5.8
+    args: plugin remove plugin-A
     expect:
-      contains: "removed successfully"
-
-  - description: "4.1.5.9 Verify plugin-A no longer in list after removal"
-    args: "plugin list --short"
+      contains: removed successfully
+  - description: Verify plugin-A no longer in list after removal
+    test_id: 4.1.5.9
+    args: plugin list --short
     expect_not:
-      contains: "plugin-A"
-
-# NOTE: Legacy tests 4.3.1 and 4.3.2 were intentionally excluded from this YAML port.
-# These tests were designed for a less stable codebase that lacked comprehensive smoke test coverage.
-# They focused on low-level validation edge cases (git error handling, missing config files) rather
-# than realistic user workflow scenarios. Modern workflow tests should demonstrate practical user
-# journeys, not bureaucratic error validation that belongs in unit tests. The YAML format serves
-# as both executable tests and self-documenting workflow audits, making such edge case tests
-# inappropriate for this context.
-
+      contains: plugin-A
 ---
-name: "4.3.1 Collection Update with Uncommitted Changes (Deprecated)"
-base_command: "md-to-pdf"
-tags: [workflow, collection, update, git, sad-path, deprecated]
+name: Collection Update with Uncommitted Changes (Deprecated)
+test_id: 4.3.1
+skip: true
+base_command: md-to-pdf
+tags:
+  - workflow
+  - collection
+  - update
+  - git
+  - sad-path
+  - deprecated
 scenarios:
-  - description: "Collection update fails with local uncommitted changes (Deprecated)"
-    notes: >-
-      This test validated git working directory state handling during collection updates.
-      While technically correct, it tests git behavior rather than user workflow patterns.
-      Such validation belongs in the existing comprehensive smoke test suite, not in
-      workflow demonstrations. Users benefit more from learning successful update patterns
-      than observing git error conditions they should avoid through proper workflow habits.
-    args: "collection --help"
+  - description: Collection update fails with local uncommitted changes (Deprecated)
+    args: collection --help
     expect:
       executes: true
-
+    notes: >-
+      This test validated git working directory state handling during collection
+      updates. While technically correct, it tests git behavior rather than user
+      workflow patterns. Such validation belongs in the existing comprehensive
+      smoke test suite, not in workflow demonstrations. Users benefit more from
+      learning successful update patterns than observing git error conditions
+      they should avoid through proper workflow habits.
 ---
-name: "4.3.2 Plugin Create Invalid Source (Deprecated)"
-base_command: "md-to-pdf"
-tags: [workflow, plugin, create, sad-path, deprecated]
+name: Plugin Create Invalid Source (Deprecated)
+test_id: 4.3.2
+skip: true
+base_command: md-to-pdf
+tags:
+  - workflow
+  - plugin
+  - create
+  - sad-path
+  - deprecated
 scenarios:
   - description: "Original Title: Plugin create fails with invalid source (Deprecated)"
-    notes: >-
-      This test validated error handling when creating plugins from nonexistent sources.
-      However, it tests input validation logic rather than demonstrating useful workflow
-      patterns. Modern users benefit more from seeing successful plugin creation workflows
-      with proper source selection than edge case error scenarios. Input validation is
-      thoroughly covered by the existing smoke test infrastructure.
-    args: "plugin create --help"
+    args: plugin create --help
     expect:
       executes: true
+    notes: >-
+      This test validated error handling when creating plugins from nonexistent
+      sources. However, it tests input validation logic rather than
+      demonstrating useful workflow patterns. Modern users benefit more from
+      seeing successful plugin creation workflows with proper source selection
+      than edge case error scenarios. Input validation is thoroughly covered by
+      the existing smoke test infrastructure.

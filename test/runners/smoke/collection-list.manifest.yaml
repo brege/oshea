@@ -1,53 +1,89 @@
-name: "collection list (End-to-End Test) src/cli/commands/collection/list.command.js"
-base_command: "md-to-pdf"
-tags: [cli, smoke, collection, list]
+name: collection list (End-to-End Test) src/cli/commands/collection/list.command.js
+base_command: md-to-pdf
+tags:
+  - cli
+  - smoke
+  - collection
+  - list
 scenarios:
-  - description: "3.11.1 List downloaded collections (default)"
-    args: "collection list names"
+  - description: List downloaded collections (default)
+    test_id: 3.11.1
+    args: collection list names
     expect:
-      contains_any: ["Downloaded plugin collections", "No downloaded collections found"]
-
-  - description: "3.11.2 List collection names (short)"  # new
-    args: "collection list names --short"
+      contains_any:
+        - Downloaded plugin collections
+        - No downloaded collections found
+  - description: List collection names (short)
+    test_id: 3.11.2
+    args: collection list names --short
     expect:
-      contains_any: ["Downloaded plugin collections", "No downloaded collections found"]
-
-  - description: "3.11.3 List available plugins from collections" # new
-    args: "collection list available"
+      contains_any:
+        - Downloaded plugin collections
+        - No downloaded collections found
+  - description: List available plugins from collections
+    test_id: 3.11.3
+    args: collection list available
     expect:
-      contains_any: ["Available plugins", "No available plugins found in any collection"]
-
-  - description: "3.11.4 List enabled plugins from collections"  # new
-    args: "collection list enabled"
+      contains_any:
+        - Available plugins
+        - No available plugins found in any collection
+  - description: List enabled plugins from collections
+    test_id: 3.11.4
+    args: collection list enabled
     expect:
-      contains_any: ["Enabled plugins", "No enabled plugins found"]
-
-  - description: "3.11.5 List all plugins (alias for available)"  # new
-    args: "collection list all"
+      contains_any:
+        - Enabled plugins
+        - No enabled plugins found
+  - description: List all plugins (alias for available)
+    test_id: 3.11.5
+    args: collection list all
     expect:
-      contains_any: ["Available plugins", "No available plugins found in any collection"]
-
+      contains_any:
+        - Available plugins
+        - No available plugins found in any collection
 ---
-name: "collection list (End-to-End Test) Collection List States (Full vs Empty)"
-base_command: "md-to-pdf"
-tags: [cli, smoke, collection, list, enable, disable, happy-path, sad-path]
-visual_focus: "empty state consistency, messaging clarity"
+name: collection list (End-to-End Test) Collection List States (Full vs Empty)
+base_command: md-to-pdf
+tags:
+  - cli
+  - smoke
+  - collection
+  - list
+  - enable
+  - disable
+  - happy-path
+  - sad-path
+visual_focus: empty state consistency, messaging clarity
 scenarios:
-  - description: "Collection list names (likely empty) - empty state"
-    args: "collection list names"
+  - description: Collection list names (likely empty) - empty state
+    test_id: 3.11.6
+    args: collection list names
     expect:
       executes: true
-    visual_check: "Clean empty state messaging with consistent theming"
+    visual_check: Clean empty state messaging with consistent theming
+  - description: Collection list available (empty) - no available plugins state
+    test_id: 3.11.7
+    args: collection list available
+    expect:
+      executes: true
+    visual_check: Empty state for no available collection plugins
+  - description: Collection list enabled (empty) - no enabled plugins state
+    test_id: 3.11.8
+    args: collection list enabled
+    expect:
+      executes: true
+    visual_check: Empty state for no enabled collection plugins
+  - description: Collection list with non-existent collection root - context isolation
 
-  - description: "Collection list available (empty) - no available plugins state"
-    args: "collection list available"
+name: "Context Switching Empty States"
+base_command: "md-to-pdf"
+tags: [cli, smoke, coll-root, sad-path]
+visual_focus: "error handling, context isolation, empty state consistency"
+scenarios:
+  - description: "Collection list with non-existent collection root - context isolation"
+    test_id: "3.11.9"
+    args: "collection list names --coll-root /tmp/nonexistent"
     expect:
       executes: true
-    visual_check: "Empty state for no available collection plugins"
-
-  - description: "Collection list enabled (empty) - no enabled plugins state"
-    args: "collection list enabled"
-    expect:
-      executes: true
-    visual_check: "Empty state for no enabled collection plugins"
+    visual_check: "Clean empty state when collection root doesn't exist"
 

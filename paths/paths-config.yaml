@@ -55,6 +55,7 @@ registries:
       statics:
         comment: "Key Static File Paths"
         items:
+          paths_config_path: "path.join(projectRoot, 'paths', 'paths-config.yaml')"
           katex_path: "path.join(assetsRoot, 'katex.min.css')"
           base_plugin_schema_path: "path.join(srcRoot, 'validators', 'base-plugin.schema.json')"
           find_litter_rules_path: "path.join(assetsRoot, 'litter-list.txt')"
@@ -234,11 +235,6 @@ registries:
 
     features:
       # Rank 0: Core Test Operations
-      smoke:
-        comment: "Smoke Tests - Basic Application Validation"
-        pattern: "test/runners/smoke/**/*.{js,yaml}"
-        rank: 0
-
       core_integration:
         comment: "Core Module Integration Tests"
         pattern: "test/runners/integration/core/**/*.js"
@@ -277,15 +273,27 @@ registries:
         rank: 2
 
       # Rank 3: Enhancements & Utilities
-      test_scripts:
-        comment: "Test Support Scripts"
-        pattern: "test/runners/scripts/**/*.js"
-        rank: 3
-
       shared_utilities:
         comment: "Shared Test Utilities & Helpers"
         pattern: "test/runners/shared/**/*.js"
         rank: 3
+
+      # TODO: Rank Aux: The YAML-driven End-to-End Tests
+      # after sufficient testing with the old E2E scripts (e2e_{core,manifests})
+      # we can relabel these test as e2e_{core,manifests}
+      yaml_workflow_tests:
+        comment: "YAML-driven Workflow Tests"
+        pattern: "test/runners/smoke/workflows/*.yaml"
+      yaml_validator_tests:
+        comment: "YAML-driven Bundled Plugin Tests"
+        pattern: "test/runners/smoke/validators/*.yaml"
+      yaml_tests:
+        comment: "YAML-driven End-to-End Tests"
+        pattern: "test/runners/smoke/*.manifest.yaml"
+      yaml_runners:
+        comment: "YAML-driven Test Runner"
+        pattern: "test/runners/smoke/*.js"
+      # /TODO
 
     contextual_naming:
       # E2E test naming
@@ -341,11 +349,6 @@ registries:
       "all-linting-unit.test.js":
         "test/runners/linting/unit": "allLintingUnitTest"
 
-      # Smoke tests
-      "smoke-tests.yaml":
-        "test/runners/smoke": "smokeTestsManifest"
-      "smoke-test-runner.js":
-        "test/runners/smoke": "smokeTestRunner"
 
 rank_definitions:
   0: "user-facing interfaces"

@@ -1,36 +1,65 @@
-name: "3.13.1 (Happy) Succesfully runs the update process on collections"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Happy) Succesfully runs the update process on collections
+test_id: 3.13.1
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.13.1 Update all collections"
-    args: "collection update"
+  - description: Update all collections
+    test_id: 3.13.1
+    args: collection update
     expect:
       executes: true
-      contains_any: ["Nothing to update", "Collection updated"]
-
+      contains_any:
+        - Nothing to update
+        - Collection updated
 ---
-name: "3.13.2 (Key Option) Successfully runs the update process on a single named collection"
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Key Option) Successfully runs the update process on a single named collection
+test_id: 3.13.2
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.13.2.1 Add a collection from a local directory"
-    args: "collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection --name test-collection"
+  - description: Add a collection from a local directory
+    test_id: 3.13.2.1
+    args: >-
+      collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
+      --name test-collection
     expect:
       executes: true
-      contains: "Successfully"
-
-  - description: "3.13.2.2 Update a single named collection"
-    args: "collection update test-collection"
+      contains: Successfully
+  - description: Update a single named collection
+    test_id: 3.13.2.2
+    args: collection update test-collection
     expect:
       executes: true
-      contains: "Collection updated"
+      contains: Collection updated
 ---
-name: "3.14.1 (Alias) The `update` alias successfully runs the collection update process."
-base_command: "md-to-pdf"
-tags: [plugin, enable, cli, smoke, collection, happy-path]
+name: (Alias) The `update` alias successfully runs the collection update process.
+test_id: 3.14.1
+base_command: md-to-pdf
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
 scenarios:
-  - description: "3.14.1 Update all collections"
-    args: "update"
+  - description: Update all collections
+    test_id: 3.14.1
+    args: update
     expect:
       executes: true
-      contains_any: ["Nothing to update", "Collection updated"]
+      contains_any:
+        - Nothing to update
+        - Collection updated

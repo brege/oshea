@@ -1,6 +1,6 @@
 // paths/tests.js
 // tests.js - Test Suite Registry
-// Generated: 2025-07-31T00:50:14.016Z
+// Generated: 2025-07-31T10:49:17.124Z
 // Architecture: Multi-layered testing infrastructure with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -45,8 +45,28 @@ const createDummyPluginPath = path.join(fixturesDir, 'create-dummy-plugin.js');
 
 // --- Rank 0: user-facing interfaces ---
 
-// Smoke Tests - Basic Application Validation
-const smokeRoot = path.join(projectRoot, 'test/runners/smoke/');
+// Core Module Integration Tests
+const coreIntegrationRoot = path.join(projectRoot, 'test/runners/integration/core/');
+const defaultHandlerFactoryPath = path.join(projectRoot, 'test/runners/integration/core/default-handler.factory.js');
+const defaultHandlerManifestPath = path.join(projectRoot, 'test/runners/integration/core/default-handler.manifest.js');
+const defaultHandlerIntegrationTestPath = path.join(projectRoot, 'test/runners/integration/core/default-handler.test.js');
+const mathIntegrationFactoryPath = path.join(projectRoot, 'test/runners/integration/core/math-integration.factory.js');
+const mathIntegrationManifestPath = path.join(projectRoot, 'test/runners/integration/core/math-integration.manifest.js');
+const mathIntegrationTestPath = path.join(projectRoot, 'test/runners/integration/core/math-integration.test.js');
+const pdfGeneratorFactoryPath = path.join(projectRoot, 'test/runners/integration/core/pdf-generator.factory.js');
+const pdfGeneratorManifestPath = path.join(projectRoot, 'test/runners/integration/core/pdf-generator.manifest.js');
+const pdfGeneratorIntegrationTestPath = path.join(projectRoot, 'test/runners/integration/core/pdf-generator.test.js');
+
+// YAML-driven Workflow Tests
+const yamlWorkflowTestsRoot = path.join(projectRoot, 'test/runners/smoke/workflows/*.yaml');
+const workflowsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/workflows/workflows.manifest.yaml');
+
+// YAML-driven Bundled Plugin Tests
+const yamlValidatorTestsRoot = path.join(projectRoot, 'test/runners/smoke/validators/*.yaml');
+const bundledPluginsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/validators/bundled-plugins.manifest.yaml');
+
+// YAML-driven End-to-End Tests
+const yamlTestsRoot = path.join(projectRoot, 'test/runners/smoke/*.manifest.yaml');
 const collectionAddManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/collection-add.manifest.yaml');
 const collectionListManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/collection-list.manifest.yaml');
 const collectionRemoveManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/collection-remove.manifest.yaml');
@@ -60,24 +80,14 @@ const pluginCreateManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/
 const pluginDisableManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-disable.manifest.yaml');
 const pluginEnableManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-enable.manifest.yaml');
 const pluginListManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-list.manifest.yaml');
+const pluginRemoveManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-remove.manifest.yaml');
 const pluginValidateManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-validate.manifest.yaml');
+
+// YAML-driven Test Runner
+const yamlRunnersRoot = path.join(projectRoot, 'test/runners/smoke/*.js');
 const yamlMochaTestPath = path.join(projectRoot, 'test/runners/smoke/yaml-mocha.test.js');
 const yamlTestHelpersPath = path.join(projectRoot, 'test/runners/smoke/yaml-test-helpers.js');
 const yamlTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/yaml-test-runner.js');
-const bundledPluginsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/validators/bundled-plugins.manifest.yaml');
-const workflowsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/workflows/workflows.manifest.yaml');
-
-// Core Module Integration Tests
-const coreIntegrationRoot = path.join(projectRoot, 'test/runners/integration/core/');
-const defaultHandlerFactoryPath = path.join(projectRoot, 'test/runners/integration/core/default-handler.factory.js');
-const defaultHandlerManifestPath = path.join(projectRoot, 'test/runners/integration/core/default-handler.manifest.js');
-const defaultHandlerIntegrationTestPath = path.join(projectRoot, 'test/runners/integration/core/default-handler.test.js');
-const mathIntegrationFactoryPath = path.join(projectRoot, 'test/runners/integration/core/math-integration.factory.js');
-const mathIntegrationManifestPath = path.join(projectRoot, 'test/runners/integration/core/math-integration.manifest.js');
-const mathIntegrationTestPath = path.join(projectRoot, 'test/runners/integration/core/math-integration.test.js');
-const pdfGeneratorFactoryPath = path.join(projectRoot, 'test/runners/integration/core/pdf-generator.factory.js');
-const pdfGeneratorManifestPath = path.join(projectRoot, 'test/runners/integration/core/pdf-generator.manifest.js');
-const pdfGeneratorIntegrationTestPath = path.join(projectRoot, 'test/runners/integration/core/pdf-generator.test.js');
 
 // --- Rank 1: essential operations ---
 
@@ -204,7 +214,21 @@ module.exports = {
   createDummyPluginPath,
 
   // --- user-facing interfaces ---
-  smokeRoot,
+  coreIntegrationRoot,
+  defaultHandlerFactoryPath,
+  defaultHandlerManifestPath,
+  defaultHandlerIntegrationTestPath,
+  mathIntegrationFactoryPath,
+  mathIntegrationManifestPath,
+  mathIntegrationTestPath,
+  pdfGeneratorFactoryPath,
+  pdfGeneratorManifestPath,
+  pdfGeneratorIntegrationTestPath,
+  yamlWorkflowTestsRoot,
+  workflowsManifestYamlPath,
+  yamlValidatorTestsRoot,
+  bundledPluginsManifestYamlPath,
+  yamlTestsRoot,
   collectionAddManifestYamlPath,
   collectionListManifestYamlPath,
   collectionRemoveManifestYamlPath,
@@ -218,22 +242,12 @@ module.exports = {
   pluginDisableManifestYamlPath,
   pluginEnableManifestYamlPath,
   pluginListManifestYamlPath,
+  pluginRemoveManifestYamlPath,
   pluginValidateManifestYamlPath,
+  yamlRunnersRoot,
   yamlMochaTestPath,
   yamlTestHelpersPath,
   yamlTestRunnerPath,
-  bundledPluginsManifestYamlPath,
-  workflowsManifestYamlPath,
-  coreIntegrationRoot,
-  defaultHandlerFactoryPath,
-  defaultHandlerManifestPath,
-  defaultHandlerIntegrationTestPath,
-  mathIntegrationFactoryPath,
-  mathIntegrationManifestPath,
-  mathIntegrationTestPath,
-  pdfGeneratorFactoryPath,
-  pdfGeneratorManifestPath,
-  pdfGeneratorIntegrationTestPath,
 
   // --- essential operations ---
   configIntegrationRoot,

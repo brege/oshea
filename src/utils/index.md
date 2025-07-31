@@ -36,7 +36,7 @@ logger(message, options) → formatter → console/file output
 | [`collection-list-formatter.js`](formatters/collection-list-formatter.js) | `collection list` |
 | **Test-side**      |                                    |
 | [`lint-formatter.js`](formatters/lint-formatter.js) | `node scripts/linting/lint.js` |
-| [`smoke-test-formatter.js`](formatters/smoke-test-formatter.js) | cf. [`test/runners/smoke/index.md`](../../test/runners/smoke/index.md) |
+| [yaml-test-formatter.js](formatters/yaml-test-formatter.js) | cf. [`test/runners/smoke/index.md`](../../test/runners/smoke/index.md) |
 
 **see [scripts/playground/](../../scripts/playground/) for examples**
 
@@ -258,6 +258,5 @@ New scripts or new script locations will appear below after running
 **`node scripts/linting/docs/librarian.js`**.
 
 <!-- uncategorized-start -->
-
 <!-- uncategorized-end -->
 

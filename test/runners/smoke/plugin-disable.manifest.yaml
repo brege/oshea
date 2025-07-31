@@ -1,0 +1,25 @@
+# Smoke test manifest - plugin enable command (End-to-End Test)
+name: "3.8.1 (Happy) Successfully disables an enabled plugin"
+base_command: "md-to-pdf"
+tags: [plugin, enable, cli, smoke, collection, happy-path]
+scenarios:
+  - description: "3.8.1.1 Add and enable a plugin"
+    args: "plugin add {{paths.fixturesDir}}/full-fat-dummies/valid-plugin"
+    expect:
+      executes: true
+      contains: "Successfully"
+  - description: "3.8.1.debug check plugin list --enabled --short"
+    debug: true # only run this step if debug is true
+    args: "plugin list --enabled --short"
+    expect:
+      executes: true
+  - description: "3.8.1.2 (Happy Path) Successfully disables a plugin from a collection"
+    args: "plugin disable valid-plugin"
+    expect:
+      executes: true
+      contains: "disabled successfully"
+  - description: "3.8.1.debug check plugin list --disabled --short"
+    debug: true # only run this step if debug is true
+    args: "plugin list --disabled --short"
+    expect:
+      executes: true

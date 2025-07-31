@@ -109,7 +109,7 @@ class CollectionsManager {
         (os.platform() === 'win32'
           ? path.join(os.homedir(), 'AppData', 'Local')
           : path.join(os.homedir(), '.local', 'share'));
-      resolvedRoot = path.join(xdgDataHome, 'md-to-pdf', 'collections');
+      resolvedRoot = path.join(xdgDataHome, 'md-to-pdf');
       logger.debug('Collections root using XDG default path', {
         context: 'CollectionsManager',
         root: resolvedRoot

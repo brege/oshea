@@ -9,7 +9,9 @@ module.exports = async function removeCollection(dependencies, collectionName, o
     options: options
   });
 
-  const collectionPath = path.join(this.collRoot, collectionName);
+  // Ensure collections are looked for in collections/ subdirectory (consistent with add command)
+  const collectionsDir = this.collRoot.endsWith('collections') ? this.collRoot : path.join(this.collRoot, 'collections');
+  const collectionPath = path.join(collectionsDir, collectionName);
 
   if (!fss.existsSync(collectionPath)) {
     logger.warn('Collection path does not exist', {

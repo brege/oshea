@@ -1,6 +1,6 @@
 // paths/tests.js
 // tests.js - Test Suite Registry
-// Generated: 2025-07-30T01:04:16.789Z
+// Generated: 2025-07-31T00:50:14.016Z
 // Architecture: Multi-layered testing infrastructure with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -47,13 +47,25 @@ const createDummyPluginPath = path.join(fixturesDir, 'create-dummy-plugin.js');
 
 // Smoke Tests - Basic Application Validation
 const smokeRoot = path.join(projectRoot, 'test/runners/smoke/');
-const smokeTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/smoke-test-runner.js');
-const smokeTestsManifestPath = path.join(projectRoot, 'test/runners/smoke/smoke-tests.yaml');
-const workflowTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/workflow-test-runner.js');
-const workflowTestsYamlPath = path.join(projectRoot, 'test/runners/smoke/workflow-tests.yaml');
+const collectionAddManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/collection-add.manifest.yaml');
+const collectionListManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/collection-list.manifest.yaml');
+const collectionRemoveManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/collection-remove.manifest.yaml');
+const collectionUpdateManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/collection-update.manifest.yaml');
+const configManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/config.manifest.yaml');
+const convertManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/convert.manifest.yaml');
+const generateManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/generate.manifest.yaml');
+const globalFlagsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/global-flags.manifest.yaml');
+const pluginAddManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-add.manifest.yaml');
+const pluginCreateManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-create.manifest.yaml');
+const pluginDisableManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-disable.manifest.yaml');
+const pluginEnableManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-enable.manifest.yaml');
+const pluginListManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-list.manifest.yaml');
+const pluginValidateManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/plugin-validate.manifest.yaml');
 const yamlMochaTestPath = path.join(projectRoot, 'test/runners/smoke/yaml-mocha.test.js');
 const yamlTestHelpersPath = path.join(projectRoot, 'test/runners/smoke/yaml-test-helpers.js');
 const yamlTestRunnerPath = path.join(projectRoot, 'test/runners/smoke/yaml-test-runner.js');
+const bundledPluginsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/validators/bundled-plugins.manifest.yaml');
+const workflowsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/workflows/workflows.manifest.yaml');
 
 // Core Module Integration Tests
 const coreIntegrationRoot = path.join(projectRoot, 'test/runners/integration/core/');
@@ -193,13 +205,25 @@ module.exports = {
 
   // --- user-facing interfaces ---
   smokeRoot,
-  smokeTestRunnerPath,
-  smokeTestsManifestPath,
-  workflowTestRunnerPath,
-  workflowTestsYamlPath,
+  collectionAddManifestYamlPath,
+  collectionListManifestYamlPath,
+  collectionRemoveManifestYamlPath,
+  collectionUpdateManifestYamlPath,
+  configManifestYamlPath,
+  convertManifestYamlPath,
+  generateManifestYamlPath,
+  globalFlagsManifestYamlPath,
+  pluginAddManifestYamlPath,
+  pluginCreateManifestYamlPath,
+  pluginDisableManifestYamlPath,
+  pluginEnableManifestYamlPath,
+  pluginListManifestYamlPath,
+  pluginValidateManifestYamlPath,
   yamlMochaTestPath,
   yamlTestHelpersPath,
   yamlTestRunnerPath,
+  bundledPluginsManifestYamlPath,
+  workflowsManifestYamlPath,
   coreIntegrationRoot,
   defaultHandlerFactoryPath,
   defaultHandlerManifestPath,

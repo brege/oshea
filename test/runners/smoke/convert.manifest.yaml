@@ -1,0 +1,83 @@
+name: "3.1.1 (Happy Path) Successfully converts a basic markdown file to PDF using the default plugin"
+base_command: "md-to-pdf"
+tags: [convert, cli, smoke, pdf]
+scenarios:
+  - description: "3.1.1 (Happy Path) Successfully converts a basic markdown file to PDF using the default plugin"
+    args: "convert {{paths.simpleMdFixture}} --outdir {{tmpdir}} --filename happy-path.pdf --no-open"
+    expect:
+      executes: true
+      contains: "Processing"
+      file_exists: "{{tmpdir}}/happy-path.pdf"
+      file_min_size: ["{{tmpdir}}/happy-path.pdf", 1000]
+
+---
+name: "3.1.2 (Key Option) Successfully converts using a specified plugin via --plugin"
+base_command: "md-to-pdf"
+tags: [convert, cli, smoke, pdf]
+scenarios:
+  - description: "3.1.2 (Key Option) Successfully converts using a specified plugin via --plugin"
+    args: "convert {{paths.simpleMdFixture}} --plugin recipe --outdir {{tmpdir}} --filename key-option-plugin.pdf --no-open"
+    expect:
+      executes: true
+      contains: "Processing"
+      file_exists: "{{tmpdir}}/key-option-plugin.pdf"
+      file_min_size: ["{{tmpdir}}/key-option-plugin.pdf", 1000]
+
+---
+name: "3.1.3 (Key Option) Successfully creates a PDF with a custom directory and filename"
+base_command: "md-to-pdf"
+tags: [convert, cli, smoke, pdf]
+scenarios:
+  - description: "3.1.3 (Key Option) Successfully creates a PDF with a custom directory and filename"
+    args: "convert {{paths.simpleMdFixture}} --outdir {{tmpdir}}/custom-output --filename my-custom-name.pdf --no-open"
+    expect:
+      executes: true
+      contains: "Processing"
+      file_exists: "{{tmpdir}}/custom-output/my-custom-name.pdf"
+      file_min_size: ["{{tmpdir}}/custom-output/my-custom-name.pdf", 1000]
+
+---
+name: "3.1.4 (Config Precedence) A 'md_to_pdf_plugin' key in front matter is correctly used for conversion"
+base_command: "md-to-pdf"
+tags: [convert, cli, smoke, pdf]
+scenarios:
+  - description: "3.1.4 (Config Precedence) A 'md_to_pdf_plugin' key in front matter is correctly used for conversion"
+    args: "convert {{paths.simpleMdFixtureWithFm}} --outdir {{tmpdir}} --filename fm-precedence.pdf --no-open"
+    expect:
+      executes: true
+      contains: "Processing"
+      file_exists: "{{tmpdir}}/fm-precedence.pdf"
+      file_min_size: ["{{tmpdir}}/fm-precedence.pdf", 1000]
+
+---
+name: "3.1.5 (Config Precedence) A '--plugin' CLI flag correctly overrides a plugin specified in front matter"
+base_command: "md-to-pdf"
+tags: [convert, cli, smoke, pdf]
+scenarios:
+  - description: "3.1.5 (Config Precedence) A '--plugin' CLI flag correctly overrides a plugin specified in front matter"
+    args: "convert {{paths.simpleMdFixtureWithFm}} --plugin cv --outdir {{tmpdir}} --filename cli-override.pdf --no-open"
+    expect:
+      executes: true
+      contains: "Plugin specified via CLI, overriding"
+      file_exists: "{{tmpdir}}/cli-override.pdf"
+      file_min_size: ["{{tmpdir}}/cli-override.pdf", 1000]
+
+---
+name: "3.1.6 (Sad Path) Fails with a non-zero exit code when the input file does not exist"
+base_command: "md-to-pdf"
+tags: [convert, cli, smoke, pdf, sad-path]
+scenarios:
+  - description: "3.1.6 (Sad Path) Fails with a non-zero exit code when the input file does not exist"
+    args: "convert {{tmpdir}}/non-existent-file.md --no-open"
+    expect_failure:
+      contains: "Markdown file not found"
+
+---
+name: "3.1.7 (Sad Path) Fails with a non-zero exit code when a non-existent plugin is specified"
+base_command: "md-to-pdf"
+tags: [convert, cli, smoke, pdf, sad-path]
+scenarios:
+  - description: "3.1.7 (Sad Path) Fails with a non-zero exit code when a non-existent plugin is specified"
+    args: "convert {{paths.simpleMdFixture}} --plugin i-do-not-exist-as-a-plugin --no-open"
+    expect_failure:
+      contains: "is not registered"

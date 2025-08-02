@@ -1,4 +1,4 @@
-// scripts/completion/generate-completion-dynamic-cache.js
+// src/completion/generate-completion-dynamic-cache.js
 
 require('module-alias/register');
 

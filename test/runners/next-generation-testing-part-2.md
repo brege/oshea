@@ -224,8 +224,10 @@ src/                                test/
   (this way `src/cli/ <--> ...end-to-end/cli/` is consistent)
 - [ ] `mv src/cli/get-help.js src/plugins/plugin-help.js` (this only applies to plugins help-text)
 - [ ] `mv src/plugins/validator.js src/plugins/plugin-validator.js` (consistency)
-- [ ] `mv src/cli/config-display.js src/utils/formatters/config-formatter.js` (consistency)
-- [ ] `mv src/utils/formatters/*-formatter.js src/utile/formatters/*.formatter.js` (good/bad idea?)
+- [x] `mv src/cli/config-display.js src/utils/formatters/config-formatter.js` (consistency)
+- [ ] `mv src/utils/formatters/*-formatter.js src/utils/formatters/*.formatter.js` (good/bad idea?)
+
+- [x] **Split CLI from API** (move heavy cli.js to index.js, produce shims for cli.js)
 
 There is an argument to just do
 ```
@@ -342,6 +344,4 @@ These are surfaced from `test/config/metadata-level-3.yaml`
 
 ### <plugin remove> (new)
 - [x] `plugin-remove.manifest.yaml`
-
-
 

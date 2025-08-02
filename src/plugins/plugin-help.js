@@ -1,4 +1,4 @@
-// src/cli/get-help.js
+// src/plugins/plugin-help.js
 const fs = require('fs').promises;
 const fss = require('fs');
 const path = require('path');

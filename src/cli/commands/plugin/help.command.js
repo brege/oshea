@@ -1,6 +1,6 @@
 // src/cli/commands/plugin/help.command.js
-const { getHelpPath, loggerPath } = require('@paths');
-const { displayPluginHelp } = require(getHelpPath);
+const { pluginHelpPath, loggerPath } = require('@paths');
+const { displayPluginHelp } = require(pluginHelpPath);
 
 const logger = require(loggerPath);
 

@@ -181,7 +181,7 @@ Perhaps mocha produces inefficiency in the old system that could also be present
 ```
 src/                                test/
 ├── cli/                            └── runners/
-│   ├── commands/                       ├── e2e/     
+│   ├── commands/                       ├── end-to-end/     
 │   │   ├── collection/                 │   ├── collection/
 │   │   │   ├── add.command.js          │   │   ├── collection-add.manifest.yaml
 │   │   │   ├── list.command.js         │   │   ├── collection-list.manifest.yaml
@@ -220,26 +220,14 @@ src/                                test/
 - [x] Rename `yaml-*.js` files to `e2e-*.js` files, as old tests are removed and don't conflict with new E2E test files 
 
 **App-side consistency**
-- [ ] Move all of `src/cli/commands` into `src/cli` (this way `src/cli/ <--> test/runners/e2e/`)
+- [ ] Move all of `src/cli/commands` into `src/cli`
+  (this way `src/cli/ <--> ...end-to-end/cli/` is consistent)
 - [ ] `mv src/cli/get-help.js src/plugins/plugin-help.js` (this only applies to plugins help-text)
 - [ ] `mv src/plugins/validator.js src/plugins/plugin-validator.js` (consistency)
 - [ ] `mv src/cli/config-display.js src/utils/formatters/config-formatter.js` (consistency)
 - [ ] `mv src/utils/formatters/*-formatter.js src/utile/formatters/*.formatter.js` (good/bad idea?)
 
 There is an argument to just do
-```
-test/runners/e2e/
-├── collection.manifest.yaml
-├── config.manifest.yaml
-├── convert.manifest.yaml
-├── generate.manifest.yaml
-├── global-flags.manifest.yaml
-├── plugin.manifest.yaml
-├── yaml-mocha.test.js
-├── yaml-test-helpers.js
-└── yaml-test-runner.js
-```
-or even
 ```
 test/runners/e2e/
 ├── collection.manifest.yaml    # ~200 lines
@@ -249,14 +237,14 @@ test/runners/e2e/
 ├── yaml-test-helpers.js
 └── yaml-test-runner.js
 ```
-By putting them all in one file, you can make it more efficient (enable/disable, add/remove, etc.)
+Undecided if this is worth it.
 
 Compactly.
-- `...end-to-end/*.manifest.yaml`               (from `...smoke/*.manifest.yaml`)
-- `...integration/**/*/*.manfest.js`            (no change)
-- `...linters/*-linting.manifest.yaml`          (from `...linters/unit/*-linting.manifest.yaml`)
-- `...workflows/workflows.manifest.yaml`        (from `...smoke/other*/workflow*.yaml`)
-- `...validators/bundled-plugins.manifest.yaml` (from `...smoke/other*/bundle*.yaml`)
+- `...end-to-end/cli/*.manifest.yaml`                (from `...smoke/*.manifest.yaml`)
+- `...end-to-end/validators/*-plugins.manifest.yaml` (from `...smoke/other*/bundle*.yaml`)
+- `...end-to-end/workflows/workflows.manifest.yaml`  (from `...smoke/other*/workflow*.yaml`)
+- `...integration/**/*/*.manfest.js`                 (no change)
+- `...linters/*-linting.manifest.yaml`               (from `...linters/unit/*-linting.manifest.yaml`)
 
 ---
 

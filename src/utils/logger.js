@@ -2,7 +2,19 @@
 // lint-skip-file no-console
 // Slim routing layer - all formatting logic delegated to formatters/
 const { formattersIndexPath, loggerEnhancerPath } = require('@paths');
-const formatters = require(formattersIndexPath);
+
+// Lazy-loaded formatter cache
+const formatterCache = {};
+function getFormatter(name) {
+  if (!formatterCache[name]) {
+    const formatters = require(formattersIndexPath);
+    formatterCache[name] = formatters[name];
+    if (!formatterCache[name]) {
+      throw new Error(`Unknown formatter: ${name}`);
+    }
+  }
+  return formatterCache[name];
+}
 
 // Global debug mode state
 let debugMode = false;
@@ -71,7 +83,7 @@ function logger(message, options = {}) {
 
   // Route to appropriate formatter
   if (format === 'default') {
-    return formatters.app(level, message, meta);
+    return getFormatter('app')(level, message, meta);
   }
 
   if (format === 'lint') {
@@ -91,126 +103,21 @@ function logger(message, options = {}) {
       return;
     }
 
-    const formatted = formatters.lint(message);
+    const formatted = getFormatter('lint')(message);
     if (formatted) {
       console.log(formatted);
     }
     return;
   }
 
-  if (format === 'inline') {
-    return formatters.inline(level, message, meta);
+  // For all other formatters, use lazy loading
+  try {
+    const formatter = getFormatter(format);
+    return formatter(level, message, meta);
+  } catch (error) {
+    // Fallback to default formatter if format not found
+    return getFormatter('app')(level, message, meta);
   }
-
-  if (format === 'raw') {
-    return formatters.raw(level, message, meta);
-  }
-
-  if (format === 'paths') {
-    return formatters.paths(level, message, meta);
-  }
-
-  if (format === 'table') {
-    return formatters.table(level, message, meta);
-  }
-
-  if (format === 'plugin-list') {
-    return formatters['plugin-list'](level, message, meta);
-  }
-
-  if (format === 'collection-list') {
-    return formatters['collection-list'](level, message, meta);
-  }
-
-  // Smoke test formatters
-  if (format === 'smoke-header') {
-    return formatters['smoke-header'](level, message, meta);
-  }
-
-  if (format === 'smoke-suite') {
-    return formatters['smoke-suite'](level, message, meta);
-  }
-
-  if (format === 'smoke-scenario') {
-    return formatters['smoke-scenario'](level, message, meta);
-  }
-
-  if (format === 'smoke-warning') {
-    return formatters['smoke-warning'](level, message, meta);
-  }
-
-  if (format === 'smoke-results') {
-    return formatters['smoke-results'](level, message, meta);
-  }
-
-  // Validation formatters
-  if (format === 'validation-header') {
-    return formatters['validation-header'](level, message, meta);
-  }
-
-  if (format === 'validation-step') {
-    return formatters['validation-step'](level, message, meta);
-  }
-
-  if (format === 'validation-test') {
-    return formatters['validation-test'](level, message, meta);
-  }
-
-  if (format === 'validation-summary') {
-    return formatters['validation-summary'](level, message, meta);
-  }
-
-  if (format === 'workflow-header') {
-    return formatters['workflow-header'](level, message, meta);
-  }
-
-  if (format === 'workflow-suite') {
-    return formatters['workflow-suite'](level, message, meta);
-  }
-
-  if (format === 'workflow-step') {
-    return formatters['workflow-step'](level, message, meta);
-  }
-
-  if (format === 'workflow-warning') {
-    return formatters['workflow-warning'](level, message, meta);
-  }
-
-  if (format === 'workflow-list') {
-    return formatters['workflow-list'](level, message, meta);
-  }
-
-  if (format === 'workflow-results') {
-    return formatters['workflow-results'](level, message, meta);
-  }
-
-  // YAML showMode formatters
-  if (format === 'yaml-show-session') {
-    return formatters['yaml-show-session'](level, message, meta);
-  }
-
-  if (format === 'yaml-show-suite') {
-    return formatters['yaml-show-suite'](level, message, meta);
-  }
-
-  if (format === 'yaml-show-scenario') {
-    return formatters['yaml-show-scenario'](level, message, meta);
-  }
-
-  if (format === 'yaml-show-separator') {
-    return formatters['yaml-show-separator'](level, message, meta);
-  }
-
-  if (format === 'yaml-show-output') {
-    return formatters['yaml-show-output'](level, message, meta);
-  }
-
-  if (format === 'yaml-show-error') {
-    return formatters['yaml-show-error'](level, message, meta);
-  }
-
-  // Fallback to default formatter
-  return formatters.app(level, message, meta);
 }
 
 // Convenience aliases for each level (backward compatibility)

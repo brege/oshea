@@ -36,7 +36,8 @@ logger(message, options) → formatter → console/file output
 | [`collection-list-formatter.js`](formatters/collection-list-formatter.js) | `collection list` |
 | **Test-side**      |                                    |
 | [`lint-formatter.js`](formatters/lint-formatter.js) | `node scripts/linting/lint.js` |
-| [yaml-test-formatter.js](formatters/yaml-test-formatter.js) | [`test/runners/end-to-end/e2e-runner.js`](../../test/runners/end-to-end/e2e-runner.js) |
+| [`yaml-test-formatter.js`](formatters/yaml-test-formatter.js) | [`test/runners/end-to-end/e2e-runner.js`](../../test/runners/end-to-end/e2e-runner.js) |
+| [`config-formatter.js`](formatters/config-formatter.js) | `md-to-pdf config` |
 
 **see [scripts/playground/](../../scripts/playground/) for examples**
 

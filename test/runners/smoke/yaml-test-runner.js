@@ -80,7 +80,7 @@ class YamlTestRunner {
 
     // Load paths config and get test features
     const pathsConfig = yaml.load(fs.readFileSync(pathsConfigPath, 'utf8'));
-    const testFeatures = pathsConfig.registries.tests.features;
+    const testFeatures = pathsConfig.registries.main.features;
 
     // Find matching pattern and return its comment
     // eslint-disable-next-line no-unused-vars

@@ -7,15 +7,11 @@ metadata:
   regenerate_command: "npm run paths"
 
 registries:
-  # Main application registry (generates paths/index.js)
+  # Flattened single registry (generates paths/index.js only)
   main:
     output_file: "paths/index.js"
-    title: "Project Path Registry"
+    title: "Project Path Registry (Flattened)"
     architecture: "Feature-based with dependency ranking"
-    imports:
-      scriptsPaths: "./scripts.js"
-      lintersPaths: "./linters.js"
-      testsPaths: "./tests.js"
     architecture_sections:
       foundation:
         comment: "Project Foundation"
@@ -49,9 +45,7 @@ registries:
           eslint_path: "path.join(nodeModulesPath, '.bin', 'eslint')"
           mocha_path: "path.join(nodeModulesPath, '.bin', 'mocha')"
           mocharc_path: "path.join(projectRoot, '.mocharc.js')"
-          file_helpers_path: "path.join(scriptsSharedRoot, 'file-helpers.js')"
           test_file_helpers_path: "path.join(testSharedRoot, 'test-helpers.js')"
-          dynamic_completion_script_path: "path.join(scriptsRoot, 'completion', 'generate-completion-dynamic-cache.js')"
       statics:
         comment: "Key Static File Paths"
         items:
@@ -68,7 +62,39 @@ registries:
           collections_enabled_manifest_filename: "'enabled.yaml'"
           collections_user_plugins_dirname: "'_user_added_plugins'"
           collections_default_archetype_dirname: "'user-plugins'"
+      test_directories:
+        comment: "Test Organization Directories"
+        items:
+          docs_test_dir: "path.join(testRoot, 'docs')"
+          e2e_test_dir: "path.join(testRoot, 'e2e')"
+          fixtures_dir: "path.join(testRoot, 'fixtures')"
+          integration_test_dir: "path.join(testRoot, 'integration')"
+          linting_test_dir: "path.join(testRoot, 'linting')"
+          scripts_test_dir: "path.join(testRoot, 'scripts')"
+          shared_test_dir: "path.join(testRoot, 'shared')"
+          smoke_test_dir: "path.join(testRoot, 'smoke')"
+      test_harnesses:
+        comment: "Test Harnesses & Factories"
+        items:
+          e2e_harness: "path.join(testRoot, 'e2e/e2e-harness.js')"
+          test_runner_factory_e2e: "path.join(testRoot, 'e2e/test-runner-factory.js')"
+          linting_unit_harness: "path.join(testRoot, 'linting/unit/linting-unit-harness.js')"
+          test_runner_factory_linting: "path.join(testRoot, 'linting/unit/test-runner-factory.js')"
+          setup_file: "path.join(testRoot, 'setup.js')"
+      test_fixtures:
+        comment: "Test Fixtures"
+        items:
+          simple_md_fixture: "path.join(fixturesDir, 'markdown/simple.md')"
+          simple_md_fixture_with_fm: "path.join(fixturesDir, 'markdown/with-front-matter.md')"
+          hugo_example_fixture_path: "path.join(fixturesDir, 'hugo-example')"
+          refresh_fixtures_path: "path.join(fixturesDir, 'refresh-fixtures.js')"
+          create_dummy_plugin_path: "path.join(fixturesDir, 'create-dummy-plugin.js')"
+      linting_foundation:
+        comment: "Linting Infrastructure Foundation"
+        items:
+          linting_root: "path.join(scriptsRoot, 'linting')"
     features:
+      # Core Application Features
       cli:
         comment: "Command Line Interface"
         pattern: "src/cli/**/*.js"
@@ -101,6 +127,92 @@ registries:
         comment: "Validation Framework"
         pattern: "src/validators/**/*.js"
         rank: 2
+
+      # Scripts Features
+      ai:
+        comment: "AI Tooling"
+        pattern: "scripts/ai/**/*.js"
+        rank: 0
+      batch:
+        comment: "Batch Processing Scripts"
+        pattern: "scripts/batch/**/*"
+        rank: 1
+      docs:
+        comment: "Documentation Helpers"
+        pattern: "scripts/docs/**/*.js"
+        rank: 1
+      script_shared:
+        comment: "Shared Script Utilities"
+        pattern: "scripts/shared/**/*.js"
+        rank: 2
+
+      # Linting Features
+      linting_core:
+        comment: "Core Linting Infrastructure"
+        pattern: "scripts/linting/lint*.js"
+        rank: 0
+      code:
+        comment: "Code Quality Linters"
+        pattern: "scripts/linting/code/**/*.js"
+        rank: 1
+      linting_docs:
+        comment: "Documentation Linters"
+        pattern: "scripts/linting/docs/**/*.js"
+        rank: 1
+      linting_validators:
+        comment: "Validation Linters"
+        pattern: "scripts/linting/validators/**/*.js"
+        rank: 2
+      lib:
+        comment: "Linting Utilities & Helpers"
+        pattern: "scripts/linting/lib/**/*.js"
+        rank: 3
+
+      # Test Features
+      core_integration:
+        comment: "Core Module Integration Tests"
+        pattern: "test/runners/integration/core/**/*.js"
+        rank: 0
+      config_integration:
+        comment: "Configuration System Integration Tests"
+        pattern: "test/runners/integration/config/**/*.js"
+        rank: 1
+      plugins_integration:
+        comment: "Plugin System Integration Tests"
+        pattern: "test/runners/integration/plugins/**/*.js"
+        rank: 1
+      collections_integration:
+        comment: "Collections System Integration Tests"
+        pattern: "test/runners/integration/collections/**/*.js"
+        rank: 1
+      e2e_core:
+        comment: "End-to-End Core Workflow Tests"
+        pattern: "test/runners/e2e/all-e2e.test.js"
+        rank: 1
+      e2e_manifests:
+        comment: "E2E Manifest Tests"
+        pattern: "test/runners/e2e/*.manifest.js"
+        rank: 2
+      linting_tests:
+        comment: "Linting Unit Tests"
+        pattern: "test/runners/linting/unit/**/*.js"
+        rank: 2
+      shared_utilities:
+        comment: "Shared Test Utilities & Helpers"
+        pattern: "test/runners/shared/**/*.js"
+        rank: 3
+      yaml_workflow_tests:
+        comment: "YAML-driven Workflow Tests"
+        pattern: "test/runners/smoke/workflows/*.yaml"
+      yaml_validator_tests:
+        comment: "YAML-driven Bundled Plugin Tests"
+        pattern: "test/runners/smoke/validators/*.yaml"
+      yaml_tests:
+        comment: "YAML-driven End-to-End Tests"
+        pattern: "test/runners/smoke/*.manifest.yaml"
+      yaml_runners:
+        comment: "YAML-driven Test Runner"
+        pattern: "test/runners/smoke/*.js"
     contextual_naming:
       "add.command.js":
         cli/commands/collection: "collections_add_command"
@@ -124,192 +236,17 @@ registries:
         src/collections: "collections_index"
         src/utils/formatters: "formatters_index"
 
-  # Scripts registry (generates paths/scripts.js)
-  scripts:
-    output_file: "paths/scripts.js"
-    title: "Scripts Path Registry"
-    architecture: "Feature-based"
-    architecture_sections:
-      foundation:
-        comment: "Project Foundation"
-        items:
-          project_root: "path.resolve(__dirname, '..')"
-          scripts_root: "path.join(projectRoot, 'scripts')"
-    features:
-      ai:
-        comment: "AI Tooling"
-        pattern: "scripts/ai/**/*.js"
-        rank: 0
-      batch:
-        comment: "Batch Processing Scripts"
-        pattern: "scripts/batch/**/*"
-        rank: 1
-      completion:
-        comment: "CLI Tab Completion Scripts"
-        pattern: "scripts/completion/**/*.js"
-        rank: 1
-      docs:
-        comment: "Documentation Helpers"
-        pattern: "scripts/docs/**/*.js"
-        rank: 1
-      shared:
-        comment: "Shared Script Utilities"
-        pattern: "scripts/shared/**/*.js"
-        rank: 2
-
-  # Linting registry (generates paths/linters.js)
-  linters:
-    output_file: "paths/linters.js"
-    title: "Linting Tools Registry"
-    architecture: "Feature-based linting infrastructure"
-    architecture_sections:
-      foundation:
-        comment: "Project Foundation"
-        items:
-          project_root: "path.resolve(__dirname, '..')"
-          scripts_root: "path.join(projectRoot, 'scripts')"
-          linting_root: "path.join(scriptsRoot, 'linting')"
-    features:
-      core:
-        comment: "Core Linting Infrastructure"
-        pattern: "scripts/linting/lint*.js"
-        rank: 0
-      code:
-        comment: "Code Quality Linters"
-        pattern: "scripts/linting/code/**/*.js"
-        rank: 1
-      docs:
-        comment: "Documentation Linters"
-        pattern: "scripts/linting/docs/**/*.js"
-        rank: 1
-      validators:
-        comment: "Validation Linters"
-        pattern: "scripts/linting/validators/**/*.js"
-        rank: 2
-      lib:
-        comment: "Linting Utilities & Helpers"
-        pattern: "scripts/linting/lib/**/*.js"
-        rank: 3
-
-  # Test registry (generates paths/tests.js)
-  tests:
-    output_file: "paths/tests.js"
-    title: "Test Suite Registry"
-    architecture: "Multi-layered testing infrastructure with dependency ranking"
-    architecture_sections:
-      foundation:
-        comment: "Test Infrastructure Foundation"
-        items:
-          project_root: "path.resolve(__dirname, '..')"
-          test_root: "path.join(projectRoot, 'test/runners')"
-          setup_file: "path.join(testRoot, 'setup.js')"
-
-      directories:
-        comment: "Test Organization Directories"
-        items:
-          docs_test_dir: "path.join(testRoot, 'docs')"
-          e2e_test_dir: "path.join(testRoot, 'e2e')"
-          fixtures_dir: "path.join(testRoot, 'fixtures')"
-          integration_test_dir: "path.join(testRoot, 'integration')"
-          linting_test_dir: "path.join(testRoot, 'linting')"
-          scripts_test_dir: "path.join(testRoot, 'scripts')"
-          shared_test_dir: "path.join(testRoot, 'shared')"
-          smoke_test_dir: "path.join(testRoot, 'smoke')"
-
-      harnesses:
-        comment: "Test Harnesses & Factories"
-        items:
-          e2e_harness: "path.join(testRoot, 'e2e/e2e-harness.js')"
-          test_runner_factory_e2e: "path.join(testRoot, 'e2e/test-runner-factory.js')"
-          linting_unit_harness: "path.join(testRoot, 'linting/unit/linting-unit-harness.js')"
-          test_runner_factory_linting: "path.join(testRoot, 'linting/unit/test-runner-factory.js')"
-
-      fixtures:
-        comment: "Test Fixtures"
-        items:
-          simple_md_fixture: "path.join(fixturesDir, 'markdown/simple.md')"
-          simple_md_fixture_with_fm: "path.join(fixturesDir, 'markdown/with-front-matter.md')"
-          hugo_example_fixture_path: "path.join(fixturesDir, 'hugo-example')"
-          refresh_fixtures_path: "path.join(fixturesDir, 'refresh-fixtures.js')"
-          create_dummy_plugin_path: "path.join(fixturesDir, 'create-dummy-plugin.js')"
-
-    features:
-      # Rank 0: Core Test Operations
-      core_integration:
-        comment: "Core Module Integration Tests"
-        pattern: "test/runners/integration/core/**/*.js"
-        rank: 0
-
-      # Rank 1: Essential Operations
-      config_integration:
-        comment: "Configuration System Integration Tests"
-        pattern: "test/runners/integration/config/**/*.js"
-        rank: 1
-
-      plugins_integration:
-        comment: "Plugin System Integration Tests"
-        pattern: "test/runners/integration/plugins/**/*.js"
-        rank: 1
-
-      collections_integration:
-        comment: "Collections System Integration Tests"
-        pattern: "test/runners/integration/collections/**/*.js"
-        rank: 1
-
-      e2e_core:
-        comment: "End-to-End Core Workflow Tests"
-        pattern: "test/runners/e2e/all-e2e.test.js"
-        rank: 1
-
-      # Rank 2: Supportive Operations
-      e2e_manifests:
-        comment: "E2E Manifest Tests"
-        pattern: "test/runners/e2e/*.manifest.js"
-        rank: 2
-
-      linting_tests:
-        comment: "Linting Unit Tests"
-        pattern: "test/runners/linting/unit/**/*.js"
-        rank: 2
-
-      # Rank 3: Enhancements & Utilities
-      shared_utilities:
-        comment: "Shared Test Utilities & Helpers"
-        pattern: "test/runners/shared/**/*.js"
-        rank: 3
-
-      # TODO: Rank Aux: The YAML-driven End-to-End Tests
-      # after sufficient testing with the old E2E scripts (e2e_{core,manifests})
-      # we can relabel these test as e2e_{core,manifests}
-      yaml_workflow_tests:
-        comment: "YAML-driven Workflow Tests"
-        pattern: "test/runners/smoke/workflows/*.yaml"
-      yaml_validator_tests:
-        comment: "YAML-driven Bundled Plugin Tests"
-        pattern: "test/runners/smoke/validators/*.yaml"
-      yaml_tests:
-        comment: "YAML-driven End-to-End Tests"
-        pattern: "test/runners/smoke/*.manifest.yaml"
-      yaml_runners:
-        comment: "YAML-driven Test Runner"
-        pattern: "test/runners/smoke/*.js"
-      # /TODO
-
-    contextual_naming:
-      # E2E test naming
+      # Test naming patterns
       "all-e2e.test.js":
         "test/runners/e2e": "allE2eTest"
       "e2e-harness.js":
         "test/runners/e2e": "e2eHarness"
-
-      # Integration test naming patterns
       "config-resolver.test.js":
         "test/runners/integration/config": "configResolverIntegrationTest"
       "main-config-loader.test.js":
         "test/runners/integration/config": "mainConfigLoaderIntegrationTest"
       "plugin-config-loader.test.js":
         "test/runners/integration/config": "pluginConfigLoaderIntegrationTest"
-
       "plugin-manager.test.js":
         "test/runners/integration/plugins": "pluginManagerIntegrationTest"
       "plugin-determiner.test.js":
@@ -318,36 +255,29 @@ registries:
         "test/runners/integration/plugins": "pluginRegistryBuilderIntegrationTest"
       "plugin-validator.test.js":
         "test/runners/integration/plugins": "pluginValidatorIntegrationTest"
-
       "collections-manager.test.js":
         "test/runners/integration/collections": "collectionsManagerIntegrationTest"
       "cm-utils.test.js":
         "test/runners/integration/collections": "cmUtilsIntegrationTest"
-
       "default-handler.test.js":
         "test/runners/integration/core": "defaultHandlerIntegrationTest"
       "pdf-generator.test.js":
         "test/runners/integration/core": "pdfGeneratorIntegrationTest"
       "math-integration.test.js":
         "test/runners/integration/core": "mathIntegrationTest"
-
-      # Factory and manifest naming
       ".factory.js":
         "test/runners/integration": "factory"
       ".manifest.js":
         "test/runners": "manifest"
-
-      # Shared utilities
       "test-helpers.js":
         "test/runners/shared": "testHelpers"
       "test-logger.js":
         "test/runners/shared": "testLogger"
       "capture-logs.js":
         "test/runners/shared": "captureLogs"
-
-      # Linting tests
       "all-linting-unit.test.js":
         "test/runners/linting/unit": "allLintingUnitTest"
+
 
 
 rank_definitions:

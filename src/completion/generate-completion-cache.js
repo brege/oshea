@@ -1,4 +1,4 @@
-// scripts/completion/generate-completion-cache.js
+// src/completion/generate-completion-cache.js
 // This script generates a completion cache for the md-to-pdf CLI. This script is for development use only.
 require('module-alias/register');
 

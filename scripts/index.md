@@ -11,13 +11,6 @@ This document is a central index for all developer and automation scripts within
   - [ [`make-screenshots.sh`](batch/make-screenshots.sh) ]
     -- Generates screenshots of example documents for the project's documentation.
 
-### Tab Completion [ `completion/` ]
-
-  - [ [`generate-completion-cache.js`](completion/generate-completion-cache.js) ]
-    -- Generates the static CLI command structure `~/.cache/md-to-pdf/cli-tree.json` for tab completion.
-  - [ [`generate-completion-dynamic-cache.js`](completion/generate-completion-dynamic-cache.js) ]
-    -- A runtime dynamic data cache `~/.cache/md-to-pdf/dynamic-completion-data.json` for tab completion.
-
 ### AI Scripts [ `ai/` ]
 
   - [ [`ai-context-generator.js`](ai/ai-context-generator.js) ]

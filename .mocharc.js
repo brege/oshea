@@ -45,13 +45,13 @@ const paths = {
   cm_utils:               'test/runners/integration/collections/cm-utils.*.js',             // Rank 2
 
   // --- End-to-End Test Paths ---
-  e2e_runner: 'test/runners/end-to-end/e2e-mocha.test.js',
+  e2e_runner:             'test/runners/end-to-end/e2e-mocha.test.js',
 
   // --- Bundled Plugin In-Situ Test Paths ---
   insitu:                 'plugins/**/.contract/test/*.test.js',
 
   // --- Linting ---
-  linting:          'test/runners/linting/all-linting.test.js',
+  linting:                'test/runners/linting/all-linting.test.js',
 
 };
 
@@ -190,7 +190,7 @@ const spec = hasFiles ? argv._ : flattenSpecs(groups[group] || groups.all);
 const mochaConfig = {
   spec: spec,
   grep: grep,
-  timeout: 20000, // Increased timeout for lifecycle tests
+  timeout: 60000, // Increased timeout for lifecycle tests
   exit: true,
   color: true,
   require: 'test/runners/integration/setup.js',

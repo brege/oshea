@@ -5,7 +5,8 @@ This directory contains the testing and quality assurance infrastructure for `md
 ### Testing Paradigm -- Manifest/Factory Harness
 
 - **Manifest-Driven:** \
-  Test scenarios are declaratively defined in manifest files (e.g., `*.manifest.js`), auditable, and easily extensible coverage.
+  Test scenarios are declaratively defined in manifest files (e.g., `*.manifest.yaml`),
+  auditable, and extensible.
 
 - **Factory Pattern:** \
   The test runner dynamically instantiates test cases from these manifests, applying stubs/mocks and assertions in a standardized way.
@@ -18,13 +19,18 @@ This directory contains the testing and quality assurance infrastructure for `md
 ```
 test/
 ├── runners/                      # Test execution infrastructure
-│   ├── e2e/                      # End-to-end test scenarios
+│   ├── end-to-end/               # End-to-end test scenarios
+│   │   ├── cli/                  # E2E tests of src/cli/    (level 3)
+│   │   ├── validators/           # Validation of plugins/
+│   │   ├── workflows/            # Lifecycles and demos     (level 4)
+│   │   └── e2e-*.js              # Test environment setup
 │   ├── integration/              # Integration test suites
+│   │   ├── <module>/             # src/<module>/            (level 1, 2)
+│   │   ├── shared/               # Helpers and utilities
+│   │   └── setup.sh              # Test environment setup
 │   ├── linting/                  # Code quality validation
-│   ├── smoke/                    # Quick validation tests
 │   ├── fixtures/                 # Shared test data
-│   ├── shared/                   # Common utilities
-│   └── setup.sh                  # Test environment setup
+│   └── shared/                   # Common utilities
 ├── analytics/                    # QA intelligence and monitoring
 │   ├── qa-analytics.js           # Test brittleness analysis
 │   ├── log-failures-reporter.js  # Enhanced test reporting
@@ -54,7 +60,7 @@ Traditional unit tests are intentionally minimal. CLI applications derive more v
 
 ### Testing Framework
 
-The project uses [Mocha](https://mochajs.org/) as its test runner. A centralized configuration file, [`.mocharc.js`](../.mocharc.js), defines test groups and paths, making the suite highly flexible and easier to manage.
+The project uses [Mocha](https://mochajs.org/) as its test runner. A centralized configuration file, [`.mocharc.js`](../.mocharc.js), defines test groups and paths, making the suite flexible and managable.
 
 #### Running Tests
 
@@ -72,9 +78,16 @@ Tests can be executed in a variety of ways to target specific groups, levels, or
     ```bash
     npm test -- --grep "3.5.1"
     ```
-  * **Run a single test file** by path:
+  * **Run a single test file** by path (integration tests):
     ```bash
-    npm test -- 'test/runners/e2e/plugin-create.test.js'
+    npm test -- 'test/runners/integration/config/config-resolver.test.js'
+    ```
+  * **Run a single test file** by path (end-to-end tests):
+    ```bash
+    node test/runners/smoke/yaml-test-runner.js \
+         test/runners/smoke/cli/config.manifest.yaml \
+         # --show   # Show test output 
+         # --debug  # Show intermediate steps
     ```
 
 ### QA Analytics and Intelligence

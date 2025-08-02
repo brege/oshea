@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-02T10:31:39.673Z
+// Generated: 2025-08-02T19:17:49.050Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -320,6 +320,7 @@ const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
 const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app-formatter.js');
 const collectionListFormatterPath = path.join(projectRoot, 'src/utils/formatters/collection-list-formatter.js');
 const colorThemePath = path.join(projectRoot, 'src/utils/formatters/color-theme.js');
+const configFormatterPath = path.join(projectRoot, 'src/utils/formatters/config-formatter.js');
 const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
 const inlineFormatterPath = path.join(projectRoot, 'src/utils/formatters/inline-formatter.js');
 const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint-formatter.js');
@@ -588,6 +589,7 @@ module.exports = {
   appFormatterPath,
   collectionListFormatterPath,
   colorThemePath,
+  configFormatterPath,
   formattersIndexPath,
   inlineFormatterPath,
   lintFormatterPath,

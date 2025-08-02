@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-02T19:17:49.050Z
+// Generated: 2025-08-02T22:56:40.946Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -83,8 +83,6 @@ const lintingTestRunnerFactory = path.join(lintingDir, 'test-runner-factory.js')
 
 // Command Line Interface
 const cliRoot = path.join(projectRoot, 'src/cli/');
-const configDisplayPath = path.join(projectRoot, 'src/cli/config-display.js');
-const getHelpPath = path.join(projectRoot, 'src/cli/get-help.js');
 const collectionCommandPath = path.join(projectRoot, 'src/cli/commands/collection.command.js');
 const configCommandPath = path.join(projectRoot, 'src/cli/commands/config.command.js');
 const convertCommandPath = path.join(projectRoot, 'src/cli/commands/convert.command.js');
@@ -246,6 +244,7 @@ const pluginValidateManifestYamlPath = path.join(projectRoot, 'test/runners/end-
 const pluginsRoot = path.join(projectRoot, 'src/plugins/');
 const pluginArchetyperPath = path.join(projectRoot, 'src/plugins/plugin-archetyper.js');
 const pluginDeterminerPath = path.join(projectRoot, 'src/plugins/plugin-determiner.js');
+const pluginHelpPath = path.join(projectRoot, 'src/plugins/plugin-help.js');
 const pluginManagerPath = path.join(projectRoot, 'src/plugins/plugin-manager.js');
 const pluginRegistryBuilderPath = path.join(projectRoot, 'src/plugins/plugin-registry-builder.js');
 const validatorPath = path.join(projectRoot, 'src/plugins/validator.js');
@@ -400,8 +399,6 @@ module.exports = {
 
   // --- user-facing interfaces ---
   cliRoot,
-  configDisplayPath,
-  getHelpPath,
   collectionCommandPath,
   configCommandPath,
   convertCommandPath,
@@ -535,6 +532,7 @@ module.exports = {
   pluginsRoot,
   pluginArchetyperPath,
   pluginDeterminerPath,
+  pluginHelpPath,
   pluginManagerPath,
   pluginRegistryBuilderPath,
   validatorPath,

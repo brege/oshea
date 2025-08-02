@@ -1,4 +1,4 @@
-// test/runners/linting/unit/test-runner-factory.js
+// test/runners/linting/test-runner-factory.js
 require('module-alias/register');
 
 const { expect } = require('chai');

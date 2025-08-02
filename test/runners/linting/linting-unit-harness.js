@@ -1,4 +1,4 @@
-// test/runners/linting/unit/linting-unit-harness.js
+// test/runners/linting/linting-unit-harness.js
 require('module-alias/register');
 
 const { spawn } = require('child_process');

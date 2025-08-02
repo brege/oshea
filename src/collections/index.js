@@ -22,8 +22,8 @@ const {
   addSingletonPath,
   collectionsMetadataFilename,
   collectionsEnabledManifestFilename,
-  collectionsUserPluginsDirname,
-  collectionsDefaultArchetypeDirname
+  collectionsDefaultArchetypeDirname,
+  collectionsUserPluginsDirname
 } = require('@paths');
 const logger = require(loggerPath);
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test/runners/smoke/yaml-mocha.test.js
+// test/runners/end-to-end/e2e-mocha.test.js
 // Mocha wrapper around YAML tests - each test_id becomes atomic mocha test
 
 require('module-alias/register');
@@ -10,19 +10,19 @@ const yaml = require('js-yaml');
 const { expect } = require('chai');
 const {
   fileHelpersPath,
-  smokeTestDir,
-  yamlTestHelpersPath,
-  yamlTestRunnerPath
+  e2eTestDir,
+  e2eHelpersPath,
+  e2eRunnerPath
 } = require('@paths');
 
 const { findFilesArray } = require(fileHelpersPath);
-const { YamlTestRunner } = require(yamlTestRunnerPath);
-const { expandScenarios } = require(yamlTestHelpersPath);
+const { YamlTestRunner } = require(e2eRunnerPath);
+const { expandScenarios } = require(e2eHelpersPath);
 
 // Discover all test_ids from all manifest YAML files
 function discoverAllTestIds() {
   // Find all manifest files
-  const yamlFiles = findFilesArray([path.join(smokeTestDir, '**/*.manifest.yaml')], {
+  const yamlFiles = findFilesArray([path.join(e2eTestDir, '**/*.manifest.yaml')], {
     filter: (name) => name.endsWith('.yaml')
   });
 
@@ -120,7 +120,7 @@ async function runSingleTestById(testCase) {
 }
 
 // Generate atomic mocha tests grouped by suite name
-describe('YAML Tests (Atomic by test_id)', function() {
+describe('End-to-End Tests (Mocha Runner)', function() {
   // Increase timeout for tests that involve workspace setup and command execution
   this.timeout(30000);
 

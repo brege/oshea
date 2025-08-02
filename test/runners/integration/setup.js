@@ -1,4 +1,4 @@
-// test/runners/setup.js
+// test/runners/integration/setup.js
 require('module-alias/register');
 const { expect } = require('chai');
 const sinon = require('sinon');

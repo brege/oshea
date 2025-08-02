@@ -45,22 +45,13 @@ const paths = {
   cm_utils:               'test/runners/integration/collections/cm-utils.*.js',             // Rank 2
 
   // --- End-to-End Test Paths ---
-  e2e: [
-    'test/runners/e2e/all-e2e.test.js'
-    //'test/runners/e2e/workflow-lifecycle.test.js'
-  ],
-
-  // --- Workflow / Lifecycle E2E Test Paths ---
-  //workflow_lifecycle:     'test/runners/e2e/workflow-lifecycle.test.js',
+  e2e_runner: 'test/runners/end-to-end/e2e-mocha.test.js',
 
   // --- Bundled Plugin In-Situ Test Paths ---
   insitu:                 'plugins/**/.contract/test/*.test.js',
 
   // --- Linting ---
-  linting_units:          'test/runners/linting/unit/all-linting-unit.test.js',
-
-  // --- YAML Tests ---
-  yaml:                   'test/runners/smoke/yaml-mocha.test.js',
+  linting:          'test/runners/linting/all-linting.test.js',
 
 };
 
@@ -108,10 +99,8 @@ const levels = {
   ],
   // test/config/metadata-level-3.yaml
   level3: [ // module E2E tests
-    paths.e2e[0], // all-e2e.test.js
+    paths.e2e_runner
   ],
-  // test/config/metadata-level-4.yaml
-  //level4: [ // moved to test/runners/smoke/workflow-test{s.yaml,-runner.js}
 };
 
 // --- By Command ---
@@ -160,10 +149,6 @@ const groups = {
   collections:     commands.collections,
   core:            commands.core,
 
-  // E2E Groups (via grep)
-  pluginCmds:      paths.e2e,       // use grep to filter
-  collectionCmds:  paths.e2e,       // use grep to filter
-
   // All In-Situ Tests for Bundled Plugins
   insitu:          paths.insitu,
 
@@ -171,29 +156,30 @@ const groups = {
   integration:     paths.integration,
 
   // All End-to-End Tests
-  e2e:             paths.e2e,
+  e2e:             paths.e2e_runner,
 
   // All Linting Tests
-  linting:         paths.linting_units,
+  linting:         paths.linting,
 
-  // All YAML Tests
-  yaml:            paths.yaml,
+  // E2E Test Subgroups
+  cli:             paths.e2e_runner,
+  workflows:       paths.e2e_runner,
+  validators:      paths.e2e_runner,
 
   // Everything
   all: [
     paths.integration,
-    paths.e2e,
+    paths.e2e_runner,
     paths.insitu,
-    paths.linting_units,
-    paths.yaml
+    paths.linting
   ]
 };
 
 // --- E2E Grep Patterns for Group Slicing ---
 const groupGreps = {
-  pluginCmds: 'plugin ',
-  collectionCmds: 'collection ',
-  // more as needed
+  cli: 'End-to-End Test',
+  workflows: 'Workflow|Demo',
+  validators: 'bundled-plugins',
 };
 
 const grep = groupGreps[group] || argv.grep;
@@ -207,7 +193,7 @@ const mochaConfig = {
   timeout: 20000, // Increased timeout for lifecycle tests
   exit: true,
   color: true,
-  require: 'test/runners/setup.js',
+  require: 'test/runners/integration/setup.js',
   reporter: path.join(__dirname, 'test', 'analytics', 'log-failures-reporter.js')
 };
 

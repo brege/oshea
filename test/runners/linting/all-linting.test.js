@@ -1,14 +1,14 @@
-// test/runners/linting/unit/all-linting-unit.test.js
+// test/runners/linting/all-linting.test.js
 require('module-alias/register');
 
 const {
-  testRunnerFactoryLinting,
+  lintingTestRunnerFactory,
   codeLintingManifestPath,
   docsLintingManifestPath
 } = require('@paths');
 const {
   createUnitTestRunner
-} = require(testRunnerFactoryLinting);
+} = require(lintingTestRunnerFactory);
 
 const testSuites = [
   { name: 'Code Linters', manifest: codeLintingManifestPath },

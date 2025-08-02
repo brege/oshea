@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/create.command.js
+// src/cli/plugin/create.command.js
 const path = require('path');
 const { cmUtilsPath, pluginArchetyperPath, loggerPath, templateBasicPlugin, cliPath, collectionsMetadataFilename, collectionsDefaultArchetypeDirname } = require('@paths');
 const { execSync } = require('child_process');

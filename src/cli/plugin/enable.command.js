@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/enable.command.js
+// src/cli/plugin/enable.command.js
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs').promises;

@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/disable.command.js
+// src/cli/plugin/disable.command.js
 const { loggerPath, cliPath } = require('@paths');
 const { execSync } = require('child_process');
 const fs = require('fs');

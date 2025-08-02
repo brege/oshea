@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/list.command.js
+// src/cli/plugin/list.command.js
 const { pluginRegistryBuilderPath, projectRoot, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);

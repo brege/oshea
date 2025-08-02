@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/validate.command.js
+// src/cli/plugin/validate.command.js
 const path = require('path');
 const fs = require('fs');
 const { validatorPath, loggerPath, projectRoot } = require('@paths');

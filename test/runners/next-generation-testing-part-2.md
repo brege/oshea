@@ -3,7 +3,7 @@ The next generation test system defined in [`docs/v0.11/next-generation-testing.
 For information on test priority rankings and what the "levels" are defined by,
 see [`test/archive/docs/test-generation-priority-order.md`](../archive/docs/test-generation-priority-order.md).  For all other test framework information, see [`test/index.md`](../index.md).  
 
-This document is living document whose results will populate [`test/runners/smoke/index.md`](smoke/index.md),
+This document is living document whose results will populate test/runners/smoke/index.md,
 or whatever location the new E2E base directory's path is defined as.
 
 ---
@@ -41,8 +41,8 @@ or whatever location the new E2E base directory's path is defined as.
 - [x] Fix overbearing header spamm; color execution command
 - [x] Rename workflow-test-formatter.js to [`yaml-test-formatter.js`](../../src/utils/formatters/yaml-test-formatter.js)
 - [x] Remove smoke-test-formatter.js
-- [x] Rename smoke-helpers.js to [`yaml-test-helpers.js`](smoke/yaml-test-helpers.js)
-- [x] Rename workflow-coffeecup.test.js to [`yaml-mocha.test.js`](smoke/yaml-mocha.test.js)
+- [x] Rename smoke-helpers.js to yaml-test-helpers.js
+- [x] Rename workflow-coffeecup.test.js to yaml-mocha.test.js
 - [x] Re-generate pathing (name changes)
 - [x] Unify smoke-test-runner.js and workflow-test-runner.js
 - [x] Generalize runner for user-extensible workflows (remove smoke/workflow distinction)
@@ -167,15 +167,15 @@ Perhaps mocha produces inefficiency in the old system that could also be present
 ## Phase 4: Restructure (Low Priority)
 
 **Prep (debt)**
-- [ ] The nested path registries is tripping up LLM's and it's difficult to make
+- [x] The nested path registries is tripping up LLM's and it's difficult to make
   progress in tricky parts you desperately need help with.  We'll just flatten the registry into
   `paths/index.js` instead.  Human's are not supposed to edit it anyway.
-  - [ ] Run all tests one more time on the flattened registry.
+  - [x] Run all tests one more time on the flattened registry.
 
 **Main**
-- [ ] Tree restructure `test/` - Reorg test structure to mirror source structure
-- [ ] Update path registry - After files move  
-- [ ] Remove old files - After files move
+- [x] Tree restructure `test/` - Reorg test structure to mirror source structure
+- [x] Update path registry - After files move  
+- [x] Remove old files - After files move
 
 **Reflection Tree**
 ```
@@ -217,7 +217,7 @@ src/                                test/
 ```
 
 **Test-side renaming**
-- [ ] Rename `yaml-*.js` files to `e2e-*.js` files, as old tests are removed and don't conflict with new E2E test files 
+- [x] Rename `yaml-*.js` files to `e2e-*.js` files, as old tests are removed and don't conflict with new E2E test files 
 
 **App-side consistency**
 - [ ] Move all of `src/cli/commands` into `src/cli` (this way `src/cli/ <--> test/runners/e2e/`)
@@ -225,8 +225,6 @@ src/                                test/
 - [ ] `mv src/plugins/validator.js src/plugins/plugin-validator.js` (consistency)
 - [ ] `mv src/cli/config-display.js src/utils/formatters/config-formatter.js` (consistency)
 - [ ] `mv src/utils/formatters/*-formatter.js src/utile/formatters/*.formatter.js` (good/bad idea?)
-
-This phase is all shell and path registry work. Try not to get distracted.
 
 There is an argument to just do
 ```
@@ -244,9 +242,9 @@ test/runners/e2e/
 or even
 ```
 test/runners/e2e/
-├── collection.manifest.yaml
-├── base.manifest.yaml
-├── plugin.manifest.yaml
+├── collection.manifest.yaml    # ~200 lines
+├── base.manifest.yaml          # ~250 lines
+├── plugin.manifest.yaml        # ~350 lines
 ├── yaml-mocha.test.js
 ├── yaml-test-helpers.js
 └── yaml-test-runner.js
@@ -254,7 +252,7 @@ test/runners/e2e/
 By putting them all in one file, you can make it more efficient (enable/disable, add/remove, etc.)
 
 Compactly.
-- `...e2e/*.manifest.yaml`                      (from `...smoke/*.manifest.yaml`)
+- `...end-to-end/*.manifest.yaml`               (from `...smoke/*.manifest.yaml`)
 - `...integration/**/*/*.manfest.js`            (no change)
 - `...linters/*-linting.manifest.yaml`          (from `...linters/unit/*-linting.manifest.yaml`)
 - `...workflows/workflows.manifest.yaml`        (from `...smoke/other*/workflow*.yaml`)

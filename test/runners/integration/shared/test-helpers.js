@@ -1,4 +1,4 @@
-// test/runners/shared/test-helpers.js
+// test/runners/integration/shared/test-helpers.js
 const fsPromises = require('fs').promises;
 const fss = require('fs');
 const path = require('path');

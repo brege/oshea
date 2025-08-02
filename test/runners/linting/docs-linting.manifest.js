@@ -1,4 +1,4 @@
-// test/runners/linting/unit/docs-linting.manifest.js
+// test/runners/linting/docs-linting.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
 const {

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// test/runners/smoke/yaml-test-runner.js
+// test/runners/end-to-end/e2e-runner.js
 // Universal YAML test runner with dynamic capability detection
 
 require('module-alias/register');
@@ -10,9 +10,9 @@ const yaml = require('js-yaml');
 const {
   cliPath,
   loggerPath,
-  smokeTestDir,
   fileHelpersPath,
-  yamlTestHelpersPath
+  e2eHelpersPath,
+  e2eTestDir
 } = require('@paths');
 const { findFilesArray, isGlobPattern } = require(fileHelpersPath);
 const logger = require(loggerPath);
@@ -28,7 +28,7 @@ const {
   validateResult,
   parseArgs,
   listTestSuites
-} = require(yamlTestHelpersPath);
+} = require(e2eHelpersPath);
 
 class YamlTestRunner {
   constructor(yamlFilePath = null, options = {}) {
@@ -606,13 +606,13 @@ if (require.main === module) {
 
     if (arg === '--coll-root' && i + 1 < args.length) {
       options.collRoot = args[i + 1];
-      i++; // Skip next arg
+      i++;
     } else if (arg === '--outdir' && i + 1 < args.length) {
       options.outdir = args[i + 1];
-      i++; // Skip next arg
+      i++;
     } else if (arg === '--base-path' && i + 1 < args.length) {
       options.basePath = args[i + 1];
-      i++; // Skip next arg
+      i++;
     } else if (arg === '--debug') {
       options.debug = true;
     } else if (!arg.startsWith('--') && (arg.endsWith('.yaml') || isGlobPattern(arg))) {
@@ -631,8 +631,7 @@ if (require.main === module) {
       filter: (name) => name.endsWith('.yaml')
     });
   } else {
-    // Default to all manifest files in smoke directory if no YAML files specified
-    yamlFiles = findFilesArray([path.join(smokeTestDir, '*.manifest.yaml')], {
+    yamlFiles = findFilesArray([path.join(e2eTestDir, '*.manifest.yaml')], {
       filter: (name) => name.endsWith('.yaml')
     });
   }

@@ -1,4 +1,4 @@
-// test/runners/shared/test-logger.js
+// test/runners/integration/shared/test-logger.js
 module.exports = {
   info: () => {},
   warn: () => {},

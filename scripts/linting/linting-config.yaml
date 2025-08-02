@@ -161,6 +161,7 @@ yaml:
   group: "docs"
   targets:
    - "test/runners/smoke/"
+   - "paths/paths-config.yaml"
   filetypes: [".yaml"] # perhaps treat *.yml differently..
   field_order:
     # Lower numbers = higher priority

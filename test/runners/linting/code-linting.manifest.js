@@ -1,4 +1,4 @@
-// test/runners/linting/unit/code-linting.manifest.js
+// test/runners/linting/code-linting.manifest.js
 // lint-skip-file no-console
 const fs = require('fs-extra');
 const path = require('path');

@@ -1,4 +1,4 @@
-// test/runners/shared/capture-logs.js
+// test/runners/integration/shared/capture-logs.js
 const logs = [];
 
 function logMethod(level) {

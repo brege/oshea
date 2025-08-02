@@ -1,4 +1,4 @@
-// test/runners/smoke/yaml-test-helpers.js
+// test/runners/end-to-end/e2e-helpers.js
 // Unified test harness for YAML-based tests (smoke tests and workflow tests)
 
 require('module-alias/register');

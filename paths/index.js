@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry (Flattened)
-// Generated: 2025-08-02T00:52:15.027Z
+// Generated: 2025-08-02T02:15:57.163Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -133,6 +133,7 @@ const pdfGeneratorIntegrationTestPath = path.join(projectRoot, 'test/runners/int
 
 // YAML-driven Workflow Tests
 const yamlWorkflowTestsRoot = path.join(projectRoot, 'test/runners/smoke/workflows/*.yaml');
+const demoHugoBatchConvertManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml');
 const workflowsManifestYamlPath = path.join(projectRoot, 'test/runners/smoke/workflows/workflows.manifest.yaml');
 
 // YAML-driven Bundled Plugin Tests
@@ -467,6 +468,7 @@ module.exports = {
   pdfGeneratorManifestPath,
   pdfGeneratorIntegrationTestPath,
   yamlWorkflowTestsRoot,
+  demoHugoBatchConvertManifestYamlPath,
   workflowsManifestYamlPath,
   yamlValidatorTestsRoot,
   bundledPluginsManifestYamlPath,

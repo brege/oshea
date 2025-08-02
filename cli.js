@@ -335,8 +335,7 @@ async function main() {
     handler: (args) => {
       const {
         generateCompletionCachePath,
-        generateCompletionDynamicCachePath,
-        completionRoot
+        generateCompletionDynamicCachePath
       } = require('@paths');
 
       try {

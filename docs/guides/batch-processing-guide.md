@@ -1,89 +1,109 @@
-# Batch Processing with External Scripts
+# Batch Processing Guide
 
-This guide explains how to perform batch conversions of multiple Markdown files to individual PDFs using `md-to-pdf` through external scripts. This approach provides maximum flexibility, allowing you to tailor file discovery, naming conventions, and specific conversion logic to your unique workflow, while leveraging the full plugin capabilities of `md-to-pdf` for each file.
+This guide explains how to perform batch conversions of multiple Markdown files to individual PDFs using `md-to-pdf`. The recommended approach is using YAML workflows, which provide a declarative, maintainable solution that integrates with the existing test infrastructure.
 
-## Batch Processing Hugo Recipes - Node.js Example
+## Batch Processing Hugo Recipes - YAML Workflow (Recommended)
 
-This example demonstrates using a Node.js script as a flexible wrapper for `md-to-pdf` to convert all recipes from a specified source directory to a target directory containing individual PDFs.
+The recommended approach for batch processing is using YAML workflows, which provide a declarative, self-documenting method that integrates seamlessly with the existing test infrastructure.
 
-#### Script Location
+In due time, this approach will be mainlined into the `md-to-pdf` CLI once stability for v0.11 is achieved.
+
+#### Workflow Location
 ```bash
-scripts/batch_convert_hugo_recipes.js
+test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml
 ```
 
 #### Output
 
-PDFs will be generated in `batch_output/hugo_recipes_node/`, with each recipe in its own subfolder, named in `<slug>-<author>-<date>` pattern.
+PDFs will be generated in isolated test workspaces, with automatic discovery of all Hugo recipe directories and validation of successful conversion.
 
 #### Execution
 
-1.  Install necessary Node.js packages for the script (if not already project dependencies):
+1.  **Basic execution** - Run the workflow directly:
 
     ```bash
-    npm install glob gray-matter yargs
+    node test/runners/smoke/yaml-test-runner.js \
+        test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml
     ```
 
-2.  Execute the script, providing the required arguments:
+2.  **With visual inspection** - Use `--show` to see commands and output in real-time:
 
     ```bash
-    node scripts/batch_convert_hugo_recipes.js \
-        --source-dir ./examples/hugo-example \
-        --output-dir ./batch_output/hugo_recipes_node \
-        --base-plugin recipe
+    node test/runners/smoke/yaml-test-runner.js \
+        test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml --show
     ```
 
-      * `--source-dir`: Points to the directory containing your Markdown collections (`examples/hugo-example`).
-      * `--output-dir`: Specifies where the generated PDFs (and their subdirectories) will be saved.
-      * `--base-plugin`: The `md-to-pdf` plugin to use for styling each recipe.
-      * You can also use the (optional) `--md-to-pdf-path` argument if your [`cli.js`](../../cli.js) file is not at the default location relative to the script.
+3.  **Via mocha integration** - Run as part of the test suite:
 
-PDFs will be generated in `batch_output/hugo_recipes_node/`, with each recipe in its own subfolder. You can adapt the glob pattern, metadata extraction, and filename logic within the script for different needs and output requirements.
+    ```bash
+    npm test -- --group yaml --grep "4.2"
+    ```
 
-## Batch Processing Hugo Recipes - Bash Example
+#### Features
 
-This example provides a Bash script to achieve a similar outcome as the Node.js script: converting all recipes from a specified source directory.
+- **Automatic Discovery**: Discovers all recipe directories in `test/runners/fixtures/hugo-example`
+- **Level 4 Workflow Tests**: Part of the comprehensive YAML workflow testing system
+- **Workspace Isolation**: Each conversion runs in an isolated temporary workspace
+- **Validation**: Automatically verifies successful execution and minimum file sizes
+- **Two Variants**: Basic conversion (4.2.1) and enhanced with custom filenames (4.2.2)
 
-#### Script Location
+>## Legacy Batch Processing Scripts (Deprecated)
+>
+>The following Node.js and Bash scripts are maintained for reference but are deprecated in favor of YAML workflows. They demonstrate custom batch processing approaches but require more maintenance and lack integration with the test infrastructure.
+>
+> ### Old Node.js and Bash Scripts
+> 
+> Located at [`scripts/batch/batch-convert-hugo-recipes.js`](../../scripts/batch/batch-convert-hugo-recipes.js), this script provides flexible metadata extraction and custom filename generation.
+>
+> Located at `scripts/batch/batch_convert_hugo_recipes.sh`, this shell-based approach uses `yq` for YAML parsing and provides similar functionality to the Node.js version.
 
-```bash
-scripts/batch_convert_hugo_recipes.sh
+## Customizing YAML Workflows
+
+To create your own batch processing workflows, you can modify the demo workflow or create new ones based on your specific needs:
+
+### Creating Custom Workflows
+
+1. **Copy the demo workflow**:
+   ```bash
+   cp test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml \
+      test/runners/smoke/workflows/my-custom-batch.manifest.yaml
+   ```
+
+2. **Modify discovery settings**:
+   - Change `source` to point to your directory
+   - Adjust `filter` (directories, files) and `pattern` as needed
+
+3. **Update scenarios**:
+   - Modify `args` to use different plugins or options
+   - Adjust file validation in `expect` section
+   - Add custom naming with `--filename` flag
+
+### Key YAML Workflow Features
+
+- **Discovery Types**: `directory_scan` for automatic file/directory discovery
+- **Template Variables**: `{{paths.variableName}}` for path resolution, `{{tmpdir}}` for workspace isolation
+- **Validation**: Use `file_exists`, `file_min_size`, `contains` for output verification
+- **Show Mode**: Always test with `--show` flag to see commands and output in real-time
+- **Debugging**: Use `--debug` for additional logging, adding intermediate steps between operaitonal scenarios
+
+### Example Customization
+
+```yaml
+name: batch convert my documents
+test_id: 5.2.1
+discovery:
+  type: directory_scan
+  source: my-docs
+  filter: files
+  pattern: "*.md"
+scenarios:
+  - description: convert {item} to PDF with custom styling
+    args: convert my-docs/{item} --plugin my-custom-plugin --outdir {{tmpdir}} --no-open
+    expect:
+      file_exists: "{{tmpdir}}/*.pdf"
 ```
 
-#### Output
-
-PDFs will be generated in `batch_output/hugo_recipes_bash/`, with each recipe in its own subfolder and individual filenames in the `<slug>-<author>-<date>` pattern.
-
-#### Execution
-
-1.  Make the script executable:
-
-    ```bash
-    chmod +x scripts/batch_convert_hugo_recipes.sh
-    ```
-
-2.  Create output directory if it doesn't exist:
-
-    ```bash
-    mkdir -p ./batch_output/hugo_recipes_bash
-    ```
-
-3.  Execute the script, providing the required arguments (source directory, output directory, base plugin):
-
-    ```bash
-    ./scripts/batch_convert_hugo_recipes.sh \
-        ./examples/hugo-example \
-        ./batch_output/hugo_recipes_bash \
-        recipe
-    ```
-
-      * The first argument is the source directory ([`./test/fixtures/hugo-example`](../../test/fixtures/hugo-example)).
-      * The second argument is the base directory where PDFs will be saved.
-      * The third argument is the `md-to-pdf` plugin to use for styling.
-      * You can also use the (optional) `--md-to-pdf-path` argument if your [`cli.js`](../../cli.js) file is not at the default location relative to the script.
-
-PDFs will be generated in `batch_output/hugo_recipes_bash/`, with each recipe in its own subfolder. You can adapt the `find` command, metadata extraction logic (especially the `get_fm_value` function), and filename construction within the script for different needs and output requirements.
-
-## General Tips for Customizing Your Batch Scripts
+## Legacy Tips for Custom Scripts (Deprecated)
 
 These tips apply to modifying the example scripts located in the [`scripts/`](../../scripts/) directory.
 

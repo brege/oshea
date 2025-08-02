@@ -1,4 +1,4 @@
-name: (Happy) Successfully validates a well-formed plugin, from a directory
+name: plugin validate (End-to-End Test) src/cli/commands/plugin/validate.command.js
 test_id: 3.9.1
 base_command: md-to-pdf
 tags:
@@ -9,20 +9,20 @@ tags:
   - collection
   - happy-path
 scenarios:
-  - description: Successfully validates a well-formed plugin, from a directory
+  - description: should successfully validate a well-formed plugin from a path
     test_id: 3.9.1
     args: plugin validate {{paths.fixturesDir}}/full-fat-dummies/valid-plugin
     expect:
       executes: true
       contains: Successfully
-  - description: debug list enabled plugins
+  - description: "[debug] should list enabled plugins"
     test_id: 3.9.1.debug
     args: plugin list --enabled --short
     expect:
       executes: true
     debug: true
 ---
-name: (Sad) Fails validation for a poorly-formed plugin, from a directory
+name: plugin validate (End-to-End Test) src/cli/commands/plugin/validate.command.js
 test_id: 3.9.2
 base_command: md-to-pdf
 tags:
@@ -32,7 +32,7 @@ tags:
   - smoke
   - sad-path
 scenarios:
-  - description: Create broken plugin and validate it directly
+  - description: should fail to validate a broken plugin
     test_id: 3.9.2
     args: plugin validate {{tmpdir}}/broken-plugin
     expect:

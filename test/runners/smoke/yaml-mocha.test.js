@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // test/runners/smoke/yaml-mocha.test.js
-// Mocha wrapper around YAML workflow blocks - each block becomes atomic mocha test
+// Mocha wrapper around YAML tests - each test_id becomes atomic mocha test
 
 require('module-alias/register');
 
@@ -9,199 +9,155 @@ const path = require('path');
 const yaml = require('js-yaml');
 const { expect } = require('chai');
 const {
-  loggerPath,
-  yamlTestHelpersPath
+  fileHelpersPath,
+  smokeTestDir,
+  yamlTestHelpersPath,
+  yamlTestRunnerPath
 } = require('@paths');
-const logger = require(loggerPath);
-const {
-  executeCommand,
-  TestWorkspace,
-  processCommandArgs,
-  createDisplayCommand,
-  validateResult
-} = require(yamlTestHelpersPath);
 
-const WORKFLOW_TESTS_FILE = path.join(__dirname, 'workflow-tests.yaml');
+const { findFilesArray } = require(fileHelpersPath);
+const { YamlTestRunner } = require(yamlTestRunnerPath);
+const { expandScenarios } = require(yamlTestHelpersPath);
 
-// Discover all YAML blocks from workflow-tests.yaml
-function discoverYamlBlocks() {
-  const content = fs.readFileSync(WORKFLOW_TESTS_FILE, 'utf8');
-  const testSuites = yaml.loadAll(content).filter(doc => doc && doc.name);
-  return testSuites;
-}
+// Discover all test_ids from all manifest YAML files
+function discoverAllTestIds() {
+  // Find all manifest files
+  const yamlFiles = findFilesArray([path.join(smokeTestDir, '**/*.manifest.yaml')], {
+    filter: (name) => name.endsWith('.yaml')
+  });
 
-// Run a single YAML block (test suite)
-async function runSingleYamlBlock(testSuite) {
-  // Setup isolated test workspace
-  const workspace = new TestWorkspace();
-  workspace.setup();
+  const testCases = [];
+  const debugMode = process.env.MD_TO_PDF_DEBUG === 'true' || process.env.DEBUG === 'true';
 
-  let allScenariosPassed = true;
-  const failureReasons = [];
+  for (const yamlFile of yamlFiles) {
+    const content = fs.readFileSync(yamlFile, 'utf8');
+    const testSuites = yaml.loadAll(content).filter(doc => doc && doc.name);
 
-  try {
-    for (const scenario of testSuite.scenarios) {
-      // Skip scenarios marked with skip: true
-      if (scenario.skip) {
-        const skipCommandDisplay = createDisplayCommand(
-          testSuite.base_command || 'md-to-pdf',
-          scenario.args,
-          workspace,
-          true
-        );
-        // Resolve test_id with inheritance: scenario.test_id || testSuite.test_id
-        const resolvedTestId = scenario.test_id || testSuite.test_id;
-        logger.info({
-          description: scenario.description,
-          command: skipCommandDisplay,
-          status: 'skipped',
-          test_id: resolvedTestId
-        }, { format: 'workflow-step' });
+    for (const suite of testSuites) {
+      // Skip entire test suite if marked with skip: true
+      if (suite.skip) {
         continue;
       }
 
-      // Process command arguments with workspace isolation
-      const args = processCommandArgs(scenario.args, workspace, true);
-      const fullCommand = `node "${require('@paths').cliPath}" ${args}`;
-      const commandDisplay = createDisplayCommand(
-        testSuite.base_command || 'md-to-pdf',
-        scenario.args,
-        workspace,
-        true // This is always a workflow test in Mocha context
-      );
-
-      // Resolve test_id with inheritance: scenario.test_id || testSuite.test_id
-      const resolvedTestId = scenario.test_id || testSuite.test_id;
-
-      // Real-time step logging using workflow formatter
-      logger.info({
-        description: scenario.description,
-        command: commandDisplay,
-        status: 'testing',
-        test_id: resolvedTestId
-      }, { format: 'workflow-step' });
-      try {
-        const result = await executeCommand(fullCommand);
-        let testPassed = true;
-        let failureReason = null;
-
-        // Handle expect_failure cases
-        if (scenario.expect && scenario.expect.executes === false) {
-          testPassed = false;
-          failureReason = 'Expected command to fail but it succeeded';
-        } else if (scenario.expect_failure) {
-          testPassed = false;
-          failureReason = 'Expected command to fail but it succeeded';
-        } else {
-          // Use harness validation function
-          const validation = validateResult(result, scenario.expect, scenario.expect_not, workspace);
-          testPassed = validation.testPassed;
-          failureReason = validation.failureReason;
-        }
-
-        if (!testPassed) {
-          allScenariosPassed = false;
-          failureReasons.push(`${scenario.description}: ${failureReason}`);
-          logger.info({
-            description: scenario.description,
-            command: commandDisplay,
-            status: 'failed',
-            reason: failureReason,
-            test_id: resolvedTestId
-          }, { format: 'workflow-step' });
-        } else {
-          logger.info({
-            description: scenario.description,
-            command: commandDisplay,
-            status: 'passed',
-            test_id: resolvedTestId
-          }, { format: 'workflow-step' });
-        }
-
-      } catch (error) {
-        // Handle expected failures
-        if (scenario.expect && scenario.expect.executes === false) {
-          // Command was expected to fail
-          let testPassed = true;
-          let failureReason = null;
-
-          if (scenario.expect_failure) {
-            const outputToCheck = error.stdout || error.stderr || error.message;
-            const mockResult = { stdout: outputToCheck };
-            const validation = validateResult(mockResult, scenario.expect_failure);
-            testPassed = validation.testPassed;
-            failureReason = validation.failureReason;
+      if (suite.workflow === false) {
+        // Each scenario becomes a separate mocha test
+        const scenarios = expandScenarios(suite);
+        for (const scenario of scenarios) {
+          // Skip debug scenarios unless debug mode is enabled
+          if (scenario.debug && !debugMode) {
+            continue;
           }
 
-          if (!testPassed) {
-            allScenariosPassed = false;
-            failureReasons.push(`${scenario.description}: ${failureReason}`);
-            logger.info({
-              description: scenario.description,
-              command: commandDisplay,
-              status: 'failed',
-              reason: failureReason,
-              test_id: resolvedTestId
-            }, { format: 'workflow-step' });
-          } else {
-            logger.info({
-              description: scenario.description,
-              command: commandDisplay,
-              status: 'passed',
-              test_id: resolvedTestId
-            }, { format: 'workflow-step' });
+          // Skip scenarios marked with skip: true
+          if (scenario.skip) {
+            continue;
           }
-        } else {
-          // Unexpected failure
-          allScenariosPassed = false;
-          failureReasons.push(`${scenario.description}: ${error.message}`);
-          logger.info({
+
+          testCases.push({
+            testId: scenario.test_id || `${suite.name}-scenario-${scenarios.indexOf(scenario)}`,
             description: scenario.description,
-            command: commandDisplay,
-            status: 'failed',
-            reason: error.message,
-            test_id: resolvedTestId
-          }, { format: 'workflow-step' });
+            yamlFile: yamlFile,
+            type: 'scenario',
+            suiteName: suite.name,
+            skip: false
+          });
         }
+      } else {
+        // Default: entire suite becomes one mocha test
+        const scenarios = expandScenarios(suite);
+        // Find the last non-debug scenario as the main test description
+        const nonDebugScenarios = scenarios.filter(s => !s.debug);
+        const lastMeaningfulScenario = nonDebugScenarios[nonDebugScenarios.length - 1];
+        const testDescription = lastMeaningfulScenario ? lastMeaningfulScenario.description : 'workflow test';
+
+        testCases.push({
+          testId: suite.test_id || suite.name,
+          description: suite.name,
+          testDescription: testDescription,
+          yamlFile: yamlFile,
+          type: 'suite',
+          suiteName: suite.name,
+          skip: suite.skip || false
+        });
       }
     }
-  } finally {
-    // Clean up workspace after test suite completion
-    workspace.teardown();
   }
 
-  return {
-    success: allScenariosPassed,
-    failureReasons
-  };
+  return testCases;
 }
 
-// Generate mocha tests dynamically
-describe('Workflow Tests (YAML-driven)', function() {
-  // Increase timeout for workflow tests that involve multiple commands
+// Run a single test in complete isolation
+async function runSingleTestById(testCase) {
+  // Create unique workspace path using PID, timestamp, and test ID to prevent race conditions
+  const timestamp = Date.now();
+  const randomId = Math.floor(Math.random() * 99999).toString().padStart(5, '0');
+  const safeTestId = testCase.testId.toString().replace(/[^a-zA-Z0-9]/g, '-');
+  const uniqueSuffix = `${process.pid}-${timestamp}-${randomId}-${safeTestId}`;
+  const uniqueWorkspacePath = `/tmp/md-to-pdf-test-${uniqueSuffix}`;
+
+  const runner = new YamlTestRunner(testCase.yamlFile, {
+    apiMode: true,
+    basePath: uniqueWorkspacePath,
+    debug: process.env.MD_TO_PDF_DEBUG === 'true'
+  });
+
+  try {
+    const result = await runner.runAllTests(false, null, null, testCase.testId);
+
+    if (!result.success) {
+      const failureDetails = (result.allFailedScenarios || []).map(f =>
+        `${f.scenario}: ${f.reason}`
+      ).join('\n');
+
+      const errorMessage = failureDetails || 'Test failed with no specific details';
+      throw new Error(`Test ID ${testCase.testId} failed:\n${errorMessage}`);
+    }
+
+    return result;
+  } catch (error) {
+    throw new Error(`Test ID ${testCase.testId} crashed: ${error.message}`);
+  }
+}
+
+// Generate atomic mocha tests grouped by suite name
+describe('YAML Tests (Atomic by test_id)', function() {
+  // Increase timeout for tests that involve workspace setup and command execution
   this.timeout(30000);
 
-  const yamlBlocks = discoverYamlBlocks();
+  const testCases = discoverAllTestIds();
 
-  yamlBlocks.forEach(testSuite => {
-    // Use test_id field for cleaner Mocha output
-    const testName = testSuite.test_id
-      ? `[${testSuite.test_id}] ${testSuite.name}`
-      : testSuite.name;
+  // Group test cases by suite name to create nested describe blocks
+  const suiteGroups = {};
+  testCases.forEach(testCase => {
+    const suiteName = testCase.suiteName || testCase.description;
+    if (!suiteGroups[suiteName]) {
+      suiteGroups[suiteName] = [];
+    }
+    suiteGroups[suiteName].push(testCase);
+  });
 
-    // Support block-level skipping with it.skip()
-    const testFunction = testSuite.skip ? it.skip : it;
+  // Create a describe block for each suite name
+  Object.entries(suiteGroups).forEach(([suiteName, cases]) => {
+    describe(suiteName, function() {
+      cases.forEach(testCase => {
+        // Create descriptive test name matching standard mocha format
+        const testName = testCase.type === 'scenario'
+          ? `${testCase.testId}: ${testCase.description}`
+          : `${testCase.testId}: ${testCase.testDescription}`;
 
-    testFunction(testName, async function() {
-      const result = await runSingleYamlBlock(testSuite);
+        const testFn = testCase.skip ? it.skip : it;
 
-      if (!result.success) {
-        const errorMessage = `Workflow block failed:\n${result.failureReasons.join('\n')}`;
-        throw new Error(errorMessage);
-      }
+        testFn(testName, async function() {
+          // Add small staggered delay to reduce race conditions in workspace setup
+          await new Promise(resolve => setTimeout(resolve, Math.random() * 100));
 
-      // If we get here, all scenarios in the block passed
-      expect(result.success).to.be.true;
+          const result = await runSingleTestById(testCase);
+
+          // Verify test passed
+          expect(result.success).to.be.true;
+          expect(result.totalFailed).to.equal(0);
+        });
+      });
     });
   });
 });

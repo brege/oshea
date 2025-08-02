@@ -97,19 +97,7 @@ Users create declarative YAML workflows instead of complex bash scripts. System 
 - [x] Add `debug: true/false` to scenarios to debug them (for intermediate workflow steps)
 - [x] Summaries are wildly inconsistent. Some are 0. See output at `./yaml-e2e-output.txt`.
 - [x] Every tests says "Smoke Test: " where is it coming from?
-- [x] More brittleness.
-  ```js
-  // Expand YAML inputs using file-helpers
-  let yamlFiles = [];    
-  if (yamlInputs.length > 0) {
-    yamlFiles = findFilesArray(yamlInputs, {
-      filter: (name) => name.endsWith('.yaml') 
-    });   
-  } else {   
-    // Default to smoke tests manifest if no YAML files specified
-    yamlFiles = [path.join(smokeTestDir, 'smoke-tests.yaml')];  //Why is this here?
-  }
-  ```  
+
 **New**
 - [x] \*Implement a test file for `plugin remove`.
 
@@ -164,12 +152,12 @@ wc -l ../e2e/*.manifest.js | tail -1
 ```
 
 ### 3.2 Mocha Runner
-- [ ] `yaml-mocha.test.js my-test.manifest.yaml`
-- [ ] `yaml-mocha.test.js *.manifest.yaml`
-- [ ] `npm run test:last-fails` (i.e. [`test/analytics/run-last-fails.js`](../analytics/run-last-fails.js))
-- [ ] [`.mocharc.js`](../../.mocharc.js)
-- [ ] `--grep` and `--group`
-- [ ] [`test/analytics/log-failures-reporter.js`](../analytics/log-failures-reporter.js)
+- [x] `yaml-mocha.test.js my-test.manifest.yaml`
+- [x] `yaml-mocha.test.js *.manifest.yaml`
+- [x] `npm run test:last-fails` (i.e. [`test/analytics/run-last-fails.js`](../analytics/run-last-fails.js))
+- [x] [`.mocharc.js`](../../.mocharc.js)
+- [x] `--grep` and `--group`
+- [x] [`test/analytics/log-failures-reporter.js`](../analytics/log-failures-reporter.js)
 - [ ] [`test/analytics/test-watcher.js`](../analytics/test-watcher.js)
 
 #### Analysis
@@ -367,7 +355,7 @@ These are surfaced from `test/config/metadata-level-3.yaml`
 - [x] 3.15.3 - (Sad Path) An unknown command fails with a non-zero exit code and an appropriate error message.
 
 ### <plugin remove> (new)
-- [ ] `plugin-remove.manifest.yaml`
+- [x] `plugin-remove.manifest.yaml`
 
 
 

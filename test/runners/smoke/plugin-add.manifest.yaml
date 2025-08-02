@@ -1,6 +1,4 @@
-name: >-
-  (Happy Path) Successfully adds and enables a singleton plugin from a local
-  path
+name: plugin add (End-to-End Test) src/cli/commands/plugin/add.command.js
 test_id: 3.6.1
 base_command: md-to-pdf
 tags:
@@ -8,16 +6,15 @@ tags:
   - add
   - cli
   - smoke
+workflow: true
 scenarios:
-  - description: Create a plugin to add
+  - description: should successfully create a local plugin
     test_id: 3.6.1.1
     args: plugin create my-local-plugin-src --outdir {{tmpdir}}
     expect:
       executes: true
       contains: created successfully
-  - description: >-
-      (Happy Path) Successfully adds and enables a singleton plugin from
-      a local path
+  - description: should successfully add (and enable) a singleton plugin from a local path
     test_id: 3.6.1.2
     args: plugin add {{tmpdir}}/my-local-plugin-src --bypass-validation
     expect:

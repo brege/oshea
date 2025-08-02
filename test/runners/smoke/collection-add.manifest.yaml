@@ -1,4 +1,4 @@
-name: (Happy) Add a collection from a git URL
+name: collection add (End-to-End Test) src/cli/commands/collection/add.command.js
 base_command: md-to-pdf
 tags:
   - plugin
@@ -7,47 +7,25 @@ tags:
   - smoke
   - collection
   - happy-path
+workflow: false
 scenarios:
-  - description: Add a collection from a git URL
+  - description: should successfully add a collection from a git URL
     test_id: 3.10.1
     args: >-
       collection add https://github.com/brege/md-to-pdf-plugins.git --name
-      test-collection
+      test-collection-1
     expect:
       executes: true
       contains: Successfully
----
-name: (Happy) Add a collection from a local directory
-base_command: md-to-pdf
-tags:
-  - plugin
-  - enable
-  - cli
-  - smoke
-  - collection
-  - happy-path
-scenarios:
-  - description: Add a collection from a local directory
+  - description: should successfully add a collection from a local directory
     test_id: 3.10.2
     args: >-
       collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
-      --name test-collection
+      --name test-collection-2
     expect:
       executes: true
       contains: Successfully
----
-name: (Sad) Add a collection from an invalid source
-test_id: 3.10.3
-base_command: md-to-pdf
-tags:
-  - plugin
-  - enable
-  - cli
-  - smoke
-  - collection
-  - sad-path
-scenarios:
-  - description: Add a collection from an invalid directory
+  - description: should fail to add a collection from an invalid local directory
     test_id: 3.10.3.1
     args: >-
       collection add {{paths.fixturesDir}}/full-fat-dummies/invalid-collection
@@ -55,7 +33,7 @@ scenarios:
     expect:
       contains: Failed
       executes: false
-  - description: Add a collection from an invalid git URL
+  - description: should fail to add a collection from an invalid git URL
     test_id: 3.10.3.2
     args: >-
       collection add https://github.com/brege/invalid-plugin-repo.git --name

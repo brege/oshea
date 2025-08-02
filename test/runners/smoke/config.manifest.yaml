@@ -5,25 +5,26 @@ tags:
   - pure
   - cli
   - smoke
+workflow: false
 scenarios:
-  - description: Global config (default)
+  - description: should display the global config
     test_id: 3.3.1
     args: config
     expect:
       contains: "pdf_viewer:"
-  - description: Plugin config (default)
+  - description: should display the config for the "default" plugin
     test_id: 3.3.2
     args: config --plugin default
     expect:
       contains_all:
         - "handler_script:"
         - "Plugin Base Path:"
-  - description: Global config (--pure)
+  - description: should display the global config without "#yaml" comments
     test_id: 3.3.3
     args: config --pure
     expect:
       yaml_has_key: pdf_viewer
-  - description: Plugin config (--pure)
+  - description: should display the config for the "cv" plugin without "#yaml" comments
     test_id: 3.3.4
     args: config --plugin cv --pure
     expect:

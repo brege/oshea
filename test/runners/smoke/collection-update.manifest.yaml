@@ -1,4 +1,6 @@
-name: (Happy) Succesfully runs the update process on collections
+name: >-
+  collection update (End-to-End Test)
+  src/cli/commands/collection/update.command.js
 test_id: 3.13.1
 base_command: md-to-pdf
 tags:
@@ -9,7 +11,7 @@ tags:
   - collection
   - happy-path
 scenarios:
-  - description: Update all collections
+  - description: should successfully update all collections
     test_id: 3.13.1
     args: collection update
     expect:
@@ -18,7 +20,9 @@ scenarios:
         - Nothing to update
         - Collection updated
 ---
-name: (Key Option) Successfully runs the update process on a single named collection
+name: >-
+  collection update (End-to-End Test)
+  src/cli/commands/collection/update.command.js
 test_id: 3.13.2
 base_command: md-to-pdf
 tags:
@@ -29,7 +33,7 @@ tags:
   - collection
   - happy-path
 scenarios:
-  - description: Add a collection from a local directory
+  - description: should successfully add a collection
     test_id: 3.13.2.1
     args: >-
       collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
@@ -37,14 +41,14 @@ scenarios:
     expect:
       executes: true
       contains: Successfully
-  - description: Update a single named collection
+  - description: should successfully update a collection by name
     test_id: 3.13.2.2
     args: collection update test-collection
     expect:
       executes: true
       contains: Collection updated
 ---
-name: (Alias) The `update` alias successfully runs the collection update process.
+name: update (End-to-End Test) src/cli/commands/update.command.js
 test_id: 3.14.1
 base_command: md-to-pdf
 tags:
@@ -55,7 +59,7 @@ tags:
   - collection
   - happy-path
 scenarios:
-  - description: Update all collections
+  - description: should successfully update all collectionsby &base_command update
     test_id: 3.14.1
     args: update
     expect:

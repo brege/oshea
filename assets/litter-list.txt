@@ -52,6 +52,7 @@
 [whitelist:comment:js,ts]
 ALL
 AND
+API
 CLI
 CLOSED
 CONTRIBUTORS

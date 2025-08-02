@@ -1,4 +1,6 @@
-name: (Happy) Add a collection from a local directory
+name: >-
+  collection remove (End-to-End Test)
+  src/cli/commands/collection/list.command.js
 test_id: 3.12.1
 base_command: md-to-pdf
 tags:
@@ -8,8 +10,9 @@ tags:
   - smoke
   - collection
   - happy-path
+workflow: true
 scenarios:
-  - description: Add a collection from a local directory
+  - description: should add a collection from a local directory
     test_id: 3.12.1.1
     args: >-
       collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
@@ -17,14 +20,15 @@ scenarios:
     expect:
       executes: true
       contains: Successfully cloned repository
-  - description: List the collections
+  - description: "[debug] List the collections"
     test_id: 3.12.1.debug
     args: collection list --short names
     expect:
       executes: true
     debug: true
-  - description: Remove the collection
+  - description: should remove the collection
     test_id: 3.12.1.2
     args: collection remove test-collection
     expect:
       contains: Collection directory removed successfully
+test_name: Add a collection from a local directory

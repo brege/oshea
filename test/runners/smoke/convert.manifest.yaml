@@ -1,6 +1,4 @@
-name: >-
-  (Happy Path) Successfully converts a basic markdown file to PDF using the
-  default plugin
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.1
 base_command: md-to-pdf
 tags:
@@ -8,10 +6,11 @@ tags:
   - cli
   - smoke
   - pdf
+  - happy-path
 scenarios:
   - description: >-
-      (Happy Path) Successfully converts a basic markdown file to PDF using the
-      default plugin
+      should sucessfully convert a basic markdown file to PDF using the default
+      plugin
     test_id: 3.1.1
     args: >-
       convert {{paths.simpleMdFixture}} --outdir {{tmpdir}} --filename
@@ -24,7 +23,7 @@ scenarios:
         - "{{tmpdir}}/happy-path.pdf"
         - 1000
 ---
-name: (Key Option) Successfully converts using a specified plugin via --plugin
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.2
 base_command: md-to-pdf
 tags:
@@ -33,7 +32,7 @@ tags:
   - smoke
   - pdf
 scenarios:
-  - description: (Key Option) Successfully converts using a specified plugin via --plugin
+  - description: should successfully convert using a specified plugin via --plugin
     test_id: 3.1.2
     args: >-
       convert {{paths.simpleMdFixture}} --plugin recipe --outdir {{tmpdir}}
@@ -46,7 +45,7 @@ scenarios:
         - "{{tmpdir}}/key-option-plugin.pdf"
         - 1000
 ---
-name: (Key Option) Successfully creates a PDF with a custom directory and filename
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.3
 base_command: md-to-pdf
 tags:
@@ -55,9 +54,7 @@ tags:
   - smoke
   - pdf
 scenarios:
-  - description: >-
-      (Key Option) Successfully creates a PDF with a custom directory and
-      filename
+  - description: should successfully create a PDF with a custom directory and filename
     test_id: 3.1.3
     args: >-
       convert {{paths.simpleMdFixture}} --outdir {{tmpdir}}/custom-output
@@ -70,9 +67,7 @@ scenarios:
         - "{{tmpdir}}/custom-output/my-custom-name.pdf"
         - 1000
 ---
-name: >-
-  (Config Precedence) A 'md_to_pdf_plugin' key in front matter is correctly used
-  for conversion
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.4
 base_command: md-to-pdf
 tags:
@@ -82,8 +77,8 @@ tags:
   - pdf
 scenarios:
   - description: >-
-      (Config Precedence) A 'md_to_pdf_plugin' key in front matter is correctly
-      used for conversion
+      should successfully convert using a specified plugin via the
+      'md_to_pdf_plugin' key in front matter
     test_id: 3.1.4
     args: >-
       convert {{paths.simpleMdFixtureWithFm}} --outdir {{tmpdir}} --filename
@@ -96,9 +91,7 @@ scenarios:
         - "{{tmpdir}}/fm-precedence.pdf"
         - 1000
 ---
-name: >-
-  (Config Precedence) A '--plugin' CLI flag correctly overrides a plugin
-  specified in front matter
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.5
 base_command: md-to-pdf
 tags:
@@ -107,9 +100,7 @@ tags:
   - smoke
   - pdf
 scenarios:
-  - description: >-
-      (Config Precedence) A '--plugin' CLI flag correctly overrides a plugin
-      specified in front matter
+  - description: should successfully use the --plugin CLI flag to trump front matter key
     test_id: 3.1.5
     args: >-
       convert {{paths.simpleMdFixtureWithFm}} --plugin cv --outdir {{tmpdir}}
@@ -122,7 +113,7 @@ scenarios:
         - "{{tmpdir}}/cli-override.pdf"
         - 1000
 ---
-name: (Sad Path) Fails with a non-zero exit code when the input file does not exist
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.6
 base_command: md-to-pdf
 tags:
@@ -132,17 +123,13 @@ tags:
   - pdf
   - sad-path
 scenarios:
-  - description: >-
-      (Sad Path) Fails with a non-zero exit code when the input file does not
-      exist
+  - description: should fail with a non-zero exit code when the input file does not exist
     test_id: 3.1.6
     args: convert {{tmpdir}}/non-existent-file.md --no-open
     expect_failure:
       contains: Markdown file not found
 ---
-name: >-
-  (Sad Path) Fails with a non-zero exit code when a non-existent plugin is
-  specified
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.7
 base_command: md-to-pdf
 tags:
@@ -152,9 +139,7 @@ tags:
   - pdf
   - sad-path
 scenarios:
-  - description: >-
-      (Sad Path) Fails with a non-zero exit code when a non-existent plugin is
-      specified
+  - description: should fail with a non-zero exit code when the plugin does not exist
     test_id: 3.1.7
     args: >-
       convert {{paths.simpleMdFixture}} --plugin i-do-not-exist-as-a-plugin

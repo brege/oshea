@@ -160,26 +160,25 @@ yaml:
   alias: "yaml-format"
   group: "docs"
   targets:
-   - "."
-  filetypes: [".yaml"]
+   - "test/runners/smoke/"
+  filetypes: [".yaml"] # perhaps treat *.yml differently..
   field_order:
-    # Lower numbers = higher priority (appear first)
-    # Negative numbers for super important fields
+    # Lower numbers = higher priority
     name: -1
-    test_id: 0
-    base_command: 1
-    tags: 2
-    visual_focus: 3
-    scenarios: 10
-    description: 5
+    description: 0
+    test_id: 1
+    base_command: 2
+    tags: 3
+    visual_focus: 4
     args: 6
     expect: 7
     expect_failure: 8
     expect_not: 9
-    visual_check: 11
     skip: 12
     debug: 13
-    # Fields not listed get priority 999 (appear last)
+    workflow: 19
+    scenarios: 20
+    visual_check: 21
 
 # --- Harness Configuration ---
 harness:
@@ -217,6 +216,9 @@ harness:
     - key: 'janitor'
       label: 'Docs: Find Litter (Janitor)'
       scriptPath: scripts/linting/docs/janitor.js
+    - key: 'yaml'
+      label: 'Docs: Check YAML Format'
+      scriptPath: scripts/linting/docs/yaml.js
 
     # --- Harness ---
     - key: 'eslint'

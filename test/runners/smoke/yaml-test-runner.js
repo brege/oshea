@@ -27,7 +27,6 @@ const {
   createDisplayCommand,
   validateResult,
   parseArgs,
-  matchesGrep,
   listTestSuites
 } = require(yamlTestHelpersPath);
 
@@ -40,6 +39,7 @@ class YamlTestRunner {
     this.needsWorkspace = false;
     this.hasDiscovery = false;
     this.sessionTitle = 'YAML Test Runner';
+    this.apiMode = options.apiMode || false; // New API mode for structured data return
   }
 
   // Auto-detect YAML capabilities to determine required features
@@ -99,11 +99,13 @@ class YamlTestRunner {
   async runTestSuite(testSuite, showMode = false) {
     // Skip entire test suite if marked with skip: true
     if (testSuite.skip) {
-      if (showMode) {
-        logger.info({ suiteName: `${testSuite.name} (SKIPPED)` }, { format: 'yaml-show-suite' });
-      } else {
-        logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
-        logger.info({ description: testSuite.name, status: 'skipped' }, { format: 'workflow-step' });
+      if (!this.apiMode) {
+        if (showMode) {
+          logger.info({ suiteName: `${testSuite.name} (SKIPPED)` }, { format: 'yaml-show-suite' });
+        } else {
+          logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
+          logger.info({ description: testSuite.name, status: 'skipped' }, { format: 'workflow-step' });
+        }
       }
       return {
         failedCount: 0,
@@ -113,10 +115,12 @@ class YamlTestRunner {
       };
     }
 
-    if (showMode) {
-      logger.info({ suiteName: testSuite.name }, { format: 'yaml-show-suite' });
-    } else {
-      logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
+    if (!this.apiMode) {
+      if (showMode) {
+        logger.info({ suiteName: testSuite.name }, { format: 'yaml-show-suite' });
+      } else {
+        logger.info({ suiteName: testSuite.name }, { format: 'workflow-suite' });
+      }
     }
 
     // Setup workspace isolation if needed (auto-detected)
@@ -131,7 +135,10 @@ class YamlTestRunner {
     }
 
     // Use appropriate scenario processing (auto-detected)
-    const scenarios = this.hasDiscovery ? expandScenarios(testSuite) : testSuite.scenarios;
+    // If testSuite already has expanded scenarios (from atomic filtering), use them directly
+    const scenarios = (testSuite.scenarios && testSuite.scenarios.length > 0 && testSuite.scenarios[0].test_id && !testSuite.scenarios[0].test_id.includes('{'))
+      ? testSuite.scenarios
+      : (this.hasDiscovery ? expandScenarios(testSuite) : testSuite.scenarios);
     const results = [];
     let failedScenarios = [];
 
@@ -145,7 +152,7 @@ class YamlTestRunner {
 
       // Skip scenarios marked with skip: true
       if (scenario.skip) {
-        if (!showMode) {
+        if (!showMode && !this.apiMode) {
           const skipCommandDisplay = createDisplayCommand(
             testSuite.base_command || 'md-to-pdf',
             scenario.args,
@@ -389,7 +396,7 @@ class YamlTestRunner {
     logger.debug(`Created broken plugin '${plugin}' with breakage '${type}' in ${destinationDir}`, { format: 'workflow-debug' });
   }
 
-  async runAllTests(showMode = false, targetBlock = null, grepPattern = null) {
+  async runAllTests(showMode = false, targetBlock = null, grepPattern = null, testId = null) {
     // Use the yamlFilePath set in constructor
     const yamlContent = fs.readFileSync(this.yamlFilePath, 'utf8');
     const testSuites = yaml.loadAll(yamlContent).filter(doc => doc && doc.name);
@@ -401,7 +408,47 @@ class YamlTestRunner {
 
     // Apply grep filtering first
     if (grepPattern) {
-      suitesToRun = testSuites.filter(suite => matchesGrep(grepPattern, suite));
+      const filteredSuites = [];
+
+      for (const suite of testSuites) {
+        const lowerPattern = grepPattern.toLowerCase();
+
+        // Check if suite-level matches (run entire suite)
+        // Skip suite-level matching if pattern looks like a specific test_id (contains dots and specific format)
+        const looksLikeTestId = /^[A-Za-z0-9]+(\.[A-Za-z0-9]+)+/.test(grepPattern);
+
+        if (!looksLikeTestId &&
+            ((suite.name && suite.name.toLowerCase().includes(lowerPattern)) ||
+             (suite.test_id && suite.test_id.toString().toLowerCase().includes(lowerPattern)) ||
+             (suite.tags && Array.isArray(suite.tags) &&
+              suite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))))) {
+          filteredSuites.push(suite);
+          continue;
+        }
+
+        // Check scenario-level matches (filter scenarios within suite)
+        const scenarios = expandScenarios(suite);
+        const matchingScenarios = scenarios.filter(scenario => {
+          // For test_id, try exact match first, then fallback to includes
+          if (scenario.test_id && scenario.test_id.toString().toLowerCase() === lowerPattern) {
+            return true;
+          }
+          return (scenario.description && scenario.description.toLowerCase().includes(lowerPattern)) ||
+                 (scenario.test_id && scenario.test_id.toString().toLowerCase().includes(lowerPattern));
+        });
+
+        if (matchingScenarios.length > 0) {
+          // Create modified suite with only matching scenarios
+          const filteredSuite = {
+            ...suite,
+            scenarios: matchingScenarios
+          };
+          filteredSuites.push(filteredSuite);
+        }
+      }
+
+      suitesToRun = filteredSuites;
+
       if (suitesToRun.length === 0) {
         // During multi-file processing, quietly skip files with no grep matches
         // Only show error if processing a single file
@@ -439,10 +486,63 @@ class YamlTestRunner {
       }
     }
 
-    if (showMode) {
-      logger.info({ title: this.sessionTitle }, { format: 'yaml-show-session' });
-    } else {
-      logger.info({ title: this.sessionTitle }, { format: 'workflow-header' });
+    // Apply atomic testId filtering
+    if (testId) {
+      let foundSuite = null;
+      let foundScenario = null;
+
+      // Search for exact test_id match in suites and scenarios
+      for (const suite of suitesToRun) {
+        // Check suite-level test_id
+        if (suite.test_id && suite.test_id.toString() === testId) {
+          foundSuite = suite;
+          break;
+        }
+
+        // Check scenario-level test_ids
+        const scenarios = expandScenarios(suite);
+        const matchingScenario = scenarios.find(scenario =>
+          scenario.test_id && scenario.test_id.toString() === testId
+        );
+
+        if (matchingScenario) {
+          foundSuite = suite;
+          foundScenario = matchingScenario;
+          break;
+        }
+      }
+
+      if (!foundSuite) {
+        // During multi-file processing, quietly skip files with no test_id matches
+        if (this.options.isMultiFile) {
+          logger.debug(`Test ID "${testId}" not found in ${path.basename(this.yamlFilePath)}, skipping.`);
+          return true; // Success, but no work to do
+        } else {
+          logger.error({ message: `Test ID "${testId}" not found. Use --list to see available test IDs.` }, { format: 'workflow-warning' });
+          return false;
+        }
+      }
+
+      // If we found a specific scenario, run only that scenario atomically
+      if (foundScenario) {
+        // Create a modified suite with only the target scenario
+        const atomicSuite = {
+          ...foundSuite,
+          scenarios: [foundScenario]
+        };
+        suitesToRun = [atomicSuite];
+      } else {
+        // Run the entire suite that matches the test_id
+        suitesToRun = [foundSuite];
+      }
+    }
+
+    if (!this.apiMode) {
+      if (showMode) {
+        logger.info({ title: this.sessionTitle }, { format: 'yaml-show-session' });
+      } else {
+        logger.info({ title: this.sessionTitle }, { format: 'workflow-header' });
+      }
     }
 
     // Run test suites sequentially for clean output
@@ -457,17 +557,30 @@ class YamlTestRunner {
 
     const totalFailed = allResults.reduce((sum, result) => sum + result.failedCount, 0);
 
-    // Display final results using structured data
-    if (this.needsWorkspace) {
-      logger.info({
-        suiteCount: suitesToRun.length,
-        failedScenarios: allFailedScenarios
-      }, { format: 'workflow-results' });
-    } else {
-      logger.info({
+    // Display final results using structured data (unless in API mode)
+    if (!this.apiMode) {
+      if (this.needsWorkspace) {
+        logger.info({
+          suiteCount: suitesToRun.length,
+          failedScenarios: allFailedScenarios
+        }, { format: 'workflow-results' });
+      } else {
+        logger.info({
+          allResults,
+          totalFailed
+        }, { format: 'workflow-results' });
+      }
+    }
+
+    // Return structured data for API mode, boolean for CLI mode
+    if (this.apiMode) {
+      return {
+        success: totalFailed === 0,
+        totalFailed,
         allResults,
-        totalFailed
-      }, { format: 'workflow-results' });
+        allFailedScenarios,
+        suiteCount: suitesToRun.length
+      };
     }
 
     return totalFailed === 0;
@@ -529,16 +642,16 @@ if (require.main === module) {
     process.exit(1);
   }
 
-  const { showMode, listMode, grepPattern, targetBlock } = parseArgs(filteredArgs);
+  const { showMode, listMode, grepPattern, targetBlock, testId } = parseArgs(filteredArgs);
 
   if (listMode) {
     // List mode: show all test suites from all YAML files
-    logger.info({ message: `Found ${yamlFiles.length} YAML file(s):` }, { format: 'workflow-list' });
+    logger.info(`Found ${yamlFiles.length} YAML file(s):`, { format: 'info' });
     for (const yamlFile of yamlFiles) {
-      logger.info({ message: `=== ${path.basename(yamlFile)} ===` }, { format: 'workflow-list' });
+      logger.info(`=== ${path.basename(yamlFile)} ===`, { format: 'info' });
       const runner = new YamlTestRunner(yamlFile, options);
       runner.listTests();
-      logger.info({ message: '' }, { format: 'workflow-list' });
+      logger.info('', { format: 'info' });
     }
   } else {
     // Run mode: execute tests from all YAML files sequentially
@@ -549,7 +662,7 @@ if (require.main === module) {
         const runnerOptions = { ...options, isMultiFile: yamlFiles.length > 1 };
         const runner = new YamlTestRunner(yamlFile, runnerOptions);
         try {
-          const success = await runner.runAllTests(showMode, targetBlock, grepPattern);
+          const success = await runner.runAllTests(showMode, targetBlock, grepPattern, testId);
           if (!success) allSuccess = false;
         } catch (error) {
           logger.error({ message: `YAML test runner crashed on ${yamlFile}: ${error.message}`, stack: error.stack }, { format: 'workflow-warning' });

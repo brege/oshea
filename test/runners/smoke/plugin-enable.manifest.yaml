@@ -1,4 +1,4 @@
-name: (Happy) Successfully enables a plugin from a collection
+name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
 test_id: 3.7.1
 base_command: md-to-pdf
 tags:
@@ -8,8 +8,9 @@ tags:
   - smoke
   - collection
   - happy-path
+workflow: true
 scenarios:
-  - description: Create a collection with a plugin to enable
+  - description: should create a collection with a plugin to enable
     test_id: 3.7.1.1
     args: >-
       collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
@@ -17,7 +18,7 @@ scenarios:
     expect:
       executes: true
       contains: Successfully
-  - description: Successfully enables a plugin from a collection
+  - description: should successfully enable a plugin from a collection without validation
     test_id: 3.7.1.2
     args: >-
       plugin enable test-collection/valid-collection-plugin-1
@@ -26,9 +27,7 @@ scenarios:
       executes: true
       contains: Attempting to enable plugin
 ---
-name: >-
-  (Happy) The plugin enable command successfully enables a valid plugin (with
-  validation)
+name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
 test_id: 3.7.2
 base_command: md-to-pdf
 tags:
@@ -40,7 +39,7 @@ tags:
   - validation
   - happy-path
 scenarios:
-  - description: Create a collection with a valid plugin
+  - description: should successfully create a collection with a valid plugin
     test_id: 3.7.2.1
     args: >-
       collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
@@ -48,16 +47,14 @@ scenarios:
     expect:
       executes: true
       contains: Successfully
-  - description: Successfully enables a valid plugin with validation
+  - description: should successfully enable a valid plugin from a collection
     test_id: 3.7.2.2
     args: plugin enable valid-coll/valid-collection-plugin-1
     expect:
       executes: true
       contains: Attempting to enable plugin
 ---
-name: >-
-  (Sad) The plugin enable command fails to enable an invalid plugin and reports
-  validation errors
+name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
 test_id: 3.7.3
 base_command: md-to-pdf
 tags:
@@ -68,7 +65,7 @@ tags:
   - validation
   - sad-path
 scenarios:
-  - description: Create broken collection and add it
+  - description: should create a collection with an invalid plugin
     test_id: 3.7.3.1
     args: collection add {{tmpdir}}/invalid-coll --name invalid-coll
     expect:
@@ -78,7 +75,7 @@ scenarios:
       plugin: invalid-plugin
       type: missing-handler
       collection: invalid-coll
-  - description: Fails to enable invalid plugin and reports validation errors
+  - description: should fail to enable an invalid plugin and reports validation errors
     test_id: 3.7.3.2
     args: plugin enable invalid-coll/invalid-plugin
     expect:

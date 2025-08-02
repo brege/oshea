@@ -128,6 +128,15 @@ tests:
       - all
     app_files:
       - src/collections/
+    deprecated: true
+    notes: >-
+      This test validated git working directory state handling during collection
+      updates. While technically correct, it tests git behavior rather than user
+      workflow patterns. Such validation belongs in the existing comprehensive
+      smoke test suite, not in workflow demonstrations. Users benefit more from
+      learning successful update patterns than observing git error conditions
+      they should avoid through proper workflow habits.
+
   4.3.2:
     description: >
       The `plugin create --from <source>` command fails gracefully with a non-zero exit code when
@@ -144,6 +153,15 @@ tests:
       - all
     app_files:
       - src/cli/commands/plugin/create.command.js
+    deprecated: true
+    notes: >-
+      This test validated error handling when creating plugins from nonexistent
+      sources. However, it tests input validation logic rather than
+      demonstrating useful workflow patterns. Modern users benefit more from
+      seeing successful plugin creation workflows with proper source selection
+      than edge case error scenarios. Input validation is thoroughly covered by
+      the existing smoke test infrastructure.
+
   4.1.5:
     description: >
       A user can successfully perform the complete unified plugin architecture workflow including

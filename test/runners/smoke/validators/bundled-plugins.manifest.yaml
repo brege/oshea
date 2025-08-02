@@ -1,4 +1,6 @@
-name: Validate bundled plugins
+name: >-
+  plugin validate (Validation Test) src/validators/v1.js
+  src/plugins/validator.js
 test_id: P.3.3.bundled
 base_command: md-to-pdf
 tags:
@@ -7,8 +9,9 @@ tags:
   - plugin
   - bundled
   - validate
+workflow: false
 scenarios:
-  - description: Validate plugin {item}
+  - description: should validate the bundled {item} plugin
     test_id: P.3.3.{item}
     args: plugin validate {item}
     expect:

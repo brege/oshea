@@ -209,7 +209,7 @@ class PluginRegistryBuilder {
             type: pluginType
           });
         } else {
-          logger.warn('User plugin directory found but no config file', {
+          logger.debug('User plugin directory found but no config file', {
             context: 'PluginRegistryBuilder',
             pluginDir: pluginDir,
             expectedConfig: `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,

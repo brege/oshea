@@ -198,6 +198,12 @@ function expandScenarios(testSuite) {
         args: scenarioTemplate.args.replace('{command}', item).replace('{item}', item),
         expect: scenarioTemplate.expect
       };
+
+      // Handle test_id expansion
+      if (scenarioTemplate.test_id) {
+        scenario.test_id = scenarioTemplate.test_id.replace('{command}', item).replace('{item}', item);
+      }
+
       expandedScenarios.push(scenario);
     }
   }
@@ -320,7 +326,8 @@ function parseArgs(args, options = {}) {
     showMode: false,
     listMode: false,
     grepPattern: null,
-    targetBlock: null
+    targetBlock: null,
+    testId: null
   };
 
   // Add yamlFile support if requested
@@ -341,6 +348,14 @@ function parseArgs(args, options = {}) {
         i++; // Skip next arg since it's the grep pattern
       } else {
         logger.error('Error: --grep requires a pattern argument');
+        process.exit(1);
+      }
+    } else if (arg === '--test-id') {
+      if (i + 1 < args.length) {
+        result.testId = args[i + 1];
+        i++; // Skip next arg since it's the test ID
+      } else {
+        logger.error('Error: --test-id requires a test ID argument');
         process.exit(1);
       }
     } else if (!arg.startsWith('--')) {
@@ -377,7 +392,7 @@ function executeCommandWithColors(command) {
   });
 }
 
-// Grep filtering function - matches against suite name, tags, and scenario descriptions
+// Grep filtering function - matches against suite name, tags, test_ids, and scenario descriptions
 function matchesGrep(grepPattern, testSuite) {
   if (!grepPattern) return true;
 
@@ -388,6 +403,11 @@ function matchesGrep(grepPattern, testSuite) {
     return true;
   }
 
+  // Match against suite-level test_id
+  if (testSuite.test_id && testSuite.test_id.toString().toLowerCase().includes(lowerPattern)) {
+    return true;
+  }
+
   // Match against tags
   if (testSuite.tags && Array.isArray(testSuite.tags)) {
     if (testSuite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))) {
@@ -395,11 +415,19 @@ function matchesGrep(grepPattern, testSuite) {
     }
   }
 
-  // Match against scenario descriptions (from expanded scenarios)
+  // Match against scenario descriptions and test_ids (from expanded scenarios)
   const scenarios = expandScenarios(testSuite);
-  if (scenarios.some(scenario =>
-    scenario.description && scenario.description.toLowerCase().includes(lowerPattern)
-  )) {
+  if (scenarios.some(scenario => {
+    // Match scenario description
+    if (scenario.description && scenario.description.toLowerCase().includes(lowerPattern)) {
+      return true;
+    }
+    // Match scenario test_id
+    if (scenario.test_id && scenario.test_id.toString().toLowerCase().includes(lowerPattern)) {
+      return true;
+    }
+    return false;
+  })) {
     return true;
   }
 

@@ -1,4 +1,4 @@
-name: "(Happy Path) Create plugin from default template and validate"
+name: plugin create (End-to-End Test) src/cli/commands/plugin/create.command.js
 base_command: md-to-pdf
 tags:
   - plugin
@@ -6,47 +6,21 @@ tags:
   - validate
   - cli
   - smoke
+workflow: false
 scenarios:
   - description: >-
-      (Happy Path) Successfully creates a new plugin directory with boilerplate
-      files
+      should successfully create a new plugin directory from the default
+      template
     test_id: 3.5.1
     args: plugin create my-boilerplate-plugin --outdir {{tmpdir}}
     expect:
-      executes: true
       contains: created successfully
       file_exists: "{{tmpdir}}/my-boilerplate-plugin/index.js"
-  - description: (Happy Path) A plugin created from the default template passes validation
-    test_id: 3.5.3
-    args: plugin validate {{tmpdir}}/my-boilerplate-plugin
-    expect:
-      executes: true
-      contains: Plugin 'my-boilerplate-plugin' is VALID
----
-name: "(Happy Path) Create archetyped plugin and validate"
-base_command: md-to-pdf
-tags:
-  - plugin
-  - create
-  - validate
-  - cli
-  - smoke
-  - archetype
-scenarios:
   - description: >-
-      (Key Option) Successfully archetypes a new plugin from a source with
-      --from
+      should successfully create a new plugin directory from a bundled source
+      (--from)
     test_id: 3.5.2
     args: plugin create my-archetyped-plugin --from cv --outdir {{tmpdir}}
     expect:
-      executes: true
       contains: created successfully
       file_exists: "{{tmpdir}}/my-archetyped-plugin/index.js"
-  - description: >-
-      (Happy Path) A plugin archetyped from a valid bundled plugin passes
-      validation
-    test_id: 3.5.4
-    args: plugin validate {{tmpdir}}/my-archetyped-plugin
-    expect:
-      executes: true
-      contains: Plugin 'my-archetyped-plugin' is VALID

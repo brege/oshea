@@ -273,6 +273,8 @@ tests:
       - pluginCmds
     app_files:
       - src/cli/commands/plugin/create.command.js
+    deprecated: true
+    notes: There are already tests for validating plugins. The original implementation here predated the workflow (level 4) tests.
   3.5.4:
     description: (Happy Path) A plugin archetyped from a valid bundled plugin passes validation.
     commands:
@@ -287,6 +289,8 @@ tests:
       - pluginCmds
     app_files:
       - src/cli/commands/plugin/create.command.js
+    deprecated: true
+    notes: There are already tests for validating plugins. The original implementation here predated the workflow (level 4) tests.
   3.6.1:
     description: (Happy Path) Successfully adds and enables a singleton plugin from a local path.
     commands:

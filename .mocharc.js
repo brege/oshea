@@ -59,6 +59,9 @@ const paths = {
   // --- Linting ---
   linting_units:          'test/runners/linting/unit/all-linting-unit.test.js',
 
+  // --- YAML Tests ---
+  yaml:                   'test/runners/smoke/yaml-mocha.test.js',
+
 };
 
 // --- By Rank -- Integration Tests ---
@@ -173,13 +176,16 @@ const groups = {
   // All Linting Tests
   linting:         paths.linting_units,
 
+  // All YAML Tests
+  yaml:            paths.yaml,
+
   // Everything
   all: [
     paths.integration,
     paths.e2e,
     paths.insitu,
     paths.linting_units,
-    //paths.smoke
+    paths.yaml
   ]
 };
 

@@ -1,4 +1,4 @@
-// src/cli/commands/generate.command.js
+// src/cli/generate.command.js
 
 module.exports = {
   command: 'generate <pluginName>',

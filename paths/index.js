@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-02T22:56:40.946Z
+// Generated: 2025-08-02T23:14:38.734Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -28,7 +28,6 @@ const srcRoot = path.join(projectRoot, 'src');
 const assetsRoot = path.join(projectRoot, 'assets');
 const scriptsRoot = path.join(projectRoot, 'scripts');
 const testRoot = path.join(projectRoot, 'test');
-const cliCommandsPath = path.join(srcRoot, 'cli', 'commands');
 const collectionsCommandsRoot = path.join(srcRoot, 'collections', 'commands');
 
 // --- Development & Build Tools ---
@@ -83,24 +82,24 @@ const lintingTestRunnerFactory = path.join(lintingDir, 'test-runner-factory.js')
 
 // Command Line Interface
 const cliRoot = path.join(projectRoot, 'src/cli/');
-const collectionCommandPath = path.join(projectRoot, 'src/cli/commands/collection.command.js');
-const configCommandPath = path.join(projectRoot, 'src/cli/commands/config.command.js');
-const convertCommandPath = path.join(projectRoot, 'src/cli/commands/convert.command.js');
-const generateCommandPath = path.join(projectRoot, 'src/cli/commands/generate.command.js');
-const pluginCommandPath = path.join(projectRoot, 'src/cli/commands/plugin.command.js');
-const updateCommandPath = path.join(projectRoot, 'src/cli/commands/update.command.js');
-const collectionsAddCommandPath = path.join(projectRoot, 'src/cli/commands/collection/add.command.js');
-const pluginAddCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/add.command.js');
-const createCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/create.command.js');
-const disableCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/disable.command.js');
-const enableCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/enable.command.js');
-const helpCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/help.command.js');
-const collectionsListCommandPath = path.join(projectRoot, 'src/cli/commands/collection/list.command.js');
-const pluginListCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/list.command.js');
-const collectionsRemoveCommandPath = path.join(projectRoot, 'src/cli/commands/collection/remove.command.js');
-const pluginRemoveCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/remove.command.js');
-const collectionsUpdateCommandPath = path.join(projectRoot, 'src/cli/commands/collection/update.command.js');
-const validateCommandPath = path.join(projectRoot, 'src/cli/commands/plugin/validate.command.js');
+const collectionCommandPath = path.join(projectRoot, 'src/cli/collection.command.js');
+const configCommandPath = path.join(projectRoot, 'src/cli/config.command.js');
+const convertCommandPath = path.join(projectRoot, 'src/cli/convert.command.js');
+const generateCommandPath = path.join(projectRoot, 'src/cli/generate.command.js');
+const pluginCommandPath = path.join(projectRoot, 'src/cli/plugin.command.js');
+const updateCommandPath = path.join(projectRoot, 'src/cli/update.command.js');
+const collectionsAddCommandPath = path.join(projectRoot, 'src/cli/collection/add.command.js');
+const pluginAddCommandPath = path.join(projectRoot, 'src/cli/plugin/add.command.js');
+const createCommandPath = path.join(projectRoot, 'src/cli/plugin/create.command.js');
+const disableCommandPath = path.join(projectRoot, 'src/cli/plugin/disable.command.js');
+const enableCommandPath = path.join(projectRoot, 'src/cli/plugin/enable.command.js');
+const helpCommandPath = path.join(projectRoot, 'src/cli/plugin/help.command.js');
+const collectionsListCommandPath = path.join(projectRoot, 'src/cli/collection/list.command.js');
+const pluginListCommandPath = path.join(projectRoot, 'src/cli/plugin/list.command.js');
+const collectionsRemoveCommandPath = path.join(projectRoot, 'src/cli/collection/remove.command.js');
+const pluginRemoveCommandPath = path.join(projectRoot, 'src/cli/plugin/remove.command.js');
+const collectionsUpdateCommandPath = path.join(projectRoot, 'src/cli/collection/update.command.js');
+const validateCommandPath = path.join(projectRoot, 'src/cli/plugin/validate.command.js');
 
 // AI Tooling
 const aiRoot = path.join(projectRoot, 'scripts/ai/');
@@ -364,7 +363,6 @@ module.exports = {
   assetsRoot,
   scriptsRoot,
   testRoot,
-  cliCommandsPath,
   collectionsCommandsRoot,
   scriptsSharedRoot,
   eslintPath,

@@ -1,4 +1,4 @@
-// src/cli/commands/collection/list.command.js
+// src/cli/collection/list.command.js
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 

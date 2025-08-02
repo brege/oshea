@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/remove.command.js
+// src/cli/plugin/remove.command.js
 const path = require('path');
 const fs = require('fs');
 const fsExtra = require('fs-extra');

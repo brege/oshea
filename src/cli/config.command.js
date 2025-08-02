@@ -1,4 +1,4 @@
-// src/cli/commands/config.command.js
+// src/cli/config.command.js
 const fs = require('fs');
 
 const { loggerPath, configFormatterPath } = require('@paths');

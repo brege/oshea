@@ -29,7 +29,6 @@ registries:
           assets_root: path.join(projectRoot, 'assets')
           scripts_root: path.join(projectRoot, 'scripts')
           test_root: path.join(projectRoot, 'test')
-          cli_commands_path: path.join(srcRoot, 'cli', 'commands')
           collections_commands_root: path.join(srcRoot, 'collections', 'commands')
       tooling:
         comment: Development & Build Tools
@@ -193,16 +192,16 @@ registries:
         rank: 2
     contextual_naming:
       add.command.js:
-        cli/commands/collection: collections_add_command
-        cli/commands/plugin: plugin_add_command
+        cli/collection: collections_add_command
+        cli/plugin: plugin_add_command
       list.command.js:
-        cli/commands/collection: collections_list_command
-        cli/commands/plugin: plugin_list_command
+        cli/collection: collections_list_command
+        cli/plugin: plugin_list_command
       remove.command.js:
-        cli/commands/collection: collections_remove_command
-        cli/commands/plugin: plugin_remove_command
+        cli/collection: collections_remove_command
+        cli/plugin: plugin_remove_command
       update.command.js:
-        cli/commands/collection: collections_update_command
+        cli/collection: collections_update_command
       add:
         collections/commands: collections_add
       list:

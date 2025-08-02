@@ -1,4 +1,4 @@
-// src/cli/commands/convert.command.js
+// src/cli/convert.command.js
 
 const cliOptionsForConvert = (yargs) => {
   yargs

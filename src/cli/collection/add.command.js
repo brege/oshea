@@ -1,4 +1,4 @@
-// src/cli/commands/collection/add.command.js
+// src/cli/collection/add.command.js
 const { loggerPath, cliPath } = require('@paths');
 const { execSync } = require('child_process');
 

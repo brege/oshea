@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/add.command.js
+// src/cli/plugin/add.command.js
 const path = require('path');
 const fss = require('fs');
 const { loggerPath, cliPath, colorThemePath } = require('@paths');

@@ -1,4 +1,4 @@
-// src/cli/commands/plugin/help.command.js
+// src/cli/plugin/help.command.js
 const { pluginHelpPath, loggerPath } = require('@paths');
 const { displayPluginHelp } = require(pluginHelpPath);
 

@@ -1,4 +1,4 @@
-// src/cli/commands/collection.command.js
+// src/cli/collection.command.js
 const {
   collectionsAddCommandPath,
   collectionsListCommandPath,

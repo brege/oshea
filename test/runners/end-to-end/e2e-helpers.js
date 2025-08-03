@@ -8,7 +8,7 @@ const path = require('path');
 const { exec } = require('child_process');
 const yaml = require('js-yaml');
 const {
-  cliCommandsPath,
+  cliRoot,
   projectRoot,
   loggerPath,
   simpleMdFixture,
@@ -122,7 +122,7 @@ const discoverers = {
       return commands;
     }
 
-    const commandPartsList = discoverCommands(cliCommandsPath);
+    const commandPartsList = discoverCommands(cliRoot);
     commandPartsList.push([]);
 
     return Array.from(new Set(commandPartsList.map(p => p.join(' ')))).sort();

@@ -23,7 +23,6 @@
 # scripts/linting/code/no-jsdoc.js
 no-jsdoc:
   group: code
-  alias: jsdoc
   filetypes: [".js"]
   targets:
     - "."
@@ -31,7 +30,6 @@ no-jsdoc:
 
 # scripts/linting/code/no-console.js
 no-console:
-  alias: logs
   group: code
   filetypes: [".js"]
   targets:
@@ -41,7 +39,6 @@ no-console:
 
 # scripts/linting/code/no-bad-headers.js
 no-bad-headers:
-  alias: header
   group: code
   filetypes: [".js"]
   targets:
@@ -50,7 +47,6 @@ no-bad-headers:
 
 # scripts/linting/code/no-trailing-whitespace.js
 no-trailing-whitespace:
-  alias: ws
   group: code
   filetypes: [".css", ".js", ".json", ".yaml"]
   targets: ["."]
@@ -58,7 +54,6 @@ no-trailing-whitespace:
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
-  alias: paths
   group: code
   filetypes: [".js"]
   targets: ["."]
@@ -67,7 +62,6 @@ no-relative-paths:
 
 # scripts/linting/code/no-old-project-name.js
 no-old-project-name:
-  alias: rename
   group: code
   filetypes: [".*"]
   targets: ["."]
@@ -92,28 +86,25 @@ no-old-project-name:
     snake_case: "oshea"
   # Ignore specific matches (whitelist these patterns to skip linting)
   ignore_matches:
-    - "md-to-pdf-plugins"
-    - "Markdown to PDF"
+    #- "md-to-pdf-plugins"
+    #- "Markdown to PDF"
 
 # --- Validators ---
 
 # scripts/linting/validators/mocha-path-validator.js
 validate-mocha:
-  alias: "mocha"
   group: "validators"
 
 # --- Docs ---
 
 # scripts/linting/docs/janitor.js
 janitor:
-  alias: "litter"
   group: "docs"
   targets: ["."]
   excludes: []
 
 # scripts/linting/docs/librarian.js
 librarian:
-  alias: "index"
   group: "docs"
   docs:
     indexFile: docs/index.md
@@ -170,7 +161,6 @@ librarian:
 
 # scripts/linting/docs/postman.js
 postman:
-  alias: "links"
   group: "docs"
   targets:
    - "."
@@ -187,7 +177,6 @@ postman:
 
 # scripts/linting/docs/yaml.js
 yaml:
-  alias: "yaml-format"
   group: "docs"
   targets:
    - "test/runners/smoke/"
@@ -217,37 +206,47 @@ harness:
   steps:
     # --- Code ---
     - key: 'no-trailing-whitespace'
+      alias: 'ws'
       label: 'Code: Check for trailing whitespace'
       scriptPath: scripts/linting/code/no-trailing-whitespace.js
     - key: 'no-bad-headers'
+      alias: 'headers'
       label: 'Code: Check for bad file headers'
       scriptPath: scripts/linting/code/no-bad-headers.js
     - key: 'no-console'
+      alias: 'chalk'
       label: 'Code: Check for console/chalk usage'
       scriptPath: scripts/linting/code/no-console.js
     - key: 'no-jsdoc'
+      alias: 'jsdoc'
       label: 'Code: Check for JSdoc comments'
       scriptPath: scripts/linting/code/no-jsdoc.js
     - key: 'no-relative-paths'
+      alias: 'paths'
       label: 'Code: Check for relative paths'
       scriptPath: scripts/linting/code/no-relative-paths.js
     - key: 'no-old-project-name'
+      alias: 'rename'
       label: 'Code: Check for old project name references'
       scriptPath: scripts/linting/code/no-old-project-name.js
 
     # --- Validators ---
     - key: 'validate-mocha'
+      alias: 'mocha'
       label: 'Validator: Check .mocharc.js paths'
       scriptPath: scripts/linting/validators/mocha-path-validator.js
 
     # --- Docs ---
     - key: 'librarian'
+      alias: 'index'
       label: 'Docs: Update project indices (Librarian)'
       scriptPath: scripts/linting/docs/librarian.js
     - key: 'postman'
+      alias: 'links'
       label: 'Docs: Check for links in markdown (Postman)'
       scriptPath: scripts/linting/docs/postman.js
     - key: 'janitor'
+      alias: 'litter'
       label: 'Docs: Find litter (Janitor)'
       scriptPath: scripts/linting/docs/janitor.js
     - key: 'yaml'

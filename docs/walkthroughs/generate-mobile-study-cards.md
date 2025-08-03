@@ -171,12 +171,12 @@ Contains the cell's genetic material and controls its growth and reproduction.
 
 ### Step 3: Add and Generate Your Notecard Deck
 
-First, add your new `notecard-deck` plugin so `md-to-pdf` can use it.
+First, add your new `notecard-deck` plugin so `oshea` can use it.
 
 **Command:**
 
 ```bash
-md-to-pdf plugin add ./notecard-deck
+oshea plugin add ./notecard-deck
 ```
 
 Now, run the `generate` command, pointing to your content directory.
@@ -184,7 +184,7 @@ Now, run the `generate` command, pointing to your content directory.
 **Command:**
 
 ```bash
-md-to-pdf generate notecard-deck --cards-dir ./my-notecards --outdir ./output
+oshea generate notecard-deck --cards-dir ./my-notecards --outdir ./output
 ```
 
 This will create a `notecard-deck.pdf` file in the `output/` directory, with each card on a separate, letter-sized page.
@@ -234,7 +234,7 @@ Sync the configuration change to your managed plugin.
 **Command:**
 
 ```bash
-md-to-pdf collection update _user_added_plugins
+oshea collection update _user_added_plugins
 ```
 
 Now, run the `generate` command again, but give the output a new name.
@@ -242,7 +242,7 @@ Now, run the `generate` command again, but give the output a new name.
 **Command:**
 
 ```bash
-md-to-pdf generate notecard-deck --cards-dir ./my-notecards --outdir ./output --filename mobile-deck.pdf
+oshea generate notecard-deck --cards-dir ./my-notecards --outdir ./output --filename mobile-deck.pdf
 ```
 
 ### Step 6: Compare the Results

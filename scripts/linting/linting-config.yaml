@@ -65,6 +65,36 @@ no-relative-paths:
   excludes:
     - paths
 
+# scripts/linting/code/no-old-project-name.js
+no-old-project-name:
+  alias: rename
+  group: code
+  filetypes: [".*"]
+  targets: ["."]
+  excludes:
+    - node_modules
+    - .git
+    - assets
+    - docs/archive
+    - test/archive
+    - scripts/linting/linting-config.yaml
+  # Project name patterns to find and replace
+  old_names:
+    primary: "md-to-pdf"
+    constant: "MD_TO_PDF"
+    camelCase: "mdToPdf"
+    snake_case: "md_to_pdf"
+  # New name replacements (leave empty to require --new-name flag)
+  new_names:
+    primary: "oshea"
+    constant: "OSHEA"
+    camelCase: "oshea"
+    snake_case: "oshea"
+  # Ignore specific matches (whitelist these patterns to skip linting)
+  ignore_matches:
+    - "md-to-pdf-plugins"
+    - "Markdown to PDF"
+
 # --- Validators ---
 
 # scripts/linting/validators/mocha-path-validator.js
@@ -187,10 +217,10 @@ harness:
   steps:
     # --- Code ---
     - key: 'no-trailing-whitespace'
-      label: 'Code: Strip Trailing Whitespace'
+      label: 'Code: Check for trailing whitespace'
       scriptPath: scripts/linting/code/no-trailing-whitespace.js
     - key: 'no-bad-headers'
-      label: 'Code: Standardize File Headers'
+      label: 'Code: Check for bad file headers'
       scriptPath: scripts/linting/code/no-bad-headers.js
     - key: 'no-console'
       label: 'Code: Check for console/chalk usage'
@@ -201,6 +231,9 @@ harness:
     - key: 'no-relative-paths'
       label: 'Code: Check for relative paths'
       scriptPath: scripts/linting/code/no-relative-paths.js
+    - key: 'no-old-project-name'
+      label: 'Code: Check for old project name references'
+      scriptPath: scripts/linting/code/no-old-project-name.js
 
     # --- Validators ---
     - key: 'validate-mocha'
@@ -209,13 +242,13 @@ harness:
 
     # --- Docs ---
     - key: 'librarian'
-      label: 'Docs: Update Project Indices (Librarian)'
+      label: 'Docs: Update project indices (Librarian)'
       scriptPath: scripts/linting/docs/librarian.js
     - key: 'postman'
-      label: 'Docs: Check Markdown Links (Postman)'
+      label: 'Docs: Check for links in markdown (Postman)'
       scriptPath: scripts/linting/docs/postman.js
     - key: 'janitor'
-      label: 'Docs: Find Litter (Janitor)'
+      label: 'Docs: Find litter (Janitor)'
       scriptPath: scripts/linting/docs/janitor.js
     - key: 'yaml'
       label: 'Docs: Check YAML Format'

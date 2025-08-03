@@ -1,6 +1,6 @@
 ## Test Harness and QA Analytics
 
-This directory contains the testing and quality assurance infrastructure for `md-to-pdf`, including test execution, analytics, and intelligent monitoring systems.
+This directory contains the testing and quality assurance infrastructure for `oshea`, including test execution, analytics, and intelligent monitoring systems.
 
 ### Testing Paradigm -- Manifest/Factory Harness
 
@@ -117,7 +117,7 @@ The analytics system provides intelligent insights into test performance, brittl
 
 **Data Storage**
 
-Test analytics data is stored in `~/.local/share/md-to-pdf/test-analytics/test-results.json` using an enhanced format that tracks:
+Test analytics data is stored in `~/.local/share/oshea/test-analytics/test-results.json` using an enhanced format that tracks:
 - Success/failure counts per test
 - Volatility classification (stable/flaky/unstable)
 - Temporal tracking (first seen, last run)

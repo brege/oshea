@@ -20,13 +20,13 @@ module.exports = [
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${fmPluginName}
+oshea_plugin: ${fmPluginName}
 ---
 # Markdown Content`,
         localConfig: `plugin: ${localCfgPluginName}\nsomeOverride: value`
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: fmPluginName },
+        fmData: { oshea_plugin: fmPluginName },
         parsedLocalConfig: { plugin: localCfgPluginName, someOverride: 'value' }
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
@@ -54,13 +54,13 @@ md_to_pdf_plugin: ${fmPluginName}
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${fmPluginName}
+oshea_plugin: ${fmPluginName}
 ---
 # Markdown Content for FM`,
         localConfig: `plugin: ${localCfgPluginName}\nanotherOverride: someValue`
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: fmPluginName },
+        fmData: { oshea_plugin: fmPluginName },
         markdownContent: '# Markdown Content for FM',
         parsedLocalConfig: { plugin: localCfgPluginName, anotherOverride: 'someValue' }
       };
@@ -300,13 +300,13 @@ some_other_key: some_value
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${pluginName}
+oshea_plugin: ${pluginName}
 ---
 # Markdown Content`,
         localConfig: undefined
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: pluginName },
+        fmData: { oshea_plugin: pluginName },
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
 
@@ -342,13 +342,13 @@ md_to_pdf_plugin: ${pluginName}
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${pluginName}
+oshea_plugin: ${pluginName}
 ---
 # Markdown Content`,
         localConfig: undefined
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: pluginName },
+        fmData: { oshea_plugin: pluginName },
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
 
@@ -388,13 +388,13 @@ md_to_pdf_plugin: ${pluginName}
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${pluginName}
+oshea_plugin: ${pluginName}
 ---
 # Markdown Content`,
         localConfig: undefined
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: pluginName },
+        fmData: { oshea_plugin: pluginName },
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
 
@@ -431,13 +431,13 @@ md_to_pdf_plugin: ${pluginName}
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${relativePluginPath}
+oshea_plugin: ${relativePluginPath}
 ---
 # Markdown Content`,
         localConfig: undefined
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: relativePluginPath },
+        fmData: { oshea_plugin: relativePluginPath },
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
@@ -489,13 +489,13 @@ md_to_pdf_plugin: ${relativePluginPath}
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${fmPluginName}
+oshea_plugin: ${fmPluginName}
 ---
 # Content`,
         localConfig: undefined
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: fmPluginName },
+        fmData: { oshea_plugin: fmPluginName },
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },
@@ -543,13 +543,13 @@ md_to_pdf_plugin: ${fmPluginName}
 
       const fileContents = {
         markdown: `---
-md_to_pdf_plugin: ${fmPluginName}
+oshea_plugin: ${fmPluginName}
 ---
 # Content`,
         localConfig: undefined
       };
       const parsedContents = {
-        fmData: { md_to_pdf_plugin: fmPluginName },
+        fmData: { oshea_plugin: fmPluginName },
       };
       setupTestFiles(mocks, constants, fileContents, parsedContents);
     },

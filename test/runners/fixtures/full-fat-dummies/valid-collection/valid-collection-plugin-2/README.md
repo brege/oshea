@@ -24,18 +24,18 @@ cli_help: >
     - math: Configure KaTeX math rendering if required.
 
   Example Usage (after registration):
-    md-to-pdf convert my_document.md --plugin valid-collection-plugin-2
+    oshea convert my_document.md --plugin valid-collection-plugin-2
 ---
 
 # `valid-collection-plugin-2` Plugin Template
 
-This is a basic template for creating new `md-to-pdf` plugins. It provides a starting point for common document conversion needs.
+This is a basic template for creating new `oshea` plugins. It provides a starting point for common document conversion needs.
 
 ## About This Template
 
 * **Functionality**
 
-  By default, this `valid-collection-plugin-2` plugin uses the `DefaultHandler` from `md-to-pdf`'s core utilities. This means it will process standard Markdown, apply styling from `valid-collection-plugin-2.css`, and use PDF generation options defined in `valid-collection-plugin-2.config.yaml`.
+  By default, this `valid-collection-plugin-2` plugin uses the `DefaultHandler` from `oshea`'s core utilities. This means it will process standard Markdown, apply styling from `valid-collection-plugin-2.css`, and use PDF generation options defined in `valid-collection-plugin-2.config.yaml`.
 
 * **Customization**
 
@@ -59,9 +59,9 @@ This is a basic template for creating new `md-to-pdf` plugins. It provides a sta
     
    The generated `valid-collection-plugin-2-example.md` is pre-configured to use your new plugin directly. Navigate into your new plugin's directory and run:
    ```bash
-   md-to-pdf valid-collection-plugin-2-example.md
+   oshea valid-collection-plugin-2-example.md
    ```
-   This works because the example Markdown file's front matter contains `md_to_pdf_plugin: "./valid-collection-plugin-2.config.yaml"`, which explicitly tells `md-to-pdf` to use the sibling configuration file for that specific conversion.
+   This works because the example Markdown file's front matter contains `oshea_plugin: "./valid-collection-plugin-2.config.yaml"`, which explicitly tells `oshea` to use the sibling configuration file for that specific conversion.
 
 3. **Customize**
 
@@ -72,7 +72,7 @@ This is a basic template for creating new `md-to-pdf` plugins. It provides a sta
 
 4. **Register Your Plugin (For General Use)**
 
-   To use your `valid-collection-plugin-2` plugin with *any* Markdown file by its name (e.g., `md-to-pdf convert another.md --plugin valid-collection-plugin-2`), you need to register it in a main `md-to-pdf` configuration file (e.g., your user-level `~/.config/md-to-pdf/config.yaml` or a project-specific `config.yaml`). Add an entry like this:
+   To use your `valid-collection-plugin-2` plugin with *any* Markdown file by its name (e.g., `oshea convert another.md --plugin valid-collection-plugin-2`), you need to register it in a main `oshea` configuration file (e.g., your user-level `~/.config/oshea/config.yaml` or a project-specific `config.yaml`). Add an entry like this:
 
    ```yaml
    # In your main config.yaml
@@ -88,11 +88,11 @@ This is a basic template for creating new `md-to-pdf` plugins. It provides a sta
 
    Once registered, you can invoke it by name from any directory:
    ```bash
-   md-to-pdf convert path/to/any_document.md --plugin valid-collection-plugin-2
+   oshea convert path/to/any_document.md --plugin valid-collection-plugin-2
    ```
 
 ---
 
-**Note:** This is an archetype of the "/path/to/md-to-pdf/plugins/valid-collection-plugin-2" plugin, created as "valid-collection-plugin-2". You may need to update its content, registration paths, and internal references if you customize it further.
+**Note:** This is an archetype of the "/path/to/oshea/plugins/valid-collection-plugin-2" plugin, created as "valid-collection-plugin-2". You may need to update its content, registration paths, and internal references if you customize it further.
 
-**Note:** This is an archetype of the '/home/notroot/Build/md-to-pdf/plugins/template-basic' plugin, created as 'valid-collection-plugin-2'. You may need to update its content, registration paths, and internal references if you customize it further.
+**Note:** This is an archetype of the '/home/notroot/Build/oshea/plugins/template-basic' plugin, created as 'valid-collection-plugin-2'. You may need to update its content, registration paths, and internal references if you customize it further.

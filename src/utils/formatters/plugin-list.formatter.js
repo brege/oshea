@@ -84,7 +84,7 @@ function generateContextMessage(listData) {
     const usableCount = plugins.filter(p =>
       (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)' || p.status === 'Enabled (Created)' || p.status === 'Enabled (Added)'
     ).length;
-    return `Found ${usableCount} plugin(s) usable by md-to-pdf`;
+    return `Found ${usableCount} plugin(s) usable by oshea`;
   }
 }
 

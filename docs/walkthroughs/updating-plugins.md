@@ -13,13 +13,13 @@ You can update all your Git-based collections at once. This will fetch the lates
 **Command:**
 
 ```bash
-md-to-pdf collection update
+oshea collection update
 ```
 
 If you only want to update a specific collection, you can provide its name:
 
 ```bash
-md-to-pdf collection update lifecycle-collection
+oshea collection update lifecycle-collection
 ```
 
 **Explanation:**
@@ -41,7 +41,7 @@ We'll start by creating a new plugin from the default template.
 **Command:**
 
 ```bash
-md-to-pdf plugin create my-flyer
+oshea plugin create my-flyer
 ```
 
 This creates a new directory, `./my-flyer/`, with all the boilerplate files for a new plugin. This is our local "development" version.
@@ -61,7 +61,7 @@ event_name: "Summer Garden Party"
 event_date: "Saturday, August 16th"
 event_time: "4:00 PM"
 event_location: "The Oak Grove Pavilion"
-md_to_pdf_plugin: "./my-flyer.config.yaml"
+oshea_plugin: "./my-flyer.config.yaml"
 ---
 
 # {{ event_name }}
@@ -124,12 +124,12 @@ p:last-of-type {
 
 ### Step 3: Add Your Local Plugin to be Managed
 
-Now, tell `md-to-pdf` about your local plugin. This command copies your plugin into the managed collections directory and enables it.
+Now, tell `oshea` about your local plugin. This command copies your plugin into the managed collections directory and enables it.
 
 **Command:**
 
 ```bash
-md-to-pdf plugin add ./my-flyer
+oshea plugin add ./my-flyer
 ```
 
 **Explanation:**
@@ -195,7 +195,7 @@ To update the managed version of your plugin with the changes you just made, run
 **Command:**
 
 ```bash
-md-to-pdf collection update _user_added_plugins
+oshea collection update _user_added_plugins
 ```
 
 **Explanation:**
@@ -208,7 +208,7 @@ md-to-pdf collection update _user_added_plugins
 Now, run the conversion again:
 
 ```bash
-md-to-pdf convert my-flyer/my-flyer-example.md --outdir ./output
+oshea convert my-flyer/my-flyer-example.md --outdir ./output
 ```
 
-Open the newly generated PDF. You will see it now has the "sunset" theme (cream background, red heading), confirming that your local changes were successfully synced and applied. This workflow allows you to develop plugins in any directory you choose while still leveraging the power of `md-to-pdf`'s management system.
+Open the newly generated PDF. You will see it now has the "sunset" theme (cream background, red heading), confirming that your local changes were successfully synced and applied. This workflow allows you to develop plugins in any directory you choose while still leveraging the power of `oshea`'s management system.

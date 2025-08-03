@@ -9,7 +9,7 @@ const CACHE_FRESHNESS_THRESHOLD = 5000;
 
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
-  return path.join(xdgCacheHome, 'md-to-pdf', 'dynamic-completion-data.json');
+  return path.join(xdgCacheHome, 'oshea', 'dynamic-completion-data.json');
 }
 
 function triggerCacheUpdate() {

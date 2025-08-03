@@ -1,6 +1,6 @@
 # Project Scripts Index
 
-This document is a central index for all developer and automation scripts within the `md-to-pdf` repo.
+This document is a central index for all developer and automation scripts within the `oshea` repo.
 
 ### Batch Jobs [ `batch/` ]
 

@@ -1,10 +1,10 @@
 {
-  "name": "md-to-pdf",
-  "version": "0.10.42",
+  "name": "oshea",
+  "version": "0.11.0",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
-    "md-to-pdf": "./cli.js"
+    "oshea": "./cli.js"
   },
   "scripts": {
     "start": "node cli.js",
@@ -27,26 +27,24 @@
     "markdown",
     "pdf",
     "puppeteer",
-    "conversion",
+    "convert",
     "cli",
-    "hugo",
+    "plugin",
     "recipe",
     "cv",
     "front-matter",
-    "gray-matter",
-    "watch",
-    "chokidar"
+    "workflow"
   ],
   "author": "Wyatt Brege/@brege",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/brege/md-to-pdf.git"
+    "url": "https://github.com/brege/oshea.git"
   },
   "bugs": {
-    "url": "https://github.com/brege/md-to-pdf/issues"
+    "url": "https://github.com/brege/oshea/issues"
   },
-  "homepage": "https://github.com/brege/md-to-pdf#readme",
+  "homepage": "https://github.com/brege/oshea#readme",
   "dependencies": {
     "@vscode/markdown-it-katex": "^1.1.0",
     "ajv": "^8.12.0",

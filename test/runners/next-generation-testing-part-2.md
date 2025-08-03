@@ -57,7 +57,7 @@ Transform test runners into user-facing batch processing tools:
 node yaml-test-runner.js "test/runners/smoke/*.yaml" --grep plugin
 
 # Validate plugins across collections (auto-detects workspace needs)
-node yaml-test-runner.js bundled-plugins.yaml --coll-root ~/.md-to-pdf/collections/themes
+node yaml-test-runner.js bundled-plugins.yaml --coll-root ~/.local/share/oshea/collections/themes
 
 # Custom user workflows (restaurant menus for holidays)  
 node yaml-test-runner.js valentine-menu-workflow.yaml --outdir /tmp/valentine-tests --show
@@ -277,7 +277,6 @@ src/                            ├── end-to-end/
 ```
 
 
-
 ## Appendix: Checklist of Porting by Manifest and Test ID
 
 These are surfaced from `test/config/metadata-level-3.yaml`
@@ -287,7 +286,7 @@ These are surfaced from `test/config/metadata-level-3.yaml`
 - [x] 3.1.1 - (Happy Path) Successfully converts a basic markdown file to PDF using the default plugin.
 - [x] 3.1.2 - (Key Option) Successfully converts using a specified plugin via `--plugin`.
 - [x] 3.1.3 - (Key Option) Successfully creates a PDF in a specified directory with `--outdir` and a custom name with `--filename`.
-- [x] 3.1.4 - (Config Precedence) A `md_to_pdf_plugin` key in front matter is correctly used for conversion.
+- [x] 3.1.4 - (Config Precedence) A `oshea_plugin` key in front matter is correctly used for conversion.
 - [x] 3.1.5 - (Config Precedence) A `--plugin` CLI flag correctly overrides a plugin specified in front matter.
 - [x] 3.1.6 - (Sad Path) Fails with a non-zero exit code when the input `<file>` does not exist.
 - [x] 3.1.7 - (Sad Path) Fails with a non-zero exit code when a non-existent plugin is specified with `--plugin`.

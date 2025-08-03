@@ -19,7 +19,7 @@ class MainConfigLoader {
     this.defaultMainConfigPath = defaultConfigPath;
     this.factoryDefaultMainConfigPath = factoryDefaultConfigPath;
 
-    this.xdgBaseDir = xdgBaseDir || this.path.join(this.process.env.XDG_CONFIG_HOME || this.path.join(os.homedir(), '.config'), 'md-to-pdf');
+    this.xdgBaseDir = xdgBaseDir || this.path.join(this.process.env.XDG_CONFIG_HOME || this.path.join(os.homedir(), '.config'), 'oshea');
     this.xdgGlobalConfigPath = this.path.join(this.xdgBaseDir, 'config.yaml');
 
     this.projectManifestConfigPath = mainConfigPathFromCli;

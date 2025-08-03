@@ -1,6 +1,6 @@
-# md-to-pdf Project Documentation
+# oshea Project Documentation
 
-This document is a central index for all documentation within the `md-to-pdf` repo.
+This document is a central index for all documentation within the `oshea` repo.
 It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk](https://diataxis.fr/) taxonomy),
 
 **Active Documents and Checklists** \
@@ -70,7 +70,7 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 *Practical walkthroughs providing demonstration and step-by-step instructions.*
 
 * [Batch Processing Guide](guides/batch-processing-guide.md):
-  Explains how to convert multiple Markdown files at once using external scripts that leverage the `md-to-pdf` CLI.
+  Explains how to convert multiple Markdown files at once using external scripts that leverage the `oshea` CLI.
 * [Walkthrough: A Plugin's Full Lifecycle](walkthroughs/full-lifecycle.md)
 * [Walkthrough: Customizing a Plugin with Archetyping](walkthroughs/archetyping-a-plugin.md)
 * [Walkthrough: Updating and Syncing Plugins](walkthroughs/updating-plugins.md)
@@ -101,7 +101,7 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
   - [**Index of Scripting Tools used during Refactor**](archive/v0.10/scripts.refactor.index.md). 
     Many of these scripts were parted out for linters to re-enforce updated standards.
     These clickthroughs resolve to GitHub, snapshotted at
-    [v0.10.31](https://github.com/brege/md-to-pdf/releases/tag/v0.10.31),
+    [v0.10.31](https://github.com/brege/oshea/releases/tag/v0.10.31),
     as the `scripts/refactor/` directory was removed.
   - [Linting Checklist](archive/v0.10/linting-checklist.md).
     Linting and code quality strategy for the project.

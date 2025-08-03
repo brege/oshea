@@ -18,9 +18,9 @@ module.exports = [
   }),
   makeMainConfigLoaderScenario({
     description: '1.4.6: Should prioritize project manifest from CLI if it exists',
-    constructorArgs: ['/root', '/project/md-to-pdf.config.yaml', false, null],
-    fsExistsStubs: { '/project/md-to-pdf.config.yaml': true },
-    loadYamlConfigStubs: { '/project/md-to-pdf.config.yaml': { isProject: true } },
+    constructorArgs: ['/root', '/project/oshea.config.yaml', false, null],
+    fsExistsStubs: { '/project/oshea.config.yaml': true },
+    loadYamlConfigStubs: { '/project/oshea.config.yaml': { isProject: true } },
     assertion: async (loader, mocks, constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal('project (from --config)');
@@ -29,9 +29,9 @@ module.exports = [
   }),
   makeMainConfigLoaderScenario({
     description: '1.4.7: Should prioritize XDG global config if no CLI config',
-    constructorArgs: ['/root', null, false, '/home/user/.config/md-to-pdf'],
-    fsExistsStubs: { '/home/user/.config/md-to-pdf/config.yaml': true },
-    loadYamlConfigStubs: { '/home/user/.config/md-to-pdf/config.yaml': { isXdg: true } },
+    constructorArgs: ['/root', null, false, '/home/user/.config/oshea'],
+    fsExistsStubs: { '/home/user/.config/oshea/config.yaml': true },
+    loadYamlConfigStubs: { '/home/user/.config/oshea/config.yaml': { isXdg: true } },
     assertion: async (loader, mocks, constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal('XDG global');

@@ -1,6 +1,6 @@
 name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
 test_id: 3.7.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable
@@ -29,7 +29,7 @@ scenarios:
 ---
 name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
 test_id: 3.7.2
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable
@@ -56,7 +56,7 @@ scenarios:
 ---
 name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
 test_id: 3.7.3
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable

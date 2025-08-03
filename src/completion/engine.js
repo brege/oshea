@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const completionTracker = require(trackerPath);
 
-const CACHE_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.cache/md-to-pdf/cli-tree.json');
+const CACHE_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.cache/oshea/cli-tree.json');
 
 function loadCache() {
   try {

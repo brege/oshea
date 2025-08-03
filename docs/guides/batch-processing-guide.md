@@ -1,12 +1,12 @@
 # Batch Processing Guide
 
-This guide explains how to perform batch conversions of multiple Markdown files to individual PDFs using `md-to-pdf`. The recommended approach is using YAML workflows, which provide a declarative, maintainable solution that integrates with the existing test infrastructure.
+This guide explains how to perform batch conversions of multiple Markdown files to individual PDFs using `oshea`. The recommended approach is using YAML workflows, which provide a declarative, maintainable solution that integrates with the existing test infrastructure.
 
 ## Batch Processing Hugo Recipes - YAML Workflow (Recommended)
 
 The recommended approach for batch processing is using YAML workflows, which provide a declarative, self-documenting method that integrates seamlessly with the existing test infrastructure.
 
-In due time, this approach will be mainlined into the `md-to-pdf` CLI once stability for v0.11 is achieved.
+In due time, this approach will be mainlined into the `oshea` CLI once stability for v0.11 is achieved.
 
 #### Workflow Location
 ```bash
@@ -119,7 +119,7 @@ These tips apply to modifying the example scripts located in the [`scripts/`](..
   * Adjust logic in `processRecipe()` to parse front matter keys relevant to your files.
   * Modify how `outputFilename` is constructed based on your needs.
 
-##### `md-to-pdf` Call
+##### `oshea` Call
 
   * Alter the `basePlugin` variable or make it an argument.
   * Add `--config /path/to/project.config.yaml` if your plugins or global `params` are defined there.
@@ -135,10 +135,10 @@ These tips apply to modifying the example scripts located in the [`scripts/`](..
   * Adapt the `get_fm_value` function (especially the `grep/sed` fallback if not using `yq`) for your front matter keys.
   * Change the `output_filename` construction logic.
 
-##### `md-to-pdf` Call
+##### `oshea` Call
 
   * Change the `BASE_PLUGIN` variable.
-  * Add `--config /path/to/project.config.yaml` to the `$MD_TO_PDF_CMD convert ...` line if needed.
+  * Add `--config /path/to/project.config.yaml` to the `$OSHEA_CMD convert ...` line if needed.
 
 ##### Front Matter
 

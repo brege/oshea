@@ -1,5 +1,5 @@
 // src/completion/generate-completion-cache.js
-// This script generates a completion cache for the md-to-pdf CLI. This script is for development use only.
+// This script generates a completion cache for the oshea CLI. This script is for development use only.
 require('module-alias/register');
 
 const fs = require('fs');
@@ -14,7 +14,7 @@ const COMMANDS_DIR = cliCommandsPath;
 
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
-  const cacheDir = path.join(xdgCacheHome, 'md-to-pdf');
+  const cacheDir = path.join(xdgCacheHome, 'oshea');
   return path.join(cacheDir, 'cli-tree.json');
 }
 

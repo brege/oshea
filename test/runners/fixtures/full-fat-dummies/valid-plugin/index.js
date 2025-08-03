@@ -4,7 +4,7 @@ const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
 // This is the handler script for the 'valid-plugin' plugin.
-// When a new plugin is created using 'md-to-pdf plugin create <new-plugin-name>',
+// When a new plugin is created using 'oshea plugin create <new-plugin-name>',
 // 'ValidPluginHandler' will be renamed to '<NewPluginName>Handler',
 // and the string 'valid-plugin' in the logger will be replaced
 // with '<new-plugin-name>'.

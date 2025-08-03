@@ -825,7 +825,7 @@ tests:
   1.3.2:
     description: >-
       Test `determinePluginToUse` correctly prioritizes a plugin specified in the Markdown file's
-      front matter (`frontMatter.md_to_pdf_plugin`) when no CLI argument is present.
+      front matter (`frontMatter.oshea_plugin`) when no CLI argument is present.
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-determiner.test.js
@@ -1594,7 +1594,7 @@ tests:
   1.6.7:
     description: >-
       Verify `applyOverrideLayers` correctly applies overrides from an XDG-specific plugin config
-      file (`~/.config/md-to-pdf/pluginName/pluginName.config.yaml`) if it exists.
+      file (`~/.config/oshea/pluginName/pluginName.config.yaml`) if it exists.
     commands:
       - plugin
     runner: test/runners/integration/config/plugin-config-loader.test.js

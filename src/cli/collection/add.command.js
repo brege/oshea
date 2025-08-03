@@ -44,7 +44,7 @@ module.exports = {
     } catch (error) {
       logger.error('Command execution failed', {
         context: 'CLICollectionAddCommand',
-        command: 'md-to-pdf collection add',
+        command: 'oshea collection add',
         error: error.message
       });
       process.exit(1);

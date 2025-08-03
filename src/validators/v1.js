@@ -181,7 +181,7 @@ const runSelfActivationV1 = (pluginDirectoryPath, pluginName, errors) => {
     };
   }
 
-  const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), `md-to-pdf-test-${pluginName}-`));
+  const tempOutputDir = fs.mkdtempSync(path.join(os.tmpdir(), `oshea-test-${pluginName}-`));
 
   try {
     const command = `node "${cliPath}" convert "${exampleMdPath}" --outdir "${tempOutputDir}" --no-open`;

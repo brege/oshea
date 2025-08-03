@@ -1,5 +1,5 @@
 name: collection add (End-to-End Test) src/cli/commands/collection/add.command.js
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable

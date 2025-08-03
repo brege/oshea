@@ -1,6 +1,6 @@
 name: "--version (End-to-End Test) cli.js"
 test_id: 3.15.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - cli
   - version
@@ -14,7 +14,7 @@ scenarios:
 ---
 name: "--help (End-to-End Test) cli.js src/cli/get-help.js"
 test_id: 3.15.2
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - cli
   - help
@@ -28,7 +28,7 @@ scenarios:
 ---
 name: asdf/--asdf (End-to-End Test) cli.js (unknown command/option)
 test_id: 3.15.3
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - cli
   - smoke

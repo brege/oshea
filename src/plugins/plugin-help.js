@@ -30,7 +30,7 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
 
     if (!pluginRegistration || !pluginRegistration.configPath) {
       logger.error(`Plugin "${pluginName}" not found or not properly registered.`);
-      logger.info('You can list available plugins using: md-to-pdf plugin list');
+      logger.info('You can list available plugins using: oshea plugin list');
       return;
     }
 

@@ -1,6 +1,6 @@
 name: generate (End-to-End Tests) src/cli/commands/generate.command.js
 test_id: 3.2.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - generate
   - cli
@@ -25,7 +25,7 @@ scenarios:
 ---
 name: generate (End-to-End Tests) src/cli/commands/generate.command.js
 test_id: 3.2.2
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - generate
   - cli

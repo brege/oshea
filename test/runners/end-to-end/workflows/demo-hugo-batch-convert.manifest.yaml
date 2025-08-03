@@ -1,6 +1,6 @@
 name: batch convert Hugo recipes (Demo) docs/guides/batch-processing-guide.md
 test_id: 4.2.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - workflow
   - batch
@@ -29,7 +29,7 @@ name: >-
   batch convert recipes, w/ custom filenames (Demo)
   docs/guides/batch-processing-guide.md
 test_id: 4.2.2
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - workflow
   - batch

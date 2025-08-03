@@ -124,6 +124,11 @@ docs
 - [ [`mocha-path-validator.js`](validators/mocha-path-validator.js) ]
   -- A utility to validate paths in [`.mocharc.js`](../../.mocharc.js) files and test configurations.
 
+**Renaming the Project**
+- [ [`no-old-project-name.js`](code/no-old-project-name.js) ]
+  -- A script to replace all instances of the old project name in the codebase.
+
 ### Uncategorized Test Scripts
 <!-- uncategorized-start -->
+
 <!-- uncategorized-end -->

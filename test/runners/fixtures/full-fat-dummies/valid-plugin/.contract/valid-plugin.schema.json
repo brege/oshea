@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "valid-plugin.schema.json",
-  "title": "Schema for md-to-pdf valid-plugin plugin",
+  "title": "Schema for oshea valid-plugin plugin",
   "description": "This schema extends the base plugin schema with properties specific to the 'valid-plugin' plugin.",
   "type": "object",
   "allOf": [

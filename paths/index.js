@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-03T01:40:26.000Z
+// Generated: 2025-08-03T10:01:15.047Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -154,6 +154,7 @@ const lintingCodeRoot = path.join(projectRoot, 'scripts/linting/code/');
 const noBadHeadersPath = path.join(projectRoot, 'scripts/linting/code/no-bad-headers.js');
 const noConsolePath = path.join(projectRoot, 'scripts/linting/code/no-console.js');
 const noJsdocPath = path.join(projectRoot, 'scripts/linting/code/no-jsdoc.js');
+const noOldProjectNamePath = path.join(projectRoot, 'scripts/linting/code/no-old-project-name.js');
 const noRelativePathsPath = path.join(projectRoot, 'scripts/linting/code/no-relative-paths.js');
 const noTrailingWhitespacePath = path.join(projectRoot, 'scripts/linting/code/no-trailing-whitespace.js');
 
@@ -453,6 +454,7 @@ module.exports = {
   noBadHeadersPath,
   noConsolePath,
   noJsdocPath,
+  noOldProjectNamePath,
   noRelativePathsPath,
   noTrailingWhitespacePath,
   lintingDocsRoot,

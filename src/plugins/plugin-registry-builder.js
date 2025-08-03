@@ -7,7 +7,7 @@ const logger = require(loggerPath);
 const { loadConfig: loadYamlConfig } = require(markdownUtilsPath);
 const yaml = require('js-yaml');
 
-const XDG_CONFIG_DIR_NAME = 'md-to-pdf';
+const XDG_CONFIG_DIR_NAME = 'oshea';
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class PluginRegistryBuilder {
@@ -147,7 +147,7 @@ class PluginRegistryBuilder {
     // Determine user-plugins directory location based on collections manager root
     const userPluginsPath = (this.collectionsManager && this.collectionsManager.collRoot) ?
       path.join(this.collectionsManager.collRoot, 'user-plugins') :
-      path.join(this.xdgBaseDir, 'md-to-pdf', 'user-plugins');
+      path.join(this.xdgBaseDir, 'oshea', 'user-plugins');
 
     logger.debug('Attempting to register user-plugins directory', {
       context: 'PluginRegistryBuilder',

@@ -20,7 +20,7 @@ async function demonstrateSmokeFormatters() {
 
   // Simulate scenarios with 1 second delays
   for (let i = 1; i <= 3; i++) {
-    const command = `md-to-pdf test-${i}`;
+    const command = `oshea test-${i}`;
 
     // Start test
     logger.info({ command, status: 'testing' }, { format: 'smoke-scenario' });
@@ -39,7 +39,7 @@ async function demonstrateSmokeFormatters() {
   logger.info({ suiteName: 'Plugin Commands' }, { format: 'smoke-suite' });
 
   for (let i = 4; i <= 5; i++) {
-    const command = `md-to-pdf plugin test-${i}`;
+    const command = `oshea plugin test-${i}`;
 
     logger.info({ command, status: 'testing' }, { format: 'smoke-scenario' });
     await sleep(1000);
@@ -66,7 +66,7 @@ async function demonstrateSmokeFormatters() {
       failedScenarios: [
         {
           scenario: 'Test command 2 validation',
-          command: 'md-to-pdf test-2',
+          command: 'oshea test-2',
           reason: 'Expected output not found',
           stderr: 'command not recognized'
         }

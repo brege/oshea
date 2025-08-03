@@ -1,5 +1,5 @@
 name: collection list (End-to-End Test) src/cli/commands/collection/list.command.js
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - cli
   - smoke

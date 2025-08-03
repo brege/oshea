@@ -18,7 +18,7 @@ const {
   cleanupTestDirectory,
 } = require(testFileHelpersPath);
 
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-plugin-e2e');
+const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', 'recipe-plugin-e2e');
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'recipe-example.md');
 

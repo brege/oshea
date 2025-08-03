@@ -22,12 +22,12 @@ cli_help: |
     - printBackground: true (important for card designs with background colors).
 
   Example Usage (assuming registered):
-    md-to-pdf convert path/to/advanced-card-example.md --plugin advanced-card
+    oshea convert path/to/advanced-card-example.md --plugin advanced-card
 ---
 
 # Advanced Card Plugin (`advanced-card`) - Example
 
-This `advanced-card` plugin is a demonstration of advanced plugin capabilities within `md-to-pdf`. It showcases how to:
+This `advanced-card` plugin is a demonstration of advanced plugin capabilities within `oshea`. It showcases how to:
 
 1.  Read primary content directly from the Markdown body (e.g., using H1 for name, H2 for title).
 2.  Utilize front matter for supplementary data like QR code information or branding colors.

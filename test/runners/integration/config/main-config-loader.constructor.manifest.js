@@ -20,7 +20,7 @@ module.exports = [
     constructorArgs: ['/app/test-root', null, false, null],
     envStubs: { XDG_CONFIG_HOME: '/custom/xdg/config' },
     assertion: (loader, mocks, constants, expect) => {
-      const expectedXdgBaseDir = path.join('/custom/xdg/config', 'md-to-pdf');
+      const expectedXdgBaseDir = path.join('/custom/xdg/config', 'oshea');
       expect(loader.xdgBaseDir).to.equal(expectedXdgBaseDir);
       expect(loader.xdgGlobalConfigPath).to.equal(path.join(expectedXdgBaseDir, 'config.yaml'));
       expect(mocks.mockDependencies.os.homedir.called).to.be.false;
@@ -30,7 +30,7 @@ module.exports = [
     description: '1.4.2.a: Should determine xdgBaseDir using os.homedir() as a fallback',
     constructorArgs: ['/app/test-root', null, false, null],
     assertion: (loader, mocks, constants, expect) => {
-      const expectedXdgBaseDir = path.join(constants.MOCK_OS_HOME_DIR, '.config', 'md-to-pdf');
+      const expectedXdgBaseDir = path.join(constants.MOCK_OS_HOME_DIR, '.config', 'oshea');
       expect(loader.xdgBaseDir).to.equal(expectedXdgBaseDir);
       expect(mocks.mockDependencies.os.homedir.calledOnce).to.be.true;
     },

@@ -2,13 +2,13 @@
 
 # AI-Assisted Plugin Development: A How-To Guide
 
-This guide explains how to use an AI assistant, like Gemini, Claude, or ChatGPT, to help you create a new plugin for `md-to-pdf`. By providing the AI with a specific "context package," you can get high-quality, relevant code that works within the project's architecture.
+This guide explains how to use an AI assistant, like Gemini, Claude, or ChatGPT, to help you create a new plugin for `oshea`. By providing the AI with a specific "context package," you can get high-quality, relevant code that works within the project's architecture.
 
-The official project repository is available at **https://github.com/brege/md-to-pdf**.
+The official project repository is available at **https://github.com/brege/oshea**.
 
 ### The Core Idea: The "Minimal Context Package"
 
-Instead of trying to explain the entire `md-to-pdf` project to an AI, we provide it with a concise package containing only the essential information it needs to create a plugin. This package includes:
+Instead of trying to explain the entire `oshea` project to an AI, we provide it with a concise package containing only the essential information it needs to create a plugin. This package includes:
 
 1. **The Interaction Specification**: The technical rules of the plugin API.
 2. **The Plugin Contract**: The required file structure and metadata.
@@ -52,12 +52,12 @@ The "Master Prompt" is a template you will use to instruct the AI. It is structu
 **Master Prompt Template**
 
 ```markdown
-You are an expert Node.js developer who specializes in creating plugins for the `md-to-pdf` command-line tool. Your task is to help me create a new plugin based on my request below.
+You are an expert Node.js developer who specializes in creating plugins for the `oshea` command-line tool. Your task is to help me create a new plugin based on my request below.
 
 You must follow these rules:
-1. You will use the **Technical Context** provided at the end of this prompt as your sole source of information about the `md-to-pdf` architecture.
+1. You will use the **Technical Context** provided at the end of this prompt as your sole source of information about the `oshea` architecture.
 2. You will help me by providing the complete, updated file contents for the new plugin files.
-3. Our workflow is as follows: I will use the `md-to-pdf` tool to scaffold the plugin files, then you will provide the code to modify them, and finally I will test your code and provide feedback.
+3. Our workflow is as follows: I will use the `oshea` tool to scaffold the plugin files, then you will provide the code to modify them, and finally I will test your code and provide feedback.
 
 ---
 

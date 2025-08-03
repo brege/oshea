@@ -2,7 +2,7 @@ name: >-
   collection update (End-to-End Test)
   src/cli/commands/collection/update.command.js
 test_id: 3.13.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable
@@ -24,7 +24,7 @@ name: >-
   collection update (End-to-End Test)
   src/cli/commands/collection/update.command.js
 test_id: 3.13.2
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable
@@ -50,7 +50,7 @@ scenarios:
 ---
 name: update (End-to-End Test) src/cli/commands/update.command.js
 test_id: 3.14.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable

@@ -20,7 +20,7 @@ function formatCollectionEntry(collection) {
   if (collection.special_type === 'singleton_container') {
     lines.push(`    ${theme.detail('Type:')} Managed Directory (for user-added singleton plugins)`);
     lines.push(`    ${theme.detail('Managed Path:')} ${collection.source}`);
-    lines.push(`    ${theme.context('(To see individual singletons, run:')} ${theme.highlight(`'md-to-pdf plugin list --available ${collection.name}'`)}`);
+    lines.push(`    ${theme.context('(To see individual singletons, run:')} ${theme.highlight(`'oshea plugin list --available ${collection.name}'`)}`);
   } else {
     lines.push(`    ${theme.detail('Source:')} ${collection.source}`);
     if (collection.added_on && collection.added_on !== 'N/A (Container)') {

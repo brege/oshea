@@ -27,7 +27,7 @@ function discoverAllTestIds() {
   });
 
   const testCases = [];
-  const debugMode = process.env.MD_TO_PDF_DEBUG === 'true' || process.env.DEBUG === 'true';
+  const debugMode = process.env.OSHEA_DEBUG === 'true' || process.env.DEBUG === 'true';
 
   for (const yamlFile of yamlFiles) {
     const content = fs.readFileSync(yamlFile, 'utf8');
@@ -93,12 +93,12 @@ async function runSingleTestById(testCase) {
   const randomId = Math.floor(Math.random() * 99999).toString().padStart(5, '0');
   const safeTestId = testCase.testId.toString().replace(/[^a-zA-Z0-9]/g, '-');
   const uniqueSuffix = `${process.pid}-${timestamp}-${randomId}-${safeTestId}`;
-  const uniqueWorkspacePath = `/tmp/md-to-pdf-test-${uniqueSuffix}`;
+  const uniqueWorkspacePath = `/tmp/oshea-test-${uniqueSuffix}`;
 
   const runner = new YamlTestRunner(testCase.yamlFile, {
     apiMode: true,
     basePath: uniqueWorkspacePath,
-    debug: process.env.MD_TO_PDF_DEBUG === 'true'
+    debug: process.env.OSHEA_DEBUG === 'true'
   });
 
   try {

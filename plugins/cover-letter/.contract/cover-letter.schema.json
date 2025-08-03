@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Cover Letter Plugin Configuration Schema",
-  "description": "Schema for the cover-letter md-to-pdf plugin's configuration, ensuring it adheres to the v1 plugin contract.",
+  "description": "Schema for the cover-letter oshea plugin's configuration, ensuring it adheres to the v1 plugin contract.",
   "type": "object",
   "properties": {
     "plugin_name": {

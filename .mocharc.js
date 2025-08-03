@@ -11,7 +11,7 @@ const debugMode = argv.debug || false;
 
 // Set environment variable for app code to detect debug mode
 if (debugMode) {
-  process.env.MD_TO_PDF_DEBUG = 'true';
+  process.env.OSHEA_DEBUG = 'true';
 }
 
 if (require.main === module) {

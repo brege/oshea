@@ -45,7 +45,7 @@ function formatGlobalConfig(level, message, meta = {}) {
 
   if (!isPure) {
     console.log(theme.detail('\n# Note: This shows the global settings from the primary main configuration file.'));
-    console.log(theme.detail('# To see the full effective configuration for a specific plugin, use \'md-to-pdf config --plugin <pluginName>\'.'));
+    console.log(theme.detail('# To see the full effective configuration for a specific plugin, use \'oshea config --plugin <pluginName>\'.'));
   }
 }
 

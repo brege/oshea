@@ -1,5 +1,5 @@
 // index.js
-// Main module entry point for md-to-pdf - API and Engine
+// Main module entry point for oshea - API and Engine
 
 require('module-alias')(__dirname);
 
@@ -101,7 +101,7 @@ async function executeConversion(args, configResolver) {
   if (args.outdir) {
     outputDir = path.resolve(args.outdir);
   } else {
-    outputDir = path.join(os.tmpdir(), 'md-to-pdf-output');
+    outputDir = path.join(os.tmpdir(), 'oshea-output');
     if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
       logger.info(`No output directory specified. Defaulting to temporary directory: ${outputDir}`);
     }

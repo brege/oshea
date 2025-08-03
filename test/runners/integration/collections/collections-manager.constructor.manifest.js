@@ -15,7 +15,7 @@ module.exports = [
     },
     assertion: (result, mocks, constants, expect) => {
       const manager = result;
-      const expectedPath = path.join('/fake/xdg_data_home', 'md-to-pdf', 'collections');
+      const expectedPath = path.join('/fake/xdg_data_home', 'oshea', 'collections');
       expect(manager.collRoot).to.equal(expectedPath);
     },
   }),
@@ -31,7 +31,7 @@ module.exports = [
     },
     assertion: (result, mocks, constants, expect) => {
       const manager = result;
-      const expectedPath = path.join('/fake/home', '.local', 'share', 'md-to-pdf', 'collections');
+      const expectedPath = path.join('/fake/home', '.local', 'share', 'oshea', 'collections');
       expect(manager.collRoot).to.equal(expectedPath);
     },
   }),
@@ -55,7 +55,7 @@ module.exports = [
       const manager = result;
       // The test runner uses path.join which will use the OS separator.
       // We need to construct the expected path in the same way.
-      const expectedPath = path.join('C:\\Users\\Test', 'AppData', 'Local', 'md-to-pdf', 'collections');
+      const expectedPath = path.join('C:\\Users\\Test', 'AppData', 'Local', 'oshea', 'collections');
       expect(manager.collRoot).to.equal(expectedPath);
     },
   }),

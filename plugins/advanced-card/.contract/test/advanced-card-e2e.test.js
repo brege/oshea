@@ -21,7 +21,7 @@ const {
 
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const PLUGIN_NAME = path.basename(PLUGIN_ROOT);
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', `${PLUGIN_NAME}-plugin-e2e`);
+const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', `${PLUGIN_NAME}-plugin-e2e`);
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, `${PLUGIN_NAME}-example.md`);
 const EXPECTED_PDF_BASENAME = 'dr-eleanor-vance.pdf';
 const MIN_PDF_SIZE = 1000;

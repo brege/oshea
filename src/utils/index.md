@@ -2,7 +2,7 @@
 
 ### Architecture
 
-The md-to-pdf logging system is a **pure routing layer** that delegates all formatting to specialized formatters. This design separates concerns between message routing, formatting, and output rendering.
+The oshea logging system is a **pure routing layer** that delegates all formatting to specialized formatters. This design separates concerns between message routing, formatting, and output rendering.
 
 ```
 logger(message, options) → formatter → console/file output
@@ -37,7 +37,7 @@ logger(message, options) → formatter → console/file output
 | **Test-side**      |                                    |
 | [`lint.formatter.js`](formatters/lint.formatter.js) | `node scripts/linting/lint.js` |
 | [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js) | [`test/runners/end-to-end/e2e-runner.js`](../../test/runners/end-to-end/e2e-runner.js) |
-| [`config.formatter.js`](formatters/config.formatter.js) | `md-to-pdf config` |
+| [`config.formatter.js`](formatters/config.formatter.js) | `oshea config` |
 
 **see [scripts/playground/](../../scripts/playground/) for examples**
 

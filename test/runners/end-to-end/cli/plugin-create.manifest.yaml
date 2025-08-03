@@ -1,5 +1,5 @@
 name: plugin create (End-to-End Test) src/cli/commands/plugin/create.command.js
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - create

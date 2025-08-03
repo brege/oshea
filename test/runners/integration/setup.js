@@ -24,7 +24,7 @@ const createMathIntegration = require(mathIntegrationPath);
 const { testLogger } = require(captureLogsPath);
 
 // Configure debug mode if enabled via environment variable
-if (process.env.MD_TO_PDF_DEBUG === 'true') {
+if (process.env.OSHEA_DEBUG === 'true') {
   const logger = require(loggerPath);
   logger.setDebugMode(true);
   logger.debug('Debug mode enabled - logger will show debug-level messages and context');

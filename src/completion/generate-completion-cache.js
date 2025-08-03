@@ -6,11 +6,11 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const { loggerPath, cliTreeBuilderPath, cliCommandsPath } = require('@paths');
+const { loggerPath, cliTreeBuilderPath, cliRoot } = require('@paths');
 const logger = require(loggerPath);
 const { discoverCommandTree } = require(cliTreeBuilderPath);
 
-const COMMANDS_DIR = cliCommandsPath;
+const COMMANDS_DIR = cliRoot;
 
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');

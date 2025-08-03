@@ -143,7 +143,7 @@ The `config/metadata-level-*.yaml` files provide static test classification incl
   Explains the ranked, multi-level testing strategy and the module priority.
 * [**Next-Generation Testing Framework**](../docs/v0.11/next-generation-testing.md):
   Intelligent test execution with volatility tracking and dependency analysis.
-* [**Next-Generation Implementation Progress**](runners/next-generation-testing-part-2.md):
+* [**Next-Generation Implementation Progress**](../docs/v0.11/next-generation-testing-part-2.md):
   Implementation status and architectural improvements completed in the YAML manifest system.
 
 ### Test Metadata Registry

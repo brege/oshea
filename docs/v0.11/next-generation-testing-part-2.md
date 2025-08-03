@@ -1,7 +1,7 @@
 The next generation test system defined in [`docs/v0.11/next-generation-testing.md`](../../docs/v0.11/next-generation-testing.md), where we ported the old QA checklists into YAML's for complete metadata tracking has revealed a new pattern.  These files can become E2E, CLI, and Workflow/Lifecycle manifest files.
 
 For information on test priority rankings and what the "levels" are defined by,
-see [`test/archive/docs/test-generation-priority-order.md`](../archive/docs/test-generation-priority-order.md).  For all other test framework information, see [`test/index.md`](../index.md).  
+see [`test/archive/docs/test-generation-priority-order.md`](../../test/archive/docs/test-generation-priority-order.md).  For all other test framework information, see [`test/index.md`](../../test/index.md).  
 
 This document is living document whose results will populate test/runners/smoke/index.md,
 or whatever location the new E2E base directory's path is defined as.
@@ -154,11 +154,11 @@ wc -l ../e2e/*.manifest.js | tail -1
 ### 3.2 Mocha Runner
 - [x] `yaml-mocha.test.js my-test.manifest.yaml`
 - [x] `yaml-mocha.test.js *.manifest.yaml`
-- [x] `npm run test:last-fails` (i.e. [`test/analytics/run-last-fails.js`](../analytics/run-last-fails.js))
+- [x] `npm run test:last-fails` (i.e. [`test/analytics/run-last-fails.js`](../../test/analytics/run-last-fails.js))
 - [x] [`.mocharc.js`](../../.mocharc.js)
 - [x] `--grep` and `--group`
-- [x] [`test/analytics/log-failures-reporter.js`](../analytics/log-failures-reporter.js)
-- [x] [`test/analytics/test-watcher.js`](../analytics/test-watcher.js)
+- [x] [`test/analytics/log-failures-reporter.js`](../../test/analytics/log-failures-reporter.js)
+- [x] [`test/analytics/test-watcher.js`](../../test/analytics/test-watcher.js)
 
 #### Analysis
 This needs a benchmark that is comparable to the performance of the old AND new system under mocha.

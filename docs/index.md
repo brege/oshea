@@ -12,8 +12,9 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 **Next-gen Features** \
 *These are the core documents for the next-gen features of the project.*
 
-- [Next-Generation Test Framework](v0.11/next-generation-testing.md):
+- [Next-Generation Test Framework](v0.11/next-generation-testing-part-2.md):
   Improving the separation of static testing metadata from dynamic test-job results.
+  Follows [next-gen part 1](v0.11/next-generation-testing.md).
 - [Task Checklist of Logger Enhancements](v0.11/checklist-logger.md):
   Maintains the list of tasks surrounding v0.11 for the logger framework. 
 - [Task Checklist of non-Logger Work](v0.11/checklist-non-logger.md):

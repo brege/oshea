@@ -76,7 +76,7 @@ function generateReport(analysis, options = {}) {
   const limit = options.limit || 20;
   const minRuns = options.minRuns || 5;
 
-  logger.info('\n=== QA Analytics Report ===\n');
+  logger.info('\n--- QA Analytics Report ---\n');
 
   // Filter and get top brittle tests
   const brittleTests = analysis
@@ -111,7 +111,7 @@ function generateReport(analysis, options = {}) {
   const flakyTests = analysis.filter(t => t.volatility === 1).length;
   const unstableTests = analysis.filter(t => t.volatility === 2).length;
 
-  logger.info('=== Summary ===');
+  logger.info('--- Summary Statistics ---');
   logger.info(`Total tracked tests: ${totalTests}`);
   logger.info(`Stable (volatility0): ${stableTests} (${((stableTests/totalTests)*100).toFixed(1)}%)`);
   logger.info(`Flaky (volatility1): ${flakyTests} (${((flakyTests/totalTests)*100).toFixed(1)}%)`);

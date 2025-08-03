@@ -1,21 +1,22 @@
 // test/analytics/test-watcher.js
 require('module-alias/register');
 
-const { projectRoot, srcRoot, loggerPath } = require('@paths');
+const {
+  projectRoot,
+  srcRoot,
+  integrationTestDir,
+  loggerPath
+} = require('@paths');
 const chokidar = require('chokidar');
 const path = require('path');
-const fs = require('fs');
 const { spawn } = require('child_process');
 const glob = require('glob');
 const logger = require(loggerPath);
 
-const TEST_DIR = path.join(projectRoot, 'test');
-const TEST_DOCS_DIR = path.join(TEST_DIR, 'docs');
 
 function buildTestMap() {
   const targetToPathMap = new Map();
-  const allTestFiles = glob.sync('test/integration/**/*.test.js', { cwd: projectRoot });
-
+  const allTestFiles = glob.sync(path.join(integrationTestDir, '**/*.test.js'));
   allTestFiles.forEach(testPath => {
     const testNameMatch = path.basename(testPath).match(/^([a-zA-Z0-9_-]+)\.test\.js$/);
     if (testNameMatch) {
@@ -27,43 +28,7 @@ function buildTestMap() {
     }
   });
 
-  const checklistFiles = glob.sync('checklist-level-*.md', { cwd: TEST_DOCS_DIR });
-  checklistFiles.forEach(file => {
-    const content = fs.readFileSync(path.join(TEST_DOCS_DIR, file), 'utf8');
-    const lines = content.split('\n');
-    let currentTestId = null;
-    let currentTestTarget = null;
-
-    for (const line of lines) {
-      const idMatch = line.match(/- \*\*test_id:\*\*\s*([\d.]+)/);
-      if (idMatch) currentTestId = idMatch[1].trim();
-
-      const targetMatch = line.match(/- \*\*test_target:\*\*\s*(.+)/);
-      if (targetMatch) currentTestTarget = targetMatch[1].trim();
-
-      if (line.trim() === '' || line.startsWith('* [')) {
-        if (currentTestId && currentTestTarget) {
-          const testFilePattern = `test/integration/**/*.test.${currentTestId}.js`;
-          const foundFiles = glob.sync(testFilePattern, { cwd: projectRoot });
-          if (foundFiles.length > 0) {
-            if (!targetToPathMap.has(currentTestTarget)) {
-              targetToPathMap.set(currentTestTarget, new Set());
-            }
-            foundFiles.forEach(f => targetToPathMap.get(currentTestTarget).add({ path: f, reason: `ID match (${currentTestId})` }));
-          }
-        }
-        currentTestId = null;
-        currentTestTarget = null;
-      }
-    }
-  });
-
-  const finalMap = new Map();
-  for (const [target, pathSet] of targetToPathMap.entries()) {
-    finalMap.set(target, Array.from(pathSet));
-  }
-
-  return finalMap;
+  return new Map(Array.from(targetToPathMap.entries()).map(([target, pathSet]) => [target, Array.from(pathSet)]));
 }
 
 function runTests(testPathsInfo) {

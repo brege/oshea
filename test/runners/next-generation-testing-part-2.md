@@ -158,7 +158,7 @@ wc -l ../e2e/*.manifest.js | tail -1
 - [x] [`.mocharc.js`](../../.mocharc.js)
 - [x] `--grep` and `--group`
 - [x] [`test/analytics/log-failures-reporter.js`](../analytics/log-failures-reporter.js)
-- [ ] [`test/analytics/test-watcher.js`](../analytics/test-watcher.js)
+- [x] [`test/analytics/test-watcher.js`](../analytics/test-watcher.js)
 
 #### Analysis
 This needs a benchmark that is comparable to the performance of the old AND new system under mocha.
@@ -250,13 +250,33 @@ Compactly.
 
 ---
 
-## Phase 5: Unify manifests with documentation
+## Final Structure
 
-**Scripting**
-- [ ] `test/config/metadata-level-3.yaml` combine into a complete `<level-3>.yaml` file
-- [ ] `test/config/metadata-level-4.yaml` combine into a complete `<level-4>.yaml` file
+```
+                                test/runners/
+src/                            ├── end-to-end/
+├── cli/                        │   ├── cli/
+│   ├── collection/             │   │   ├── collection/
+│   │   └── *.command.js        │   │   │   └── collection-*.manifest.yaml
+│   ├── *.command.js            │   │   ├── *.manifest.yaml
+│   └── plugin/                 │   │   └── plugin/
+│       └── *.command.js        │   │       └── plugin-*.manifest.yaml
+│                               │   ├── workflows/   
+│                               │   │   └── *.manifest.yaml
+│                               │   └── validators/
+│                               │       └── bundled-plugins.yaml (move from smoke)
+│                               ├── integration/
+├── collections/                │   ├── collections/
+├── config/                     │   ├── config/
+├── core/                       │   ├── core/
+├── plugins/                    │   └── plugins/
+├── utils/formatters/           └── linters/
+│   └── *.formatter.js              └── *-linting.manifest.yaml
+└── validators/                         
+    └── v1.js                               
+```
 
-How well will this work with the QA tools?
+
 
 ## Appendix: Checklist of Porting by Manifest and Test ID
 

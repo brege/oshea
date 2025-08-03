@@ -30,32 +30,14 @@ function main() {
   let titles = [];
 
   try {
-    // Handle both old NDJSON format and new JSON format
-    if (content.trim().startsWith('{') && !content.includes('\n{')) {
-      // New JSON format
-      const testData = JSON.parse(content);
-      titles = Object.entries(testData)
-        .filter(([key, data]) => data.last_status === 'failed')
-        .map(([key, data]) => {
-          // Extract title from key: "file::title" -> "title"
-          const title = key.split('::').slice(1).join('::');
-          return escapeRegex(title);
-        });
-    } else {
-      // Legacy NDJSON format
-      titles = content
-        .trim()
-        .split('\n')
-        .map(line => {
-          try {
-            return JSON.parse(line);
-          } catch {
-            return null;
-          }
-        })
-        .filter(test => test && test.status === 'failed')
-        .map(test => escapeRegex(test.title));
-    }
+    const testData = JSON.parse(content);
+    titles = Object.entries(testData)
+      .filter(([key, data]) => data.last_status === 'failed')
+      .map(([key, data]) => {
+        // Extract title from key: "file::title" -> "title"
+        const title = key.split('::').slice(1).join('::');
+        return escapeRegex(title);
+      });
   } catch (error) {
     logger.error(`Failed to parse test results: ${error.message}`);
     return;

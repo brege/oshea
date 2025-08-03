@@ -60,7 +60,9 @@ Traditional unit tests are intentionally minimal. CLI applications derive more v
 
 ### Testing Framework
 
-The project uses [Mocha](https://mochajs.org/) as its test runner. A centralized configuration file, [`.mocharc.js`](../.mocharc.js), defines test groups and paths, making the suite flexible and managable.
+The project uses [Mocha](https://mochajs.org/) as its test runner with a hybrid architecture combining traditional integration tests and manifest-driven end-to-end tests. A centralized configuration file, [`.mocharc.js`](../.mocharc.js), defines test groups and paths, making the suite flexible and manageable.
+
+**YAML Manifest System**: End-to-end tests use declarative YAML manifests that define test scenarios, enabling user-extensible workflows and efficient batch processing of test cases.
 
 #### Running Tests
 
@@ -84,8 +86,8 @@ Tests can be executed in a variety of ways to target specific groups, levels, or
     ```
   * **Run a single test file** by path (end-to-end tests):
     ```bash
-    node test/runners/smoke/yaml-test-runner.js \
-         test/runners/smoke/cli/config.manifest.yaml \
+    node test/runners/end-to-end/e2e-runner.js \
+         test/runners/end-to-end/cli/config.manifest.yaml \
          # --show   # Show test output 
          # --debug  # Show intermediate steps
     ```
@@ -141,6 +143,8 @@ The `config/metadata-level-*.yaml` files provide static test classification incl
   Explains the ranked, multi-level testing strategy and the module priority.
 * [**Next-Generation Testing Framework**](../docs/v0.11/next-generation-testing.md):
   Intelligent test execution with volatility tracking and dependency analysis.
+* [**Next-Generation Implementation Progress**](runners/next-generation-testing-part-2.md):
+  Implementation status and architectural improvements completed in the YAML manifest system.
 
 ### Test Metadata Registry
 

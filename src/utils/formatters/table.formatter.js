@@ -1,4 +1,4 @@
-// src/utils/formatters/table-formatter.js
+// src/utils/formatters/table.formatter.js
 
 // Table formatter for user-facing CLI outputs
 // Formats tabular data for CLI display with proper column alignment

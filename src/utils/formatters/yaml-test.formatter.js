@@ -1,4 +1,4 @@
-// src/utils/formatters/yaml-test-formatter.js
+// src/utils/formatters/yaml-test.formatter.js
 // YAML-based test result formatter - unified formatter for smoke tests and workflow tests
 /* eslint-disable camelcase */
 

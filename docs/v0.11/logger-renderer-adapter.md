@@ -42,7 +42,7 @@ Problems.
 src/utils/
 ├── formatters/                       # specialized formatting modules
 │   ├── index.js                      # central registry: exports { lint: formatLint }
-│   └── lint-formatter.js             # complex lint styling logic isolated
+│   └── lint.formatter.js             # complex lint styling logic isolated
 │                                     # formatLint(structuredData) with chalk
 │                                     # applyStyle(), processHighlights()
 └── logger.js                         # **slim** routing layer
@@ -74,7 +74,7 @@ scripts/linting/
 Benefits.
 
 - Each module has one clear purpose
-- Easier to add `formatters/inline-formatter.js`, `formatters/debug-formatter.js`, etc.
+- Easier to add `formatters/inline.formatter.js`, `formatters/debug.formatter.js`, etc.
 - Pure data functions separate from styling functions  
 - All output goes through logger system
 - All styling centralized in formatters directory

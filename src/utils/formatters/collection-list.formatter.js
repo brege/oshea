@@ -1,4 +1,4 @@
-// src/utils/formatters/collection-list-formatter.js
+// src/utils/formatters/collection-list.formatter.js
 // Collection list formatter - handles table and detailed views for collections
 
 const { colorThemePath, tableFormatterPath } = require('@paths');

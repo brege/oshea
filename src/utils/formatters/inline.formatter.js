@@ -1,4 +1,4 @@
-// src/utils/formatters/inline-formatter.js
+// src/utils/formatters/inline.formatter.js
 // Inline formatter with no newline (for prompts/results on same line)
 
 const fs = require('fs');

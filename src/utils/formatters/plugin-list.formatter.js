@@ -1,4 +1,4 @@
-// src/utils/formatters/plugin-list-formatter.js
+// src/utils/formatters/plugin-list.formatter.js
 // Plugin list formatter - handles both table and detailed views
 
 const { colorThemePath, tableFormatterPath } = require('@paths');

@@ -1,6 +1,6 @@
 // src/collections/commands/enable.js
-const { validatorPath } = require('@paths');
-const { validate: pluginValidator } = require(validatorPath);
+const { pluginValidatorPath } = require('@paths');
+const { validate: pluginValidator } = require(pluginValidatorPath);
 
 module.exports = async function enablePlugin(dependencies, collectionPluginId, options = {}) {
   const { fss, logger } = dependencies;

@@ -4,7 +4,7 @@ const {
   captureLogsPath,
   projectRoot,
   pluginValidatorManifestPath,
-  validatorPath,
+  pluginValidatorPath,
   v1Path
 } = require('@paths');
 const { logs, testLogger, clearLogs } = require(captureLogsPath);
@@ -20,7 +20,7 @@ const fs = require('fs');
 
 const proxyquire = require('proxyquire');
 
-describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(projectRoot, validatorPath)}`, function() {
+describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(projectRoot, pluginValidatorPath)}`, function() {
   this.timeout(5000);
   let tempDir;
   let mockFs, mockExecSync, mockYaml, mockOs;
@@ -77,7 +77,7 @@ describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(project
         }
       });
 
-      const { validate } = proxyquire(validatorPath, {
+      const { validate } = proxyquire(pluginValidatorPath, {
         fs: mockFs,
         path,
         yaml: mockYaml,

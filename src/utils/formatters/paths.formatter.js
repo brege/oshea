@@ -1,4 +1,4 @@
-// src/utils/formatters/paths-formatter.js
+// src/utils/formatters/paths.formatter.js
 // Rudimentary syntax highlighting for path-finder shell output
 
 const { colorThemePath } = require('@paths');

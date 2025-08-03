@@ -67,7 +67,7 @@ These modules handle fundamental configuration loading, plugin selection, and th
    -- [`src/collections/index.js`](../../../src/collections/index.js)
    -- 28 Tests
 4. **L2Y4: `plugin-validator`**
-   -- [`src/plugins/plugin-validator.js`](../../../src/plugins/validator.js)
+   -- [`src/plugins/plugin-validator.js`](../../../src/plugins/plugin-validator.js)
    -- 10 Tests
 
 ---

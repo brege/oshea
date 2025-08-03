@@ -1,4 +1,4 @@
-// src/utils/formatters/config-formatter.js
+// src/utils/formatters/config.formatter.js
 // Configuration display formatter - handles both global and plugin config formatting
 const yaml = require('js-yaml');
 const path = require('path');

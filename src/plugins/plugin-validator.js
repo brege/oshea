@@ -1,4 +1,4 @@
-// src/plugins/validator.js
+// src/plugins/plugin-validator.js
 const { v1Path, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 

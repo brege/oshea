@@ -1,4 +1,4 @@
-// src/utils/formatters/app-formatter.js
+// src/utils/formatters/app.formatter.js
 // Default app theme formatter with colored output
 // lint-skip-file no-console
 

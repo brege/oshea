@@ -1,4 +1,4 @@
-// src/utils/formatters/raw-formatter.js
+// src/utils/formatters/raw.formatter.js
 // Raw formatter with no coloring or formatting (for JSON/structured data)
 
 const fs = require('fs');

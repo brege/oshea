@@ -21,7 +21,6 @@ const { formatPathFinderOutput } = require(pathsFormatterPath);
 const { formatTable } = require(tableFormatterPath);
 const { formatPluginList } = require(pluginListFormatterPath);
 const { formatCollectionList } = require(collectionListFormatterPath);
-// Removed smoke-test-formatter.js - functionality moved to yaml-test-formatter.js
 const {
   formatValidationHeader,
   formatValidationStep,
@@ -53,7 +52,6 @@ module.exports = {
   table: formatTable,
   'plugin-list': formatPluginList,
   'collection-list': formatCollectionList,
-  // Removed smoke-* formatters - functionality moved to yaml-test-formatter.js
   'validation-header': formatValidationHeader,
   'validation-step': formatValidationStep,
   'validation-test': formatValidationTest,

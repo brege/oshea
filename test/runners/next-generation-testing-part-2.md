@@ -39,8 +39,8 @@ or whatever location the new E2E base directory's path is defined as.
 **Unify smoke-like runners**
 - [x] Extract special showMode formatting
 - [x] Fix overbearing header spamm; color execution command
-- [x] Rename workflow-test-formatter.js to [`yaml-test-formatter.js`](../../src/utils/formatters/yaml-test-formatter.js)
-- [x] Remove smoke-test-formatter.js
+- [x] Rename workflow-test.formatter.js to [`yaml-test.formatter.js`](../../src/utils/formatters/yaml-test.formatter.js)
+- [x] Remove smoke-test.formatter.js
 - [x] Rename smoke-helpers.js to yaml-test-helpers.js
 - [x] Rename workflow-coffeecup.test.js to yaml-mocha.test.js
 - [x] Re-generate pathing (name changes)
@@ -220,12 +220,12 @@ src/                                test/
 - [x] Rename `yaml-*.js` files to `e2e-*.js` files, as old tests are removed and don't conflict with new E2E test files 
 
 **App-side consistency**
-- [ ] Move all of `src/cli/commands` into `src/cli`
+- [x] Move all of `src/cli/commands` into `src/cli`
   (this way `src/cli/ <--> ...end-to-end/cli/` is consistent)
-- [ ] `mv src/cli/get-help.js src/plugins/plugin-help.js` (this only applies to plugins help-text)
-- [ ] `mv src/plugins/validator.js src/plugins/plugin-validator.js` (consistency)
-- [x] `mv src/cli/config-display.js src/utils/formatters/config-formatter.js` (consistency)
-- [ ] `mv src/utils/formatters/*-formatter.js src/utils/formatters/*.formatter.js` (good/bad idea?)
+- [x] `mv src/cli/get-help.js src/plugins/plugin-help.js` (this only applies to plugins help-text)
+- [x] `mv src/plugins/validator.js src/plugins/plugin-validator.js` (consistency)
+- [x] `mv src/cli/config-display.js src/utils/formatters/config.formatter.js` (consistency)
+- [x] `mv src/utils/formatters/*.formatter.js src/utils/formatters/*.formatter.js` (good/bad idea?)
 
 - [x] **Split CLI from API** (move heavy cli.js to index.js, produce shims for cli.js)
 

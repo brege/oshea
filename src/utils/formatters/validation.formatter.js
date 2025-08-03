@@ -1,4 +1,4 @@
-// src/utils/formatters/validation-formatter.js
+// src/utils/formatters/validation.formatter.js
 // Plugin validation formatter - handles validation output with clean data contracts
 
 const { colorThemePath } = require('@paths');

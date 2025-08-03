@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-02T23:14:38.734Z
+// Generated: 2025-08-03T01:40:26.000Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -246,7 +246,7 @@ const pluginDeterminerPath = path.join(projectRoot, 'src/plugins/plugin-determin
 const pluginHelpPath = path.join(projectRoot, 'src/plugins/plugin-help.js');
 const pluginManagerPath = path.join(projectRoot, 'src/plugins/plugin-manager.js');
 const pluginRegistryBuilderPath = path.join(projectRoot, 'src/plugins/plugin-registry-builder.js');
-const validatorPath = path.join(projectRoot, 'src/plugins/validator.js');
+const pluginValidatorPath = path.join(projectRoot, 'src/plugins/plugin-validator.js');
 
 // Collections Management
 const collectionsRoot = path.join(projectRoot, 'src/collections/');
@@ -315,19 +315,19 @@ const utilsRoot = path.join(projectRoot, 'src/utils/');
 const assetResolverPath = path.join(projectRoot, 'src/utils/asset-resolver.js');
 const loggerEnhancerPath = path.join(projectRoot, 'src/utils/logger-enhancer.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
-const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app-formatter.js');
-const collectionListFormatterPath = path.join(projectRoot, 'src/utils/formatters/collection-list-formatter.js');
+const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app.formatter.js');
+const collectionListFormatterPath = path.join(projectRoot, 'src/utils/formatters/collection-list.formatter.js');
 const colorThemePath = path.join(projectRoot, 'src/utils/formatters/color-theme.js');
-const configFormatterPath = path.join(projectRoot, 'src/utils/formatters/config-formatter.js');
+const configFormatterPath = path.join(projectRoot, 'src/utils/formatters/config.formatter.js');
 const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
-const inlineFormatterPath = path.join(projectRoot, 'src/utils/formatters/inline-formatter.js');
-const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint-formatter.js');
-const pathsFormatterPath = path.join(projectRoot, 'src/utils/formatters/paths-formatter.js');
-const pluginListFormatterPath = path.join(projectRoot, 'src/utils/formatters/plugin-list-formatter.js');
-const rawFormatterPath = path.join(projectRoot, 'src/utils/formatters/raw-formatter.js');
-const tableFormatterPath = path.join(projectRoot, 'src/utils/formatters/table-formatter.js');
-const validationFormatterPath = path.join(projectRoot, 'src/utils/formatters/validation-formatter.js');
-const yamlTestFormatterPath = path.join(projectRoot, 'src/utils/formatters/yaml-test-formatter.js');
+const inlineFormatterPath = path.join(projectRoot, 'src/utils/formatters/inline.formatter.js');
+const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint.formatter.js');
+const pathsFormatterPath = path.join(projectRoot, 'src/utils/formatters/paths.formatter.js');
+const pluginListFormatterPath = path.join(projectRoot, 'src/utils/formatters/plugin-list.formatter.js');
+const rawFormatterPath = path.join(projectRoot, 'src/utils/formatters/raw.formatter.js');
+const tableFormatterPath = path.join(projectRoot, 'src/utils/formatters/table.formatter.js');
+const validationFormatterPath = path.join(projectRoot, 'src/utils/formatters/validation.formatter.js');
+const yamlTestFormatterPath = path.join(projectRoot, 'src/utils/formatters/yaml-test.formatter.js');
 
 // Linting Utilities & Helpers
 const lintingLibRoot = path.join(projectRoot, 'scripts/linting/lib/');
@@ -533,7 +533,7 @@ module.exports = {
   pluginHelpPath,
   pluginManagerPath,
   pluginRegistryBuilderPath,
-  validatorPath,
+  pluginValidatorPath,
   collectionsRoot,
   cmUtilsPath,
   collectionsIndexPath,

@@ -1,4 +1,4 @@
-// src/utils/formatters/lint-formatter.js
+// src/utils/formatters/lint.formatter.js
 // Lint-specific formatting logic
 
 const chalk = require('chalk');

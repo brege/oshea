@@ -26,18 +26,18 @@ logger(message, options) → formatter → console/file output
 | [`index.js`](formatters/index.js) | orchestrator for all formatters |
 | [`color-theme.js`](formatters/color-theme.js) | color palette for CLI output |
 | **App-side**      |                                    |
-| [`app-formatter.js`](formatters/app-formatter.js) | **default output format** |
-| [`inline-formatter.js`](formatters/inline-formatter.js) | --consider pruning-- |
-| [`paths-formatter.js`](formatters/paths-formatter.js) | --consider pruning-- |
-| [`raw-formatter.js`](formatters/raw-formatter.js) | raw unformatted output |
-| [`validation-formatter.js`](formatters/validation-formatter.js) | `plugin validate` |
-| [`plugin-list-formatter.js`](formatters/plugin-list-formatter.js) | `plugin list` |
-| [`table-formatter.js`](formatters/table-formatter.js) | `plugin list --short` |
-| [`collection-list-formatter.js`](formatters/collection-list-formatter.js) | `collection list` |
+| [`app.formatter.js`](formatters/app.formatter.js) | **default output format** |
+| [`inline.formatter.js`](formatters/inline.formatter.js) | --consider pruning-- |
+| [`paths.formatter.js`](formatters/paths.formatter.js) | --consider pruning-- |
+| [`raw.formatter.js`](formatters/raw.formatter.js) | raw unformatted output |
+| [`validation.formatter.js`](formatters/validation.formatter.js) | `plugin validate` |
+| [`plugin-list.formatter.js`](formatters/plugin-list.formatter.js) | `plugin list` |
+| [`table.formatter.js`](formatters/table.formatter.js) | `plugin list --short` |
+| [`collection-list.formatter.js`](formatters/collection-list.formatter.js) | `collection list` |
 | **Test-side**      |                                    |
-| [`lint-formatter.js`](formatters/lint-formatter.js) | `node scripts/linting/lint.js` |
-| [`yaml-test-formatter.js`](formatters/yaml-test-formatter.js) | [`test/runners/end-to-end/e2e-runner.js`](../../test/runners/end-to-end/e2e-runner.js) |
-| [`config-formatter.js`](formatters/config-formatter.js) | `md-to-pdf config` |
+| [`lint.formatter.js`](formatters/lint.formatter.js) | `node scripts/linting/lint.js` |
+| [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js) | [`test/runners/end-to-end/e2e-runner.js`](../../test/runners/end-to-end/e2e-runner.js) |
+| [`config.formatter.js`](formatters/config.formatter.js) | `md-to-pdf config` |
 
 **see [scripts/playground/](../../scripts/playground/) for examples**
 

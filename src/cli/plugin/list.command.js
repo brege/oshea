@@ -112,7 +112,7 @@ module.exports = {
       })
       .epilogue(`Default view shows all usable plugins (registered and CM-enabled).
 Status flags (--available, --disabled) filter within CM-managed collections.
-For a list of collection names, use 'md-to-pdf collection list'.`);
+For a list of collection names, use 'oshea collection list'.`);
   },
   handler: async (args) => {
     try {

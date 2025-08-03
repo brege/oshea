@@ -6,7 +6,7 @@ set -e
 
 # --- Script Usage ---
 if [ "$#" -ne 3 ] && [ "$#" -ne 4 ]; then
-    echo "Usage: $0 <source_dir> <output_dir> <base_plugin> [<md_to_pdf_cli_path>]"
+    echo "Usage: $0 <source_dir> <output_dir> <base_plugin> [<oshea_cli_path>]"
     echo "Example: $0 ./examples/hugo-example ./batch_output/hugo_recipes_bash recipe"
     echo "Example with custom cli.js: $0 ../my_docs ../my_pdfs default ../dist/cli.js"
     exit 1
@@ -16,13 +16,13 @@ fi
 SOURCE_BASE_DIR_ARG="$1"
 OUTPUT_BASE_DIR_ARG="$2"
 BASE_PLUGIN_ARG="$3"
-MD_TO_PDF_CLI_PATH_ARG="${4:-$(dirname "$0")/../../cli.js}" # Default path relative to this script
+OSHEA_CLI_PATH_ARG="${4:-$(dirname "$0")/../../cli.js}" # Default path relative to this script
 
 # Resolve to absolute paths
 SOURCE_BASE_DIR=$(readlink -f "$SOURCE_BASE_DIR_ARG")
 OUTPUT_BASE_DIR=$(readlink -f "$OUTPUT_BASE_DIR_ARG")
 BASE_PLUGIN="$BASE_PLUGIN_ARG"
-MD_TO_PDF_CMD="node $(readlink -f "$MD_TO_PDF_CLI_PATH_ARG")"
+OSHEA_CMD="node $(readlink -f "$OSHEA_CLI_PATH_ARG")"
 
 
 # --- Helper Functions ---
@@ -63,7 +63,7 @@ echo "Starting batch conversion for Hugo recipes (Bash script)..."
 echo "Source directory: $SOURCE_BASE_DIR"
 echo "Output directory: $OUTPUT_BASE_DIR"
 echo "Base plugin: $BASE_PLUGIN"
-echo "md-to-pdf CLI command: $MD_TO_PDF_CMD"
+echo "oshea CLI command: $OSHEA_CMD"
 
 
 if [ ! -d "$SOURCE_BASE_DIR" ]; then
@@ -77,8 +77,8 @@ if ! command -v node &> /dev/null; then
     echo "ERROR: Node.js (node) command not found. Please install Node.js."
     exit 1
 fi
-if [ ! -f "$(echo $MD_TO_PDF_CMD | cut -d' ' -f2)" ]; then
-    echo "ERROR: md-to-pdf cli.js not found at $(echo $MD_TO_PDF_CMD | cut -d' ' -f2)"
+if [ ! -f "$(echo $OSHEA_CMD | cut -d' ' -f2)" ]; then
+    echo "ERROR: oshea cli.js not found at $(echo $OSHEA_CMD | cut -d' ' -f2)"
     echo "Please check the path or provide it as the 4th argument to the script."
     exit 1
 fi
@@ -122,7 +122,7 @@ find "$SOURCE_BASE_DIR" -mindepth 2 -name "index.md" -type f | while IFS= read -
 
     echo "  Generating PDF: $output_pdf_path"
     set -x
-    $MD_TO_PDF_CMD convert "$markdown_file_path" \
+    $OSHEA_CMD convert "$markdown_file_path" \
         --plugin "$BASE_PLUGIN" \
         --outdir "$item_output_dir" \
         --filename "$output_filename" \

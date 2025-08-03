@@ -1,6 +1,6 @@
 name: plugin add (End-to-End Test) src/cli/commands/plugin/add.command.js
 test_id: 3.6.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - add

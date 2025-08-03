@@ -140,7 +140,7 @@ class ConfigResolver {
         logger.debug('To see final applied settings, run the config command', {
           context: 'ConfigResolver',
           plugin: pluginName,
-          command: `md-to-pdf config --plugin ${pluginName}`
+          command: `oshea config --plugin ${pluginName}`
         });
       }
 

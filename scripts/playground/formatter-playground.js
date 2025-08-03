@@ -55,7 +55,7 @@ function showValidatorOutput() {
   console.log(theme.info('  Running in-situ E2E test... '));
   console.log(theme.success('✓ OK'));
   console.log(theme.success('    ✓ CV Plugin E2E Test'));
-  console.log(theme.success('      ✓ should convert cv-example.md to PDF'));
+  console.log(theme.success('      ✓ should convert cv-example.md to cv-example.pdf'));
   console.log(theme.success('      1 passing (142ms)'));
   console.log('');
 }
@@ -97,7 +97,7 @@ function showCommandExamples() {
 // Main playground
 function main() {
   console.clear();
-  console.log(theme.highlight('MD-to-PDF Formatter Playground \n'));
+  console.log(theme.highlight('oshea Formatter Playground \n'));
 
   showPalette();
   showLogLevels();

@@ -76,7 +76,7 @@ module.exports = {
     const manager = args.manager;
     const configResolver = args.configResolver;
 
-    logger.info('md-to-pdf plugin: Attempting to disable plugin...');
+    logger.info('oshea plugin: Attempting to disable plugin...');
     logger.detail(`  Plugin Invoke Name: ${args.invoke_name}`);
 
     try {

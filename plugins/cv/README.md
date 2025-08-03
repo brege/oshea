@@ -20,7 +20,7 @@ cli_help: |
     - inject_fm_title_as_h1: Typically true for this plugin.
 
   Example Usage:
-    md-to-pdf convert my_cv.md --plugin cv
+    oshea convert my_cv.md --plugin cv
 ---
 
 # CV Plugin (`cv`)

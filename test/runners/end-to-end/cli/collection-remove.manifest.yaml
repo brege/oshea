@@ -2,7 +2,7 @@ name: >-
   collection remove (End-to-End Test)
   src/cli/commands/collection/list.command.js
 test_id: 3.12.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable

@@ -21,7 +21,7 @@ function getReportPath() {
     return path.resolve(process.env.MOCHA_JSON_REPORT_FILE);
   }
   const xdgDataHome = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
-  const reportDir = path.join(xdgDataHome, 'md-to-pdf', 'test-analytics');
+  const reportDir = path.join(xdgDataHome, 'oshea', 'test-analytics');
   fs.mkdirSync(reportDir, { recursive: true });
   return path.join(reportDir, 'test-results.json');
 }

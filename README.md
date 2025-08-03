@@ -1,12 +1,13 @@
-# md-to-pdf - Markdown to PDF Converter
+# oshea - Markdown to PDF Converter
 
-A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs. It features a powerful, extensible plugin system, making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports. `md-to-pdf` is built on:
+A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs. It features a powerful, extensible plugin system, making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports.
+**`oshea`** is built on:
 [markdown-it](https://github.com/markdown-it/markdown-it) for Markdown parsing, and
 [puppeteer](https://pptr.dev/) for high-quality PDF generation.
 
 ---
 
-**The rise of AI tooling has brought enormous growth to universal Markdown usage. `md-to-pdf` is ideal for anyone who writes in Markdown but needs polished, professional, reproducible output for resumes, reports, presentations, and more.**
+**The rise of AI tooling has brought enormous growth to universal Markdown usage. **`oshea`** is ideal for anyone who writes in Markdown but needs polished, professional, reproducible output for resumes, reports, presentations, and more.**
 
 ---
 
@@ -14,13 +15,13 @@ A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](ht
 
 ```bash
 # Convert a basic markdown file
-md-to-pdf my-document.md
+oshea my-document.md
 
 # Use a built-in plugin for styling
-md-to-pdf my-resume.md --plugin cv
+oshea my-resume.md --plugin cv
 
 # Create a cover letter with professional formatting
-md-to-pdf my-letter.md --plugin cover-letter
+oshea my-letter.md --plugin cover-letter
 ```
 
 ---
@@ -39,10 +40,10 @@ This tool allows you to produce high-quality and re-usable, aesthetic documents.
 
 ### Installation
 
-Install `md-to-pdf` globally with `npm install -g md-to-pdf`, or locally.
+Install `oshea` globally with `npm install -g oshea`, or locally.
 ```bash
-git clone https://github.com/brege/md-to-pdf.git
-cd md-to-pdf
+git clone https://github.com/brege/oshea.git
+cd oshea
 npm install
 npm link
 ```
@@ -54,12 +55,12 @@ npm link
 Use any plugin with your markdown files:
 
 ```bash
-md-to-pdf convert my-resume.md --plugin cv
+oshea convert my-resume.md --plugin cv
 ```
 
 Take a look at the [Bundled Plugins](plugins/index.md) page for more examples.
 
-**Watch mode:** `md-to-pdf` can watch for changes to your markdown and plugin files with `md-to-pdf --watch`.
+**Watch mode:** `oshea` can watch for changes to your markdown and plugin files with `oshea --watch`.
 
 > **Note:** The `convert` command is implicit when a markdown file is provided. For generators (like building recipe books), the distinction between `convert` and `generate` becomes important.
 
@@ -69,7 +70,7 @@ Take a look at the [Bundled Plugins](plugins/index.md) page for more examples.
 
 To customize layouts, you can archetype from existing plugins or create a new one from scratch.
 ```bash
-md-to-pdf plugin create --from cover-letter my-better-letter --target-dir 'my-plugins'
+oshea plugin create --from cover-letter my-better-letter --target-dir 'my-plugins'
 ```
 
 This creates a complete plugin structure:
@@ -107,16 +108,16 @@ The command above specifies a base plugin to archetype from, the "default" plugi
 
 The collections manager makes it easy to manage plugins and collections of plugins.
 ```bash
-md-to-pdf collection add my-plugins
+oshea collection add my-plugins
 # or add individual plugins
-md-to-pdf plugin add my-plugins/my-better-letter
+oshea plugin add my-plugins/my-better-letter
 ```
 
 Enable plugins for use anywhere:
 ```bash
-md-to-pdf plugin enable my-plugins/my-better-letter
+oshea plugin enable my-plugins/my-better-letter
 # or enable entire collections
-md-to-pdf collection enable my-plugins
+oshea collection enable my-plugins
 ```
 
 This workflow lets you maintain a development repository with a self-activating testing area while providing production copies for use anywhere.
@@ -148,22 +149,22 @@ Alternatively, the `generate` command is used to generate one PDF from a set of 
 
 **Dynamic Tab-completion:**
 ```bash
-echo 'source <(md-to-pdf completion)' >> ~/.bashrc
+echo 'source <(oshea completion)' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 **Plugin Management Commands:**
 ```bash
-md-to-pdf plugin help cv              # Plugin-specific help
-md-to-pdf plugin list                 # List all plugins (add --short for brief)
-md-to-pdf plugin validate my-plugin   # Validate plugin structure and tests
+oshea plugin help cv              # Plugin-specific help
+oshea plugin list                 # List all plugins (add --short for brief)
+oshea plugin validate my-plugin   # Validate plugin structure and tests
 ```
 
 **Collection Commands:**
 ```bash
-md-to-pdf collection list                                          # List collections
-md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins # Add remote collection
-md-to-pdf update                                                   # Update plugins/collections
+oshea collection list                                          # List collections
+oshea collection add https://github.com/brege/md-to-pdf-plugins # Add remote collection
+oshea update                                                   # Update plugins/collections
 ```
 
 ---
@@ -191,7 +192,7 @@ The librarian, together with the [**postman**](scripts/linting/docs/postman.js),
 
 ### Development & Testing
 
-**Config precedence:** `--config` flag > user `~/.config/md-to-pdf/config.yaml` > `config.example.yaml`
+**Config precedence:** `--config` flag > user `~/.config/oshea/config.yaml` > `config.example.yaml`
 
 **Plugin precedence:** `--plugin` flag > front matter > local `*.config.yaml` > default
 
@@ -208,7 +209,7 @@ You can run the last tests that failed `npm run test:last-fails`. You can use th
 
 Plugins are easy to test.
 ```bash
-md-to-pdf plugin validate my-plugins/my-better-letter
+oshea plugin validate my-plugins/my-better-letter
 ```
 This checks if your plugin is self-activating, if the in-situ tests pass, and if the plugin's directory structure is valid, among other verifications.
 

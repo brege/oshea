@@ -11,7 +11,7 @@ const logger = require(loggerPath);
 
 function getTestResultsPath() {
   const xdgDataHome = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
-  return path.join(xdgDataHome, 'md-to-pdf', 'test-analytics', 'test-results.json');
+  return path.join(xdgDataHome, 'oshea', 'test-analytics', 'test-results.json');
 }
 
 function loadTestResults() {

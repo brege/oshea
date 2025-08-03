@@ -1,6 +1,6 @@
 # Walkthrough: A Plugin's Full Lifecycle
 
-This guide demonstrates a complete, real-world workflow for managing plugins in `md-to-pdf`. You will add a plugin collection from a remote Git repository, enable a specific plugin, use it to convert a document, and then clean up by disabling the plugin and removing the collection.
+This guide demonstrates a complete, real-world workflow for managing plugins in `oshea`. You will add a plugin collection from a remote Git repository, enable a specific plugin, use it to convert a document, and then clean up by disabling the plugin and removing the collection.
 
 This entire process is automated and verified by the test at
 [`test/runners/smoke/workflow-tests.yaml`](test/runners/smoke/workflow-tests.yaml),
@@ -14,7 +14,7 @@ This will run the whole process, showing output as it happens, leaving your user
 
 ### Prerequisites
 
-  * `md-to-pdf` installed.
+  * `oshea` installed.
   * `git` installed on your system.
   * A sample Markdown file. You can create one named `sample.md` with the content: `# My Document`.
 
@@ -27,7 +27,7 @@ First, add a collection of plugins from a remote Git repository. This command cl
 **Command:**
 
 ```bash
-md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins.git --name lifecycle-collection
+oshea collection add https://github.com/brege/md-to-pdf-plugins.git --name lifecycle-collection
 ```
 
 **Explanation:**
@@ -45,7 +45,7 @@ Now that the collection is available, you can enable a specific plugin from it. 
 **Command:**
 
 ```bash
-md-to-pdf plugin enable lifecycle-collection/restaurant-menu
+oshea plugin enable lifecycle-collection/restaurant-menu
 ```
 
 **Explanation:**
@@ -64,7 +64,7 @@ With the plugin enabled, you can now use it to convert your `sample.md` file.
 **Command:**
 
 ```bash
-md-to-pdf convert sample.md --plugin restaurant-menu --outdir ./output
+oshea convert sample.md --plugin restaurant-menu --outdir ./output
 ```
 
 **Explanation:**
@@ -84,7 +84,7 @@ After you're done using a plugin, you can disable it to remove it from the list 
 **Command:**
 
 ```bash
-md-to-pdf plugin disable restaurant-menu
+oshea plugin disable restaurant-menu
 ```
 
 **Explanation:**
@@ -102,7 +102,7 @@ Finally, to completely remove the plugin and all others from the `lifecycle-coll
 **Command:**
 
 ```bash
-md-to-pdf collection remove lifecycle-collection
+oshea collection remove lifecycle-collection
 ```
 
 **Explanation:**

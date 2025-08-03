@@ -2,7 +2,7 @@ name: >-
   plugin validate (Validation Test) src/validators/v1.js
   src/plugins/validator.js
 test_id: P.3.3.bundled
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - cli
   - smoke

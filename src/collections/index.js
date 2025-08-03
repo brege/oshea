@@ -86,14 +86,14 @@ class CollectionsManager {
         context: 'CollectionsManager',
         root: resolvedRoot
       });
-    } else if (process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE) {
-      resolvedRoot = process.env.MD_TO_PDF_COLL_ROOT_TEST_OVERRIDE;
+    } else if (process.env.OSHEA_COLL_ROOT_TEST_OVERRIDE) {
+      resolvedRoot = process.env.OSHEA_COLL_ROOT_TEST_OVERRIDE;
       logger.debug('Collections root derived from test environment override', {
         context: 'CollectionsManager',
         root: resolvedRoot
       });
-    } else if (process.env.MD_TO_PDF_COLLECTIONS_ROOT) {
-      resolvedRoot = process.env.MD_TO_PDF_COLLECTIONS_ROOT;
+    } else if (process.env.OSHEA_COLLECTIONS_ROOT) {
+      resolvedRoot = process.env.OSHEA_COLLECTIONS_ROOT;
       logger.debug('Collections root derived from environment variable', {
         context: 'CollectionsManager',
         root: resolvedRoot
@@ -109,7 +109,7 @@ class CollectionsManager {
         (os.platform() === 'win32'
           ? path.join(os.homedir(), 'AppData', 'Local')
           : path.join(os.homedir(), '.local', 'share'));
-      resolvedRoot = path.join(xdgDataHome, 'md-to-pdf');
+      resolvedRoot = path.join(xdgDataHome, 'oshea');
       logger.debug('Collections root using XDG default path', {
         context: 'CollectionsManager',
         root: resolvedRoot

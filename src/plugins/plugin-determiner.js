@@ -34,8 +34,8 @@ async function determinePluginToUse(args, { fsPromises, fsSync, path, yaml, mark
       try {
         const rawMarkdownContent = await fsPromises.readFile(markdownFilePathAbsolute, 'utf8');
         const { data: frontMatter } = markdownUtils.extractFrontMatter(rawMarkdownContent);
-        if (frontMatter && frontMatter.md_to_pdf_plugin) {
-          fmPlugin = frontMatter.md_to_pdf_plugin;
+        if (frontMatter && frontMatter.oshea_plugin) {
+          fmPlugin = frontMatter.oshea_plugin;
           logger.debug('Plugin found in front matter', {
             context: 'PluginDeterminer',
             plugin: fmPlugin,

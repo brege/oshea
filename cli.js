@@ -39,7 +39,7 @@ function createBaseYargs() {
   const yargs = require('yargs/yargs');
   return yargs(hideBin(process.argv))
     .parserConfiguration({ 'short-option-groups': false })
-    .scriptName('md-to-pdf')
+    .scriptName('oshea')
     .usage('Usage: $0 <command_or_markdown_file> [options]')
     .option('config', {
       describe: 'path to a project-specific YAML config file',
@@ -70,8 +70,8 @@ function createBaseYargs() {
     .epilogue(
       'For more information, refer to the README.md file.\n' +
             'Tab-completion Tip:\n' +
-            '   echo \'source <(md-to-pdf completion)\' >> ~/.bashrc\n' +
-            '   echo \'source <(md-to-pdf completion)\' >> ~/.zshrc\n' +
+            '   echo \'source <(oshea completion)\' >> ~/.bashrc\n' +
+            '   echo \'source <(oshea completion)\' >> ~/.zshrc\n' +
             'then run `source ~/.bashrc` or `source ~/.zshrc`'
     );
 }

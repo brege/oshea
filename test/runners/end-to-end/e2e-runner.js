@@ -154,7 +154,7 @@ class YamlTestRunner {
       if (scenario.skip) {
         if (!showMode && !this.apiMode) {
           const skipCommandDisplay = createDisplayCommand(
-            testSuite.base_command || 'md-to-pdf',
+            testSuite.base_command || 'oshea',
             scenario.args,
             workspace,
             this.needsWorkspace
@@ -183,7 +183,7 @@ class YamlTestRunner {
 
       const fullCommand = `node "${cliPath}" ${args}`;
       const commandDisplay = createDisplayCommand(
-        testSuite.base_command || 'md-to-pdf',
+        testSuite.base_command || 'oshea',
         scenario.args,
         workspace,
         this.needsWorkspace

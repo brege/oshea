@@ -1,5 +1,5 @@
 name: plugin list (End-to-End Test) src/cli/commands/plugin/list.command.js
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - cli
   - smoke
@@ -11,7 +11,7 @@ scenarios:
     test_id: 3.4.1
     args: plugin list
     expect:
-      contains: usable by md-to-pdf
+      contains: usable by oshea
   - description: should list only enabled plugins
     test_id: 3.4.2
     args: plugin list --enabled

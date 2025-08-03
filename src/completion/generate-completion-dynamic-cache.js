@@ -44,7 +44,7 @@ async function getUserPluginsFromManifest(collRoot) {
 
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
-  const cacheDir = path.join(xdgCacheHome, 'md-to-pdf');
+  const cacheDir = path.join(xdgCacheHome, 'oshea');
   return path.join(cacheDir, 'dynamic-completion-data.json');
 }
 

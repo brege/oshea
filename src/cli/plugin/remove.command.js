@@ -148,7 +148,7 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
     const manager = args.manager;
     const pluginName = args.plugin_name;
 
-    logger.info('md-to-pdf plugin: Attempting to remove plugin...');
+    logger.info('oshea plugin: Attempting to remove plugin...');
     logger.detail(`  Plugin Name: ${theme.value(pluginName)}`);
 
     try {
@@ -166,7 +166,7 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
         if (targetPlugin.source === 'bundled' || (targetPlugin.status && targetPlugin.status.includes('Bundled'))) {
           logger.error(`Cannot remove '${pluginName}' - it's a bundled plugin.`);
           logger.info('Only user plugins (created or added plugins) can be removed.');
-          logger.info('Use \'md-to-pdf plugin list\' to see what plugins you have.');
+          logger.info('Use \'oshea plugin list\' to see what plugins you have.');
           process.exit(1);
           return;
         }
@@ -174,8 +174,8 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
         // Check if it's a collection-managed plugin (which also cannot be removed this way)
         if (targetPlugin.source === 'cm') {
           logger.error(`Cannot remove '${pluginName}' - it's managed by a collection.`);
-          logger.info('Use \'md-to-pdf plugin disable\' to disable it, or remove the entire collection.');
-          logger.info('Use \'md-to-pdf plugin list --enabled\' to see what plugins you have.');
+          logger.info('Use \'oshea plugin disable\' to disable it, or remove the entire collection.');
+          logger.info('Use \'oshea plugin list --enabled\' to see what plugins you have.');
           process.exit(1);
           return;
         }
@@ -195,7 +195,7 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
             logger.error(`Plugin '${pluginName}' cannot be removed.`);
             logger.info('This plugin exists but is not a user-created or user-added plugin.');
           }
-          logger.info('Use \'md-to-pdf plugin list\' to see what plugins you have.');
+          logger.info('Use \'oshea plugin list\' to see what plugins you have.');
           break;
         case 'no_manifest':
           logger.error(`Plugins manifest not found. Cannot remove plugin '${pluginName}'.`);
@@ -230,12 +230,12 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
       logger.info(`  Removed: ${theme.path(result.removedPath)}`);
 
       logger.info('\nNext Steps:');
-      logger.info(`  • List remaining plugins: ${theme.highlight('md-to-pdf plugin list')}`);
+      logger.info(`  • List remaining plugins: ${theme.highlight('oshea plugin list')}`);
 
       if (result.pluginType === 'added' && result.sourceInfo) {
-        logger.info(`  • To re-add this plugin: ${theme.highlight('md-to-pdf plugin add <original_path>')}`);
+        logger.info(`  • To re-add this plugin: ${theme.highlight('oshea plugin add <original_path>')}`);
       } else if (result.pluginType === 'created') {
-        logger.info(`  • To recreate this plugin: ${theme.highlight('md-to-pdf plugin create ' + pluginName + ' --from <source>')}`);
+        logger.info(`  • To recreate this plugin: ${theme.highlight('oshea plugin create ' + pluginName + ' --from <source>')}`);
       }
 
       // Update tab completion cache

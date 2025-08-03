@@ -25,14 +25,14 @@ module.exports = {
 
     try {
       if (args.collection_name) {
-        logger.info(`md-to-pdf collection: Attempting to update collection '${args.collection_name}'...`);
+        logger.info(`oshea collection: Attempting to update collection '${args.collection_name}'...`);
         const cmResult = await manager.updateCollection(args.collection_name);
         if (!cmResult.success) {
           logger.warn(`Update for '${args.collection_name}' reported issues (see CM logs above for details).`);
           commandShouldFailHard = true;
         }
       } else {
-        logger.info('md-to-pdf collection: Attempting to update all Git-based collections...');
+        logger.info('oshea collection: Attempting to update all Git-based collections...');
         const cmResults = await manager.updateAllCollections();
         if (!cmResults.success) {
           logger.warn('The batch update process for all collections may have encountered issues for some collections. Check CM logs above.');

@@ -9,7 +9,7 @@ const { runHarness } = require(lintHarnessPath);
 const logger = require(loggerPath);
 
 function printHelp() {
-  logger.detail(`md-to-pdf Linter
+  logger.detail(`oshea Linter
 
 Usage:
   node scripts/linting/lint.js [options] [targets...]

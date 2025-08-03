@@ -104,7 +104,7 @@ class PluginConfigLoader {
       const inlineXdgOverrideBlock = this.xdgMainConfig[pluginName];
       currentMergedConfig = this.configUtils.deepMerge(currentMergedConfig, inlineXdgOverrideBlock);
       // Use the stored xdgMainConfigPath for accurate reporting
-      const xdgConfigReportPath = this.xdgMainConfigPath ? this.xdgMainConfigPath : this.path.join(this.xdgBaseDir || '~/.config/md-to-pdf', 'config.yaml (path not found)');
+      const xdgConfigReportPath = this.xdgMainConfigPath ? this.xdgMainConfigPath : this.path.join(this.xdgBaseDir || '~/.config/oshea', 'config.yaml (path not found)');
       contributingPaths.push(`Inline override from XDG main config: ${xdgConfigReportPath}`);
       currentCssPaths = this.AssetResolver.resolveAndMergeCss(
         inlineXdgOverrideBlock.css_files,

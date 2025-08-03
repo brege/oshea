@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "template-basic.schema.json",
-  "title": "Schema for md-to-pdf template-basic plugin",
+  "title": "Schema for oshea template-basic plugin",
   "description": "This schema extends the base plugin schema with properties specific to the 'template-basic' plugin.",
   "type": "object",
   "allOf": [

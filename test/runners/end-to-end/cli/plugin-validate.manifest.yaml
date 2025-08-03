@@ -1,6 +1,6 @@
 name: plugin validate (End-to-End Test) src/cli/commands/plugin/validate.command.js
 test_id: 3.9.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable
@@ -24,7 +24,7 @@ scenarios:
 ---
 name: plugin validate (End-to-End Test) src/cli/commands/plugin/validate.command.js
 test_id: 3.9.2
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - validate

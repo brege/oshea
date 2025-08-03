@@ -1,5 +1,5 @@
 ---
-md_to_pdf_plugin: recipe
+oshea_plugin: recipe
 title: A Test Recipe
 author: The Fixture
 ---

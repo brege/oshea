@@ -1,6 +1,6 @@
 name: plugin remove (End-to-End Test) src/cli/commands/plugin/remove.command.js
 test_id: 3.16.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - remove
@@ -32,7 +32,7 @@ scenarios:
 ---
 name: plugin remove (End-to-End Test) src/cli/commands/plugin/remove.command.js
 test_id: 3.16.2
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - remove
@@ -50,7 +50,7 @@ scenarios:
 ---
 name: plugin remove (End-to-End Test) src/cli/commands/plugin/remove.command.js
 test_id: 3.16.3
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - remove

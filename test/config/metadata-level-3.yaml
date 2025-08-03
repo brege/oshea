@@ -50,7 +50,7 @@ tests:
     app_files:
       - src/cli/commands/convert.command.js
   3.1.4:
-    description: (Config Precedence) A `md_to_pdf_plugin` key in front matter is correctly used for conversion.
+    description: (Config Precedence) A `oshea_plugin` key in front matter is correctly used for conversion.
     commands:
       - convert
     runner: test/runners/e2e/all-e2e.test.js

@@ -144,7 +144,7 @@ const discoverers = {
 
 // Test workspace manager for isolated test environments
 class TestWorkspace {
-  constructor(basePath = '/tmp/md-to-pdf-workspace', customOutdir = null, customCollRoot = null) {
+  constructor(basePath = '/tmp/oshea-workspace', customOutdir = null, customCollRoot = null) {
     this.basePath = basePath;
     // Allow custom paths for user-specified --outdir and --coll-root
     this.outdir = customOutdir || path.join(basePath, 'outdir');

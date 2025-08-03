@@ -28,7 +28,7 @@ module.exports = {
       })
       .epilogue(
         'If --name is omitted, the plugin directory name will be used as the invoke name.' +
-        '\n' + 'Tip: Use \'md-to-pdf plugin list\' to see all currently enabled plugins.'
+        '\n' + 'Tip: Use \'oshea plugin list\' to see all currently enabled plugins.'
       );
   },
   handler: async (args) => {
@@ -49,7 +49,7 @@ module.exports = {
     const derivedPluginId = path.basename(absolutePluginPath);
     const invokeNameAttempt = args.name || derivedPluginId;
 
-    logger.info('md-to-pdf plugin: Attempting to add and enable plugin from local path...');
+    logger.info('oshea plugin: Attempting to add and enable plugin from local path...');
     logger.info(`  Source Path: ${theme.path(absolutePluginPath)}`);
     logger.info(`  Requested Invoke Name: ${theme.value(invokeNameAttempt)}`);
 
@@ -61,17 +61,17 @@ module.exports = {
         logger.success(`\nSuccessfully processed 'plugin add' for '${theme.value(result.invoke_name)}'.`);
 
         logger.info('\nImportant Notes:');
-        logger.info(`  • A copy of your plugin from ${theme.path(absolutePluginPath)} is now managed by md-to-pdf at:`);
+        logger.info(`  • A copy of your plugin from ${theme.path(absolutePluginPath)} is now managed by oshea at:`);
         logger.info(`    ${theme.path(result.path)}`);
         logger.info('  • For future development, it\'s recommended to edit your original plugin at:');
         logger.info(`    ${theme.path(absolutePluginPath)}`);
         logger.info('  • To sync any changes from your original plugin into the managed version:');
-        logger.info(`    ${theme.highlight('md-to-pdf plugin add ' + absolutePluginPath + ' --name ' + result.invoke_name)}`);
+        logger.info(`    ${theme.highlight('oshea plugin add ' + absolutePluginPath + ' --name ' + result.invoke_name)}`);
         logger.detail('    (Re-run the add command to sync changes from your original source)');
 
         logger.info('\nNext Steps:');
-        logger.info(`  • List active plugins: ${theme.highlight('md-to-pdf plugin list')}`);
-        logger.info(`  • Use your new plugin: ${theme.highlight('md-to-pdf convert mydoc.md --plugin ' + result.invoke_name)}`);
+        logger.info(`  • List active plugins: ${theme.highlight('oshea plugin list')}`);
+        logger.info(`  • Use your new plugin: ${theme.highlight('oshea convert mydoc.md --plugin ' + result.invoke_name)}`);
       } else if (result && !result.success) {
         logger.error(`Plugin add operation reported as unsuccessful. Message: ${result.message || 'No specific message.'}`);
       }

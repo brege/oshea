@@ -20,7 +20,7 @@ const {
   checkFile,
 } = require(testFileHelpersPath);
 
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'recipe-book-e2e');
+const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', 'recipe-book-e2e');
 const HUGO_EXAMPLE_PATH = path.join(fixturesDir, 'hugo-example');
 
 describe('plugins/recipe-book (in-situ Self-Activation Test) .contract/test/recipe-book-e2e.test.js', function () {

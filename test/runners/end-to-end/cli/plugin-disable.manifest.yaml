@@ -1,6 +1,6 @@
 name: plugin disable (End-to-End Test) src/cli/commands/plugin/disable.command.js
 test_id: 3.8.1
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - plugin
   - enable

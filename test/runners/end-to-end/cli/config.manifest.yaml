@@ -1,5 +1,5 @@
 name: config (End-to-End Test) src/cli/commands/config.command.js
-base_command: md-to-pdf
+base_command: oshea
 tags:
   - config
   - pure

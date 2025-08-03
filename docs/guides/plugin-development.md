@@ -1,6 +1,6 @@
 # Plugin Development Guide
 
-This guide explains the basics of creating, configuring, and managing plugins for `md-to-pdf`. 
+This guide explains the basics of creating, configuring, and managing plugins for `oshea`. 
 Plugins are the core of the tool's extensibility, allowing you to define custom processing, styling, and PDF generation options for any type of Markdown document.
 
 ---
@@ -12,7 +12,7 @@ The easiest and most reliable way to start a new plugin is with the built-in `pl
 ### Command Syntax
 
 ```bash
-md-to-pdf plugin create <new-plugin-name> \
+oshea plugin create <new-plugin-name> \
         [ --output-dir <path> ] \
         [ --from <source-plugin> ] \
         [ --force ]
@@ -31,7 +31,7 @@ This command creates a fully functional plugin with a standard structure, includ
 To create a plugin based on the `cv` plugin, run the following command:
 
 ```bash
-md-to-pdf plugin create my-plugin --from cv --target-dir ./my-plugins
+oshea plugin create my-plugin --from cv --target-dir ./my-plugins
 ```
 
 ---
@@ -88,7 +88,7 @@ module.exports = MyPluginHandler;
 The `plugin validate` command is your primary tool for ensuring your plugin meets the required contract. It checks file structure, configuration, and runs any in-situ tests to verify forward compatibility with the core application.
 
 ```bash
-md-to-pdf plugin validate my-plugins/business-card
+oshea plugin validate my-plugins/business-card
 ```
 
 ### Step 2: Register and Use Your Plugin
@@ -105,12 +105,12 @@ Use `plugin add` to copy your local plugin directory into the tool's managed col
 
 Add from a local directory
 ```bash
-md-to-pdf plugin add ./my-plugins/business-card
+oshea plugin add ./my-plugins/business-card
 ```
 
 Or, add directly from a GitHub repository
 ```bash
-md-to-pdf plugin add https://github.com/user/my-awesome-plugin
+oshea plugin add https://github.com/user/my-awesome-plugin
 ```
 
 **For a collection of plugins**
@@ -119,7 +119,7 @@ If you have a repository containing multiple plugins, users can add the entire s
 
 Add a collection from a local directory
 ```bash
-md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins
+oshea collection add https://github.com/brege/md-to-pdf-plugins
 ```
 
 #### Method B: Developer Convenience with `collections_root`
@@ -141,12 +141,12 @@ collections_root: ./my-company-plugins
 After modifying your source files in some local development directory like `./my-plugins/business-card`, you can update your plugin with the following commands:
 
 ```bash
-md-to-pdf collection update _user_added_plugins
+oshea collection update _user_added_plugins
 ```
 
 Having registered your plugin, you can now convert a document using your plugin by name. The `plugin enable` command (which `plugin add` uses internally) automatically runs the validator, ensuring that only safe and valid plugins are activated.
 ```bash
-md-to-pdf document.md --plugin business-card
+oshea document.md --plugin business-card
 ```
 
 In your local environment, you may find yourself using `plugin validate` locally and `collection update` globally to smoke test a plugin in different states of development and production.

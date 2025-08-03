@@ -110,7 +110,7 @@ you must re-run this command to enable any new plugins.`);
 
     try {
       if (args.all) {
-        logger.info('md-to-pdf plugin: Attempting to enable all plugins in collection...');
+        logger.info('oshea plugin: Attempting to enable all plugins in collection...');
         logger.detail(`  Collection Name: ${args.target}`);
 
         let originalSourceForPrefixFallback = '';
@@ -143,7 +143,7 @@ you must re-run this command to enable any new plugins.`);
           bypassValidation: args.bypassValidation
         });
       } else {
-        logger.info('md-to-pdf plugin: Attempting to enable plugin...');
+        logger.info('oshea plugin: Attempting to enable plugin...');
         logger.detail(`  Plugin Identifier: ${args.target}`);
         if (args.name) {
           logger.detail(`  Requested invoke name: ${args.name}`);
@@ -157,7 +157,7 @@ you must re-run this command to enable any new plugins.`);
           const enabledUserPlugin = await enableUserPlugin(args.target, manager);
           if (enabledUserPlugin) {
             logger.success('Plugin enabled successfully');
-            logger.info(`\nTo use this plugin with md-to-pdf, invoke it as: md-to-pdf convert ... --plugin ${args.target}`);
+            logger.info(`\nTo use this plugin with oshea, invoke it as: oshea convert ... --plugin ${args.target}`);
             return; // Early return, skip CM-based enabling
           }
         }
@@ -169,7 +169,7 @@ you must re-run this command to enable any new plugins.`);
         });
         if (result && result.success) {
           const finalInvokeName = result.invoke_name || args.target.split('/')[1];
-          logger.info(`\nTo use this plugin with md-to-pdf, invoke it as: md-to-pdf convert ... --plugin ${finalInvokeName}`);
+          logger.info(`\nTo use this plugin with oshea, invoke it as: oshea convert ... --plugin ${finalInvokeName}`);
         }
       }
 

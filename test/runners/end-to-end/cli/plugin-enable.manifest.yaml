@@ -21,8 +21,7 @@ scenarios:
   - description: should successfully enable a plugin from a collection without validation
     test_id: 3.7.1.2
     args: >-
-      plugin enable test-collection/valid-collection-plugin-1
-      --bypass-validation
+      plugin enable test-collection/valid-collection-plugin-1 --bypass-validation
     expect:
       executes: true
       contains: Attempting to enable plugin

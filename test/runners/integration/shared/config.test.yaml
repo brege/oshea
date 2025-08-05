@@ -5,13 +5,13 @@
 pdf_viewer: null
 
 global_pdf_options:
-  format: "Letter"
+  format: Letter
   printBackground: true
   margin:
-    top: "1in"
-    right: "1in"
-    bottom: "1in"
-    left: "1in"
+    top: 1in
+    right: 1in
+    bottom: 1in
+    left: 1in
 
 global_remove_shortcodes:
   - ""
@@ -19,7 +19,7 @@ global_remove_shortcodes:
 # --- Math Rendering Settings for Tests ---
 math:
   enabled: true
-  engine: "katex"
+  engine: katex
   katex_options:
     throwOnError: false
     trust: false
@@ -49,5 +49,5 @@ plugins:
 default:
   description: "Test Override for Default Plugin"
   pdf_options:
-    format: "A5"
-    margin: { top: "0.5in", bottom: "0.5in" }
+    format: A5
+    margin: { top: 0.5in, bottom: 0.5in }

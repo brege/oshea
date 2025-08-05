@@ -23,7 +23,7 @@
 # scripts/linting/code/no-jsdoc.js
 no-jsdoc:
   group: code
-  filetypes: [".js"]
+  filetypes: [ ".js" ]
   targets:
     - "."
   excludes: []
@@ -31,16 +31,17 @@ no-jsdoc:
 # scripts/linting/code/no-console.js
 no-console:
   group: code
-  filetypes: [".js"]
+  filetypes: [ ".js" ]
   targets:
     - "."
-  excludes: # []
+  excludes:
+    # []
     - src/utils/formatters
 
 # scripts/linting/code/no-bad-headers.js
 no-bad-headers:
   group: code
-  filetypes: [".js"]
+  filetypes: [ ".js" ]
   targets:
     - "."
   excludes: []
@@ -48,23 +49,23 @@ no-bad-headers:
 # scripts/linting/code/no-trailing-whitespace.js
 no-trailing-whitespace:
   group: code
-  filetypes: [".css", ".js", ".json", ".yaml"]
-  targets: ["."]
+  filetypes: [ ".css", ".js", ".json", ".yaml" ]
+  targets: [ "." ]
   excludes: []
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
   group: code
-  filetypes: [".js"]
-  targets: ["."]
+  filetypes: [ ".js" ]
+  targets: [ "." ]
   excludes:
     - paths
 
 # scripts/linting/code/no-old-project-name.js
 no-old-project-name:
   group: code
-  filetypes: [".*"]
-  targets: ["."]
+  filetypes: [ ".*" ]
+  targets: [ "." ]
   excludes:
     - node_modules
     - .git
@@ -74,97 +75,91 @@ no-old-project-name:
     - scripts/linting/linting-config.yaml
   # Project name patterns to find and replace
   old_names:
-    primary: "md-to-pdf"
-    constant: "MD_TO_PDF"
-    camelCase: "mdToPdf"
-    snake_case: "md_to_pdf"
+    primary: md-to-pdf
+    constant: MD_TO_PDF
+    camelCase: mdToPdf
+    snake_case: md_to_pdf
   # New name replacements (leave empty to require --new-name flag)
   new_names:
-    primary: "oshea"
-    constant: "OSHEA"
-    camelCase: "oshea"
-    snake_case: "oshea"
+    primary: oshea
+    constant: OSHEA
+    camelCase: oshea
+    snake_case: oshea
   # Ignore specific matches (whitelist these patterns to skip linting)
   ignore_matches:
     #- "md-to-pdf-plugins"
     #- "Markdown to PDF"
 
-# --- Validators ---
+    # --- Docs ---
 
-# scripts/linting/validators/mocha-path-validator.js
-validate-mocha:
-  group: "validators"
-
-# --- Docs ---
-
-# scripts/linting/docs/janitor.js
+    # scripts/linting/docs/janitor.js
 janitor:
-  group: "docs"
-  targets: ["."]
+  group: docs
+  targets: [ "." ]
   excludes: []
 
 # scripts/linting/docs/librarian.js
 librarian:
-  group: "docs"
+  group: docs
   docs:
     indexFile: docs/index.md
     scanRoot: docs
-    filetypes: [".md"]
+    filetypes: [ ".md" ]
   plugins:
-    marker: "plugins"
+    marker: plugins
     indexFile: plugins/index.md
     scanRoot: plugins
-    filetypes: [".md"]
+    filetypes: [ ".md" ]
     excludePatterns:
       - "plugins/**/index.md"
       - "plugins/**/*-example.md"
   scripts:
-    marker: "scripts"
+    marker: scripts
     indexFile: scripts/index.md
     scanRoot: scripts
-    filetypes: [".js", ".sh"]
+    filetypes: [ ".js", ".sh" ]
     excludePatterns:
       - "scripts/linting/**"
   linting:
-    marker: "linting"
+    marker: linting
     indexFile: scripts/linting/index.md
     scanRoot: scripts/linting
-    filetypes: [".js", ".yaml"]
+    filetypes: [ ".js", ".yaml" ]
     excludePatterns: []
   test:
-    marker: "test"
+    marker: test
     indexFile: test/index.md
     scanRoot:
       - test/analytics
       - test/config
-    filetypes: [".js", ".json", ".yaml"]
+    filetypes: [ ".js", ".json", ".yaml" ]
     excludePatterns:
       - "test/archive/**"
   test-archive:
-    marker: "test-archive"
+    marker: test-archive
     indexFile: test/archive/index.md
     scanRoot: test/archive
-    filetypes: [".js", ".md"]
+    filetypes: [ ".js", ".md" ]
     excludePatterns: []
   paths:
-    marker: "paths"
+    marker: paths
     indexFile: paths/index.md
     scanRoot: paths
-    filetypes: [".js", ".yaml"]
+    filetypes: [ ".js", ".yaml" ]
     excludePatterns: []
   utils:
-    marker: "utils"
+    marker: utils
     indexFile: src/utils/index.md
     scanRoot: src/utils
-    filetypes: [".js"]
+    filetypes: [ ".js" ]
     excludePatterns: []
 
 # scripts/linting/docs/postman.js
 postman:
-  group: "docs"
+  group: docs
   targets:
-   - "."
-  filetypes: [".md", ".js"]
+    - "."
+  filetypes: [ ".md", ".js" ]
   skip_link_patterns:
     - "**/my[-_]*"
     - "**/my[-_]*/**"
@@ -177,13 +172,12 @@ postman:
 
 # scripts/linting/docs/yaml.js
 yaml:
-  group: "docs"
-  targets:
-   - "test/runners/smoke/"
-   - "paths/paths-config.yaml"
-  filetypes: [".yaml"] # perhaps treat *.yml differently..
+  group: docs
+  targets: [ "." ]
+  filetypes: [ ".yaml" ]
   field_order:
     # Lower numbers = higher priority
+    # default: 999
     name: -1
     description: 0
     test_id: 1
@@ -199,6 +193,25 @@ yaml:
     workflow: 19
     scenarios: 20
     visual_check: 21
+    # Test file ordering
+    config: 1
+    api: 2
+    database: 3
+    # Plugin file ordering
+    plugin_name: -1
+    version: -1
+    protocol: -1
+  yaml_options:
+    lineWidth: 80
+    indent: 2
+    quotingType: '"'
+    forceQuotes: false
+    blockQuote: folded
+    flowCollectionPadding: true
+
+# scripts/linting/validators/mocha-path-validator.js
+validate-mocha:
+  group: validators
 
 # --- Harness Configuration ---
 harness:
@@ -258,4 +271,4 @@ harness:
       label: 'ESLint'
       quiet: false
       command: 'eslint'
-      defaultTargets: ['.']
+      defaultTargets: [ '.' ]

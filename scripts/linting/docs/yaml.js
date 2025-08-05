@@ -4,7 +4,7 @@ require('module-alias/register');
 
 const fs = require('fs');
 const path = require('path');
-const yaml = require('js-yaml');
+const YAML = require('yaml');
 const {
   lintHelpersPath,
   lintingConfigPath,
@@ -24,61 +24,114 @@ const {
 const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(visualRenderersPath);
 
-// Helper to sort object keys by configured field order
-function sortByFieldOrder(obj, fieldOrder) {
-  const ordered = {};
-
-  // Sort by field order priority (lower numbers = higher priority)
-  Object.keys(obj)
-    .sort((a, b) => {
-      const aOrder = fieldOrder[a] ?? 999; // Default to 999 if not configured
-      const bOrder = fieldOrder[b] ?? 999;
-      return aOrder - bOrder;
-    })
-    .forEach(key => {
-      ordered[key] = obj[key];
-    });
-
-  return ordered;
-}
 
 // Process a single YAML file and return formatting issues
-function processYamlFile(filePath, fieldOrder) {
+function processYamlFile(filePath, fieldOrder, yamlOptions = {}) {
   try {
+    logger.debug(`Processing YAML file: ${filePath}`, { context: 'YamlLinter' });
     const original = fs.readFileSync(filePath, 'utf8');
-    const documents = yaml.loadAll(original);
 
-    // YAML dump options with controlled formatting
-    const yamlOptions = {
+    // Parse all documents while preserving comments and structure
+    const docs = YAML.parseAllDocuments(original);
+    logger.debug(`Parsed ${docs.length} YAML documents`, { context: 'YamlLinter' });
+
+    // Default YAML formatting options (can be overridden by config)
+    // eslint-disable-next-line no-unused-vars
+    const defaultYamlOptions = {
       lineWidth: 80,
-      noRefs: true,
+      indent: 2,
       quotingType: '"',
       forceQuotes: false,
-      sortKeys: false,
-      indent: 2
+      blockQuote: 'literal',
+      flowCollectionPadding: true,
+      commentString: (comment) => comment.comment
     };
 
-    // Apply field ordering and consistent formatting to each document
-    const orderedDocuments = documents
-      .filter(doc => doc) // Remove any null/undefined documents
-      .map(doc => {
-        // Apply field ordering recursively
-        const orderedDoc = sortByFieldOrder(doc, fieldOrder);
+    // Filter out empty documents that are just separators
+    const validDocs = docs.filter(doc => {
+      // Check if document has actual content
+      return doc && doc.contents && (
+        (doc.contents.items && doc.contents.items.length > 0) ||
+        (doc.contents.value !== null && doc.contents.value !== undefined)
+      );
+    });
+    logger.debug(`Found ${validDocs.length} valid documents after filtering`, { context: 'YamlLinter' });
 
-        // Also apply ordering to nested objects (like scenarios)
-        if (orderedDoc.scenarios && Array.isArray(orderedDoc.scenarios)) {
-          orderedDoc.scenarios = orderedDoc.scenarios.map(scenario =>
-            typeof scenario === 'object' ? sortByFieldOrder(scenario, fieldOrder) : scenario
-          );
+    // Process each valid document
+    const processedDocs = validDocs.map(doc => {
+
+      try {
+        // Apply field ordering by sorting existing items (preserves comments)
+        if (doc.contents && doc.contents.items && Object.keys(fieldOrder).length > 0) {
+          logger.debug(`Applying field ordering to ${doc.contents.items.length} items`, { context: 'YamlLinter' });
+          doc.contents.items.sort((a, b) => {
+            const aKey = a.key?.value;
+            const bKey = b.key?.value;
+            const aOrder = fieldOrder[aKey] ?? 999;
+            const bOrder = fieldOrder[bKey] ?? 999;
+            return aOrder - bOrder;
+          });
         }
 
-        return orderedDoc;
-      });
+        // Strip unnecessary quotes from scalar values while preserving comments
+        function stripQuotesFromNode(node) {
+          if (node?.items) {
+            // Handle maps and sequences
+            node.items.forEach(item => {
+              if (item.key) stripQuotesFromNode(item.key);
+              if (item.value) stripQuotesFromNode(item.value);
+            });
+          } else if (node?.type === 'QUOTE_DOUBLE' || node?.type === 'QUOTE_SINGLE') {
+            // Check if quotes are unnecessary
+            const value = node.value;
+            if (typeof value === 'string' && /^[a-zA-Z0-9\-_./]+$/.test(value)) {
+              node.type = 'PLAIN';
+            }
+          }
+        }
 
-    // Convert back to YAML with controlled formatting
-    const formatted = orderedDocuments
-      .map(doc => yaml.dump(doc, yamlOptions).trim())
-      .join('\n---\n') + '\n';
+        stripQuotesFromNode(doc.contents);
+
+        return doc;
+      } catch (error) {
+        logger.warn(`Failed to process document in ${filePath}: ${error.message}`);
+        return doc;
+      }
+    });
+
+    // Convert back to YAML string preserving document structure
+    let formatted;
+    if (processedDocs.length === 1) {
+      // Single document file - check if original had document separators
+      const hasLeadingSeparator = original.trim().startsWith('---');
+      const hasTrailingSeparator = original.includes('\n---') || original.includes('\n...');
+
+      if (hasLeadingSeparator || hasTrailingSeparator) {
+        // Original had separators, preserve them
+        formatted = '---\n' + processedDocs[0].toString();
+      } else {
+        // No separators in original
+        formatted = processedDocs[0].toString();
+      }
+    } else if (processedDocs.length > 1) {
+      // Multi-document file - join documents with single separator
+      formatted = processedDocs.map((doc, index) => {
+        let docString = doc.toString().trim();
+        // Remove leading --- from documents after the first (they already have it)
+        if (index > 0 && docString.startsWith('---\n')) {
+          docString = docString.substring(4); // Remove '---\n'
+        }
+        return docString;
+      }).join('\n---\n');
+    } else {
+      // No valid documents
+      formatted = '';
+    }
+
+    // Ensure file ends with newline
+    if (!formatted.endsWith('\n')) {
+      formatted += '\n';
+    }
 
     return { original, formatted, error: null };
 
@@ -95,7 +148,8 @@ function runLinter(options = {}) {
     dryRun = false,
     debug = false,
     filetypes = undefined,
-    fieldOrder = {}
+    fieldOrder = {},
+    yamlOptions = {}
   } = options;
 
   const files = findFiles({
@@ -110,7 +164,7 @@ function runLinter(options = {}) {
 
   for (const filePath of files) {
     const relPath = path.relative(projectRoot, filePath);
-    const result = processYamlFile(filePath, fieldOrder);
+    const result = processYamlFile(filePath, fieldOrder, yamlOptions);
 
     if (result.error) {
       issues.push({
@@ -153,16 +207,22 @@ if (require.main === module) {
   const { flags, targets } = parseCliArgs(process.argv.slice(2));
   const config = loadLintSection('yaml', lintingConfigPath) || {};
 
+  // Set global debug mode
+  logger.setDebugMode(!!flags.debug);
+
   const finalTargets = targets.length > 0
     ? targets
     : (config.targets || []);
   const ignores = config.excludes || [];
   const filetypes = config.filetypes;
   const fieldOrder = config.field_order || {};
+  const yamlOptions = config.yaml_options || {};
 
   if (!filetypes) {
     logger.warn('No filetypes specified! Using file-discovery safe defaults.', { context: 'YamlLinter' });
   }
+
+  logger.debug(`YAML linter starting with ${finalTargets.length} targets`, { context: 'YamlLinter' });
 
   const { issues, summary } = runLinter({
     targets: finalTargets,
@@ -171,7 +231,8 @@ if (require.main === module) {
     dryRun: !!flags.dryRun,
     debug: !!flags.debug,
     filetypes,
-    fieldOrder
+    fieldOrder,
+    yamlOptions
   });
 
   renderLintOutput({ issues, summary, flags });

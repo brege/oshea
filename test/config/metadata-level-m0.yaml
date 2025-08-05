@@ -5,11 +5,12 @@ metadata:
   scope: Level 0 test scenarios
   type: Unit Tests
   description: >-
-    Unit tests for custom linting tools that enforce code quality, documentation standards, and
-    project conventions across the codebase
+    Unit tests for custom linting tools that enforce code quality, documentation
+    standards, and project conventions across the codebase
 tests:
   M.0.1.1:
-    description: (Unit Test) The `no-console` linter correctly identifies `console.log` usage.
+    description: (Unit Test) The `no-console` linter correctly identifies
+      `console.log` usage.
     commands:
       - node scripts/linting/code/no-console.js
       - node scripts/linting/lint.js --only "no-console"
@@ -22,7 +23,8 @@ tests:
     app_files:
       - scripts/linting/code/no-console.js
   M.0.1.2:
-    description: (Unit Test) The `no-jsdoc` linter correctly identifies `@jsdoc` comment blocks.
+    description: (Unit Test) The `no-jsdoc` linter correctly identifies `@jsdoc`
+      comment blocks.
     commands:
       - node scripts/linting/code/no-jsdoc.js
       - node scripts/linting/lint.js --only "no-jsdoc"
@@ -35,7 +37,8 @@ tests:
     app_files:
       - scripts/linting/code/no-jsdoc.js
   M.0.1.3:
-    description: (Unit Test) The `no-trailing-whitespace` linter correctly identifies trailing whitespace.
+    description: (Unit Test) The `no-trailing-whitespace` linter correctly
+      identifies trailing whitespace.
     commands:
       - node scripts/linting/code/no-trailing-whitespace.js
       - node scripts/linting/lint.js --only "no-trailing-whitespace"
@@ -48,7 +51,8 @@ tests:
     app_files:
       - scripts/linting/code/no-trailing-whitespace.js
   M.0.1.4:
-    description: (Unit Test) The `no-bad-headers` linter correctly identifies incorrect file headers.
+    description: (Unit Test) The `no-bad-headers` linter correctly identifies
+      incorrect file headers.
     commands:
       - node scripts/linting/code/no-bad-headers.js
       - node scripts/linting/lint.js --only "no-bad-headers"
@@ -61,7 +65,8 @@ tests:
     app_files:
       - scripts/linting/code/no-bad-headers.js
   M.0.1.5:
-    description: (Unit Test) The `no-relative-paths` linter correctly identifies relative `require()` paths.
+    description: (Unit Test) The `no-relative-paths` linter correctly identifies
+      relative `require()` paths.
     commands:
       - node scripts/linting/code/no-relative-paths.js
       - node scripts/linting/lint.js --only "no-relative-paths"
@@ -75,8 +80,8 @@ tests:
       - scripts/linting/code/no-relative-paths.js
   M.0.2.1:
     description: >-
-      (Unit Test) The `postman` linter correctly identifies orphan or ambiguous links in Markdown
-      files.
+      (Unit Test) The `postman` linter correctly identifies orphan or ambiguous
+      links in Markdown files.
     commands:
       - node scripts/linting/docs/postman.js
       - node scripts/linting/lint.js --only "postman"
@@ -90,8 +95,8 @@ tests:
       - scripts/linting/docs/postman.js
   M.0.2.2:
     description: >-
-      (Unit Test) The `janitor` linter correctly identifies anti-patterns, like disallowed emojis or
-      keywords.
+      (Unit Test) The `janitor` linter correctly identifies anti-patterns, like
+      disallowed emojis or keywords.
     commands:
       - node scripts/linting/docs/janitor.js
       - node scripts/linting/lint.js --only "janitor"
@@ -105,7 +110,8 @@ tests:
       - scripts/linting/docs/janitor.js
       - assets/litter-list.txt
   M.0.2.3:
-    description: (Unit Test) The `librarian` linter correctly identifies untracked files in the repository.
+    description: (Unit Test) The `librarian` linter correctly identifies untracked
+      files in the repository.
     commands:
       - node scripts/linting/docs/librarian.js
       - node scripts/linting/lint.js --only "librarian"

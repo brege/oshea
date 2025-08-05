@@ -9,8 +9,7 @@ tags:
 workflow: false
 scenarios:
   - description: >-
-      should successfully create a new plugin directory from the default
-      template
+      should successfully create a new plugin directory from the default template
     test_id: 3.5.1
     args: plugin create my-boilerplate-plugin --outdir {{tmpdir}}
     expect:

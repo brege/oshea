@@ -4,7 +4,8 @@ const path = require('path');
 const {
   postmanPath,
   librarianPath,
-  janitorPath
+  janitorPath,
+  yamlPath
 } = require('@paths');
 
 module.exports = [
@@ -60,6 +61,28 @@ module.exports = [
       expect(exitCode).to.equal(0);
       expect(stdout).to.match(/Untracked file: 'dummy\.js'/i);
       expect(stdout).to.match(/missing-index-entry/);
+    },
+  },
+  {
+    describe: 'M.0.2.4 yaml linter should reorder fields and detect formatting issues',
+    scriptPath: yamlPath,
+    sandboxPrefix: 'docs-yaml-',
+    setup: async (sandboxDir) => {
+      await fs.writeFile(path.join(sandboxDir, 'test.yaml'), [
+        '# Test YAML file',
+        'database:',
+        '  host: localhost',
+        'config:',
+        '  env: development',
+        'api:',
+        '  timeout: 30'
+      ].join('\n'));
+    },
+    args: (sandboxDir) => [path.join(sandboxDir, 'test.yaml')],
+    assert: async ({ exitCode, stdout }) => {
+      expect(exitCode).to.equal(0);
+      expect(stdout).to.match(/YAML field ordering or formatting needs correction/i);
+      expect(stdout).to.match(/yaml-format/);
     },
   },
 ];

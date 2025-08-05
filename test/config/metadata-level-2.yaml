@@ -5,13 +5,15 @@ metadata:
   scope: Level 2 test scenarios
   type: Subsystem Integration Tests
   description: >-
-    Subsystem integration tests ensuring major components work together - collections management,
-    PDF generation pipeline, document processing, and plugin validation systems
+    Subsystem integration tests ensuring major components work together -
+    collections management, PDF generation pipeline, document processing, and
+    plugin validation systems
 tests:
   2.1.1:
     description: >-
-      Verify the constructor correctly initializes file paths (`cmCollRoot`, `cmMainManifestPath`,
-      `cmEnabledManifestPath`) based on `projectRoot` and `XDG_DATA_HOME`.
+      Verify the constructor correctly initializes file paths (`cmCollRoot`,
+      `cmMainManifestPath`, `cmEnabledManifestPath`) based on `projectRoot` and
+      `XDG_DATA_HOME`.
     commands: []
     runner: test/runners/integration/collections/collections-manager.test.js
     manifest: test/runners/integration/collections/collections-manager.constructor.manifest.js
@@ -26,9 +28,9 @@ tests:
       - src/collections-manager/
   2.1.2:
     description: >-
-      Verify the constructor correctly prioritizes the CLI override (`collRootCliOverride`) for
-      setting the `collRoot` path over all other methods (environment variables, config files, or
-      defaults).
+      Verify the constructor correctly prioritizes the CLI override
+      (`collRootCliOverride`) for setting the `collRoot` path over all other
+      methods (environment variables, config files, or defaults).
     commands: []
     runner: test/runners/integration/collections/collections-manager.test.js
     manifest: test/runners/integration/collections/collections-manager.constructor.manifest.js
@@ -43,8 +45,8 @@ tests:
       - src/collections-manager/
   2.1.3:
     description: >-
-      Verify `addCollection` successfully clones a Git repository or downloads a zip file, creates
-      the collection directory, and updates `cm-main.yaml`.
+      Verify `addCollection` successfully clones a Git repository or downloads a
+      zip file, creates the collection directory, and updates `cm-main.yaml`.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -60,8 +62,8 @@ tests:
       - src/collections-manager/
   2.1.4:
     description: >-
-      Test `addCollection` handles attempts to add a collection with a name that already exists,
-      preventing duplication.
+      Test `addCollection` handles attempts to add a collection with a name that
+      already exists, preventing duplication.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -77,8 +79,8 @@ tests:
       - src/collections-manager/
   2.1.5:
     description: >-
-      Verify `addCollection` gracefully handles invalid source URLs or paths, reporting appropriate
-      errors.
+      Verify `addCollection` gracefully handles invalid source URLs or paths,
+      reporting appropriate errors.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -94,8 +96,8 @@ tests:
       - src/collections-manager/
   2.1.6:
     description: >-
-      Test `addCollection` correctly uses `cm-utils.deriveCollectionName` to sanitize the collection
-      name.
+      Test `addCollection` correctly uses `cm-utils.deriveCollectionName` to
+      sanitize the collection name.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -111,8 +113,8 @@ tests:
       - src/collections-manager/
   2.1.7:
     description: >-
-      Verify `removeCollection` successfully removes a collection entry from `cm-main.yaml` and
-      deletes its corresponding directory.
+      Verify `removeCollection` successfully removes a collection entry from
+      `cm-main.yaml` and deletes its corresponding directory.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -127,7 +129,8 @@ tests:
     app_files:
       - src/collections-manager/
   2.1.8:
-    description: Test `removeCollection` gracefully handles attempts to remove a non-existent collection.
+    description: Test `removeCollection` gracefully handles attempts to remove a
+      non-existent collection.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -143,8 +146,9 @@ tests:
       - src/collections-manager/
   2.1.9:
     description: >-
-      Verify `removeCollection` handles cases where the collection's directory cannot be deleted
-      (e.g., due to permissions), logging an error but still updating the manifest.
+      Verify `removeCollection` handles cases where the collection's directory
+      cannot be deleted (e.g., due to permissions), logging an error but still
+      updating the manifest.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -159,7 +163,8 @@ tests:
     app_files:
       - src/collections-manager/
   2.1.10:
-    description: Test `updateCollection` successfully pulls updates for a Git-sourced collection.
+    description: Test `updateCollection` successfully pulls updates for a
+      Git-sourced collection.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -174,7 +179,8 @@ tests:
     app_files:
       - src/collections-manager/
   2.1.11:
-    description: Verify `updateCollection` gracefully handles updating a non-existent collection.
+    description: Verify `updateCollection` gracefully handles updating a
+      non-existent collection.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -190,8 +196,8 @@ tests:
       - src/collections-manager/
   2.1.12:
     description: >-
-      Test `updateCollection` handles update failures (e.g., network issues, conflicts) for a
-      Git-sourced collection.
+      Test `updateCollection` handles update failures (e.g., network issues,
+      conflicts) for a Git-sourced collection.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -207,8 +213,9 @@ tests:
       - src/collections-manager/
   2.1.13:
     description: >-
-      Verify `listCollections` returns a comprehensive list of all collections from `cm-main.yaml`
-      when `filter` is 'all', including their enabled status from `enabled.yaml`.
+      Verify `listCollections` returns a comprehensive list of all collections
+      from `cm-main.yaml` when `filter` is 'all', including their enabled status
+      from `enabled.yaml`.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -224,8 +231,8 @@ tests:
       - src/collections-manager/
   2.1.14:
     description: >-
-      Test `listCollections` correctly filters and returns only 'enabled' collections when `filter`
-      is 'enabled'.
+      Test `listCollections` correctly filters and returns only 'enabled'
+      collections when `filter` is 'enabled'.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -241,8 +248,8 @@ tests:
       - src/collections-manager/
   2.1.15:
     description: >-
-      Verify `listCollections` correctly filters and returns only 'disabled' collections when
-      `filter` is 'disabled'.
+      Verify `listCollections` correctly filters and returns only 'disabled'
+      collections when `filter` is 'disabled'.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -258,8 +265,8 @@ tests:
       - src/collections-manager/
   2.1.16:
     description: >-
-      Test `listCollections` handles cases where `cm-main.yaml` or `enabled.yaml` are missing or
-      empty.
+      Test `listCollections` handles cases where `cm-main.yaml` or
+      `enabled.yaml` are missing or empty.
     commands:
       - collection
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -275,9 +282,9 @@ tests:
       - src/collections-manager/
   2.1.17:
     description: >-
-      Verify `enablePlugin` successfully adds a plugin to `enabled.yaml` with the specified
-      `invokeName`, `collectionName`, and `pluginId`, ensuring the plugin's config path is resolved
-      and valid.
+      Verify `enablePlugin` successfully adds a plugin to `enabled.yaml` with
+      the specified `invokeName`, `collectionName`, and `pluginId`, ensuring the
+      plugin's config path is resolved and valid.
     commands:
       - plugin
       - collection
@@ -294,8 +301,8 @@ tests:
       - src/collections-manager/
   2.1.18:
     description: >-
-      Test `enablePlugin` correctly prevents enabling a plugin if the `invokeName` already exists in
-      `enabled.yaml`.
+      Test `enablePlugin` correctly prevents enabling a plugin if the
+      `invokeName` already exists in `enabled.yaml`.
     commands:
       - plugin
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -311,8 +318,8 @@ tests:
       - src/collections-manager/
   2.1.19:
     description: >-
-      Verify `enablePlugin` handles attempts to enable a plugin that does not exist within the
-      specified collection.
+      Verify `enablePlugin` handles attempts to enable a plugin that does not
+      exist within the specified collection.
     commands:
       - plugin
       - collection
@@ -328,7 +335,8 @@ tests:
     app_files:
       - src/collections-manager/
   2.1.20:
-    description: Test `enablePlugin` correctly uses `cm-utils.isValidPluginName` to validate the `invokeName`.
+    description: Test `enablePlugin` correctly uses `cm-utils.isValidPluginName` to
+      validate the `invokeName`.
     commands:
       - plugin
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -343,7 +351,8 @@ tests:
     app_files:
       - src/collections-manager/
   2.1.21:
-    description: Verify `enablePlugin` handles cases where the plugin's resolved config path does not exist.
+    description: Verify `enablePlugin` handles cases where the plugin's resolved
+      config path does not exist.
     commands:
       - plugin
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -359,8 +368,8 @@ tests:
       - src/collections-manager/
   2.1.22:
     description: >-
-      Test `disablePlugin` successfully removes a plugin entry from `enabled.yaml` based on its
-      `invokeName`.
+      Test `disablePlugin` successfully removes a plugin entry from
+      `enabled.yaml` based on its `invokeName`.
     commands:
       - plugin
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -375,7 +384,8 @@ tests:
     app_files:
       - src/collections-manager/
   2.1.23:
-    description: Verify `disablePlugin` gracefully handles attempts to disable a non-existent `invokeName`.
+    description: Verify `disablePlugin` gracefully handles attempts to disable a
+      non-existent `invokeName`.
     commands:
       - plugin
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -391,8 +401,9 @@ tests:
       - src/collections-manager/
   2.1.24:
     description: >-
-      Test `listAvailablePlugins` correctly scans all collections for `*.config.yaml` files and
-      extracts available plugin details (name, description, configPath).
+      Test `listAvailablePlugins` correctly scans all collections for
+      `*.config.yaml` files and extracts available plugin details (name,
+      description, configPath).
     commands:
       - plugin
       - collection
@@ -408,7 +419,8 @@ tests:
     app_files:
       - src/collections-manager/
   2.1.25:
-    description: Verify `listAvailablePlugins` correctly filters results when a `collectionName` is provided.
+    description: Verify `listAvailablePlugins` correctly filters results when a
+      `collectionName` is provided.
     commands:
       - plugin
       - collection
@@ -425,8 +437,8 @@ tests:
       - src/collections-manager/
   2.1.26:
     description: >-
-      Test `listAvailablePlugins` handles collections that are empty or do not contain valid plugin
-      configuration files.
+      Test `listAvailablePlugins` handles collections that are empty or do not
+      contain valid plugin configuration files.
     commands:
       - plugin
       - collection
@@ -443,8 +455,8 @@ tests:
       - src/collections-manager/
   2.1.27:
     description: >-
-      Verify `listAvailablePlugins` gracefully handles collections directories that are unreadable
-      or corrupt.
+      Verify `listAvailablePlugins` gracefully handles collections directories
+      that are unreadable or corrupt.
     commands:
       - plugin
       - collection
@@ -461,8 +473,8 @@ tests:
       - src/collections-manager/
   2.1.28:
     description: >-
-      Test `listAvailablePlugins` correctly extracts the `description` from the plugin's
-      configuration file.
+      Test `listAvailablePlugins` correctly extracts the `description` from the
+      plugin's configuration file.
     commands:
       - plugin
     runner: test/runners/integration/collections/collections-manager.test.js
@@ -478,8 +490,9 @@ tests:
       - src/collections-manager/
   2.2.1:
     description: >-
-      Verify the `handle` function successfully processes a basic Markdown file, extracts front
-      matter, renders HTML, applies default CSS, and generates a PDF.
+      Verify the `handle` function successfully processes a basic Markdown file,
+      extracts front matter, renders HTML, applies default CSS, and generates a
+      PDF.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -493,7 +506,8 @@ tests:
     app_files:
       - src/core/default-handler.js
   2.2.2:
-    description: Test `handle` correctly removes shortcodes from Markdown content before rendering.
+    description: Test `handle` correctly removes shortcodes from Markdown content
+      before rendering.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -507,7 +521,8 @@ tests:
     app_files:
       - src/core/default-handler.js
   2.2.3:
-    description: Verify `handle` correctly substitutes placeholders in Markdown content before rendering.
+    description: Verify `handle` correctly substitutes placeholders in Markdown
+      content before rendering.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -522,8 +537,8 @@ tests:
       - src/core/default-handler.js
   2.2.4:
     description: >-
-      Test `handle` correctly applies `pluginSpecificConfig.markdown_it_options` to the MarkdownIt
-      instance.
+      Test `handle` correctly applies `pluginSpecificConfig.markdown_it_options`
+      to the MarkdownIt instance.
     commands:
       - plugin
     runner: test/runners/integration/core/default-handler.test.js
@@ -540,8 +555,8 @@ tests:
   2.2.5:
     description: >-
       Verify `handle` integrates math rendering by calling
-      `math_integration.configureMarkdownItForMath` and `math_integration.getMathCssContent` when
-      configured.
+      `math_integration.configureMarkdownItForMath` and
+      `math_integration.getMathCssContent` when configured.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -556,8 +571,8 @@ tests:
       - src/core/default-handler.js
   2.2.6:
     description: >-
-      Test `handle` correctly applies `markdown-it-anchor` and `markdown-it-table-of-contents` when
-      configured in `pluginSpecificConfig`.
+      Test `handle` correctly applies `markdown-it-anchor` and
+      `markdown-it-table-of-contents` when configured in `pluginSpecificConfig`.
     commands:
       - plugin
     runner: test/runners/integration/core/default-handler.test.js
@@ -573,8 +588,8 @@ tests:
       - src/core/default-handler.js
   2.2.7:
     description: >-
-      Verify `handle` correctly integrates custom MarkdownIt plugins specified in
-      `pluginSpecificConfig.markdown_it_plugins`.
+      Verify `handle` correctly integrates custom MarkdownIt plugins specified
+      in `pluginSpecificConfig.markdown_it_plugins`.
     commands:
       - plugin
     runner: test/runners/integration/core/default-handler.test.js
@@ -590,8 +605,9 @@ tests:
       - src/core/default-handler.js
   2.2.8:
     description: >-
-      Test `handle` resolves and merges CSS files from `pluginSpecificConfig.css_files` and
-      `raw_css_files`, injecting them into the HTML output.
+      Test `handle` resolves and merges CSS files from
+      `pluginSpecificConfig.css_files` and `raw_css_files`, injecting them into
+      the HTML output.
     commands:
       - plugin
     runner: test/runners/integration/core/default-handler.test.js
@@ -607,8 +623,8 @@ tests:
       - src/core/default-handler.js
   2.2.9:
     description: >-
-      Verify `handle` correctly loads and uses a custom HTML template specified by
-      `pluginSpecificConfig.html_template_path`.
+      Verify `handle` correctly loads and uses a custom HTML template specified
+      by `pluginSpecificConfig.html_template_path`.
     commands:
       - plugin
     runner: test/runners/integration/core/default-handler.test.js
@@ -624,8 +640,8 @@ tests:
       - src/core/default-handler.js
   2.2.10:
     description: >-
-      Test `handle` correctly injects `head_html`, `body_html_start`, and `body_html_end` from
-      `pluginSpecificConfig` into the HTML template.
+      Test `handle` correctly injects `head_html`, `body_html_start`, and
+      `body_html_end` from `pluginSpecificConfig` into the HTML template.
     commands:
       - plugin
     runner: test/runners/integration/core/default-handler.test.js
@@ -641,8 +657,8 @@ tests:
       - src/core/default-handler.js
   2.2.11:
     description: >-
-      Verify `handle` correctly determines the output filename based on `outputFilenameOpt`, front
-      matter, or the input Markdown file name.
+      Verify `handle` correctly determines the output filename based on
+      `outputFilenameOpt`, front matter, or the input Markdown file name.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -656,7 +672,8 @@ tests:
     app_files:
       - src/core/default-handler.js
   2.2.12:
-    description: Test `handle` gracefully manages errors during Markdown file reading, returning `null`.
+    description: Test `handle` gracefully manages errors during Markdown file
+      reading, returning `null`.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -671,8 +688,8 @@ tests:
       - src/core/default-handler.js
   2.2.13:
     description: >-
-      Verify `handle` calls `pdfGenerator.generatePdf` with the correctly prepared HTML content and
-      PDF options.
+      Verify `handle` calls `pdfGenerator.generatePdf` with the correctly
+      prepared HTML content and PDF options.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -687,8 +704,8 @@ tests:
       - src/core/default-handler.js
   2.2.14:
     description: >-
-      Test `handle` correctly applies the `lang` attribute from front matter to the HTML `<html>`
-      tag.
+      Test `handle` correctly applies the `lang` attribute from front matter to
+      the HTML `<html>` tag.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -703,8 +720,8 @@ tests:
       - src/core/default-handler.js
   2.2.15:
     description: >-
-      Verify `handle` correctly handles `omit_title_heading` to prevent the title heading from being
-      rendered when true.
+      Verify `handle` correctly handles `omit_title_heading` to prevent the
+      title heading from being rendered when true.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -719,8 +736,8 @@ tests:
       - src/core/default-handler.js
   2.2.16:
     description: >-
-      Test `handle` returns `null` and logs an error if any critical step in the pipeline (e.g.,
-      HTML rendering, PDF generation) fails.
+      Test `handle` returns `null` and logs an error if any critical step in the
+      pipeline (e.g., HTML rendering, PDF generation) fails.
     commands: []
     runner: test/runners/integration/core/default-handler.test.js
     manifest: test/runners/integration/core/default-handler.manifest.js
@@ -735,8 +752,9 @@ tests:
       - src/core/default-handler.js
   2.3.1:
     description: >-
-      Verify `generatePdf` successfully launches Puppeteer, navigates to a blank page, sets HTML
-      content, and generates a PDF file to the specified output path.
+      Verify `generatePdf` successfully launches Puppeteer, navigates to a blank
+      page, sets HTML content, and generates a PDF file to the specified output
+      path.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -751,8 +769,8 @@ tests:
       - src/core/pdf-generator.js
   2.3.2:
     description: >-
-      Test `generatePdf` correctly applies various `pdfOptions` such as `format`, `printBackground`,
-      and `scale`.
+      Test `generatePdf` correctly applies various `pdfOptions` such as
+      `format`, `printBackground`, and `scale`.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -767,8 +785,8 @@ tests:
       - src/core/pdf-generator.js
   2.3.3:
     description: >-
-      Verify `generatePdf` correctly applies `margin` options (top, bottom, left, right) from
-      `pdfOptions`.
+      Verify `generatePdf` correctly applies `margin` options (top, bottom,
+      left, right) from `pdfOptions`.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -782,7 +800,8 @@ tests:
     app_files:
       - src/core/pdf-generator.js
   2.3.4:
-    description: Test `generatePdf` injects `cssContent` into the generated HTML page before rendering the PDF.
+    description: Test `generatePdf` injects `cssContent` into the generated HTML
+      page before rendering the PDF.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -797,8 +816,8 @@ tests:
       - src/core/pdf-generator.js
   2.3.5:
     description: >-
-      Verify `generatePdf` correctly handles header and footer templates, including dynamic fields,
-      when provided in `pdfOptions`.
+      Verify `generatePdf` correctly handles header and footer templates,
+      including dynamic fields, when provided in `pdfOptions`.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -813,8 +832,8 @@ tests:
       - src/core/pdf-generator.js
   2.3.6:
     description: >-
-      Test `generatePdf` returns `null` and logs an error if Puppeteer fails to launch (e.g.,
-      executable not found).
+      Test `generatePdf` returns `null` and logs an error if Puppeteer fails to
+      launch (e.g., executable not found).
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -828,7 +847,8 @@ tests:
     app_files:
       - src/core/pdf-generator.js
   2.3.7:
-    description: Verify `generatePdf` returns `null` and logs an error if setting page content fails.
+    description: Verify `generatePdf` returns `null` and logs an error if setting
+      page content fails.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -843,8 +863,8 @@ tests:
       - src/core/pdf-generator.js
   2.3.8:
     description: >-
-      Test `generatePdf` returns `null` and logs an error if PDF generation itself fails (e.g.,
-      invalid `pdfOptions`).
+      Test `generatePdf` returns `null` and logs an error if PDF generation
+      itself fails (e.g., invalid `pdfOptions`).
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -859,8 +879,8 @@ tests:
       - src/core/pdf-generator.js
   2.3.9:
     description: >-
-      Verify `generatePdf` ensures the browser and page are properly closed after PDF generation,
-      even if errors occur.
+      Verify `generatePdf` ensures the browser and page are properly closed
+      after PDF generation, even if errors occur.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -875,8 +895,8 @@ tests:
       - src/core/pdf-generator.js
   2.3.10:
     description: >-
-      Test `generatePdf` correctly handles empty or null `htmlContent` and `cssContent` without
-      crashing.
+      Test `generatePdf` correctly handles empty or null `htmlContent` and
+      `cssContent` without crashing.
     commands: []
     runner: test/runners/integration/core/pdf-generator.test.js
     manifest: test/runners/integration/core/pdf-generator.manifest.js
@@ -892,8 +912,8 @@ tests:
       - src/validation/v1.js
   2.4.1:
     description: >-
-      Verify a fully compliant v1 plugin (all files, passing tests, successful self-activation) is
-      reported as `VALID` with no errors or warnings.
+      Verify a fully compliant v1 plugin (all files, passing tests, successful
+      self-activation) is reported as `VALID` with no errors or warnings.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -910,8 +930,8 @@ tests:
       - src/validation/v1.js
   2.4.2:
     description: >-
-      Test that a plugin with an unsupported protocol (e.g., `v2`) is reported as `INVALID` with a
-      clear error message.
+      Test that a plugin with an unsupported protocol (e.g., `v2`) is reported
+      as `INVALID` with a clear error message.
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -928,8 +948,8 @@ tests:
       - src/validation/v1.js
   2.4.3:
     description: >-
-      Verify that a plugin whose directory name does not match the `plugin_name` in its metadata is
-      reported as `INVALID` with a critical mismatch error.
+      Verify that a plugin whose directory name does not match the `plugin_name`
+      in its metadata is reported as `INVALID` with a critical mismatch error.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -946,8 +966,9 @@ tests:
       - src/validation/v1.js
   2.4.4:
     description: >-
-      Test the metadata resolution precedence: `protocol` from `.schema.json` should be used even if
-      different values exist in `.config.yaml` and `README.md`.
+      Test the metadata resolution precedence: `protocol` from `.schema.json`
+      should be used even if different values exist in `.config.yaml` and
+      `README.md`.
     commands: []
     runner: test/runners/integration/plugins/plugin-validator.test.js
     manifest: test/runners/integration/plugins/plugin-validator.manifest.js
@@ -963,8 +984,8 @@ tests:
       - src/validation/v1.js
   2.4.5:
     description: >-
-      Test that a plugin missing a `protocol` in all its metadata files defaults to `v1` and is
-      reported as `USABLE (with warnings)`.
+      Test that a plugin missing a `protocol` in all its metadata files defaults
+      to `v1` and is reported as `USABLE (with warnings)`.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -980,7 +1001,8 @@ tests:
       - src/plugins/validator.js
       - src/validation/v1.js
   2.4.6:
-    description: Verify that a plugin with a missing required file (e.g., `index.js`) is reported as `INVALID`.
+    description: Verify that a plugin with a missing required file (e.g.,
+      `index.js`) is reported as `INVALID`.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -997,8 +1019,9 @@ tests:
       - src/validation/v1.js
   2.4.7:
     description: >-
-      Test that a plugin with a missing optional file (e.g., `test/cv-e2e.test.js` or
-      `cv.schema.json`) is reported as `USABLE (with warnings)`.
+      Test that a plugin with a missing optional file (e.g.,
+      `test/cv-e2e.test.js` or `cv.schema.json`) is reported as `USABLE (with
+      warnings)`.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -1014,7 +1037,8 @@ tests:
       - src/plugins/validator.js
       - src/validation/v1.js
   2.4.8:
-    description: Verify that a plugin whose co-located E2E test fails when executed is reported as `INVALID`.
+    description: Verify that a plugin whose co-located E2E test fails when executed
+      is reported as `INVALID`.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -1031,8 +1055,8 @@ tests:
       - src/validation/v1.js
   2.4.9:
     description: >-
-      Test that a plugin whose self-activation sanity check fails (e.g., the CLI command returns an
-      error) is reported as `INVALID`.
+      Test that a plugin whose self-activation sanity check fails (e.g., the CLI
+      command returns an error) is reported as `INVALID`.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js
@@ -1049,8 +1073,9 @@ tests:
       - src/validation/v1.js
   2.4.10:
     description: >-
-      Test a plugin with malformed YAML in its `README.md` front matter, which should result in a
-      `USABLE (with warnings)` status, assuming other checks pass.
+      Test a plugin with malformed YAML in its `README.md` front matter, which
+      should result in a `USABLE (with warnings)` status, assuming other checks
+      pass.
     commands:
       - plugin validate
     runner: test/runners/integration/plugins/plugin-validator.test.js

@@ -9,9 +9,16 @@ module.exports = async function updateCollection(dependencies, collectionName) {
   });
 
   // Look for collections in collections/ subdirectory or directly if collRoot ends with 'collections'
-  const actualCollectionPath = this.collRoot.endsWith('collections') ?
-    path.join(this.collRoot, collectionName) :
-    path.join(this.collRoot, 'collections', collectionName);
+  // Handle singleton plugins (user-plugins/plugin-name) differently
+  let actualCollectionPath;
+  if (collectionName.startsWith('user-plugins/')) {
+    // For singleton plugins, they're stored directly at collRoot/user-plugins/plugin-name
+    actualCollectionPath = path.join(this.collRoot, collectionName);
+  } else {
+    actualCollectionPath = this.collRoot.endsWith('collections') ?
+      path.join(this.collRoot, collectionName) :
+      path.join(this.collRoot, 'collections', collectionName);
+  }
   const collectionPath = actualCollectionPath;
 
   if (!fss.existsSync(collectionPath)) {
@@ -30,7 +37,14 @@ module.exports = async function updateCollection(dependencies, collectionName) {
 
   // Look for collections in collections/ subdirectory or directly if collRoot ends with 'collections'
   // This matches the same logic used in other collection commands like list.js
-  const metadataPath = this.collRoot.endsWith('collections') ? collectionName : path.join('collections', collectionName);
+  // Handle singleton plugins (user-plugins/plugin-name) differently
+  let metadataPath;
+  if (collectionName.startsWith('user-plugins/')) {
+    // For singleton plugins, metadata is in the plugin directory itself
+    metadataPath = collectionName;
+  } else {
+    metadataPath = this.collRoot.endsWith('collections') ? collectionName : path.join('collections', collectionName);
+  }
   const metadata = await this._readCollectionMetadata(metadataPath);
   if (!metadata) {
     logger.warn('Metadata file not found or unreadable for collection, cannot determine source for update', {
@@ -40,6 +54,21 @@ module.exports = async function updateCollection(dependencies, collectionName) {
     });
     return { success: false, message: `Metadata not found or unreadable for "${collectionName}".` };
   }
+
+  // Check if this is an archetyped plugin (not updatable)
+  if (metadata.isArchetyped) {
+    logger.info('Archetyped plugin is not updatable, skipping', {
+      context: 'UpdateCollectionCommand',
+      collectionName: collectionName,
+      sourceType: metadata.source_type,
+      createdFrom: metadata.created_from
+    });
+    return {
+      success: true,
+      message: `Archetyped plugin "${collectionName}" is not updatable (created from template).`
+    };
+  }
+
   logger.debug('Collection metadata loaded', {
     context: 'UpdateCollectionCommand',
     collectionName: collectionName,

@@ -57,13 +57,14 @@ function createBaseYargs() {
       normalize: true,
     })
     .option('debug', {
-      describe: 'enable detailed debug output with enhanced logging (use --debug=stack for stack traces)',
-      type: 'string',
-      default: false,
-      coerce: (value) => {
-        if (value === true || value === 'true' || value === '') return true;
-        return value;
-      }
+      describe: 'enable detailed debug output with enhanced logging',
+      type: 'boolean',
+      default: false
+    })
+    .option('stack', {
+      describe: 'show stack traces in debug output (implies --debug)',
+      type: 'boolean',
+      default: false
     })
     .alias('h', 'help')
     .alias('v', 'version')
@@ -186,20 +187,15 @@ async function main() {
   const argvBuilder = createBaseYargs();
 
   argvBuilder.middleware(async (argv) => {
-    // Configure enhanced debugging if --debug flag is used
-    if (argv.debug) {
+    // Configure enhanced debugging if --debug or --stack flag is used
+    if (argv.debug || argv.stack) {
       logger.setDebugMode(true);
 
       const debugConfig = {
         showCaller: true,
         enrichErrors: true,
-        showStack: false
+        showStack: argv.stack || false
       };
-
-      // Enable stack traces for --debug=stack
-      if (argv.debug === 'stack' || argv.debug === 'trace') {
-        debugConfig.showStack = true;
-      }
 
       logger.configureLogger(debugConfig);
     }

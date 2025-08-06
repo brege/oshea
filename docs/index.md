@@ -6,24 +6,21 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 **Active Documents and Checklists** \
 *For convenience, these are symlinks to the latest version of each document below.*
 
-- [**Polish Checklist**](archive/v0.10/polish-checklist.md):
-  **Polishing.** Aggregates all loose ends from previous checklists.
+- [**Next-Generation Test Framework**](v0.11/next-generation-testing.md):
+  **Testing.** Improving the separation of static testing metadata from dynamic test-job results.
+- [**Tasklist v0.11**](tasklist-v0.11.md):
+  **Everything else.** Logger, linting, app-side integrations, refactors and reorganizations. 
+
 
 **Next-gen Features** \
 *These are the core documents for the next-gen features of the project.*
 
-- [Next-Generation Test Framework](v0.11/next-generation-testing-part-2.md):
-  Improving the separation of static testing metadata from dynamic test-job results.
-  Follows [next-gen part 1](v0.11/next-generation-testing.md).
-- [Task Checklist of Logger Enhancements](v0.11/checklist-logger.md):
-  Maintains the list of tasks surrounding v0.11 for the logger framework. 
-- [Task Checklist of non-Logger Work](v0.11/checklist-non-logger.md):
-  Broader project tasks (e.g. linter renaming, auxillary scripts, etc.) that may have wider appeal.
+- [**Polish Checklist**](archive/v0.10/polish-checklist.md):
+  **Polishing.** Aggregates all loose ends from previous checklists.
 - [Planning for ErrorManager Groups via Paths Registry](v0.11/error-group-registry-from-paths.md):
   Plans for the ErrorManager framework to be refactored to use the Paths Registry.
 - [The Logger-Renderer-Adapter Model](v0.11/logger-renderer-adapter.md):
   Graphical overview of how the architecture in [`src/utils/`](../src/utils/) changed from v0.10 to v0.11.
-
 
 There are also several indexes for the main components of the project.
 

@@ -204,6 +204,39 @@ class CollectionsManager {
         collection: collectionName,
         path: metadataPath
       });
+
+      // Check for .source.yaml (archetyped plugins)
+      const sourceMetadataPath = path.join(collectionPath, '.source.yaml');
+      if (fss.existsSync(sourceMetadataPath)) {
+        try {
+          const sourceContent = await fs.readFile(sourceMetadataPath, 'utf8');
+          const sourceMetadata = yaml.load(sourceContent);
+          logger.debug('Found source metadata for archetyped plugin', {
+            context: 'CollectionsManager',
+            collection: collectionName,
+            path: sourceMetadataPath,
+            sourceType: sourceMetadata.source_type
+          });
+          // Return a special marker indicating this is not updatable
+          return {
+            isArchetyped: true,
+            source_type: sourceMetadata.source_type,
+            created_from: sourceMetadata.created_from,
+            archetype_source: sourceMetadata.archetype_source,
+            created_on: sourceMetadata.created_on
+          };
+        } catch (e) {
+          logger.error('Could not read or parse source metadata', {
+            context: 'CollectionsManager',
+            collection: collectionName,
+            file: sourceMetadataPath,
+            error: e.message,
+            operation: 'readCollectionMetadata'
+          });
+          throw e;
+        }
+      }
+
       return null;
     }
     try {

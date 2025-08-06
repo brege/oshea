@@ -77,11 +77,11 @@ async function generateCache() {
 
     // 4. Process the data into simple lists for completion
     const usablePlugins = allPlugins
-      .filter(p => p.status && (p.status.startsWith('Registered') || p.status === 'Enabled (CM)'))
+      .filter(p => p.status && (p.status.startsWith('Registered') || p.status.startsWith('Enabled (')))
       .map(p => p.name);
 
     const enabledPlugins = allPlugins
-      .filter(p => p.status === 'Enabled (CM)')
+      .filter(p => p.status && p.status.startsWith('Enabled ('))
       .map(p => p.name);
 
     const availableFromCM = allPlugins

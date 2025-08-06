@@ -17,7 +17,13 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
     const configResolver = currentConfigResolver;
 
     try {
-      const effectiveConfig = await configResolver.getEffectiveConfig(currentArgs.plugin || currentArgs.pluginName);
+      // Resolve relative plugin paths to absolute paths
+      let pluginSpec = currentArgs.plugin || currentArgs.pluginName;
+      if (pluginSpec && pluginSpec.startsWith('./')) {
+        pluginSpec = path.resolve(pluginSpec);
+      }
+
+      const effectiveConfig = await configResolver.getEffectiveConfig(pluginSpec);
       const pluginSpecificConfig = effectiveConfig.pluginSpecificConfig;
       const pluginBasePath = effectiveConfig.pluginBasePath;
 
@@ -138,6 +144,19 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
         }
       }
 
+      // Add CSS files from the effective config (already resolved and available)
+      if (pluginSpecificConfig.css_files && Array.isArray(pluginSpecificConfig.css_files)) {
+        pluginSpecificConfig.css_files.forEach(cssPath => {
+          if (fs.existsSync(cssPath)) {
+            files.add(cssPath);
+            logger.debug('Added CSS file to watch list', {
+              context: 'WatchHandler',
+              file: cssPath
+            });
+          }
+        });
+      }
+
       const configSources = configResolver.getConfigFileSources();
 
       if (configSources.mainConfigPath && fs.existsSync(configSources.mainConfigPath)) {
@@ -153,15 +172,6 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
           logger.debug('Added plugin config file to watch list', {
             context: 'WatchHandler',
             file: p
-          });
-        }
-      });
-      configSources.cssFiles.forEach(cssPath => {
-        if (fs.existsSync(cssPath)) {
-          files.add(cssPath);
-          logger.debug('Added CSS file to watch list', {
-            context: 'WatchHandler',
-            file: cssPath
           });
         }
       });
@@ -232,7 +242,12 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
         triggeredByFile: filePathTrigger
       });
 
-      const newConfigResolverForPaths = new ConfigResolver(args.config, args.factoryDefaults);
+      const newConfigResolverForPaths = new ConfigResolver(
+        args.config,
+        args.factoryDefaults,
+        args.isLazyLoad || false,
+        args.manager ? { collRoot: args.manager.collRoot, collectionsManager: args.manager } : {}
+      );
       const newWatchedPaths = await collectWatchablePaths(newConfigResolverForPaths, args);
 
       const pathsToAdd = newWatchedPaths.filter(p => !watchedPaths.includes(p));
@@ -300,7 +315,12 @@ async function setupWatch(args, configResolverForInitialPaths, commandExecutor) 
   };
 
   try {
-    const initialConfigResolver = new ConfigResolver(args.config, args.factoryDefaults);
+    const initialConfigResolver = new ConfigResolver(
+      args.config,
+      args.factoryDefaults,
+      args.isLazyLoad || false,
+      args.manager ? { collRoot: args.manager.collRoot, collectionsManager: args.manager } : {}
+    );
     watchedPaths = await collectWatchablePaths(initialConfigResolver, args);
     logger.info('Initial paths for watcher collected', {
       context: 'WatchHandler',

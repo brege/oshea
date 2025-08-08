@@ -12,11 +12,11 @@ logger(message, options) → formatter → console/file output
 
 *Core.*
 
-- [**`logger.js`**](logger.js)
+- [ [**`logger.js`**](logger.js) ]
   -- Pure routing layer for message delegation to formatters.
-- [`formatters/`](formatters/)
+- [ [`formatters/`](formatters/) ]
   -- Specialized output formatting (app, table, inline, etc.)
-- [`logger-enhancer.js`](logger-enhancer.js)
+- [ [`logger-enhancer.js`](logger-enhancer.js) ]
   -- Optional debugging enhancements (caller info, stack traces, error categorization).
 
 *Formatters.*
@@ -40,11 +40,17 @@ logger(message, options) → formatter → console/file output
 | [`config.formatter.js`](formatters/config.formatter.js) | `oshea config` |
 | [`js.formatter.js`](formatters/js.formatter.js) | `node ...path-finder.js <path>` | 
 
-**see [scripts/playground/](../../scripts/playground/) for examples**
+**see [scripts/demo/](../../scripts/demo/) for examples**
 
 *Others.*
-- [`asset-resolver.js`](asset-resolver.js)
+
+- [ [`asset-resolver.js`](asset-resolver.js) ]
   -- Loading CSS properties, like Katex styles.
+- [ [`file-helpers.js`](file-helpers.js) ]
+  -- Makes the rest of the Node.js scripts easier to point and shoot at file(s) and directories.
+- [ [`logger-surfacer.js`](logger-surfacer.js) ]
+  -- Useful for surfacing how console output is being formed, without syntax distractions.
+
 
 ### Canonical Usage Patterns
 

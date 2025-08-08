@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/shared/path-finder.js
+// paths/path-finder.js
 require('module-alias/register');
 
 const fs = require('fs');

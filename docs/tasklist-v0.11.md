@@ -107,7 +107,7 @@ Most “next-gen” ideas are speculative; move practical content, then create a
     Legacy batch scripts are now covered by declarative workflows (YAML), but where does `scripts/batch/make-screenshots.sh` fit in?
 
 - **Reorganization**
-  - [x] Built [`scripts/shared/logger-surfacer.js`](../scripts/shared/logger-surfacer.js)
+  - [x] Built *scripts/shared/logger-surfacer.js*
   - [x] Developed taxonomy for operational vs user-facing logging
   - [ ] Move `scripts/shared/file-helpers.js -> src/utils/file-helpers.js` (?)
     - Is this necessary, since it's app-facing?

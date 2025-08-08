@@ -45,15 +45,15 @@ const __dirname = ...;                                      // ✖ redeclaration
 
 For any given file, you can generate the above code with the following command:
 ```bash
-node scripts/shared/path-finder.js scripts/linting/lint.js
+node paths/path-finder.js scripts/linting/lint.js
 ```
 
-[This tool](../scripts/shared/path-finder.js) helps build the import statements in the above example.
+[This tool](path-finder.js) helps build the import statements in the above example.
 
 Use on multiple files or directories as needed.
 
 ```bash
-node scripts/shared/path-finder.js scripts/linting/lint.js scripts/linting/lib/
+node paths/path-finder.js scripts/linting/lint.js scripts/linting/lib/
 ```
 ```js
 require('module-alias/register');
@@ -68,7 +68,7 @@ const {
 ```
 Since the [`no-relative-paths` linter](../scripts/linting/code/no-relative-paths.js) will catch unused imports, it's often easier to add all then remove later.
 ```bash
-node scripts/shared/path-finder.js src/collections/commands/
+node paths/path-finder.js src/collections/commands/
 ```
 ```js
 require('module-alias/register');
@@ -88,7 +88,7 @@ const {
 // ... 
 ```
 
-As a companion to [`scripts/shared/path-finder.js`](../scripts/shared/path-finder.js),
+As a companion to [`path-finder.js`](path-finder.js),
 the following files can be used to generate the dependency tree from the pathing registry:
 
 - [ [`dep-tree.js`](dep-tree.js) ]

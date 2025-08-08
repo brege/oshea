@@ -10,7 +10,7 @@ logger(message, options) → formatter → console/file output
 
 ### Script Directory
 
-*Core*
+*Core.*
 
 - [**`logger.js`**](logger.js)
   -- Pure routing layer for message delegation to formatters.
@@ -19,7 +19,7 @@ logger(message, options) → formatter → console/file output
 - [`logger-enhancer.js`](logger-enhancer.js)
   -- Optional debugging enhancements (caller info, stack traces, error categorization).
 
-*Formatters*
+*Formatters.*
 
 | Formatter         | Description                        |
 |------------------:|:-----------------------------------|
@@ -36,12 +36,13 @@ logger(message, options) → formatter → console/file output
 | [`collection-list.formatter.js`](formatters/collection-list.formatter.js) | `collection list` |
 | **Test-side**      |                                    |
 | [`lint.formatter.js`](formatters/lint.formatter.js) | `node scripts/linting/lint.js` |
-| [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js) | [`test/runners/end-to-end/e2e-runner.js`](../../test/runners/end-to-end/e2e-runner.js) |
+| [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js) | `node ...e2e-runner.js` |
 | [`config.formatter.js`](formatters/config.formatter.js) | `oshea config` |
+| [`js.formatter.js`](formatters/js.formatter.js) | `node ...path-finder.js <path>` | 
 
 **see [scripts/playground/](../../scripts/playground/) for examples**
 
-*Others*
+*Others.*
 - [`asset-resolver.js`](asset-resolver.js)
   -- Loading CSS properties, like Katex styles.
 

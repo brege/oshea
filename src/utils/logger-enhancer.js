@@ -1,16 +1,39 @@
 // src/utils/logger-enhancer.js
 // Enhanced debugging utilities extracted from logger.js
 
-// Enhanced logging functions
+// Enhanced logging functions with improved caller detection
 function getCallerInfo(stackDepth = 3) {
   const stack = new Error().stack;
   const lines = stack.split('\n');
 
-  // Skip: Error, getCallerInfo, enhanceMessage, the actual logger method, find real caller
-  for (let i = 4; i < lines.length && i < 4 + stackDepth; i++) {
+  // Skip internal logger/enhancer frames to find actual caller
+  const skipPatterns = [
+    /logger-enhancer\.js/,
+    /logger\.js/,
+    /formatters\//,
+    /enhanceMessage/,
+    /getCallerInfo/
+  ];
+
+  for (let i = 1; i < lines.length; i++) {
     const line = lines[i];
-    const match = line.match(/at\s+(.+?)\s+\((.+?):(\d+):\d+\)/);
-    if (match) {
+
+    // Skip frames that match our internal patterns
+    if (skipPatterns.some(pattern => pattern.test(line))) {
+      continue;
+    }
+
+    // Try different stack trace formats
+    let match = line.match(/at\s+(.+?)\s+\((.+?):(\d+):\d+\)/);
+    if (!match) {
+      // Try format without function name
+      match = line.match(/at\s+(.+?):(\d+):\d+/);
+      if (match) {
+        const [, file, lineNum] = match;
+        const shortFile = file.replace(process.cwd(), '.');
+        return { function: 'anonymous', file: shortFile, line: lineNum };
+      }
+    } else {
       const [, func, file, lineNum] = match;
       const shortFile = file.replace(process.cwd(), '.');
       return { function: func, file: shortFile, line: lineNum };
@@ -19,8 +42,22 @@ function getCallerInfo(stackDepth = 3) {
   return { function: 'unknown', file: 'unknown', line: '0' };
 }
 
-function categorizeError(message, errorPatterns = {}) {
-  for (const [category, pattern] of Object.entries(errorPatterns)) {
+// Built-in error patterns based on codebase analysis
+const defaultErrorPatterns = {
+  filesystem: /(?:Could not read|Failed to write|Failed to remove|directory|file|path|Permission denied|ENOENT|EACCES)/i,
+  plugin: /(?:plugin|Plugin|bundled plugin|collection.*managed|validation failed|contract|registry)/i,
+  config: /(?:configuration|config|yaml|json|CONFIG|settings|manifest)/i,
+  network: /(?:fetch|download|git|url|connection|timeout|DNS|certificate)/i,
+  validation: /(?:validation|validate|schema|invalid|missing.*field|required)/i,
+  cli: /(?:command|argument|flag|option|CLI|usage)/i,
+  fatal: /(?:FATAL|fatal|Fatal|critical|Critical)/i
+};
+
+function categorizeError(message, customPatterns = {}) {
+  // Combine default patterns with any custom ones
+  const patterns = { ...defaultErrorPatterns, ...customPatterns };
+
+  for (const [category, pattern] of Object.entries(patterns)) {
     if (pattern.test(message)) {
       return category;
     }
@@ -44,18 +81,32 @@ function enhanceMessage(message, options = {}, level = 'info', loggerConfig = {}
   }
 
   // Auto-categorize errors if enabled
-  if (loggerConfig.enrichErrors && (level === 'error' || level === 'warn')) {
-    // TODO: Use path-based error registry from paths/paths-config.yaml
+  if (loggerConfig.enrichErrors && (level === 'error' || level === 'warn' || level === 'fatal')) {
     const category = categorizeError(message, {});
     enhanced.errorCategory = category;
 
     // Add category-specific debugging hints
-    if (category === 'filesystem' && !options.file) {
-      enhanced.hint = 'Consider checking file permissions and paths';
-    } else if (category === 'plugin' && !options.plugin) {
-      enhanced.hint = 'Check plugin contract validation and registry';
-    } else if (category === 'config' && !options.config) {
-      enhanced.hint = 'Verify configuration format and required fields';
+    const hints = {
+      filesystem: 'Check file permissions, paths, and disk space. Use --debug for detailed file operations.',
+      plugin: 'Verify plugin contract, check registry, or run `oshea plugin validate`. Use --debug for plugin loading details.',
+      config: 'Validate YAML/JSON syntax, check required fields, or run `oshea config --pure` to inspect merged config.',
+      network: 'Check internet connection, git repository access, or proxy settings. Use --debug for network operations.',
+      validation: 'Review schema requirements, check field types, or run validation with --debug for detailed errors.',
+      cli: 'Check command syntax with `oshea --help` or `oshea <command> --help`. Use --debug for argument parsing.',
+      fatal: 'Critical system error - check logs and consider filing a bug report with reproduction steps.',
+      general: 'Use --debug flag for more detailed logging and stack traces.'
+    };
+
+    enhanced.hint = hints[category] || hints.general;
+
+    // Add contextual information based on caller location
+    if (enhanced.caller) {
+      const callerFile = enhanced.caller.split(':')[0];
+      if (callerFile.includes('/cli/') && category === 'plugin') {
+        enhanced.hint += ' CLI context detected - verify command arguments and plugin availability.';
+      } else if (callerFile.includes('/config/') && category === 'config') {
+        enhanced.hint += ' Configuration loading context - check config file hierarchy and YAML syntax.';
+      }
     }
   }
 
@@ -65,5 +116,7 @@ function enhanceMessage(message, options = {}, level = 'info', loggerConfig = {}
 module.exports = {
   getCallerInfo,
   categorizeError,
-  enhanceMessage
+  enhanceMessage,
+  // Export patterns for testing/extension
+  defaultErrorPatterns
 };

@@ -31,9 +31,7 @@ const loggerConfig = {
   stackDepth: 3           // Number of stack frames to show
 };
 
-// Error categorization - TODO: populate from paths/paths-config.yaml
-// Stubbed until path-based error registry is implemented
-const errorPatterns = {}; // eslint-disable-line no-unused-vars
+// Error categorization is now handled in logger-enhancer.js with built-in patterns
 
 // Configure logger formatting
 function configureLogger(config = {}) {
@@ -138,6 +136,22 @@ function formatLint(structuredData, meta = {}) {
   return logger(structuredData, { format: 'lint', meta });
 }
 
+// Convenience method for pre-configured loggers with context
+function createLoggerFor(context) {
+  return {
+    info: (msg, options = {}) => logger(msg, { ...options, level: 'info', context }),
+    warn: (msg, options = {}) => logger(msg, { ...options, level: 'warn', context }),
+    error: (msg, options = {}) => logger(msg, { ...options, level: 'error', context }),
+    success: (msg, options = {}) => logger(msg, { ...options, level: 'success', context }),
+    detail: (msg, options = {}) => logger(msg, { ...options, level: 'detail', context }),
+    fatal: (msg, options = {}) => logger(msg, { ...options, level: 'fatal', context }),
+    debug: (msg, options = {}) => logger(msg, { ...options, level: 'debug', context }),
+    validation: (msg, options = {}) => logger(msg, { ...options, level: 'validation', context }),
+    // Main logger with context pre-filled
+    log: (msg, options = {}) => logger(msg, { ...options, context })
+  };
+}
+
 module.exports = {
   // Debug mode control
   setDebugMode,
@@ -146,6 +160,8 @@ module.exports = {
   getLoggerConfig,
   // Main logger interface
   logger,
+  // Convenience method for pre-configured loggers
+  for: createLoggerFor,
   // Convenience aliases for each level (backward compatibility)
   info,
   warn,

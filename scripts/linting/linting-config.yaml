@@ -35,7 +35,7 @@ no-console:
   targets:
     - "."
   excludes:
-    # []
+    - scripts/demo
     - src/utils/formatters
 
 # scripts/linting/code/no-bad-headers.js
@@ -120,11 +120,18 @@ librarian:
     filetypes: [ ".js", ".sh" ]
     excludePatterns:
       - "scripts/linting/**"
+      - "scripts/demo/**"
   linting:
     marker: linting
     indexFile: scripts/linting/index.md
     scanRoot: scripts/linting
     filetypes: [ ".js", ".yaml" ]
+    excludePatterns: []
+  demo:
+    marker: demo
+    indexFile: scripts/demo/index.md
+    scanRoot: scripts/demo
+    filetypes: [ ".js" ]
     excludePatterns: []
   test:
     marker: test

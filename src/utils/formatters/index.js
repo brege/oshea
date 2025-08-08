@@ -12,12 +12,14 @@ const {
   collectionListFormatterPath,
   validationFormatterPath,
   yamlTestFormatterPath,
+  jsFormatterPath,
 } = require('@paths');
 const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
 const { formatInline } = require(inlineFormatterPath);
 const { formatRaw } = require(rawFormatterPath);
 const { formatPathFinderOutput } = require(pathsFormatterPath);
+const { formatJs } = require(jsFormatterPath);
 const { formatTable } = require(tableFormatterPath);
 const { formatPluginList } = require(pluginListFormatterPath);
 const { formatCollectionList } = require(collectionListFormatterPath);
@@ -49,6 +51,7 @@ module.exports = {
   inline: formatInline,
   raw: formatRaw,
   paths: formatPathFinderOutput,
+  js: formatJs,
   table: formatTable,
   'plugin-list': formatPluginList,
   'collection-list': formatCollectionList,

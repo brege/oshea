@@ -16,6 +16,10 @@ This document is a central index for all developer and automation scripts within
   - [ [`ai-context-generator.js`](ai/ai-context-generator.js) ]
     -- Generates AI context from a source plugin as input and a context file as output to provide one big beautiful paste.
 
+### Demonstrations [ `demo/` ]
+
+This module has its own index file at [**the demo index**](demo/index.md).
+
 ### Documentation [ `docs/` ]
 
   - [ [`generate-toc.js`](docs/generate-toc.js) ]
@@ -56,14 +60,6 @@ This module has its own index file at [**the test index**](../test/index.md) for
       getPatternsFromArgs
     } = require(fileHelpersPath);
     ```
-
-### Console Formatter Toys [ `playground/` ]
-
-Places to test console formatters. cf [`src/utils/index.md`](../src/utils/index.md)
-
-  - [ [`toy-smoke-formatter.js`](playground/toy-smoke-formatter.js) ]
-  - [ [`toy-validation-formatter.js`](playground/toy-validation-formatter.js) ]
-  - [ [`formatter-playground.js`](playground/formatter-playground.js) ]
 
 ### Uncategorized Scripts
 

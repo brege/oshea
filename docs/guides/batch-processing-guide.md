@@ -2,11 +2,13 @@
 
 This guide explains how to perform batch conversions of multiple Markdown files to individual PDFs using `oshea`. The recommended approach is using YAML workflows, which provide a declarative, maintainable solution that integrates with the existing test infrastructure.
 
-## Batch Processing Hugo Recipes - YAML Workflow (Recommended)
+## YAML Workflows (Recommended)
 
 The recommended approach for batch processing is using YAML workflows, which provide a declarative, self-documenting method that integrates seamlessly with the existing test infrastructure.
 
 In due time, this approach will be mainlined into the `oshea` CLI once stability for v0.11 is achieved.
+
+### Example: Batch Processing Hugo Recipes
 
 #### Workflow Location
 ```bash
@@ -47,16 +49,6 @@ PDFs will be generated in isolated test workspaces, with automatic discovery of 
 - **Validation**: Automatically verifies successful execution and minimum file sizes
 - **Two Variants**: Basic conversion (4.2.1) and enhanced with custom filenames (4.2.2)
 
->## Legacy Batch Processing Scripts (Deprecated)
->
->The following Node.js and Bash scripts are maintained for reference but are deprecated in favor of YAML workflows. They demonstrate custom batch processing approaches but require more maintenance and lack integration with the test infrastructure.
->
-> ### Old Node.js and Bash Scripts
-> 
-> Located at [`scripts/batch/batch-convert-hugo-recipes.js`](../../scripts/batch/batch-convert-hugo-recipes.js), this script provides flexible metadata extraction and custom filename generation.
->
-> Located at `scripts/batch/batch_convert_hugo_recipes.sh`, this shell-based approach uses `yq` for YAML parsing and provides similar functionality to the Node.js version.
-
 ## Customizing YAML Workflows
 
 To create your own batch processing workflows, you can modify the demo workflow or create new ones based on your specific needs:
@@ -84,7 +76,7 @@ To create your own batch processing workflows, you can modify the demo workflow 
 - **Template Variables**: `{{paths.variableName}}` for path resolution, `{{tmpdir}}` for workspace isolation
 - **Validation**: Use `file_exists`, `file_min_size`, `contains` for output verification
 - **Show Mode**: Always test with `--show` flag to see commands and output in real-time
-- **Debugging**: Use `--debug` for additional logging, adding intermediate steps between operaitonal scenarios
+- **Debugging**: Use `--debug` for additional logging, adding intermediate steps between operational scenarios
 
 ### Example Customization
 
@@ -103,51 +95,9 @@ scenarios:
       file_exists: "{{tmpdir}}/*.pdf"
 ```
 
-## Legacy Tips for Custom Scripts (Deprecated)
+> ## Legacy Scripts (Historical Reference)
+> 
+> Legacy batch processing scripts have been deprecated in favor of YAML workflows. For historical reference, the previous approach using Node.js and Bash scripts can be found in this repository snapshot:
+> 
+> **Historical Reference**: [Legacy batch processing guide](https://github.com/brege/oshea/blob/4d1ceb01ed241e7c8e955ecc29e2e228ce3f0abe/docs/guides/batch-processing-guide.md)
 
-These tips apply to modifying the example scripts located in the [`scripts/`](../../scripts/) directory.
-
-### Node.js
-
-##### File Discovery
-
-  * Change `glob.sync('**/index.md', ...)` to match your file structure.
-  * Examples: `'*.md'` (flat directory), `'docs/**/*.md'` (recursive).
-
-##### Metadata & Naming:
-
-  * Adjust logic in `processRecipe()` to parse front matter keys relevant to your files.
-  * Modify how `outputFilename` is constructed based on your needs.
-
-##### `oshea` Call
-
-  * Alter the `basePlugin` variable or make it an argument.
-  * Add `--config /path/to/project.config.yaml` if your plugins or global `params` are defined there.
-
-### Bash
-
-##### File Discovery
-
-  * Modify the `find` command (e.g., `find "$SOURCE_BASE_DIR" -maxdepth 1 -name "*.md" ...` for flat directories).
-
-##### Metadata & Naming:
-
-  * Adapt the `get_fm_value` function (especially the `grep/sed` fallback if not using `yq`) for your front matter keys.
-  * Change the `output_filename` construction logic.
-
-##### `oshea` Call
-
-  * Change the `BASE_PLUGIN` variable.
-  * Add `--config /path/to/project.config.yaml` to the `$OSHEA_CMD convert ...` line if needed.
-
-##### Front Matter
-
-`yq` is better for YAML complexity
-
-  - **Fedora**
-    ```bash
-    sudo dnf install yq
-    ```
-  - **Debian**
-    ```bash
-    sudo apt install yq

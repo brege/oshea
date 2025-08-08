@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-08T01:38:02.836Z
+// Generated: 2025-08-08T05:17:48.449Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -268,12 +268,6 @@ const updatePath = path.join(projectRoot, 'src/collections/commands/update.js');
 const validatorsRoot = path.join(projectRoot, 'src/validators/');
 const v1Path = path.join(projectRoot, 'src/validators/v1.js');
 
-// Shared Script Utilities
-const scriptSharedRoot = path.join(projectRoot, 'scripts/shared/');
-const fileHelpersPath = path.join(projectRoot, 'scripts/shared/file-helpers.js');
-const loggerSurfacerPath = path.join(projectRoot, 'scripts/shared/logger-surfacer.js');
-const pathFinderPath = path.join(projectRoot, 'scripts/shared/path-finder.js');
-
 // Validation Linters
 const lintingValidatorsRoot = path.join(projectRoot, 'scripts/linting/validators/');
 const mochaPathValidatorPath = path.join(projectRoot, 'scripts/linting/validators/mocha-path-validator.js');
@@ -314,7 +308,9 @@ const trackerPath = path.join(projectRoot, 'src/completion/tracker.js');
 // Utilities & Helpers
 const utilsRoot = path.join(projectRoot, 'src/utils/');
 const assetResolverPath = path.join(projectRoot, 'src/utils/asset-resolver.js');
+const fileHelpersPath = path.join(projectRoot, 'src/utils/file-helpers.js');
 const loggerEnhancerPath = path.join(projectRoot, 'src/utils/logger-enhancer.js');
+const loggerSurfacerPath = path.join(projectRoot, 'src/utils/logger-surfacer.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
 const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app.formatter.js');
 const collectionListFormatterPath = path.join(projectRoot, 'src/utils/formatters/collection-list.formatter.js');
@@ -552,10 +548,6 @@ module.exports = {
   updatePath,
   validatorsRoot,
   v1Path,
-  scriptSharedRoot,
-  fileHelpersPath,
-  loggerSurfacerPath,
-  pathFinderPath,
   lintingValidatorsRoot,
   mochaPathValidatorPath,
   e2eWorkflowTestsRoot,
@@ -583,7 +575,9 @@ module.exports = {
   trackerPath,
   utilsRoot,
   assetResolverPath,
+  fileHelpersPath,
   loggerEnhancerPath,
+  loggerSurfacerPath,
   loggerPath,
   appFormatterPath,
   collectionListFormatterPath,

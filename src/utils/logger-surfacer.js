@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/shared/logger-surfacer.js
+// src/utils/logger-surfacer.js
 // lint-skip-file no-console
 
 require('module-alias/register');

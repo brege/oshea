@@ -1,0 +1,664 @@
+'# Level 3 - Test Metadata Registry': null
+'# Central registry connecting test metadata, commands, files, and documentation': null
+metadata:
+  level: 3
+  scope: Level 3 test scenarios
+  type: End-to-End Tests
+  description: >-
+    End-to-end CLI tests validating complete user workflows through command-line
+    interface - document conversion, plugin operations, collection management,
+    and configuration handling
+tests:
+  3.1.1:
+    description: (Happy Path) Successfully converts a basic markdown file to PDF
+      using the default plugin.
+    commands:
+      - convert
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/convert.command.js
+  3.1.2:
+    description: (Key Option) Successfully converts using a specified plugin via `--plugin`.
+    commands:
+      - convert --plugin
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/convert.command.js
+  3.1.3:
+    description: >-
+      (Key Option) Successfully creates a PDF in a specified directory with
+      `--outdir` and a custom name with `--filename`.
+    commands:
+      - convert
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/convert.command.js
+  3.1.4:
+    description: (Config Precedence) A `oshea_plugin` key in front matter is
+      correctly used for conversion.
+    commands:
+      - convert
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/convert.command.js
+  3.1.5:
+    description: >-
+      (Config Precedence) A `--plugin` CLI flag correctly overrides a plugin
+      specified in front matter.
+    commands:
+      - convert --plugin
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/convert.command.js
+  3.1.6:
+    description: (Sad Path) Fails with a non-zero exit code when the input `<file>`
+      does not exist.
+    commands:
+      - convert
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/convert.command.js
+  3.1.7:
+    description: >-
+      (Sad Path) Fails with a non-zero exit code when a non-existent plugin is
+      specified with `--plugin`.
+    commands:
+      - convert --plugin
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/convert.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/convert.command.js
+  3.2.1:
+    description: >-
+      (Happy Path) Successfully generates an artifact using a known generator
+      plugin (e.g., `recipe-book`).
+    commands:
+      - generate recipe-book
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/generate.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/generate.command.js
+  3.2.2:
+    description: (Sad Path) Fails with a non-zero exit code if required
+      plugin-specific options are missing.
+    commands:
+      - generate recipe-book
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/generate.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/generate.command.js
+  3.3.1:
+    description: (Happy Path) Correctly displays the global configuration.
+    commands:
+      - config
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/config.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/config.command.js
+  3.3.2:
+    description: >-
+      (Key Option) Correctly displays the merged configuration for a specific
+      plugin using `--plugin`.
+    commands:
+      - config --plugin
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/config.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/config.command.js
+  3.3.3:
+    description: (Key Option) Correctly outputs clean YAML when using the `--pure` flag.
+    commands:
+      - config --pure
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/config.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/commands/config.command.js
+  3.4.1:
+    description: Correctly lists plugins with the default (`--all`) filter.
+    commands:
+      - plugin list
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/list.command.js
+  3.4.2:
+    description: Correctly filters for enabled plugins with `--enabled`.
+    commands:
+      - plugin list --enabled
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/list.command.js
+  3.4.3:
+    description: Correctly filters for disabled plugins with `--disabled`.
+    commands:
+      - plugin list --disabled
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/list.command.js
+  3.4.4:
+    description: Correctly filters for all available plugins with `--available`.
+    commands:
+      - plugin list --available
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-list.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/list.command.js
+  3.5.1:
+    description: (Happy Path) Successfully creates a new plugin directory with
+      boilerplate files.
+    commands:
+      - plugin create
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/create.command.js
+  3.5.2:
+    description: (Key Option) Successfully archetypes a new plugin from a source
+      with `--from`.
+    commands:
+      - plugin create
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/create.command.js
+  3.5.3:
+    description: (Happy Path) A plugin created from the default template passes validation.
+    commands:
+      - plugin create
+      - plugin validate
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/create.command.js
+    deprecated: true
+    notes: There are already tests for validating plugins. The original
+      implementation here predated the workflow (level 4) tests.
+  3.5.4:
+    description: (Happy Path) A plugin archetyped from a valid bundled plugin passes
+      validation.
+    commands:
+      - plugin create --from
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-create.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/create.command.js
+    deprecated: true
+    notes: There are already tests for validating plugins. The original
+      implementation here predated the workflow (level 4) tests.
+  3.6.1:
+    description: (Happy Path) Successfully adds and enables a singleton plugin from
+      a local path.
+    commands:
+      - plugin add
+      - plugin enable
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-add.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/add.command.js
+  3.7.1:
+    description: (Happy Path) Successfully enables a plugin from a collection.
+    commands:
+      - plugin enable --bypass-validation
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-enable.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/enable.command.js
+  3.7.2:
+    description: (Happy Path) The `plugin enable` command successfully enables a
+      valid plugin.
+    commands:
+      - plugin enable
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-enable.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/enable.command.js
+  3.7.3:
+    description: >-
+      (Sad Path) The `plugin enable` command fails to enable an invalid plugin
+      and reports validation errors.
+    commands:
+      - plugin enable
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-enable.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/enable.command.js
+  3.8.1:
+    description: (Happy Path) Successfully disables an enabled plugin.
+    commands:
+      - plugin disable
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-disable.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/disable.command.js
+  3.9.1:
+    description: (Happy Path) Successfully validates a well-formed plugin directory.
+    commands:
+      - plugin validate
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-validate.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/validate.command.js
+  3.9.2:
+    description: (Sad Path) Fails validation for a poorly-formed plugin directory.
+    commands:
+      - plugin validate
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/plugin-validate.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - pluginCmds
+    app_files:
+      - src/cli/commands/plugin/validate.command.js
+  3.10.1:
+    description: (Happy Path) Successfully adds a collection from a git URL.
+    commands:
+      - collection add
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-add.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/collection/add.command.js
+  3.10.2:
+    description: (Input Variation) Successfully adds a collection from a local
+      directory path.
+    commands:
+      - collection add
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-add.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/collection/add.command.js
+  3.10.3:
+    description: (Sad Path) Fails with a non-zero exit code when the source is invalid.
+    commands:
+      - collection add
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-add.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/collection/add.command.js
+  3.11.1:
+    description: (Happy Path) Correctly lists all added collections.
+    commands:
+      - collection list
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-list.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/collection/list.command.js
+  3.12.1:
+    description: (Happy Path) Successfully removes an added collection.
+    commands:
+      - collection remove
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-remove.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/collection/remove.command.js
+  3.13.1:
+    description: (Happy Path) Successfully runs the update process on all collections.
+    commands:
+      - collection update
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-update.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/collection/update.command.js
+  3.13.2:
+    description: (Key Option) Successfully runs the update process on a single named
+      collection.
+    commands:
+      - collection update
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-update.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/collection/update.command.js
+  3.14.1:
+    description: (Alias) The `update` alias successfully runs the collection update process.
+    commands:
+      - collection update
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/collection-update.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+      - collectionCmds
+    app_files:
+      - src/cli/commands/update.command.js
+  3.15.1:
+    description: The `--version` flag correctly displays the tool's version.
+    commands:
+      - '--version'
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/global-flags.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/
+  3.15.2:
+    description: The `--help` flag correctly displays the help text.
+    commands:
+      - '--help'
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/global-flags.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/
+  3.15.3:
+    description: >-
+      (Sad Path) An unknown command fails with a non-zero exit code and an
+      appropriate error message.
+    commands:
+      - unknown-command
+    runner: test/runners/e2e/all-e2e.test.js
+    manifest: test/runners/e2e/global-flags.manifest.js
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/
+  3.20.1:
+    description: (Smoke Test) The `config` command and its primary options execute
+      without errors.
+    commands:
+      - config
+      - config --pure
+      - config --plugin cv
+      - config --plugin cv --pure
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/
+  3.20.2:
+    description: (Smoke Test) The `--help` flag for all discovered commands executes
+      without errors.
+    commands:
+      - '--help'
+      - collection --help
+      - collection add --help
+      - collection list --help
+      - collection remove --help
+      - collection update --help
+      - config --help
+      - generate --help
+      - plugin --help
+      - plugin add --help
+      - plugin create --help
+      - plugin disable --help
+      - plugin enable --help
+      - plugin help --help
+      - plugin list --help
+      - plugin validate --help
+      - update --help
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/
+  3.20.3:
+    description: (Smoke Test) The `plugin validate` command successfully runs on all
+      bundled plugins.
+    commands:
+      - plugin list
+      - plugin list --enabled
+      - plugin list --available
+      - plugin list --disabled
+      - plugin list --short
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/
+  3.20.4:
+    description: (Smoke Test) The `collection list` command and its variants execute
+      without errors.
+    commands:
+      - collection list names --short
+      - collection list names
+      - collection list available
+      - collection list enabled
+      - collection list all
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/
+  3.20.5:
+    description: (Smoke Test) The `plugin list` command and its variants execute
+      without errors.
+    commands:
+      - plugin validate advanced-card
+      - plugin validate cover-letter
+      - plugin validate cv
+      - plugin validate default
+      - plugin validate recipe
+      - plugin validate recipe-book
+      - plugin validate template-basic
+    runner: test/runners/smoke/smoke-test-runner.js
+    manifest: test/runners/smoke/smoke-tests.yaml
+    reference: null
+    mocha_groups:
+      - level3
+      - e2e
+      - all
+    app_files:
+      - src/cli/

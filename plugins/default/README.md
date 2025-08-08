@@ -22,12 +22,12 @@ cli_help: |
     - toc_options: (object) Table of Contents generation can be enabled/configured.
 
   Example Usage:
-    md-to-pdf convert my_document.md
-    md-to-pdf convert my_document.md --plugin default
+    oshea convert my_document.md
+    oshea convert my_document.md --plugin default
 ---
 
 # Default Plugin (`default`)
 
-This is the standard, general-purpose plugin for `md-to-pdf`. It's designed to handle a wide variety of Markdown documents and provides a clean, readable PDF output.
+This is the standard, general-purpose plugin for `oshea`. It's designed to handle a wide variety of Markdown documents and provides a clean, readable PDF output.
 
 It serves as a good base for understanding basic plugin functionality and can be easily customized via XDG or project-level configuration overrides.

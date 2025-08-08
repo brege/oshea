@@ -1,0 +1,66 @@
+name: plugin remove (End-to-End Test) src/cli/commands/plugin/remove.command.js
+test_id: 3.16.1
+base_command: oshea
+tags:
+  - plugin
+  - remove
+  - cli
+  - smoke
+workflow: true
+scenarios:
+  - description: should create a plugin
+    test_id: 3.16.1.1
+    args: plugin create my-plugin-to-remove --outdir {{tmpdir}}
+    expect:
+      executes: true
+      contains: created successfully
+  - description: should add the plugin
+    test_id: 3.16.1.2
+    args: plugin add {{tmpdir}}/my-plugin-to-remove --bypass-validation
+    expect:
+      executes: true
+      contains: Successfully processed 'plugin add'
+  - description: should successfully remove a user plugin
+    test_id: 3.16.1.3
+    args: plugin remove my-plugin-to-remove --force
+    expect:
+      executes: true
+      contains_all:
+        - removed successfully
+        - Plugin Type
+        - Next Steps
+---
+name: plugin remove (End-to-End Test) src/cli/commands/plugin/remove.command.js
+test_id: 3.16.2
+base_command: oshea
+tags:
+  - plugin
+  - remove
+  - cli
+  - smoke
+  - error
+  - sad-path
+scenarios:
+  - description: should fail when trying to remove a non-existent plugin
+    test_id: 3.16.2.1
+    args: plugin remove non-existent-plugin --force
+    expect_failure:
+      exit_code: 1
+      contains: not found
+---
+name: plugin remove (End-to-End Test) src/cli/commands/plugin/remove.command.js
+test_id: 3.16.3
+base_command: oshea
+tags:
+  - plugin
+  - remove
+  - cli
+  - smoke
+  - error
+scenarios:
+  - description: should fail when trying to remove a bundled plugin
+    test_id: 3.16.3.1
+    args: plugin remove cv --force
+    expect_failure:
+      exit_code: 1
+      contains: bundled plugin

@@ -1,343 +1,221 @@
-# paths/paths-config.yaml
-# Declarative Master Configuration for the Path Registry Generator
-
 metadata:
   version: "1.0"
-  generated_warning: "Auto-generated - do not edit manually"
-  regenerate_command: "npm run paths"
-
+  generated_warning: Auto-generated - do not edit manually
+  regenerate_command: npm run paths
 registries:
-  # Main application registry (generates paths/index.js)
   main:
-    output_file: "paths/index.js"
-    title: "Project Path Registry"
-    architecture: "Feature-based with dependency ranking"
-    imports:
-      scriptsPaths: "./scripts.js"
-      lintersPaths: "./linters.js"
-      testsPaths: "./tests.js"
+    output_file: paths/index.js
+    title: Project Path Registry
+    architecture: Feature-based with dependency ranking
     architecture_sections:
       foundation:
-        comment: "Project Foundation"
+        comment: Project Foundation
         items:
-          project_root: "path.resolve(__dirname, '..')"
-          paths_path: "path.join(__dirname, 'index.js')"
-          package_json_path: "path.join(projectRoot, 'package.json')"
-          node_modules_path: "path.join(projectRoot, 'node_modules')"
-          config_example_path: "path.join(projectRoot, 'config.example.yaml')"
-          default_config_path: "path.join(projectRoot, 'config.yaml')"
-          factory_default_config_path: "path.join(projectRoot, 'config.example.yaml')"
+          project_root: path.resolve(__dirname, '..')
+          paths_path: path.join(__dirname, 'index.js')
+          package_json_path: path.join(projectRoot, 'package.json')
+          node_modules_path: path.join(projectRoot, 'node_modules')
+          default_config_path: path.join(projectRoot, 'config.yaml')
+          factory_default_config_path: path.join(projectRoot, 'config.example.yaml')
       interfaces:
-        comment: "CLI & External Interfaces"
+        comment: CLI & External Interfaces
         items:
-          cli_path: "path.join(projectRoot, 'cli.js')"
-          template_basic_plugin: "path.join(projectRoot, 'plugins', 'template-basic')"
+          cli_path: path.join(projectRoot, 'cli.js')
+          template_basic_plugin: path.join(projectRoot, 'plugins', 'template-basic')
       boundaries:
-        comment: "Architectural Boundaries"
+        comment: Architectural Boundaries
         items:
-          src_root: "path.join(projectRoot, 'src')"
-          assets_root: "path.join(projectRoot, 'assets')"
-          scripts_root: "path.join(projectRoot, 'scripts')"
-          test_root: "path.join(projectRoot, 'test')"
-          cli_commands_path: "path.join(srcRoot, 'cli', 'commands')"
-          collections_commands_root: "path.join(srcRoot, 'collections', 'commands')"
-          scripts_shared_root: "path.join(scriptsRoot, 'shared')"
-          test_shared_root: "path.join(testRoot, 'shared')"
+          src_root: path.join(projectRoot, 'src')
+          assets_root: path.join(projectRoot, 'assets')
+          scripts_root: path.join(projectRoot, 'scripts')
+          test_root: path.join(projectRoot, 'test')
+          collections_commands_root: path.join(srcRoot, 'collections', 'commands')
       tooling:
-        comment: "Development & Build Tools"
+        comment: Development & Build Tools
         items:
-          eslint_path: "path.join(nodeModulesPath, '.bin', 'eslint')"
-          mocha_path: "path.join(nodeModulesPath, '.bin', 'mocha')"
-          mocharc_path: "path.join(projectRoot, '.mocharc.js')"
-          file_helpers_path: "path.join(scriptsSharedRoot, 'file-helpers.js')"
-          test_file_helpers_path: "path.join(testSharedRoot, 'test-helpers.js')"
-          dynamic_completion_script_path: "path.join(scriptsRoot, 'completion', 'generate-completion-dynamic-cache.js')"
+          scripts_shared_root: path.join(scriptsRoot, 'shared')
+          eslint_path: path.join(nodeModulesPath, '.bin', 'eslint')
+          mocha_path: path.join(nodeModulesPath, '.bin', 'mocha')
+          mocharc_path: path.join(projectRoot, '.mocharc.js')
       statics:
-        comment: "Key Static File Paths"
+        comment: Key Static File Paths
         items:
-          katex_path: "path.join(assetsRoot, 'katex.min.css')"
-          base_plugin_schema_path: "path.join(srcRoot, 'validators', 'base-plugin.schema.json')"
-          find_litter_rules_path: "path.join(assetsRoot, 'litter-list.txt')"
-          linting_config_path: "path.join(scriptsRoot, 'linting', 'linting-config.yaml')"
-          test_config_path: "path.join(testRoot, 'shared', 'config.test.yaml')"
+          paths_config_path: path.join(projectRoot, 'paths', 'paths-config.yaml')
+          katex_path: path.join(assetsRoot, 'katex.min.css')
+          find_litter_rules_path: path.join(assetsRoot, 'litter-list.txt')
+          base_plugin_schema_path: path.join(srcRoot, 'validators', 'base-plugin.schema.json')
+          linting_config_path: path.join(scriptsRoot, 'linting', 'linting-config.yaml')
+      collections:
+        comment: Collections System Constants
+        items:
+          collections_metadata_filename: "'.collection-metadata.yaml'"
+          collections_enabled_manifest_filename: "'enabled.yaml'"
+          collections_default_archetype_dirname: "'user-plugins'"
+          collections_user_plugins_dirname: "'user-plugins'"
+      test_directories:
+        comment: Test Organization
+        items:
+          test_runners_dir: path.join(testRoot, 'runners')
+          e2e_test_dir: path.join(testRunnersDir, 'end-to-end')
+          integration_test_dir: path.join(testRunnersDir, 'integration')
+          linting_test_dir: path.join(testRunnersDir, 'linting')
+      test_fixtures:
+        comment: Test Fixtures
+        items:
+          fixtures_dir: path.join(testRunnersDir, 'fixtures')
+          simple_md_fixture: path.join(fixturesDir, 'markdown/simple.md')
+          simple_md_fixture_with_fm: path.join(fixturesDir, 'markdown/with-front-matter.md')
+          hugo_example_fixture_path: path.join(fixturesDir, 'hugo-example')
+          refresh_fixtures_path: path.join(fixturesDir, 'refresh-fixtures.js')
+          create_dummy_plugin_path: path.join(fixturesDir, 'create-dummy-plugin.js')
+      test_integration:
+        comment: Integration Testing Foundation
+        items:
+          setup_file: path.join(integrationTestDir, 'setup.js')
+          test_shared_root: path.join(integrationTestDir, 'shared')
+          test_config_path: path.join(testSharedRoot, 'config.test.yaml')
+          test_file_helpers_path: path.join(testSharedRoot, 'test-helpers.js')
+      linting_foundation:
+        comment: Linting Infrastructure Foundation
+        items:
+          linting_dir: path.join(testRunnersDir, 'linting')
+          linting_unit_harness: path.join(lintingDir, 'linting-unit-harness.js')
+          linting_test_runner_factory: path.join(lintingDir, 'test-runner-factory.js')
     features:
       cli:
-        comment: "Command Line Interface"
-        pattern: "src/cli/**/*.js"
+        comment: Command Line Interface
+        pattern: src/cli/**/*.js
         rank: 0
       core:
-        comment: "Core Processing Engine"
-        pattern: "src/core/**/*.js"
+        comment: Core Processing Engine
+        pattern: src/core/**/*.js
         rank: 1
       plugins:
-        comment: "Plugin System"
-        pattern: "src/plugins/**/*.js"
+        comment: Plugin System
+        pattern: src/plugins/**/*.js
         rank: 2
       collections:
-        comment: "Collections Management"
-        pattern: "src/collections/**/*.js"
+        comment: Collections Management
+        pattern: src/collections/**/*.js
         rank: 2
       config:
-        comment: "Configuration System"
-        pattern: "src/config/**/*.js"
+        comment: Configuration System
+        pattern: src/config/**/*.js
         rank: 1
       completion:
-        comment: "CLI Completion Engine"
-        pattern: "src/completion/**/*.js"
+        comment: CLI Completion Engine
+        pattern: src/completion/**/*.js
         rank: 3
       utils:
-        comment: "Utilities & Helpers"
-        pattern: "src/utils/**/*.js"
+        comment: Utilities & Helpers
+        pattern: src/utils/**/*.js
         rank: 3
       validators:
-        comment: "Validation Framework"
-        pattern: "src/validators/**/*.js"
+        comment: Validation Framework
+        pattern: src/validators/**/*.js
         rank: 2
-    contextual_naming:
-      "add.command.js":
-        cli/commands/collection: "collections_add_command"
-        cli/commands/plugin: "plugin_add_command"
-      "list.command.js":
-        cli/commands/collection: "collections_list_command"
-        cli/commands/plugin: "plugin_list_command"
-      "remove.command.js":
-        cli/commands/collection: "collections_remove_command"
-      "update.command.js":
-        cli/commands/collection: "collections_update_command"
-      add:
-        collections/commands: "collections_add"
-      list:
-        collections/commands: "collections_list"
-      remove:
-        collections/commands: "collections_remove"
-      update:
-        collections/commands: "collections_update"
-
-  # Scripts registry (generates paths/scripts.js)
-  scripts:
-    output_file: "paths/scripts.js"
-    title: "Scripts Path Registry"
-    architecture: "Feature-based"
-    architecture_sections:
-      foundation:
-        comment: "Project Foundation"
-        items:
-          project_root: "path.resolve(__dirname, '..')"
-          scripts_root: "path.join(projectRoot, 'scripts')"
-    features:
       ai:
-        comment: "AI Tooling"
-        pattern: "scripts/ai/**/*.js"
+        comment: AI Tooling
+        pattern: scripts/ai/**/*.js
         rank: 0
       batch:
-        comment: "Batch Processing Scripts"
-        pattern: "scripts/batch/**/*"
-        rank: 1
-      completion:
-        comment: "CLI Tab Completion Scripts"
-        pattern: "scripts/completion/**/*.js"
+        comment: Batch Processing Scripts
+        pattern: scripts/batch/**/*
         rank: 1
       docs:
-        comment: "Documentation Helpers"
-        pattern: "scripts/docs/**/*.js"
+        comment: Documentation Helpers
+        pattern: scripts/docs/**/*.js
         rank: 1
-      shared:
-        comment: "Shared Script Utilities"
-        pattern: "scripts/shared/**/*.js"
+      script_shared:
+        comment: Shared Script Utilities
+        pattern: scripts/shared/**/*.js
         rank: 2
-
-  # Linting registry (generates paths/linters.js)
-  linters:
-    output_file: "paths/linters.js"
-    title: "Linting Tools Registry"
-    architecture: "Feature-based linting infrastructure"
-    architecture_sections:
-      foundation:
-        comment: "Project Foundation"
-        items:
-          project_root: "path.resolve(__dirname, '..')"
-          scripts_root: "path.join(projectRoot, 'scripts')"
-          linting_root: "path.join(scriptsRoot, 'linting')"
-    features:
-      core:
-        comment: "Core Linting Infrastructure"
-        pattern: "scripts/linting/lint*.js"
+      linting_core:
+        comment: Core Linting Infrastructure
+        pattern: scripts/linting/**.js
         rank: 0
-      code:
-        comment: "Code Quality Linters"
-        pattern: "scripts/linting/code/**/*.js"
+      linting_code:
+        comment: Code Quality Linters
+        pattern: scripts/linting/code/**/*.js
         rank: 1
-      docs:
-        comment: "Documentation Linters"
-        pattern: "scripts/linting/docs/**/*.js"
+      linting_docs:
+        comment: Documentation Linters
+        pattern: scripts/linting/docs/**/*.js
         rank: 1
-      validators:
-        comment: "Validation Linters"
-        pattern: "scripts/linting/validators/**/*.js"
+      linting_validators:
+        comment: Validation Linters
+        pattern: scripts/linting/validators/**/*.js
         rank: 2
-      lib:
-        comment: "Linting Utilities & Helpers"
-        pattern: "scripts/linting/lib/**/*.js"
+      linting_lib:
+        comment: Linting Utilities & Helpers
+        pattern: scripts/linting/lib/**/*.js
         rank: 3
-
-  # Test registry (generates paths/tests.js)
-  tests:
-    output_file: "paths/tests.js"
-    title: "Test Suite Registry"
-    architecture: "Multi-layered testing infrastructure with dependency ranking"
-    architecture_sections:
-      foundation:
-        comment: "Test Infrastructure Foundation"
-        items:
-          project_root: "path.resolve(__dirname, '..')"
-          test_root: "path.join(projectRoot, 'test')"
-          setup_file: "path.join(testRoot, 'setup.js')"
-
-      directories:
-        comment: "Test Organization Directories"
-        items:
-          docs_test_dir: "path.join(testRoot, 'docs')"
-          e2e_test_dir: "path.join(testRoot, 'e2e')"
-          fixtures_dir: "path.join(testRoot, 'fixtures')"
-          integration_test_dir: "path.join(testRoot, 'integration')"
-          linting_test_dir: "path.join(testRoot, 'linting')"
-          scripts_test_dir: "path.join(testRoot, 'scripts')"
-          shared_test_dir: "path.join(testRoot, 'shared')"
-          smoke_test_dir: "path.join(testRoot, 'smoke')"
-
-      harnesses:
-        comment: "Test Harnesses & Factories"
-        items:
-          e2e_harness: "path.join(testRoot, 'e2e/e2e-harness.js')"
-          test_runner_factory_e2e: "path.join(testRoot, 'e2e/test-runner-factory.js')"
-          linting_unit_harness: "path.join(testRoot, 'linting/unit/linting-unit-harness.js')"
-          test_runner_factory_linting: "path.join(testRoot, 'linting/unit/test-runner-factory.js')"
-
-      fixtures:
-        comment: "Test Fixtures"
-        items:
-          simple_md_fixture: "path.join(fixturesDir, 'markdown/simple.md')"
-          simple_md_fixture_with_fm: "path.join(fixturesDir, 'markdown/with-front-matter.md')"
-          hugo_example_fixture_path: "path.join(fixturesDir, 'hugo-example')"
-
-    features:
-      # Rank 0: Core Test Operations
-      smoke:
-        comment: "Smoke Tests - Basic Application Validation"
-        pattern: "test/smoke/**/*.js"
-        rank: 0
-
       core_integration:
-        comment: "Core Module Integration Tests"
-        pattern: "test/integration/core/**/*.js"
+        comment: Core Module Integration Tests
+        pattern: test/runners/integration/core/**/*.js
         rank: 0
-
-      # Rank 1: Essential Operations
       config_integration:
-        comment: "Configuration System Integration Tests"
-        pattern: "test/integration/config/**/*.js"
+        comment: Configuration System Integration Tests
+        pattern: test/runners/integration/config/**/*.js
         rank: 1
-
       plugins_integration:
-        comment: "Plugin System Integration Tests"
-        pattern: "test/integration/plugins/**/*.js"
+        comment: Plugin System Integration Tests
+        pattern: test/runners/integration/plugins/**/*.js
         rank: 1
-
       collections_integration:
-        comment: "Collections System Integration Tests"
-        pattern: "test/integration/collections/**/*.js"
+        comment: Collections System Integration Tests
+        pattern: test/runners/integration/collections/**/*.js
         rank: 1
-
-      e2e_core:
-        comment: "End-to-End Core Workflow Tests"
-        pattern: "test/e2e/all-e2e.test.js"
-        rank: 1
-
-      # Rank 2: Supportive Operations
-      e2e_manifests:
-        comment: "E2E Manifest Tests"
-        pattern: "test/e2e/*.manifest.js"
-        rank: 2
-
-      e2e_workflows:
-        comment: "E2E Workflow Lifecycle Tests"
-        pattern: "test/e2e/workflow-lifecycle.test.js"
-        rank: 2
-
-      linting_tests:
-        comment: "Linting Unit Tests"
-        pattern: "test/linting/unit/**/*.js"
-        rank: 2
-
-      # Rank 3: Enhancements & Utilities
-      test_scripts:
-        comment: "Test Support Scripts"
-        pattern: "test/scripts/**/*.js"
-        rank: 3
-
       shared_utilities:
-        comment: "Shared Test Utilities & Helpers"
-        pattern: "test/shared/**/*.js"
+        comment: Shared Test Utilities & Helpers
+        pattern: test/runners/integration/shared/**/*.js
         rank: 3
-
+      e2e_cli_tests:
+        comment: End-to-End CLI Tests
+        pattern: test/runners/end-to-end/cli/**/*.manifest.yaml
+        rank: 1
+      e2e_workflow_tests:
+        comment: End-to-End Workflow Tests
+        pattern: test/runners/end-to-end/workflows/**/*.manifest.yaml
+        rank: 2
+      e2e_validator_tests:
+        comment: End-to-End Bundled Plugin Tests
+        pattern: test/runners/end-to-end/validators/**/*.manifest.yaml
+        rank: 2
+      e2e_runners:
+        comment: End-to-End Test Runners
+        pattern: test/runners/end-to-end/**/*.js
+        rank: 2
+      linting_tests:
+        comment: Linting Tests
+        pattern: test/runners/linting/**/*.js
+        rank: 2
     contextual_naming:
-      # E2E test naming
-      "all-e2e.test.js":
-        "test/e2e": "allE2eTest"
-      "workflow-lifecycle.test.js":
-        "test/e2e": "workflowLifecycleTest"
-      "e2e-harness.js":
-        "test/e2e": "e2eHarness"
-
-      # Integration test naming patterns
-      "config-resolver.test.js":
-        "test/integration/config": "configResolverIntegrationTest"
-      "main-config-loader.test.js":
-        "test/integration/config": "mainConfigLoaderIntegrationTest"
-      "plugin-config-loader.test.js":
-        "test/integration/config": "pluginConfigLoaderIntegrationTest"
-
-      "plugin-manager.test.js":
-        "test/integration/plugins": "pluginManagerIntegrationTest"
-      "plugin-determiner.test.js":
-        "test/integration/plugins": "pluginDeterminerIntegrationTest"
-      "plugin-registry-builder.test.js":
-        "test/integration/plugins": "pluginRegistryBuilderIntegrationTest"
-      "plugin-validator.test.js":
-        "test/integration/plugins": "pluginValidatorIntegrationTest"
-
-      "collections-manager.test.js":
-        "test/integration/collections": "collectionsManagerIntegrationTest"
-      "cm-utils.test.js":
-        "test/integration/collections": "cmUtilsIntegrationTest"
-
-      "default-handler.test.js":
-        "test/integration/core": "defaultHandlerIntegrationTest"
-      "pdf-generator.test.js":
-        "test/integration/core": "pdfGeneratorIntegrationTest"
-      "math-integration.test.js":
-        "test/integration/core": "mathIntegrationTest"
-
-      # Factory and manifest naming
-      ".factory.js":
-        "test/integration": "factory"
-      ".manifest.js":
-        "test/": "manifest"
-
-      # Shared utilities
-      "test-helpers.js":
-        "test/shared": "testHelpers"
-      "test-logger.js":
-        "test/shared": "testLogger"
-      "capture-logs.js":
-        "test/shared": "captureLogs"
-
-      # Linting tests
-      "all-linting-unit.test.js":
-        "test/linting/unit": "allLintingUnitTest"
-
+      add.command.js:
+        cli/collection: collections_add_command
+        cli/plugin: plugin_add_command
+      list.command.js:
+        cli/collection: collections_list_command
+        cli/plugin: plugin_list_command
+      remove.command.js:
+        cli/collection: collections_remove_command
+        cli/plugin: plugin_remove_command
+      update.command.js:
+        cli/collection: collections_update_command
+      add:
+        collections/commands: collections_add
+      list:
+        collections/commands: collections_list
+      remove:
+        collections/commands: collections_remove
+      update:
+        collections/commands: collections_update
+      index.js:
+        paths: paths_index
+        src/collections: collections_index
+        src/utils/formatters: formatters_index
 rank_definitions:
-  0: "user-facing interfaces"
-  1: "essential operations"
-  2: "supportive operations"
-  3: "enhancements & utilities"
+  "0": user-facing interfaces
+  "1": essential operations
+  "2": supportive operations
+  "3": enhancements & utilities

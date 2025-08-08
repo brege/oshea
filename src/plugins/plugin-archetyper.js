@@ -10,7 +10,7 @@ const yaml = require('js-yaml');
 const matter = require('gray-matter');
 
 async function createArchetype(dependencies, managerContext, sourcePluginIdentifier, newArchetypeName, options = {}) {
-  const { cmUtils, constants } = dependencies;
+  const { cmUtils, collectionsMetadataFilename, collectionsDefaultArchetypeDirname } = dependencies;
   const { collRoot, listAvailablePlugins } = managerContext;
 
   let sourcePluginInfo = {};
@@ -18,9 +18,9 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
 
   const idParts = sourcePluginIdentifier.split('/');
   const isPotentiallyCmIdentifier = idParts.length === 2 && idParts[0] && idParts[1] &&
-                                 !sourcePluginIdentifier.startsWith('.') &&
-                                 !sourcePluginIdentifier.startsWith('~') &&
-                                 !path.isAbsolute(sourcePluginIdentifier);
+                                   !sourcePluginIdentifier.startsWith('.') &&
+                                   !sourcePluginIdentifier.startsWith('~') &&
+                                   !path.isAbsolute(sourcePluginIdentifier);
 
   if (isPotentiallyCmIdentifier) {
     const [sourceCollectionName, sourcePluginId] = idParts;
@@ -52,7 +52,11 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
       const sourceConfigContent = await fs.readFile(sourcePluginInfo.config_path, 'utf8');
       sourcePluginInfo.description = yaml.load(sourceConfigContent).description || `Plugin from path: ${sourcePluginIdForReplacement}`;
     } catch {
-      logger.warn('WARN: Could not read description from direct path source config.');
+      logger.warn('Could not read description from direct path source config.', {
+        context: 'PluginArchetyper',
+        configPath: sourcePluginInfo.config_path,
+        suggestion: 'Ensure the config file is a valid YAML format.'
+      });
     }
   }
 
@@ -60,7 +64,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   const originalSourceConfigFilename = path.basename(sourcePluginInfo.config_path);
   const originalPluginDescriptionFromSource = sourcePluginInfo.description || `Plugin ${sourcePluginIdForReplacement}`;
 
-  const targetBaseDir = options.targetDir ? path.resolve(options.targetDir) : path.join(path.dirname(collRoot), constants.DEFAULT_ARCHETYPE_BASE_DIR_NAME);
+  const targetBaseDir = options.targetDir ? path.resolve(options.targetDir) : path.join(collRoot, collectionsDefaultArchetypeDirname);
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
   if (fss.existsSync(archetypePath) && !options.force) {
@@ -72,7 +76,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
 
   await fs.mkdir(targetBaseDir, { recursive: true });
   await fsExtra.copy(sourcePluginBasePath, archetypePath, {
-    filter: (src) => !src.includes(constants.METADATA_FILENAME)
+    filter: (src) => !src.includes(collectionsMetadataFilename)
   });
 
   const sourcePluginIdPascal = cmUtils.toPascalCase(sourcePluginIdForReplacement);
@@ -92,23 +96,30 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
     tempConfigData.description = `Archetype of "${sourcePluginIdentifier}": ${originalPluginDescriptionFromSource}`.trim();
 
     if (tempConfigData.css_files && Array.isArray(tempConfigData.css_files)) {
-      const conventionalCssToRename = `${sourcePluginIdForReplacement}.css`;
-      const cssIndex = tempConfigData.css_files.findIndex(f => typeof f === 'string' && f.toLowerCase() === conventionalCssToRename.toLowerCase());
-      if (cssIndex !== -1) {
-        const oldCssPathInArchetype = path.join(archetypePath, tempConfigData.css_files[cssIndex]);
-        const newCssName = `${newArchetypeName}.css`;
-        if (fss.existsSync(oldCssPathInArchetype)) {
-          await fs.rename(oldCssPathInArchetype, path.join(archetypePath, newCssName));
-          tempConfigData.css_files[cssIndex] = newCssName;
-          filesToProcessForStringReplacement.push(path.join(archetypePath, newCssName));
+      tempConfigData.css_files = tempConfigData.css_files.map(cssFile => {
+        if (typeof cssFile === 'string' && cssFile.includes(sourcePluginIdForReplacement)) {
+          const oldCssPathInArchetype = path.join(archetypePath, cssFile);
+          const newCssName = cssFile.replace(new RegExp(sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newArchetypeName);
+          if (fss.existsSync(oldCssPathInArchetype)) {
+            fss.renameSync(oldCssPathInArchetype, path.join(archetypePath, newCssName));
+            filesToProcessForStringReplacement.push(path.join(archetypePath, newCssName));
+          }
+          return newCssName;
         }
-      }
+        return cssFile;
+      });
     }
 
     if (tempConfigData.handler_script && fss.existsSync(path.join(archetypePath, tempConfigData.handler_script))) {
       filesToProcessForStringReplacement.push(path.join(archetypePath, tempConfigData.handler_script));
     }
     await fs.writeFile(newConfigPathInArchetype, yaml.dump(tempConfigData));
+
+    // Don't process config file again in global replacement since we've already handled CSS files
+    const configFileIndex = filesToProcessForStringReplacement.indexOf(newConfigPathInArchetype);
+    if (configFileIndex > -1) {
+      filesToProcessForStringReplacement.splice(configFileIndex, 1);
+    }
   }
 
   const contractDirInArchetype = path.join(archetypePath, '.contract');
@@ -136,7 +147,10 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   for (const dirent of currentArchetypeFiles) {
     const fullFilePath = path.join(archetypePath, dirent.name);
     if (dirent.isFile() && processExtensions.includes(path.extname(dirent.name).toLowerCase())) {
-      filesToProcessForStringReplacement.push(fullFilePath);
+      // Skip config file - already processed above
+      if (fullFilePath !== newConfigPathInArchetype) {
+        filesToProcessForStringReplacement.push(fullFilePath);
+      }
     }
   }
 
@@ -174,8 +188,73 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
     }
   }
 
-  logger.success(`Archetype '${newArchetypeName}' created successfully from '${sourcePluginIdentifier}'.`, { module: 'src/plugins/plugin_archetyper.js' });
+  // Add to unified plugins manifest if using default location
+  if (!options.targetDir) {
+    await addToUserPluginsManifest(targetBaseDir, newArchetypeName, sourcePluginIdentifier);
+  }
+
+  // Create source metadata for the plugin
+  const sourceMetadata = {
+    source_type: 'created',
+    created_from: sourcePluginIdentifier,
+    archetype_source: isPotentiallyCmIdentifier ? 'collection' : 'bundled',
+    created_on: new Date().toISOString()
+  };
+
+  const sourceMetadataPath = path.join(archetypePath, '.source.yaml');
+  await fs.writeFile(sourceMetadataPath, yaml.dump(sourceMetadata));
+
+  logger.success('Archetype created successfully.', {
+    context: 'PluginArchetyper',
+    archetypeName: newArchetypeName,
+    sourcePlugin: sourcePluginIdentifier,
+    result: archetypePath
+  });
   return { success: true, message: `Archetype '${newArchetypeName}' created successfully.`, archetypePath };
+}
+
+// Helper function to add created plugin to unified manifest
+async function addToUserPluginsManifest(userPluginsDir, pluginName, sourceIdentifier) {
+  const pluginsManifestPath = path.join(userPluginsDir, 'plugins.yaml');
+
+  let pluginStates = {};
+
+  // Read existing manifest if it exists
+  if (fss.existsSync(pluginsManifestPath)) {
+    try {
+      const content = await fs.readFile(pluginsManifestPath, 'utf8');
+      const parsed = yaml.load(content);
+      pluginStates = parsed?.plugins || {};
+    } catch (e) {
+      logger.warn('Could not read existing plugins manifest', {
+        context: 'PluginArchetyper',
+        path: pluginsManifestPath,
+        error: e.message
+      });
+    }
+  }
+
+  // Add the new plugin
+  pluginStates[pluginName] = {
+    type: 'created',
+    enabled: true,
+    created_from: sourceIdentifier,
+    created_on: new Date().toISOString()
+  };
+
+  // Write updated manifest
+  const updatedManifest = {
+    version: '1.0',
+    plugins: pluginStates
+  };
+
+  await fs.writeFile(pluginsManifestPath, yaml.dump(updatedManifest));
+
+  logger.debug('Added plugin to unified manifest', {
+    context: 'PluginArchetyper',
+    pluginName: pluginName,
+    manifestPath: pluginsManifestPath
+  });
 }
 
 module.exports = {

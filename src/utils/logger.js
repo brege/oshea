@@ -1,89 +1,168 @@
 // src/utils/logger.js
-// lint-skip-logger
-const chalk = require('chalk');
-const fs = require('fs');
-const path = require('path');
+// lint-skip-file no-console
+// Slim routing layer - all formatting logic delegated to formatters/
+const { formattersIndexPath, loggerEnhancerPath } = require('@paths');
 
-// Ensure log directory exists
-const logDir = path.join(process.cwd(), 'logs');
-if (process.env.LOG_MODE === 'json' && !fs.existsSync(logDir)) {
-  fs.mkdirSync(logDir, { recursive: true });
-}
-const logFilePath = path.join(logDir, 'app.log');
-
-// Returns a colored string for the given level.
-function colorForLevel(level, message) {
-  if (level === 'error' || level === 'fatal') return chalk.red(message);
-  if (level === 'warn') return chalk.yellow(message);
-  if (level === 'success') return chalk.green(message);
-  if (level === 'info') return chalk.cyan(message);
-  if (level === 'validation') return chalk.magentaBright(message); // custom validation color
-  if (level === 'detail') return chalk.gray(message);
-  if (level === 'debug') return chalk.magenta(message);
-  return message;
+// Lazy-loaded formatter cache
+const formatterCache = {};
+function getFormatter(name) {
+  if (!formatterCache[name]) {
+    const formatters = require(formattersIndexPath);
+    formatterCache[name] = formatters[name];
+    if (!formatterCache[name]) {
+      throw new Error(`Unknown formatter: ${name}`);
+    }
+  }
+  return formatterCache[name];
 }
 
-// Normal logger
-function log(level, message, meta = {}) {
-  if (level === 'debug' && !process.env.MD2PDF_DEBUG) return;
-  if (process.env.LOG_MODE === 'json') {
-    const entry = {
-      level,
-      message,
-      ...meta,
-      timestamp: new Date().toISOString()
-    };
-    fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+// Global debug mode state
+let debugMode = false;
+
+// Logger formatting configuration
+const loggerConfig = {
+  showContext: true,      // Show context in formatted output
+  showTimestamp: false,   // Show timestamp in formatted output
+  contextStyle: 'prefix', // 'prefix', 'suffix', 'none'
+  // Enhanced debugging features
+  showCaller: false,      // Show file:line caller info
+  showStack: false,       // Show stack traces for errors
+  enrichErrors: false,    // Auto-categorize errors and add hints
+  stackDepth: 3           // Number of stack frames to show
+};
+
+// Error categorization is now handled in logger-enhancer.js with built-in patterns
+
+// Configure logger formatting
+function configureLogger(config = {}) {
+  Object.assign(loggerConfig, config);
+}
+
+// Get current logger configuration
+function getLoggerConfig() {
+  return { ...loggerConfig };
+}
+
+// Set debug mode globally
+function setDebugMode(enabled) {
+  debugMode = enabled;
+}
+
+// Import enhancement utilities
+const { enhanceMessage } = require(loggerEnhancerPath);
+
+// Unified logger interface with CSS-like format parameter
+// Pure routing - delegates all formatting to formatters/
+// Usage examples:
+//   logger('message')                                    // same as logger.info('message')
+//   logger('message', { level: 'debug' })                // same as logger.debug('message')
+//   logger(lintData, { format: 'lint' })                 // lint formatting with info level
+//   logger('debug msg', { level: 'debug', format: 'lint' }) // lint formatting with debug level
+//   logger('inline', { format: 'inline' })               // no newline, same as writeInfo()
+function logger(message, options = {}) {
+  const { format = 'default', level = 'info', context, meta = {} } = options;
+
+  // Suppress context for user-facing commands unless debug mode
+  if (!debugMode && (level === 'info' || level === 'success')) {
+    meta.context = undefined; // Suppress context for clean user output
   } else {
-    console.log(colorForLevel(level, message));
+    meta.context = context; // Preserve context for debug/warn/error levels
   }
-  if (level === 'fatal') {
-    process.exit(1);
+  meta.config = loggerConfig;
+
+  // Apply enhanced debugging if any enhancement features are enabled
+  if (loggerConfig.showCaller || loggerConfig.showStack || loggerConfig.enrichErrors) {
+    const enhanced = enhanceMessage(message, options, level, loggerConfig);
+    Object.assign(meta, enhanced);
+  }
+
+  // Debug mode filtering
+  if (level === 'debug' && !debugMode) return;
+
+  // Route to appropriate formatter
+  if (format === 'default') {
+    return getFormatter('app')(level, message, meta);
+  }
+
+  if (format === 'lint') {
+    // Special handling for lint format with JSON mode support
+    if (process.env.LOG_MODE === 'json') {
+      const fs = require('fs');
+      const path = require('path');
+      const logFilePath = path.join(process.cwd(), 'logs', 'app.log');
+      const entry = {
+        level: 'info',
+        type: 'lint-output',
+        data: message,
+        ...meta,
+        timestamp: new Date().toISOString()
+      };
+      fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+      return;
+    }
+
+    const formatted = getFormatter('lint')(message);
+    if (formatted) {
+      console.log(formatted);
+    }
+    return;
+  }
+
+  // For all other formatters, use lazy loading
+  try {
+    const formatter = getFormatter(format);
+    return formatter(level, message, meta);
+  } catch (error) {
+    // Fallback to default formatter if format not found
+    return getFormatter('app')(level, message, meta);
   }
 }
 
-// Logger with NO newline (for prompts/results on same line).
-function write(level, message, meta = {}) {
-  if (level === 'debug' && !process.env.MD2PDF_DEBUG) return;
-  if (process.env.LOG_MODE === 'json') {
-    const entry = {
-      level,
-      message,
-      ...meta,
-      timestamp: new Date().toISOString()
-    };
-    fs.appendFileSync(logFilePath, JSON.stringify(entry)); // no \n
-  } else {
-    process.stdout.write(colorForLevel(level, message));
-  }
-  if (level === 'fatal') {
-    process.exit(1);
-  }
+// Convenience aliases for each level (backward compatibility)
+// Now support context: logger.info('message', { context: 'MyContext' })
+const info      = (msg, options = {}) => logger(msg, { ...options, level: 'info' });
+const warn      = (msg, options = {}) => logger(msg, { ...options, level: 'warn' });
+const error     = (msg, options = {}) => logger(msg, { ...options, level: 'error' });
+const success   = (msg, options = {}) => logger(msg, { ...options, level: 'success' });
+const detail    = (msg, options = {}) => logger(msg, { ...options, level: 'detail' });
+const fatal     = (msg, options = {}) => logger(msg, { ...options, level: 'fatal' });
+const debug     = (msg, options = {}) => logger(msg, { ...options, level: 'debug' });
+const validation= (msg, options = {}) => logger(msg, { ...options, level: 'validation' });
+
+// writeFunction aliases removed - all migrated to { format: 'inline' } pattern
+
+// Legacy specialized formatter methods (maintained for backward compatibility)
+function formatLint(structuredData, meta = {}) {
+  return logger(structuredData, { format: 'lint', meta });
 }
 
-// Aliases for each level with newline
-const info      = (msg, meta) => log('info', msg, meta);
-const warn      = (msg, meta) => log('warn', msg, meta);
-const error     = (msg, meta) => log('error', msg, meta);
-const success   = (msg, meta) => log('success', msg, meta);
-const detail    = (msg, meta) => log('detail', msg, meta);
-const fatal     = (msg, meta) => log('fatal', msg, meta);
-const debug     = (msg, meta) => log('debug', msg, meta);
-const validation= (msg, meta) => log('validation', msg, meta);
-
-// Aliases for each level, NO newline
-const writeInfo      = (msg, meta) => write('info', msg, meta);
-const writeWarn      = (msg, meta) => write('warn', msg, meta);
-const writeError     = (msg, meta) => write('error', msg, meta);
-const writeSuccess   = (msg, meta) => write('success', msg, meta);
-const writeDetail    = (msg, meta) => write('detail', msg, meta);
-const writeFatal     = (msg, meta) => write('fatal', msg, meta);
-const writeDebug     = (msg, meta) => write('debug', msg, meta);
-const writeValidation= (msg, meta) => write('validation', msg, meta);
+// Convenience method for pre-configured loggers with context
+function createLoggerFor(context) {
+  return {
+    info: (msg, options = {}) => logger(msg, { ...options, level: 'info', context }),
+    warn: (msg, options = {}) => logger(msg, { ...options, level: 'warn', context }),
+    error: (msg, options = {}) => logger(msg, { ...options, level: 'error', context }),
+    success: (msg, options = {}) => logger(msg, { ...options, level: 'success', context }),
+    detail: (msg, options = {}) => logger(msg, { ...options, level: 'detail', context }),
+    fatal: (msg, options = {}) => logger(msg, { ...options, level: 'fatal', context }),
+    debug: (msg, options = {}) => logger(msg, { ...options, level: 'debug', context }),
+    validation: (msg, options = {}) => logger(msg, { ...options, level: 'validation', context }),
+    // Main logger with context pre-filled
+    log: (msg, options = {}) => logger(msg, { ...options, context })
+  };
+}
 
 module.exports = {
-  log,
-  write,
+  // Debug mode control
+  setDebugMode,
+  // Logger configuration
+  configureLogger,
+  getLoggerConfig,
+  // Main logger interface
+  logger,
+  // Convenience method for pre-configured loggers
+  for: createLoggerFor,
+  // Convenience aliases for each level (backward compatibility)
   info,
   warn,
   error,
@@ -92,13 +171,7 @@ module.exports = {
   fatal,
   debug,
   validation,
-  writeInfo,
-  writeWarn,
-  writeError,
-  writeSuccess,
-  writeDetail,
-  writeFatal,
-  writeDebug,
-  writeValidation,
+  // Legacy specialized formatters (backward compatibility)
+  formatLint
 };
 

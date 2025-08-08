@@ -13,7 +13,7 @@
 [comment:high:js,ts] FIX$match-case
 [comment:high:js,ts] BEGIN$match-case
 [comment:high:js,ts] END$match-case
-[comment:high:js,ts] Added$match-case
+[comment:high:js,ts] ADD$match-case
 [comment:high:js,ts] Removed $match-case
 [comment:high:js,ts] NEW$match-case
 [comment:high:js,ts] <--
@@ -27,6 +27,11 @@
 [string:medium:md] robustify
 [string:medium:md] robustly
 
+# logger anti-patterns - prevent regression to hardcoded prefixes
+[string:high:js,ts] logger\.(error|warn|info|debug)\(`\[*\]
+[string:high:js,ts] logger\.(error|warn|info|debug)\('\[*\]
+[string:medium:js,ts] logger\.(error|warn|info|debug)\([^,]+\s*\+\s*[^,)]+
+
 # custom patterns 
 
 # emoji whitelist 
@@ -39,12 +44,15 @@
 ★
 ➜ 
 ↔
+⚠
+ℹ
 
 # --- whitelist: allowed ALL CAPS in comments ---
 # pattern examples: TOC, LINT_*, ESLint
 [whitelist:comment:js,ts]
 ALL
 AND
+API
 CLI
 CLOSED
 CONTRIBUTORS
@@ -58,6 +66,7 @@ JSDoc
 JSON
 LICENSE
 LINT_.*
+NDJSON
 NOT
 OPEN
 PDF
@@ -69,4 +78,4 @@ URL
 VALID
 XDG
 YAML
-
+ANSI

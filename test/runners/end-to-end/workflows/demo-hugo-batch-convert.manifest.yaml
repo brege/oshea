@@ -1,0 +1,59 @@
+name: batch convert Hugo recipes (Demo) docs/guides/batch-processing-guide.md
+test_id: 4.2.1
+base_command: oshea
+tags:
+  - workflow
+  - batch
+  - hugo
+  - recipes
+  - demo
+  - convert
+workflow: false
+scenarios:
+  - description: convert Hugo recipe {item} to PDF with custom naming based on front matter
+    test_id: 4.2.1.{item}
+    args: >-
+      convert {{paths.hugoExampleFixturePath}}/{item}/index.md --plugin recipe
+      --outdir {{tmpdir}}/{item} --no-open
+    expect:
+      executes: true
+      file_min_size:
+        - "{{tmpdir}}/{item}/*.pdf"
+        - 5000
+discovery:
+  type: directory_scan
+  source: test/runners/fixtures/hugo-example
+  filter: directories
+---
+name: >-
+  batch convert recipes, w/ custom filenames (Demo)
+  docs/guides/batch-processing-guide.md
+test_id: 4.2.2
+base_command: oshea
+tags:
+  - workflow
+  - batch
+  - hugo
+  - recipes
+  - demo
+  - convert
+  - custom-naming
+workflow: false
+scenarios:
+  - description: >-
+      convert Hugo recipe {item} to PDF with custom filename based on title and
+      date
+    test_id: 4.2.2.{item}
+    args: >-
+      convert {{paths.hugoExampleFixturePath}}/{item}/index.md --plugin recipe
+      --outdir {{tmpdir}}/{item} --filename {item}-recipe.pdf --no-open
+    expect:
+      executes: true
+      file_exists: "{{tmpdir}}/{item}/{item}-recipe.pdf"
+      file_min_size:
+        - "{{tmpdir}}/{item}/{item}-recipe.pdf"
+        - 5000
+discovery:
+  type: directory_scan
+  source: test/runners/fixtures/hugo-example
+  filter: directories

@@ -31,12 +31,12 @@ const argv = yargs(hideBin(process.argv))
   })
   .option('plugin', {
     alias: 'p',
-    describe: 'The md-to-pdf plugin to use for styling each document',
+    describe: 'The oshea plugin to use for styling each document',
     type: 'string',
     default: 'recipe'
   })
-  .option('md-to-pdf-path', {
-    describe: 'Path to the md-to-pdf cli.js script',
+  .option('oshea-path', {
+    describe: 'Path to the oshea cli.js script',
     type: 'string',
     default: path.resolve(__dirname, cliPath)
   })
@@ -46,12 +46,12 @@ const argv = yargs(hideBin(process.argv))
 
 if (argv.help) {
   logger.detail(`
-Batch convert Markdown to PDF using md-to-pdf.
+Batch convert Markdown files to PDF using oshea.
 
   --source-dir, -s      Source directory containing Markdown recipe folders
   --output-dir, -o      Output directory to save generated PDFs
-  --plugin, -p          The md-to-pdf plugin to use for styling (default "recipe")
-  --md-to-pdf-path      Path to md-to-pdf cli.js script (default: autodetected)
+  --plugin, -p          The oshea plugin to use for styling (default "recipe")
+  --oshea-path      Path to oshea cli.js script (default: autodetected)
   -h, --help            Show this help
 
 Example:
@@ -64,7 +64,7 @@ Example:
 const sourceBaseDir = path.resolve(argv.sourceDir);
 const outputBaseDir = path.resolve(argv.outputDir);
 const basePlugin = argv.plugin;
-const mdToPdfCliPath = path.resolve(argv.mdToPdfPath);
+const osheaCliPath = path.resolve(argv.osheaPath);
 
 // Function to generate a slug (simplified version)
 function generateSlug(text) {
@@ -115,9 +115,9 @@ async function processRecipe(markdownFilePath) {
     }
     const outputPdfPath = path.join(itemOutputDir, outputFilename);
 
-    const mdToPdfCommand = [
+    const osheaCommand = [
       'node',
-      `"${mdToPdfCliPath}"`,
+      `"${osheaCliPath}"`,
       'convert',
       `"${markdownFilePath}"`,
       '--plugin', basePlugin,
@@ -126,10 +126,10 @@ async function processRecipe(markdownFilePath) {
       '--no-open'
     ].join(' ');
 
-    logger.detail(`  Executing: ${mdToPdfCommand}`);
+    logger.detail(`  Executing: ${osheaCommand}`);
 
     return new Promise((resolve, reject) => {
-      exec(mdToPdfCommand, (error, stdout, stderr) => {
+      exec(osheaCommand, (error, stdout, stderr) => {
         if (error) {
           logger.error(`  ERROR converting ${markdownFilePath}: ${error.message}`);
           if (stderr) logger.error(`  Stderr: ${stderr}`);
@@ -154,7 +154,7 @@ async function main() {
   logger.info(`Source directory: ${sourceBaseDir}`);
   logger.info(`Output directory: ${outputBaseDir}`);
   logger.info(`Plugin: ${basePlugin}`);
-  logger.info(`md-to-pdf CLI path: ${mdToPdfCliPath}`);
+  logger.info(`oshea CLI path: ${osheaCliPath}`);
 
   if (!fss.existsSync(sourceBaseDir)) {
     logger.error(`Source directory does not exist: ${sourceBaseDir}`);
@@ -163,8 +163,8 @@ async function main() {
   if (!fss.existsSync(outputBaseDir)) {
     await fs.mkdir(outputBaseDir, { recursive: true });
   }
-  if (!fss.existsSync(mdToPdfCliPath)) {
-    logger.error(`md-to-pdf CLI script not found at: ${mdToPdfCliPath}. Please check the path or install md-to-pdf globally.`);
+  if (!fss.existsSync(osheaCliPath)) {
+    logger.error(`oshea CLI script not found at: ${osheaCliPath}. Please check the path or install oshea globally.`);
     process.exit(1);
   }
 

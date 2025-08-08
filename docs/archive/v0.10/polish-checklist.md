@@ -11,8 +11,8 @@ Previous checklist/roadmap documents:
 
 ### General
 
-- [ ] Update `README.md`; expand [`scripts/linting/index.md`](../scripts/linting/index.md) (like `test/index.md`)
-- [ ] Merge `develop` into `main`
+- [x] Update `README.md`; expand [`scripts/linting/index.md`](../scripts/linting/index.md) (like `test/index.md`)
+- [x] Merge `develop` into `main`
 - [ ] Rename project and string-replace `md-to-pdf` with new product name
 - [ ] Build more plugins (and have fun)
 
@@ -33,7 +33,7 @@ Previous checklist/roadmap documents:
 
 ### Linting Framework
 
-- [ ] **Replace all linter scripts' `console.*` logging with the centralized logger**
+- [x] **Replace all linter scripts' `console.*` logging with the centralized logger**
 
 #### Config and Rules
 
@@ -58,35 +58,13 @@ Previous checklist/roadmap documents:
 
 #### Linting Rules
 
-- [ ] Unified skipping logic, using alias/groups as tags:
-  ``` js
-  // lint-disable-next-line logging
-  console.log('hello')
-
-  y = x + 1 // lint-disable-line code
-  ```
+- [x] Unified skipping logic, using alias/groups as tags:
   
-  ```html
-  <!-- lint-disable-begin postman -->
-  | uncooperating/table.js | AST should be skipping this, yet it's not |  
-  <!-- lint-disable-end postman -->
-  ```
-
-  ```yaml
-  # .lintignore file to skip a directory
-  postman
-  code
-  ```
-
-  ```js
-  // lint-skip-file no-relative-paths logging 
-  console.log('hello')
-  ```
-
   Each linter is currently implementing its own skipping logic, making it difficult to find
   and turn off skipping logic during debugging. We should abstract this into [`lint-helpers.js`](../scripts/linting/lib/lint-helpers.js)
   for central management.
   
+  Logic moved to **[`scripts/linting/index.md`](../scripts/linting/index.md)**
 
 #### Linting Reporting
 
@@ -119,21 +97,23 @@ In general, **total coverage** means the following:
 | `remove-ws`            | ✔ | `.` for `!.md`                 | ✔ | none                            |
 | `no-relative-paths`    | ✔ | `.` for `.js`                  | ✔ | `paths/`                        |
 | **validation**         |   |                                |   |                                 |
-| `validate-mocha`       | ✔ | [`.mocharc.js`](../.mocharc.js)                  | ✔ | none                            |
+| `validate-mocha`       | ✔ | `.mocharc.js`                  | ✔ | none                            |
 | **docs**               |   |                                |   |                                 |
 | `find-litter`          | ✔ | `.` for `.*`                   | ✔ | none                            |
-| `update-indices`       | ○ | `.` for `.md`                  | ○ | plugin's `{index,*-example}.md` |
-| `doc-links`            | ✔ | `.` for `.md, .js`             | ○ | other `index.md`'s              |
+| `update-indices`       | ✔ | `.` for `.md`                  | ✔ | plugin's `{index,*-example}.md` |
+| `doc-links`            | ✔ | `.` for `.md, .js`             | ✔ | other `index.md`'s              |
 | **third-party**        |   |                                |   |                                 |
 | `eslint`               | ✔ | `.` for `.*`                   | ✔ |                                 |
 
 ---
 
 **Main issues.**
-- [ ] [**logging**] **`scripts/linting`** replace all `console.*` logging with the centrallogger
-- [ ] [**postman**] **`README.md`** has dozens of broken links
-- [ ] [**librarian**] does **`README.md`** need to "index" all ALLCAPS.md files (`CONTRIBUTING.md`, `LICENSE`)?
+- [x] [**logging**] **`scripts/linting`** replace all `console.*` logging with the centrallogger
+- [x] [**postman**] **`README.md`** has dozens of broken links
+- [x] [**librarian**] does **`README.md`** need to "index" all ALLCAPS.md files (`CONTRIBUTING.md`, `LICENSE`)?  Answer: **No**.
 <!-- lint-enable-links -->
+
+**Status: Complete.**
 
 ---
 

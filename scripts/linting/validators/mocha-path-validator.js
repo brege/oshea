@@ -9,12 +9,12 @@ const {
   mocharcPath,
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   loggerPath
 } = require('@paths');
 
 const { loadLintSection, parseCliArgs } = require(lintHelpersPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
 
 const logger = require(loggerPath);
 
@@ -33,11 +33,11 @@ function* extractJsPatterns(obj) {
 }
 
 function runValidator(options = {}) {
-  const { config = {}, debug = false } = options;
+  const { config = {}, debug = false } = options; // eslint-disable-line no-unused-vars
   const issues = [];
   const results = [];
 
-  if (debug) logger.writeDebug(`[DEBUG] Checking for .mocharc.js at: ${mocharcPath}`);
+  logger.debug(`Checking for .mocharc.js at: ${mocharcPath}`, { context: 'MochaValidator' });
 
   if (!fs.existsSync(mocharcPath)) {
     issues.push({
@@ -53,12 +53,12 @@ function runValidator(options = {}) {
   try {
     mochaConfig = require(mocharcPath);
   } catch (e) {
-    if (debug) logger.writeDebug(`[DEBUG] Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`);
+    logger.debug(`Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`, { context: 'MochaValidator' });
     try {
       const content = fs.readFileSync(mocharcPath, 'utf8');
       mochaConfig = eval(`(() => (${content.replace(/^module\.exports\s*=\s*/, '')}))()`);
     } catch (evalError) {
-      if (debug) logger.writeDebug(`[DEBUG] Manual parsing of .mocharc.js failed. Error: ${evalError.message}`);
+      logger.debug(`Manual parsing of .mocharc.js failed. Error: ${evalError.message}`, { context: 'MochaValidator' });
       mochaConfig = {};
     }
   }
@@ -68,7 +68,7 @@ function runValidator(options = {}) {
     pattern => !excludes.some(ex => pattern.includes(ex))
   );
 
-  if (debug) logger.writeDebug(`[DEBUG] Found ${patterns.length} patterns to validate.`);
+  logger.debug(`Found ${patterns.length} patterns to validate.`, { context: 'MochaValidator' });
 
   for (const pattern of patterns) {
     if (pattern.includes('*')) {
@@ -113,6 +113,25 @@ if (require.main === module) {
   const config = loadLintSection('validate-mocha', lintingConfigPath) || {};
 
   const { summary, results, issues } = runValidator({ config, debug: !!flags.debug });
+
+  // Show debug output if --debug flag is set
+  if (flags.debug && results.length > 0) {
+    logger.info('\n[DEBUG] Validated patterns extracted from .mocharc.js:\n');
+    for (const r of results) {
+      const symbol = r.type === 'found' ? '[✓]' : '[✗]';
+      const trail = r.count ? `→ ${r.count} file(s) matched` : (r.type === 'missing' ? '→ NOT FOUND' : '');
+      const message = `  ${symbol} ${r.pattern} ${trail}`;
+
+      // Use appropriate log level based on result type
+      if (r.type === 'found') {
+        logger.success(message);
+      } else if (r.type === 'missing') {
+        logger.warn(message);
+      } else {
+        logger.info(message);
+      }
+    }
+  }
 
   renderLintOutput({ issues, summary, results, flags });
 

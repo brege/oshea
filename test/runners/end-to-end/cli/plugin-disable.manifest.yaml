@@ -1,0 +1,35 @@
+name: plugin disable (End-to-End Test) src/cli/commands/plugin/disable.command.js
+test_id: 3.8.1
+base_command: oshea
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - collection
+  - happy-path
+scenarios:
+  - description: should successfully add a plugin
+    test_id: 3.8.1.1
+    args: plugin add {{paths.fixturesDir}}/full-fat-dummies/valid-plugin
+    expect:
+      executes: true
+      contains: Successfully
+  - description: "[debug] check plugin list --enabled --short"
+    test_id: 3.8.1.debug
+    args: plugin list --enabled --short
+    expect:
+      executes: true
+    debug: true
+  - description: should successfully disable a plugin by name
+    test_id: 3.8.1
+    args: plugin disable valid-plugin
+    expect:
+      executes: true
+      contains: disabled successfully
+  - description: "[debug] check plugin list --disabled --short"
+    test_id: 3.8.1.debug
+    args: plugin list --disabled --short
+    expect:
+      executes: true
+    debug: true

@@ -9,12 +9,12 @@ const CACHE_FRESHNESS_THRESHOLD = 5000;
 
 function getCachePath() {
   const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
-  return path.join(xdgCacheHome, 'md-to-pdf', 'dynamic-completion-data.json');
+  return path.join(xdgCacheHome, 'oshea', 'dynamic-completion-data.json');
 }
 
 function triggerCacheUpdate() {
-  const { completionRoot } = require('@paths');
-  const scriptPath = path.join(completionRoot, 'generate-completion-dynamic-cache.js');
+  const { generateCompletionCachePath } = require('@paths');
+  const scriptPath = generateCompletionCachePath;
   if (!fs.existsSync(scriptPath)) {
     return;
   }
@@ -77,9 +77,15 @@ function getAvailablePlugins() {
   return data.availablePlugins || [];
 }
 
+function getUserPlugins() {
+  const data = getDynamicData();
+  return data.userPlugins || [];
+}
+
 module.exports = {
   getUsablePlugins,
   getDownloadedCollections,
   getEnabledPlugins,
-  getAvailablePlugins
+  getAvailablePlugins,
+  getUserPlugins
 };

@@ -1,6 +1,6 @@
-# md-to-pdf Cheat Sheet
+# oshea Cheat Sheet
 
-Quick examples and syntax for `md-to-pdf` commands and configurations.
+Quick examples and syntax for `oshea` commands and configurations.
 
 **Index of all Documentation: [`docs/index.md`](../index.md).**
 
@@ -12,7 +12,7 @@ Quick examples and syntax for `md-to-pdf` commands and configurations.
 * Auto-opens the PDF by default.
 
 ```bash
-md-to-pdf plugins/default/default-example.md --outdir ./output
+oshea plugins/default/default-example.md --outdir ./output
 ```
 
 ### Convert with a Specific Plugin
@@ -20,7 +20,7 @@ md-to-pdf plugins/default/default-example.md --outdir ./output
   * Uses the `cv` plugin for specialized CV formatting.
 
 ```bash
-md-to-pdf convert plugins/cv/cv-example.md --plugin cv --outdir ./output
+oshea convert plugins/cv/cv-example.md --plugin cv --outdir ./output
 ```
 
 ### Generate a Document (Complex Plugins)
@@ -28,7 +28,7 @@ md-to-pdf convert plugins/cv/cv-example.md --plugin cv --outdir ./output
   * Used for plugins like `recipe-book` that require additional arguments.
 
 ```bash
-md-to-pdf generate recipe-book --recipes-base-dir ./test/fixtures/hugo-example --outdir ./output
+oshea generate recipe-book --recipes-base-dir ./test/fixtures/hugo-example --outdir ./output
 ```
 
 ### Watch Mode for Live Reloading
@@ -36,7 +36,7 @@ md-to-pdf generate recipe-book --recipes-base-dir ./test/fixtures/hugo-example -
   * Automatically re-converts the document when the source file or its dependencies change.
 
 ```bash
-md-to-pdf convert plugins/recipe/recipe-example.md --plugin recipe --watch
+oshea convert plugins/recipe/recipe-example.md --plugin recipe --watch
 ```
 
 ## Plugin & Collection Management
@@ -45,77 +45,77 @@ md-to-pdf convert plugins/recipe/recipe-example.md --plugin recipe --watch
 
   * **Add a collection** from a Git repository or local path:
     ```bash
-    md-to-pdf collection add https://github.com/brege/md-to-pdf-plugins
-    md-to-pdf collection add ./path/to/local/collection
+    oshea collection add https://github.com/brege/md-to-pdf-plugins
+    oshea collection add ./path/to/local/collection
     ```
   * **List downloaded collections** and their status:
     ```bash
-    md-to-pdf collection list names --short
+    oshea collection list names --short
     ```
   * **Update all Git-based collections:**
     ```bash
-    md-to-pdf update
+    oshea update
     ```
   * **Remove a downloaded collection:**
     ```bash
-    md-to-pdf collection remove md-to-pdf-plugins
+    oshea collection remove md-to-pdf-plugins
     ```
 
 ### Plugins
 
   * **Create a new plugin** from the default template:
     ```bash
-    md-to-pdf plugin create my-new-plugin --dir ./my-plugins
+    oshea plugin create my-new-plugin --dir ./my-plugins
     ```
   * **Create a plugin from an existing one** (archetyping):
     ```bash
-    md-to-pdf plugin create my-custom-cv --from cv
+    oshea plugin create my-custom-cv --from cv
     ```
   * **Validate a plugin** against the official contract:
     ```bash
-    md-to-pdf plugin validate plugins/cv # [ my-plugins/my-custom-cv ]
+    oshea plugin validate plugins/cv # [ my-plugins/my-custom-cv ]
     ```
     or, since bundled's are registered:
     ```bash
-    md-to-pdf plugin validate cv # [ my-custom-cv ]
+    oshea plugin validate cv # [ my-custom-cv ]
     ```
   * **Add and enable a local plugin** for system-wide use:
     ```bash
-    md-to-pdf plugin add ./my-plugins/my-new-plugin
+    oshea plugin add ./my-plugins/my-new-plugin
     ```
   * **List all usable plugins:**
     ```bash
-    md-to-pdf plugin list
+    oshea plugin list
     ```
   * **List all usable plugins compactly:**
     ```bash
-    md-to-pdf plugin list --short
+    oshea plugin list --short
     ```
   * **Get detailed help** for a specific plugin:
     ```bash
-    md-to-pdf plugin help cv
+    oshea plugin help cv
     ```
 
 ## Configuration Inspection
 
   * **Display active global configuration:**
     ```bash
-    md-to-pdf config
+    oshea config
     ```
   * **Display the final, merged configuration for a plugin:**
     ```bash
-    md-to-pdf config --plugin cv
+    oshea config --plugin cv
     ```
   * **Output raw YAML** for scripting or copying:
     ```bash
-    md-to-pdf config --plugin cv --pure
+    oshea config --plugin cv --pure
     ```
 
 ## Config Snippets (`config.yaml`)
 
   * **Set PDF Viewer:**
     ```yaml
-    # In ~/.config/md-to-pdf/config.yaml
+    # In ~/.config/oshea/config.yaml
     pdf_viewer: xdg-open # Linux
     ```
   * **Define Global `params`:**
@@ -138,7 +138,7 @@ md-to-pdf convert plugins/recipe/recipe-example.md --plugin recipe --watch
     ---
     title: "My Awesome Document"
     author: "{{ .author }}"
-    md_to_pdf_plugin: "cv"
+    oshea_plugin: "cv"
     ---
     ```
   * **Math Delimiters (KaTeX):**
@@ -151,10 +151,10 @@ md-to-pdf convert plugins/recipe/recipe-example.md --plugin recipe --watch
 
 ## Tab-Completion
 
-`md-to-pdf` has dynamic tab-completion for commands and options.
+`oshea` has dynamic tab-completion for commands and options.
 
 A hidden command that is ran during state-change operations like `update`, `add`, `enable`, etc:
 
 ```bash
-md-to-pdf _tab_cache
+oshea _tab_cache
 ```

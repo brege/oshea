@@ -3,7 +3,7 @@ title: "Simple Pancakes - Example Recipe"
 author: "The Plugin Chef"
 date: "{{ .CurrentDateISO }}"
 tags: ["breakfast", "easy", "example"]
-md_to_pdf_plugin: "./recipe.config.yaml"
+oshea_plugin: "./recipe.config.yaml"
 
 # Other potential recipe-specific front matter fields:
 # prep_time: "10 minutes"
@@ -14,7 +14,7 @@ md_to_pdf_plugin: "./recipe.config.yaml"
 
 {{% recipe %}}
 
-This is an example recipe to demonstrate the **`recipe`** plugin. It uses the `md_to_pdf_plugin: "./recipe.config.yaml"` key in its front matter. This means it will automatically use the `recipe` plugin's specific configuration when you run `md-to-pdf recipe-example.md` from within the `plugins/recipe/` directory.
+This is an example recipe to demonstrate the **`recipe`** plugin. It uses the `oshea_plugin: "./recipe.config.yaml"` key in its front matter. This means it will automatically use the `recipe` plugin's specific configuration when you run `oshea recipe-example.md` from within the `plugins/recipe/` directory.
 
 The `recipe` plugin is designed for clear and readable recipe formatting.
 
@@ -47,4 +47,4 @@ The `recipe` plugin is designed for clear and readable recipe formatting.
 
 ---
 
-For using the `recipe` plugin with *your actual* recipe Markdown files from any directory (e.g., `md-to-pdf convert my_favorite_pancakes.md --plugin recipe`), ensure it's registered in a main `md-to-pdf` configuration file. (It usually is by default in `config.example.yaml`).
+For using the `recipe` plugin with *your actual* recipe Markdown files from any directory (e.g., `oshea convert my_favorite_pancakes.md --plugin recipe`), ensure it's registered in a main `oshea` configuration file. (It usually is by default in `config.example.yaml`).

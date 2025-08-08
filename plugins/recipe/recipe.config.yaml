@@ -1,11 +1,11 @@
 # plugins/recipe/recipe.config.yaml
-plugin_name: "recipe"
-version: "1.0.0"
-protocol: "v1"
+plugin_name: recipe
+version: 1.0.0
+protocol: v1
 
 description: "Plugin for individual Recipe documents."
 # Points to the handler script within this plugin's directory (plugins/recipe/index.js).
-handler_script: "index.js"
+handler_script: index.js
 
 # CSS file for this plugin, resolved relative to this plugin's directory.
 css_files:
@@ -14,13 +14,13 @@ css_files:
 # PDF generation options specific to Recipes.
 pdf_options:
   margin:
-    top: "0.8in"
-    right: "0.8in"
-    bottom: "0.8in"
-    left: "0.8in"
+    top: 0.8in
+    right: 0.8in
+    bottom: 0.8in
+    left: 0.8in
   # Inherits other global PDF options like format, printBackground.
 
-# Table of Contents settings for individual recipes (typically disabled).
+  # Table of Contents settings for individual recipes (typically disabled).
 toc_options:
   enabled: false
 

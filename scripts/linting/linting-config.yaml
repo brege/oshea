@@ -13,176 +13,269 @@
 # filetypes: [".js", ".json", ".md", ".sh", ".yaml", ".txt"]
 #
 # If you set `filetypes: [".js"]`, *only* `.js` files will be linted.
+#
+# See
+#   node scripts/linting/lib/find-lint-skips.js
+# for multi-level excludes (line, block, file, directory).
 
 # --- Code ---
 
-# scripts/linting/code/remove-jsdoc.js
-remove-jsdoc:
+# scripts/linting/code/no-jsdoc.js
+no-jsdoc:
   group: code
-  alias: jsdoc
+  filetypes: [ ".js" ]
   targets:
     - "."
   excludes: []
 
-# scripts/linting/code/logging-lint.js
-logging:
-  alias: chalk
+# scripts/linting/code/no-console.js
+no-console:
   group: code
-  filetypes: [".js"]
+  filetypes: [ ".js" ]
   targets:
     - "."
   excludes:
-    - scripts/linting/code
-    - scripts/linting/validators
-    - scripts/linting/docs
-    - scripts/linting/lib
-    - scripts/linting/lint-harness.js
-    - scripts/linting/linting-config.yaml
-    - scripts/linting/lint.js
+    - scripts/demo
+    - src/utils/formatters
 
-# scripts/linting/code/standardize-js-line-one-all.js
-standardize-line-one:
-  alias: line-one
+# scripts/linting/code/no-bad-headers.js
+no-bad-headers:
   group: code
-  filetypes: [".js"]
+  filetypes: [ ".js" ]
   targets:
     - "."
   excludes: []
 
-# scripts/linting/code/strip-trailing-whitespace.js
-remove-ws:
-  alias: whitespace
+# scripts/linting/code/no-trailing-whitespace.js
+no-trailing-whitespace:
   group: code
-  filetypes: [".css", ".js", ".json", ".yaml"]
-  targets: ["."]
+  filetypes: [ ".css", ".js", ".json", ".yaml" ]
+  targets: [ "." ]
   excludes: []
 
 # scripts/linting/code/no-relative-paths.js
 no-relative-paths:
-  alias: paths
   group: code
-  targets: ["."]
+  filetypes: [ ".js" ]
+  targets: [ "." ]
   excludes:
     - paths
 
-# --- Validators ---
+# scripts/linting/code/no-old-project-name.js
+no-old-project-name:
+  group: code
+  filetypes: [ ".*" ]
+  targets: [ "." ]
+  excludes:
+    - node_modules
+    - .git
+    - assets
+    - docs/archive
+    - test/archive
+    - scripts/linting/linting-config.yaml
+  # Project name patterns to find and replace
+  old_names:
+    primary: md-to-pdf
+    constant: MD_TO_PDF
+    camelCase: mdToPdf
+    snake_case: md_to_pdf
+  # New name replacements (leave empty to require --new-name flag)
+  new_names:
+    primary: oshea
+    constant: OSHEA
+    camelCase: oshea
+    snake_case: oshea
+  # Ignore specific matches (whitelist these patterns to skip linting)
+  ignore_matches:
+    #- "md-to-pdf-plugins"
+    #- "Markdown to PDF"
 
-# scripts/linting/validators/mocha-path-validator.js
-validate-mocha:
-  alias: "mocha"
-  group: "validators"
+    # --- Docs ---
 
-# --- Docs ---
-
-# scripts/linting/docs/find-litter.js
-find-litter:
-  alias: "custodian"
-  group: "docs"
-  targets: ["."]
+    # scripts/linting/docs/janitor.js
+janitor:
+  group: docs
+  targets: [ "." ]
   excludes: []
 
-# scripts/linting/docs/update-project-indices.js
-update-indices:
-  alias: "librarian"
-  group: "docs"
-  #rule for README.md
+# scripts/linting/docs/librarian.js
+librarian:
+  group: docs
   docs:
     indexFile: docs/index.md
     scanRoot: docs
-    filetypes: [".md"]
+    filetypes: [ ".md" ]
   plugins:
-    marker: "plugins"
+    marker: plugins
     indexFile: plugins/index.md
     scanRoot: plugins
-    filetypes: [".md"]
+    filetypes: [ ".md" ]
     excludePatterns:
       - "plugins/**/index.md"
       - "plugins/**/*-example.md"
   scripts:
-    marker: "scripts"
+    marker: scripts
     indexFile: scripts/index.md
     scanRoot: scripts
-    filetypes: [".js", ".sh"]
+    filetypes: [ ".js", ".sh" ]
     excludePatterns:
       - "scripts/linting/**"
+      - "scripts/demo/**"
   linting:
-    marker: "linting"
+    marker: linting
     indexFile: scripts/linting/index.md
     scanRoot: scripts/linting
-    filetypes: [".js", ".yaml"]
+    filetypes: [ ".js", ".yaml" ]
     excludePatterns: []
-  test-scripts:
-    marker: "test-scripts"
+  demo:
+    marker: demo
+    indexFile: scripts/demo/index.md
+    scanRoot: scripts/demo
+    filetypes: [ ".js" ]
+    excludePatterns: []
+  test:
+    marker: test
     indexFile: test/index.md
     scanRoot:
-      - test/docs
-      - test/scripts
-    filetypes: [".js", ".md"]
+      - test/analytics
+      - test/config
+    filetypes: [ ".js", ".json", ".yaml" ]
+    excludePatterns:
+      - "test/archive/**"
+  test-archive:
+    marker: test-archive
+    indexFile: test/archive/index.md
+    scanRoot: test/archive
+    filetypes: [ ".js", ".md" ]
     excludePatterns: []
   paths:
-    marker: "paths"
+    marker: paths
     indexFile: paths/index.md
     scanRoot: paths
-    filetypes: [".js", ".yaml"]
+    filetypes: [ ".js", ".yaml" ]
+    excludePatterns: []
+  utils:
+    marker: utils
+    indexFile: src/utils/index.md
+    scanRoot: src/utils
+    filetypes: [ ".js" ]
     excludePatterns: []
 
 # scripts/linting/docs/postman.js
-doc-links:
-  alias: "postman"
-  group: "docs"
+postman:
+  group: docs
   targets:
-   - "."
-  filetypes: [".md", ".js"]
+    - "."
+  filetypes: [ ".md", ".js" ]
   skip_link_patterns:
     - "**/my[-_]*"
     - "**/my[-_]*/**"
     - "**/sample.md"
     - "**/index.js"
   excludes:
-    - "test/docs/checklist-*.md"
-    - "test/docs/audit-log.md"
+    - "test/archive/docs/checklist-*.md"
+    - "test/archive/docs/audit-log.md"
     - "plugins/recipe-book/README.md"
+
+# scripts/linting/docs/yaml.js
+yaml:
+  group: docs
+  targets: [ "." ]
+  filetypes: [ ".yaml" ]
+  field_order:
+    # Lower numbers = higher priority
+    # default: 999
+    name: -1
+    description: 0
+    test_id: 1
+    base_command: 2
+    tags: 3
+    visual_focus: 4
+    args: 6
+    expect: 7
+    expect_failure: 8
+    expect_not: 9
+    skip: 12
+    debug: 13
+    workflow: 19
+    scenarios: 20
+    visual_check: 21
+    # Test file ordering
+    config: 1
+    api: 2
+    database: 3
+    # Plugin file ordering
+    plugin_name: -1
+    version: -1
+    protocol: -1
+  yaml_options:
+    lineWidth: 80
+    indent: 2
+    quotingType: '"'
+    forceQuotes: false
+    blockQuote: folded
+    flowCollectionPadding: true
+
+# scripts/linting/validators/mocha-path-validator.js
+validate-mocha:
+  group: validators
 
 # --- Harness Configuration ---
 harness:
   continueOnError: false
   steps:
     # --- Code ---
-    - key: 'remove-ws'
-      label: 'Code: Strip Trailing Whitespace'
-      scriptPath: scripts/linting/code/strip-trailing-whitespace.js
-    - key: 'standardize-line-one'
-      label: 'Code: Standardize File Headers'
-      scriptPath: scripts/linting/code/standardize-js-line-one-all.js
-    - key: 'logging'
+    - key: 'no-trailing-whitespace'
+      alias: 'ws'
+      label: 'Code: Check for trailing whitespace'
+      scriptPath: scripts/linting/code/no-trailing-whitespace.js
+    - key: 'no-bad-headers'
+      alias: 'headers'
+      label: 'Code: Check for bad file headers'
+      scriptPath: scripts/linting/code/no-bad-headers.js
+    - key: 'no-console'
+      alias: 'chalk'
       label: 'Code: Check for console/chalk usage'
-      scriptPath: scripts/linting/code/logging-lint.js
-    - key: 'remove-jsdoc'
+      scriptPath: scripts/linting/code/no-console.js
+    - key: 'no-jsdoc'
+      alias: 'jsdoc'
       label: 'Code: Check for JSdoc comments'
-      scriptPath: scripts/linting/code/remove-jsdoc.js
+      scriptPath: scripts/linting/code/no-jsdoc.js
     - key: 'no-relative-paths'
+      alias: 'paths'
       label: 'Code: Check for relative paths'
       scriptPath: scripts/linting/code/no-relative-paths.js
+    - key: 'no-old-project-name'
+      alias: 'rename'
+      label: 'Code: Check for old project name references'
+      scriptPath: scripts/linting/code/no-old-project-name.js
 
     # --- Validators ---
     - key: 'validate-mocha'
+      alias: 'mocha'
       label: 'Validator: Check .mocharc.js paths'
       scriptPath: scripts/linting/validators/mocha-path-validator.js
 
     # --- Docs ---
-    - key: 'update-indices'
-      label: 'Docs: Update Project Indices (Librarian)'
-      scriptPath: scripts/linting/docs/update-project-indices.js
-    - key: 'doc-links'
-      label: 'Docs: Check Markdown Links (Postman)'
+    - key: 'librarian'
+      alias: 'index'
+      label: 'Docs: Update project indices (Librarian)'
+      scriptPath: scripts/linting/docs/librarian.js
+    - key: 'postman'
+      alias: 'links'
+      label: 'Docs: Check for links in markdown (Postman)'
       scriptPath: scripts/linting/docs/postman.js
-    - key: 'find-litter'
-      label: 'Docs: Find Litter (Custodian)'
-      scriptPath: scripts/linting/docs/find-litter.js
+    - key: 'janitor'
+      alias: 'litter'
+      label: 'Docs: Find litter (Janitor)'
+      scriptPath: scripts/linting/docs/janitor.js
+    - key: 'yaml'
+      label: 'Docs: Check YAML Format'
+      scriptPath: scripts/linting/docs/yaml.js
 
     # --- Harness ---
     - key: 'eslint'
       label: 'ESLint'
       quiet: false
       command: 'eslint'
-      defaultTargets: ['.']
+      defaultTargets: [ '.' ]

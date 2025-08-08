@@ -5,20 +5,19 @@ require('module-alias/register');
 const fs = require('fs');
 const path = require('path');
 const yaml = require('js-yaml');
-const chalk = require('chalk');
-const {
-  minimatch
-} = require('minimatch');
+const { minimatch } = require('minimatch');
 const {
   fileHelpersPath,
   lintingConfigPath,
-  projectRoot
+  projectRoot,
+  loggerPath
 } = require('@paths');
 const {
   findFiles,
   getPatternsFromArgs,
   getDefaultGlobIgnores
 } = require(fileHelpersPath);
+const logger = require(loggerPath);
 
 function loadLintSection(section, configPath = lintingConfigPath) {
   const raw = fs.readFileSync(configPath, 'utf8');
@@ -34,38 +33,37 @@ function loadLintConfig(configPath = lintingConfigPath) {
     const configContent = fs.readFileSync(configPath, 'utf8');
     return yaml.load(configContent);
   } catch (error) {
-    console.error('Error loading lint config:', error.message);
+    logger.error(`Error loading lint config: ${error.message}`);
     process.exit(1);
   }
 }
 
 function findFilesArray(inputs, opts = {}) {
-  const { debug = false } = opts;
-  if (debug) console.log(chalk.yellowBright(`\n[findFilesArray:Debug] Received inputs: ${JSON.stringify(inputs)}`));
+  const { debug = false } = opts; // eslint-disable-line no-unused-vars
+  logger.debug(` Received inputs: ${JSON.stringify(inputs)}`, { context: 'LintHelpers' });
 
   const files = new Set();
   const inputsArray = Array.isArray(inputs) ? inputs : [inputs];
 
   for (const input of inputsArray) {
-    if (debug) console.log(chalk.cyan(`[findFilesArray:Debug] Processing input: '${input}'`));
+    logger.debug(` Processing input: '${input}'`, { context: 'LintHelpers' });
     if (fs.existsSync(input) && fs.statSync(input).isDirectory()) {
-      if (debug) console.log(chalk.gray(`[findFilesArray:Debug] Input '${input}' is a directory, walking it recursively...`));
+      logger.debug(` Input '${input}' is a directory, walking it recursively...`, { context: 'LintHelpers' });
       for (const file of findFiles(input, opts)) {
         files.add(file);
       }
     } else {
-      if (debug) console.log(chalk.gray(`[findFilesArray:Debug] Input '${input}' is being treated as a glob pattern.`));
+      logger.debug(` Input '${input}' is being treated as a glob pattern.`, { context: 'LintHelpers' });
       const { glob } = require('glob');
       const matches = glob.sync(input, { nodir: true, ignore: opts.ignores || [], dot: true, absolute: true, cwd: projectRoot });
-      if (debug) console.log(chalk.gray(`[findFilesArray:Debug] Glob '${input}' matched ${matches.length} files.`));
+      logger.debug(` Glob '${input}' matched ${matches.length} files.`, { context: 'LintHelpers' });
       matches.forEach(file => files.add(file));
     }
   }
   const finalFiles = Array.from(files);
-  if (debug) console.log(chalk.green(`[findFilesArray:Debug] Finished, returning ${finalFiles.length} unique files.`));
+  logger.debug(` Finished, returning ${finalFiles.length} unique files.`, { context: 'LintHelpers' });
   return finalFiles;
 }
-
 
 function isExcluded(filePath, patterns) {
   const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
@@ -92,7 +90,7 @@ function parseCliArgs(args) {
     const arg = args[i];
 
     if (!arg) {
-      console.error('Warning: Encountered null/undefined argument at index', i);
+      logger.warn(`Encountered null/undefined argument at index ${i}`);
       continue;
     }
 
@@ -131,8 +129,8 @@ function parseCliArgs(args) {
     } else if (arg.startsWith('--')) {
       const eqIdx = arg.indexOf('=');
       if (eqIdx !== -1) {
-        const key = arg.slice(2, eqIdx);      // e.g. 'rules'
-        const value = arg.slice(eqIdx + 1);   // e.g. './llm-litter-list.txt'
+        const key = arg.slice(2, eqIdx);
+        const value = arg.slice(eqIdx + 1);
         flags[key] = value;
       } else {
         const flagName = arg.replace(/^--/, '');
@@ -143,13 +141,7 @@ function parseCliArgs(args) {
     }
   }
 
-  if (flags.debug) {
-    console.log('Parsed CLI args:', {
-      flags,
-      targets,
-      only
-    });
-  }
+  logger.debug('Parsed CLI args:', { flags, targets, only });
 
   return {
     flags,
@@ -213,3 +205,4 @@ module.exports = {
   filterSteps,
   getStepInfo,
 };
+

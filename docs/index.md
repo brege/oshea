@@ -1,30 +1,48 @@
-# md-to-pdf Project Documentation
+# oshea Project Documentation
 
-This document is a central index for all documentation within the `md-to-pdf` repo.
+This document is a central index for all documentation within the `oshea` repo.
 It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk](https://diataxis.fr/) taxonomy),
 
 **Active Documents and Checklists** \
 *For convenience, these are symlinks to the latest version of each document below.*
 
-- [**Polish Checklist**](polish-checklist.md): **Polishing.**
+- [**Next-Generation Test Framework**](v0.11/next-generation-testing.md):
+  **Testing.** Improving the separation of static testing metadata from dynamic test-job results.
+- [**Tasklist v0.11**](tasklist-v0.11.md):
+  **Everything else.** Logger, linting, app-side integrations, refactors and reorganizations. 
+
+
+**Next-gen Features** \
+*These are the core documents for the next-gen features of the project.*
+
+- [**Polish Checklist**](archive/v0.10/polish-checklist.md):
+  **Polishing.** Aggregates all loose ends from previous checklists.
+- [Planning for ErrorManager Groups via Paths Registry](v0.11/error-group-registry-from-paths.md):
+  Plans for the ErrorManager framework to be refactored to use the Paths Registry.
+- [The Logger-Renderer-Adapter Model](v0.11/logger-renderer-adapter.md):
+  Graphical overview of how the architecture in [`src/utils/`](../src/utils/) changed from v0.10 to v0.11.
 
 There are also several indexes for the main components of the project.
 
 **Indexes** -
 [ [**Docs**](index.md) ]
-[ [**Scripts**](../scripts/index.md) ]
+[ [**Linting**](../scripts/linting/index.md) ]
+[ [**Paths**](../paths/index.md) ]
 [ [**Plugins**](../plugins/index.md) ]
+[ [**Scripts**](../scripts/index.md) ]
 [ [**Tests**](../test/index.md) ]
+[ [**Utils**](../src/utils/index.md) ]
 
 These indices are automatically managed by
-[**`scripts/linting/docs/update-project-indices.js`**](../scripts/linting/docs/update-project-indices.js)
-and configure via
+[**the librarian**](../scripts/linting/docs/librarian.js)
+and configured via
 [`scripts/linting/linting-config.yaml`](../scripts/linting/linting-config.yaml)
 at the project root.
+The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-to-date.
 
 ---
 
-## 1. Reference Documentation
+## Reference Documentation
 
 *Technical descriptions of the project's commands, APIs, and structure.*
 
@@ -45,12 +63,12 @@ at the project root.
     
 ---
 
-## 2. Tutorials & How-To Guides
+## Tutorials & How-To Guides
 
 *Practical walkthroughs providing demonstration and step-by-step instructions.*
 
 * [Batch Processing Guide](guides/batch-processing-guide.md):
-  Explains how to convert multiple Markdown files at once using external scripts that leverage the `md-to-pdf` CLI.
+  Explains how to convert multiple Markdown files at once using external scripts that leverage the `oshea` CLI.
 * [Walkthrough: A Plugin's Full Lifecycle](walkthroughs/full-lifecycle.md)
 * [Walkthrough: Customizing a Plugin with Archetyping](walkthroughs/archetyping-a-plugin.md)
 * [Walkthrough: Updating and Syncing Plugins](walkthroughs/updating-plugins.md)
@@ -58,7 +76,7 @@ at the project root.
 
 ---
 
-## 3. Architecture & Reasoning (Explanation)
+## Architecture & Reasoning (Explanation)
 
 *Discussions that explore the context and reasoning behind project decisions.*
 
@@ -81,7 +99,7 @@ at the project root.
   - [**Index of Scripting Tools used during Refactor**](archive/v0.10/scripts.refactor.index.md). 
     Many of these scripts were parted out for linters to re-enforce updated standards.
     These clickthroughs resolve to GitHub, snapshotted at
-    [v0.10.31](https://github.com/brege/md-to-pdf/releases/tag/v0.10.31),
+    [v0.10.31](https://github.com/brege/oshea/releases/tag/v0.10.31),
     as the `scripts/refactor/` directory was removed.
   - [Linting Checklist](archive/v0.10/linting-checklist.md).
     Linting and code quality strategy for the project.
@@ -120,33 +138,28 @@ at the project root.
 
 ---
 
-## 4. Testing & Quality Assurance
+## Testing & Quality Assurance
 
 *Documentation that details the project's testing framework, strategy, and metrics that define project quality.*
 
 ### Strategy & Process
+
 * [Test Suite Index](../test/index.md):
   Main entry point for test-related documentation. Details the test harness and adjoins the dynamic QA dashboard.
-* [Test Generation Priority Order](../test/docs/test-generation-priority-order.md):
+* [Test Generation Priority Order](../test/archive/docs/test-generation-priority-order.md):
   Explains the ranked, multi-level testing strategy and the priority for module test implementation.
-* [Audit Log](../test/docs/audit-log.md): 
-  Logs known issues, limitations, and discrepancies discovered during testing and code audits.
 
 ### Technical Reference
-* [Test Suite Checklist Level 1](../test/docs/checklist-level-1.md):
-  Module integration test scenarios.
-* [Test Suite Checklist Level 2](../test/docs/checklist-level-2.md):
-  Subsystem integration test scenarios.
-* [Test Suite Checklist Level 3](../test/docs/checklist-level-3.md):
-  End-to-End CLI test scenarios.
-* [Test Suite Checklist Level 4](../test/docs/checklist-level-4.md):
-  End-to-End lifecycle test scenarios.
-* [Test Suite Checklist Meta Level 0](../test/docs/checklist-level-m0.md):
-  Unit tests for code and documentation linters.
+
+* [Level 1 Tests](config/metadata-level-1.yaml): Module integration scenarios
+* [Level 2 Tests](config/metadata-level-2.yaml): Subsystem integration scenarios  
+* [Level 3 Tests](config/metadata-level-3.yaml): End-to-End CLI scenarios
+* [Level 4 Tests](config/metadata-level-4.yaml): End-to-End lifecycle scenarios
+* [Level M0 Tests](config/metadata-level-m0.yaml): Unit tests for linters and validators
 
 ---
 
-## 5. AI & Automation
+## AI & Automation
 
 *Guides and specifications for programmatic interaction with the plugin system.*
 
@@ -161,9 +174,8 @@ at the project root.
 
 ## Uncategorized Documents
 *A dynamically generated list of documents that have not yet been categorized.* \
-*This list is automatically updated by [`scripts/linting/docs/update-project-indices.js`](../scripts/linting/docs/update-project-indices.js)*
+*This list is automatically updated by [`scripts/linting/docs/librarian.js`](../scripts/linting/docs/librarian.js)*
 
 <!-- uncategorized-start -->
-
 <!-- uncategorized-end -->
 

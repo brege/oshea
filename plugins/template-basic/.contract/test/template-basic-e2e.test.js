@@ -18,11 +18,11 @@ const {
   cleanupTestDirectory,
 } = require(testFileHelpersPath);
 
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', 'template-basic-e2e');
-const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-disable-line no-relative-paths
+const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', 'template-basic-e2e');
+const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'template-basic-example.md');
 
-describe('Template Basic Plugin E2E', function() {
+describe('plugins/template-basic (in-situ Self-Activation Test) .contract/test/template-basic-e2e.test.js', function() {
   this.timeout(15000);
 
   before(async () => {
@@ -33,7 +33,7 @@ describe('Template Basic Plugin E2E', function() {
     await cleanupTestDirectory(TEST_OUTPUT_DIR);
   });
 
-  it('should convert the example markdown using self-activation', async () => {
+  it('in-situ: should convert the example markdown using self-activation', async () => {
     const { success, stdout, stderr } = await runCliCommand(
       ['convert', EXAMPLE_MD, '--outdir', TEST_OUTPUT_DIR, '--no-open'],
       cliPath,

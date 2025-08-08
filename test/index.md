@@ -1,17 +1,50 @@
-## Test Harness and QA Dashboard
+## Test Harness and QA Analytics
 
-This directory contains all assets related to testing the `md-to-pdf` application, including integration tests, end-to-end (E2E) tests, smoke tests, tests on lints, and the scripts that power this QA dashboard.
+This directory contains the testing and quality assurance infrastructure for `oshea`, including test execution, analytics, and intelligent monitoring systems.
 
 ### Testing Paradigm -- Manifest/Factory Harness
 
 - **Manifest-Driven:** \
-  Test scenarios are declaratively defined in manifest files (e.g., `*.manifest.js`), auditable, and easily extensible coverage.
+  Test scenarios are declaratively defined in manifest files (e.g., `*.manifest.yaml`),
+  auditable, and extensible.
 
 - **Factory Pattern:** \
   The test runner dynamically instantiates test cases from these manifests, applying stubs/mocks and assertions in a standardized way.
 
 - **Single Source of Truth:** \
   Reduced duplication between "atomic" and "harness" test means every logical scenario is mapped in exactly one place.
+
+### Directory Structure
+
+```
+test/
+├── runners/                      # Test execution infrastructure
+│   ├── end-to-end/               # End-to-end test scenarios
+│   │   ├── cli/                  # E2E tests of src/cli/    (level 3)
+│   │   ├── validators/           # Validation of plugins/
+│   │   ├── workflows/            # Lifecycles and demos     (level 4)
+│   │   └── e2e-*.js              # Test environment setup
+│   ├── integration/              # Integration test suites
+│   │   ├── <module>/             # src/<module>/            (level 1, 2)
+│   │   ├── shared/               # Helpers and utilities
+│   │   └── setup.sh              # Test environment setup
+│   ├── linting/                  # Code quality validation
+│   ├── fixtures/                 # Shared test data
+│   └── shared/                   # Common utilities
+├── analytics/                    # QA intelligence and monitoring
+│   ├── qa-analytics.js           # Test brittleness analysis
+│   ├── log-failures-reporter.js  # Enhanced test reporting
+│   ├── test-watcher.js           # Smart test selection
+│   └── sample-test-results.json  # Reference data format
+├── config/                       # Test metadata and classification
+│   └── metadata-level-*.yaml     # Test registry and specs
+└── archive/                      # Historical documentation and deprecated tools
+    ├── (docs/.. scripts/)        # Legacy QA tools 
+    └── index.md                  # Archive index
+
+```
+See [`archive/index.md`](archive/index.md) for historical documentation.
+
 
 ### Testing Levels & Coverage Strategy
 
@@ -27,7 +60,9 @@ Traditional unit tests are intentionally minimal. CLI applications derive more v
 
 ### Testing Framework
 
-The project uses [Mocha](https://mochajs.org/) as its test runner. A centralized configuration file, [`.mocharc.js`](../.mocharc.js), defines test groups and paths, making the suite highly flexible and easier to manage.
+The project uses [Mocha](https://mochajs.org/) as its test runner with a hybrid architecture combining traditional integration tests and manifest-driven end-to-end tests. A centralized configuration file, [`.mocharc.js`](../.mocharc.js), defines test groups and paths, making the suite flexible and manageable.
+
+**YAML Manifest System**: End-to-end tests use declarative YAML manifests that define test scenarios, enabling user-extensible workflows and efficient batch processing of test cases.
 
 #### Running Tests
 
@@ -45,64 +80,56 @@ Tests can be executed in a variety of ways to target specific groups, levels, or
     ```bash
     npm test -- --grep "3.5.1"
     ```
-  * **Run a single test file** by path:
+  * **Run a single test file** by path (integration tests):
     ```bash
-    npm test -- 'test/e2e/plugin-create.test.js'
+    npm test -- 'test/runners/integration/config/config-resolver.test.js'
+    ```
+  * **Run a single test file** by path (end-to-end tests):
+    ```bash
+    node test/runners/end-to-end/e2e-runner.js \
+         test/runners/end-to-end/cli/config.manifest.yaml \
+         # --show   # Show test output 
+         # --debug  # Show intermediate steps
     ```
 
-### Telemetry -- Test Watcher
+### QA Analytics and Intelligence
 
-**[ [`test-watcher.js`](scripts/test-watcher.js) ]**
+The analytics system provides intelligent insights into test performance, brittleness, and historical patterns to optimize development workflows.
 
-A simple telemetry system watches `src/` for changes and auto-runs corresponding integration tests.
-This an **experimental** feature.
+**Core Analytics Tools:**
 
-```bash
-node test/scripts/test-watcher.js
-```
+- **[`qa-analytics.js`](analytics/qa-analytics.js)** - Analyzes test brittleness and failure patterns
+  ```bash
+  node test/analytics/qa-analytics.js [--limit 20] [--min-runs 5]
+  ```
 
-### QA System Overview
+- **[`test-watcher.js`](analytics/test-watcher.js)** - Smart test selection based on source changes
+  ```bash
+  node test/analytics/test-watcher.js
+  ```
 
-Test status is dynamically generated by scripts that analyze manifests, checklists, and audit logs.
+- **[`log-failures-reporter.js`](analytics/log-failures-reporter.js)** - Enhanced Mocha reporter tracking test history
 
-**Source of Truth**
+- **[`run-last-fails.js`](analytics/run-last-fails.js)** - Re-run previously failed tests
+  ```bash
+  npm run test:last-fails  # Re-run previously failed tests
+  ```
 
-* `test/docs/checklist-level-?.md`: master list of all planned test scenarios for each level of testing.
-* `test/docs/audit-log.md`: documented known issues, limitations, or reasons for skips.
+**Data Storage**
 
-**QA Scripts**
+Test analytics data is stored in `~/.local/share/oshea/test-analytics/test-results.json` using an enhanced format that tracks:
+- Success/failure counts per test
+- Volatility classification (stable/flaky/unstable)
+- Temporal tracking (first seen, last run)
+- Performance metrics (duration, error patterns)
 
-The scripts in `test/scripts/` are used to parse supporting documents and manifests. They generate a consolidated report on any tests that are not in a "completed and passing" state. 
+**Test Metadata**
 
-
-The table below is updated by the **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script.
-
-```bash
-node test/scripts/qa-dashboard.js --update-index
-```
-
-**Checking for Holes in Test Coverage [beyond CI]**
-
-These items are the kinds that *do not* get picked up by a CI. These tests are of three categories, and each category has its own script
-
-- [ [`find-nonclosed-audits.js`](scripts/find-nonclosed-audits.js) ]
-  -- tests that are in the [audit log](docs/audit-log.md) not marked as `CLOSED`
-- [ [`find-unchecked-tests.js`](scripts/find-unchecked-tests.js) ]
-  -- tests that are unchecked in the [checklist](docs/) `checklist-level-?.md`
-- [ [`find-skipped-tests.js`](scripts/find-skipped-tests.js) ]
-  -- tests that have been skipped via `it.skip()` in test manifests
-
-The **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script synthesizes this information into a table at the end of this document.
-
-**Reporter and Logging of Failed Tests**
-
-- [ [`log-failures-reporter.js`](scripts/log-failures-reporter.js) ]
-   -- custom mocha **reporter** logging failures to `~/.cache/md-to-pdf/logs/test-failures.json`
-- [ [`run-last-fails.js`](scripts/run-last-fails.js) ]
-   -- parses `~/.cache/md-to-pdf/logs/test-failures.json` for failed tests to re-run only those tests:
-   ```bash
-   npm run test:last-fails
-   ```
+The `config/metadata-level-*.yaml` files provide static test classification including:
+- Test levels, ranks, and groups
+- Source file mappings
+- Command specifications
+- Documentation references
 
 ---
 
@@ -112,84 +139,29 @@ The **[ [`qa-dashboard.js`](scripts/qa-dashboard.js)** script synthesizes this i
 
 ### Strategy & Process
 
-* [Test Suite Index](../test/index.md):
-  Main entry point for test-related documentation (this page).
-* [Test Generation Priority Order](../test/docs/test-generation-priority-order.md):
+* [**Test Generation Priority Order**](archive/docs/test-generation-priority-order.md):
   Explains the ranked, multi-level testing strategy and the module priority.
-* [Audit Log](../test/docs/audit-log.md):
-  Known issues, limitations, and discrepancies.
+* [**Next-Generation Testing Framework**](../docs/v0.11/next-generation-testing.md):
+  Implementation status and architectural improvements completed in the YAML manifest system,
+  as well as intelligent test execution with volatility tracking and dependency analysis.
 
-### Technical Reference
+### Test Metadata Registry
 
-* [Test Suite Checklist Level 1](../test/docs/checklist-level-1.md):
-  Module integration scenarios.
-* [Test Suite Checklist Level 2](../test/docs/checklist-level-2.md):
-  Subsystem integration scenarios.
-* [Test Suite Checklist Level 3](../test/docs/checklist-level-3.md):
-  End-to-End CLI scenarios.
-* [Test Suite Checklist Level 4](../test/docs/checklist-level-4.md):
-  End-to-End lifecycle scenarios.
-* [Test Suite Checklist Meta Level 0](../test/docs/checklist-level-m0.md):
-  Unit tests for code and documentation linters.
+Current test specifications are defined in structured YAML metadata.
 
-### Evolution of the Test Suite
+* [Level 1 Tests](config/metadata-level-1.yaml): Module integration scenarios
+* [Level 2 Tests](config/metadata-level-2.yaml): Subsystem integration scenarios  
+* [Level 3 Tests](config/metadata-level-3.yaml): End-to-End CLI scenarios
+* [Level 4 Tests](config/metadata-level-4.yaml): End-to-End lifecycle scenarios
+* [Level M0 Tests](config/metadata-level-m0.yaml): Unit tests for linters and validators
 
-* [**Test Suite Refactor Impact Report**](../test/docs/refactor-impact.md).
+### Historical Documentation
 
----
+All formation-era documentation and deprecated tools are preserved in the archive.
 
-**QA Dashboard** -- Current (automatically generated)
-
-<!--qa-dashboard-start-->
-
-| Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |
-|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|
-| 4.1.3    | Custom Plugin Workflow| OPEN     |            |              |                                                       |
-| 4.1.4    | Local Plugin Update & Sync| OPEN     |            |              |                                                       |
-| 4.2.1    | convert --watch     | OPEN     |            |              |                                                       |
-| 4.2.2    | convert --watch     | OPEN     |            |              |                                                       |
-
-<!--qa-dashboard-end-->
-
----
-
-<details>
-<summary><b>Original</b> (at script creation)</summary>
-
-| Test Code | Test Target        | Checklist | # it.skip() | Audit Log  | Test File Path  |
-|----------|---------------------|----------|------------|--------------|-----------------|
-| 1.1.2    |                     |          |            | audit-log:7  |                 |
-| 1.2.4    |                     |          |            | audit-log:44 |                 |
-| 1.2.8    |                     |          |            | audit-log:44 |                 |
-| 1.2.24   | plugin-registry-builder | OPEN    | 1 it.skip()| audit-log:56 | test/integration/plugin-registry-builder/plugin-registry-builder.test.1.2.24.js |
-| 1.2.27   |                     |          |            | audit-log:68 |                 |
-| 1.2.28   |                     |          |            | audit-log:68 |                 |
-| 1.2.29   |                     |          |            | audit-log:68 |                 |
-| 1.2.30   |                     |          |            | audit-log:68 |                 |
-| 1.2.31   |                     |          |            | audit-log:68 |                 |
-| 1.2.32   |                     |          |            | audit-log:68 |                 |
-| 1.3.2    | plugin-determiner   | OPEN     | 1 it.skip()| audit-log:92 | test/integration/plugin-determiner/plugin-determiner.test.1.3.2.js |
-| 1.4.14   | main-config-loader  | OPEN     | 1 it.skip()| audit-log:104| test/integration/main-config-loader/main-config-loader.test.1.4.14.js |
-| 1.4.15   | main-config-loader  | OPEN     | 1 it.skip()|              | test/integration/main-config-loader/main-config-loader.test.1.4.15.js |
-| 1.6.14   |                     |          |            | audit-log:128|                 |
-| 1.7.1    | math-integration    | OPEN     |            |              |                 |
-| 1.7.2    | math-integration    | OPEN     |            |              |                 |
-| 1.7.3    | math-integration    | OPEN     |            |              |                 |
-| 1.7.4    | math-integration    | OPEN     |            |              |                 |
-| 1.7.5    | math-integration    | OPEN     |            |              |                 |
-| 1.7.6    | math-integration    | OPEN     |            |              |                 |
-| 1.7.7    | math-integration    | OPEN     |            |              |                 |
-| 1.7.8    | math-integration    | OPEN     |            |              |                 |
-| 2.2.2    |                     |          | 1 it.skip()|              | test/integration/default-handler/default-handler.test.2.2.2.js |
-| 2.3.9    |                     |          |            | audit-log:178|                 |
-| 4.1.1    | CLI Commands Interaction| OPEN |            |              |                 |
-| 4.1.2    | CLI Commands Interaction| OPEN |            |              |                 |
-| 4.2.1    | convert --watch     | OPEN     |            |              |                 |
-| 4.2.2    | convert --watch     | OPEN     |            |              |                 |
-| 4.3.1    | collection update   | OPEN     |            |              |                 |
-| 4.3.2    | plugin create --from| OPEN     |            |              |                 |
-
-</details>
+* [Archive Index](archive/index.md): Complete historical documentation
+* [Legacy QA Tools](archive/scripts/): Deprecated analysis scripts  
+* [Original Checklists](archive/docs/): Markdown-based test checklists
 
 ---
 

@@ -6,7 +6,7 @@ We will create a custom CV plugin with a different color scheme.
 
 ### Prerequisites
 
-  * `md-to-pdf` installed.
+  * `oshea` installed.
   * A sample CV document. You can use the one from the bundled `cv` plugin located at [`plugins/cv/cv-example.md`](../../plugins/cv/cv-example.md). Copy it to your current directory and rename it to `my-cv.md`.
 
 ---
@@ -18,7 +18,7 @@ First, we'll use the `plugin create` command with the `--from` option to create 
 **Command:**
 
 ```bash
-md-to-pdf plugin create my-cv --from cv
+oshea plugin create my-cv --from cv
 ```
 
 **Explanation:**
@@ -170,12 +170,12 @@ blockquote {
 
 ### Step 3: Add and Enable the Custom Plugin
 
-Now, add your new, locally-modified plugin to `md-to-pdf`'s managed collection. This command will copy your plugin into the collections directory and automatically enable it for use.
+Now, add your new, locally-modified plugin to `oshea`'s managed collection. This command will copy your plugin into the collections directory and automatically enable it for use.
 
 **Command:**
 
 ```bash
-md-to-pdf plugin add ./my-cv
+oshea plugin add ./my-cv
 ```
 
 **Explanation:**
@@ -192,7 +192,7 @@ You can now convert your CV document using the newly created and enabled `my-cv`
 **Command:**
 
 ```bash
-md-to-pdf convert my-cv.md --plugin my-cv --outdir ./output
+oshea convert my-cv.md --plugin my-cv --outdir ./output
 ```
 
 ---

@@ -1,8 +1,8 @@
-# The `md-to-pdf` Plugin Contract
+# The `oshea` Plugin Contract
 
-This document outlines the formal contract that all plugins for `md-to-pdf` must adhere to. It serves as a guide for plugin developers, ensuring that plugins are reliable, predictable, and integrate smoothly with the core application.
+This document outlines the formal contract that all plugins for `oshea` must adhere to. It serves as a guide for plugin developers, ensuring that plugins are reliable, predictable, and integrate smoothly with the core application.
 
-The contract is enforced at runtime by a validation system (`[`src/plugins/validator.js`](../../src/plugins/validator.js)`) that uses JSON Schemas. Every plugin's configuration is checked against a base schema, and optionally against its own specific schema.
+The contract is enforced at runtime by a validation system ([`src/plugins/plugin-validator.js`](../../src/plugins/plugin-validator.js)) that uses JSON Schemas. Every plugin's configuration is checked against a base schema, and optionally against its own specific schema.
 
 ## Standard Directory Structure
 
@@ -45,7 +45,7 @@ These properties **must** be present in every plugin's configuration file.
 #### `protocol`
 
 - **Type:** `string`
-- **Purpose:** The version of the `md-to-pdf` plugin contract this plugin adheres to. For this version, it must be `"v1"`.
+- **Purpose:** The version of the `oshea` plugin contract this plugin adheres to. For this version, it must be `"v1"`.
 - **Example:** `"v1"`
 
 #### `description`
@@ -62,7 +62,7 @@ These properties **must** be present in every plugin's configuration file.
 
 ### Core Optional Properties
 
-These are standard properties that plugins can use to hook into `md-to-pdf`'s functionality.
+These are standard properties that plugins can use to hook into `oshea`'s functionality.
 
 #### `pdf_options`
 
@@ -118,7 +118,7 @@ These are standard properties that plugins can use to hook into `md-to-pdf`'s fu
 #### `watch_sources`
 
 - **Type:** `array` of `object`s
-- **Purpose:** Defines additional files or directories for `md-to-pdf` to monitor in `--watch` mode. This is useful for plugins that depend on external assets not directly referenced in the Markdown or CSS.
+- **Purpose:** Defines additional files or directories for `oshea` to monitor in `--watch` mode. This is useful for plugins that depend on external assets not directly referenced in the Markdown or CSS.
 - **Example:**
    ```yaml
    watch_sources:
@@ -136,7 +136,7 @@ These are standard properties that plugins can use to hook into `md-to-pdf`'s fu
 
 #### `aggressiveHeadingCleanup`
 - **Type:** `boolean`
-- **Purpose:** If `true`, this option instructs `md-to-pdf` to remove any existing H1 (prefixed with ` #  `) or H2 (prefixed with ` ##  `) headings found within the Markdown content. This is useful when the plugin or other configurations are expected to generate the main headings.
+- **Purpose:** If `true`, this option instructs `oshea` to remove any existing H1 (prefixed with ` #  `) or H2 (prefixed with ` ##  `) headings found within the Markdown content. This is useful when the plugin or other configurations are expected to generate the main headings.
 - **Example:** `aggressiveHeadingCleanup: false`
 
 ---

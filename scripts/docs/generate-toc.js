@@ -84,7 +84,7 @@ function parseHeadings(lines, startLine) {
 // Print help/usage message
 function printHelp() {
   logger.info(`
-md-to-pdf TOC generator
+oshea TOC generator
 
 Usage:
   node generate-toc.js [-L4|--level 3] [--help] <markdown-file>

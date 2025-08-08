@@ -1,0 +1,51 @@
+name: plugin list (End-to-End Test) src/cli/commands/plugin/list.command.js
+base_command: oshea
+tags:
+  - cli
+  - smoke
+  - plugin
+  - list
+workflow: false
+scenarios:
+  - description: should list plugins all plugins (default)
+    test_id: 3.4.1
+    args: plugin list
+    expect:
+      contains: usable by oshea
+  - description: should list only enabled plugins
+    test_id: 3.4.2
+    args: plugin list --enabled
+    expect:
+      contains: Enabled plugins
+  - description: should list only disabled plugins
+    test_id: 3.4.3
+    args: plugin list --disabled
+    expect:
+      contains_any:
+        - Disabled (but available) CM-managed plugins
+        - No disabled (but available) CM-managed plugins found.
+  - description: should list all available plugins
+    test_id: 3.4.4
+    args: plugin list --available
+    expect:
+      contains_any:
+        - Available CM-managed plugins
+        - No CM-managed plugins found
+  - description: should list all plugins in a condensed table format
+    test_id: 3.4.5
+    args: plugin list --short
+    expect:
+      contains_any:
+        - Summary for all known plugins
+  - description: should handle empty-state scenarios gracefully
+    test_id: 3.4.6
+    args: plugin list --available
+    expect:
+      executes: true
+    visual_check: Clean empty state with consistent theming and helpful messaging
+  - description: should gracefully handle missing collection root on plugin list
+    test_id: 3.4.7
+    args: plugin list --coll-root /tmp/nonexistent
+    expect:
+      executes: true
+    visual_check: Graceful handling of missing collection root with clear messaging

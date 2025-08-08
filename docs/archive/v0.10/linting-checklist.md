@@ -1,4 +1,4 @@
-<!-- lint-skip-postman -->
+<!-- lint-skip-file postman -->
 
 ### 0. Audit and Parity Task Matrix
 

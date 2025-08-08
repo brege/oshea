@@ -3,6 +3,9 @@
 > **Historical Note:**  
 > This document captures the initial exploration and strategic formulation for implementing command-line tab completion in `md-to-pdf`. It reflects a preparatory assessment--an examination of the current state and potential before committing to implementation.
 
+> **Historical Note:**  
+> July, 2025. After adding a new static command node, it was made apparent that a manual refresh of the static tab completion cache is necessary to tab-complete on the new node.  Static completion cache has been added to `_tab_cache` so that it's refreshe with user states as well. 
+
 ---
 
 ## Arguments for Tab Completion in a Post-AI World

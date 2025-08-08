@@ -1,0 +1,148 @@
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.1
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+  - happy-path
+scenarios:
+  - description: >-
+      should sucessfully convert a basic markdown file to PDF using the default
+      plugin
+    test_id: 3.1.1
+    args: >-
+      convert {{paths.simpleMdFixture}} --outdir {{tmpdir}} --filename
+      happy-path.pdf --no-open
+    expect:
+      executes: true
+      contains: Processing
+      file_exists: "{{tmpdir}}/happy-path.pdf"
+      file_min_size:
+        - "{{tmpdir}}/happy-path.pdf"
+        - 1000
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.2
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+scenarios:
+  - description: should successfully convert using a specified plugin via --plugin
+    test_id: 3.1.2
+    args: >-
+      convert {{paths.simpleMdFixture}} --plugin recipe --outdir {{tmpdir}}
+      --filename key-option-plugin.pdf --no-open
+    expect:
+      executes: true
+      contains: Processing
+      file_exists: "{{tmpdir}}/key-option-plugin.pdf"
+      file_min_size:
+        - "{{tmpdir}}/key-option-plugin.pdf"
+        - 1000
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.3
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+scenarios:
+  - description: should successfully create a PDF with a custom directory and filename
+    test_id: 3.1.3
+    args: >-
+      convert {{paths.simpleMdFixture}} --outdir {{tmpdir}}/custom-output
+      --filename my-custom-name.pdf --no-open
+    expect:
+      executes: true
+      contains: Processing
+      file_exists: "{{tmpdir}}/custom-output/my-custom-name.pdf"
+      file_min_size:
+        - "{{tmpdir}}/custom-output/my-custom-name.pdf"
+        - 1000
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.4
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+scenarios:
+  - description: >-
+      should successfully convert using a specified plugin via the
+      'oshea_plugin' key in front matter
+    test_id: 3.1.4
+    args: >-
+      convert {{paths.simpleMdFixtureWithFm}} --outdir {{tmpdir}} --filename
+      fm-precedence.pdf --no-open
+    expect:
+      executes: true
+      contains: Processing
+      file_exists: "{{tmpdir}}/fm-precedence.pdf"
+      file_min_size:
+        - "{{tmpdir}}/fm-precedence.pdf"
+        - 1000
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.5
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+scenarios:
+  - description: should successfully use the --plugin CLI flag to trump front matter key
+    test_id: 3.1.5
+    args: >-
+      convert {{paths.simpleMdFixtureWithFm}} --plugin cv --outdir {{tmpdir}}
+      --filename cli-override.pdf --no-open
+    expect:
+      executes: true
+      contains: Plugin specified via CLI, overriding
+      file_exists: "{{tmpdir}}/cli-override.pdf"
+      file_min_size:
+        - "{{tmpdir}}/cli-override.pdf"
+        - 1000
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.6
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+  - sad-path
+scenarios:
+  - description: should fail with a non-zero exit code when the input file does not exist
+    test_id: 3.1.6
+    args: convert {{tmpdir}}/non-existent-file.md --no-open
+    expect_failure:
+      contains: Markdown file not found
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.7
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+  - sad-path
+scenarios:
+  - description: should fail with a non-zero exit code when the plugin does not exist
+    test_id: 3.1.7
+    args: >-
+      convert {{paths.simpleMdFixture}} --plugin i-do-not-exist-as-a-plugin
+      --no-open
+    expect_failure:
+      contains: is not registered

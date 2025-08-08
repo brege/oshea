@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const completionTracker = require(trackerPath);
 
-const CACHE_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.cache/md-to-pdf/cli-tree.json');
+const CACHE_PATH = path.join(process.env.HOME || process.env.USERPROFILE, '.cache/oshea/cli-tree.json');
 
 function loadCache() {
   try {
@@ -55,7 +55,7 @@ function findNode(tree, parts) {
 function getSuggestions(argv, current) {
   const rawArgv = argv._.filter(Boolean);
   const cache = loadCache();
-  const commandPathParts = getCommandPath(cache, rawArgv); // Use the new helper
+  const commandPathParts = getCommandPath(cache, rawArgv);
 
   let suggestions = [];
 
@@ -120,7 +120,8 @@ function getSuggestions(argv, current) {
   if (targetChoices) {
     suggestions.push(...targetChoices);
   } else if (targetCompletionKey) {
-    const dynamicSuggestionsFn = completionTracker[`get${targetCompletionKey.charAt(0).toUpperCase() + targetCompletionKey.slice(1)}`];
+    const capitalizedKey = targetCompletionKey.charAt(0).toUpperCase() + targetCompletionKey.slice(1);
+    const dynamicSuggestionsFn = completionTracker[`get${capitalizedKey}`];
     if (typeof dynamicSuggestionsFn === 'function') {
       const dynamicCompletions = dynamicSuggestionsFn();
       suggestions.push(...dynamicCompletions);

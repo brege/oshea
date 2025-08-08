@@ -8,14 +8,12 @@ const path = require('path');
 const fs = require('fs');
 
 const {
+  packageJsonPath,
   loggerPath,
+  configFormatterPath,
   configResolverPath,
-  pluginManagerPath,
-  watchHandlerPath,
-  pluginDeterminerPath,
-  indexPath,
+  collectionsIndexPath,
   mainConfigLoaderPath,
-  markdownUtilsPath,
   configCommandPath,
   pluginCommandPath,
   convertCommandPath,
@@ -26,8 +24,104 @@ const {
 } = require('@paths');
 const logger = require(loggerPath);
 
+
 const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
+
+// Fast shims for simple operations using proper logging/formatting
+if (argvRaw.includes('--version') || argvRaw.includes('-v')) {
+  const { version } = require(packageJsonPath);
+  logger.info(version);
+  process.exit(0);
+}
+
+function createBaseYargs() {
+  const yargs = require('yargs/yargs');
+  return yargs(hideBin(process.argv))
+    .parserConfiguration({ 'short-option-groups': false })
+    .scriptName('oshea')
+    .usage('Usage: $0 <command_or_markdown_file> [options]')
+    .option('config', {
+      describe: 'path to a project-specific YAML config file',
+      type: 'string',
+      normalize: true,
+    })
+    .option('factory-defaults', {
+      describe: 'use only bundled default config, ignores overrides',
+      type: 'boolean',
+      default: false,
+    })
+    .option('coll-root', {
+      describe: 'overrides the main collection directory',
+      type: 'string',
+      normalize: true,
+    })
+    .option('debug', {
+      describe: 'enable detailed debug output with enhanced logging',
+      type: 'boolean',
+      default: false
+    })
+    .option('stack', {
+      describe: 'show stack traces in debug output (implies --debug)',
+      type: 'boolean',
+      default: false
+    })
+    .alias('h', 'help')
+    .alias('v', 'version')
+    .epilogue(
+      'For more information, refer to the README.md file.\n' +
+            'Tab-completion Tip:\n' +
+            '   echo \'source <(oshea completion)\' >> ~/.bashrc\n' +
+            '   echo \'source <(oshea completion)\' >> ~/.zshrc\n' +
+            'then run `source ~/.bashrc` or `source ~/.zshrc`'
+    );
+}
+
+if (argvRaw.includes('--help') || argvRaw.includes('-h')) {
+  createBaseYargs()
+    .command('completion', 'generate completion script')
+    .command('[markdownFile]', 'convert a markdown file to PDF (default command)')
+    .command('convert <markdownFile>', 'convert a markdown file to PDF')
+    .command('generate <pluginName>', 'generate a document from a complex plugin')
+    .command('plugin <command>', 'manage plugins')
+    .command('collection <subcommand>', 'manage plugin collections')
+    .command('update [<collection_name>]', 'update a git-based plugin collection')
+    .command('config', 'display active configuration settings')
+    .showHelp((output) => {
+      logger.info(output);
+      process.exit(0);
+    });
+}
+
+// Lightweight config display shim using proper formatter
+if (argvRaw[0] === 'config' && argvRaw.length <= 3 && !argvRaw.includes('--plugin')) {
+  const fs = require('fs');
+  const yaml = require('js-yaml');
+  const path = require('path');
+  const { formatGlobalConfig } = require(configFormatterPath);
+
+  try {
+    const configPath = path.join(__dirname, 'config.example.yaml');
+    const configContent = fs.readFileSync(configPath, 'utf8');
+    const config = yaml.load(configContent);
+
+    const sources = {
+      mainConfigPath: configPath,
+      loadReason: 'factory default fallback',
+      useFactoryDefaultsOnly: false,
+      factoryDefaultMainConfigPath: configPath
+    };
+
+    formatGlobalConfig('info', '', {
+      configData: config,
+      sources,
+      isPure: argvRaw.includes('--pure')
+    });
+    process.exit(0);
+  } catch (error) {
+    // Fall through to full engine for complex config operations
+  }
+}
 
 // This block is a special case for shell completion.
 if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
@@ -61,26 +155,23 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
   }
 
   const suggestions = getSuggestions(completionArgv, currentWord);
-  // lint-disable-next-line logging
+  // lint-skip-next-line no-console
   console.log(suggestions.join('\n'));
   process.exit(0);
 }
 
 
-const os = require('os');
-const fsp = require('fs').promises;
-const { spawn, execSync } = require('child_process');
+const { execSync } = require('child_process');
 
 const ConfigResolver = require(configResolverPath);
-const PluginManager = require(pluginManagerPath);
-const { setupWatch } = require(watchHandlerPath);
-const { determinePluginToUse } = require(pluginDeterminerPath);
-const CollectionsManager = require(indexPath);
+const CollectionsManager = require(collectionsIndexPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
-const markdownUtils = require(markdownUtilsPath);
-const yaml = require('js-yaml');
 
-const yargs = require('yargs/yargs');
+const {
+  commonCommandHandler,
+  executeConversion,
+  executeGeneration
+} = require('./index.js'); // lint-skip-line no-relative-paths
 
 const configCommand = require(configCommandPath);
 const pluginCommand = require(pluginCommandPath);
@@ -90,195 +181,32 @@ const collectionCommand = require(collectionCommandPath);
 const updateCommand = require(updateCommandPath);
 
 
-function openPdf(pdfPath, viewerCommand) {
-  if (!viewerCommand) {
-    logger.warn(`PDF viewer not configured. PDF generated at: ${pdfPath}`);
-    return;
-  }
-  logger.info(`Attempting to open PDF "${pdfPath}" with: ${viewerCommand}`);
-  try {
-    const [command, ...args] = viewerCommand.split(' ');
-    const viewerProcess = spawn(command, [...args, pdfPath], {
-      detached: true,
-      stdio: 'ignore',
-    });
-    viewerProcess.on('error', (err) => {
-      logger.warn(`WARN: Failed to start PDF viewer '${viewerCommand}': ${err.message}.`);
-      logger.warn(`Please open "${pdfPath}" manually.`);
-    });
-    viewerProcess.unref();
-  } catch (e) {
-    logger.warn(`WARN: Error trying to open PDF with '${viewerCommand}': ${e.message}.`);
-    logger.warn(`Please open "${pdfPath}" manually.`);
-  }
-}
-
-async function commonCommandHandler(args, executorFunction, commandType) {
-  try {
-    if (args.watch) {
-      await setupWatch(args, null,
-        async (watchedArgs) => {
-          const currentConfigResolver = new ConfigResolver(watchedArgs.config, watchedArgs.factoryDefaults, watchedArgs.isLazyLoad || false, { collRoot: watchedArgs.manager.collRoot });
-          await executorFunction(watchedArgs, currentConfigResolver);
-        }
-      );
-    } else {
-      await executorFunction(args, args.configResolver);
-    }
-  } catch (error) {
-    const pluginNameForError = args.pluginSpec || args.plugin || args.pluginName || 'N/A';
-    logger.error(`ERROR in '${commandType}' command for plugin '${pluginNameForError}': ${error.message}`);
-    if (error.stack && !args.watch) logger.error(error.stack);
-    if (!args.watch) process.exit(1);
-  }
-}
-
-async function executeConversion(args, configResolver) {
-  const dependenciesForPluginDeterminer = {
-    fsPromises: fsp,
-    fsSync: fs,
-    path: path,
-    yaml: yaml,
-    markdownUtils: markdownUtils,
-    processCwd: process.cwd
-  };
-
-  const { pluginSpec, source: pluginSource, localConfigOverrides } = await determinePluginToUse(args, dependenciesForPluginDeterminer, 'default');
-  args.pluginSpec = pluginSpec;
-
-  logger.info(`Processing 'convert' for: ${args.markdownFile}`);
-
-  const resolvedMarkdownPath = path.resolve(args.markdownFile);
-
-  const effectiveConfig = await configResolver.getEffectiveConfig(pluginSpec, localConfigOverrides, resolvedMarkdownPath);
-  const mainLoadedConfig = effectiveConfig.mainConfig;
-
-  let outputDir;
-  if (args.outdir) {
-    outputDir = path.resolve(args.outdir);
-  } else {
-    outputDir = path.join(os.tmpdir(), 'md-to-pdf-output');
-    if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
-      logger.info(`No output directory specified. Defaulting to temporary directory: ${outputDir}`);
-    }
-  }
-
-  if (!fs.existsSync(outputDir)) {
-    await fsp.mkdir(outputDir, { recursive: true });
-    if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
-      logger.info(`Created output directory: ${outputDir}`);
-    }
-  }
-
-  const dataForPlugin = { markdownFilePath: resolvedMarkdownPath };
-
-  const pluginManager = new PluginManager();
-  const generatedPdfPath = await pluginManager.invokeHandler(
-    pluginSpec,
-    effectiveConfig,
-    dataForPlugin,
-    outputDir,
-    args.filename
-  );
-
-  if (generatedPdfPath) {
-    logger.success(`Successfully generated PDF with plugin '${pluginSpec}': ${generatedPdfPath}`);
-    const viewer = mainLoadedConfig.pdf_viewer;
-    if (args.open && viewer) {
-      openPdf(generatedPdfPath, viewer);
-    } else if (args.open && !viewer) {
-      logger.warn(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
-    } else if (!args.open && !args.outdir) {
-      logger.info(`PDF saved to temporary directory: ${generatedPdfPath}`);
-    }
-  } else {
-    if (!args.watch) throw new Error(`PDF generation failed for plugin '${pluginSpec}' (determined via ${pluginSource}).`);
-  }
-  logger.detail('convert command finished.');
-}
-
-async function executeGeneration(args, configResolver) {
-  const pluginToUse = args.pluginName;
-  args.pluginSpec = pluginToUse;
-  logger.info(`Processing 'generate' command for plugin: ${pluginToUse}`);
-
-  const effectiveConfig = await configResolver.getEffectiveConfig(pluginToUse, null, null);
-  const mainLoadedConfig = effectiveConfig.mainConfig;
-
-  const knownGenerateOptions = ['pluginName', 'outdir', 'o', 'filename', 'f', 'open', 'watch', 'w', 'config', 'help', 'h', 'version', 'v', '$0', '_', 'factoryDefaults', 'pluginSpec', 'isLazyLoad', 'manager'];
-  const cliArgsForPlugin = {};
-  for (const key in args) {
-    if (!knownGenerateOptions.includes(key) && Object.prototype.hasOwnProperty.call(args, key)) {
-      cliArgsForPlugin[key] = args[key];
-    }
-  }
-
-  const dataForPlugin = { cliArgs: cliArgsForPlugin };
-  const outputFilename = args.filename;
-  let outputDir = args.outdir;
-  if (args.outdir) {
-    outputDir = path.resolve(args.outdir);
-  }
-
-  if (!fs.existsSync(outputDir)) {
-    await fsp.mkdir(outputDir, { recursive: true });
-    logger.info(`Created output directory: ${outputDir}`);
-  }
-
-  const pluginManager = new PluginManager();
-  const generatedPdfPath = await pluginManager.invokeHandler(
-    pluginToUse,
-    effectiveConfig,
-    dataForPlugin,
-    outputDir,
-    outputFilename
-  );
-
-  if (generatedPdfPath) {
-    logger.success(`Successfully generated PDF via plugin '${pluginToUse}': ${generatedPdfPath}`);
-    const viewer = mainLoadedConfig.pdf_viewer;
-    if (args.open && viewer) {
-      openPdf(generatedPdfPath, viewer);
-    } else if (args.open && !viewer) {
-      logger.warn(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
-    }
-  } else {
-    if (!args.watch) throw new Error(`PDF generation failed for plugin '${pluginToUse}'.`);
-  }
-  logger.detail('generate command finished.');
-}
-
 async function main() {
   let managerInstance;
 
-  const argvBuilder = yargs(hideBin(process.argv))
-    .parserConfiguration({ 'short-option-groups': false })
-    .scriptName('md-to-pdf')
-    .usage('Usage: $0 <command_or_markdown_file> [options]')
-    .option('config', {
-      describe: 'path to a project-specific YAML config file',
-      type: 'string',
-      normalize: true,
-    })
-    .option('factory-defaults', {
-      describe: 'use only bundled default config, ignores overrides',
-      type: 'boolean',
-      default: false,
-    })
-    .option('coll-root', {
-      describe: 'overrides the main collection directory',
-      type: 'string',
-      normalize: true,
-    });
+  const argvBuilder = createBaseYargs();
 
   argvBuilder.middleware(async (argv) => {
+    // Configure enhanced debugging if --debug or --stack flag is used
+    if (argv.debug || argv.stack) {
+      logger.setDebugMode(true);
+
+      const debugConfig = {
+        showCaller: true,
+        enrichErrors: true,
+        showStack: argv.stack || false
+      };
+
+      logger.configureLogger(debugConfig);
+    }
+
     const mainConfigLoader = new MainConfigLoader(path.resolve(__dirname, '..'), argv.config, argv.factoryDefaults);
     const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
     const collRootFromMainConfig = primaryConfig.config.collections_root || null;
     const collRootCliOverride = argv['coll-root'] || null;
 
     managerInstance = new CollectionsManager({
-      debug: process.env.DEBUG_CM === 'true',
+      debug: argv.debug || process.env.DEBUG_CM === 'true',
       collRootFromMainConfig: collRootFromMainConfig,
       collRootCliOverride: collRootCliOverride
     });
@@ -289,7 +217,7 @@ async function main() {
       argv.config,
       argv.factoryDefaults,
       false,
-      { collRoot: managerInstance.collRoot }
+      { collRoot: managerInstance.collRoot, collectionsManager: managerInstance }
     );
     argv.configResolver = configResolver;
   });
@@ -304,9 +232,17 @@ async function main() {
         .option('coll-root', { type: 'string' });
     },
     handler: (args) => {
-      const { dynamicCompletionScriptPath } = require('@paths');
+      const {
+        generateCompletionCachePath,
+        generateCompletionDynamicCachePath
+      } = require('@paths');
+
       try {
-        execSync(`node "${dynamicCompletionScriptPath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+        // Regenerate static command tree cache
+        execSync(`node "${generateCompletionCachePath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+
+        // Regenerate dynamic completion data cache
+        execSync(`node "${generateCompletionDynamicCachePath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
       } catch (error) {
         logger.error(`ERROR: Cache generation failed: ${error.message}`);
         process.exit(1);
@@ -350,8 +286,6 @@ async function main() {
     .command(collectionCommand)
     .command(updateCommand)
     .command(configCommand)
-    .alias('h', 'help')
-    .alias('v', 'version')
     .strictCommands()
     .fail((msg, err, yargsInstance) => {
       if (err) {
@@ -374,14 +308,7 @@ async function main() {
       logger.error(msg || 'An error occurred.');
       if (msg) logger.warn('For usage details, run with --help.');
       process.exit(1);
-    })
-    .epilogue(
-      'For more information, refer to the README.md file.\n' +
-            'Tab-completion Tip:\n' +
-            '   echo \'source <(md-to-pdf completion)\' >> ~/.bashrc\n' +
-            '   echo \'source <(md-to-pdf completion)\' >> ~/.zshrc\n' +
-            'then run `source ~/.bashrc` or `source ~/.zshrc`'
-    );
+    });
 
   await argvBuilder.argv;
 }
@@ -405,4 +332,5 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { openPdf };
+// CLI module - main functions now in index.js
+module.exports = {};

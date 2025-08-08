@@ -1,6 +1,6 @@
 # Project Scripts Index
 
-This document is a central index for all developer and automation scripts within the `md-to-pdf` repo.
+This document is a central index for all developer and automation scripts within the `oshea` repo.
 
 ### Batch Jobs [ `batch/` ]
 
@@ -11,17 +11,14 @@ This document is a central index for all developer and automation scripts within
   - [ [`make-screenshots.sh`](batch/make-screenshots.sh) ]
     -- Generates screenshots of example documents for the project's documentation.
 
-### Tab Completion [ `completion/` ]
-
-  - [ [`generate-completion-cache.js`](completion/generate-completion-cache.js) ]
-    -- Generates the static CLI command structure `~/.cache/md-to-pdf/cli-tree.json` for tab completion.
-  - [ [`generate-completion-dynamic-cache.js`](completion/generate-completion-dynamic-cache.js) ]
-    -- A runtime dynamic data cache `~/.cache/md-to-pdf/dynamic-completion-data.json` for tab completion.
-
 ### AI Scripts [ `ai/` ]
 
   - [ [`ai-context-generator.js`](ai/ai-context-generator.js) ]
     -- Generates AI context from a source plugin as input and a context file as output to provide one big beautiful paste.
+
+### Demonstrations [ `demo/` ]
+
+This module has its own index file at [**the demo index**](demo/index.md).
 
 ### Documentation [ `docs/` ]
 
@@ -44,28 +41,10 @@ This module has its own index file at [**the test index**](../test/index.md) for
   These scripts are separated from the rest of the project scripts because they are only relevant to the test suite.
   The main test runner is managed by `mocha` via `npm test`.
 
-### Shared Scripts [ `shared/` ]
-
-  - [ [`file-helpers.js`](shared/file-helpers.js) ] -- Makes the rest of the Node.js scripts easier to point and shoot at file(s) and directories.
-  - [ [path-finder.js](shared/path-finder.js) ]
-    -- A helper tool that turns a script path in to a variable name.
-
-    `node scripts/shared/path-finder.js scripts/shared/file-helpers.js`
-    ```js
-    require('module-alias/register');
-    const { fileHelpersPath } = require('@paths');
-    const {
-      findFiles,
-      findFilesArray,
-      getDefaultGlobIgnores,
-      getPatternsFromArgs
-    } = require(fileHelpersPath);
-    ```
-
 ### Uncategorized Scripts
 
 New scripts or new script locations will appear below after running
-**`node scripts/linting/docs/update-project-indices.js`**.
+**`node scripts/linting/docs/librarian.js`**.
 
 <!-- uncategorized-start -->
 <!-- uncategorized-end -->

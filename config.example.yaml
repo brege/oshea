@@ -1,5 +1,5 @@
 # config.example.yaml
-# Main configuration for md-to-pdf.
+# Main configuration for oshea.
 
 # --- Global Settings ---
 
@@ -10,13 +10,13 @@ pdf_viewer: xdg-open
 # global_pdf_options: Default Puppeteer PDF options.
 # See https://pptr.dev/api/puppeteer.pdfoptions for all available options.
 global_pdf_options:
-  format: "Letter"
+  format: Letter
   printBackground: true
   margin:
-    top: "1in"
-    right: "1in"
-    bottom: "1in"
-    left: "1in"
+    top: 1in
+    right: 1in
+    bottom: 1in
+    left: 1in
 
 # global_remove_shortcodes: Array of regex patterns to remove content globally.
 global_remove_shortcodes:
@@ -25,7 +25,7 @@ global_remove_shortcodes:
 # --- Math Rendering Settings (KaTeX) ---
 math:
   enabled: true
-  engine: "katex"
+  engine: katex
   katex_options:
     throwOnError: false
     trust: false
@@ -42,15 +42,15 @@ math:
 # --- Collections Root Directory (Optional) ---
 # Overrides the default location for storing managed plugin collections.
 # Precedence: --coll-root > env var > this key > OS default.
-# collections_root: "~/my-md-to-pdf-collections"
+# collections_root: "~/my-oshea-collections"
 
 # --- Plugin Management Notes ---
 # Bundled plugins (default, cv, recipe, etc.) are now auto-discovered.
 # Custom plugins should be managed via the CLI:
-#   - md-to-pdf collection add <git-url-or-path>
-#   - md-to-pdf plugin add <local-plugin-path>
+#   - oshea collection add <git-url-or-path>
+#   - oshea plugin add <local-plugin-path>
 #
-# Use `md-to-pdf config --plugin <name>` to see a plugin's final settings.
+# Use `oshea config --plugin <name>` to see a plugin's final settings.
 
 # --- Inline Plugin Overrides ---
 # Override settings for any registered or bundled plugin.

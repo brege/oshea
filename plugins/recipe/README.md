@@ -23,7 +23,7 @@ cli_help: |
     - remove_shortcodes_patterns: Can be used to clean Hugo-specific or other shortcodes.
 
   Example Usage:
-    md-to-pdf convert my_favorite_recipe.md --plugin recipe
+    oshea convert my_favorite_recipe.md --plugin recipe
 ---
 
 # Recipe Plugin (`recipe`)

@@ -19,14 +19,14 @@ const {
   checkFile,
 } = require(testFileHelpersPath);
 
-const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-disable-line no-relative-paths
+const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const PLUGIN_NAME = path.basename(PLUGIN_ROOT);
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'md-to-pdf-test-output', `${PLUGIN_NAME}-plugin-e2e`);
+const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', `${PLUGIN_NAME}-plugin-e2e`);
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, `${PLUGIN_NAME}-example.md`);
 const EXPECTED_PDF_BASENAME = 'dr-eleanor-vance.pdf';
 const MIN_PDF_SIZE = 1000;
 
-describe(`E2E Test for ${PLUGIN_NAME} Plugin`, function() {
+describe('plugins/advanced-card (in-situ Self-Activation Test) .contract/test/advanced-card-e2e.test.js', function() {
   this.timeout(20000);
 
   before(async () => {
@@ -37,7 +37,7 @@ describe(`E2E Test for ${PLUGIN_NAME} Plugin`, function() {
     await cleanupTestDirectory(TEST_OUTPUT_DIR);
   });
 
-  it('should successfully convert its own example markdown file', async () => {
+  it('in-situ: should successfully convert its own example markdown file', async () => {
     const commandArgs = [
       'convert',
       EXAMPLE_MD,
@@ -52,7 +52,7 @@ describe(`E2E Test for ${PLUGIN_NAME} Plugin`, function() {
 
     if (!result.success) {
       const errorMessage = result.stderr || (result.error ? result.error.message : 'Unknown error');
-      logger.error(`[${PLUGIN_NAME}-e2e] CLI command failed: ${errorMessage}`);
+      logger.error('CLI command failed', { context: `${PLUGIN_NAME}-e2e`, error: errorMessage });
       throw new Error(`CLI command failed for ${PLUGIN_NAME}:\n${errorMessage}`);
     }
 

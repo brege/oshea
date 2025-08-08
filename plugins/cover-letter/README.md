@@ -25,7 +25,7 @@ cli_help: |
     - inject_fm_title_as_h1: Typically false, as cover letters don't have a main H1 title in the document body. PDF metadata title comes from front matter.
 
   Example Usage:
-    md-to-pdf convert my_application_letter.md --plugin cover-letter
+    oshea convert my_application_letter.md --plugin cover-letter
 ---
 
 # Cover Letter Plugin (`cover-letter`)

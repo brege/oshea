@@ -1,0 +1,43 @@
+name: generate (End-to-End Tests) src/cli/commands/generate.command.js
+test_id: 3.2.1
+base_command: oshea
+tags:
+  - generate
+  - cli
+  - smoke
+  - pdf
+  - recipe-book
+scenarios:
+  - description: >-
+      should successfully generate an artifact using a known generator plugin
+      (recipe-book)
+    test_id: 3.2.1
+    args: >-
+      generate recipe-book --recipes-base-dir {{paths.hugoExampleFixturePath}}
+      --outdir {{tmpdir}} --filename my-recipe-book.pdf --no-open
+    expect:
+      executes: true
+      contains: Processing
+      file_exists: "{{tmpdir}}/my-recipe-book.pdf"
+      file_min_size:
+        - "{{tmpdir}}/my-recipe-book.pdf"
+        - 20000
+---
+name: generate (End-to-End Tests) src/cli/commands/generate.command.js
+test_id: 3.2.2
+base_command: oshea
+tags:
+  - generate
+  - cli
+  - smoke
+  - pdf
+  - recipe-book
+  - sad-path
+scenarios:
+  - description: >-
+      should fail with a non-zero exit code if required plugin-specific options
+      are missing
+    test_id: 3.2.2
+    args: generate recipe-book --no-open
+    expect_failure:
+      contains: recipesBaseDir' option was not provided

@@ -1,0 +1,25 @@
+name: plugin create (End-to-End Test) src/cli/commands/plugin/create.command.js
+base_command: oshea
+tags:
+  - plugin
+  - create
+  - validate
+  - cli
+  - smoke
+workflow: false
+scenarios:
+  - description: >-
+      should successfully create a new plugin directory from the default template
+    test_id: 3.5.1
+    args: plugin create my-boilerplate-plugin --outdir {{tmpdir}}
+    expect:
+      contains: created successfully
+      file_exists: "{{tmpdir}}/my-boilerplate-plugin/index.js"
+  - description: >-
+      should successfully create a new plugin directory from a bundled source
+      (--from)
+    test_id: 3.5.2
+    args: plugin create my-archetyped-plugin --from cv --outdir {{tmpdir}}
+    expect:
+      contains: created successfully
+      file_exists: "{{tmpdir}}/my-archetyped-plugin/index.js"

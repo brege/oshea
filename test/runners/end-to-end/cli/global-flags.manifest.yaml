@@ -1,0 +1,42 @@
+name: "--version (End-to-End Test) cli.js"
+test_id: 3.15.1
+base_command: oshea
+tags:
+  - cli
+  - version
+  - smoke
+scenarios:
+  - description: "--version (End-to-End Test) cli.js"
+    test_id: 3.15.1
+    args: "--version"
+    expect:
+      executes: true
+---
+name: "--help (End-to-End Test) cli.js src/cli/get-help.js"
+test_id: 3.15.2
+base_command: oshea
+tags:
+  - cli
+  - help
+  - smoke
+scenarios:
+  - description: "--help (End-to-End Test) cli.js src/cli/get-help.js"
+    test_id: 3.15.2
+    args: "{command} --help"
+    expect:
+      executes: true
+---
+name: asdf/--asdf (End-to-End Test) cli.js (unknown command/option)
+test_id: 3.15.3
+base_command: oshea
+tags:
+  - cli
+  - smoke
+  - sad-path
+scenarios:
+  - description: asdf/--asdf (End-to-End Test) cli.js (unknown command/option)
+    test_id: 3.15.3
+    args: asdf
+    expect:
+      executes: false
+    visual_check: Clear messaging for unrecognized command

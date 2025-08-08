@@ -1,19 +1,19 @@
 # plugins/template-basic/template-basic.config.yaml
 # The plugin's identity is now defined here.
 # These values will be replaced by the 'plugin create' command.
-plugin_name: "template-basic"
-version: "1.0.0"
-protocol: "v1"
+plugin_name: template-basic
+version: 1.0.0
+protocol: v1
 
 description: "A new template-basic plugin for [describe your plugin's purpose here]."
-handler_script: "index.js" # Points to the handler within this plugin's directory
+handler_script: index.js # Points to the handler within this plugin's directory
 css_files:
-  - "template-basic.css"  # Points to CSS within this plugin's directory
+  - "template-basic.css" # Points to CSS within this plugin's directory
 pdf_options:
   # Standard PDF options, users should customize these as needed.
-  format: "Letter"
+  format: Letter
   printBackground: true
-  margin: { top: "1in", right: "1in", bottom: "1in", left: "1in" }
+  margin: { top: 1in, right: 1in, bottom: 1in, left: 1in }
 # toc_options: # Uncomment and configure if your plugin needs a Table of Contents
 #   enabled: false
 #   placeholder: "%%TOC%%"
@@ -29,6 +29,7 @@ math:
 #      "\\RR": "\\mathbb{R}"
 inject_fm_title_as_h1: true
 aggressiveHeadingCleanup: false
+
 # watch_sources: # Example to show users how to add more watchable sources
 #   - type: "file"
 #     path: "data/my-data.json" # Relative to this config file

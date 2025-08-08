@@ -3,15 +3,23 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
+const pLimit = require('p-limit');
+
+// Control file processing concurrency
+const fileLimit = pLimit(10);
 const {
   lintHelpersPath,
   lintingConfigPath,
-  formattersPath,
+  visualRenderersPath,
   projectRoot,
-  fileDiscoveryPath
+  fileDiscoveryPath,
+  skipSystemPath,
+  loggerPath
 } = require('@paths');
+
+const logger = require(loggerPath);
 
 const {
   loadLintSection,
@@ -19,10 +27,10 @@ const {
 } = require(lintHelpersPath);
 
 const { findFiles } = require(fileDiscoveryPath);
-const { renderLintOutput } = require(formattersPath);
+const { renderLintOutput } = require(visualRenderersPath);
+const { shouldSkipLine, shouldSkipFile } = require(skipSystemPath);
 
-const LINT_DISABLE_TAG = 'lint-disable-next-line';
-const LINT_DISABLE_LINE = 'lint-disable-line no-relative-paths';
+// Using centralized skip system - no more hardcoded constants needed
 
 function classifyRequireLine(line) {
   const code = line.replace(/\/\/.*$/, '').trim();
@@ -45,69 +53,71 @@ function classifyRequireLine(line) {
   }
 }
 
-function scanFileForRelativePaths(filePath, debug = false) {
-  if (debug) console.log(`[DEBUG] Scanning file: ${path.relative(projectRoot, filePath)}`);
-  const issues = [];
-  const content = fs.readFileSync(filePath, 'utf8');
-  const lines = content.split('\n');
-  const relativePathRegex = /(['"`])(\.\/|\.\.\/)/;
-
-  lines.forEach((line, index) => {
-    const trimmedLine = line.trim();
-
-    if (index > 0) {
-      const prevLine = lines[index - 1].trim();
-      if (prevLine.startsWith('//') && prevLine.includes(LINT_DISABLE_TAG)) {
-        if (debug) {
-          console.log(`[DEBUG] Skipping line ${index + 1} due to lint-disable-next-line`);
-        }
-        return;
-      }
-    }
-    if (trimmedLine.startsWith('//')) return;
-
-    const hasDisableLine = line.includes(LINT_DISABLE_LINE);
-
-    if (trimmedLine.includes('require(')) {
-      const classification = classifyRequireLine(trimmedLine);
-      if (classification && classification.type === 'pathlike') {
-        if (relativePathRegex.test(`'${classification.requiredPath}'`)) {
-          if (!hasDisableLine) {
-            issues.push({
-              line: index + 1,
-              column: line.indexOf(classification.requiredPath) + 1,
-              message: `Disallowed relative path in require(): '${classification.requiredPath}'`,
-              rule: 'no-relative-require'
-            });
-          }
-        }
-      }
+async function scanFileForRelativePaths(filePath, debug = false) {
+  try {
+  // Check if file should be skipped based on .skipignore files
+    if (shouldSkipFile(filePath, 'no-relative-paths')) {
+      return [];
     }
 
-    if (trimmedLine.includes('path.join(') || trimmedLine.includes('path.resolve(')) {
-      const match = trimmedLine.match(/(path\.(?:join|resolve))\(([^)]*)\)/);
-      if (match) {
-        const args = match[2].split(',').map(arg => arg.trim());
-        args.forEach(arg => {
-          if (relativePathRegex.test(arg)) {
-            if (!hasDisableLine) {
+    logger.debug(`Scanning file: ${path.relative(projectRoot, filePath)}`, { context: 'PathValidator' });
+    const issues = [];
+    const content = await fs.readFile(filePath, 'utf8');
+    const lines = content.split('\n');
+    const relativePathRegex = /(['"`])(\.\/|\.\.\/)/;
+
+    lines.forEach((line, index) => {
+      const trimmedLine = line.trim();
+
+      if (trimmedLine.startsWith('//')) return;
+
+      const prevLine = index > 0 ? lines[index - 1].trim() : '';
+      const hasSkip = shouldSkipLine(line, prevLine, 'no-relative-paths');
+
+      if (trimmedLine.includes('require(')) {
+        const classification = classifyRequireLine(trimmedLine);
+        if (classification && classification.type === 'pathlike') {
+          if (relativePathRegex.test(`'${classification.requiredPath}'`)) {
+            if (!hasSkip) {
               issues.push({
                 line: index + 1,
-                column: line.indexOf(arg) + 1,
-                message: `Disallowed relative path argument in ${match[1]}: ${arg}`,
-                rule: 'no-relative-path-join'
+                column: line.indexOf(classification.requiredPath) + 1,
+                message: `Disallowed relative path in require(): '${classification.requiredPath}'`,
+                rule: 'no-relative-require'
               });
             }
           }
-        });
+        }
       }
-    }
-  });
 
-  return issues;
+      if (trimmedLine.includes('path.join(') || trimmedLine.includes('path.resolve(')) {
+        const match = trimmedLine.match(/(path\.(?:join|resolve))\(([^)]*)\)/);
+        if (match) {
+          const args = match[2].split(',').map(arg => arg.trim());
+          args.forEach(arg => {
+            if (relativePathRegex.test(arg)) {
+              if (!hasSkip) {
+                issues.push({
+                  line: index + 1,
+                  column: line.indexOf(arg) + 1,
+                  message: `Disallowed relative path argument in ${match[1]}: ${arg}`,
+                  rule: 'no-relative-path-join'
+                });
+              }
+            }
+          });
+        }
+      }
+    });
+
+    return issues;
+  } catch (error) {
+    logger.error(`Failed to read file ${filePath}: ${error.message}`);
+    return [];
+  }
 }
 
-function runLinter(options = {}) {
+async function runLinter(options = {}) {
   const {
     targets = [],
     excludes = [],
@@ -115,9 +125,7 @@ function runLinter(options = {}) {
     filetypes = undefined
   } = options;
 
-  if (debug) {
-    console.log('[DEBUG] Running no-relative-paths linter with options:', { targets, excludes });
-  }
+  logger.debug('Running no-relative-paths linter with options:', { context: 'PathValidator', targets, excludes });
 
   const allIssues = [];
 
@@ -128,16 +136,23 @@ function runLinter(options = {}) {
     debug: debug
   });
 
-  for (const file of filesToScan) {
-    const fileIssues = scanFileForRelativePaths(file, debug);
-    if (fileIssues.length > 0) {
-      allIssues.push(...fileIssues.map(issue => ({
-        file: path.relative(projectRoot, file),
-        severity: 1,
-        ...issue
-      })));
-    }
-  }
+  // Process files concurrently with controlled concurrency
+  const scanPromises = filesToScan.map(file =>
+    fileLimit(async () => {
+      const fileIssues = await scanFileForRelativePaths(file, debug);
+      if (fileIssues.length > 0) {
+        return fileIssues.map(issue => ({
+          file: path.relative(projectRoot, file),
+          severity: 1,
+          ...issue
+        }));
+      }
+      return [];
+    })
+  );
+
+  const results = await Promise.all(scanPromises);
+  allIssues.push(...results.flat());
 
   const summary = {
     errorCount: 0,
@@ -152,36 +167,47 @@ function runLinter(options = {}) {
 }
 
 if (require.main === module) {
-  const {
-    flags,
-    targets
-  } = parseCliArgs(process.argv.slice(2));
-  const config = loadLintSection('no-relative-paths', lintingConfigPath) || {};
-  const configTargets = config.targets || [];
-  const configExcludes = config.excludes || [];
-  const filetypes = config.filetypes;
+  (async () => {
+    const {
+      flags,
+      targets
+    } = parseCliArgs(process.argv.slice(2));
 
-  const finalTargets = targets.length ? targets : configTargets;
-  const excludes = flags.force ? [] : configExcludes;
+    // Set global debug mode
+    logger.setDebugMode(!!flags.debug && !flags.json);
 
-  const {
-    issues,
-    summary
-  } = runLinter({
-    targets: finalTargets,
-    excludes,
-    debug: !!flags.debug,
-    filetypes,
-    ...flags
-  });
+    const config = loadLintSection('no-relative-paths', lintingConfigPath) || {};
+    const configTargets = config.targets || [];
+    const configExcludes = config.excludes || [];
+    const filetypes = config.filetypes;
 
-  renderLintOutput({
-    issues,
-    summary,
-    flags
-  });
+    const finalTargets = targets.length ? targets : configTargets;
+    const excludes = flags.force ? [] : configExcludes;
 
-  process.exitCode = summary.errorCount > 0 ? 1 : 0;
+    try {
+      const {
+        issues,
+        summary
+      } = await runLinter({
+        targets: finalTargets,
+        excludes,
+        debug: !!flags.debug,
+        filetypes,
+        ...flags
+      });
+
+      renderLintOutput({
+        issues,
+        summary,
+        flags
+      });
+
+      process.exitCode = summary.errorCount > 0 ? 1 : 0;
+    } catch (error) {
+      logger.error('Linter failed:', error.message);
+      process.exitCode = 1;
+    }
+  })();
 }
 
 module.exports = {

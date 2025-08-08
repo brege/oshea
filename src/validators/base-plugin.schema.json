@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Base Schema for md-to-pdf Plugins",
-  "description": "Defines the common set of properties and rules that all md-to-pdf plugins should adhere to.",
+  "title": "Base Schema for oshea Plugins",
+  "description": "Defines the common set of properties and rules that all oshea plugins should adhere to.",
   "type": "object",
   "properties": {
     "description": {
@@ -54,7 +54,7 @@
       "additionalProperties": true
     },
     "watch_sources": {
-      "description": "Defines additional files or directories for md-to-pdf to monitor in --watch mode.",
+      "description": "Defines additional files or directories for oshea to monitor in --watch mode.",
       "type": "array",
       "items": { "type": "object" }
     },

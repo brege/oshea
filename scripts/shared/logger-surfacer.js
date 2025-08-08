@@ -3,12 +3,12 @@
 // lint-skip-file no-console
 
 require('module-alias/register');
-const { fileHelpersPath } = require('@paths');
+const { fileHelpersPath, loggerPath } = require('@paths');
 const { findFilesArray, getDefaultGlobIgnores } = require(fileHelpersPath);
+const logger = require(loggerPath);
 
 const fs = require('fs');
 const readline = require('readline');
-const chalk = require('chalk');
 
 // Logger levels to detect
 const LOG_LEVELS = ['info', 'debug', 'warn', 'error', 'fatal', 'success', 'detail', 'validation'];
@@ -33,7 +33,7 @@ function parseArgs(argv) {
       if (LOG_LEVELS.includes(level)) {
         levelsFilter.add(level);
       } else {
-        console.error(`Unknown flag: ${arg}`);
+        logger.error(`Unknown flag: ${arg}`);
         process.exit(1);
       }
     } else {
@@ -48,13 +48,7 @@ function buildLoggerRegex(levels) {
   return new RegExp(`logger\\.(${levelsGroup})\\s*\\(`);
 }
 
-function highlightStrings(line) {
-  return line.replace(/(['"])(?:(?=(\\?))\2.)*?\1/g, match => chalk.cyanBright(match));
-}
-
-function highlightKeys(line) {
-  return line.replace(/(\b\w+)(:)/g, (_, key, colon) => chalk.yellowBright(key) + colon);
-}
+// Highlighting functions removed - now handled by JS formatter
 
 function matchLoggerBlock(linesBuffer, matcherSet) {
   if (!matcherSet) return true;
@@ -69,19 +63,15 @@ function matchLoggerBlock(linesBuffer, matcherSet) {
 }
 
 function printMatch(filePath, startLine, linesBuffer) {
-  const coloredPath = chalk.magentaBright(`// ${filePath}`); // copy-pastable
-  const coloredLine = chalk.hex('#FFA500')(startLine.toString());
-  console.log(`${coloredPath}:${coloredLine}`);
+  logger.info(`// ${filePath}:${startLine}`, { format: 'js' });
   const firstLine = linesBuffer[0];
   const indentMatch = firstLine.match(/^(\s*)/);
   const baseIndent = indentMatch ? indentMatch[1] : '';
-  for (const line of linesBuffer) {
-    let trimmedLine = line.startsWith(baseIndent) ? line.slice(baseIndent.length) : line;
-    trimmedLine = highlightKeys(trimmedLine);
-    trimmedLine = highlightStrings(trimmedLine);
-    console.log(trimmedLine);
-  }
-  console.log('');
+  const codeBlock = linesBuffer.map(line =>
+    line.startsWith(baseIndent) ? line.slice(baseIndent.length) : line
+  ).join('\n');
+  logger.info(codeBlock, { format: 'js' });
+  logger.info(''); // Empty line separator
 }
 
 async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, showStatsOnly) {
@@ -157,22 +147,22 @@ async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, sho
 }
 
 function printStats(stats, levelsFilter) {
-  console.log(chalk.bold('\nLogging call statistics per file:'));
+  logger.info('\nLogging call statistics per file:');
   for (const [file, counts] of Object.entries(stats)) {
-    console.log(chalk.whiteBright(file));
+    logger.info(file);
     for (const level of LOG_LEVELS) {
       if ((!levelsFilter.size || levelsFilter.has(level)) && counts[level]) {
-        console.log(chalk.grey(`  ${level}: ${counts[level]}`));
+        logger.detail(`  ${level}: ${counts[level]}`);
       }
     }
-    console.log('');
+    logger.info('');
   }
 }
 
 async function main() {
   const { onlyMatchingFrom, showStatsOnly, suppressStats, levelsFilter, filesOrGlobs } = parseArgs(process.argv.slice(2));
   if (filesOrGlobs.length === 0) {
-    console.error('Usage: logger-surfacer.js <file|dir|glob> [--only=file] [--stats] [--no-stats] [--info] [--warn] ...');
+    logger.error('Usage: logger-surfacer.js <file|dir|glob> [--only=file] [--stats] [--no-stats] [--info] [--warn] ...');
     process.exit(1);
   }
   let matcherSet = null;
@@ -182,11 +172,11 @@ async function main() {
         .split('\n').map(s => s.trim()).filter(Boolean);
       matcherSet = new Set(lines);
       if (!lines.length) {
-        console.error(`Warning: matcher file ${onlyMatchingFrom} is empty!`);
+        logger.warn(`Warning: matcher file ${onlyMatchingFrom} is empty!`);
         matcherSet = null;
       }
     } catch (err) {
-      console.error(`Failed to read only file ${onlyMatchingFrom}:`, err);
+      logger.error(`Failed to read only file ${onlyMatchingFrom}: ${err.message}`);
       process.exit(1);
     }
   }
@@ -205,7 +195,7 @@ async function main() {
 
 if (require.main === module) {
   main().catch(err => {
-    console.error(err);
+    logger.error(`Error: ${err.message}`);
     process.exit(1);
   });
 }

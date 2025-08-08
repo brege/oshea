@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/playground/toy-validation-formatter.js
+// scripts/demo/toy-validation-formatter.js
 // Toy validation formatter demonstration
 // Companion to formatter-playground.js for testing validation formatters
 // lint-skip-file no-console

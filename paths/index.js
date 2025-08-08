@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-03T10:35:28.584Z
+// Generated: 2025-08-08T01:38:02.836Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -322,6 +322,7 @@ const colorThemePath = path.join(projectRoot, 'src/utils/formatters/color-theme.
 const configFormatterPath = path.join(projectRoot, 'src/utils/formatters/config.formatter.js');
 const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
 const inlineFormatterPath = path.join(projectRoot, 'src/utils/formatters/inline.formatter.js');
+const jsFormatterPath = path.join(projectRoot, 'src/utils/formatters/js.formatter.js');
 const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint.formatter.js');
 const pathsFormatterPath = path.join(projectRoot, 'src/utils/formatters/paths.formatter.js');
 const pluginListFormatterPath = path.join(projectRoot, 'src/utils/formatters/plugin-list.formatter.js');
@@ -590,6 +591,7 @@ module.exports = {
   configFormatterPath,
   formattersIndexPath,
   inlineFormatterPath,
+  jsFormatterPath,
   lintFormatterPath,
   pathsFormatterPath,
   pluginListFormatterPath,

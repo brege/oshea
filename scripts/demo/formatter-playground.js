@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/playground/formatter-playground.js
+// scripts/demo/formatter-playground.js
 // lint-skip-file no-console
 
 require('module-alias/register');

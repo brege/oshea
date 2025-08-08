@@ -83,9 +83,39 @@ function findVariablesForTargets(targets) {
 if (require.main === module) {
   let rawTargets = process.argv.slice(2);
   if (!rawTargets.length) {
-    logger.error('Usage: node scripts/shared/path-finder.js <file|dir|glob> [...]', { format: 'inline' });
+    logger.error('Usage: node scripts/shared/path-finder.js <file|dir|glob> [--exports] [--reverse <var>] [--list]');
     process.exit(1);
   }
+
+  // Handle reverse lookup: --reverse <variable>
+  const reverseIndex = rawTargets.indexOf('--reverse');
+  if (reverseIndex !== -1) {
+    const variableName = rawTargets[reverseIndex + 1];
+    if (!variableName) {
+      logger.error('--reverse requires a variable name');
+      process.exit(1);
+    }
+    const results = getPathByVariable(variableName);
+    if (results.length > 0) {
+      results.forEach(result => {
+        logger.info(`${result.variable}: ${result.path}`, { format: 'js' });
+      });
+    } else {
+      logger.detail(`No path found for variable: ${variableName}`);
+    }
+    return;
+  }
+
+  // Handle list all variables: --list
+  if (rawTargets.includes('--list')) {
+    const allVars = getAllPathVariables();
+    logger.info('Available path variables:', { format: 'js' });
+    allVars.forEach(item => {
+      logger.info(`${item.variable} → ${item.path}`, { format: 'js' });
+    });
+    return;
+  }
+
   // If the last argument is --exports, print exports for each file
   const showExports = rawTargets.includes('--exports');
   if (showExports) rawTargets = rawTargets.filter(arg => arg !== '--exports');
@@ -126,18 +156,60 @@ if (require.main === module) {
       }
     }
 
-    logger.info(output, { format: 'paths' });
+    logger.info(output, { format: 'js' });
   } else {
     for (const file of fileList) {
-      logger.detail(`No variable found for path: ${path.resolve(file)}\n`, { format: 'inline' });
+      logger.detail(`No variable found for path: ${path.resolve(file)}`);
     }
     process.exit(1);
   }
+}
+
+// Reverse lookup: get paths from registry key
+function getPathByVariable(variableName) {
+  const paths = require('@paths');
+
+  function* walkRegistry(obj, prefix = '') {
+    for (const [key, value] of Object.entries(obj)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        yield* walkRegistry(value, fullKey);
+      } else if (typeof value === 'string' && key === variableName) {
+        yield { variable: key, path: value, fullKey };
+      }
+    }
+  }
+
+  return [...walkRegistry(paths)];
+}
+
+// Get all available path variables
+function getAllPathVariables() {
+  const paths = require('@paths');
+  const variables = [];
+
+  function walkRegistry(obj, prefix = '') {
+    for (const [key, value] of Object.entries(obj)) {
+      const fullKey = prefix ? `${prefix}.${key}` : key;
+
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+        walkRegistry(value, fullKey);
+      } else if (typeof value === 'string') {
+        variables.push({ variable: key, path: value, fullKey });
+      }
+    }
+  }
+
+  walkRegistry(paths);
+  return variables.sort((a, b) => a.variable.localeCompare(b.variable));
 }
 
 module.exports = {
   findVariableByPath,
   getFileExports,
   findVariablesForTargets,
+  getPathByVariable,
+  getAllPathVariables,
 };
 

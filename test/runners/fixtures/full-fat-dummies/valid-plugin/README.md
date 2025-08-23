@@ -95,4 +95,4 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
 
 **Note:** This is an archetype of the "/path/to/oshea/plugins/valid-plugin" plugin, created as "valid-plugin". You may need to update its content, registration paths, and internal references if you customize it further.
 
-**Note:** This is an archetype of the '/home/notroot/Build/oshea/plugins/template-basic' plugin, created as 'valid-plugin'. You may need to update its content, registration paths, and internal references if you customize it further.
+**Note:** This is an archetype of the './/oshea/plugins/template-basic' plugin, created as 'valid-plugin'. You may need to update its content, registration paths, and internal references if you customize it further.

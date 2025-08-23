@@ -90,9 +90,9 @@ no-old-project-name:
     #- "md-to-pdf-plugins"
     #- "Markdown to PDF"
 
-    # --- Docs ---
+# --- Docs ---
 
-    # scripts/linting/docs/janitor.js
+# scripts/linting/docs/janitor.js
 janitor:
   group: docs
   targets: [ "." ]

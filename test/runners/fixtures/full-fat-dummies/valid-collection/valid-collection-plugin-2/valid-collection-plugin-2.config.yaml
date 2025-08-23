@@ -2,7 +2,7 @@ plugin_name: valid-collection-plugin-2
 version: 1.0.0
 protocol: v1
 description: >-
-  Archetype of "/home/notroot/Build/oshea/plugins/valid-collection-plugin-2": A
+  Archetype of ".//oshea/plugins/valid-collection-plugin-2": A
   new valid-collection-plugin-2 plugin for [describe your plugin's purpose
   here].
 handler_script: index.js

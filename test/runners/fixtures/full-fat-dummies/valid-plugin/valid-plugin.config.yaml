@@ -2,7 +2,7 @@ plugin_name: valid-plugin
 version: 1.0.0
 protocol: v1
 description: >-
-  Archetype of "/home/notroot/Build/oshea/plugins/valid-plugin": A new
+  Archetype of ".//oshea/plugins/valid-plugin": A new
   valid-plugin plugin for [describe your plugin's purpose here].
 handler_script: index.js
 css_files:

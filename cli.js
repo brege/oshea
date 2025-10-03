@@ -73,7 +73,8 @@ function createBaseYargs() {
             'Tab-completion Tip:\n' +
             '   echo \'source <(oshea completion)\' >> ~/.bashrc\n' +
             '   echo \'source <(oshea completion)\' >> ~/.zshrc\n' +
-            'then run `source ~/.bashrc` or `source ~/.zshrc`'
+            'then run source ~/.bashrc or source ~/.zshrc\n' +
+            'oshea _tab_cache'
     );
 }
 

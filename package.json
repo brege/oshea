@@ -11,6 +11,7 @@
     "convert": "node cli.js convert",
     "generate": "node cli.js generate",
     "paths": "node paths/generator.js",
+    "postinstall": "npx puppeteer browsers install chrome",
     "test": "mocha",
     "test:all": "npm run test",
     "test:last-fails": "node test/analytics/run-last-fails.js",

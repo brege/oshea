@@ -22,7 +22,16 @@ const logger = require(loggerPath);
 // Execute a shell command and return promise with result
 function executeCommand(command) {
   return new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
+    exec(command, {
+      env: {
+        ...process.env,
+        GIT_TERMINAL_PROMPT: '0',
+        GIT_CONFIG_GLOBAL: '/dev/null',
+        GIT_CONFIG_SYSTEM: '/dev/null',
+        GIT_ASKPASS: 'echo',
+        SSH_ASKPASS: 'echo'
+      }
+    }, (error, stdout, stderr) => {
       if (error) {
         reject({ error, stdout, stderr, message: error.message });
         return;
@@ -375,7 +384,15 @@ function executeCommandWithColors(command) {
   return new Promise((resolve, reject) => {
     const { exec } = require('child_process');
     exec(command, {
-      env: { ...process.env, FORCE_COLOR: '1' }, // Ensure colors are preserved
+      env: {
+        ...process.env,
+        FORCE_COLOR: '1', // Ensure colors are preserved
+        GIT_TERMINAL_PROMPT: '0',
+        GIT_CONFIG_GLOBAL: '/dev/null',
+        GIT_CONFIG_SYSTEM: '/dev/null',
+        GIT_ASKPASS: 'echo',
+        SSH_ASKPASS: 'echo'
+      },
       maxBuffer: 1024 * 1024 // 1MB buffer for large outputs
     }, (error, stdout, stderr) => {
       if (error) {

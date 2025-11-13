@@ -162,6 +162,17 @@ class DefaultHandler {
         });
       }
 
+      const styleHyperlinks = processedFmData.style_hyperlinks !== undefined
+        ? processedFmData.style_hyperlinks
+        : globalConfig.style_hyperlinks;
+      if (styleHyperlinks === false) {
+        const noLinkStylesCss = 'a,a:link,a:visited,a:hover,a:active{color:inherit!important;text-decoration:none!important;font-weight:inherit!important}';
+        cssFileContentsArray.push(noLinkStylesCss);
+        logger.debug('Hyperlink styling disabled', {
+          context: 'DefaultHandler'
+        });
+      }
+
       for (const cssFile of (pluginSpecificConfig.css_files || [])) {
         const cssFilePath = path.resolve(pluginBasePath, cssFile);
         if (fss.existsSync(cssFilePath)) {

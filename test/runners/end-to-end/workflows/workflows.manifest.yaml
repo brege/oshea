@@ -14,7 +14,7 @@ scenarios:
   - description: add a collection from a remote repository
     test_id: 4.1.1.1
     args: >-
-      collection add https://github.com/brege/md-to-pdf-plugins.git --name
+      collection add https://github.com/brege/oshea-plugins.git --name
       lifecycle-collection
     expect:
       contains: Successfully cloned repository

@@ -45,7 +45,7 @@ oshea convert plugins/recipe/recipe-example.md --plugin recipe --watch
 
   * **Add a collection** from a Git repository or local path:
     ```bash
-    oshea collection add https://github.com/brege/md-to-pdf-plugins
+    oshea collection add https://github.com/brege/oshea-plugins
     oshea collection add ./path/to/local/collection
     ```
   * **List downloaded collections** and their status:
@@ -58,7 +58,7 @@ oshea convert plugins/recipe/recipe-example.md --plugin recipe --watch
     ```
   * **Remove a downloaded collection:**
     ```bash
-    oshea collection remove md-to-pdf-plugins
+    oshea collection remove oshea-plugins
     ```
 
 ### Plugins

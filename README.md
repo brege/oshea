@@ -33,7 +33,7 @@ This tool allows you to produce high-quality and re-usable, aesthetic documents.
 | [CV Layout](plugins/cv) | [Cover Letter Layout](plugins/cover-letter) | [Recipe Layout](plugins/recipe) |
 | :---------------: | :----------------: | :---------------: |
 | <img src="docs/images/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="docs/images/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="docs/images/screenshots/example-recipe.png" alt="Recipe Screenshot" width="300"/> |
-| [**Business Card**](plugins/advanced-card) | [**Restaurant Menu**](https://github.com/brege/md-to-pdf-plugins/tree/main/restaurant-menu) | [**D3.js Slide**](https://github.com/brege/md-to-pdf-plugins/tree/main/d3-histogram-slide) |
+| [**Business Card**](plugins/advanced-card) | [**Restaurant Menu**](https://github.com/brege/oshea-plugins/tree/main/restaurant-menu) | [**D3.js Slide**](https://github.com/brege/oshea-plugins/tree/main/d3-histogram-slide) |
 | <img src="docs/images/screenshots/advanced-business-card.png" alt="Business Card" width="300"/> | <img src="docs/images/screenshots/restaurant-menu.png" alt="Restaurant Menu" width="300"/>  | <img src="docs/images/screenshots/d3-histogram-slide.png" alt="D3.js Slide" width="300"/> | 
 
 ---
@@ -100,7 +100,7 @@ node scripts/ai/ai-context-generator.js --plugin default --filename ai-context.t
 
 See the [**AI Assisted Plugin Development Guide**](docs/ai/ai-assisted-plugin-development-guide.md) for more information. This uses built-in assets like the [**Plugin Contract**](docs/refs/plugin-contract.md), appends all plugin files, and [an interaction spec](docs/ai/interaction-spec.md) to guide the AI.
 
-The command above specifies a base plugin to archetype from, the "default" plugin, although any plugin will work. [This is how the D3.js Slide was created.](https://github.com/brege/md-to-pdf-plugins/tree/main/d3-histogram-slide).
+The command above specifies a base plugin to archetype from, the "default" plugin, although any plugin will work. [This is how the D3.js Slide was created.](https://github.com/brege/oshea-plugins/tree/main/d3-histogram-slide).
 
 ---
 
@@ -163,7 +163,7 @@ oshea plugin validate my-plugin   # Validate plugin structure and tests
 **Collection Commands:**
 ```bash
 oshea collection list                                          # List collections
-oshea collection add https://github.com/brege/md-to-pdf-plugins # Add remote collection
+oshea collection add https://github.com/brege/oshea-plugins # Add remote collection
 oshea update                                                   # Update plugins/collections
 ```
 

@@ -119,7 +119,7 @@ If you have a repository containing multiple plugins, users can add the entire s
 
 Add a collection from a local directory
 ```bash
-oshea collection add https://github.com/brege/md-to-pdf-plugins
+oshea collection add https://github.com/brege/oshea-plugins
 ```
 
 #### Method B: Developer Convenience with `collections_root`

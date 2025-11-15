@@ -12,7 +12,7 @@ scenarios:
   - description: should successfully add a collection from a git URL
     test_id: 3.10.1
     args: >-
-      collection add https://github.com/brege/md-to-pdf-plugins.git --name
+      collection add https://github.com/brege/oshea-plugins.git --name
       test-collection-1
     expect:
       executes: true

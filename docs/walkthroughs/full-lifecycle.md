@@ -3,12 +3,12 @@
 This guide demonstrates a complete, real-world workflow for managing plugins in `oshea`. You will add a plugin collection from a remote Git repository, enable a specific plugin, use it to convert a document, and then clean up by disabling the plugin and removing the collection.
 
 This entire process is automated and verified by the test at
-[`test/runners/smoke/workflow-tests.yaml`](test/runners/smoke/workflow-tests.yaml),
+[`test/runners/end-to-end/workflows/workflow-tests.yaml`](../../test/runners/end-to-end/workflows/workflow-tests.yaml),
 which you can run to confirm that the steps above work as expected.
 
 **Command.**
 ```bash
-node test/runners/smoke/workflow-test-runner.js --show
+node test/runners/end-to-end/workflows/workflow-test-runner.js --show
 ```
 This will run the whole process, showing output as it happens, leaving your user-data untouched.
 
@@ -27,13 +27,13 @@ First, add a collection of plugins from a remote Git repository. This command cl
 **Command:**
 
 ```bash
-oshea collection add https://github.com/brege/md-to-pdf-plugins.git --name lifecycle-collection
+oshea collection add https://github.com/brege/oshea-plugins.git --name lifecycle-collection
 ```
 
 **Explanation:**
 
   * `collection add`: The command to add a new source of plugins.
-  * `https://github.com/brege/md-to-pdf-plugins.git`: The URL of the remote Git repository containing the plugins.
+  * `https://github.com/brege/oshea-plugins.git`: The URL of the remote Git repository containing the plugins.
   * `--name lifecycle-collection`: Assigns a local, memorable name to this collection.
 
 ---

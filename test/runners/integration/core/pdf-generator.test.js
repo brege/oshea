@@ -24,6 +24,7 @@ describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoo
 
     // Create the full mock object structure that puppeteer returns
     const mockPage = {
+      setViewport: sandbox.stub(),
       setContent: sandbox.stub(),
       pdf: sandbox.stub(),
       close: sandbox.stub(),

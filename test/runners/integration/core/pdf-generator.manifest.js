@@ -17,7 +17,9 @@ module.exports = [
       const actualHtml = mockPage.setContent.getCall(0).args[0];
       const dom = new JSDOM(actualHtml);
       expect(dom.window.document.body.innerHTML.trim()).to.equal(htmlBodyContent);
-      expect(dom.window.document.querySelector('style').textContent).to.equal(cssFileContentsArray[0]);
+      const styleContent = dom.window.document.querySelector('style').textContent;
+      expect(styleContent).to.include(cssFileContentsArray[0]);
+      expect(styleContent).to.include('html, body');
     },
   }),
 
@@ -46,7 +48,9 @@ module.exports = [
       const actualHtml = mockPage.setContent.getCall(0).args[0];
       const dom = new JSDOM(actualHtml);
       const combinedCss = cssFileContentsArray.join('\n\n/* --- Next CSS File --- */\n\n');
-      expect(dom.window.document.querySelector('style').textContent).to.equal(combinedCss);
+      const styleContent = dom.window.document.querySelector('style').textContent;
+      expect(styleContent).to.include(combinedCss);
+      expect(styleContent).to.include('html, body');
     },
   }),
 

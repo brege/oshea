@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // cli.js
 
+require('module-alias/register');
 require('module-alias')(__dirname);
 
 const { hideBin } = require('yargs/helpers');

@@ -1,6 +1,6 @@
 # oshea - Markdown to PDF Converter
 
-A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs. It features a powerful, extensible plugin system, making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports.
+A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs. It features a powerful, extensible plugin system making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports.
 **`oshea`** is built on:
 [markdown-it](https://github.com/markdown-it/markdown-it) for Markdown parsing, and
 [puppeteer](https://pptr.dev/) for high-quality PDF generation.
@@ -13,14 +13,16 @@ A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](ht
 
 ### Quick Start
 
+Convert a basic Markdown file to PDF
 ```bash
-# Convert a basic markdown file
 oshea my-document.md
-
-# Use a built-in plugin for styling
+```
+Use a built-in plugin for styling
+```bash
 oshea my-resume.md --plugin cv
-
-# Create a cover letter with professional formatting
+```
+Create a cover letter with professional formatting
+```bash
 oshea my-letter.md --plugin cover-letter
 ```
 
@@ -30,22 +32,53 @@ oshea my-letter.md --plugin cover-letter
 
 This tool allows you to produce high-quality and re-usable, aesthetic documents.
 
-| [CV Layout](plugins/cv) | [Cover Letter Layout](plugins/cover-letter) | [Recipe Layout](plugins/recipe) |
-| :---------------: | :----------------: | :---------------: |
-| <img src="docs/images/screenshots/example-cv.png" alt="CV Layout Screenshot" width="300"/> | <img src="docs/images/screenshots/example-cover-letter.png" alt="Cover Letter Screenshot" width="300"/> | <img src="docs/images/screenshots/example-recipe.png" alt="Recipe Screenshot" width="300"/> |
-| [**Business Card**](plugins/advanced-card) | [**Restaurant Menu**](https://github.com/brege/oshea-plugins/tree/main/restaurant-menu) | [**D3.js Slide**](https://github.com/brege/oshea-plugins/tree/main/d3-histogram-slide) |
-| <img src="docs/images/screenshots/advanced-business-card.png" alt="Business Card" width="300"/> | <img src="docs/images/screenshots/restaurant-menu.png" alt="Restaurant Menu" width="300"/>  | <img src="docs/images/screenshots/d3-histogram-slide.png" alt="D3.js Slide" width="300"/> | 
+#### Documents
+
+<table>
+  <tr>
+    <td><a href="plugins/cv">
+      <img src="docs/images/screenshots/example-cv.png" width="300">
+      <br><strong>CV Layout</strong></a>
+    </td>
+    <td><a href="plugins/cover-letter">
+      <img src="docs/images/screenshots/example-cover-letter.png" width="300">
+      <br><strong>Cover Letter Layout</strong></a>
+    </td>
+    <td><a href="plugins/recipe">
+      <img src="docs/images/screenshots/example-recipe.png" width="300">
+      <br><strong>Recipe Layout</strong></a>
+    </td>
+  </tr>
+</table>
+
+#### Advanced Layouts
+
+<table>
+  <tr>
+    <td><a href="plugins/advanced-card">
+      <img src="docs/images/screenshots/advanced-business-card.png" width="300">
+      <br><strong>Business Card</strong></a>
+    </td>
+    <td><a href="https://github.com/brege/oshea-plugins/tree/main/restaurant-menu">
+      <img src="docs/images/screenshots/restaurant-menu.png" width="300">
+      <br><strong>Restaurant Menu</strong></a>
+    </td>
+    <td><a href="https://github.com/brege/oshea-plugins/tree/main/d3-histogram-slide">
+      <img src="docs/images/screenshots/d3-histogram-slide.png" width="300">
+      <br><strong>D3.js Slide</strong></a>
+    </td>
+  </tr>
+</table>
 
 ---
 
 ### Installation
 
-Install `oshea` globally with `npm install -g oshea`, or locally.
+Install `oshea` globally
 ```bash
 git clone https://github.com/brege/oshea.git
 cd oshea
-npm install
-npm link
+npm install -g
 ```
 
 ---
@@ -84,8 +117,6 @@ my-plugins/my-better-letter
 └── README.md                       # plugin description (embedded --help text)
 ```
 
----
-
 This allows for great flexibility and re-usability. Plugins are portable and can be shared across projects.
 
 ---
@@ -98,7 +129,7 @@ Use the [helper script](scripts/ai/ai-context-generator.js) to build a context p
 node scripts/ai/ai-context-generator.js --plugin default --filename ai-context.txt
 ```
 
-See the [**AI Assisted Plugin Development Guide**](docs/ai/ai-assisted-plugin-development-guide.md) for more information. This uses built-in assets like the [**Plugin Contract**](docs/refs/plugin-contract.md), appends all plugin files, and [an interaction spec](docs/ai/interaction-spec.md) to guide the AI.
+See the [**AI Assisted Plugin Development Guide**](docs/ai/ai-assisted-plugin-development-guide.md) for more information. This uses built-in assets like the [**Plugin Contract**](docs/refs/plugin-contract.md), appends all plugin files, and [an interaction spec](docs/ai/interaction-spec.md) to onboard and guide the AI.
 
 The command above specifies a base plugin to archetype from, the "default" plugin, although any plugin will work. [This is how the D3.js Slide was created.](https://github.com/brege/oshea-plugins/tree/main/d3-histogram-slide).
 
@@ -137,7 +168,6 @@ Other guides:
 
 * [Batch Processing](docs/guides/batch-processing-guide.md) - Creating a set of PDFs from a directory of markdown files.
 Alternatively, the `generate` command is used to generate one PDF from a set of markdown files.
-
 * [Plugin Development Guide](docs/guides/plugin-development.md) - Manual configurations and complex workflows.
 * [Configuration Hierarchies](docs/guides/configuration-hierarchies.md) - Nitty-gritty details on the config hierarchy and how it's used.
 
@@ -147,20 +177,20 @@ Alternatively, the `generate` command is used to generate one PDF from a set of 
 
 **Cheatsheet:** [`docs/refs/cheat-sheet.md`](docs/refs/cheat-sheet.md)
 
-**Dynamic Tab-completion:**
+**Dynamic Tab-completion**
 ```bash
 echo 'source <(oshea completion)' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-**Plugin Management Commands:**
+**Plugin Management Commands**
 ```bash
 oshea plugin help cv              # Plugin-specific help
 oshea plugin list                 # List all plugins (add --short for brief)
 oshea plugin validate my-plugin   # Validate plugin structure and tests
 ```
 
-**Collection Commands:**
+**Collection Commands**
 ```bash
 oshea collection list                                          # List collections
 oshea collection add https://github.com/brege/oshea-plugins # Add remote collection
@@ -176,27 +206,23 @@ Each directory below has a mini-README (cf. main [`index.md`](docs/index.md)) th
 
 The librarian, together with the [**postman**](scripts/linting/docs/postman.js), ensures all documentation is properly indexed and linked.
 
-**Docs** - [[`docs/`](docs/index.md)] - Documentation index (guides, reference, walkthroughs, vision, development sequence)
-
-**Linting** - [[`linting/`](scripts/linting/index.md)] - Scripts to improve code quality and document indexes and interlinking
-
-**Paths** - [[`paths/`](paths/index.md)] - The centralized path registry used by all app, test and auxiliary modules
-
-**Plugins** - [[`plugins/`](plugins/index.md)] - Bundled plugins, and a higher level plugin overview
-
-**Scripts** - [[`scripts/`](scripts/index.md)] - Utility scripts (using AI, batch processing, project management, etc.)
-
-**Tests** - [[`test/`](test/index.md)] - Unit, integration and end-to-end tests. Life cycle, smoke, and linting tests. The test framework and how to use [mocha](https://mochajs.org/)
+- [**Docs**](docs/index.md) - Documentation index (guides, reference, walkthroughs, vision, development sequence)
+- [**Linting**](scripts/linting/index.md) - Scripts to improve code quality and document indexes and interlinking
+- [**Paths**](paths/index.md) - The centralized path registry used by all app, test and auxiliary modules
+- [**Plugins**](plugins/index.md) - Bundled plugins, and a higher level plugin overview
+- [**Scripts**](scripts/index.md) - Utility scripts (using AI, batch processing, project management, etc.)
+- [**Tests**](test/index.md) - Unit, integration and end-to-end tests. Life cycle, smoke, and linting tests. The test framework and how to use [mocha](https://mochajs.org/)
 
 ---
 
 ### Development & Testing
 
-**Config precedence:** `--config` flag > user `~/.config/oshea/config.yaml` > `config.example.yaml`
+- **Config precedence:** `--config` flag > user `~/.config/oshea/config.yaml` > `config.example.yaml`
+- **Plugin precedence:** `--plugin` flag > front matter > local `*.config.yaml` > default
 
-**Plugin precedence:** `--plugin` flag > front matter > local `*.config.yaml` > default
-
-[[`test/`](test/index.md)] - [[`linting/`](scripts/linting/index.md)] - [[`.mocharc.js`](.mocharc.js)]
+* [`test/index.md`](test/index.md)
+* [`linting/index.md`](scripts/linting/index.md)
+* [`.mocharc.js`](.mocharc.js)
 
 This project has a rich testing framework. In addition to the in-situ tests bundled with each plugin, there are over 300 tests, ranging from unit, integration, end-to-end, and lifecycle tests, in a declarative, manifest-driven harness and factory mocking system. The best place to start is the [Test Index](test/index.md).
 
@@ -215,22 +241,21 @@ This checks if your plugin is self-activating, if the in-situ tests pass, and if
 
 **Development history.**
 
-[ [`v0.10`](docs/archive/v0.10/) ]
+- [ [`v0.10`](docs/archive/v0.10/) ]
 [ [polish](docs/archive/v0.10/polish-checklist.md) ] ←
 [ [linting](docs/archive/v0.10/linting-checklist.md) ] ←
 [ [release candidate](docs/archive/v0.10/rc-checklist.md) ] ←
 [ [refactor](docs/archive/v0.10/scripts.refactor.index.md) ] ←
 [ [reorg](docs/archive/v0.10/reorganization-planner.md) ]
-⋅ [ [`v0.9`](docs/archive/v0.9/) ]
+- [ [`v0.9`](docs/archive/v0.9/) ]
 [ [dream-board](docs/archive/v0.9/dream-board-v0.9.md) ]
-
-[ [`v0.8`](docs/archive/v0.8/) ]
+- [ [`v0.8`](docs/archive/v0.8/) ]
 [ [dream-board](docs/archive/v0.8/dream-board-v0.8.md) ]
 [ [changelog](docs/archive/v0.8/changelog-v0.8.md) ]
-⋅ [ [`v0.7`](docs/archive/v0.7/) ]
+- [ [`v0.7`](docs/archive/v0.7/) ]
 [ [dream-board](docs/archive/v0.7/dream-board-v0.7.md) ]
 [ [changelog](docs/archive/v0.7/changelog-v0.7.md) ]
-⋅ [ [`v0.6` (and earlier)](docs/archive/v0.6/) ]
+- [ [`v0.6` (and earlier)](docs/archive/v0.6/) ]
 [ [roadmap](docs/archive/v0.6/roadmap.md)]
 
 ---

@@ -23,18 +23,23 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
 
     let viewportWidth = 800;
     let viewportHeight = 600;
+    let hasExplicitDimensions = false;
 
     if (pdfOptions?.width) {
       viewportWidth = parseInt(String(pdfOptions.width), 10);
+      hasExplicitDimensions = true;
     }
     if (pdfOptions?.height) {
       viewportHeight = parseInt(String(pdfOptions.height), 10);
+      hasExplicitDimensions = true;
     }
 
     await page.setViewport({ width: viewportWidth, height: viewportHeight });
 
-    const viewportCss = `html, body { width: ${viewportWidth}px !important; height: ${viewportHeight}px !important; }`;
-    const combinedCss = viewportCss + '\n\n' + (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
+    const viewportCss = hasExplicitDimensions
+      ? `html, body { width: ${viewportWidth}px !important; height: ${viewportHeight}px !important; }`
+      : '';
+    const combinedCss = (viewportCss ? viewportCss + '\n\n' : '') + (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
     logger.debug('Combined CSS content', {
       context: 'PDFGenerator',
       cssFileCount: (cssFileContentsArray || []).length,

@@ -19,7 +19,6 @@ module.exports = [
       expect(dom.window.document.body.innerHTML.trim()).to.equal(htmlBodyContent);
       const styleContent = dom.window.document.querySelector('style').textContent;
       expect(styleContent).to.include(cssFileContentsArray[0]);
-      expect(styleContent).to.include('html, body');
     },
   }),
 
@@ -50,7 +49,6 @@ module.exports = [
       const combinedCss = cssFileContentsArray.join('\n\n/* --- Next CSS File --- */\n\n');
       const styleContent = dom.window.document.querySelector('style').textContent;
       expect(styleContent).to.include(combinedCss);
-      expect(styleContent).to.include('html, body');
     },
   }),
 

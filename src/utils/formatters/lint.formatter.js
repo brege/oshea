@@ -1,7 +1,11 @@
 // src/utils/formatters/lint.formatter.js
 // Lint-specific formatting logic
 
-const chalk = require('chalk');
+const chalkImport = require('chalk');
+const chalk = chalkImport.default || chalkImport;
+if (typeof chalkImport.level === 'number') {
+  chalk.level = chalkImport.level;
+}
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 

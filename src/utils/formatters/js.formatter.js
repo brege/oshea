@@ -2,7 +2,11 @@
 // General JavaScript code output formatter for scripts and tools
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
-const chalk = require('chalk');
+const chalkImport = require('chalk');
+const chalk = chalkImport.default || chalkImport;
+if (typeof chalkImport.level === 'number') {
+  chalk.level = chalkImport.level;
+}
 
 // JavaScript-specific theme extensions using simpler chalk colors
 const jsTheme = {

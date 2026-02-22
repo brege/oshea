@@ -25,6 +25,8 @@ function executeCommand(command) {
     exec(command, {
       env: {
         ...process.env,
+        FORCE_COLOR: '0',
+        NO_COLOR: '1',
         GIT_TERMINAL_PROMPT: '0',
         GIT_CONFIG_GLOBAL: '/dev/null',
         GIT_CONFIG_SYSTEM: '/dev/null',
@@ -495,4 +497,3 @@ module.exports = {
   matchesGrep,
   listTestSuites
 };
-

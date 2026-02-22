@@ -2,7 +2,7 @@
 
 // Table formatter for user-facing CLI outputs
 // Formats tabular data for CLI display with proper column alignment
-const stripAnsi = require('strip-ansi');
+const { stripVTControlCharacters } = require('util');
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 
@@ -20,7 +20,7 @@ function formatTable(level, message, meta = {}) {
 
   // Calculate column widths
   const columnWidths = columns.map((col, index) => {
-    const headerWidth = stripAnsi(col.header || col).length;
+    const headerWidth = stripVTControlCharacters(col.header || col).length;
     const maxDataWidth = Math.max(
       ...rows.map(row => {
         const key = col.key || col;
@@ -28,10 +28,10 @@ function formatTable(level, message, meta = {}) {
 
         // For status column, account for Unicode indicator that will be prepended
         if (key === 'status' && row.statusType && row.statusType !== 'unknown') {
-          return stripAnsi(`● ${String(value)}`).length; // ● and ○ are same width
+          return stripVTControlCharacters(`● ${String(value)}`).length; // ● and ○ are same width
         }
 
-        return stripAnsi(String(value)).length;
+        return stripVTControlCharacters(String(value)).length;
       })
     );
     return Math.max(headerWidth, maxDataWidth);
@@ -94,7 +94,7 @@ function formatTable(level, message, meta = {}) {
         }
 
         // Calculate padding based on text length without colors, then apply colors
-        const rawLength = stripAnsi(`${statusIndicator} ${displayValue}`).length;
+        const rawLength = stripVTControlCharacters(`${statusIndicator} ${displayValue}`).length;
         const paddingNeeded = Math.max(0, columnWidths[index] - rawLength);
         return coloredStatus + ' '.repeat(paddingNeeded);
       }

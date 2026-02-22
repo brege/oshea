@@ -1,5 +1,9 @@
 // src/utils/formatters/color-theme.js
-const chalk = require('chalk');
+const chalkImport = require('chalk');
+const chalk = chalkImport.default || chalkImport;
+if (typeof chalkImport.level === 'number') {
+  chalk.level = chalkImport.level;
+}
 
 // Gruvbox color palette
 // https://github.com/morhetz/gruvbox

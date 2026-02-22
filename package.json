@@ -1,6 +1,6 @@
 {
   "name": "oshea",
-  "version": "0.11.2",
+  "version": "0.12.0",
   "description": "A Node.JS Markdown to PDF convertor and extensible doctype plugin system.",
   "main": "cli.js",
   "bin": {
@@ -77,6 +77,13 @@
     "remark": "^15.0.1",
     "sinon": "^21.0.1",
     "unist-util-visit-parents": "^6.0.2"
+  },
+  "overrides": {
+    "mocha": {
+      "diff": "8.0.3",
+      "glob": "11.1.0",
+      "minimatch": "10.2.2"
+    }
   },
   "engines": {
     "node": ">=20.0.0"

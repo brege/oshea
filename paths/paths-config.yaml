@@ -42,9 +42,7 @@ registries:
         items:
           paths_config_path: path.join(projectRoot, 'paths', 'paths-config.yaml')
           katex_path: path.join(assetsRoot, 'katex.min.css')
-          find_litter_rules_path: path.join(assetsRoot, 'litter-list.txt')
           base_plugin_schema_path: path.join(srcRoot, 'validators', 'base-plugin.schema.json')
-          linting_config_path: path.join(scriptsRoot, 'linting', 'linting-config.yaml')
       collections:
         comment: Collections System Constants
         items:
@@ -58,7 +56,6 @@ registries:
           test_runners_dir: path.join(testRoot, 'runners')
           e2e_test_dir: path.join(testRunnersDir, 'end-to-end')
           integration_test_dir: path.join(testRunnersDir, 'integration')
-          linting_test_dir: path.join(testRunnersDir, 'linting')
       test_fixtures:
         comment: Test Fixtures
         items:
@@ -75,12 +72,6 @@ registries:
           test_shared_root: path.join(integrationTestDir, 'shared')
           test_config_path: path.join(testSharedRoot, 'config.test.yaml')
           test_file_helpers_path: path.join(testSharedRoot, 'test-helpers.js')
-      linting_foundation:
-        comment: Linting Infrastructure Foundation
-        items:
-          linting_dir: path.join(testRunnersDir, 'linting')
-          linting_unit_harness: path.join(lintingDir, 'linting-unit-harness.js')
-          linting_test_runner_factory: path.join(lintingDir, 'test-runner-factory.js')
     features:
       cli:
         comment: Command Line Interface
@@ -126,22 +117,6 @@ registries:
         comment: Shared Script Utilities
         pattern: scripts/shared/**/*.js
         rank: 2
-      linting_core:
-        comment: Core Linting Infrastructure
-        pattern: scripts/linting/**.js
-        rank: 0
-      linting_docs:
-        comment: Documentation Linters
-        pattern: scripts/linting/docs/**/*.js
-        rank: 1
-      linting_validators:
-        comment: Validation Linters
-        pattern: scripts/linting/validators/**/*.js
-        rank: 2
-      linting_lib:
-        comment: Linting Utilities & Helpers
-        pattern: scripts/linting/lib/**/*.js
-        rank: 3
       core_integration:
         comment: Core Module Integration Tests
         pattern: test/runners/integration/core/**/*.js
@@ -177,10 +152,6 @@ registries:
       e2e_runners:
         comment: End-to-End Test Runners
         pattern: test/runners/end-to-end/**/*.js
-        rank: 2
-      linting_tests:
-        comment: Linting Tests
-        pattern: test/runners/linting/**/*.js
         rank: 2
     contextual_naming:
       add.command.js:

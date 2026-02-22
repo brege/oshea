@@ -15,7 +15,6 @@ if (debugMode) {
 }
 
 if (require.main === module) {
-  // lint-skip-next-line no-console
   console.log(`[Mocha] Running test group: '${group}'${debugMode ? ' (debug mode enabled)' : ''}`);
 }
 function flattenSpecs(spec) {
@@ -49,9 +48,6 @@ const paths = {
 
   // --- Bundled Plugin In-Situ Test Paths ---
   insitu:                 'plugins/**/.contract/test/*.test.js',
-
-  // --- Linting ---
-  linting:                'test/runners/linting/all-linting.test.js',
 
 };
 
@@ -158,9 +154,6 @@ const groups = {
   // All End-to-End Tests
   e2e:             paths.e2e_runner,
 
-  // All Linting Tests
-  linting:         paths.linting,
-
   // E2E Test Subgroups
   cli:             paths.e2e_runner,
   workflows:       paths.e2e_runner,
@@ -171,7 +164,6 @@ const groups = {
     paths.integration,
     paths.e2e_runner,
     paths.insitu,
-    paths.linting
   ]
 };
 

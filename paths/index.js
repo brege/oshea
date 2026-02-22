@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-22T17:15:07.816Z
+// Generated: 2026-02-22T18:13:28.806Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -39,9 +39,7 @@ const mocharcPath = path.join(projectRoot, '.mocharc.js');
 // --- Key Static File Paths ---
 const pathsConfigPath = path.join(projectRoot, 'paths', 'paths-config.yaml');
 const katexPath = path.join(assetsRoot, 'katex.min.css');
-const findLitterRulesPath = path.join(assetsRoot, 'litter-list.txt');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
-const lintingConfigPath = path.join(scriptsRoot, 'linting', 'linting-config.yaml');
 
 // --- Collections System Constants ---
 const collectionsMetadataFilename = '.collection-metadata.yaml';
@@ -53,7 +51,6 @@ const collectionsUserPluginsDirname = 'user-plugins';
 const testRunnersDir = path.join(testRoot, 'runners');
 const e2eTestDir = path.join(testRunnersDir, 'end-to-end');
 const integrationTestDir = path.join(testRunnersDir, 'integration');
-const lintingTestDir = path.join(testRunnersDir, 'linting');
 
 // --- Test Fixtures ---
 const fixturesDir = path.join(testRunnersDir, 'fixtures');
@@ -68,11 +65,6 @@ const setupFile = path.join(integrationTestDir, 'setup.js');
 const testSharedRoot = path.join(integrationTestDir, 'shared');
 const testConfigPath = path.join(testSharedRoot, 'config.test.yaml');
 const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
-
-// --- Linting Infrastructure Foundation ---
-const lintingDir = path.join(testRunnersDir, 'linting');
-const lintingUnitHarness = path.join(lintingDir, 'linting-unit-harness.js');
-const lintingTestRunnerFactory = path.join(lintingDir, 'test-runner-factory.js');
 
 // ==========================================
 // Features (by dependency rank)
@@ -104,11 +96,6 @@ const validateCommandPath = path.join(projectRoot, 'src/cli/plugin/validate.comm
 // AI Tooling
 const aiRoot = path.join(projectRoot, 'scripts/ai/');
 const aiContextGeneratorPath = path.join(projectRoot, 'scripts/ai/ai-context-generator.js');
-
-// Core Linting Infrastructure
-const lintingCoreRoot = path.join(projectRoot, 'scripts/linting/');
-const lintHarnessPath = path.join(projectRoot, 'scripts/linting/lint-harness.js');
-const lintPath = path.join(projectRoot, 'scripts/linting/lint.js');
 
 // Core Module Integration Tests
 const coreIntegrationRoot = path.join(projectRoot, 'test/runners/integration/core/');
@@ -142,12 +129,6 @@ const pluginConfigLoaderPath = path.join(projectRoot, 'src/config/plugin-config-
 // Documentation Helpers
 const docsRoot = path.join(projectRoot, 'scripts/docs/');
 const generateTocPath = path.join(projectRoot, 'scripts/docs/generate-toc.js');
-
-// Documentation Linters
-const lintingDocsRoot = path.join(projectRoot, 'scripts/linting/docs/');
-const janitorPath = path.join(projectRoot, 'scripts/linting/docs/janitor.js');
-const librarianPath = path.join(projectRoot, 'scripts/linting/docs/librarian.js');
-const postmanPath = path.join(projectRoot, 'scripts/linting/docs/postman.js');
 
 // Configuration System Integration Tests
 const configIntegrationRoot = path.join(projectRoot, 'test/runners/integration/config/');
@@ -267,13 +248,6 @@ const e2eHelpersPath = path.join(projectRoot, 'test/runners/end-to-end/e2e-helpe
 const e2eMochaTestPath = path.join(projectRoot, 'test/runners/end-to-end/e2e-mocha.test.js');
 const e2eRunnerPath = path.join(projectRoot, 'test/runners/end-to-end/e2e-runner.js');
 
-// Linting Tests
-const lintingTestsRoot = path.join(projectRoot, 'test/runners/linting/');
-const allLintingTestPath = path.join(projectRoot, 'test/runners/linting/all-linting.test.js');
-const docsLintingManifestPath = path.join(projectRoot, 'test/runners/linting/docs-linting.manifest.js');
-const lintingUnitHarnessPath = path.join(projectRoot, 'test/runners/linting/linting-unit-harness.js');
-const testRunnerFactoryPath = path.join(projectRoot, 'test/runners/linting/test-runner-factory.js');
-
 // --- Rank 3: enhancements & utilities ---
 
 // CLI Completion Engine
@@ -305,15 +279,6 @@ const rawFormatterPath = path.join(projectRoot, 'src/utils/formatters/raw.format
 const tableFormatterPath = path.join(projectRoot, 'src/utils/formatters/table.formatter.js');
 const validationFormatterPath = path.join(projectRoot, 'src/utils/formatters/validation.formatter.js');
 const yamlTestFormatterPath = path.join(projectRoot, 'src/utils/formatters/yaml-test.formatter.js');
-
-// Linting Utilities & Helpers
-const lintingLibRoot = path.join(projectRoot, 'scripts/linting/lib/');
-const dataAdaptersPath = path.join(projectRoot, 'scripts/linting/lib/data-adapters.js');
-const fileDiscoveryPath = path.join(projectRoot, 'scripts/linting/lib/file-discovery.js');
-const findLintSkipsPath = path.join(projectRoot, 'scripts/linting/lib/find-lint-skips.js');
-const lintHelpersPath = path.join(projectRoot, 'scripts/linting/lib/lint-helpers.js');
-const skipSystemPath = path.join(projectRoot, 'scripts/linting/lib/skip-system.js');
-const visualRenderersPath = path.join(projectRoot, 'scripts/linting/lib/visual-renderers.js');
 
 // Shared Test Utilities & Helpers
 const sharedUtilitiesRoot = path.join(projectRoot, 'test/runners/integration/shared/');
@@ -347,9 +312,7 @@ module.exports = {
   mocharcPath,
   pathsConfigPath,
   katexPath,
-  findLitterRulesPath,
   basePluginSchemaPath,
-  lintingConfigPath,
   collectionsMetadataFilename,
   collectionsEnabledManifestFilename,
   collectionsDefaultArchetypeDirname,
@@ -357,7 +320,6 @@ module.exports = {
   testRunnersDir,
   e2eTestDir,
   integrationTestDir,
-  lintingTestDir,
   fixturesDir,
   simpleMdFixture,
   simpleMdFixtureWithFm,
@@ -368,9 +330,6 @@ module.exports = {
   testSharedRoot,
   testConfigPath,
   testFileHelpersPath,
-  lintingDir,
-  lintingUnitHarness,
-  lintingTestRunnerFactory,
 
   // --- user-facing interfaces ---
   cliRoot,
@@ -394,9 +353,6 @@ module.exports = {
   validateCommandPath,
   aiRoot,
   aiContextGeneratorPath,
-  lintingCoreRoot,
-  lintHarnessPath,
-  lintPath,
   coreIntegrationRoot,
   defaultHandlerFactoryPath,
   defaultHandlerManifestPath,
@@ -422,10 +378,6 @@ module.exports = {
   pluginConfigLoaderPath,
   docsRoot,
   generateTocPath,
-  lintingDocsRoot,
-  janitorPath,
-  librarianPath,
-  postmanPath,
   configIntegrationRoot,
   configResolverConstructorManifestPath,
   configResolverFactoryPath,
@@ -524,11 +476,6 @@ module.exports = {
   e2eHelpersPath,
   e2eMochaTestPath,
   e2eRunnerPath,
-  lintingTestsRoot,
-  allLintingTestPath,
-  docsLintingManifestPath,
-  lintingUnitHarnessPath,
-  testRunnerFactoryPath,
 
   // --- enhancements & utilities ---
   completionRoot,
@@ -557,13 +504,6 @@ module.exports = {
   tableFormatterPath,
   validationFormatterPath,
   yamlTestFormatterPath,
-  lintingLibRoot,
-  dataAdaptersPath,
-  fileDiscoveryPath,
-  findLintSkipsPath,
-  lintHelpersPath,
-  skipSystemPath,
-  visualRenderersPath,
   sharedUtilitiesRoot,
   captureLogsPath,
   testHelpersPath,

@@ -120,7 +120,7 @@ if (argvRaw[0] === 'config' && argvRaw.length <= 3 && !argvRaw.includes('--plugi
       isPure: argvRaw.includes('--pure')
     });
     process.exit(0);
-  } catch (error) {
+  } catch {
     // Fall through to full engine for complex config operations
   }
 }

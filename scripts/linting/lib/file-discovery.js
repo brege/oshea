@@ -224,4 +224,3 @@ function findCandidates(ref, allowedExts, rootDirs = ['.']) {
 }
 
 module.exports = { findFiles, findCandidates };
-

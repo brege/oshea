@@ -129,7 +129,7 @@ function discoverCommandTree(dir, prefixParts = []) {
         if (typeof cmdObj.builder === 'function') {
           try {
             cmdObj.builder(yargsStub);
-          } catch (e) {
+          } catch {
           // logger.warn(`Could not extract command builder info for ${commandName} node: ${e.message}`, { module: 'src/completion/cli-tree-builder.js' });
           }
         }

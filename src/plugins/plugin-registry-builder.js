@@ -746,7 +746,7 @@ class PluginRegistryBuilder {
     for (const pluginName in traditionalRegistry) {
       if (Object.prototype.hasOwnProperty.call(traditionalRegistry, pluginName)) {
         const regInfo = traditionalRegistry[pluginName];
-        let description = 'N/A';
+        let description;
         try {
           if (regInfo.configPath && fs.existsSync(regInfo.configPath) && fs.statSync(regInfo.configPath).isFile()) {
             const pluginConfig = await loadYamlConfig(regInfo.configPath);

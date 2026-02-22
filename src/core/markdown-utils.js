@@ -44,7 +44,7 @@ async function loadConfig(configPath) {
       error: error.message,
       operation: 'loadConfig'
     });
-    throw new Error(`Error loading or parsing '${configPath}': ${error.message}`);
+    throw new Error(`Error loading or parsing '${configPath}': ${error.message}`, { cause: error });
   }
 }
 

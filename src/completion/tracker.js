@@ -32,9 +32,9 @@ function triggerCacheUpdate() {
 
 function getDynamicData() {
   const cachePath = getCachePath();
-  let cacheData = {};
 
   if (fs.existsSync(cachePath)) {
+    let cacheData;
     try {
       cacheData = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
       const lastUpdated = new Date(cacheData.lastUpdated || 0);
@@ -47,12 +47,12 @@ function getDynamicData() {
       triggerCacheUpdate();
       return {};
     }
+
+    return cacheData;
   } else {
     triggerCacheUpdate();
     return {};
   }
-
-  return cacheData;
 }
 
 // --- Exported Provider Functions ---

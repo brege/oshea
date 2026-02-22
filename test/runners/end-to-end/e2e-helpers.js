@@ -63,7 +63,7 @@ const validators = {
     try {
       const doc = yaml.load(stdout);
       return typeof doc === 'object' && doc !== null && key in doc;
-    } catch (e) {
+    } catch {
       return false;
     }
   },
@@ -76,7 +76,7 @@ const validators = {
   file_exists: (filePath) => () => {
     try {
       return fs.existsSync(filePath);
-    } catch (e) {
+    } catch {
       return false;
     }
   },
@@ -89,7 +89,7 @@ const validators = {
       }
       const stats = fs.statSync(filePath);
       return stats.size >= minSize;
-    } catch (e) {
+    } catch {
       return false;
     }
   }

@@ -24,7 +24,7 @@ async function checkFile(baseDir, relativeFilePath, minSize) {
   try {
     await fsPromises.access(fullPath, fss.constants.F_OK);
   } catch (e) {
-    throw new Error(`File not found or not accessible: ${fullPath} - ${e.message}`);
+    throw new Error(`File not found or not accessible: ${fullPath} - ${e.message}`, { cause: e });
   }
   const stats = await fsPromises.stat(fullPath);
   if (stats.size < minSize) {

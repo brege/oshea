@@ -44,7 +44,7 @@ async function loadYamlConfig(configPath) {
     }
     return config;
   } catch (error) {
-    throw new Error(`Error loading or parsing '${configPath}': ${error.message}`);
+    throw new Error(`Error loading or parsing '${configPath}': ${error.message}`, { cause: error });
   }
 }
 

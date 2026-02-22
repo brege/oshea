@@ -33,7 +33,7 @@ function formatPluginEntry(plugin) {
 
   lines.push(`    ${theme.detail('Description:')} ${plugin.description}`);
 
-  let sourceDisplayMessage = plugin.registrationSourceDisplay;
+  let sourceDisplayMessage;
   if (plugin.status === 'Enabled (CM)' && plugin.cmCollection && plugin.cmPluginId) {
     sourceDisplayMessage = `CollectionsManager (CM: ${plugin.cmCollection}/${plugin.cmPluginId})`;
   } else if (plugin.registrationSourceDisplay && plugin.registrationSourceDisplay.includes('(CM:')) {

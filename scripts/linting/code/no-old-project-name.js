@@ -216,13 +216,11 @@ function runLinter(options = {}) {
     const result = scanFile(file, patterns, ignoreMatches);
     if (!result) continue;
 
-    let fileContent = null;
-    let originalContent = null;
+    let fileContent;
     let hasChanges = false;
 
     if (fix) {
-      originalContent = fs.readFileSync(file, 'utf8');
-      fileContent = originalContent;
+      fileContent = fs.readFileSync(file, 'utf8');
     }
 
     for (const hit of result.hits) {

@@ -13,7 +13,7 @@ async function createArchetype(dependencies, managerContext, sourcePluginIdentif
   const { cmUtils, collectionsMetadataFilename, collectionsDefaultArchetypeDirname } = dependencies;
   const { collRoot, listAvailablePlugins } = managerContext;
 
-  let sourcePluginInfo = {};
+  let sourcePluginInfo;
   let sourcePluginIdForReplacement = '';
 
   const idParts = sourcePluginIdentifier.split('/');

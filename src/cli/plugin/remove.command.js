@@ -36,13 +36,13 @@ async function removeUserPlugin(pluginName, manager) {
     return { success: false, reason: 'no_manifest' };
   }
 
-  let pluginStates = {};
-  let parsed = {};
+  let pluginStates;
+  let parsed;
 
   // Read existing plugins manifest
   try {
     const content = fs.readFileSync(pluginsManifestPath, 'utf8');
-    parsed = yaml.load(content);
+    parsed = yaml.load(content) || {};
     pluginStates = parsed?.plugins || {};
   } catch (e) {
     logger.warn(`Could not read user plugins manifest: ${e.message}`);

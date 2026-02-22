@@ -115,7 +115,7 @@ async function runSingleTestById(testCase) {
 
     return result;
   } catch (error) {
-    throw new Error(`Test ID ${testCase.testId} crashed: ${error.message}`);
+    throw new Error(`Test ID ${testCase.testId} crashed: ${error.message}`, { cause: error });
   }
 }
 

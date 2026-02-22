@@ -134,7 +134,10 @@ module.exports = async function addSingletonPlugin(dependencies, sourcePluginPat
         error: err.message
       });
     });
-    throw new Error(`Failed to copy plugin from "${sourcePluginPath}" to "${targetPluginDir}": ${copyError.message}`);
+    throw new Error(
+      `Failed to copy plugin from "${sourcePluginPath}" to "${targetPluginDir}": ${copyError.message}`,
+      { cause: copyError }
+    );
   }
 
   // 5. Create source metadata for the added plugin

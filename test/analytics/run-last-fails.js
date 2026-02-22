@@ -27,7 +27,7 @@ function main() {
   }
 
   const content = fs.readFileSync(reportPath, 'utf8');
-  let titles = [];
+  let titles;
 
   try {
     const testData = JSON.parse(content);
@@ -60,4 +60,3 @@ function main() {
 }
 
 main();
-

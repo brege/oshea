@@ -26,7 +26,7 @@ function findVariableByPath(targetPath) {
           if (path.resolve(value) === absoluteTargetPath) {
             yield key;
           }
-        } catch (e) {}
+        } catch {}
       }
     }
   }
@@ -62,7 +62,7 @@ function getFileExports(targetPath) {
         }
       }
     });
-  } catch (e) {}
+  } catch {}
   return Array.from(exportsSet).sort();
 }
 
@@ -212,4 +212,3 @@ module.exports = {
   getPathByVariable,
   getAllPathVariables,
 };
-

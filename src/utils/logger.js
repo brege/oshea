@@ -112,7 +112,7 @@ function logger(message, options = {}) {
   try {
     const formatter = getFormatter(format);
     return formatter(level, message, meta);
-  } catch (error) {
+  } catch {
     // Fallback to default formatter if format not found
     return getFormatter('app')(level, message, meta);
   }
@@ -174,4 +174,3 @@ module.exports = {
   // Legacy specialized formatters (backward compatibility)
   formatLint
 };
-

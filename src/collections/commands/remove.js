@@ -31,7 +31,6 @@ module.exports = async function removeCollection(dependencies, collectionName, o
   }
 
   const enabledManifest = await this._readEnabledManifest();
-  let pluginsFromThisCollectionCount = 0;
 
   let actualCollectionNameForFilterCheck = collectionName;
   let specificPluginIdForFilterCheck = null;
@@ -48,7 +47,7 @@ module.exports = async function removeCollection(dependencies, collectionName, o
     }
   }
 
-  pluginsFromThisCollectionCount = enabledManifest.enabled_plugins.filter(p => {
+  const pluginsFromThisCollectionCount = enabledManifest.enabled_plugins.filter(p => {
     if (specificPluginIdForFilterCheck) {
       return p.collection_name === actualCollectionNameForFilterCheck && p.plugin_id === specificPluginIdForFilterCheck;
     }

@@ -87,7 +87,6 @@ async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, sho
   let capturing = false;
   let buffer = [];
   let parenDepth = 0;
-  let currentLogLevel = null;
 
   for await (const line of rl) {
     lineNumber++;
@@ -98,7 +97,7 @@ async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, sho
         capturing = true;
         buffer = [];
         parenDepth = 0;
-        currentLogLevel = match[1];
+        const currentLogLevel = match[1];
 
         // Defensive check (should not be needed as regex filters levels)
         if (levelsFilter.size && !levelsFilter.has(currentLogLevel)) continue;
@@ -122,7 +121,6 @@ async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, sho
           }
           capturing = false;
           buffer = [];
-          currentLogLevel = null;
         }
         continue;
       }
@@ -140,7 +138,6 @@ async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, sho
         }
         capturing = false;
         buffer = [];
-        currentLogLevel = null;
       }
     }
   }
@@ -199,4 +196,3 @@ if (require.main === module) {
     process.exit(1);
   });
 }
-

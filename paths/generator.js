@@ -7,7 +7,7 @@ try {
   require('module-alias/register');
   const { loggerPath } = require('@paths');
   logger = require(loggerPath);
-} catch (err) {
+} catch {
   // Minimal bootstrap logger when @paths system doesn't exist
   logger = {
     info: (msg) => console.log(`[INFO] ${msg}`),
@@ -39,7 +39,7 @@ class DeclarativePathsGenerator {
       const configContent = fs.readFileSync(this.configPath, 'utf8');
       return yaml.load(configContent);
     } catch (error) {
-      throw new Error(`Failed to parse configuration: ${error.message}`);
+      throw new Error(`Failed to parse configuration: ${error.message}`, { cause: error });
     }
   }
 
@@ -481,4 +481,3 @@ if (require.main === module) {
 }
 
 module.exports = DeclarativePathsGenerator;
-

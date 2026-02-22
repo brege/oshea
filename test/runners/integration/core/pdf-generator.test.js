@@ -81,7 +81,7 @@ describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoo
 
       testCase.setup({ mockPuppeteer, mockPage: mockPuppeteer.mockPage }, constants);
 
-      let result = null;
+      let result;
       try {
         result = await generatePdf(
           constants.htmlBodyContent, // Use as-is, including null/empty string!
@@ -97,4 +97,3 @@ describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoo
     });
   });
 });
-

@@ -21,11 +21,18 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
     }
   }
 
+  const childEnv = { ...process.env, CALLED_BY_HARNESS: '1' };
+  if (childEnv.NO_COLOR) {
+    delete childEnv.FORCE_COLOR;
+  } else {
+    childEnv.FORCE_COLOR = childEnv.FORCE_COLOR || '1';
+  }
+
   const result = spawnSync(command, args, {
     stdio: 'pipe',
     encoding: 'utf-8',
     cwd: projectRoot,
-    env: { ...process.env, FORCE_COLOR: '1', CALLED_BY_HARNESS: '1' },
+    env: childEnv,
   });
 
   const stdout = result.stdout.trim();

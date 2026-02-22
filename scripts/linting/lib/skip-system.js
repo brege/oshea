@@ -202,7 +202,7 @@ function shouldSkipDirectory(dirPath, linterKey) {
            skipEntries.includes(linterKey) ||
            skipEntries.includes(group);
 
-  } catch (error) {
+  } catch {
     return false; // Error reading file, don't skip
   }
 }

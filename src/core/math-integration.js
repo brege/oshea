@@ -14,18 +14,16 @@ function createMathIntegration(dependencies = {}) {
 
   function configureMarkdownItForMath(mdInstance, mathConfig) {
     if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
-      let currentKatexPluginModule = katexPluginModule;
-
-      let pluginFunction = null;
-      if (typeof currentKatexPluginModule === 'function') {
-        pluginFunction = currentKatexPluginModule;
-      } else if (currentKatexPluginModule && typeof currentKatexPluginModule.default === 'function') {
-        pluginFunction = currentKatexPluginModule.default;
+      let pluginFunction;
+      if (typeof katexPluginModule === 'function') {
+        pluginFunction = katexPluginModule;
+      } else if (katexPluginModule && typeof katexPluginModule.default === 'function') {
+        pluginFunction = katexPluginModule.default;
       } else {
         logger.error('KaTeX plugin is not a function', {
           context: 'MathIntegration',
           error: 'Resolved KaTeX plugin or its .default is not a function. Cannot apply to markdown-it.',
-          actualModuleType: typeof currentKatexPluginModule
+          actualModuleType: typeof katexPluginModule
         });
         return;
       }

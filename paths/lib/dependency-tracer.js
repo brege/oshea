@@ -76,7 +76,7 @@ class DependencyTreeTracer {
       delete require.cache[require.resolve(registryPath)];
       return require(registryPath);
     } catch (error) {
-      throw new Error(`Failed to load paths registry: ${error.message}`);
+      throw new Error(`Failed to load paths registry: ${error.message}`, { cause: error });
     }
   }
 
@@ -96,7 +96,7 @@ class DependencyTreeTracer {
       try {
         const content = fs.readFileSync(filePath, 'utf8');
         this.fileContentsCache.set(filePath, content);
-      } catch (error) {
+      } catch {
         this.fileContentsCache.set(filePath, null);
       }
     }

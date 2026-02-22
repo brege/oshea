@@ -37,7 +37,7 @@ class MainConfigLoader {
     if (this._initialized) return;
 
     let configPathToLoad;
-    let loadedFromReason = '';
+    let loadedFromReason;
 
     if (this.useFactoryDefaultsOnly) {
       configPathToLoad = this.factoryDefaultMainConfigPath;

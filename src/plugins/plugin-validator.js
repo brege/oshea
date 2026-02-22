@@ -103,7 +103,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     return null;
   };
 
-  // --- Check .config.yaml ---
+  // Check .config.yaml
   const configPath = path.join(
     pluginDirectoryPath,
     `${pluginName}.config.yaml`,
@@ -271,7 +271,7 @@ function validate(pluginIdentifier) {
   // Final validity is true only if no errors accumulated anywhere
   validationResult.isValid = validationResult.isValid && errors.length === 0;
 
-  logger.validation('--- Validation Summary ---', {
+  logger.validation('--- Validation Summary', {
     //context: 'PluginValidator',
     pluginName: pluginName,
     isValid: validationResult.isValid,

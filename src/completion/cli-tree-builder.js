@@ -6,7 +6,7 @@ const path = require('node:path');
 const { convertCommandPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-// --- Dynamic Proxy Yargs Stub ---
+// Dynamic Proxy Yargs Stub
 function createYargsStub() {
   const stub = new Proxy(
     {
@@ -58,13 +58,13 @@ function createYargsStub() {
   return stub;
 }
 
-// --- Command Tree Discovery ---
+// Command Tree Discovery
 function parseBaseCommand(commandDef) {
   const cmdString = Array.isArray(commandDef) ? commandDef[0] : commandDef;
   return cmdString.split(' ')[0];
 }
 
-// --- Command Tree Discovery ---
+// Command Tree Discovery
 function discoverCommandTree(dir, prefixParts = []) {
   const nodesMap = new Map();
   const entries = fs.readdirSync(dir);

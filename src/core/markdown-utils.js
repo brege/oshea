@@ -362,7 +362,7 @@ function ensureAndPreprocessHeading(
   }
 }
 
-// --- Placeholder Substitution Functions ---
+// Placeholder Substitution Functions
 
 function resolvePath(object, pathStr) {
   if (typeof pathStr !== 'string' || !object || typeof object !== 'object') {

@@ -24,7 +24,7 @@ const REQUIRED_PLUGIN_FILES = [
   'README.md',
 ];
 
-// --- Parse CLI args ---
+// Parse CLI args
 const args = process.argv.slice(2);
 let pluginArg = null;
 let outFile = null;
@@ -52,7 +52,7 @@ To copy output to clipboard, pipe to xclip or pbcopy, e.g.:
   }
 }
 
-// --- Consistent-length doc break ---
+// Consistent-length doc break
 function docBreak(filePath, width = 65) {
   const label = `[ ${filePath} ]`;
   const padLen = Math.max(0, Math.floor((width - label.length) / 2));
@@ -122,7 +122,7 @@ function readFileOrWarn(filePath) {
     process.stdout.write(output);
   }
 
-  // --- Estimate token count ---
+  // Estimate token count
   const estTokens = Math.ceil(output.length / 4);
   logger.detail(`Estimated tokens in output: ${estTokens}`);
 })();

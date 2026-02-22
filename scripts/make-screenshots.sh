@@ -2,8 +2,8 @@
 
 set -e
 
-# --- Path Variables for Portability ---
-REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# Path Variables for Portability
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PLUGINS_DIR="$REPO_ROOT/plugins"
 SCREENSHOTS_DIR="$REPO_ROOT/docs/images/screenshots"
 # The external plugins directory is a sibling to the project root
@@ -12,11 +12,11 @@ PLUGIN_DIR_EXTERNAL="$REPO_ROOT/../extra/oshea-plugins"
 # Change to the project root to ensure all paths are resolved correctly
 cd "$REPO_ROOT" || exit 1
 
-# --- Configuration ---
+# Configuration
 USE_PDFTOPPM=true
 SAVE_PDFS_FOR_DEBUGGING=false
 
-# --- Check for required tools ---
+# Check for required tools
 command -v magick >/dev/null 2>&1 || {
   echo >&2 "I require imagemagick but it's not installed.  Aborting.";
   echo "debian:   sudo apt-get install imagemagick";
@@ -36,9 +36,9 @@ fi
 
 mkdir -p "$SCREENSHOTS_DIR"
 
-echo "--- Generating PDFs for Screenshots ---"
+echo "=== Generating PDFs for Screenshots ==="
 
-# --- Bundled Plugin Examples ---
+# Bundled Plugin Examples
 # These commands now use the self-activating example files from within the plugins directory.
 # The `--config` flag is no longer needed.
 
@@ -62,7 +62,7 @@ node ./cli.js "plugins/advanced-card/advanced-card-example.md" \
            --outdir "$SCREENSHOTS_DIR" \
            --no-open
 
-# --- External Plugin Examples ---
+# External Plugin Examples
 echo "Checking for external plugins..."
 
 D3_MD_PATH="$PLUGIN_DIR_EXTERNAL/d3-histogram-slide/d3-histogram-slide.md"
@@ -89,8 +89,8 @@ else
 fi
 
 
-# --- Convert PDFs to PNGs ---
-echo "--- Converting PDFs to PNGs ---"
+# Convert PDFs to PNGs
+echo "=== Converting PDFs to PNGs ==="
 for f in "$SCREENSHOTS_DIR"/*.pdf; do
   output_base="$SCREENSHOTS_DIR/$(basename "$f" .pdf)"
   output_png="${output_base}.png"
@@ -119,9 +119,9 @@ for f in "$SCREENSHOTS_DIR"/*.pdf; do
   fi
 done
 
-# --- Clean up PDFs ---
+# Clean up PDFs
 if [ "$SAVE_PDFS_FOR_DEBUGGING" = false ]; then
   rm -f "$SCREENSHOTS_DIR"/*.pdf
 fi
 
-echo "--- Screenshot generation complete. ---"
+echo "--- Screenshot generation complete."

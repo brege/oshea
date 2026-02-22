@@ -56,7 +56,7 @@ function getDynamicData() {
   }
 }
 
-// --- Exported Provider Functions ---
+// Exported Provider Functions
 
 function getUsablePlugins() {
   const data = getDynamicData();

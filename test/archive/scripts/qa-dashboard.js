@@ -12,7 +12,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const logger = require(loggerPath);
 
-// --- Helper functions for all three sources ---
+// Helper functions for all three sources
 
 // 1. Build testId -> testTarget, checklistStatus for ALL checklist entries
 function getChecklistStatuses() {
@@ -136,7 +136,7 @@ function getAuditLogMap() {
   return auditMap;
 }
 
-// --- Main execution logic ---
+// Main execution logic
 
 function generateDashboardContent() {
   const checklistStatuses = getChecklistStatuses();
@@ -246,7 +246,7 @@ function updateIndex(dashboardLines) {
   logger.success(`Successfully updated dashboard in ${indexPath}`);
 }
 
-// --- Check command line arguments to determine action ---
+// Check command line arguments to determine action
 if (process.argv.includes('update')) {
   const dashboardLines = generateDashboardContent();
   updateIndex(dashboardLines);

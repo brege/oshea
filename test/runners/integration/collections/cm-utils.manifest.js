@@ -4,7 +4,7 @@ const { cmUtilsFactoryPath } = require('@paths');
 const { makeCmUtilsScenario } = require(cmUtilsFactoryPath);
 
 module.exports = [
-  // --- deriveCollectionName (1.8.1) ---
+  // deriveCollectionName (1.8.1)
   makeCmUtilsScenario({
     testId: '1.8.1.1',
     method: 'deriveCollectionName',
@@ -87,7 +87,7 @@ module.exports = [
     expected: 'repo-with-leading-trailing-',
   }),
 
-  // --- toPascalCase (1.8.2) ---
+  // toPascalCase (1.8.2)
   makeCmUtilsScenario({
     testId: '1.8.2.1',
     method: 'toPascalCase',
@@ -161,7 +161,7 @@ module.exports = [
     expected: 'PluginV102',
   }),
 
-  // --- isValidPluginName (1.8.3) ---
+  // isValidPluginName (1.8.3)
   makeCmUtilsScenario({
     testId: '1.8.3.1',
     method: 'isValidPluginName',

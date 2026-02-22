@@ -23,10 +23,10 @@ function flattenSpecs(spec) {
 }
 
 const paths = {
-  // --- Integration Test Paths ---
+  // Integration Test Paths
   integration:            'test/runners/integration/**/*.js',
 
-  // --- Subsystem & Module Integration Test Paths ---
+  // Subsystem & Module Integration Test Paths
   default_handler:        'test/runners/integration/core/default-handler.*.js',             // Rank 0
   pdf_generator:          'test/runners/integration/core/pdf-generator.*.js',               // Rank 0
   math_integration:       'test/runners/integration/core/math-integration.*.js',            // Rank 2
@@ -43,15 +43,15 @@ const paths = {
   collections_manager:    'test/runners/integration/collections/collections-manager.*.js',  // Rank 1
   cm_utils:               'test/runners/integration/collections/cm-utils.*.js',             // Rank 2
 
-  // --- End-to-End Test Paths ---
+  // End-to-End Test Paths
   e2e_runner:             'test/runners/end-to-end/e2e-mocha.test.js',
 
-  // --- Bundled Plugin In-Situ Test Paths ---
+  // Bundled Plugin In-Situ Test Paths
   insitu:                 'plugins/**/.contract/test/*.test.js',
 
 };
 
-// --- By Rank -- Integration Tests ---
+// By Rank -- Integration Tests
 const ranks = {
   // test/archive/docs/test-generation-priority-order.md
   rank0: [ // core operations
@@ -72,7 +72,7 @@ const ranks = {
   ]
 };
 
-// --- By Level ---
+// By Level
 const levels = {
   // test/config/metadata-level-1.yaml
   level1: [ // module integration tests
@@ -99,7 +99,7 @@ const levels = {
   ],
 };
 
-// --- By Command ---
+// By Command
 // (Integration tests only; E2E is now handled via grep/group below)
 const commands = {
   // By Modules (Integration)
@@ -125,7 +125,7 @@ const commands = {
   ],
 };
 
-// --- By Group ---  [ npm run -- --group <group> ]
+// By Group  [ npm run -- --group <group> ]
 const groups = {
 
   // Ranks -- Integration Tests
@@ -167,7 +167,7 @@ const groups = {
   ]
 };
 
-// --- E2E Grep Patterns for Group Slicing ---
+// E2E Grep Patterns for Group Slicing
 const groupGreps = {
   cli: 'End-to-End Test',
   workflows: 'Workflow|Demo',

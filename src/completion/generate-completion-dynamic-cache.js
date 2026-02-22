@@ -8,7 +8,7 @@ const os = require('node:os');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-// --- Use path registry for all internal modules ---
+// Use path registry for all internal modules
 const {
   projectRoot,
   pluginRegistryBuilderPath,

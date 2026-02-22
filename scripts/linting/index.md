@@ -19,13 +19,12 @@ npm run lint -- --fix
 ```
 Linters also can be used autonomously, pointed at a specific file or directory.
 ```bash
-node scripts/linting/code/no-jsdoc.js --fix src/utils/foo.js
 node scripts/linting/docs/janitor.js README.md
 ```
 But you can also use the harness in a targeted way.
 ```bash
-node scripts/linting/lint.js --only code --fix
-node scripts/linting/lint.js --skip no-console,remove-jsdoc --debug src/
+node scripts/linting/lint.js --only docs --fix
+node scripts/linting/lint.js --skip janitor --debug src/
 ```
 
 Linters also have unit tests, which can be initiated with `npm test -- --group linting`.
@@ -95,18 +94,6 @@ docs
 - [ [`visual-renderers.js`](lib/visual-renderers.js) ]
   -- Visual formatting and console output functions for linting results
 
-**Code Standards [`code/`](code/)**
-- [ [`no-bad-headers.js`](code/no-bad-headers.js) ]
-  -- A shell script to enforce a consistent header comment in all project JavaScript files.
-- [ [`no-trailing-whitespace.js`](code/no-trailing-whitespace.js) ]
-  -- A shell script to strip trailing whitespace from all project JavaScript files.   
-- [ [`no-console.js`](code/no-console.js) ]
-  -- Enforces unified logger usage by detecting `console.*` statements
-- [ [`no-relative-paths.js`](code/no-relative-paths.js) ]
-  -- Prevents relative path usage in `require()` statements, enforcing path registry
-- [ [`no-jsdoc.js`](code/no-jsdoc.js) ]
-  -- Find and remove `jsdoc` comments from JavaScript files. 
-
 **Documentation Quality [`docs/`](docs/)**
 - [ [`postman.js`](docs/postman.js) ]
   -- Detects and can correct Markdown links to other files in the repo.
@@ -117,17 +104,6 @@ docs
      - Emojis/graphic icons are whitelist-only and configure in `assets/litter-list.txt`.
      - Checks for `logger.*([HandwrittenBrackets] ... )` in JS files.
  
-- [ [`yaml.js`](docs/yaml.js) ]
-  -- A validator for YAML files in the repo (**NEW**).
-
-**Path Validation [`validators/`](validators/)**
-- [ [`mocha-path-validator.js`](validators/mocha-path-validator.js) ]
-  -- A utility to validate paths in [`.mocharc.js`](../../.mocharc.js) files and test configurations.
-
-**Renaming the Project**
-- [ [`no-old-project-name.js`](code/no-old-project-name.js) ]
-  -- A script to replace all instances of the old project name in the codebase.
-
 ### Uncategorized Test Scripts
 <!-- uncategorized-start -->
 

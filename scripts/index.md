@@ -2,15 +2,6 @@
 
 This document is a central index for all developer and automation scripts within the `oshea` repo.
 
-### Batch Jobs [ `batch/` ]
-
-  - [ [`batch-convert-hugo-recipes.js`](batch/batch-convert-hugo-recipes.js) ]
-    -- Converts a directory of Hugo-formatted recipe files into individual PDFs.
-  - [ [`batch_convert_hugo_recipes.sh`](batch/batch_convert_hugo_recipes.sh) ]
-    -- A shell script version for converting Hugo recipes.
-  - [ [`make-screenshots.sh`](batch/make-screenshots.sh) ]
-    -- Generates screenshots of example documents for the project's documentation.
-
 ### AI Scripts [ `ai/` ]
 
   - [ [`ai-context-generator.js`](ai/ai-context-generator.js) ]
@@ -25,6 +16,8 @@ This module has its own index file at [**the demo index**](demo/index.md).
   - [ [`generate-toc.js`](docs/generate-toc.js) ]
     -- A utility to generate a Table of Contents for a Markdown file based on its headings.
     -- Automatically generates the main documentation index [`docs/index.md`](../docs/index.md) by discovering all non-excluded Markdown files.
+  - [ [`make-screenshots.sh`](docs/make-screenshots.sh) ]
+    -- Generates screenshots of example documents for the project's documentation.
 
 ### Linting & Code Style [ `linting/` ]
 

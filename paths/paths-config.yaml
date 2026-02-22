@@ -118,10 +118,6 @@ registries:
         comment: AI Tooling
         pattern: scripts/ai/**/*.js
         rank: 0
-      batch:
-        comment: Batch Processing Scripts
-        pattern: scripts/batch/**/*
-        rank: 1
       docs:
         comment: Documentation Helpers
         pattern: scripts/docs/**/*.js

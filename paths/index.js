@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-22T07:42:33.258Z
+// Generated: 2026-02-22T17:15:07.816Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -139,12 +139,6 @@ const configUtilsPath = path.join(projectRoot, 'src/config/config-utils.js');
 const mainConfigLoaderPath = path.join(projectRoot, 'src/config/main-config-loader.js');
 const pluginConfigLoaderPath = path.join(projectRoot, 'src/config/plugin-config-loader.js');
 
-// Batch Processing Scripts
-const batchRoot = path.join(projectRoot, 'scripts/batch/');
-const batchConvertHugoRecipesShPath = path.join(projectRoot, 'scripts/batch/batch_convert_hugo_recipes.sh');
-const batchConvertHugoRecipesPath = path.join(projectRoot, 'scripts/batch/batch-convert-hugo-recipes.js');
-const makeScreenshotsShPath = path.join(projectRoot, 'scripts/batch/make-screenshots.sh');
-
 // Documentation Helpers
 const docsRoot = path.join(projectRoot, 'scripts/docs/');
 const generateTocPath = path.join(projectRoot, 'scripts/docs/generate-toc.js');
@@ -154,7 +148,6 @@ const lintingDocsRoot = path.join(projectRoot, 'scripts/linting/docs/');
 const janitorPath = path.join(projectRoot, 'scripts/linting/docs/janitor.js');
 const librarianPath = path.join(projectRoot, 'scripts/linting/docs/librarian.js');
 const postmanPath = path.join(projectRoot, 'scripts/linting/docs/postman.js');
-const yamlPath = path.join(projectRoot, 'scripts/linting/docs/yaml.js');
 
 // Configuration System Integration Tests
 const configIntegrationRoot = path.join(projectRoot, 'test/runners/integration/config/');
@@ -258,10 +251,6 @@ const updatePath = path.join(projectRoot, 'src/collections/commands/update.js');
 // Validation Framework
 const validatorsRoot = path.join(projectRoot, 'src/validators/');
 const v1Path = path.join(projectRoot, 'src/validators/v1.js');
-
-// Validation Linters
-const lintingValidatorsRoot = path.join(projectRoot, 'scripts/linting/validators/');
-const mochaPathValidatorPath = path.join(projectRoot, 'scripts/linting/validators/mocha-path-validator.js');
 
 // End-to-End Workflow Tests
 const e2eWorkflowTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/workflows/');
@@ -431,17 +420,12 @@ module.exports = {
   configUtilsPath,
   mainConfigLoaderPath,
   pluginConfigLoaderPath,
-  batchRoot,
-  batchConvertHugoRecipesShPath,
-  batchConvertHugoRecipesPath,
-  makeScreenshotsShPath,
   docsRoot,
   generateTocPath,
   lintingDocsRoot,
   janitorPath,
   librarianPath,
   postmanPath,
-  yamlPath,
   configIntegrationRoot,
   configResolverConstructorManifestPath,
   configResolverFactoryPath,
@@ -531,8 +515,6 @@ module.exports = {
   updatePath,
   validatorsRoot,
   v1Path,
-  lintingValidatorsRoot,
-  mochaPathValidatorPath,
   e2eWorkflowTestsRoot,
   demoHugoBatchConvertManifestYamlPath,
   workflowsManifestYamlPath,

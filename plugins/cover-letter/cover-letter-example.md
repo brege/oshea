@@ -1,5 +1,5 @@
 ---
-title: "Cover Letter Example - John Applicant"
+title: "Cover Letter Example"
 author: "John Applicant"
 date: "{{ .CurrentDateISO }}"
 oshea_plugin: "./cover-letter.config.yaml"
@@ -22,17 +22,17 @@ closing: "Sincerely,"
 
 # {{ title }}
 
-{{ yourName }}
-{{ yourAddress }}
-Phone: {{ yourPhone }}
-Email: {{ yourEmail }}
+{{ yourName }}  
+{{ yourAddress }}  
+Phone: {{ yourPhone }}  
+Email: {{ yourEmail }}  
 
-{{ CurrentDateFormatted }}
+{{ CurrentDateFormatted }}  
 
-{{ recipientName }}
-{{ recipientTitle }}
-{{ companyName }}
-{{ companyAddress }}
+{{ recipientName }}  
+{{ recipientTitle }}  
+{{ companyName }}  
+{{ companyAddress }}  
 
 {{ salutation }}
 

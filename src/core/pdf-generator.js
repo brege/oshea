@@ -5,6 +5,23 @@ const path = require('node:path');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
+function parseViewportPixels(dimension) {
+  if (typeof dimension === 'number') {
+    return Number.isFinite(dimension) && dimension > 0
+      ? Math.round(dimension)
+      : null;
+  }
+  if (typeof dimension !== 'string') {
+    return null;
+  }
+  const match = dimension.trim().match(/^([0-9]*\.?[0-9]+)\s*(px)?$/i);
+  if (!match) {
+    return null;
+  }
+  const value = Number.parseFloat(match[1]);
+  return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
+}
+
 async function generatePdf(
   htmlBodyContent,
   outputPdfPath,
@@ -32,12 +49,14 @@ async function generatePdf(
     let viewportHeight = 600;
     let hasExplicitDimensions = false;
 
-    if (pdfOptions?.width) {
-      viewportWidth = parseInt(String(pdfOptions.width), 10);
+    const parsedWidth = parseViewportPixels(pdfOptions?.width);
+    if (parsedWidth) {
+      viewportWidth = parsedWidth;
       hasExplicitDimensions = true;
     }
-    if (pdfOptions?.height) {
-      viewportHeight = parseInt(String(pdfOptions.height), 10);
+    const parsedHeight = parseViewportPixels(pdfOptions?.height);
+    if (parsedHeight) {
+      viewportHeight = parsedHeight;
       hasExplicitDimensions = true;
     }
 

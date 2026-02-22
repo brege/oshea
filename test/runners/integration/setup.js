@@ -12,7 +12,7 @@ const {
   mathIntegrationPath,
   defaultHandlerPath,
   captureLogsPath,
-  loggerPath
+  loggerPath,
 } = require('@paths');
 
 // Require all modules that will be stubbed globally
@@ -27,7 +27,9 @@ const { testLogger } = require(captureLogsPath);
 if (process.env.OSHEA_DEBUG === 'true') {
   const logger = require(loggerPath);
   logger.setDebugMode(true);
-  logger.debug('Debug mode enabled - logger will show debug-level messages and context');
+  logger.debug(
+    'Debug mode enabled - logger will show debug-level messages and context',
+  );
 }
 
 // Make these globally available in the test context
@@ -45,19 +47,40 @@ module.exports = {
       // Stub all external dependencies that the DefaultHandler test suite relies on.
       this.generatePdfStub = this.sandbox.stub(pdfGenerator, 'generatePdf');
 
-      this.extractFrontMatterStub = this.sandbox.stub(markdownUtils, 'extractFrontMatter');
-      this.removeShortcodesStub = this.sandbox.stub(markdownUtils, 'removeShortcodes');
-      this.renderMarkdownToHtmlStub = this.sandbox.stub(markdownUtils, 'renderMarkdownToHtml');
+      this.extractFrontMatterStub = this.sandbox.stub(
+        markdownUtils,
+        'extractFrontMatter',
+      );
+      this.removeShortcodesStub = this.sandbox.stub(
+        markdownUtils,
+        'removeShortcodes',
+      );
+      this.renderMarkdownToHtmlStub = this.sandbox.stub(
+        markdownUtils,
+        'renderMarkdownToHtml',
+      );
       this.generateSlugStub = this.sandbox.stub(markdownUtils, 'generateSlug');
-      this.ensureAndPreprocessHeadingStub = this.sandbox.stub(markdownUtils, 'ensureAndPreprocessHeading');
-      this.substituteAllPlaceholdersStub = this.sandbox.stub(markdownUtils, 'substituteAllPlaceholders');
+      this.ensureAndPreprocessHeadingStub = this.sandbox.stub(
+        markdownUtils,
+        'ensureAndPreprocessHeading',
+      );
+      this.substituteAllPlaceholdersStub = this.sandbox.stub(
+        markdownUtils,
+        'substituteAllPlaceholders',
+      );
 
       const mathIntegrationInstance = createMathIntegration();
-      this.getMathCssContentStub = this.sandbox.stub(mathIntegrationInstance, 'getMathCssContent');
-      this.configureMarkdownItForMathStub = this.sandbox.stub(mathIntegrationInstance, 'configureMarkdownItForMath');
+      this.getMathCssContentStub = this.sandbox.stub(
+        mathIntegrationInstance,
+        'getMathCssContent',
+      );
+      this.configureMarkdownItForMathStub = this.sandbox.stub(
+        mathIntegrationInstance,
+        'configureMarkdownItForMath',
+      );
       // Hijack the require cache so any call to require(mathIntegrationPath) gets our stubbed instance's factory
       require.cache[require.resolve(mathIntegrationPath)] = {
-        exports: () => mathIntegrationInstance
+        exports: () => mathIntegrationInstance,
       };
 
       this.readFileStub = this.sandbox.stub(fs, 'readFile');
@@ -68,8 +91,8 @@ module.exports = {
       require.cache[require.resolve('@paths')] = {
         exports: {
           ...require('@paths'),
-          logger: testLogger
-        }
+          logger: testLogger,
+        },
       };
 
       // Re-require DefaultHandler to ensure it picks up all stubbed dependencies
@@ -89,6 +112,6 @@ module.exports = {
       // Clean up the logger injection
       delete require.cache[require.resolve('@paths')];
       if (done) done();
-    }
-  }
+    },
+  },
 };

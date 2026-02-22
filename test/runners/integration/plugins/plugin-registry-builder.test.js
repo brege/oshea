@@ -10,7 +10,7 @@ const {
   pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath,
   pluginRegistryBuilderCmManifestsManifestPath,
   pluginRegistryBuilderBuildRegistryManifestPath,
-  pluginRegistryBuilderGetAllPluginDetailsManifestPath
+  pluginRegistryBuilderGetAllPluginDetailsManifestPath,
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -27,13 +27,27 @@ const getTestCases = (manifest) => {
   throw new Error(`Invalid manifest format: ${JSON.stringify(manifest)}`);
 };
 
-const constructorManifest = require(pluginRegistryBuilderConstructorManifestPath);
-const resolveAliasManifest = require(pluginRegistryBuilderResolveAliasManifestPath);
-const resolvePluginConfigPathManifest = require(pluginRegistryBuilderResolvePluginConfigPathManifestPath);
-const getPluginRegistrationsFromFileManifest = require(pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath);
-const cmManifestsManifest = require(pluginRegistryBuilderCmManifestsManifestPath);
-const buildRegistryManifest = require(pluginRegistryBuilderBuildRegistryManifestPath);
-const getAllPluginDetailsManifest = require(pluginRegistryBuilderGetAllPluginDetailsManifestPath);
+const constructorManifest = require(
+  pluginRegistryBuilderConstructorManifestPath,
+);
+const resolveAliasManifest = require(
+  pluginRegistryBuilderResolveAliasManifestPath,
+);
+const resolvePluginConfigPathManifest = require(
+  pluginRegistryBuilderResolvePluginConfigPathManifestPath,
+);
+const getPluginRegistrationsFromFileManifest = require(
+  pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath,
+);
+const cmManifestsManifest = require(
+  pluginRegistryBuilderCmManifestsManifestPath,
+);
+const buildRegistryManifest = require(
+  pluginRegistryBuilderBuildRegistryManifestPath,
+);
+const getAllPluginDetailsManifest = require(
+  pluginRegistryBuilderGetAllPluginDetailsManifestPath,
+);
 
 const allTestCases = [
   ...getTestCases(constructorManifest),
@@ -54,13 +68,12 @@ const commonTestConstants = {
   DUMMY_MARKDOWN_FILENAME: 'my-document.md',
 };
 
-describe(`plugin-registry-builder (Module Integration Tests) ${path.relative(projectRoot, pluginRegistryBuilderPath)}`, function() {
-
+describe(`plugin-registry-builder (Module Integration Tests) ${path.relative(projectRoot, pluginRegistryBuilderPath)}`, () => {
   let mockDependencies;
   let originalPathsModule;
   let PluginRegistryBuilder;
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
 
     const pathsPath = require.resolve('@paths');
@@ -73,21 +86,26 @@ describe(`plugin-registry-builder (Module Integration Tests) ${path.relative(pro
     require.cache[pathsPath] = {
       exports: {
         ...require(pathsPath),
-        loggerPath: testLoggerPath
-      }
+        loggerPath: testLoggerPath,
+      },
     };
 
     mockDependencies = {
       fs: {
         existsSync: sinon.stub().returns(true),
-        promises: { readFile: sinon.stub().resolves(''), readdir: sinon.stub().resolves([]) },
-        statSync: sinon.stub().returns({ isDirectory: () => true, isFile: () => true }),
+        promises: {
+          readFile: sinon.stub().resolves(''),
+          readdir: sinon.stub().resolves([]),
+        },
+        statSync: sinon
+          .stub()
+          .returns({ isDirectory: () => true, isFile: () => true }),
         readdir: sinon.stub().resolves([]),
-        readdirSync: sinon.stub().returns([])
+        readdirSync: sinon.stub().returns([]),
       },
       os: {
         homedir: sinon.stub().returns(commonTestConstants.FAKE_HOME_DIR),
-        platform: sinon.stub().returns('linux')
+        platform: sinon.stub().returns('linux'),
       },
       path: {
         join: sinon.stub().callsFake((...args) => path.join(...args)),
@@ -110,19 +128,19 @@ describe(`plugin-registry-builder (Module Integration Tests) ${path.relative(pro
     PluginRegistryBuilder = require(pluginRegistryBuilderPath);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     if (originalPathsModule) {
       require.cache[require.resolve('@paths')] = originalPathsModule;
     }
     sinon.restore();
   });
 
-  allTestCases.forEach(testCase => {
+  allTestCases.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
 
-    it_(`${testCase.description}`, async function() {
+    it_(`${testCase.description}`, async () => {
       const currentMocks = {
-        mockDependencies
+        mockDependencies,
       };
 
       let builderInstance;
@@ -133,20 +151,37 @@ describe(`plugin-registry-builder (Module Integration Tests) ${path.relative(pro
             testCase.setup(currentMocks, commonTestConstants);
           }
           const constructorArgsToUse = testCase.constructorArgs || [
-            commonTestConstants.FAKE_PROJECT_ROOT, null, null, false, false, null, null
+            commonTestConstants.FAKE_PROJECT_ROOT,
+            null,
+            null,
+            false,
+            false,
+            null,
+            null,
           ];
-          new PluginRegistryBuilder(...constructorArgsToUse, currentMocks.mockDependencies);
+          new PluginRegistryBuilder(
+            ...constructorArgsToUse,
+            currentMocks.mockDependencies,
+          );
         }).to.throw(testCase.expectedErrorMessage);
       } else {
-
         if (testCase.setup && !testCase.methodName) {
           await testCase.setup(currentMocks, commonTestConstants);
         }
 
         const constructorArgsForCurrentTest = testCase.constructorArgs || [
-          commonTestConstants.FAKE_PROJECT_ROOT, null, null, false, false, null, null
+          commonTestConstants.FAKE_PROJECT_ROOT,
+          null,
+          null,
+          false,
+          false,
+          null,
+          null,
         ];
-        builderInstance = new PluginRegistryBuilder(...constructorArgsForCurrentTest, currentMocks.mockDependencies);
+        builderInstance = new PluginRegistryBuilder(
+          ...constructorArgsForCurrentTest,
+          currentMocks.mockDependencies,
+        );
         currentMocks.builderInstance = builderInstance;
 
         if (testCase.setup && testCase.methodName) {
@@ -160,14 +195,29 @@ describe(`plugin-registry-builder (Module Integration Tests) ${path.relative(pro
         }
 
         if (testCase.methodName && typeof testCase.methodName === 'string') {
-          const argsToPass = Array.isArray(testCase.methodArgs) ? testCase.methodArgs : [];
-          const methodResult = await builderInstance[testCase.methodName](...argsToPass);
-          await testCase.assert(methodResult, currentMocks, commonTestConstants, expect, logs);
+          const argsToPass = Array.isArray(testCase.methodArgs)
+            ? testCase.methodArgs
+            : [];
+          const methodResult = await builderInstance[testCase.methodName](
+            ...argsToPass,
+          );
+          await testCase.assert(
+            methodResult,
+            currentMocks,
+            commonTestConstants,
+            expect,
+            logs,
+          );
         } else {
-          await testCase.assert(builderInstance, currentMocks, commonTestConstants, expect, logs);
+          await testCase.assert(
+            builderInstance,
+            currentMocks,
+            commonTestConstants,
+            expect,
+            logs,
+          );
         }
       }
     });
   });
 });
-

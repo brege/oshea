@@ -17,14 +17,14 @@ module.exports = {
       .option('name', {
         alias: 'n',
         describe: 'set a custom name for the collection',
-        type: 'string'
+        type: 'string',
       });
   },
   handler: async (args) => {
     if (!args.manager) {
       logger.fatal('CollectionsManager instance not found', {
         context: 'CLICollectionAddCommand',
-        reason: 'This is an internal setup issue.'
+        reason: 'This is an internal setup issue.',
       });
       process.exit(1);
     }
@@ -38,16 +38,16 @@ module.exports = {
         logger.warn('Failed to regenerate completion cache', {
           context: 'CLICollectionAddCommand',
           error: e.message,
-          note: 'This is not a fatal error.'
+          note: 'This is not a fatal error.',
         });
       }
     } catch (error) {
       logger.error('Command execution failed', {
         context: 'CLICollectionAddCommand',
         command: 'oshea collection add',
-        error: error.message
+        error: error.message,
       });
       process.exit(1);
     }
-  }
+  },
 };

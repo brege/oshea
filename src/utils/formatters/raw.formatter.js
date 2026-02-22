@@ -19,7 +19,7 @@ function formatRaw(level, message, meta = {}) {
       type: 'raw-output',
       data: message,
       ...meta,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
     return;
@@ -33,5 +33,5 @@ function formatRaw(level, message, meta = {}) {
 }
 
 module.exports = {
-  formatRaw
+  formatRaw,
 };

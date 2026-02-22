@@ -12,8 +12,17 @@ class AdvancedCardHandler {
     this.pdfGenerator = coreUtils.pdfGenerator;
   }
 
-  async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
-    logger.info(`(AdvancedCardHandler): Processing for plugin '${pluginSpecificConfig.description || 'advanced-card'}' using Markdown body.`);
+  async generate(
+    data,
+    pluginSpecificConfig,
+    globalConfig,
+    outputDir,
+    outputFilenameOpt,
+    pluginBasePath,
+  ) {
+    logger.info(
+      `(AdvancedCardHandler): Processing for plugin '${pluginSpecificConfig.description || 'advanced-card'}' using Markdown body.`,
+    );
 
     const { markdownFilePath } = data;
     if (!markdownFilePath || !fss.existsSync(markdownFilePath)) {
@@ -24,7 +33,8 @@ class AdvancedCardHandler {
       await fs.mkdir(outputDir, { recursive: true });
 
       const rawMarkdownContent = await fs.readFile(markdownFilePath, 'utf8');
-      const { data: fm, content: markdownBody } = this.markdownUtils.extractFrontMatter(rawMarkdownContent);
+      const { data: fm, content: markdownBody } =
+        this.markdownUtils.extractFrontMatter(rawMarkdownContent);
 
       const globalParams = globalConfig.params || {};
 
@@ -36,13 +46,18 @@ class AdvancedCardHandler {
         markdownBody,
         pluginSpecificConfig.toc_options,
         pdfGenOptions.anchor_options,
-        pluginSpecificConfig.math
+        pluginSpecificConfig.math,
       );
 
-      const qrDataSource = fm.qr_data || fm.website || globalParams.defaultWebsite || 'https://example.com';
+      const qrDataSource =
+        fm.qr_data ||
+        fm.website ||
+        globalParams.defaultWebsite ||
+        'https://example.com';
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(qrDataSource)}`;
 
-      const cardBrandingColor = fm.brandingColor || globalParams.defaultBrandingColor || '#333';
+      const cardBrandingColor =
+        fm.brandingColor || globalParams.defaultBrandingColor || '#333';
 
       const htmlBodyContent = `
                 <div class="card-container" style="border-top: 5px solid ${cardBrandingColor};">
@@ -56,8 +71,13 @@ class AdvancedCardHandler {
                 </div>
             `;
 
-      const cardNameForFile = fm.name || (markdownBody.split('\n')[0].replace(/^#+\s*/, '')) || 'advanced-card';
-      const baseOutputFilename = outputFilenameOpt || `${this.markdownUtils.generateSlug(cardNameForFile)}.pdf`;
+      const cardNameForFile =
+        fm.name ||
+        markdownBody.split('\n')[0].replace(/^#+\s*/, '') ||
+        'advanced-card';
+      const baseOutputFilename =
+        outputFilenameOpt ||
+        `${this.markdownUtils.generateSlug(cardNameForFile)}.pdf`;
       const finalOutputPdfPath = path.join(outputDir, baseOutputFilename);
 
       const pdfOptions = {
@@ -66,20 +86,25 @@ class AdvancedCardHandler {
         margin: {
           ...((globalConfig.global_pdf_options || {}).margin || {}),
           ...((pluginSpecificConfig.pdf_options || {}).margin || {}),
-        }
+        },
       };
       if (pdfOptions.width || pdfOptions.height) {
         delete pdfOptions.format;
       }
 
       const cssFileContentsArray = [];
-      if (pluginSpecificConfig.css_files && Array.isArray(pluginSpecificConfig.css_files)) {
+      if (
+        pluginSpecificConfig.css_files &&
+        Array.isArray(pluginSpecificConfig.css_files)
+      ) {
         for (const cssFile of pluginSpecificConfig.css_files) {
           const cssFilePath = path.resolve(pluginBasePath, cssFile);
           if (fss.existsSync(cssFilePath)) {
             cssFileContentsArray.push(await fs.readFile(cssFilePath, 'utf8'));
           } else {
-            logger.warn(`(AdvancedCardHandler): CSS file not found at ${cssFilePath}`);
+            logger.warn(
+              `(AdvancedCardHandler): CSS file not found at ${cssFilePath}`,
+            );
           }
         }
       }
@@ -88,14 +113,15 @@ class AdvancedCardHandler {
         htmlBodyContent,
         finalOutputPdfPath,
         pdfOptions,
-        cssFileContentsArray
+        cssFileContentsArray,
       );
 
       logger.success(`Successfully generated PDF: ${finalOutputPdfPath}`);
       return finalOutputPdfPath;
-
     } catch (error) {
-      logger.error(`(AdvancedCardHandler): Failed to generate card for ${markdownFilePath}: ${error.message}`);
+      logger.error(
+        `(AdvancedCardHandler): Failed to generate card for ${markdownFilePath}: ${error.message}`,
+      );
       if (error.stack) {
         logger.error(error.stack);
       }

@@ -37,13 +37,17 @@ async function getUserPluginsFromManifest(collRoot) {
     // Return all user plugin names (both enabled and disabled for removal completion)
     return Object.keys(pluginStates);
   } catch (e) {
-    logger.warn('Could not read user plugins manifest for completion cache:', e.message);
+    logger.warn(
+      'Could not read user plugins manifest for completion cache:',
+      e.message,
+    );
     return [];
   }
 }
 
 function getCachePath() {
-  const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
+  const xdgCacheHome =
+    process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
   const cacheDir = path.join(xdgCacheHome, 'oshea');
   return path.join(cacheDir, 'dynamic-completion-data.json');
 }
@@ -54,13 +58,20 @@ async function generateCache() {
     // We cannot rely on CLI args here, so we load config to find collRoot
     const mainConfigLoader = new MainConfigLoader(projectRoot, null, false);
     const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
-    const collRootFromMainConfig = primaryConfig.config.collections_root || null;
+    const collRootFromMainConfig =
+      primaryConfig.config.collections_root || null;
     logger.debug(`collections_root resolved: ${collRootFromMainConfig}`);
 
     const manager = new CollectionsManager({ collRootFromMainConfig });
     const builder = new PluginRegistryBuilder(
-      projectRoot, null, null, false,
-      false, null, manager, { collRoot: manager.collRoot }
+      projectRoot,
+      null,
+      null,
+      false,
+      false,
+      null,
+      manager,
+      { collRoot: manager.collRoot },
     );
 
     // 1. Get all plugin details
@@ -77,25 +88,30 @@ async function generateCache() {
 
     // 4. Process the data into simple lists for completion
     const usablePlugins = allPlugins
-      .filter(p => p.status && (p.status.startsWith('Registered') || p.status.startsWith('Enabled (')))
-      .map(p => p.name);
+      .filter(
+        (p) =>
+          p.status &&
+          (p.status.startsWith('Registered') ||
+            p.status.startsWith('Enabled (')),
+      )
+      .map((p) => p.name);
 
     const enabledPlugins = allPlugins
-      .filter(p => p.status && p.status.startsWith('Enabled ('))
-      .map(p => p.name);
+      .filter((p) => p.status && p.status.startsWith('Enabled ('))
+      .map((p) => p.name);
 
     const availableFromCM = allPlugins
-      .filter(p => p.status === 'Available (CM)')
-      .map(p => p.name);
+      .filter((p) => p.status === 'Available (CM)')
+      .map((p) => p.name);
 
-    const downloadedCollections = allCollections.map(c => c.name);
+    const downloadedCollections = allCollections.map((c) => c.name);
 
     const cacheStats = [
       `usablePlugins(${usablePlugins.length})`,
       `enabledPlugins(${enabledPlugins.length})`,
       `availablePlugins(${availableFromCM.length})`,
       `downloadedCollections(${downloadedCollections.length})`,
-      `userPlugins(${userPlugins.length})`
+      `userPlugins(${userPlugins.length})`,
     ].join(', ');
     logger.debug(`Cache data will include: ${cacheStats}`);
 
@@ -122,4 +138,3 @@ async function generateCache() {
 
 // Execute the cache generation
 generateCache();
-

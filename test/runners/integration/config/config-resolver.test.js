@@ -9,7 +9,7 @@ const {
   configResolverLoadPluginBaseConfigManifestPath,
   configResolverGetEffectiveConfigManifestPath,
   allPaths,
-  testLoggerPath
+  testLoggerPath,
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -20,8 +20,12 @@ const _ = require('lodash');
 
 const constructorManifest = require(configResolverConstructorManifestPath);
 const initializeManifest = require(configResolverInitializeManifestPath);
-const loadPluginBaseConfigManifest = require(configResolverLoadPluginBaseConfigManifestPath);
-const getEffectiveConfigManifest = require(configResolverGetEffectiveConfigManifestPath);
+const loadPluginBaseConfigManifest = require(
+  configResolverLoadPluginBaseConfigManifestPath,
+);
+const getEffectiveConfigManifest = require(
+  configResolverGetEffectiveConfigManifestPath,
+);
 
 const allTestCases = [
   ...constructorManifest,
@@ -30,13 +34,13 @@ const allTestCases = [
   ...getEffectiveConfigManifest,
 ];
 
-describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot, configResolverPath)}`, function () {
+describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot, configResolverPath)}`, () => {
   let mockDependencies;
   let mockMainConfigLoaderInstance;
   let mockPluginConfigLoaderInstance;
   let ConfigResolver;
 
-  beforeEach(function () {
+  beforeEach(() => {
     clearLogs();
 
     mockMainConfigLoaderInstance = {
@@ -53,9 +57,15 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
       }),
     };
 
-    const MockMainConfigLoader = sinon.stub().returns(mockMainConfigLoaderInstance);
-    const MockPluginConfigLoader = sinon.stub().returns(mockPluginConfigLoaderInstance);
-    const MockPluginRegistryBuilder = sinon.stub().returns({ buildRegistry: sinon.stub().resolves({}) });
+    const MockMainConfigLoader = sinon
+      .stub()
+      .returns(mockMainConfigLoaderInstance);
+    const MockPluginConfigLoader = sinon
+      .stub()
+      .returns(mockPluginConfigLoaderInstance);
+    const MockPluginRegistryBuilder = sinon
+      .stub()
+      .returns({ buildRegistry: sinon.stub().resolves({}) });
 
     mockDependencies = {
       MainConfigLoader: MockMainConfigLoader,
@@ -64,7 +74,9 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
       fs: {
         existsSync: sinon.stub().returns(true),
         readFileSync: sinon.stub().returns('{}'),
-        statSync: sinon.stub().returns({ isFile: () => true, isDirectory: () => false }),
+        statSync: sinon
+          .stub()
+          .returns({ isFile: () => true, isDirectory: () => false }),
       },
       path: { ...nodePath },
       os: { homedir: sinon.stub().returns('/fake/home') },
@@ -80,7 +92,7 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
     });
   });
 
-  afterEach(function () {
+  afterEach(() => {
     sinon.restore();
   });
 
@@ -96,11 +108,15 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
       ...scenarioConfig
     } = testCase;
 
-    it_(description, async function () {
-      const mocks = { mockDependencies, mockMainConfigLoaderInstance, mockPluginConfigLoaderInstance };
+    it_(description, async () => {
+      const mocks = {
+        mockDependencies,
+        mockMainConfigLoaderInstance,
+        mockPluginConfigLoaderInstance,
+      };
       const constants = {};
 
-      let resolver = new ConfigResolver(null, false, false, mockDependencies);
+      const resolver = new ConfigResolver(null, false, false, mockDependencies);
 
       if (setup) {
         await setup(mocks, constants, resolver, scenarioConfig);
@@ -109,29 +125,41 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
       if (useImperativeSetup) {
         if (scenarioConfig.mainConfigStubs) {
           if (scenarioConfig.mainConfigStubs.getPrimaryMainConfig) {
-            mocks.mockMainConfigLoaderInstance.getPrimaryMainConfig.resolves(scenarioConfig.mainConfigStubs.getPrimaryMainConfig);
+            mocks.mockMainConfigLoaderInstance.getPrimaryMainConfig.resolves(
+              scenarioConfig.mainConfigStubs.getPrimaryMainConfig,
+            );
           }
           if (scenarioConfig.mainConfigStubs.getXdgMainConfig) {
-            mocks.mockMainConfigLoaderInstance.getXdgMainConfig.resolves(scenarioConfig.mainConfigStubs.getXdgMainConfig);
+            mocks.mockMainConfigLoaderInstance.getXdgMainConfig.resolves(
+              scenarioConfig.mainConfigStubs.getXdgMainConfig,
+            );
           }
           if (scenarioConfig.mainConfigStubs.getProjectManifestConfig) {
-            mocks.mockMainConfigLoaderInstance.getProjectManifestConfig.resolves(scenarioConfig.mainConfigStubs.getProjectManifestConfig);
+            mocks.mockMainConfigLoaderInstance.getProjectManifestConfig.resolves(
+              scenarioConfig.mainConfigStubs.getProjectManifestConfig,
+            );
           }
         }
         await resolver._initializeResolverIfNeeded();
 
         if (scenarioConfig.registryStubs) {
-          resolver.mergedPluginRegistry = _.cloneDeep(scenarioConfig.registryStubs);
+          resolver.mergedPluginRegistry = _.cloneDeep(
+            scenarioConfig.registryStubs,
+          );
         }
         if (scenarioConfig.pluginConfigLoaderStubs) {
           resolver.pluginConfigLoader = {
-            applyOverrideLayers: sinon.stub().resolves(
-              scenarioConfig.pluginConfigLoaderStubs.applyOverrideLayers
-            )
+            applyOverrideLayers: sinon
+              .stub()
+              .resolves(
+                scenarioConfig.pluginConfigLoaderStubs.applyOverrideLayers,
+              ),
           };
         }
         if (scenarioConfig.baseConfigStubs) {
-          sinon.stub(resolver, '_loadPluginBaseConfig').resolves(scenarioConfig.baseConfigStubs);
+          sinon
+            .stub(resolver, '_loadPluginBaseConfig')
+            .resolves(scenarioConfig.baseConfigStubs);
         }
         if (scenarioConfig.primaryMainConfig) {
           resolver.primaryMainConfig = scenarioConfig.primaryMainConfig;
@@ -142,19 +170,29 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
             !scenarioConfig.mainConfigStubs ||
             !scenarioConfig.mainConfigStubs.getPrimaryMainConfig
           ) {
-            mocks.mockMainConfigLoaderInstance.getPrimaryMainConfig.resolves({ config: {}, path: null, baseDir: null });
+            mocks.mockMainConfigLoaderInstance.getPrimaryMainConfig.resolves({
+              config: {},
+              path: null,
+              baseDir: null,
+            });
           }
           if (
             !scenarioConfig.mainConfigStubs ||
             !scenarioConfig.mainConfigStubs.getXdgMainConfig
           ) {
-            mocks.mockMainConfigLoaderInstance.getXdgMainConfig.resolves({ config: {}, path: null, baseDir: null });
+            mocks.mockMainConfigLoaderInstance.getXdgMainConfig.resolves({
+              config: {},
+              path: null,
+              baseDir: null,
+            });
           }
           if (
             !scenarioConfig.mainConfigStubs ||
             !scenarioConfig.mainConfigStubs.getProjectManifestConfig
           ) {
-            mocks.mockMainConfigLoaderInstance.getProjectManifestConfig.resolves({ config: {}, path: null, baseDir: null });
+            mocks.mockMainConfigLoaderInstance.getProjectManifestConfig.resolves(
+              { config: {}, path: null, baseDir: null },
+            );
           }
           await resolver._initializeResolverIfNeeded();
         }
@@ -165,7 +203,7 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
           await resolver.getEffectiveConfig(
             scenarioConfig.pluginSpec,
             scenarioConfig.localConfigOverrides,
-            scenarioConfig.markdownFilePath
+            scenarioConfig.markdownFilePath,
           );
           throw new Error('Expected an error to be thrown, but it was not.');
         } catch (error) {
@@ -181,4 +219,3 @@ describe(`config-resolver (Module Integration Tests) ${path.relative(projectRoot
     });
   });
 });
-

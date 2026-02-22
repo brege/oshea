@@ -13,7 +13,7 @@ const {
   fileDiscoveryPath,
   skipSystemPath,
   projectRoot,
-  loggerPath
+  loggerPath,
 } = require('@paths');
 
 const logger = require(loggerPath);
@@ -73,18 +73,20 @@ function scanGroup(name, config, opts = {}) {
     scanRoot,
     excludePatterns = [],
     fix: configFix = false,
-    filetypes
+    filetypes,
   } = config;
 
   if (typeof indexFile !== 'string' || !indexFile) {
-    logger.debug(`Skipping group '${name}': 'indexFile' not configured.`, { context: 'Librarian' });
+    logger.debug(`Skipping group '${name}': 'indexFile' not configured.`, {
+      context: 'Librarian',
+    });
     return { issues: [], fixedCount: 0 };
   }
 
   const allowFix = configFix || fix;
   const indexAbsPath = path.resolve(indexFile);
   const indexDir = path.dirname(indexAbsPath);
-  let issues = [];
+  const issues = [];
   let fixedCount = 0;
 
   if (!fs.existsSync(indexAbsPath)) {
@@ -93,12 +95,15 @@ function scanGroup(name, config, opts = {}) {
       line: 1,
       message: `Index file not found for group: '${name}'`,
       rule: 'missing-index-file',
-      severity: 1
+      severity: 1,
     });
     return { issues, fixedCount };
   }
 
-  logger.debug(`Reading index file: ${path.relative(projectRoot, indexAbsPath)}`, { context: 'Librarian' });
+  logger.debug(
+    `Reading index file: ${path.relative(projectRoot, indexAbsPath)}`,
+    { context: 'Librarian' },
+  );
 
   const content = fs.readFileSync(indexAbsPath, 'utf8');
   const lines = content.split('\n');
@@ -107,15 +112,20 @@ function scanGroup(name, config, opts = {}) {
   let filesToIndex;
 
   if (targets.length > 0 && !force) {
-    logger.debug(`Using CLI target '${targets[0]}' to generate specific glob.`, { context: 'Librarian' });
+    logger.debug(
+      `Using CLI target '${targets[0]}' to generate specific glob.`,
+      { context: 'Librarian' },
+    );
     const target = targets[0];
-    const extPattern = filetypes.length > 1
-      ? `{${filetypes.map(e => e.replace(/^\./, '')).join(',')}}`
-      : filetypes[0].replace(/^\./, '');
+    const extPattern =
+      filetypes.length > 1
+        ? `{${filetypes.map((e) => e.replace(/^\./, '')).join(',')}}`
+        : filetypes[0].replace(/^\./, '');
 
-    const globTarget = fs.existsSync(target) && fs.statSync(target).isDirectory()
-      ? `${target}/**/*.${extPattern}`
-      : target;
+    const globTarget =
+      fs.existsSync(target) && fs.statSync(target).isDirectory()
+        ? `${target}/**/*.${extPattern}`
+        : target;
 
     filesToIndex = findFiles({
       targets: [globTarget],
@@ -126,15 +136,20 @@ function scanGroup(name, config, opts = {}) {
       skipTag: 'lint-skip-file librarian',
       debug,
     });
-
   } else {
-    const globRoots = (force && targets.length > 0) ? targets : (Array.isArray(scanRoot) ? scanRoot : [scanRoot]);
-    let globTargets = [];
+    const globRoots =
+      force && targets.length > 0
+        ? targets
+        : Array.isArray(scanRoot)
+          ? scanRoot
+          : [scanRoot];
+    const globTargets = [];
     for (const root of globRoots) {
       if (!root) continue;
-      const extPattern = filetypes.length > 1
-        ? `{${filetypes.map(e => e.replace(/^\./, '')).join(',')}}`
-        : filetypes[0].replace(/^\./, '');
+      const extPattern =
+        filetypes.length > 1
+          ? `{${filetypes.map((e) => e.replace(/^\./, '')).join(',')}}`
+          : filetypes[0].replace(/^\./, '');
       globTargets.push(`${root}/**/*.${extPattern}`);
     }
     filesToIndex = findFiles({
@@ -156,7 +171,7 @@ function scanGroup(name, config, opts = {}) {
       line: 1,
       severity: 1,
       rule: 'uncategorized-index-entry',
-      message: `Uncategorized index entry: '${rel}'`
+      message: `Uncategorized index entry: '${rel}'`,
     });
   }
 
@@ -177,9 +192,12 @@ function scanGroup(name, config, opts = {}) {
 
   if (missingInIndex.length > 0) {
     logger.debug('Missing file(s) from index:', { context: 'Librarian' });
-    missingInIndex.forEach(file => logger.debug(`  - ${file}`));
+    missingInIndex.forEach((file) => logger.debug(`  - ${file}`));
   } else {
-    logger.debug(`Found ${missingInIndex.length} files missing from the index for group '${name}'.`, { context: 'Librarian' });
+    logger.debug(
+      `Found ${missingInIndex.length} files missing from the index for group '${name}'.`,
+      { context: 'Librarian' },
+    );
   }
 
   for (const rel of missingInIndex) {
@@ -188,13 +206,13 @@ function scanGroup(name, config, opts = {}) {
       line: 1,
       severity: 1,
       rule: 'missing-index-entry',
-      message: `Untracked file: '${rel}'`
+      message: `Untracked file: '${rel}'`,
     });
   }
 
   if (allowFix && missingInIndex.length > 0) {
-    const startIdx = lines.findIndex(l => l.trim().includes(START_MARKER));
-    const endIdx = lines.findIndex(l => l.trim().includes(END_MARKER));
+    const startIdx = lines.findIndex((l) => l.trim().includes(START_MARKER));
+    const endIdx = lines.findIndex((l) => l.trim().includes(END_MARKER));
 
     if (startIdx === -1 || endIdx === -1 || endIdx <= startIdx) {
       issues.push({
@@ -202,23 +220,24 @@ function scanGroup(name, config, opts = {}) {
         line: 1,
         severity: 2,
         rule: 'uncategorized-block-missing',
-        message: 'Uncategorized block missing in index file.'
+        message: 'Uncategorized block missing in index file.',
       });
       return { issues, fixedCount };
     }
 
     const previousBlockLines = lines.slice(startIdx + 1, endIdx);
-    const existingEntries = new Set(previousBlockLines
-      .map(line => {
-        const match = line.match(/\[.*?\]\((.*?)\)/);
-        return match ? match[1] : null;
-      })
-      .filter(Boolean)
+    const existingEntries = new Set(
+      previousBlockLines
+        .map((line) => {
+          const match = line.match(/\[.*?\]\((.*?)\)/);
+          return match ? match[1] : null;
+        })
+        .filter(Boolean),
     );
 
     const additions = missingInIndex
-      .filter(p => !existingEntries.has(p))
-      .map(p => `\n- [${path.basename(p)}](${p})`);
+      .filter((p) => !existingEntries.has(p))
+      .map((p) => `\n- [${path.basename(p)}](${p})`);
 
     if (additions.length > 0) {
       if (!dryRun) {
@@ -240,7 +259,7 @@ async function runLibrarian(options = {}) {
   const configYaml = fs.readFileSync(lintingConfigPath, 'utf8');
   const parsedConfig = yaml.load(configYaml);
   const groups = parsedConfig['librarian'] || {};
-  let allIssues = [];
+  const allIssues = [];
   let totalFixed = 0;
 
   logger.debug('--- Running Librarian in Debug Mode ---');
@@ -248,20 +267,36 @@ async function runLibrarian(options = {}) {
   let groupsToRun = [];
 
   if (targets.length > 0) {
-    logger.debug('CLI targets provided. Determining relevant group(s)...', { context: 'Librarian' });
+    logger.debug('CLI targets provided. Determining relevant group(s)...', {
+      context: 'Librarian',
+    });
     const targetPath = path.resolve(targets[0]);
     for (const [groupName, groupConfig] of Object.entries(groups)) {
       if (typeof groupConfig !== 'object' || !groupConfig.scanRoot) continue;
-      const scanRoots = Array.isArray(groupConfig.scanRoot) ? groupConfig.scanRoot : [groupConfig.scanRoot];
-      if (scanRoots.some(root => root && targetPath.startsWith(path.resolve(root)))) {
+      const scanRoots = Array.isArray(groupConfig.scanRoot)
+        ? groupConfig.scanRoot
+        : [groupConfig.scanRoot];
+      if (
+        scanRoots.some(
+          (root) => root && targetPath.startsWith(path.resolve(root)),
+        )
+      ) {
         groupsToRun.push(groupName);
-        logger.debug(`Target '${targets[0]}' matches scan root for group '${groupName}'.`, { context: 'Librarian' });
+        logger.debug(
+          `Target '${targets[0]}' matches scan root for group '${groupName}'.`,
+          { context: 'Librarian' },
+        );
       }
     }
     if (groupsToRun.length === 0) {
-      logger.debug('No matching groups found for CLI target. Falling back to manual target processing.', { context: 'Librarian' });
+      logger.debug(
+        'No matching groups found for CLI target. Falling back to manual target processing.',
+        { context: 'Librarian' },
+      );
     } else {
-      logger.info(`No matching group found for target '${targets[0]}'.`, { context: 'Librarian' });
+      logger.info(`No matching group found for target '${targets[0]}'.`, {
+        context: 'Librarian',
+      });
     }
   } else {
     groupsToRun = group ? [group] : Object.keys(groups);
@@ -276,9 +311,9 @@ async function runLibrarian(options = {}) {
   }
 
   const summary = {
-    errorCount: allIssues.filter(i => i.severity === 2).length,
-    warningCount: allIssues.filter(i => i.severity === 1).length,
-    fixedCount: totalFixed
+    errorCount: allIssues.filter((i) => i.severity === 2).length,
+    warningCount: allIssues.filter((i) => i.severity === 1).length,
+    fixedCount: totalFixed,
   };
 
   return { issues: allIssues, summary, results: [] };
@@ -300,16 +335,17 @@ if (require.main === module) {
       dryRun: !!flags.dryRun,
       debug: !!flags.debug,
       force: !!flags.force,
-    }).then(({ issues, summary }) => {
-      renderLintOutput({ issues, summary, flags });
-      process.exitCode = summary.errorCount > 0 ? 1 : 0;
-    }).catch(error => {
-      logger.error('--- LIBRARIAN CRASHED ---');
-      logger.error(error);
-      process.exit(1);
-    });
+    })
+      .then(({ issues, summary }) => {
+        renderLintOutput({ issues, summary, flags });
+        process.exitCode = summary.errorCount > 0 ? 1 : 0;
+      })
+      .catch((error) => {
+        logger.error('--- LIBRARIAN CRASHED ---');
+        logger.error(error);
+        process.exit(1);
+      });
   })();
 }
 
 module.exports = { runLibrarian };
-

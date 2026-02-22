@@ -21,36 +21,41 @@ async function displayGlobalConfig(configResolver, isPure) {
     mainConfigPath,
     loadReason,
     useFactoryDefaultsOnly: configResolver.useFactoryDefaultsOnly,
-    factoryDefaultMainConfigPath: configResolver.mainConfigLoader.factoryDefaultMainConfigPath
+    factoryDefaultMainConfigPath:
+      configResolver.mainConfigLoader.factoryDefaultMainConfigPath,
   };
 
   // Get additional source details if not using factory defaults only
   if (!configResolver.useFactoryDefaultsOnly) {
-    const xdgConfigDetails = await configResolver.mainConfigLoader.getXdgMainConfig();
-    const projectConfigDetails = await configResolver.mainConfigLoader.getProjectManifestConfig();
+    const xdgConfigDetails =
+      await configResolver.mainConfigLoader.getXdgMainConfig();
+    const projectConfigDetails =
+      await configResolver.mainConfigLoader.getProjectManifestConfig();
 
     sources.xdgConfigDetails = {
       path: xdgConfigDetails.path,
-      pathExists: xdgConfigDetails.path && fs.existsSync(xdgConfigDetails.path)
+      pathExists: xdgConfigDetails.path && fs.existsSync(xdgConfigDetails.path),
     };
     sources.projectConfigDetails = {
       path: projectConfigDetails.path,
-      pathExists: projectConfigDetails.path && fs.existsSync(projectConfigDetails.path)
+      pathExists:
+        projectConfigDetails.path && fs.existsSync(projectConfigDetails.path),
     };
   }
 
   // Get bundled config info
-  const bundledMainDefaultPath = configResolver.mainConfigLoader.defaultMainConfigPath;
+  const bundledMainDefaultPath =
+    configResolver.mainConfigLoader.defaultMainConfigPath;
   sources.bundledMainDefaultPath = {
     path: bundledMainDefaultPath,
-    exists: fs.existsSync(bundledMainDefaultPath)
+    exists: fs.existsSync(bundledMainDefaultPath),
   };
 
   // Use formatter to display the configuration
   formatGlobalConfig('info', '', {
     configData: configToDump,
     sources,
-    isPure
+    isPure,
   });
 }
 
@@ -65,7 +70,7 @@ async function displayPluginConfig(configResolver, pluginName, isPure) {
     effectiveConfig,
     configSources,
     pluginName,
-    isPure
+    isPure,
   });
 }
 
@@ -73,7 +78,9 @@ async function displayConfig(args) {
   try {
     const configResolver = args.configResolver;
     if (!configResolver) {
-      throw new Error('ConfigResolver was not initialized by the CLI middleware.');
+      throw new Error(
+        'ConfigResolver was not initialized by the CLI middleware.',
+      );
     }
 
     if (args.plugin) {
@@ -97,16 +104,16 @@ module.exports = {
         alias: 'p',
         describe: 'display the effective configuration for a plugin',
         type: 'string',
-        completionKey: 'usablePlugins'
+        completionKey: 'usablePlugins',
       })
       .option('pure', {
         describe: 'output raw configuration data (for piping)',
         type: 'boolean',
-        default: false
+        default: false,
       });
   },
   handler: async (args) => {
     args.isLazyLoad = false;
     await displayConfig(args);
-  }
+  },
 };

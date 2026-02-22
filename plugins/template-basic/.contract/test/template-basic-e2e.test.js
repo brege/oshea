@@ -12,17 +12,19 @@ const {
 
 const logger = require(loggerPath);
 
-const {
-  runCliCommand,
-  setupTestDirectory,
-  cleanupTestDirectory,
-} = require(testFileHelpersPath);
+const { runCliCommand, setupTestDirectory, cleanupTestDirectory } = require(
+  testFileHelpersPath,
+);
 
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', 'template-basic-e2e');
+const TEST_OUTPUT_DIR = path.join(
+  os.tmpdir(),
+  'oshea-test-output',
+  'template-basic-e2e',
+);
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'template-basic-example.md');
 
-describe('plugins/template-basic (in-situ Self-Activation Test) .contract/test/template-basic-e2e.test.js', function() {
+describe('plugins/template-basic (in-situ Self-Activation Test) .contract/test/template-basic-e2e.test.js', function () {
   this.timeout(15000);
 
   before(async () => {
@@ -37,7 +39,7 @@ describe('plugins/template-basic (in-situ Self-Activation Test) .contract/test/t
     const { success, stdout, stderr } = await runCliCommand(
       ['convert', EXAMPLE_MD, '--outdir', TEST_OUTPUT_DIR, '--no-open'],
       cliPath,
-      projectRoot
+      projectRoot,
     );
 
     if (!success) {

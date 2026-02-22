@@ -8,7 +8,7 @@ const {
   fileDiscoveryPath,
   loggerPath,
   skipSystemPath,
-  projectRoot
+  projectRoot,
 } = require('@paths');
 
 const { findFiles } = require(fileDiscoveryPath);
@@ -18,7 +18,7 @@ const {
   getLegacyMigrationMap,
   extractLinterFromMarker,
   isValidSkipMarker,
-  loadLinterConfig
+  loadLinterConfig,
 } = require(skipSystemPath);
 
 // Use centralized config loader
@@ -32,7 +32,7 @@ function findSkipsInFile(filePath) {
     const skipPatterns = getAllSkipPatterns();
 
     lines.forEach((line, lineIndex) => {
-      skipPatterns.forEach(pattern => {
+      skipPatterns.forEach((pattern) => {
         pattern.lastIndex = 0; // Reset regex
         let match;
         while ((match = pattern.exec(line)) !== null) {
@@ -46,7 +46,7 @@ function findSkipsInFile(filePath) {
             context: line.trim(),
             linterKey: linterKey || 'unknown',
             isStandard: isStandard,
-            needsMigration: !isStandard
+            needsMigration: !isStandard,
           });
         }
       });
@@ -64,7 +64,7 @@ function categorizeSkipsByLinter(skips, config) {
   const migrationNeeded = [];
 
   // Initialize categories from config
-  Object.keys(config).forEach(linterKey => {
+  Object.keys(config).forEach((linterKey) => {
     if (linterKey !== 'harness') {
       categorized[linterKey] = [];
     }
@@ -72,7 +72,7 @@ function categorizeSkipsByLinter(skips, config) {
   categorized['unknown'] = [];
   categorized['legacy'] = [];
 
-  skips.forEach(skip => {
+  skips.forEach((skip) => {
     if (skip.needsMigration) {
       migrationNeeded.push(skip);
       categorized['legacy'].push(skip);
@@ -92,7 +92,7 @@ function generateReport(result, config) {
     summary: {},
     details: categorized,
     migrationNeeded: migrationNeeded,
-    linterMapping: {}
+    linterMapping: {},
   };
 
   // Build linter mapping from config
@@ -101,7 +101,7 @@ function generateReport(result, config) {
       report.linterMapping[key] = {
         group: linterConfig.group,
         alias: linterConfig.alias,
-        label: linterConfig.label || key
+        label: linterConfig.label || key,
       };
     }
   });
@@ -110,9 +110,9 @@ function generateReport(result, config) {
   Object.entries(categorized).forEach(([linter, skips]) => {
     report.summary[linter] = {
       totalSkips: skips.length,
-      uniqueFiles: new Set(skips.map(s => s.file)).size,
-      skipTypes: new Set(skips.map(s => s.match)).size,
-      needsMigration: skips.filter(s => s.needsMigration).length
+      uniqueFiles: new Set(skips.map((s) => s.file)).size,
+      skipTypes: new Set(skips.map((s) => s.match)).size,
+      needsMigration: skips.filter((s) => s.needsMigration).length,
     };
   });
 
@@ -128,27 +128,39 @@ function displayReport(report) {
   logger.info('\nSUMMARY:');
   logger.info('-'.repeat(40));
   Object.entries(report.summary).forEach(([linter, stats]) => {
-    const linterInfo = report.linterMapping[linter] || { group: 'unknown', alias: linter };
-    const migrationNote = stats.needsMigration > 0 ? ` (${stats.needsMigration} need migration)` : '';
-    logger.info(`${linter.padEnd(12)} (${linterInfo.group}): ${stats.totalSkips} skips in ${stats.uniqueFiles} files${migrationNote}`);
+    const linterInfo = report.linterMapping[linter] || {
+      group: 'unknown',
+      alias: linter,
+    };
+    const migrationNote =
+      stats.needsMigration > 0
+        ? ` (${stats.needsMigration} need migration)`
+        : '';
+    logger.info(
+      `${linter.padEnd(12)} (${linterInfo.group}): ${stats.totalSkips} skips in ${stats.uniqueFiles} files${migrationNote}`,
+    );
   });
 
   // Migration needed section
   if (report.migrationNeeded.length > 0) {
     logger.info('\nMIGRATION NEEDED:');
     logger.info('-'.repeat(40));
-    logger.warn(`Found ${report.migrationNeeded.length} legacy skip markers that need standardization:`);
+    logger.warn(
+      `Found ${report.migrationNeeded.length} legacy skip markers that need standardization:`,
+    );
 
     const migrationMap = getLegacyMigrationMap();
     const byPattern = {};
 
-    report.migrationNeeded.forEach(skip => {
+    report.migrationNeeded.forEach((skip) => {
       if (!byPattern[skip.match]) byPattern[skip.match] = [];
       byPattern[skip.match].push(skip);
     });
 
     Object.entries(byPattern).forEach(([pattern, skips]) => {
-      const suggested = migrationMap[pattern] || `lint-skip-${pattern.replace(/lint-skip-|lint-disable-|lint-enable-/, '')}`;
+      const suggested =
+        migrationMap[pattern] ||
+        `lint-skip-${pattern.replace(/lint-skip-|lint-disable-|lint-enable-/, '')}`;
       logger.info(`  "${pattern}" ✖ ${skips.length} occurrences`);
       logger.success(`    Suggested: "${suggested}"`);
     });
@@ -161,21 +173,28 @@ function displayReport(report) {
   Object.entries(report.details).forEach(([linter, skips]) => {
     if (skips.length === 0 || linter === 'legacy') return;
 
-    const standardSkips = skips.filter(s => s.isStandard);
+    const standardSkips = skips.filter((s) => s.isStandard);
     if (standardSkips.length === 0) return;
 
-    const linterInfo = report.linterMapping[linter] || { group: 'unknown', alias: linter };
-    logger.info(`\n● ${linter.toUpperCase()} (${linterInfo.group}/${linterInfo.alias}): ${standardSkips.length} standard skips`);
+    const linterInfo = report.linterMapping[linter] || {
+      group: 'unknown',
+      alias: linter,
+    };
+    logger.info(
+      `\n● ${linter.toUpperCase()} (${linterInfo.group}/${linterInfo.alias}): ${standardSkips.length} standard skips`,
+    );
 
     // Group by file
     const byFile = {};
-    standardSkips.forEach(skip => {
+    standardSkips.forEach((skip) => {
       if (!byFile[skip.file]) byFile[skip.file] = [];
       byFile[skip.file].push(skip);
     });
 
     Object.entries(byFile).forEach(([file, fileSkips]) => {
-      logger.detail(`  ${file}: ${fileSkips.length} skips`, { format: 'inline' });
+      logger.detail(`  ${file}: ${fileSkips.length} skips`, {
+        format: 'inline',
+      });
       logger.detail('\n', { format: 'inline' });
     });
   });
@@ -185,7 +204,9 @@ function displayReport(report) {
   logger.info('-'.repeat(40));
   logger.info('● Run migration to standardize legacy skip markers');
   logger.info('● Use format: lint-skip-<linter-key> for file-level skips');
-  logger.info('● Use format: lint-disable-line <linter-key> for line-level skips');
+  logger.info(
+    '● Use format: lint-disable-line <linter-key> for line-level skips',
+  );
   logger.info('● Consider .skipignore files for permanent exclusions');
   logger.info('● Document skip reasons in comments');
 }
@@ -202,14 +223,14 @@ function main() {
     filetypes: ['.js', '.md', '.yaml', '.json', '.sh'],
     ignores: ['node_modules/**', '.git/**', 'assets/**'],
     respectDocignore: false,
-    debug: false
-  }).filter(file => !file.endsWith('skip-system.js')); // Exclude pattern registry itself
+    debug: false,
+  }).filter((file) => !file.endsWith('skip-system.js')); // Exclude pattern registry itself
 
   logger.info(`Scanning ${allFiles.length} files...`);
 
   // Scan all files for skip markers
   let allSkips = [];
-  allFiles.forEach(file => {
+  allFiles.forEach((file) => {
     const skips = findSkipsInFile(file);
     allSkips = allSkips.concat(skips);
   });

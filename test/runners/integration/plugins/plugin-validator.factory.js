@@ -2,12 +2,7 @@
 const path = require('path');
 const sinon = require('sinon');
 
-
-function setupPluginScenario({
-  files = {},
-  yaml = {},
-  exec = {},
-}) {
+function setupPluginScenario({ files = {}, yaml = {}, exec = {} }) {
   return (pluginDir, pluginName, { mockFs, mockYaml, mockExecSync }) => {
     Object.entries(files).forEach(([file, value]) => {
       const fullPath = path.join(pluginDir, file);
@@ -19,7 +14,9 @@ function setupPluginScenario({
       } else {
         mockFs.existsSync.withArgs(fullPath).returns(!!value);
         if (value) {
-          mockFs.readFileSync.withArgs(fullPath, 'utf8').returns('dummy content');
+          mockFs.readFileSync
+            .withArgs(fullPath, 'utf8')
+            .returns('dummy content');
         }
       }
     });
@@ -40,14 +37,18 @@ function setupPluginScenario({
   };
 }
 
-
-function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mockYaml }) {
+function setupWellFormedPlugin(
+  pluginDir,
+  pluginName,
+  { mockFs, mockExecSync, mockYaml },
+) {
   const files = {
     'index.js': 'module.exports = class {};',
     [`${pluginName}.config.yaml`]: `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: A valid plugin.`,
     'README.md': '---\ncli_help: "Help text"\n---',
     [`${pluginName}-example.md`]: '# Example',
-    [`.contract/test/${pluginName}-e2e.test.js`]: 'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));',
+    [`.contract/test/${pluginName}-e2e.test.js`]:
+      'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));',
     [`.contract/${pluginName}.schema.json`]: '{}',
   };
 
@@ -58,7 +59,9 @@ function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mo
     mockFs.statSync.withArgs(dir).returns({ isDirectory: () => true });
     mockFs.existsSync.withArgs(fullPath).returns(true);
     mockFs.readFileSync.withArgs(fullPath, 'utf8').returns(content);
-    mockFs.statSync.withArgs(fullPath).returns({ isDirectory: () => false, isFile: () => true });
+    mockFs.statSync
+      .withArgs(fullPath)
+      .returns({ isDirectory: () => false, isFile: () => true });
   }
 
   mockYaml.load.withArgs(sinon.match.any).returns({
@@ -67,11 +70,12 @@ function setupWellFormedPlugin(pluginDir, pluginName, { mockFs, mockExecSync, mo
     version: '1.0.0',
     description: 'A valid plugin.',
   });
-  mockYaml.load.withArgs(sinon.match(/cli_help/)).returns({ cli_help: 'Help text' });
+  mockYaml.load
+    .withArgs(sinon.match(/cli_help/))
+    .returns({ cli_help: 'Help text' });
 
   mockExecSync.returns('');
 }
-
 
 function makeValidatorScenario({
   description,
@@ -96,37 +100,35 @@ function makeValidatorScenario({
       expect(result.isValid).to.equal(expectedResult.isValid);
 
       if (expectedResult.errors) {
-        expectedResult.errors.forEach(expectedErr => {
+        expectedResult.errors.forEach((expectedErr) => {
           expect(
-            result.errors.some(actualErr =>
+            result.errors.some((actualErr) =>
               typeof expectedErr === 'string'
                 ? actualErr.includes(expectedErr)
-                : expectedErr.test(actualErr)
+                : expectedErr.test(actualErr),
             ),
-            `Expected error: ${expectedErr}\nActual errors: ${JSON.stringify(result.errors, null, 2)}`
+            `Expected error: ${expectedErr}\nActual errors: ${JSON.stringify(result.errors, null, 2)}`,
           ).to.be.true;
         });
       }
 
       if (expectedResult.warnings) {
-        expectedResult.warnings.forEach(expectedWarn => {
+        expectedResult.warnings.forEach((expectedWarn) => {
           expect(
-            result.warnings.some(actualWarn =>
+            result.warnings.some((actualWarn) =>
               typeof expectedWarn === 'string'
                 ? actualWarn.includes(expectedWarn)
-                : expectedWarn.test(actualWarn)
+                : expectedWarn.test(actualWarn),
             ),
-            `Expected warning: ${expectedWarn}\nActual warnings: ${JSON.stringify(result.warnings, null, 2)}`
+            `Expected warning: ${expectedWarn}\nActual warnings: ${JSON.stringify(result.warnings, null, 2)}`,
           ).to.be.true;
         });
       }
     }
 
     if (expectedLogs.length > 0) {
-      const relevantLogs = logs.map(l => ({ level: l.level, msg: l.msg }));
-      expectedLogs.forEach(log =>
-        expect(relevantLogs).to.deep.include(log)
-      );
+      const relevantLogs = logs.map((l) => ({ level: l.level, msg: l.msg }));
+      expectedLogs.forEach((log) => expect(relevantLogs).to.deep.include(log));
     }
   };
 
@@ -141,6 +143,5 @@ function makeValidatorScenario({
 module.exports = {
   makeValidatorScenario,
   setupWellFormedPlugin,
-  setupPluginScenario
+  setupPluginScenario,
 };
-

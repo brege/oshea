@@ -2,10 +2,12 @@
 
 /* --- Base Styles --- */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 10.5pt; /* Slightly larger than a typical CV for readability */
   line-height: 1.45; /* Comfortable line spacing */
-  color: #333333;    /* Dark gray for text, less harsh than pure black */
+  color: #333333; /* Dark gray for text, less harsh than pure black */
   background-color: #ffffff;
   margin: 0; /* Page margins are controlled by Puppeteer options from config.yaml */
 }
@@ -21,7 +23,12 @@ a:hover {
 }
 
 /* --- Headings (Less common in cover letter body, but good for consistency) --- */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: #222222; /* Slightly darker than body text for emphasis */
   margin-top: 1.2em;
   margin-bottom: 0.6em;
@@ -30,21 +37,34 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Relative font sizes for headings based on body font-size */
-h1 { font-size: 1.8em; } /* e.g., 10.5pt * 1.8 = ~19pt */
-h2 { font-size: 1.5em; } /* ~16pt */
-h3 { font-size: 1.3em; } /* ~14pt */
-h4 { font-size: 1.1em; } /* ~11.5pt */
-h5 { font-size: 1.0em; }
-h6 { font-size: 0.9em; }
+h1 {
+  font-size: 1.8em;
+} /* e.g., 10.5pt * 1.8 = ~19pt */
+h2 {
+  font-size: 1.5em;
+} /* ~16pt */
+h3 {
+  font-size: 1.3em;
+} /* ~14pt */
+h4 {
+  font-size: 1.1em;
+} /* ~11.5pt */
+h5 {
+  font-size: 1em;
+}
+h6 {
+  font-size: 0.9em;
+}
 
 /* --- Paragraphs and Text Elements --- */
 p {
   margin-top: 0;
   margin-bottom: 0.85em; /* Standard paragraph spacing */
-  text-align: left;   /* Or 'justify' for a more formal block look */
+  text-align: left; /* Or 'justify' for a more formal block look */
 }
 
-strong, b {
+strong,
+b {
   font-weight: 600; /* Ensure bold is sufficiently distinct */
 }
 
@@ -78,7 +98,7 @@ hr {
 @media print {
   @page {
     margin: 1in; /* This should align with 'cover-letter' type's margin in config.yaml */
-                 /* if preferCSSPageSize were true. Currently, Puppeteer's options rule. */
+    /* if preferCSSPageSize were true. Currently, Puppeteer's options rule. */
   }
 
   body {
@@ -95,12 +115,20 @@ hr {
   }
 
   /* Avoid page breaks inside paragraphs or list items where possible */
-  p, li, blockquote { /* Added figure, table for completeness, though less common in CLs */
+  p,
+  li,
+  blockquote {
+    /* Added figure, table for completeness, though less common in CLs */
     page-break-inside: avoid;
   }
 
   /* Avoid page breaks after headings where possible */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     page-break-after: avoid;
   }
 

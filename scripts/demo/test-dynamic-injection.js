@@ -13,7 +13,7 @@ logger.configureLogger({
   showCaller: true,
   showStack: true,
   enrichErrors: true,
-  stackDepth: 3
+  stackDepth: 3,
 });
 
 console.log('1. Testing logger.for() convenience method:');
@@ -32,7 +32,7 @@ function simpleFunction() {
 const objectMethod = {
   testMethod() {
     logger.warn('Called from object method');
-  }
+  },
 };
 
 const arrowFunction = () => {
@@ -119,13 +119,13 @@ console.log('\n7. Testing enhancement disable/enable:');
 logger.configureLogger({
   showCaller: false,
   showStack: false,
-  enrichErrors: false
+  enrichErrors: false,
 });
 logger.error('Plain error without enhancements');
 
 logger.configureLogger({
   showCaller: true,
-  enrichErrors: true
+  enrichErrors: true,
 });
 logger.error('Error with selective enhancements enabled');
 

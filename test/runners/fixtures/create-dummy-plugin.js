@@ -11,7 +11,7 @@ async function createDummyPlugin(pluginName, options = {}) {
   const {
     breakage = [],
     baseFixture = 'valid-plugin',
-    destinationDir
+    destinationDir,
   } = options;
 
   if (!destinationDir) {
@@ -33,10 +33,16 @@ async function createDummyPlugin(pluginName, options = {}) {
   const originalPluginName = getOriginalPluginName(baseFixture);
 
   // Rename config file
-  const originalConfigPath = path.join(pluginDir, `${originalPluginName}.config.yaml`);
+  const originalConfigPath = path.join(
+    pluginDir,
+    `${originalPluginName}.config.yaml`,
+  );
   const targetConfigPath = path.join(pluginDir, `${pluginName}.config.yaml`);
 
-  if (await fs.pathExists(originalConfigPath) && originalConfigPath !== targetConfigPath) {
+  if (
+    (await fs.pathExists(originalConfigPath)) &&
+    originalConfigPath !== targetConfigPath
+  ) {
     // Read, update plugin_name, and write to new location
     const config = yaml.load(await fs.readFile(originalConfigPath, 'utf8'));
     config.plugin_name = pluginName;
@@ -45,10 +51,16 @@ async function createDummyPlugin(pluginName, options = {}) {
   }
 
   // Rename example file
-  const originalExamplePath = path.join(pluginDir, `${originalPluginName}-example.md`);
+  const originalExamplePath = path.join(
+    pluginDir,
+    `${originalPluginName}-example.md`,
+  );
   const targetExamplePath = path.join(pluginDir, `${pluginName}-example.md`);
 
-  if (await fs.pathExists(originalExamplePath) && originalExamplePath !== targetExamplePath) {
+  if (
+    (await fs.pathExists(originalExamplePath)) &&
+    originalExamplePath !== targetExamplePath
+  ) {
     await fs.move(originalExamplePath, targetExamplePath);
   }
 
@@ -56,14 +68,19 @@ async function createDummyPlugin(pluginName, options = {}) {
   const originalCssPath = path.join(pluginDir, `${originalPluginName}.css`);
   const targetCssPath = path.join(pluginDir, `${pluginName}.css`);
 
-  if (await fs.pathExists(originalCssPath) && originalCssPath !== targetCssPath) {
+  if (
+    (await fs.pathExists(originalCssPath)) &&
+    originalCssPath !== targetCssPath
+  ) {
     await fs.move(originalCssPath, targetCssPath);
 
     // Update CSS reference in config file
-    const configContent = yaml.load(await fs.readFile(targetConfigPath, 'utf8'));
+    const configContent = yaml.load(
+      await fs.readFile(targetConfigPath, 'utf8'),
+    );
     if (configContent.css_files) {
-      configContent.css_files = configContent.css_files.map(file =>
-        file === `${originalPluginName}.css` ? `${pluginName}.css` : file
+      configContent.css_files = configContent.css_files.map((file) =>
+        file === `${originalPluginName}.css` ? `${pluginName}.css` : file,
       );
       await fs.writeFile(targetConfigPath, yaml.dump(configContent));
     }
@@ -79,49 +96,52 @@ async function createDummyPlugin(pluginName, options = {}) {
 
 // Apply specific breakage to a plugin
 async function applyBreakage(pluginDir, pluginName, breakageType, baseFixture) {
-  const configPath = path.join(pluginDir, `${getOriginalPluginName(baseFixture)}.config.yaml`);
+  const configPath = path.join(
+    pluginDir,
+    `${getOriginalPluginName(baseFixture)}.config.yaml`,
+  );
   const newConfigPath = path.join(pluginDir, `${pluginName}.config.yaml`);
 
   switch (breakageType) {
-  case 'unsupported-protocol':
-    await breakProtocol(configPath, newConfigPath, pluginName);
-    break;
+    case 'unsupported-protocol':
+      await breakProtocol(configPath, newConfigPath, pluginName);
+      break;
 
-  case 'missing-yaml':
-    await fs.remove(await findConfigFile(pluginDir));
-    break;
+    case 'missing-yaml':
+      await fs.remove(await findConfigFile(pluginDir));
+      break;
 
-  case 'missing-handler':
-    await fs.remove(path.join(pluginDir, 'index.js'));
-    break;
+    case 'missing-handler':
+      await fs.remove(path.join(pluginDir, 'index.js'));
+      break;
 
-  case 'missing-plugin-name':
-    await breakPluginName(configPath, newConfigPath, pluginName);
-    break;
+    case 'missing-plugin-name':
+      await breakPluginName(configPath, newConfigPath, pluginName);
+      break;
 
-  case 'missing-version':
-    await breakVersion(configPath, newConfigPath, pluginName);
-    break;
+    case 'missing-version':
+      await breakVersion(configPath, newConfigPath, pluginName);
+      break;
 
-  case 'minimal-legacy':
-    // Creates old-style plugin with just description (for backwards compatibility tests)
-    await createMinimalLegacyPlugin(pluginDir, pluginName);
-    break;
+    case 'minimal-legacy':
+      // Creates old-style plugin with just description (for backwards compatibility tests)
+      await createMinimalLegacyPlugin(pluginDir, pluginName);
+      break;
 
-  case 'missing-example': {
-    const exampleFile = await findExampleFile(pluginDir);
-    if (exampleFile) await fs.remove(exampleFile);
-    break;
-  }
+    case 'missing-example': {
+      const exampleFile = await findExampleFile(pluginDir);
+      if (exampleFile) await fs.remove(exampleFile);
+      break;
+    }
 
-  case 'missing-readme':
-    await fs.remove(path.join(pluginDir, 'README.md'));
-    break;
+    case 'missing-readme':
+      await fs.remove(path.join(pluginDir, 'README.md'));
+      break;
 
-  default:
-    logger.warn(`Unknown breakage type: ${breakageType}`, {
-      context: 'createDummyPlugin'
-    });
+    default:
+      logger.warn(`Unknown breakage type: ${breakageType}`, {
+        context: 'createDummyPlugin',
+      });
   }
 }
 
@@ -163,28 +183,40 @@ async function createMinimalLegacyPlugin(pluginDir, pluginName) {
 
   // Create minimal files
   await fs.writeFile(path.join(pluginDir, 'index.js'), 'module.exports = {};');
-  await fs.writeFile(path.join(pluginDir, `${pluginName}.config.yaml`), `description: ${pluginName}`);
+  await fs.writeFile(
+    path.join(pluginDir, `${pluginName}.config.yaml`),
+    `description: ${pluginName}`,
+  );
   await fs.writeFile(path.join(pluginDir, 'README.md'), `# ${pluginName}`);
-  await fs.writeFile(path.join(pluginDir, `${pluginName}-example.md`), '# Example');
+  await fs.writeFile(
+    path.join(pluginDir, `${pluginName}-example.md`),
+    '# Example',
+  );
 }
 
 function getOriginalPluginName(baseFixture) {
-  return baseFixture === 'valid-collection' ? 'valid-collection-plugin-1' : baseFixture;
+  return baseFixture === 'valid-collection'
+    ? 'valid-collection-plugin-1'
+    : baseFixture;
 }
 
 async function findConfigFile(pluginDir) {
   const files = await fs.readdir(pluginDir);
-  return files.find(f => f.endsWith('.config.yaml'));
+  return files.find((f) => f.endsWith('.config.yaml'));
 }
 
 async function findExampleFile(pluginDir) {
   const files = await fs.readdir(pluginDir);
-  const exampleFile = files.find(f => f.endsWith('-example.md'));
+  const exampleFile = files.find((f) => f.endsWith('-example.md'));
   return exampleFile ? path.join(pluginDir, exampleFile) : null;
 }
 
 // Create a collection with multiple plugins, optionally broken
-async function createDummyCollection(collectionName, destinationDir, options = {}) {
+async function createDummyCollection(
+  collectionName,
+  destinationDir,
+  options = {},
+) {
   const { pluginBreakages = [] } = options;
 
   const collectionDir = path.join(destinationDir, collectionName);
@@ -202,7 +234,12 @@ async function createDummyCollection(collectionName, destinationDir, options = {
     const pluginDir = path.join(collectionDir, pluginName);
 
     for (const breakageType of breakage) {
-      await applyBreakage(pluginDir, pluginName, breakageType, 'valid-collection-plugin-1');
+      await applyBreakage(
+        pluginDir,
+        pluginName,
+        breakageType,
+        'valid-collection-plugin-1',
+      );
     }
   }
 
@@ -211,5 +248,5 @@ async function createDummyCollection(collectionName, destinationDir, options = {
 
 module.exports = {
   createDummyPlugin,
-  createDummyCollection
+  createDummyCollection,
 };

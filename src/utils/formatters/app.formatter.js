@@ -50,14 +50,15 @@ function formatApp(level, message, meta = {}) {
       level,
       message,
       ...meta,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
   } else {
     const contextPrefix = formatContext(context, config);
-    let formattedMessage = config.contextStyle === 'suffix'
-      ? message + formatContext(context, config)
-      : contextPrefix + message;
+    let formattedMessage =
+      config.contextStyle === 'suffix'
+        ? message + formatContext(context, config)
+        : contextPrefix + message;
 
     // Add enhanced debugging information
     if (caller) {
@@ -78,7 +79,7 @@ function formatApp(level, message, meta = {}) {
     // Display stack trace if available
     if (stack && Array.isArray(stack)) {
       console.log(theme.debug('  Stack trace:'));
-      stack.forEach(line => {
+      stack.forEach((line) => {
         console.log(theme.debug(`    ${line.trim()}`));
       });
     }
@@ -91,5 +92,5 @@ function formatApp(level, message, meta = {}) {
 
 module.exports = {
   formatApp,
-  colorForLevel
+  colorForLevel,
 };

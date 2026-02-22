@@ -4,7 +4,7 @@ const { pluginValidatorFactoryPath } = require('@paths');
 const {
   makeValidatorScenario,
   setupPluginScenario,
-  setupWellFormedPlugin
+  setupWellFormedPlugin,
 } = require(pluginValidatorFactoryPath);
 const path = require('path');
 
@@ -17,7 +17,8 @@ module.exports = [
   }),
 
   makeValidatorScenario({
-    description: '2.4.6: Should FAIL a validation check if a required file is missing',
+    description:
+      '2.4.6: Should FAIL a validation check if a required file is missing',
     pluginName: 'missing-file-plugin',
     setup: setupPluginScenario({
       files: {
@@ -27,17 +28,20 @@ module.exports = [
         'README.md': false,
       },
       yaml: {
-        'missing-file-plugin.config.yaml': { plugin_name: 'missing-file-plugin', protocol: 'v1' },
-      }
+        'missing-file-plugin.config.yaml': {
+          plugin_name: 'missing-file-plugin',
+          protocol: 'v1',
+        },
+      },
     }),
     expectedResult: {
       isValid: false,
       errors: [
-        'Missing required file: \'index.js\'.',
-        'Missing required file: \'missing-file-plugin-example.md\'.',
-        'Missing required file: \'README.md\'.'
-      ]
-    }
+        "Missing required file: 'index.js'.",
+        "Missing required file: 'missing-file-plugin-example.md'.",
+        "Missing required file: 'README.md'.",
+      ],
+    },
   }),
 
   makeValidatorScenario({
@@ -51,14 +55,17 @@ module.exports = [
         'missing-protocol-plugin-example.md': true,
       },
       yaml: {
-        'missing-protocol-plugin.config.yaml': { plugin_name: 'missing-protocol-plugin', version: '1.0.0' },
+        'missing-protocol-plugin.config.yaml': {
+          plugin_name: 'missing-protocol-plugin',
+          version: '1.0.0',
+        },
       },
-      exec: { returns: '' }
+      exec: { returns: '' },
     }),
     expectedResult: {
       isValid: true,
-      warnings: ['protocol not found']
-    }
+      warnings: ['protocol not found'],
+    },
   }),
 
   makeValidatorScenario({
@@ -74,53 +81,80 @@ module.exports = [
         '.contract/failing-test-plugin.schema.json': true,
       },
       yaml: {
-        'failing-test-plugin.config.yaml': { plugin_name: 'failing-test-plugin', protocol: 'v1', version: '1.0.0' },
+        'failing-test-plugin.config.yaml': {
+          plugin_name: 'failing-test-plugin',
+          protocol: 'v1',
+          version: '1.0.0',
+        },
       },
-      exec: { throws: 'Test failed with exit code 1' }
+      exec: { throws: 'Test failed with exit code 1' },
     }),
-    expectedResult: { isValid: false, errors: ['In-situ E2E test failed'] }
+    expectedResult: { isValid: false, errors: ['In-situ E2E test failed'] },
   }),
 
   makeValidatorScenario({
-    description: '2.4.2: Should FAIL validation for a plugin with an unsupported protocol',
+    description:
+      '2.4.2: Should FAIL validation for a plugin with an unsupported protocol',
     pluginName: 'unsupported-proto',
     setup: (pluginDir, pluginName, mocks) => {
       const configPath = path.join(pluginDir, `${pluginName}.config.yaml`);
       const configYaml = `plugin_name: ${pluginName}\nprotocol: v99`;
       // Files exist
-      ['index.js', `${pluginName}.config.yaml`, 'README.md', `${pluginName}-example.md`].forEach(file => {
-        mocks.mockFs.existsSync.withArgs(path.join(pluginDir, file)).returns(true);
+      [
+        'index.js',
+        `${pluginName}.config.yaml`,
+        'README.md',
+        `${pluginName}-example.md`,
+      ].forEach((file) => {
+        mocks.mockFs.existsSync
+          .withArgs(path.join(pluginDir, file))
+          .returns(true);
       });
-      mocks.mockFs.readFileSync.withArgs(configPath, 'utf8').returns(configYaml);
-      mocks.mockYaml.load.withArgs(configYaml).returns({ plugin_name: pluginName, protocol: 'v99' });
+      mocks.mockFs.readFileSync
+        .withArgs(configPath, 'utf8')
+        .returns(configYaml);
+      mocks.mockYaml.load
+        .withArgs(configYaml)
+        .returns({ plugin_name: pluginName, protocol: 'v99' });
     },
     expectedResult: {
       isValid: false,
-      errors: [ 'Unsupported plugin protocol \'v99\'' ]
-    }
+      errors: ["Unsupported plugin protocol 'v99'"],
+    },
   }),
   makeValidatorScenario({
-    description: '2.4.3: Should FAIL validation if directory name mismatches metadata plugin_name',
+    description:
+      '2.4.3: Should FAIL validation if directory name mismatches metadata plugin_name',
     pluginName: 'dir-name',
     setup: (pluginDir, pluginName, mocks) => {
       const configPath = path.join(pluginDir, `${pluginName}.config.yaml`);
       const configYaml = 'plugin_name: mismatched-name\nprotocol: v1';
-      ['index.js', `${pluginName}.config.yaml`, 'README.md', `${pluginName}-example.md`].forEach(file => {
-        mocks.mockFs.existsSync.withArgs(path.join(pluginDir, file)).returns(true);
+      [
+        'index.js',
+        `${pluginName}.config.yaml`,
+        'README.md',
+        `${pluginName}-example.md`,
+      ].forEach((file) => {
+        mocks.mockFs.existsSync
+          .withArgs(path.join(pluginDir, file))
+          .returns(true);
       });
-      mocks.mockFs.readFileSync.withArgs(configPath, 'utf8').returns(configYaml);
-      mocks.mockYaml.load.withArgs(configYaml).returns({ plugin_name: 'mismatched-name', protocol: 'v1' });
+      mocks.mockFs.readFileSync
+        .withArgs(configPath, 'utf8')
+        .returns(configYaml);
+      mocks.mockYaml.load
+        .withArgs(configYaml)
+        .returns({ plugin_name: 'mismatched-name', protocol: 'v1' });
     },
     expectedResult: {
       isValid: false,
-      errors: [ 'does not match plugin directory name' ]
-    }
+      errors: ['does not match plugin directory name'],
+    },
   }),
 
-
-
   makeValidatorScenario({
-    description: '2.4.7: Should report USABLE (with warnings) for missing optional files',
+    description:
+      '2.4.7: Should report USABLE (with warnings) for missing optional files',
     pluginName: 'missing-optional',
     setup: setupPluginScenario({
       files: {
@@ -130,22 +164,26 @@ module.exports = [
         'missing-optional-example.md': true,
       },
       yaml: {
-        'missing-optional.config.yaml': { plugin_name: 'missing-optional', protocol: 'v1' }
+        'missing-optional.config.yaml': {
+          plugin_name: 'missing-optional',
+          protocol: 'v1',
+        },
       },
-      exec: { returns: '' }
+      exec: { returns: '' },
     }),
     expectedResult: {
       isValid: true,
       warnings: [
         'Missing optional ".contract/test/" directory.',
         'Missing optional schema file',
-        'Missing E2E test file'
-      ]
-    }
+        'Missing E2E test file',
+      ],
+    },
   }),
 
   makeValidatorScenario({
-    description: '2.4.10: Should report USABLE (with warnings) for malformed README.md front matter',
+    description:
+      '2.4.10: Should report USABLE (with warnings) for malformed README.md front matter',
     pluginName: 'bad-readme',
     setup: (pluginDir, pluginName, mocks) => {
       // Use the well-formed helper, then override README.md YAML parsing to throw
@@ -158,22 +196,24 @@ module.exports = [
     expectedResult: {
       isValid: true,
       warnings: [
-        'README.md for \'bad-readme\' does not have a valid YAML front matter block.'
-      ]
-    }
+        "README.md for 'bad-readme' does not have a valid YAML front matter block.",
+      ],
+    },
   }),
 
   makeValidatorScenario({
-    description: '2.4.9: Should report as INVALID when plugin self-activation fails',
+    description:
+      '2.4.9: Should report as INVALID when plugin self-activation fails',
     pluginName: 'bad-activation',
     setup: (pluginDir, pluginName, mocks) => {
       setupWellFormedPlugin(pluginDir, pluginName, mocks);
-      mocks.mockExecSync.withArgs(sinon.match(/convert/)).throws(new Error('Activation failed'));
+      mocks.mockExecSync
+        .withArgs(sinon.match(/convert/))
+        .throws(new Error('Activation failed'));
     },
     expectedResult: {
       isValid: false,
-      errors: [ 'Self-activation failed' ]
-    }
+      errors: ['Self-activation failed'],
+    },
   }),
 ];
-

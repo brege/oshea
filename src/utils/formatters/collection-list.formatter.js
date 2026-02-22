@@ -7,7 +7,11 @@ const { theme } = require(colorThemePath);
 // Helper function to determine collection type
 function getCollectionType(collection) {
   if (collection.special_type === 'singleton_container') return 'Managed Dir';
-  if (collection.source && (collection.source.startsWith('http') || collection.source.endsWith('.git'))) return 'Git';
+  if (
+    collection.source &&
+    (collection.source.startsWith('http') || collection.source.endsWith('.git'))
+  )
+    return 'Git';
   return 'Local Path';
 }
 
@@ -18,16 +22,24 @@ function formatCollectionEntry(collection) {
   lines.push(`  ${theme.success('Collection Name:')} ${collection.name}`);
 
   if (collection.special_type === 'singleton_container') {
-    lines.push(`    ${theme.detail('Type:')} Managed Directory (for user-added singleton plugins)`);
+    lines.push(
+      `    ${theme.detail('Type:')} Managed Directory (for user-added singleton plugins)`,
+    );
     lines.push(`    ${theme.detail('Managed Path:')} ${collection.source}`);
-    lines.push(`    ${theme.context('(To see individual singletons, run:')} ${theme.highlight(`'oshea plugin list --available ${collection.name}'`)}`);
+    lines.push(
+      `    ${theme.context('(To see individual singletons, run:')} ${theme.highlight(`'oshea plugin list --available ${collection.name}'`)}`,
+    );
   } else {
     lines.push(`    ${theme.detail('Source:')} ${collection.source}`);
     if (collection.added_on && collection.added_on !== 'N/A (Container)') {
-      lines.push(`    ${theme.detail('Added On:')} ${new Date(collection.added_on).toLocaleString()}`);
+      lines.push(
+        `    ${theme.detail('Added On:')} ${new Date(collection.added_on).toLocaleString()}`,
+      );
     }
     if (collection.updated_on) {
-      lines.push(`    ${theme.detail('Updated On:')} ${new Date(collection.updated_on).toLocaleString()}`);
+      lines.push(
+        `    ${theme.detail('Updated On:')} ${new Date(collection.updated_on).toLocaleString()}`,
+      );
     }
   }
 
@@ -46,18 +58,29 @@ function formatAvailablePluginEntry(plugin) {
     if (plugin.is_original_source_missing) {
       originalSourceDisplay += theme.warn(' (MISSING)');
     }
-    lines.push(`    ${theme.detail('Original Source:')} ${originalSourceDisplay}`);
+    lines.push(
+      `    ${theme.detail('Original Source:')} ${originalSourceDisplay}`,
+    );
     if (plugin.added_on) {
-      lines.push(`    ${theme.detail('Added On:')} ${new Date(plugin.added_on).toLocaleString()}`);
+      lines.push(
+        `    ${theme.detail('Added On:')} ${new Date(plugin.added_on).toLocaleString()}`,
+      );
     }
     if (plugin.updated_on) {
-      lines.push(`    ${theme.detail('Updated On:')} ${new Date(plugin.updated_on).toLocaleString()}`);
+      lines.push(
+        `    ${theme.detail('Updated On:')} ${new Date(plugin.updated_on).toLocaleString()}`,
+      );
     }
   }
 
-  if (plugin.config_path) lines.push(`    ${theme.detail('Config Path:')} ${plugin.config_path}`);
-  if (plugin.base_path) lines.push(`    ${theme.detail('Base Path:')} ${plugin.base_path}`);
-  if (plugin.metadata_error) lines.push(`    ${theme.error('Metadata Error:')} ${plugin.metadata_error}`);
+  if (plugin.config_path)
+    lines.push(`    ${theme.detail('Config Path:')} ${plugin.config_path}`);
+  if (plugin.base_path)
+    lines.push(`    ${theme.detail('Base Path:')} ${plugin.base_path}`);
+  if (plugin.metadata_error)
+    lines.push(
+      `    ${theme.error('Metadata Error:')} ${plugin.metadata_error}`,
+    );
 
   return lines.join('\n');
 }
@@ -75,16 +98,23 @@ function formatEnabledPluginEntry(plugin) {
     if (plugin.is_original_source_missing) {
       originalSourceDisplay += theme.warn(' (MISSING)');
     }
-    lines.push(`    ${theme.detail('Original Source:')} ${originalSourceDisplay}`);
+    lines.push(
+      `    ${theme.detail('Original Source:')} ${originalSourceDisplay}`,
+    );
     if (plugin.added_on) {
-      lines.push(`    ${theme.detail('Added On:')} ${new Date(plugin.added_on).toLocaleString()}`);
+      lines.push(
+        `    ${theme.detail('Added On:')} ${new Date(plugin.added_on).toLocaleString()}`,
+      );
     }
     if (plugin.updated_on) {
-      lines.push(`    ${theme.detail('Updated On:')} ${new Date(plugin.updated_on).toLocaleString()}`);
+      lines.push(
+        `    ${theme.detail('Updated On:')} ${new Date(plugin.updated_on).toLocaleString()}`,
+      );
     }
   }
 
-  if (plugin.config_path) lines.push(`    ${theme.detail('Config Path:')} ${plugin.config_path}`);
+  if (plugin.config_path)
+    lines.push(`    ${theme.detail('Config Path:')} ${plugin.config_path}`);
 
   return lines.join('\n');
 }
@@ -147,16 +177,16 @@ function formatCollectionList(level, message, meta = {}) {
   if (listData.type === 'downloaded') {
     if (listData.format === 'table') {
       // Use table formatter for short display
-      const rows = listData.items.map(coll => ({
+      const rows = listData.items.map((coll) => ({
         name: coll.name,
         type: getCollectionType(coll),
-        source: coll.source || 'N/A'
+        source: coll.source || 'N/A',
       }));
 
       const columns = [
         { key: 'name', header: 'Name' },
         { key: 'type', header: 'Type' },
-        { key: 'source', header: 'Source' }
+        { key: 'source', header: 'Source' },
       ];
 
       const tableFormatter = require(tableFormatterPath);
@@ -165,7 +195,7 @@ function formatCollectionList(level, message, meta = {}) {
         rows,
         columns,
         showBorders: true,
-        title: tableTitle
+        title: tableTitle,
       });
     } else {
       // Detailed collection view - show context header for non-table format
@@ -174,7 +204,7 @@ function formatCollectionList(level, message, meta = {}) {
       console.log(theme.info(contextMsg));
       console.log(''); // spacing after header
 
-      listData.items.forEach(collection => {
+      listData.items.forEach((collection) => {
         console.log(''); // spacing between entries
         console.log(formatCollectionEntry(collection));
       });
@@ -186,7 +216,7 @@ function formatCollectionList(level, message, meta = {}) {
     console.log(theme.info(contextMsg));
     console.log(''); // spacing after header
 
-    listData.items.forEach(plugin => {
+    listData.items.forEach((plugin) => {
       console.log(formatAvailablePluginEntry(plugin));
     });
   } else if (listData.type === 'enabled') {
@@ -196,7 +226,7 @@ function formatCollectionList(level, message, meta = {}) {
     console.log(theme.info(contextMsg));
     console.log(''); // spacing after header
 
-    listData.items.forEach(plugin => {
+    listData.items.forEach((plugin) => {
       console.log(formatEnabledPluginEntry(plugin));
     });
   }
@@ -209,5 +239,5 @@ module.exports = {
   formatEnabledPluginEntry,
   generateContextMessage,
   generateEmptyMessage,
-  getCollectionType
+  getCollectionType,
 };

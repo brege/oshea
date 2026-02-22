@@ -25,9 +25,10 @@ const {
 } = require('@paths');
 const logger = require(loggerPath);
 
-
 const argvRaw = hideBin(process.argv);
-const isCompletionScriptGeneration = argvRaw.includes('completion') && !argvRaw.includes('--get-yargs-completions');
+const isCompletionScriptGeneration =
+  argvRaw.includes('completion') &&
+  !argvRaw.includes('--get-yargs-completions');
 
 // Fast shims for simple operations using proper logging/formatting
 if (argvRaw.includes('--version') || argvRaw.includes('-v')) {
@@ -60,34 +61,43 @@ function createBaseYargs() {
     .option('debug', {
       describe: 'enable detailed debug output with enhanced logging',
       type: 'boolean',
-      default: false
+      default: false,
     })
     .option('stack', {
       describe: 'show stack traces in debug output (implies --debug)',
       type: 'boolean',
-      default: false
+      default: false,
     })
     .alias('h', 'help')
     .alias('v', 'version')
     .epilogue(
       'For more information, refer to the README.md file.\n' +
-            'Tab-completion Tip:\n' +
-            '   echo \'source <(oshea completion)\' >> ~/.bashrc\n' +
-            '   echo \'source <(oshea completion)\' >> ~/.zshrc\n' +
-            'then run source ~/.bashrc or source ~/.zshrc\n' +
-            'oshea _tab_cache'
+        'Tab-completion Tip:\n' +
+        "   echo 'source <(oshea completion)' >> ~/.bashrc\n" +
+        "   echo 'source <(oshea completion)' >> ~/.zshrc\n" +
+        'then run source ~/.bashrc or source ~/.zshrc\n' +
+        'oshea _tab_cache',
     );
 }
 
 if (argvRaw.includes('--help') || argvRaw.includes('-h')) {
   createBaseYargs()
     .command('completion', 'generate completion script')
-    .command('[markdownFile]', 'convert a markdown file to PDF (default command)')
+    .command(
+      '[markdownFile]',
+      'convert a markdown file to PDF (default command)',
+    )
     .command('convert <markdownFile>', 'convert a markdown file to PDF')
-    .command('generate <pluginName>', 'generate a document from a complex plugin')
+    .command(
+      'generate <pluginName>',
+      'generate a document from a complex plugin',
+    )
     .command('plugin <command>', 'manage plugins')
     .command('collection <subcommand>', 'manage plugin collections')
-    .command('update [<collection_name>]', 'update a git-based plugin collection')
+    .command(
+      'update [<collection_name>]',
+      'update a git-based plugin collection',
+    )
     .command('config', 'display active configuration settings')
     .showHelp((output) => {
       logger.info(output);
@@ -96,7 +106,11 @@ if (argvRaw.includes('--help') || argvRaw.includes('-h')) {
 }
 
 // Lightweight config display shim using proper formatter
-if (argvRaw[0] === 'config' && argvRaw.length <= 3 && !argvRaw.includes('--plugin')) {
+if (
+  argvRaw[0] === 'config' &&
+  argvRaw.length <= 3 &&
+  !argvRaw.includes('--plugin')
+) {
   const fs = require('fs');
   const yaml = require('js-yaml');
   const path = require('path');
@@ -111,13 +125,13 @@ if (argvRaw[0] === 'config' && argvRaw.length <= 3 && !argvRaw.includes('--plugi
       mainConfigPath: configPath,
       loadReason: 'factory default fallback',
       useFactoryDefaultsOnly: false,
-      factoryDefaultMainConfigPath: configPath
+      factoryDefaultMainConfigPath: configPath,
     };
 
     formatGlobalConfig('info', '', {
       configData: config,
       sources,
-      isPure: argvRaw.includes('--pure')
+      isPure: argvRaw.includes('--pure'),
     });
     process.exit(0);
   } catch {
@@ -126,12 +140,15 @@ if (argvRaw[0] === 'config' && argvRaw.length <= 3 && !argvRaw.includes('--plugi
 }
 
 // This block is a special case for shell completion.
-if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration) {
+if (
+  argvRaw.includes('--get-yargs-completions') &&
+  !isCompletionScriptGeneration
+) {
   const { getSuggestions } = require(enginePath);
 
   const completionArgv = {
     _: [],
-    'get-yargs-completions': true
+    'get-yargs-completions': true,
   };
   let currentWord = '';
 
@@ -152,7 +169,11 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
     }
   }
 
-  if (completionArgv._.length > 0 && completionArgv._[completionArgv._.length - 1] === currentWord && !currentWord.startsWith('-')) {
+  if (
+    completionArgv._.length > 0 &&
+    completionArgv._[completionArgv._.length - 1] === currentWord &&
+    !currentWord.startsWith('-')
+  ) {
     completionArgv._.pop();
   }
 
@@ -161,7 +182,6 @@ if (argvRaw.includes('--get-yargs-completions') && !isCompletionScriptGeneration
   console.log(suggestions.join('\n'));
   process.exit(0);
 }
-
 
 const { execSync } = require('child_process');
 
@@ -172,7 +192,7 @@ const MainConfigLoader = require(mainConfigLoaderPath);
 const {
   commonCommandHandler,
   executeConversion,
-  executeGeneration
+  executeGeneration,
 } = require('./index.js'); // lint-skip-line no-relative-paths
 
 const configCommand = require(configCommandPath);
@@ -181,7 +201,6 @@ const convertCommandModule = require(convertCommandPath);
 const generateCommand = require(generateCommandPath);
 const collectionCommand = require(collectionCommandPath);
 const updateCommand = require(updateCommandPath);
-
 
 async function main() {
   let managerInstance;
@@ -196,21 +215,26 @@ async function main() {
       const debugConfig = {
         showCaller: true,
         enrichErrors: true,
-        showStack: argv.stack || false
+        showStack: argv.stack || false,
       };
 
       logger.configureLogger(debugConfig);
     }
 
-    const mainConfigLoader = new MainConfigLoader(path.resolve(__dirname, '..'), argv.config, argv.factoryDefaults);
+    const mainConfigLoader = new MainConfigLoader(
+      path.resolve(__dirname, '..'),
+      argv.config,
+      argv.factoryDefaults,
+    );
     const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
-    const collRootFromMainConfig = primaryConfig.config.collections_root || null;
+    const collRootFromMainConfig =
+      primaryConfig.config.collections_root || null;
     const collRootCliOverride = argv['coll-root'] || null;
 
     managerInstance = new CollectionsManager({
       debug: argv.debug || process.env.DEBUG_CM === 'true',
       collRootFromMainConfig: collRootFromMainConfig,
-      collRootCliOverride: collRootCliOverride
+      collRootCliOverride: collRootCliOverride,
     });
 
     argv.manager = managerInstance;
@@ -219,7 +243,10 @@ async function main() {
       argv.config,
       argv.factoryDefaults,
       false,
-      { collRoot: managerInstance.collRoot, collectionsManager: managerInstance }
+      {
+        collRoot: managerInstance.collRoot,
+        collectionsManager: managerInstance,
+      },
     );
     argv.configResolver = configResolver;
   });
@@ -230,26 +257,33 @@ async function main() {
     command: '_tab_cache',
     describe: false,
     builder: (yargsCommand) => {
-      yargsCommand.option('config', { type: 'string' })
+      yargsCommand
+        .option('config', { type: 'string' })
         .option('coll-root', { type: 'string' });
     },
     handler: (args) => {
       const {
         generateCompletionCachePath,
-        generateCompletionDynamicCachePath
+        generateCompletionDynamicCachePath,
       } = require('@paths');
 
       try {
         // Regenerate static command tree cache
-        execSync(`node "${generateCompletionCachePath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+        execSync(`node "${generateCompletionCachePath}"`, {
+          stdio: 'inherit',
+          env: { ...process.env, DEBUG: args.debug },
+        });
 
         // Regenerate dynamic completion data cache
-        execSync(`node "${generateCompletionDynamicCachePath}"`, { stdio: 'inherit', env: { ...process.env, DEBUG: args.debug } });
+        execSync(`node "${generateCompletionDynamicCachePath}"`, {
+          stdio: 'inherit',
+          env: { ...process.env, DEBUG: args.debug },
+        });
       } catch (error) {
         logger.error(`ERROR: Cache generation failed: ${error.message}`);
         process.exit(1);
       }
-    }
+    },
   });
 
   argvBuilder
@@ -258,31 +292,45 @@ async function main() {
       handler: async (args) => {
         const potentialFile = args.markdownFile;
         if (potentialFile) {
-          if (!fs.existsSync(potentialFile) && !potentialFile.endsWith('.md') && !potentialFile.endsWith('.mdx')) {
+          if (
+            !fs.existsSync(potentialFile) &&
+            !potentialFile.endsWith('.md') &&
+            !potentialFile.endsWith('.mdx')
+          ) {
             logger.error(`Error: Unknown command: '${potentialFile}'`);
-            logger.warn('\nTo convert a file, provide a valid path. For other commands, see --help.');
+            logger.warn(
+              '\nTo convert a file, provide a valid path. For other commands, see --help.',
+            );
             process.exit(1);
           }
           args.isLazyLoad = true;
-          await commonCommandHandler(args, executeConversion, 'convert (implicit)');
+          await commonCommandHandler(
+            args,
+            executeConversion,
+            'convert (implicit)',
+          );
         } else {
           argvBuilder.showHelp();
         }
-      }
+      },
     })
     .command({
       ...convertCommandModule.explicitConvert,
       handler: async (args) => {
         args.isLazyLoad = false;
-        await commonCommandHandler(args, executeConversion, 'convert (explicit)');
-      }
+        await commonCommandHandler(
+          args,
+          executeConversion,
+          'convert (explicit)',
+        );
+      },
     })
     .command({
       ...generateCommand,
       handler: async (args) => {
         args.isLazyLoad = false;
         await commonCommandHandler(args, executeGeneration, 'generate');
-      }
+      },
     })
     .command(pluginCommand)
     .command(collectionCommand)
@@ -292,16 +340,38 @@ async function main() {
     .fail((msg, err, yargsInstance) => {
       if (err) {
         logger.error(msg || err.message);
-        if (process.env.DEBUG_CM === 'true' && err.stack) logger.error(err.stack);
+        if (process.env.DEBUG_CM === 'true' && err.stack)
+          logger.error(err.stack);
         yargsInstance.showHelp();
         process.exit(1);
         return;
       }
       if (msg && msg.includes('Unknown argument')) {
         const firstArg = process.argv[2];
-        if(firstArg && !['convert', 'generate', 'plugin', 'config', 'collection', 'update', 'up', '--help', '-h', '--version', '-v', '--config', '--factory-defaults', '--coll-root'].includes(firstArg) && (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))){
+        if (
+          firstArg &&
+          ![
+            'convert',
+            'generate',
+            'plugin',
+            'config',
+            'collection',
+            'update',
+            'up',
+            '--help',
+            '-h',
+            '--version',
+            '-v',
+            '--config',
+            '--factory-defaults',
+            '--coll-root',
+          ].includes(firstArg) &&
+          (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))
+        ) {
           logger.error(`ERROR: ${msg}`);
-          logger.warn(`\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`);
+          logger.warn(
+            `\nIf you intended to convert '${firstArg}', ensure all options are valid for the convert command or the default command.`,
+          );
           yargsInstance.showHelp();
           process.exit(1);
           return;

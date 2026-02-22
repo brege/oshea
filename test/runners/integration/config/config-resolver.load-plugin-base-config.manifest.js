@@ -9,7 +9,7 @@ const mainConfigStubs = {
   getPrimaryMainConfig: {
     config: { collections_root: '/fake/collections/root' },
     path: '/fake/path/to/main-config.yaml',
-    reason: 'test'
+    reason: 'test',
   },
   getXdgMainConfig: { config: {}, path: null, baseDir: null },
   getProjectManifestConfig: { config: {}, path: null, baseDir: null },
@@ -17,11 +17,12 @@ const mainConfigStubs = {
 
 module.exports = [
   makeConfigResolverScenario({
-    description: '1.1.3: should load raw config, resolve CSS, and return a structured object',
+    description:
+      '1.1.3: should load raw config, resolve CSS, and return a structured object',
     mainConfigStubs,
     setup: (mocks) => {
       mocks.mockDependencies.AssetResolver = {
-        resolveAndMergeCss: sinon.stub()
+        resolveAndMergeCss: sinon.stub(),
       };
     },
     assertion: async (resolver, mocks, constants, expect) => {
@@ -32,21 +33,36 @@ module.exports = [
       const rawConfigData = { css_files: ['style.css'], inherit_css: true };
       const resolvedCssPaths = ['/fake/plugin/style.css'];
 
-      mockDependencies.loadYamlConfig.withArgs(fakeConfigPath).resolves(rawConfigData);
+      mockDependencies.loadYamlConfig
+        .withArgs(fakeConfigPath)
+        .resolves(rawConfigData);
       mockDependencies.AssetResolver.resolveAndMergeCss
-        .withArgs(rawConfigData.css_files, fakeAssetsPath, [], false, fakePluginName, fakeConfigPath)
+        .withArgs(
+          rawConfigData.css_files,
+          fakeAssetsPath,
+          [],
+          false,
+          fakePluginName,
+          fakeConfigPath,
+        )
         .returns(resolvedCssPaths);
 
-      const result = await resolver._loadPluginBaseConfig(fakeConfigPath, fakeAssetsPath, fakePluginName);
+      const result = await resolver._loadPluginBaseConfig(
+        fakeConfigPath,
+        fakeAssetsPath,
+        fakePluginName,
+      );
 
-      expect(mockDependencies.loadYamlConfig.calledOnceWith(fakeConfigPath)).to.be.true;
-      expect(mockDependencies.AssetResolver.resolveAndMergeCss.calledOnce).to.be.true;
+      expect(mockDependencies.loadYamlConfig.calledOnceWith(fakeConfigPath)).to
+        .be.true;
+      expect(mockDependencies.AssetResolver.resolveAndMergeCss.calledOnce).to.be
+        .true;
       expect(result).to.deep.equal({
         rawConfig: rawConfigData,
         resolvedCssPaths: resolvedCssPaths,
         inheritCss: true,
         actualPath: fakeConfigPath,
       });
-    }
+    },
   }),
 ];

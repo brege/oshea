@@ -8,7 +8,8 @@ const { spawn } = require('child_process');
 const CACHE_FRESHNESS_THRESHOLD = 5000;
 
 function getCachePath() {
-  const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
+  const xdgCacheHome =
+    process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
   return path.join(xdgCacheHome, 'oshea', 'dynamic-completion-data.json');
 }
 
@@ -22,7 +23,7 @@ function triggerCacheUpdate() {
   try {
     const child = spawn('node', [scriptPath], {
       detached: true,
-      stdio: 'ignore'
+      stdio: 'ignore',
     });
     child.unref();
   } catch {
@@ -87,5 +88,5 @@ module.exports = {
   getDownloadedCollections,
   getEnabledPlugins,
   getAvailablePlugins,
-  getUserPlugins
+  getUserPlugins,
 };

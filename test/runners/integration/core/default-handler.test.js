@@ -5,7 +5,7 @@ const {
   defaultHandlerManifestPath,
   defaultHandlerPath,
   allPaths,
-  captureLogsPath
+  captureLogsPath,
 } = require('@paths');
 const { expect } = require('chai');
 const { logs, clearLogs } = require(captureLogsPath);
@@ -31,20 +31,20 @@ function collectStubs(ctx) {
   };
 }
 
-describe(`default-handler (Subsystem Integration Tests) ${path.relative(projectRoot, defaultHandlerPath)}`, function () {
+describe(`default-handler (Subsystem Integration Tests) ${path.relative(projectRoot, defaultHandlerPath)}`, () => {
   let DefaultHandler;
 
-  beforeEach(function () {
+  beforeEach(() => {
     clearLogs();
     // Clear the require cache for the handler so it picks up fresh stubs
     delete require.cache[require.resolve(defaultHandlerPath)];
     // Use proxyquire to inject loggerPath for log capturing
     DefaultHandler = proxyquire(defaultHandlerPath, {
-      '@paths': { ...allPaths, loggerPath: testLoggerPath }
+      '@paths': { ...allPaths, loggerPath: testLoggerPath },
     });
   });
 
-  testManifest.forEach(testCase => {
+  testManifest.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
 
     it_(testCase.description, async function () {
@@ -57,11 +57,10 @@ describe(`default-handler (Subsystem Integration Tests) ${path.relative(projectR
         testCase.globalConfig,
         testCase.outputDir,
         testCase.outputFilenameOpt,
-        testCase.pluginBasePath
+        testCase.pluginBasePath,
       );
 
       testCase.assert(result, stubs, expect, logs);
     });
   });
 });
-

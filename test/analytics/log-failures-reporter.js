@@ -9,18 +9,15 @@ const os = require('os');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-const {
-  EVENT_RUN_END,
-  EVENT_TEST_FAIL,
-  EVENT_TEST_PASS,
-  EVENT_TEST_PENDING
-} = Mocha.Runner.constants;
+const { EVENT_RUN_END, EVENT_TEST_FAIL, EVENT_TEST_PASS, EVENT_TEST_PENDING } =
+  Mocha.Runner.constants;
 
 function getReportPath() {
   if (process.env.MOCHA_JSON_REPORT_FILE) {
     return path.resolve(process.env.MOCHA_JSON_REPORT_FILE);
   }
-  const xdgDataHome = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
+  const xdgDataHome =
+    process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
   const reportDir = path.join(xdgDataHome, 'oshea', 'test-analytics');
   fs.mkdirSync(reportDir, { recursive: true });
   return path.join(reportDir, 'test-results.json');
@@ -44,7 +41,10 @@ function loadExistingResults(reportPath) {
       }
     } else {
       // Legacy NDJSON format - migrate to new structure
-      const lines = content.trim().split('\n').filter(line => line.trim());
+      const lines = content
+        .trim()
+        .split('\n')
+        .filter((line) => line.trim());
       for (const line of lines) {
         try {
           const result = JSON.parse(line);
@@ -56,7 +56,7 @@ function loadExistingResults(reportPath) {
               first_seen: result.timestamp,
               last_run: result.timestamp,
               last_status: result.status,
-              last_duration: result.duration || 0
+              last_duration: result.duration || 0,
             };
 
             // Update counts based on status
@@ -107,7 +107,7 @@ class LogJsonReporter extends Mocha.reporters.Spec {
     const resultMap = loadExistingResults(outputFile);
 
     runner
-      .on(EVENT_TEST_PASS, test => {
+      .on(EVENT_TEST_PASS, (test) => {
         const key = `${test.file}::${test.fullTitle()}`;
         const timestamp = new Date().toISOString();
         const existing = resultMap.get(key) || {
@@ -116,7 +116,7 @@ class LogJsonReporter extends Mocha.reporters.Spec {
           first_seen: timestamp,
           last_run: timestamp,
           last_status: 'passed',
-          last_duration: test.duration || 0
+          last_duration: test.duration || 0,
         };
 
         existing.success_count++;
@@ -136,7 +136,7 @@ class LogJsonReporter extends Mocha.reporters.Spec {
           last_run: timestamp,
           last_status: 'failed',
           last_duration: test.duration || 0,
-          last_error: err.message
+          last_error: err.message,
         };
 
         existing.fail_count++;
@@ -147,7 +147,7 @@ class LogJsonReporter extends Mocha.reporters.Spec {
 
         resultMap.set(key, existing);
       })
-      .on(EVENT_TEST_PENDING, test => {
+      .on(EVENT_TEST_PENDING, (test) => {
         const key = `${test.file}::${test.fullTitle()}`;
         const timestamp = new Date().toISOString();
         const existing = resultMap.get(key) || {
@@ -156,7 +156,7 @@ class LogJsonReporter extends Mocha.reporters.Spec {
           first_seen: timestamp,
           last_run: timestamp,
           last_status: 'pending',
-          last_duration: 0
+          last_duration: 0,
         };
 
         existing.last_run = timestamp;
@@ -169,11 +169,10 @@ class LogJsonReporter extends Mocha.reporters.Spec {
         writeResults(outputFile, resultMap);
         logger.info(`\nTest report written to: ${outputFile}`);
         logger.debug(`Total results tracked: ${resultMap.size}`, {
-          context: 'LogJsonReporter'
+          context: 'LogJsonReporter',
         });
       });
   }
 }
 
 module.exports = LogJsonReporter;
-

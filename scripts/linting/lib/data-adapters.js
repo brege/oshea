@@ -8,12 +8,12 @@ function padRight(str = '', len) {
 }
 
 function createLintResult(filePath, messages = []) {
-  const errorCount = messages.filter(msg => msg.severity === 2).length;
-  const warningCount = messages.filter(msg => msg.severity === 1).length;
+  const errorCount = messages.filter((msg) => msg.severity === 2).length;
+  const warningCount = messages.filter((msg) => msg.severity === 1).length;
 
   return {
     filePath: path.resolve(filePath),
-    messages: messages.map(msg => ({
+    messages: messages.map((msg) => ({
       ruleId: msg.rule || msg.ruleId || 'unknown',
       severity: msg.severity === 2 ? 2 : 1,
       message: msg.message || '',
@@ -24,7 +24,7 @@ function createLintResult(filePath, messages = []) {
       fix: msg.fix || null,
       // pass through highlighting fields if present
       matchedText: msg.matchedText,
-      sourceLine: msg.sourceLine
+      sourceLine: msg.sourceLine,
     })),
     errorCount,
     warningCount,
@@ -33,7 +33,10 @@ function createLintResult(filePath, messages = []) {
 }
 
 function adaptRawIssuesToEslintFormat(rawIssues) {
-  if (Array.isArray(rawIssues) && rawIssues.every(item => item && typeof item.filePath === 'string')) {
+  if (
+    Array.isArray(rawIssues) &&
+    rawIssues.every((item) => item && typeof item.filePath === 'string')
+  ) {
     return rawIssues;
   }
   if (!rawIssues || rawIssues.length === 0) {
@@ -42,7 +45,7 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
 
   const resultsByFile = {};
 
-  rawIssues.forEach(issue => {
+  rawIssues.forEach((issue) => {
     const filePath = issue.file || 'unknown-file';
     if (!resultsByFile[filePath]) {
       resultsByFile[filePath] = [];
@@ -59,8 +62,8 @@ function adaptRawIssuesToEslintFormat(rawIssues) {
     });
   });
 
-  return Object.keys(resultsByFile).map(filePath =>
-    createLintResult(filePath, resultsByFile[filePath])
+  return Object.keys(resultsByFile).map((filePath) =>
+    createLintResult(filePath, resultsByFile[filePath]),
   );
 }
 
@@ -70,7 +73,7 @@ function transformToStructuredData(results) {
     return {
       type: 'empty',
       sections: [],
-      summary: { totalErrors: 0, totalWarnings: 0, totalProblems: 0 }
+      summary: { totalErrors: 0, totalWarnings: 0, totalProblems: 0 },
     };
   }
 
@@ -90,9 +93,9 @@ function transformToStructuredData(results) {
     const section = {
       header: {
         text: relPath,
-        style: 'underline'
+        style: 'underline',
       },
-      messages: []
+      messages: [],
     };
 
     for (const msg of messages) {
@@ -103,23 +106,23 @@ function transformToStructuredData(results) {
       const formattedMessage = {
         location: {
           text: padRight(location, 8),
-          style: 'dim'
+          style: 'dim',
         },
         level: {
           text: padRight(levelText, 8),
-          severity: msg.severity
+          severity: msg.severity,
         },
         message: message,
         rule: {
           text: msg.ruleId || '',
-          style: 'dim'
-        }
+          style: 'dim',
+        },
       };
 
       if (msg.sourceLine && msg.matchedText) {
         formattedMessage.sourceLine = {
           text: msg.sourceLine,
-          highlight: msg.matchedText
+          highlight: msg.matchedText,
         };
       }
 
@@ -138,8 +141,8 @@ function transformToStructuredData(results) {
       totalErrors,
       totalWarnings,
       totalProblems,
-      hasSummary: totalProblems > 0
-    }
+      hasSummary: totalProblems > 0,
+    },
   };
 }
 
@@ -147,5 +150,5 @@ module.exports = {
   padRight,
   createLintResult,
   adaptRawIssuesToEslintFormat,
-  transformToStructuredData
+  transformToStructuredData,
 };

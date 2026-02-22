@@ -14,7 +14,9 @@ function makePdfGeneratorScenario({
       mockPuppeteer.launch.rejects(new Error(stubs.launchRejects));
     }
     if (stubs.setContentRejects) {
-      mockPuppeteer.mockPage.setContent.rejects(new Error(stubs.setContentRejects));
+      mockPuppeteer.mockPage.setContent.rejects(
+        new Error(stubs.setContentRejects),
+      );
     }
     if (stubs.pdfRejects) {
       mockPuppeteer.mockPage.pdf.rejects(new Error(stubs.pdfRejects));
@@ -31,4 +33,3 @@ function makePdfGeneratorScenario({
 }
 
 module.exports = { makePdfGeneratorScenario };
-

@@ -27,7 +27,7 @@ function formatPathFinderOutput(level, message, meta = {}) {
 
   const highlightedOutput = message
     .split('\n')
-    .map(line => formatLine(line))
+    .map((line) => formatLine(line))
     .join('\n');
 
   // Output without additional newline (similar to inline formatter)
@@ -38,4 +38,3 @@ module.exports = {
   formatLine,
   formatPathFinderOutput,
 };
-

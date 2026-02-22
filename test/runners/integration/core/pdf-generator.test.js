@@ -5,7 +5,7 @@ const {
   pdfGeneratorPath,
   captureLogsPath,
   pdfGeneratorManifestPath,
-  allPaths
+  allPaths,
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -13,12 +13,12 @@ const { logs, clearLogs } = require(captureLogsPath);
 const testManifest = require(pdfGeneratorManifestPath);
 const proxyquire = require('proxyquire');
 
-describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoot, pdfGeneratorPath)}`, function() {
+describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoot, pdfGeneratorPath)}`, () => {
   let generatePdf;
   let mockPuppeteer;
   let sandbox;
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
     sandbox = sinon.createSandbox();
 
@@ -40,29 +40,29 @@ describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoo
       launch: sandbox.stub().resolves(mockBrowser),
       // Keep a reference to the nested mocks for easy access in assertions
       mockBrowser,
-      mockPage
+      mockPage,
     };
 
     // Use proxyquire to inject the mocked puppeteer module and loggerPath
     const testLoggerPath = captureLogsPath;
     const { generatePdf: proxiedGeneratePdf } = proxyquire(pdfGeneratorPath, {
-      'puppeteer': mockPuppeteer,
+      puppeteer: mockPuppeteer,
       '@paths': {
         ...allPaths, // Ensure other paths are preserved
-        loggerPath: testLoggerPath
-      }
+        loggerPath: testLoggerPath,
+      },
     });
     generatePdf = proxiedGeneratePdf;
   });
 
-  afterEach(function() {
+  afterEach(() => {
     sandbox.restore();
   });
 
-  testManifest.forEach(testCase => {
+  testManifest.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
 
-    it_(testCase.description, async function() {
+    it_(testCase.description, async () => {
       // Use per-test-case constants if provided, else fall back to defaults
       const constants = testCase.constants || {
         htmlBodyContent: '<p>Test</p>',
@@ -79,7 +79,10 @@ describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoo
         cssFileContentsArray: ['body { color: blue; }'],
       };
 
-      testCase.setup({ mockPuppeteer, mockPage: mockPuppeteer.mockPage }, constants);
+      testCase.setup(
+        { mockPuppeteer, mockPage: mockPuppeteer.mockPage },
+        constants,
+      );
 
       let result;
       try {
@@ -87,13 +90,19 @@ describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoo
           constants.htmlBodyContent, // Use as-is, including null/empty string!
           constants.outputPdfPath,
           constants.pdfOptionsFromConfig,
-          constants.cssFileContentsArray
+          constants.cssFileContentsArray,
         );
       } catch (e) {
         result = e; // Capture thrown error for assertion
       }
 
-      await testCase.assert(result, { mockPuppeteer, mockPage: mockPuppeteer.mockPage }, constants, expect, logs);
+      await testCase.assert(
+        result,
+        { mockPuppeteer, mockPage: mockPuppeteer.mockPage },
+        constants,
+        expect,
+        logs,
+      );
     });
   });
 });

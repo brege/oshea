@@ -3,6 +3,9 @@
   "vcs": {
     "enabled": false
   },
+  "files": {
+    "includes": ["**", "!assets", "!.mocharc.js", "!paths/index.js"]
+  },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",

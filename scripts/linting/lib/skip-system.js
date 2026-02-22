@@ -39,9 +39,9 @@ function generateSkipMarkers() {
 
   // Group linters by category
   const groups = {
-    'code': [],
-    'docs': [],
-    'validators': []
+    code: [],
+    docs: [],
+    validators: [],
   };
 
   // Categorize linters and create simplified aliases
@@ -71,7 +71,7 @@ function generateSkipMarkers() {
 
       // Group and alias info
       group: group,
-      alias: alias
+      alias: alias,
     };
   });
 
@@ -80,7 +80,7 @@ function generateSkipMarkers() {
     markers[`group-${groupName}`] = {
       skip: `lint-skip-file ${groupName}`,
       fileSkip: `<!-- lint-skip-file ${groupName} -->`,
-      linters: linters
+      linters: linters,
     };
   });
 
@@ -91,15 +91,15 @@ function generateSkipMarkers() {
 // Get simplified alias for common linters
 function getSimplifiedAlias(linterKey) {
   const aliases = {
-    'postman': 'links',
-    'janitor': 'litter',
-    'librarian': 'index',
+    postman: 'links',
+    janitor: 'litter',
+    librarian: 'index',
     'no-bad-headers': 'header',
     'no-console': 'logs',
     'no-jsdoc': 'jsdoc',
     'no-relative-paths': 'paths',
     'no-trailing-whitespace': 'ws',
-    'validate-mocha': 'mocha'
+    'validate-mocha': 'mocha',
   };
 
   return aliases[linterKey] || linterKey;
@@ -118,7 +118,7 @@ function getAllSkipPatterns() {
     // HTML comment versions
     /<!--\s*lint-skip-file\s+([\w\s-]+)\s*-->/g,
     /<!--\s*lint-disable\s+([\w-]+)\s*-->/g,
-    /<!--\s*lint-enable\s+([\w-]+)\s*-->/g
+    /<!--\s*lint-enable\s+([\w-]+)\s*-->/g,
   ];
 
   return patterns;
@@ -139,10 +139,10 @@ function isValidSkipMarker(marker, linterKey = null) {
     /^lint-enable\s+[\w-]+$/,
     /^<!--\s*lint-skip-file\s+[\w\s-]+\s*-->$/,
     /^<!--\s*lint-disable\s+[\w-]+\s*-->$/,
-    /^<!--\s*lint-enable\s+[\w-]+\s*-->$/
+    /^<!--\s*lint-enable\s+[\w-]+\s*-->$/,
   ];
 
-  return standardPatterns.some(pattern => pattern.test(marker));
+  return standardPatterns.some((pattern) => pattern.test(marker));
 }
 
 // Get skip marker for specific linter and type
@@ -157,15 +157,21 @@ function getSkipMarker(linterKey, type = 'skip-file', isComment = false) {
   const group = markers[linterKey].group;
 
   if (type === 'skip-file') {
-    return isComment ? `<!-- lint-skip-file ${alias} -->` : `lint-skip-file ${alias}`;
+    return isComment
+      ? `<!-- lint-skip-file ${alias} -->`
+      : `lint-skip-file ${alias}`;
   } else if (type === 'skip-line') {
     return `lint-skip-line ${alias}`;
   } else if (type === 'skip-next') {
     return `lint-skip-next-line ${alias}`;
   } else if (type === 'skip-group') {
-    return isComment ? `<!-- lint-skip-file ${group} -->` : `lint-skip-file ${group}`;
+    return isComment
+      ? `<!-- lint-skip-file ${group} -->`
+      : `lint-skip-file ${group}`;
   } else if (type === 'disable') {
-    return isComment ? `<!-- lint-disable ${alias} -->` : `lint-disable ${alias}`;
+    return isComment
+      ? `<!-- lint-disable ${alias} -->`
+      : `lint-disable ${alias}`;
   } else if (type === 'enable') {
     return isComment ? `<!-- lint-enable ${alias} -->` : `lint-enable ${alias}`;
   }
@@ -189,7 +195,10 @@ function shouldSkipDirectory(dirPath, linterKey) {
       return true;
     }
 
-    const skipEntries = content.split('\n').map(line => line.trim()).filter(Boolean);
+    const skipEntries = content
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
     const markers = generateSkipMarkers()[linterKey];
 
     if (!markers) return false;
@@ -198,10 +207,11 @@ function shouldSkipDirectory(dirPath, linterKey) {
     const group = markers.group;
 
     // Check if linter should be skipped
-    return skipEntries.includes(alias) ||
-           skipEntries.includes(linterKey) ||
-           skipEntries.includes(group);
-
+    return (
+      skipEntries.includes(alias) ||
+      skipEntries.includes(linterKey) ||
+      skipEntries.includes(group)
+    );
   } catch {
     return false; // Error reading file, don't skip
   }
@@ -236,22 +246,29 @@ function shouldSkipLine(line, previousLine, linterKey) {
   const group = markers.group;
 
   // Check for file-level skip
-  if (line.includes(`lint-skip-file ${alias}`) ||
-      line.includes(`lint-skip-file ${group}`) ||
-      line.includes(`<!-- lint-skip-file ${alias}`) ||
-      line.includes(`<!-- lint-skip-file ${group}`)) {
+  if (
+    line.includes(`lint-skip-file ${alias}`) ||
+    line.includes(`lint-skip-file ${group}`) ||
+    line.includes(`<!-- lint-skip-file ${alias}`) ||
+    line.includes(`<!-- lint-skip-file ${group}`)
+  ) {
     return true;
   }
 
   // Check current line for line-level skip
-  if (line.includes(`lint-skip-line ${alias}`) ||
-      line.includes(`lint-skip-line ${linterKey}`)) {
+  if (
+    line.includes(`lint-skip-line ${alias}`) ||
+    line.includes(`lint-skip-line ${linterKey}`)
+  ) {
     return true;
   }
 
   // Check previous line for next-line skip
-  if (previousLine && (previousLine.includes(`lint-skip-next-line ${alias}`) ||
-                       previousLine.includes(`lint-skip-next-line ${linterKey}`))) {
+  if (
+    previousLine &&
+    (previousLine.includes(`lint-skip-next-line ${alias}`) ||
+      previousLine.includes(`lint-skip-next-line ${linterKey}`))
+  ) {
     return true;
   }
 
@@ -272,7 +289,7 @@ function extractLinterFromMarker(marker) {
     /<!--\s*lint-enable\s+([\w-]+)\s*-->/,
     // ESLint patterns (legitimate ESLint syntax)
     /eslint-disable-line\s+([\w-]+)/,
-    /eslint-disable-next-line\s+([\w-]+)/
+    /eslint-disable-next-line\s+([\w-]+)/,
   ];
 
   for (const pattern of patterns) {
@@ -287,15 +304,15 @@ function extractLinterFromMarker(marker) {
 
       // Handle aliases and convert back to linter keys
       const aliasToKey = {
-        'links': 'postman',
-        'index': 'librarian',
-        'litter': 'janitor',
-        'paths': 'no-relative-paths',
-        'jsdoc': 'no-jsdoc',
-        'header': 'no-bad-headers',
-        'ws': 'no-trailing-whitespace',
-        'logs': 'no-console',
-        'mocha': 'validate-mocha'
+        links: 'postman',
+        index: 'librarian',
+        litter: 'janitor',
+        paths: 'no-relative-paths',
+        jsdoc: 'no-jsdoc',
+        header: 'no-bad-headers',
+        ws: 'no-trailing-whitespace',
+        logs: 'no-console',
+        mocha: 'validate-mocha',
       };
 
       return aliasToKey[extracted] || extracted;
@@ -315,5 +332,5 @@ module.exports = {
   shouldSkipFile,
   shouldSkipDirectory,
   extractLinterFromMarker,
-  loadLinterConfig
+  loadLinterConfig,
 };

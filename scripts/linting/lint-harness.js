@@ -4,12 +4,25 @@ require('module-alias/register');
 
 const { spawnSync } = require('child_process');
 const { resolve } = require('path');
-const { projectRoot, eslintPath, dataAdaptersPath, loggerPath } = require('@paths');
+const {
+  projectRoot,
+  eslintPath,
+  dataAdaptersPath,
+  loggerPath,
+} = require('@paths');
 const { adaptRawIssuesToEslintFormat } = require(dataAdaptersPath);
 const logger = require(loggerPath);
 
 // Accept userArgs (for display only) and the usingJson flag
-function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun = false, usingJson = false }) {
+function runStep({
+  label,
+  command,
+  args,
+  userArgs,
+  ignoreFailure = false,
+  dryRun = false,
+  usingJson = false,
+}) {
   // Only print step info if not in JSON mode
   if (!usingJson) {
     logger.info(`--- Running: ${label} ---`);
@@ -45,7 +58,9 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
     try {
       // ESLint returns an array, our scripts return an object.
       // Look for JSON object start, but skip ANSI color codes by looking for {"issues"
-      const jsonStart = stdout.startsWith('[') ? stdout.indexOf('[') : stdout.indexOf('{"issues"');
+      const jsonStart = stdout.startsWith('[')
+        ? stdout.indexOf('[')
+        : stdout.indexOf('{"issues"');
       if (jsonStart !== -1) {
         // Extract debug output that comes before JSON (when in debug mode)
         const preJsonOutput = stdout.substring(0, jsonStart).trim();
@@ -59,10 +74,10 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
         if (command === eslintPath && Array.isArray(parsed)) {
           let errorCount = 0;
           let warningCount = 0;
-          parsed.forEach(fileResult => {
+          parsed.forEach((fileResult) => {
             errorCount += fileResult.errorCount;
             warningCount += fileResult.warningCount;
-            if(fileResult.messages.length > 0) issues.push(fileResult);
+            if (fileResult.messages.length > 0) issues.push(fileResult);
           });
           stepSummary = { errorCount, warningCount, fixedCount: 0 }; // ESLint JSON format doesn't summarize fixes well.
         } else if (parsed && parsed.summary) {
@@ -79,23 +94,30 @@ function runStep({ label, command, args, userArgs, ignoreFailure = false, dryRun
   if (!usingJson) {
     if (issues.length > 0) {
       const isEslintResult = command === eslintPath;
-      const adaptedIssues = isEslintResult ? issues : adaptRawIssuesToEslintFormat(issues);
+      const adaptedIssues = isEslintResult
+        ? issues
+        : adaptRawIssuesToEslintFormat(issues);
       const { transformToStructuredData } = require(dataAdaptersPath);
       const structuredData = transformToStructuredData(adaptedIssues);
       logger.info(structuredData, { format: 'lint' });
     } else if (stdout && !stepSummary) {
       logger.info(stdout);
-    } else if (issues.length === 0 && stepSummary && stepSummary.fixedCount === 0) {
+    } else if (
+      issues.length === 0 &&
+      stepSummary &&
+      stepSummary.fixedCount === 0
+    ) {
       logger.success('✔ No problems found.');
     }
 
     if (stderr) logger.error(stderr);
   }
 
-
   if (result.error) {
     // Always report catastrophic errors
-    logger.error(`--- ERROR: Failed to spawn ${command}: ${result.error.message}`);
+    logger.error(
+      `--- ERROR: Failed to spawn ${command}: ${result.error.message}`,
+    );
     return { stepPassed: false };
   }
 
@@ -122,17 +144,19 @@ function runHarness(config, globalFlags, targets = [], only = '') {
     const group = step.group || '';
     const alias = step.alias || '';
 
-    const shouldRun = !only ||
-                      label.toLowerCase().includes(only.toLowerCase()) ||
-                      key.toLowerCase() === only.toLowerCase() ||
-                      group.toLowerCase() === only.toLowerCase() ||
-                      alias.toLowerCase() === only.toLowerCase();
+    const shouldRun =
+      !only ||
+      label.toLowerCase().includes(only.toLowerCase()) ||
+      key.toLowerCase() === only.toLowerCase() ||
+      group.toLowerCase() === only.toLowerCase() ||
+      alias.toLowerCase() === only.toLowerCase();
 
-    const shouldSkip = globalFlags.skip &&
-                       (key === globalFlags.skip ||
-                        label.toLowerCase().includes(globalFlags.skip.toLowerCase()) ||
-                        group.toLowerCase() === globalFlags.skip.toLowerCase() ||
-                        alias.toLowerCase() === globalFlags.skip.toLowerCase());
+    const shouldSkip =
+      globalFlags.skip &&
+      (key === globalFlags.skip ||
+        label.toLowerCase().includes(globalFlags.skip.toLowerCase()) ||
+        group.toLowerCase() === globalFlags.skip.toLowerCase() ||
+        alias.toLowerCase() === globalFlags.skip.toLowerCase());
 
     if (!shouldRun || shouldSkip) {
       if (!usingJson && shouldSkip) logger.warn(`--- SKIPPED: ${label} ---`);
@@ -142,7 +166,9 @@ function runHarness(config, globalFlags, targets = [], only = '') {
     const resolvedFlags = {};
     for (const flag of flagList) {
       resolvedFlags[flag] =
-        globalFlags[flag] === true || step[flag] === true || config[flag] === true;
+        globalFlags[flag] === true ||
+        step[flag] === true ||
+        config[flag] === true;
     }
 
     let command, commandArgs, userDisplayArgs;
@@ -169,7 +195,9 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       }
     } else if (step.command) {
       command = step.command === 'eslint' ? eslintPath : step.command;
-      commandArgs = [...(targets.length > 0 ? targets : step.defaultTargets || [])];
+      commandArgs = [
+        ...(targets.length > 0 ? targets : step.defaultTargets || []),
+      ];
 
       if (command === eslintPath) {
         commandArgs.push('--format=json');
@@ -179,14 +207,18 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       }
 
       // User-display args -- omit --format=json
-      userDisplayArgs = [...(targets.length > 0 ? targets : step.defaultTargets || [])];
+      userDisplayArgs = [
+        ...(targets.length > 0 ? targets : step.defaultTargets || []),
+      ];
       if (command === eslintPath) {
         if (resolvedFlags.fix) userDisplayArgs.push('--fix');
         if (resolvedFlags.quiet) userDisplayArgs.push('--quiet');
       }
     } else {
       if (!usingJson) {
-        logger.error(`--- ERROR: Step '${label}' missing both 'command' and 'scriptPath'.`);
+        logger.error(
+          `--- ERROR: Step '${label}' missing both 'command' and 'scriptPath'.`,
+        );
       }
       allPassed = false;
       continue;
@@ -207,15 +239,31 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       if (!config.continueOnError) {
         if (usingJson) {
           // Output partial JSON, abort
-          logger.info(JSON.stringify({
-            ok: false,
-            aborted: true,
-            steps: stepSummaries,
-            totalErrors: stepSummaries.reduce((t, s) => t + (s.errorCount || 0), 0),
-            totalWarnings: stepSummaries.reduce((t, s) => t + (s.warningCount || 0), 0),
-            totalFixed: stepSummaries.reduce((t, s) => t + (s.fixedCount || 0), 0),
-            message: 'Unified linting harness aborted due to step failure.'
-          }, null, 2) + '\n', { format: 'inline' });
+          logger.info(
+            JSON.stringify(
+              {
+                ok: false,
+                aborted: true,
+                steps: stepSummaries,
+                totalErrors: stepSummaries.reduce(
+                  (t, s) => t + (s.errorCount || 0),
+                  0,
+                ),
+                totalWarnings: stepSummaries.reduce(
+                  (t, s) => t + (s.warningCount || 0),
+                  0,
+                ),
+                totalFixed: stepSummaries.reduce(
+                  (t, s) => t + (s.fixedCount || 0),
+                  0,
+                ),
+                message: 'Unified linting harness aborted due to step failure.',
+              },
+              null,
+              2,
+            ) + '\n',
+            { format: 'inline' },
+          );
           process.exit(1);
         } else {
           logger.fatal('Harness exiting early due to failure.');
@@ -230,19 +278,34 @@ function runHarness(config, globalFlags, targets = [], only = '') {
 
   // JSON output mode: emit single summary block, exit
   if (usingJson) {
-    const totalErrors = stepSummaries.reduce((t, s) => t + (s.errorCount || 0), 0);
-    const totalWarnings = stepSummaries.reduce((t, s) => t + (s.warningCount || 0), 0);
-    const totalFixed = stepSummaries.reduce((t, s) => t + (s.fixedCount || 0), 0);
-    logger.info(JSON.stringify({
-      ok: totalErrors === 0,
-      steps: stepSummaries,
-      totalErrors,
-      totalWarnings,
-      totalFixed,
-      result: totalErrors > 0 ? 'errors'
-        : totalWarnings > 0 ? 'warnings'
-          : 'ok'
-    }, null, 2) + '\n', { format: 'inline' });
+    const totalErrors = stepSummaries.reduce(
+      (t, s) => t + (s.errorCount || 0),
+      0,
+    );
+    const totalWarnings = stepSummaries.reduce(
+      (t, s) => t + (s.warningCount || 0),
+      0,
+    );
+    const totalFixed = stepSummaries.reduce(
+      (t, s) => t + (s.fixedCount || 0),
+      0,
+    );
+    logger.info(
+      JSON.stringify(
+        {
+          ok: totalErrors === 0,
+          steps: stepSummaries,
+          totalErrors,
+          totalWarnings,
+          totalFixed,
+          result:
+            totalErrors > 0 ? 'errors' : totalWarnings > 0 ? 'warnings' : 'ok',
+        },
+        null,
+        2,
+      ) + '\n',
+      { format: 'inline' },
+    );
     process.exit(totalErrors === 0 ? 0 : 1);
   }
 
@@ -262,7 +325,8 @@ function runHarness(config, globalFlags, targets = [], only = '') {
 
     const symbol = errorCount > 0 ? '✖' : warningCount > 0 ? '!' : '✔';
     const fixText = fixedCount > 0 ? ` (${fixedCount} fixed)` : '';
-    const logLevel = errorCount > 0 ? 'error' : warningCount > 0 ? 'warn' : 'success';
+    const logLevel =
+      errorCount > 0 ? 'error' : warningCount > 0 ? 'warn' : 'success';
 
     logger[logLevel](`${symbol} ${step.label}${fixText}`);
   }

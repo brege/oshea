@@ -5,20 +5,27 @@ const path = require('path');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileContentsArray, htmlTemplateStr = null, injectionPoints = {}) {
+async function generatePdf(
+  htmlBodyContent,
+  outputPdfPath,
+  pdfOptions,
+  cssFileContentsArray,
+  htmlTemplateStr = null,
+  injectionPoints = {},
+) {
   let browser = null;
   let page = null;
   try {
     logger.debug('Launching Puppeteer browser', {
-      context: 'PDFGenerator'
+      context: 'PDFGenerator',
     });
     browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     page = await browser.newPage();
     logger.debug('New Puppeteer page created', {
-      context: 'PDFGenerator'
+      context: 'PDFGenerator',
     });
 
     let viewportWidth = 800;
@@ -39,17 +46,24 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
     const viewportCss = hasExplicitDimensions
       ? `html, body { width: ${viewportWidth}px !important; height: ${viewportHeight}px !important; }`
       : '';
-    const combinedCss = (viewportCss ? viewportCss + '\n\n' : '') + (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
+    const combinedCss =
+      (viewportCss ? viewportCss + '\n\n' : '') +
+      (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
     logger.debug('Combined CSS content', {
       context: 'PDFGenerator',
       cssFileCount: (cssFileContentsArray || []).length,
-      combinedCssLength: combinedCss.length
+      combinedCssLength: combinedCss.length,
     });
 
-    const { headHtml = '', bodyHtmlStart = '', bodyHtmlEnd = '', lang = 'en' } = injectionPoints;
+    const {
+      headHtml = '',
+      bodyHtmlStart = '',
+      bodyHtmlEnd = '',
+      lang = 'en',
+    } = injectionPoints;
     logger.debug('Injection points resolved', {
       context: 'PDFGenerator',
-      lang: lang
+      lang: lang,
     });
 
     let template = htmlTemplateStr;
@@ -65,34 +79,40 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
         <body>${bodyHtmlStart}{{{body}}}${bodyHtmlEnd}</body>
         </html>`;
       logger.debug('Using default HTML template', {
-        context: 'PDFGenerator'
+        context: 'PDFGenerator',
       });
     } else {
       logger.debug('Using custom HTML template', {
         context: 'PDFGenerator',
-        templateLength: template.length
+        templateLength: template.length,
       });
     }
 
-    const documentTitle = (pdfOptions && pdfOptions.title) ? pdfOptions.title : path.basename(outputPdfPath, '.pdf');
+    const documentTitle =
+      pdfOptions && pdfOptions.title
+        ? pdfOptions.title
+        : path.basename(outputPdfPath, '.pdf');
     logger.debug('Resolved document title for PDF', {
       context: 'PDFGenerator',
       title: documentTitle,
-      outputPath: outputPdfPath
+      outputPath: outputPdfPath,
     });
 
     const finalHtml = template
       .replace('{{{title}}}', documentTitle)
       .replace('{{{styles}}}', combinedCss)
-      .replace('{{{body}}}', htmlBodyContent === null ? 'null' : (htmlBodyContent || ''));
+      .replace(
+        '{{{body}}}',
+        htmlBodyContent === null ? 'null' : htmlBodyContent || '',
+      );
     logger.debug('Final HTML content prepared', {
       context: 'PDFGenerator',
-      finalHtmlLength: finalHtml.length
+      finalHtmlLength: finalHtml.length,
     });
 
     await page.setContent(finalHtml, { waitUntil: 'networkidle0' });
     logger.debug('Page content set', {
-      context: 'PDFGenerator'
+      context: 'PDFGenerator',
     });
 
     const defaultPdfOptions = {
@@ -102,8 +122,8 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
         top: '1cm',
         right: '1cm',
         bottom: '1cm',
-        left: '1cm'
-      }
+        left: '1cm',
+      },
     };
 
     if (pdfOptions && (pdfOptions.width || pdfOptions.height)) {
@@ -111,7 +131,7 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
       logger.debug('PDF format removed due to custom width/height', {
         context: 'PDFGenerator',
         width: pdfOptions.width,
-        height: pdfOptions.height
+        height: pdfOptions.height,
       });
     }
 
@@ -120,29 +140,30 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
       ...(pdfOptions || {}),
       margin: {
         ...defaultPdfOptions.margin,
-        ...((pdfOptions || {}).margin || {})
+        ...((pdfOptions || {}).margin || {}),
       },
-      path: outputPdfPath
+      path: outputPdfPath,
     };
     logger.debug('Final PDF options assembled', {
       context: 'PDFGenerator',
-      options: finalPdfOptions
+      options: finalPdfOptions,
     });
 
     await page.pdf(finalPdfOptions);
     logger.debug('PDF successfully generated', {
       context: 'PDFGenerator',
-      outputPath: outputPdfPath
+      outputPath: outputPdfPath,
     });
-
   } catch (error) {
-    const descriptiveError = new Error(`Error during PDF generation for "${outputPdfPath}": ${error.message}`);
+    const descriptiveError = new Error(
+      `Error during PDF generation for "${outputPdfPath}": ${error.message}`,
+    );
     descriptiveError.stack = error.stack;
     logger.error('Error during PDF generation', {
       context: 'PDFGenerator',
       outputPath: outputPdfPath,
       error: descriptiveError.message,
-      stack: descriptiveError.stack
+      stack: descriptiveError.stack,
     });
     throw descriptiveError;
   } finally {
@@ -150,12 +171,12 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
       try {
         await page.close();
         logger.debug('Puppeteer page closed', {
-          context: 'PDFGenerator'
+          context: 'PDFGenerator',
         });
       } catch (e) {
         logger.warn('Failed to close Puppeteer page', {
           context: 'PDFGenerator',
-          error: e.message
+          error: e.message,
         });
       }
     }
@@ -163,12 +184,12 @@ async function generatePdf(htmlBodyContent, outputPdfPath, pdfOptions, cssFileCo
       try {
         await browser.close();
         logger.debug('Puppeteer browser closed', {
-          context: 'PDFGenerator'
+          context: 'PDFGenerator',
         });
       } catch (e) {
         logger.warn('Failed to close Puppeteer browser', {
           context: 'PDFGenerator',
-          error: e.message
+          error: e.message,
         });
       }
     }

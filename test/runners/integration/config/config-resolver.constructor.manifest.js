@@ -6,25 +6,31 @@ const { makeConfigResolverScenario } = require(configResolverFactoryPath);
 
 module.exports = [
   makeConfigResolverScenario({
-    description: '1.1.1: should correctly load configurations and set internal properties',
+    description:
+      '1.1.1: should correctly load configurations and set internal properties',
     useImperativeSetup: true,
     mainConfigStubs: {
       getPrimaryMainConfig: {
-        config: { collections_root: '/fake/collections/root', some_other_key: 'value' },
+        config: {
+          collections_root: '/fake/collections/root',
+          some_other_key: 'value',
+        },
         path: '/fake/path/to/main-config.yaml',
-        reason: 'test'
+        reason: 'test',
       },
       getXdgMainConfig: { config: {}, path: null, baseDir: null },
       getProjectManifestConfig: { config: {}, path: null, baseDir: null },
     },
     expectations: {
       getPrimaryMainConfigCalled: true,
-      primaryMainConfig: { collections_root: '/fake/collections/root', some_other_key: 'value' },
+      primaryMainConfig: {
+        collections_root: '/fake/collections/root',
+        some_other_key: 'value',
+      },
       primaryMainConfigPathActual: '/fake/path/to/main-config.yaml',
       resolvedCollRoot: '/fake/collections/root',
       pluginConfigLoaderCalled: true,
       pluginRegistryBuilderCalled: true,
-    }
+    },
   }),
 ];
-

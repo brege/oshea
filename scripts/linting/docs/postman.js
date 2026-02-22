@@ -14,7 +14,7 @@ const {
   fileDiscoveryPath,
   skipSystemPath,
   projectRoot,
-  loggerPath
+  loggerPath,
 } = require('@paths');
 
 const { parseCliArgs, loadLintSection } = require(lintHelpersPath);
@@ -29,7 +29,7 @@ const { shouldSkipFile } = require(skipSystemPath);
 class FileRegistry {
   constructor() {
     this.filesByBasename = new Map(); // basename -> [full paths]
-    this.filesByPath = new Map();     // relative path -> full path
+    this.filesByPath = new Map(); // relative path -> full path
     this.built = false;
   }
 
@@ -38,7 +38,7 @@ class FileRegistry {
 
     const allFiles = findFiles({
       targets: rootDirs,
-      fileFilter: name => filetypes.some(ext => name.endsWith(ext)),
+      fileFilter: (name) => filetypes.some((ext) => name.endsWith(ext)),
     });
 
     for (const file of allFiles) {
@@ -94,7 +94,7 @@ async function initializeRemark() {
   if (!remarkModule || !visitParentsModule) {
     const [{ remark }, { visitParents }] = await Promise.all([
       import('remark'),
-      import('unist-util-visit-parents')
+      import('unist-util-visit-parents'),
     ]);
     remarkModule = remark;
     visitParentsModule = visitParents;
@@ -105,17 +105,17 @@ async function initializeRemark() {
 function isReferenceExcluded(ref, rules) {
   const rel = ref.replace(/\\/g, '/');
   const patterns = rules.excludes || [];
-  return patterns.some(pattern => minimatch(rel, pattern));
+  return patterns.some((pattern) => minimatch(rel, pattern));
 }
 
 function isAllowedExtension(ref, rules) {
   const allowed = rules.filetypes || [];
-  return allowed.some(ext => ref.endsWith(ext));
+  return allowed.some((ext) => ref.endsWith(ext));
 }
 
 function isSkipLink(ref, rules) {
   const patterns = rules.skip_link_patterns || [];
-  return patterns.some(pattern => minimatch(ref, pattern));
+  return patterns.some((pattern) => minimatch(ref, pattern));
 }
 
 function containsGlobPattern(ref) {
@@ -124,8 +124,8 @@ function containsGlobPattern(ref) {
 
 function resolveReference(mdFile, ref, allowedExts) {
   const mdDir = path.dirname(mdFile);
-  let targetPath = path.resolve(mdDir, ref);
-  if (!allowedExts.some(ext => ref.endsWith(ext))) {
+  const targetPath = path.resolve(mdDir, ref);
+  if (!allowedExts.some((ext) => ref.endsWith(ext))) {
     for (const ext of allowedExts) {
       if (fs.existsSync(targetPath + ext)) return targetPath + ext;
     }
@@ -136,7 +136,7 @@ function resolveReference(mdFile, ref, allowedExts) {
 
 function buildLinksEnabledMap(lines) {
   let enabled = true;
-  return lines.map(line => {
+  return lines.map((line) => {
     if (line.includes('lint-disable postman')) enabled = false;
     if (line.includes('lint-enable postman')) enabled = true;
     return enabled;
@@ -145,7 +145,7 @@ function buildLinksEnabledMap(lines) {
 
 function isLineAlreadyLinked(line, rel) {
   const linkRegex = /\[[^\]]*]\(([^)]+)\)/g;
-  return [...line.matchAll(linkRegex)].some(m => {
+  return [...line.matchAll(linkRegex)].some((m) => {
     const target = m[1].replace(/\\/g, '/');
     return target === rel || target.endsWith('/' + path.basename(rel));
   });
@@ -170,8 +170,8 @@ async function probeMarkdownFile(mdFile, rules) {
     const lineNum = node.position?.start.line;
     const lineContent = lines[lineNum - 1] || '';
     const skip = !linkStatus[lineNum - 1];
-    const inTable = ancestors.some(a => a.type?.startsWith('table'));
-    const inCode = ancestors.some(a => a.type === 'code');
+    const inTable = ancestors.some((a) => a.type?.startsWith('table'));
+    const inCode = ancestors.some((a) => a.type === 'code');
 
     if (skip || inTable || inCode) return;
 
@@ -182,7 +182,8 @@ async function probeMarkdownFile(mdFile, rules) {
         containsGlobPattern(url) ||
         isReferenceExcluded(url, rules) ||
         isSkipLink(url, rules)
-      ) return;
+      )
+        return;
 
       const resolved = resolveReference(mdFile, url, rules.filetypes);
       results.push({
@@ -197,12 +198,13 @@ async function probeMarkdownFile(mdFile, rules) {
 
     if (node.type === 'inlineCode') {
       if (
-        ancestors.some(a => a.type === 'link') ||
+        ancestors.some((a) => a.type === 'link') ||
         node.value.includes(' ') ||
         containsGlobPattern(node.value) ||
         isReferenceExcluded(node.value, rules) ||
         isSkipLink(node.value, rules)
-      ) return;
+      )
+        return;
 
       const resolved = resolveReference(mdFile, node.value, rules.filetypes);
       results.push({
@@ -225,7 +227,7 @@ async function runLinter(options = {}) {
     fix = false,
     dryRun = false,
     debug = false,
-    config = {}
+    config = {},
   } = options;
 
   const rules = config;
@@ -238,12 +240,12 @@ async function runLinter(options = {}) {
   }
 
   const mdFiles = findFiles({
-    targets: targets.length > 0 ? targets : (rules.targets || []),
-    fileFilter: (filename) => sourceExts.some(ext => filename.endsWith(ext)),
+    targets: targets.length > 0 ? targets : rules.targets || [],
+    fileFilter: (filename) => sourceExts.some((ext) => filename.endsWith(ext)),
     ignores: rules.excludes || [],
     respectDocignore: true,
     skipTag: 'lint-skip-file postman',
-    debug: debug
+    debug: debug,
   });
 
   const issues = [];
@@ -259,8 +261,8 @@ async function runLinter(options = {}) {
       if (!isAllowedExtension(r.target, rules)) continue;
 
       const candidates = fileRegistry.findCandidates(r.target);
-      const relCandidates = candidates.map(c =>
-        path.relative(path.dirname(file), c).replace(/\\/g, '/')
+      const relCandidates = candidates.map((c) =>
+        path.relative(path.dirname(file), c).replace(/\\/g, '/'),
       );
 
       if (candidates.length === 1 && r.type === 'inlineCode') {
@@ -271,7 +273,7 @@ async function runLinter(options = {}) {
 
         const replacement = oldLine.replace(
           '`' + r.target + '`',
-          '[`' + r.target + '`](' + rel + ')'
+          '[`' + r.target + '`](' + rel + ')',
         );
 
         if (fix) {
@@ -315,9 +317,9 @@ async function runLinter(options = {}) {
   }
 
   const summary = {
-    errorCount: issues.filter(i => i.severity === 2).length,
-    warningCount: issues.filter(i => i.severity === 1).length,
-    fixedCount: fixedCount
+    errorCount: issues.filter((i) => i.severity === 2).length,
+    warningCount: issues.filter((i) => i.severity === 1).length,
+    fixedCount: fixedCount,
   };
 
   return { issues, summary, results: [] };

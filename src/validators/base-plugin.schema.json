@@ -33,9 +33,9 @@
       "additionalProperties": true
     },
     "params": {
-        "description": "Defines default parameters specific to this plugin, which can be used as placeholders.",
-        "type": "object",
-        "additionalProperties": true
+      "description": "Defines default parameters specific to this plugin, which can be used as placeholders.",
+      "type": "object",
+      "additionalProperties": true
     },
     "math": {
       "description": "Configuration for KaTeX math rendering.",
@@ -67,8 +67,5 @@
       "type": "boolean"
     }
   },
-  "required": [
-    "description",
-    "handler_script"
-  ]
+  "required": ["description", "handler_script"]
 }

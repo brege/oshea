@@ -2,7 +2,6 @@
 const path = require('path');
 const fs = require('fs');
 
-
 function makePluginManagerScenario({
   description,
   pluginType,
@@ -22,8 +21,8 @@ function makePluginManagerScenario({
     const mockPluginFilePath = path.join(tempDir, mockPluginFileName);
 
     switch (pluginType) {
-    case 'class':
-      content = `
+      case 'class':
+        content = `
           const { defaultHandlerPath, markdownUtilsPath, pdfGeneratorPath } = require('@paths');
           class MockClassPlugin {
             constructor(coreUtils) {
@@ -38,33 +37,34 @@ function makePluginManagerScenario({
           }
           module.exports = MockClassPlugin;
         `;
-      break;
-    case 'object':
-      content = `
+        break;
+      case 'object':
+        content = `
           module.exports = {
             async generate(data, pluginSpecificConfig, mainConfig, outputDir, outputFilenameOpt, pluginBasePath) {
               return ${JSON.stringify(expectedResult || { success: true })};
             }
           };
         `;
-      break;
-    case 'throwing':
-      content = `
+        break;
+      case 'throwing':
+        content = `
           class MockThrowingPlugin {
             async generate() { throw new Error('Simulated error from plugin'); }
           }
           module.exports = MockThrowingPlugin;
         `;
-      break;
-    case 'function':
-      content = 'module.exports = function() {};';
-      break;
-    case 'object-no-generate':
-      content = 'module.exports = { someProp: \'value\' };';
-      break;
-    case 'class-no-generate':
-      content = 'class MockClassNoGenerate { constructor() {} } module.exports = MockClassNoGenerate;';
-      break;
+        break;
+      case 'function':
+        content = 'module.exports = function() {};';
+        break;
+      case 'object-no-generate':
+        content = "module.exports = { someProp: 'value' };";
+        break;
+      case 'class-no-generate':
+        content =
+          'class MockClassNoGenerate { constructor() {} } module.exports = MockClassNoGenerate;';
+        break;
     }
 
     if (content) {
@@ -78,11 +78,11 @@ function makePluginManagerScenario({
 
     if (expectedError) {
       expect(result).to.be.null;
-      const errorLog = logs.find(log => log.level === 'error');
+      const errorLog = logs.find((log) => log.level === 'error');
       expect(errorLog, 'Expected an error log').to.not.be.undefined;
       expect(errorLog.msg).to.include(expectedError);
     } else if (expectedLog) {
-      const logEntry = logs.find(log => log.level === 'warn');
+      const logEntry = logs.find((log) => log.level === 'warn');
       expect(logEntry, 'Expected a log entry').to.not.be.undefined;
       if (typeof expectedLog === 'string') {
         expect(logEntry.msg).to.equal(expectedLog);
@@ -95,7 +95,11 @@ function makePluginManagerScenario({
       if (expectedResult.coreUtilsReceived) {
         expect(result.success).to.be.true;
         expect(result.coreUtilsReceived).to.be.an('object');
-        expect(result.coreUtilsReceived).to.have.keys(['DefaultHandler', 'markdownUtils', 'pdfGenerator']);
+        expect(result.coreUtilsReceived).to.have.keys([
+          'DefaultHandler',
+          'markdownUtils',
+          'pdfGenerator',
+        ]);
       } else {
         // Remove the coreUtilsReceived from the actual result before comparison if it wasn't expected
         delete result.coreUtilsReceived;
@@ -115,7 +119,7 @@ function makePluginManagerScenario({
     outputDir,
     outputFilenameOpt,
     pluginType,
-    expectedResult
+    expectedResult,
   };
 }
 

@@ -19,13 +19,19 @@ function formatWorkflowStep(level, message, meta = {}) {
     // Start of step - show test_id and description
     if (description) {
       if (test_id) {
-        process.stdout.write(`      ${colorForLevel('success', `[${test_id}]`)} ${colorForLevel('detail', description)} ... `);
+        process.stdout.write(
+          `      ${colorForLevel('success', `[${test_id}]`)} ${colorForLevel('detail', description)} ... `,
+        );
       } else {
-        process.stdout.write(`      ${colorForLevel('detail', description)} ... `);
+        process.stdout.write(
+          `      ${colorForLevel('detail', description)} ... `,
+        );
       }
     } else {
       // Fallback for legacy format
-      process.stdout.write(`      ${colorForLevel('detail', `Testing: ${command}`)} ... `);
+      process.stdout.write(
+        `      ${colorForLevel('detail', `Testing: ${command}`)} ... `,
+      );
     }
   } else if (status === 'passed') {
     // Step passed - complete the line
@@ -68,11 +74,17 @@ function formatWorkflowList(level, message, meta = {}) {
   console.log(''); // spacing after header
 
   blocks.forEach((block, index) => {
-    console.log(`  ${theme.success(`${index + 1}.`)} ${theme.info(block.name)}`);
-    console.log(`     ${theme.detail('Steps:')} ${theme.context(block.stepCount)}`);
+    console.log(
+      `  ${theme.success(`${index + 1}.`)} ${theme.info(block.name)}`,
+    );
+    console.log(
+      `     ${theme.detail('Steps:')} ${theme.context(block.stepCount)}`,
+    );
 
     if (block.tags && block.tags.length > 0) {
-      console.log(`     ${theme.detail('Tags:')} ${theme.context(block.tags.join(', '))}`);
+      console.log(
+        `     ${theme.detail('Tags:')} ${theme.context(block.tags.join(', '))}`,
+      );
     }
 
     console.log(''); // spacing between blocks
@@ -84,19 +96,26 @@ function formatWorkflowResults(level, message, meta = {}) {
   const { suiteCount, failedScenarios = [], allResults } = message;
 
   // Handle both data formats
-  const actualSuiteCount = suiteCount !== undefined ? suiteCount : (allResults ? allResults.length : 0);
-  const actualFailedScenarios = failedScenarios.length > 0 ? failedScenarios : [];
+  const actualSuiteCount =
+    suiteCount !== undefined ? suiteCount : allResults ? allResults.length : 0;
+  const actualFailedScenarios =
+    failedScenarios.length > 0 ? failedScenarios : [];
 
   console.log(''); // spacing before results
 
   if (actualFailedScenarios.length > 0) {
     // Failed workflows
     console.log(colorForLevel('error', '--- Workflow Tests Failed ---'));
-    console.log(colorForLevel('error', `${actualFailedScenarios.length} scenario(s) failed across ${actualSuiteCount} test suite(s):`));
+    console.log(
+      colorForLevel(
+        'error',
+        `${actualFailedScenarios.length} scenario(s) failed across ${actualSuiteCount} test suite(s):`,
+      ),
+    );
     console.log(''); // spacing
 
     const failuresBySuite = {};
-    actualFailedScenarios.forEach(failure => {
+    actualFailedScenarios.forEach((failure) => {
       if (!failuresBySuite[failure.suite]) {
         failuresBySuite[failure.suite] = [];
       }
@@ -104,10 +123,14 @@ function formatWorkflowResults(level, message, meta = {}) {
     });
 
     Object.entries(failuresBySuite).forEach(([suiteName, failures]) => {
-      console.log(colorForLevel('error', `${suiteName}: ${failures.length} failures`));
-      failures.forEach(failure => {
+      console.log(
+        colorForLevel('error', `${suiteName}: ${failures.length} failures`),
+      );
+      failures.forEach((failure) => {
         console.log(`  ${theme.context('- ')}${failure.scenario}`);
-        console.log(`    ${theme.detail('Command:')} ${theme.path(failure.command)}`);
+        console.log(
+          `    ${theme.detail('Command:')} ${theme.path(failure.command)}`,
+        );
         console.log(`    ${theme.detail('Reason:')} ${failure.reason}`);
       });
       console.log(''); // spacing between suites
@@ -117,7 +140,12 @@ function formatWorkflowResults(level, message, meta = {}) {
   } else {
     // Success
     const suiteText = actualSuiteCount === 1 ? 'test suite' : 'test suites';
-    console.log(colorForLevel('success', `✓ All workflow tests passed (${actualSuiteCount} ${suiteText})`));
+    console.log(
+      colorForLevel(
+        'success',
+        `✓ All workflow tests passed (${actualSuiteCount} ${suiteText})`,
+      ),
+    );
   }
 }
 
@@ -211,5 +239,5 @@ module.exports = {
   formatYamlShowScenario,
   formatYamlShowSeparator,
   formatYamlShowOutput,
-  formatYamlShowError
+  formatYamlShowError,
 };

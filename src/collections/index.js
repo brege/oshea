@@ -23,7 +23,7 @@ const {
   collectionsMetadataFilename,
   collectionsEnabledManifestFilename,
   collectionsDefaultArchetypeDirname,
-  collectionsUserPluginsDirname
+  collectionsUserPluginsDirname,
 } = require('@paths');
 const logger = require(loggerPath);
 
@@ -46,34 +46,62 @@ class CollectionsManager {
   constructor(options = {}, dependencies = {}) {
     // Define all default dependencies needed by any command module
     const defaultDependencies = {
-      fs, fss, path, os, spawn, fsExtra, yaml, matter,
-      cmUtils, process, logger,
+      fs,
+      fss,
+      path,
+      os,
+      spawn,
+      fsExtra,
+      yaml,
+      matter,
+      cmUtils,
+      process,
+      logger,
       collectionsMetadataFilename,
       collectionsEnabledManifestFilename,
       collectionsUserPluginsDirname,
-      collectionsDefaultArchetypeDirname
+      collectionsDefaultArchetypeDirname,
     };
 
     // Merge defaults with any injected dependencies for testing
     this.dependencies = { ...defaultDependencies, ...dependencies };
 
-    this.collRoot = this.determineCollRoot(options.collRootCliOverride, options.collRootFromMainConfig);
+    this.collRoot = this.determineCollRoot(
+      options.collRootCliOverride,
+      options.collRootFromMainConfig,
+    );
     logger.debug('CollectionsManager initialized', {
       context: 'CollectionsManager',
-      collectionsRoot: this.collRoot
+      collectionsRoot: this.collRoot,
     });
 
     // Bind all commands, passing the 'dependencies' object as the first argument
     this.addCollection = addCollectionCommand.bind(this, this.dependencies);
     this.enablePlugin = enablePluginCommand.bind(this, this.dependencies);
-    this.enableAllPluginsInCollection = enableAllPluginsInCollectionCommand.bind(this, this.dependencies);
+    this.enableAllPluginsInCollection =
+      enableAllPluginsInCollectionCommand.bind(this, this.dependencies);
     this.disablePlugin = disablePluginCommand.bind(this, this.dependencies);
-    this.removeCollection = removeCollectionCommand.bind(this, this.dependencies);
-    this.updateCollection = updateCollectionCommand.bind(this, this.dependencies);
-    this.updateAllCollections = updateAllCollectionsCommand.bind(this, this.dependencies);
-    this.listAvailablePlugins = listAvailablePluginsCommand.bind(this, this.dependencies);
+    this.removeCollection = removeCollectionCommand.bind(
+      this,
+      this.dependencies,
+    );
+    this.updateCollection = updateCollectionCommand.bind(
+      this,
+      this.dependencies,
+    );
+    this.updateAllCollections = updateAllCollectionsCommand.bind(
+      this,
+      this.dependencies,
+    );
+    this.listAvailablePlugins = listAvailablePluginsCommand.bind(
+      this,
+      this.dependencies,
+    );
     this.listCollections = listCollectionsCommand.bind(this, this.dependencies);
-    this.addSingletonPlugin = addSingletonPluginCommand.bind(this, this.dependencies);
+    this.addSingletonPlugin = addSingletonPluginCommand.bind(
+      this,
+      this.dependencies,
+    );
   }
 
   determineCollRoot(collRootCliOverride = null, collRootFromConfig = null) {
@@ -84,35 +112,36 @@ class CollectionsManager {
       resolvedRoot = collRootCliOverride;
       logger.debug('Collections root derived from CLI override', {
         context: 'CollectionsManager',
-        root: resolvedRoot
+        root: resolvedRoot,
       });
     } else if (process.env.OSHEA_COLL_ROOT_TEST_OVERRIDE) {
       resolvedRoot = process.env.OSHEA_COLL_ROOT_TEST_OVERRIDE;
       logger.debug('Collections root derived from test environment override', {
         context: 'CollectionsManager',
-        root: resolvedRoot
+        root: resolvedRoot,
       });
     } else if (process.env.OSHEA_COLLECTIONS_ROOT) {
       resolvedRoot = process.env.OSHEA_COLLECTIONS_ROOT;
       logger.debug('Collections root derived from environment variable', {
         context: 'CollectionsManager',
-        root: resolvedRoot
+        root: resolvedRoot,
       });
     } else if (collRootFromConfig) {
       resolvedRoot = collRootFromConfig;
       logger.debug('Collections root derived from main config', {
         context: 'CollectionsManager',
-        root: resolvedRoot
+        root: resolvedRoot,
       });
     } else {
-      const xdgDataHome = process.env.XDG_DATA_HOME ||
+      const xdgDataHome =
+        process.env.XDG_DATA_HOME ||
         (os.platform() === 'win32'
           ? path.join(os.homedir(), 'AppData', 'Local')
           : path.join(os.homedir(), '.local', 'share'));
       resolvedRoot = path.join(xdgDataHome, 'oshea');
       logger.debug('Collections root using XDG default path', {
         context: 'CollectionsManager',
-        root: resolvedRoot
+        root: resolvedRoot,
       });
     }
     return resolvedRoot;
@@ -120,11 +149,14 @@ class CollectionsManager {
 
   async _readEnabledManifest() {
     const { path, fss, fs, yaml } = this.dependencies;
-    const enabledManifestPath = path.join(this.collRoot, collectionsEnabledManifestFilename);
+    const enabledManifestPath = path.join(
+      this.collRoot,
+      collectionsEnabledManifestFilename,
+    );
     let enabledManifest = { enabled_plugins: [] };
     logger.debug('Attempting to read enabled manifest', {
       context: 'CollectionsManager',
-      path: enabledManifestPath
+      path: enabledManifestPath,
     });
     try {
       if (fss.existsSync(enabledManifestPath)) {
@@ -135,20 +167,20 @@ class CollectionsManager {
           logger.debug('Enabled manifest loaded successfully', {
             context: 'CollectionsManager',
             path: enabledManifestPath,
-            pluginCount: loadedData.enabled_plugins.length
+            pluginCount: loadedData.enabled_plugins.length,
           });
         } else {
           logger.warn('Enabled manifest file exists but is empty or invalid', {
             context: 'CollectionsManager',
             path: enabledManifestPath,
-            suggestion: 'Starting with a new manifest structure.'
+            suggestion: 'Starting with a new manifest structure.',
           });
         }
       } else {
         logger.debug('Enabled manifest file not found', {
           context: 'CollectionsManager',
           path: enabledManifestPath,
-          suggestion: 'Starting with a new, empty manifest.'
+          suggestion: 'Starting with a new, empty manifest.',
         });
       }
     } catch (e) {
@@ -156,7 +188,7 @@ class CollectionsManager {
         context: 'CollectionsManager',
         file: enabledManifestPath,
         error: e.message,
-        suggestion: 'Starting with a new manifest.'
+        suggestion: 'Starting with a new manifest.',
       });
     }
     return enabledManifest;
@@ -164,10 +196,13 @@ class CollectionsManager {
 
   async _writeEnabledManifest(manifestData) {
     const { path, fs, yaml } = this.dependencies;
-    const enabledManifestPath = path.join(this.collRoot, collectionsEnabledManifestFilename);
+    const enabledManifestPath = path.join(
+      this.collRoot,
+      collectionsEnabledManifestFilename,
+    );
     logger.debug('Attempting to write enabled manifest', {
       context: 'CollectionsManager',
-      path: enabledManifestPath
+      path: enabledManifestPath,
     });
     try {
       await fs.mkdir(this.collRoot, { recursive: true });
@@ -176,14 +211,16 @@ class CollectionsManager {
       logger.debug('Enabled manifest written successfully', {
         context: 'CollectionsManager',
         path: enabledManifestPath,
-        pluginCount: manifestData.enabled_plugins ? manifestData.enabled_plugins.length : 0
+        pluginCount: manifestData.enabled_plugins
+          ? manifestData.enabled_plugins.length
+          : 0,
       });
     } catch (e) {
       logger.error('Failed to write enabled manifest', {
         context: 'CollectionsManager',
         file: enabledManifestPath,
         error: e.message,
-        operation: 'writeEnabledManifest'
+        operation: 'writeEnabledManifest',
       });
       throw e;
     }
@@ -196,13 +233,13 @@ class CollectionsManager {
     logger.debug('Attempting to read collection metadata', {
       context: 'CollectionsManager',
       collection: collectionName,
-      path: metadataPath
+      path: metadataPath,
     });
     if (!fss.existsSync(metadataPath)) {
       logger.debug('Collection metadata file not found', {
         context: 'CollectionsManager',
         collection: collectionName,
-        path: metadataPath
+        path: metadataPath,
       });
 
       // Check for .source.yaml (archetyped plugins)
@@ -215,7 +252,7 @@ class CollectionsManager {
             context: 'CollectionsManager',
             collection: collectionName,
             path: sourceMetadataPath,
-            sourceType: sourceMetadata.source_type
+            sourceType: sourceMetadata.source_type,
           });
           // Return a special marker indicating this is not updatable
           return {
@@ -223,7 +260,7 @@ class CollectionsManager {
             source_type: sourceMetadata.source_type,
             created_from: sourceMetadata.created_from,
             archetype_source: sourceMetadata.archetype_source,
-            created_on: sourceMetadata.created_on
+            created_on: sourceMetadata.created_on,
           };
         } catch (e) {
           logger.error('Could not read or parse source metadata', {
@@ -231,7 +268,7 @@ class CollectionsManager {
             collection: collectionName,
             file: sourceMetadataPath,
             error: e.message,
-            operation: 'readCollectionMetadata'
+            operation: 'readCollectionMetadata',
           });
           throw e;
         }
@@ -245,7 +282,7 @@ class CollectionsManager {
       logger.debug('Collection metadata loaded successfully', {
         context: 'CollectionsManager',
         collection: collectionName,
-        path: metadataPath
+        path: metadataPath,
       });
       return metadata;
     } catch (e) {
@@ -254,7 +291,7 @@ class CollectionsManager {
         collection: collectionName,
         file: metadataPath,
         error: e.message,
-        operation: 'readCollectionMetadata'
+        operation: 'readCollectionMetadata',
       });
       throw e;
     }
@@ -267,7 +304,7 @@ class CollectionsManager {
     logger.debug('Attempting to write collection metadata', {
       context: 'CollectionsManager',
       collection: collectionName,
-      path: metadataPath
+      path: metadataPath,
     });
     try {
       await fs.mkdir(collectionPath, { recursive: true });
@@ -276,7 +313,7 @@ class CollectionsManager {
       logger.debug('Collection metadata written successfully', {
         context: 'CollectionsManager',
         collection: collectionName,
-        path: metadataPath
+        path: metadataPath,
       });
     } catch (metaError) {
       logger.warn('Could not write collection metadata', {
@@ -285,13 +322,18 @@ class CollectionsManager {
         file: metadataPath,
         error: metaError.message,
         operation: 'writeCollectionMetadata',
-        suggestion: 'Check file permissions or path validity.'
+        suggestion: 'Check file permissions or path validity.',
       });
       throw metaError;
     }
   }
 
-  async _addToUserPluginsManifest(userPluginsDir, pluginId, invokeName, sourcePath) {
+  async _addToUserPluginsManifest(
+    userPluginsDir,
+    pluginId,
+    invokeName,
+    sourcePath,
+  ) {
     const { path, fs, fss, yaml } = this.dependencies;
     const pluginsManifestPath = path.join(userPluginsDir, 'plugins.yaml');
 
@@ -307,7 +349,7 @@ class CollectionsManager {
         logger.warn('Could not read existing plugins manifest', {
           context: 'CollectionsManager',
           path: pluginsManifestPath,
-          error: e.message
+          error: e.message,
         });
       }
     }
@@ -317,13 +359,13 @@ class CollectionsManager {
       type: 'added',
       enabled: true,
       added_from: sourcePath,
-      added_on: new Date().toISOString()
+      added_on: new Date().toISOString(),
     };
 
     // Write updated manifest
     const updatedManifest = {
       version: '1.0',
-      plugins: pluginStates
+      plugins: pluginStates,
     };
 
     await fs.writeFile(pluginsManifestPath, yaml.dump(updatedManifest));
@@ -332,7 +374,7 @@ class CollectionsManager {
       context: 'CollectionsManager',
       pluginId: pluginId,
       invokeName: invokeName,
-      manifestPath: pluginsManifestPath
+      manifestPath: pluginsManifestPath,
     });
   }
 
@@ -346,10 +388,12 @@ class CollectionsManager {
 
     logger.debug('Attempting to disable plugins from collection', {
       context: 'CollectionsManager',
-      collectionIdentifier: collectionIdentifier
+      collectionIdentifier: collectionIdentifier,
     });
 
-    if (collectionIdentifier.startsWith(collectionsUserPluginsDirname + path.sep)) {
+    if (
+      collectionIdentifier.startsWith(collectionsUserPluginsDirname + path.sep)
+    ) {
       const parts = collectionIdentifier.split(path.sep);
       if (parts.length >= 2 && parts[0] === collectionsUserPluginsDirname) {
         actualCollectionNameForFilter = collectionsUserPluginsDirname;
@@ -358,17 +402,20 @@ class CollectionsManager {
         logger.debug('Disabling a specific user-added plugin', {
           context: 'CollectionsManager',
           pluginId: specificPluginIdForFilter,
-          collectionName: actualCollectionNameForFilter
+          collectionName: actualCollectionNameForFilter,
         });
       }
     }
 
     const pluginsToKeep = [];
     const disabledInvokeNames = new Set();
-    manifest.enabled_plugins.forEach(pluginEntry => {
+    manifest.enabled_plugins.forEach((pluginEntry) => {
       let matchesCriteriaForRemoval = false;
       if (specificPluginIdForFilter) {
-        if (pluginEntry.collection_name === actualCollectionNameForFilter && pluginEntry.plugin_id === specificPluginIdForFilter) {
+        if (
+          pluginEntry.collection_name === actualCollectionNameForFilter &&
+          pluginEntry.plugin_id === specificPluginIdForFilter
+        ) {
           matchesCriteriaForRemoval = true;
         }
       } else {
@@ -382,7 +429,7 @@ class CollectionsManager {
             context: 'CollectionsManager',
             invokeName: pluginEntry.invoke_name,
             collectionName: pluginEntry.collection_name,
-            pluginId: pluginEntry.plugin_id
+            pluginId: pluginEntry.plugin_id,
           });
           disabledInvokeNames.add(pluginEntry.invoke_name);
         }
@@ -397,14 +444,17 @@ class CollectionsManager {
       logger.success('Successfully disabled plugin instance(s)', {
         context: 'CollectionsManager',
         disabledCount: initialCount - pluginsToKeep.length,
-        origin: userFriendlyName
+        origin: userFriendlyName,
       });
-      return { success: true, disabledCount: initialCount - pluginsToKeep.length };
+      return {
+        success: true,
+        disabledCount: initialCount - pluginsToKeep.length,
+      };
     } else {
       logger.info('No plugin instances found or disabled for collection', {
         context: 'CollectionsManager',
         collectionIdentifier: collectionIdentifier,
-        status: 'No changes made to manifest.'
+        status: 'No changes made to manifest.',
       });
       return { success: true, disabledCount: 0 };
     }
@@ -416,7 +466,7 @@ class CollectionsManager {
       const spawnOptions = {
         cwd,
         stdio: ['pipe', 'pipe', 'pipe'],
-        env: { ...process.env, GIT_TERMINAL_PROMPT: '0' }
+        env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
       };
       const gitProcess = spawn('git', gitArgs, spawnOptions);
 
@@ -428,7 +478,7 @@ class CollectionsManager {
         logger.debug('Git stdout', {
           context: 'CollectionsManager',
           operation: operationDescription,
-          output: dataStr.trim()
+          output: dataStr.trim(),
         });
       });
       gitProcess.stderr.on('data', (data) => {
@@ -437,7 +487,7 @@ class CollectionsManager {
         logger.debug('Git stderr', {
           context: 'CollectionsManager',
           operation: operationDescription,
-          output: dataStr.trim()
+          output: dataStr.trim(),
         });
       });
       gitProcess.on('close', (code) => {
@@ -446,7 +496,7 @@ class CollectionsManager {
             context: 'CollectionsManager',
             command: gitArgs.join(' '),
             operation: operationDescription,
-            exitCode: code
+            exitCode: code,
           });
           resolve({ success: true, code, stdout, stderr });
         } else {
@@ -456,9 +506,11 @@ class CollectionsManager {
             operation: operationDescription,
             exitCode: code,
             stdout: stdout.trim(),
-            stderr: stderr.trim()
+            stderr: stderr.trim(),
           });
-          const error = new Error(`Git ${gitArgs.join(' ')} failed for ${operationDescription} with exit code ${code}.`);
+          const error = new Error(
+            `Git ${gitArgs.join(' ')} failed for ${operationDescription} with exit code ${code}.`,
+          );
           error.stdout = stdout;
           error.stderr = stderr;
           reject(error);
@@ -470,7 +522,7 @@ class CollectionsManager {
           operation: operationDescription,
           command: gitArgs.join(' '),
           error: err.message,
-          stack: err.stack
+          stack: err.stack,
         });
         reject(err);
       });

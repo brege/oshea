@@ -13,7 +13,7 @@ const {
   fileDiscoveryPath,
   findLitterRulesPath,
   skipSystemPath,
-  loggerPath
+  loggerPath,
 } = require('@paths');
 
 const logger = require(loggerPath);
@@ -26,7 +26,8 @@ const { shouldSkipLine, shouldSkipFile } = require(skipSystemPath);
 const TYPE_RE = /^\[(\w+):(\w+):([\w*,.]+)\]\s+(.+)$/i;
 const WHITELIST_RE = /^\[whitelist:(\w+):([\w*,.]+)\]$/i;
 const EMOJI_RULE = /^\[emoji:([\w*,.]+)\]$/i;
-const EMOJI_REGEX = /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\u{1F3FB}-\u{1F3FF}|\u{1F9B0}-\u{1F9B3})/gu;
+const EMOJI_REGEX =
+  /(\p{Extended_Pictographic}|\p{Emoji_Presentation}|\u{1F3FB}-\u{1F3FF}|\u{1F9B0}-\u{1F9B3})/gu;
 
 // Using centralized skip system - no more hardcoded constants needed
 const CAPS_COMMENT_REGEX = /\b[A-Z]{3,}\b/;
@@ -44,12 +45,18 @@ function parseRulesFile(filename) {
   const rules = [];
   let currentMode = null;
   let emojiFiletypes = null;
-  let emojiWhitelist = [];
-  let customWhitelists = new Map();
+  const emojiWhitelist = [];
+  const customWhitelists = new Map();
 
   if (!fs.existsSync(filename)) {
     logger.warn(`Rules file not found: ${filename}`, { context: 'Janitor' });
-    return { rules, emojiFiletypes: ['*'], emojiWhitelist, customWhitelists, commentCapsWhitelist: [] };
+    return {
+      rules,
+      emojiFiletypes: ['*'],
+      emojiWhitelist,
+      customWhitelists,
+      commentCapsWhitelist: [],
+    };
   }
 
   const lines = fs.readFileSync(filename, 'utf8').split('\n');
@@ -61,7 +68,7 @@ function parseRulesFile(filename) {
     const emojiMatch = line.match(EMOJI_RULE);
     if (emojiMatch) {
       currentMode = 'emoji';
-      emojiFiletypes = emojiMatch[1].split(',').map(s => s.trim());
+      emojiFiletypes = emojiMatch[1].split(',').map((s) => s.trim());
       continue;
     }
 
@@ -83,17 +90,22 @@ function parseRulesFile(filename) {
         flags = '';
         pattern = pattern.replace(/\$match-case\s*$/, '').trim();
       }
-      const filetypeList = ftypes.split(',').map(ft => ft.trim().toLowerCase());
+      const filetypeList = ftypes
+        .split(',')
+        .map((ft) => ft.trim().toLowerCase());
       rules.push({
         type: type.toLowerCase(),
         severity: severity.toLowerCase(),
         filetypes: filetypeList,
         pattern,
         // Pre-compile regex once during parsing
-        regex: new RegExp(pattern.replace(/\*/g, '.*').replace(/\^/g, '\\b'), flags),
+        regex: new RegExp(
+          pattern.replace(/\*/g, '.*').replace(/\^/g, '\\b'),
+          flags,
+        ),
         // Pre-compute filetype matching for faster lookups
         matchesAllFiles: filetypeList.includes('*'),
-        filetypeSet: new Set(filetypeList)
+        filetypeSet: new Set(filetypeList),
       });
       currentMode = null;
       continue;
@@ -101,7 +113,11 @@ function parseRulesFile(filename) {
 
     if (currentMode === 'emoji' && !line.startsWith('[')) {
       emojiWhitelist.push(line);
-    } else if (currentMode && currentMode.startsWith('whitelist:') && !line.startsWith('[')) {
+    } else if (
+      currentMode &&
+      currentMode.startsWith('whitelist:') &&
+      !line.startsWith('[')
+    ) {
       const type = currentMode.split(':')[1];
       customWhitelists.get(type).add(line);
     }
@@ -109,12 +125,10 @@ function parseRulesFile(filename) {
 
   function makeWhitelistRegexes(set) {
     if (!set) return [];
-    return [...set].map(
-      pattern => {
-        if (pattern.match(/[*.^$|+?()[\]\\]/)) return new RegExp(pattern, 'i');
-        return new RegExp(`\\b${pattern}\\b`, 'i');
-      }
-    );
+    return [...set].map((pattern) => {
+      if (pattern.match(/[*.^$|+?()[\]\\]/)) return new RegExp(pattern, 'i');
+      return new RegExp(`\\b${pattern}\\b`, 'i');
+    });
   }
 
   const result = {
@@ -122,7 +136,7 @@ function parseRulesFile(filename) {
     emojiFiletypes: emojiFiletypes || ['*'],
     emojiWhitelist,
     customWhitelists,
-    commentCapsWhitelist: makeWhitelistRegexes(customWhitelists.get('comment'))
+    commentCapsWhitelist: makeWhitelistRegexes(customWhitelists.get('comment')),
   };
 
   // Cache the parsed result
@@ -138,17 +152,24 @@ function scanFileForLitter(filePath, config) {
     return [];
   }
 
-  const { rules, emojiFiletypes, emojiWhitelist, customWhitelists, commentCapsWhitelist } = config;
+  const {
+    rules,
+    emojiFiletypes,
+    emojiWhitelist,
+    customWhitelists,
+    commentCapsWhitelist,
+  } = config;
   const issues = [];
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
   const ext = path.extname(filePath).replace(/^\./, '').toLowerCase();
 
   // Use pre-computed filetype matching for faster filtering
-  const rulesForExt = rules.filter(rule =>
-    rule.matchesAllFiles || rule.filetypeSet.has(ext)
+  const rulesForExt = rules.filter(
+    (rule) => rule.matchesAllFiles || rule.filetypeSet.has(ext),
   );
-  const emojiEnabled = emojiFiletypes.includes('*') || emojiFiletypes.includes(ext);
+  const emojiEnabled =
+    emojiFiletypes.includes('*') || emojiFiletypes.includes(ext);
 
   lines.forEach((line, index) => {
     if (line.includes('lint-skip-file janitor')) return;
@@ -165,13 +186,14 @@ function scanFileForLitter(filePath, config) {
         subject = line.slice(commentIdx + 2).trim();
 
         if (CAPS_COMMENT_REGEX.test(subject)) {
-          if (commentCapsWhitelist &&
-             commentCapsWhitelist.some(re => re.test(subject))) {
+          if (
+            commentCapsWhitelist &&
+            commentCapsWhitelist.some((re) => re.test(subject))
+          ) {
             continue;
           }
         }
-      } else if (rule.type === 'string' ||
-                 rule.type === 'error') {
+      } else if (rule.type === 'string' || rule.type === 'error') {
         subject = line;
       } else if (rule.type === 'import') {
         if (line.includes('import') || line.includes('require')) {
@@ -185,19 +207,24 @@ function scanFileForLitter(filePath, config) {
 
       if (rule.regex.test(subject)) {
         const whitelist = customWhitelists.get(rule.type);
-        const isWhitelisted = whitelist && [...whitelist].some(item =>
-          new RegExp(item.replace(/\*/g, '.*').replace(/\^/g, '\\b'), 'i').test(subject)
-        );
+        const isWhitelisted =
+          whitelist &&
+          [...whitelist].some((item) =>
+            new RegExp(
+              item.replace(/\*/g, '.*').replace(/\^/g, '\\b'),
+              'i',
+            ).test(subject),
+          );
         if (!isWhitelisted) {
           const match = subject.match(rule.regex);
           issues.push({
             line: index + 1,
-            column: match ? (line.indexOf(match[0]) + 1) : 1,
+            column: match ? line.indexOf(match[0]) + 1 : 1,
             message: `Found '${rule.pattern}' in a ${rule.type}.`,
             rule: `janitor/${rule.type}`,
             severity: rule.severity === 'high' ? 2 : 1,
             sourceLine: line,
-            matchedText: match ? match[0] : null
+            matchedText: match ? match[0] : null,
           });
         }
       }
@@ -206,8 +233,13 @@ function scanFileForLitter(filePath, config) {
     const commentIdx = line.indexOf('//');
     if (commentIdx !== -1) {
       const subject = line.slice(commentIdx + 2).trim();
-      if (CAPS_COMMENT_REGEX.test(subject) &&
-          !(commentCapsWhitelist && commentCapsWhitelist.some(re => re.test(subject)))) {
+      if (
+        CAPS_COMMENT_REGEX.test(subject) &&
+        !(
+          commentCapsWhitelist &&
+          commentCapsWhitelist.some((re) => re.test(subject))
+        )
+      ) {
         issues.push({
           line: index + 1,
           column: commentIdx + 3,
@@ -215,14 +247,14 @@ function scanFileForLitter(filePath, config) {
           rule: 'janitor/all-caps-comment',
           severity: 1,
           sourceLine: line,
-          matchedText: subject.match(CAPS_COMMENT_REGEX)[0]
+          matchedText: subject.match(CAPS_COMMENT_REGEX)[0],
         });
       }
     }
 
     if (emojiEnabled) {
-      const foundEmojis = [...line.matchAll(EMOJI_REGEX)].map(m => m[0]);
-      const disallowed = foundEmojis.filter(e => !emojiWhitelist.includes(e));
+      const foundEmojis = [...line.matchAll(EMOJI_REGEX)].map((m) => m[0]);
+      const disallowed = foundEmojis.filter((e) => !emojiWhitelist.includes(e));
       if (disallowed.length > 0) {
         issues.push({
           line: index + 1,
@@ -233,19 +265,26 @@ function scanFileForLitter(filePath, config) {
         });
       }
     }
-
   });
 
   return issues;
 }
 
 function runLinter(options = {}) {
-  const { targets = [], excludes = [], rulesPath, debug = false, filetypes } = options;
+  const {
+    targets = [],
+    excludes = [],
+    rulesPath,
+    debug = false,
+    filetypes,
+  } = options;
 
   logger.debug(`Loading rules from: ${rulesPath}`, { context: 'Janitor' });
   const janitorConfig = parseRulesFile(rulesPath);
 
-  logger.debug(`Loaded ${janitorConfig.rules.length} rules`, { context: 'Janitor' });
+  logger.debug(`Loaded ${janitorConfig.rules.length} rules`, {
+    context: 'Janitor',
+  });
 
   const allIssues = [];
 
@@ -255,22 +294,24 @@ function runLinter(options = {}) {
     filetypes,
     respectDocignore: true,
     skipTag: 'lint-skip-file janitor',
-    debug: debug
+    debug: debug,
   });
 
   for (const file of files) {
     const fileIssues = scanFileForLitter(file, janitorConfig);
     if (fileIssues.length > 0) {
-      allIssues.push(...fileIssues.map(issue => ({
-        file: path.relative(projectRoot, file),
-        ...issue,
-      })));
+      allIssues.push(
+        ...fileIssues.map((issue) => ({
+          file: path.relative(projectRoot, file),
+          ...issue,
+        })),
+      );
     }
   }
 
   const summary = {
-    errorCount: allIssues.filter(i => i.severity === 2).length,
-    warningCount: allIssues.filter(i => i.severity === 1).length,
+    errorCount: allIssues.filter((i) => i.severity === 2).length,
+    warningCount: allIssues.filter((i) => i.severity === 1).length,
     fixedCount: 0,
   };
 
@@ -282,8 +323,10 @@ if (require.main === module) {
   try {
     config = loadLintSection('janitor', lintingConfigPath) || {};
   } catch (e) {
-    if (!e.message.includes('Section \'janitor\' not found')) {
-      logger.warn(`Could not load linting config: ${e.message}`, { context: 'Janitor' });
+    if (!e.message.includes("Section 'janitor' not found")) {
+      logger.warn(`Could not load linting config: ${e.message}`, {
+        context: 'Janitor',
+      });
     }
   }
 
@@ -291,14 +334,12 @@ if (require.main === module) {
 
   // Set global debug mode
   logger.setDebugMode(!!flags.debug);
-  const finalTargets = targets.length > 0 ? targets : (config.targets || ['.']);
-  const excludes = flags.force ? [] : (config.excludes || []);
+  const finalTargets = targets.length > 0 ? targets : config.targets || ['.'];
+  const excludes = flags.force ? [] : config.excludes || [];
   const filetypes = config.filetypes;
 
   const rulesPathToUse =
-        flags.rules ||
-        findLitterRulesPath ||
-        'assets/litter-list.txt';
+    flags.rules || findLitterRulesPath || 'assets/litter-list.txt';
 
   const absRulesPath = path.resolve(process.cwd(), rulesPathToUse);
   logger.debug('Using rules file:', { context: 'Janitor', path: absRulesPath });
@@ -318,4 +359,3 @@ if (require.main === module) {
 }
 
 module.exports = { runLinter };
-

@@ -12,17 +12,22 @@ const {
 
 const logger = require(loggerPath);
 
-const {
-  runCliCommand,
-  setupTestDirectory,
-  cleanupTestDirectory,
-} = require(testFileHelpersPath);
+const { runCliCommand, setupTestDirectory, cleanupTestDirectory } = require(
+  testFileHelpersPath,
+);
 
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', 'valid-collection-plugin-1-e2e');
+const TEST_OUTPUT_DIR = path.join(
+  os.tmpdir(),
+  'oshea-test-output',
+  'valid-collection-plugin-1-e2e',
+);
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
-const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'valid-collection-plugin-1-example.md');
+const EXAMPLE_MD = path.join(
+  PLUGIN_ROOT,
+  'valid-collection-plugin-1-example.md',
+);
 
-describe('plugins/valid-collection-plugin-1 (in-situ Self-Activation Test) .contract/test/valid-collection-plugin-1-e2e.test.js', function() {
+describe('plugins/valid-collection-plugin-1 (in-situ Self-Activation Test) .contract/test/valid-collection-plugin-1-e2e.test.js', function () {
   this.timeout(15000);
 
   before(async () => {
@@ -37,7 +42,7 @@ describe('plugins/valid-collection-plugin-1 (in-situ Self-Activation Test) .cont
     const { success, stdout, stderr } = await runCliCommand(
       ['convert', EXAMPLE_MD, '--outdir', TEST_OUTPUT_DIR, '--no-open'],
       cliPath,
-      projectRoot
+      projectRoot,
     );
 
     if (!success) {

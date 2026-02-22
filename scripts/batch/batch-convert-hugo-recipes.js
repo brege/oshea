@@ -19,30 +19,31 @@ const argv = yargs(hideBin(process.argv))
   .usage('Usage: $0 --source-dir <path> --output-dir <path> --plugin <name>')
   .option('source-dir', {
     alias: 's',
-    describe: 'Source directory containing Markdown files (e.g., ./examples/hugo-example)',
+    describe:
+      'Source directory containing Markdown files (e.g., ./examples/hugo-example)',
     type: 'string',
-    demandOption: true
+    demandOption: true,
   })
   .option('output-dir', {
     alias: 'o',
     describe: 'Base directory to save generated PDFs',
     type: 'string',
-    demandOption: true
+    demandOption: true,
   })
   .option('plugin', {
     alias: 'p',
     describe: 'The oshea plugin to use for styling each document',
     type: 'string',
-    default: 'recipe'
+    default: 'recipe',
   })
   .option('oshea-path', {
     describe: 'Path to the oshea cli.js script',
     type: 'string',
-    default: path.resolve(__dirname, cliPath)
+    default: path.resolve(__dirname, cliPath),
   })
-  .epilog('For help, run with --help. All logs are detailed.').help('help')
-  .alias('help', 'h')
-  .argv;
+  .epilog('For help, run with --help. All logs are detailed.')
+  .help('help')
+  .alias('help', 'h').argv;
 
 if (argv.help) {
   logger.detail(`
@@ -101,7 +102,9 @@ async function processRecipe(markdownFilePath) {
       if (bodyAuthor) author = bodyAuthor;
     }
 
-    const date = frontMatter.date ? new Date(frontMatter.date).toISOString().split('T')[0] : '';
+    const date = frontMatter.date
+      ? new Date(frontMatter.date).toISOString().split('T')[0]
+      : '';
 
     let outputFilename = generateSlug(title);
     if (author) outputFilename += `-${author}`;
@@ -120,10 +123,13 @@ async function processRecipe(markdownFilePath) {
       `"${osheaCliPath}"`,
       'convert',
       `"${markdownFilePath}"`,
-      '--plugin', basePlugin,
-      '--outdir', `"${itemOutputDir}"`,
-      '--filename', `"${outputFilename}"`,
-      '--no-open'
+      '--plugin',
+      basePlugin,
+      '--outdir',
+      `"${itemOutputDir}"`,
+      '--filename',
+      `"${outputFilename}"`,
+      '--no-open',
     ].join(' ');
 
     logger.detail(`  Executing: ${osheaCommand}`);
@@ -131,18 +137,21 @@ async function processRecipe(markdownFilePath) {
     return new Promise((resolve, reject) => {
       exec(osheaCommand, (error, stdout, stderr) => {
         if (error) {
-          logger.error(`  ERROR converting ${markdownFilePath}: ${error.message}`);
+          logger.error(
+            `  ERROR converting ${markdownFilePath}: ${error.message}`,
+          );
           if (stderr) logger.error(`  Stderr: ${stderr}`);
           return reject(error);
         }
         if (stderr) {
-          logger.warn(`  Stderr during conversion of ${markdownFilePath}: ${stderr}`);
+          logger.warn(
+            `  Stderr during conversion of ${markdownFilePath}: ${stderr}`,
+          );
         }
         logger.success(`  Successfully generated: ${outputPdfPath}`);
         resolve(outputPdfPath);
       });
     });
-
   } catch (err) {
     logger.error(`Failed to process file ${markdownFilePath}: ${err}`);
     return Promise.reject(err);
@@ -164,14 +173,21 @@ async function main() {
     await fs.mkdir(outputBaseDir, { recursive: true });
   }
   if (!fss.existsSync(osheaCliPath)) {
-    logger.error(`oshea CLI script not found at: ${osheaCliPath}. Please check the path or install oshea globally.`);
+    logger.error(
+      `oshea CLI script not found at: ${osheaCliPath}. Please check the path or install oshea globally.`,
+    );
     process.exit(1);
   }
 
-  const filesToProcess = glob.sync('**/index.md', { cwd: sourceBaseDir, absolute: true });
+  const filesToProcess = glob.sync('**/index.md', {
+    cwd: sourceBaseDir,
+    absolute: true,
+  });
 
   if (filesToProcess.length === 0) {
-    logger.warn('No Markdown files found to process with pattern "**/index.md".');
+    logger.warn(
+      'No Markdown files found to process with pattern "**/index.md".',
+    );
     return;
   }
   logger.info(`Found ${filesToProcess.length} recipes to process.`);
@@ -186,7 +202,7 @@ async function main() {
   logger.info('Batch processing complete.');
 }
 
-main().catch(err => {
+main().catch((err) => {
   logger.error('Batch script failed:', err);
   process.exit(1);
 });

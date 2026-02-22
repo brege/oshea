@@ -7,10 +7,7 @@ const path = require('path');
 
 const logger = require(loggerPath);
 
-const TEST_DIRS = [
-  integrationTestDir,
-  e2eTestDir
-];
+const TEST_DIRS = [integrationTestDir, e2eTestDir];
 
 function findAllJsFiles(dir) {
   let results = [];
@@ -37,14 +34,14 @@ function getRelativePath(file) {
 
 const filesWithItSkip = [];
 for (const dir of TEST_DIRS) {
-  findAllJsFiles(dir).forEach(file => {
+  findAllJsFiles(dir).forEach((file) => {
     const content = fs.readFileSync(file, 'utf8');
     const skips = (content.match(/it\.skip\s*\(/g) || []).length;
     if (skips > 0) {
       filesWithItSkip.push({
         testCode: extractTestCode(file),
         relPath: getRelativePath(file),
-        skips
+        skips,
       });
     }
   });
@@ -54,4 +51,3 @@ filesWithItSkip.forEach(({ testCode, relPath, skips }) => {
   const skipCol = `${skips} it.skip()`.padEnd(12);
   logger.info(`${tid}${skipCol}${relPath}`);
 });
-

@@ -9,7 +9,6 @@ const { findFilesArray } = require('../scripts/shared/file-helpers');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-
 function exportContextPackage(contextPackage, exportPath, projectRoot) {
   logger.info(`\nExporting context package to: ${exportPath}`);
   if (fs.existsSync(exportPath)) {
@@ -18,7 +17,7 @@ function exportContextPackage(contextPackage, exportPath, projectRoot) {
     fs.mkdirSync(exportPath, { recursive: true });
   }
 
-  contextPackage.files.forEach(file => {
+  contextPackage.files.forEach((file) => {
     const sourcePath = path.join(projectRoot, file);
     const destPath = path.join(exportPath, file);
 
@@ -45,7 +44,7 @@ function parseArgs(args) {
     showStats: args.includes('--stats') || args.includes('--all'),
     showFiles: args.includes('--files') || args.includes('--all'),
     verbose: args.includes('--verbose'),
-    exportPath: null
+    exportPath: null,
   };
 
   const targetFiles = [];
@@ -55,8 +54,8 @@ function parseArgs(args) {
 
   for (const arg of args) {
     if (arg.startsWith('--')) {
-      nextIsInclude = (arg === '--include' || arg === '-P');
-      nextIsExport = (arg === '--export');
+      nextIsInclude = arg === '--include' || arg === '-P';
+      nextIsExport = arg === '--export';
       continue;
     }
 
@@ -71,7 +70,7 @@ function parseArgs(args) {
     }
   }
 
-  if (!Object.values(options).some(v => v === true) && !options.exportPath) {
+  if (!Object.values(options).some((v) => v === true) && !options.exportPath) {
     options.showTree = true;
     options.showFiles = true;
   }
@@ -81,7 +80,9 @@ function parseArgs(args) {
 
 function main() {
   if (process.argv.length <= 2) {
-    logger.error('Usage: node paths/dep-tree.js <file ...> [--export <dir>] [--include <path ...> | -P <path ...>] [options]');
+    logger.error(
+      'Usage: node paths/dep-tree.js <file ...> [--export <dir>] [--include <path ...> | -P <path ...>] [options]',
+    );
     process.exit(1);
   }
 
@@ -95,8 +96,12 @@ function main() {
     // Add included files to the final package
     if (includes.length > 0) {
       const includedFiles = findFilesArray(includes);
-      const relativeIncludedFiles = includedFiles.map(f => path.relative(projectRoot, f).replace(/\\/g, '/'));
-      const combinedFiles = [...new Set([...contextPackage.files, ...relativeIncludedFiles])].sort();
+      const relativeIncludedFiles = includedFiles.map((f) =>
+        path.relative(projectRoot, f).replace(/\\/g, '/'),
+      );
+      const combinedFiles = [
+        ...new Set([...contextPackage.files, ...relativeIncludedFiles]),
+      ].sort();
       contextPackage.files = combinedFiles;
       contextPackage.stats.totalFiles = combinedFiles.length;
     }
@@ -104,7 +109,6 @@ function main() {
     if (options.exportPath) {
       exportContextPackage(contextPackage, options.exportPath, projectRoot);
     }
-
   } catch (error) {
     logger.error(`Error: ${error.message}`);
     if (options.verbose) {

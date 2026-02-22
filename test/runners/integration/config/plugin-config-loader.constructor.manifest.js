@@ -1,14 +1,21 @@
 // test/runners/integration/config/plugin-config-loader.constructor.manifest.js
 require('module-alias/register');
 const { pluginConfigLoaderFactoryPath } = require('@paths');
-const { makePluginConfigLoaderScenario } = require(pluginConfigLoaderFactoryPath);
+const { makePluginConfigLoaderScenario } = require(
+  pluginConfigLoaderFactoryPath,
+);
 
 module.exports = [
   makePluginConfigLoaderScenario({
-    description: '1.6.1: Should correctly initialize properties from constructor arguments',
+    description:
+      '1.6.1: Should correctly initialize properties from constructor arguments',
     constructorArgs: [
-      '/xdg/base', { xdg: 'config' }, '/xdg/path',
-      '/proj/base', { proj: 'config' }, '/proj/path',
+      '/xdg/base',
+      { xdg: 'config' },
+      '/xdg/path',
+      '/proj/base',
+      { proj: 'config' },
+      '/proj/path',
       false,
     ],
     assertion: (loader, mocks, constants, expect) => {
@@ -23,15 +30,33 @@ module.exports = [
     },
   }),
   makePluginConfigLoaderScenario({
-    description: '1.6.1: should set xdgMainConfig to an empty object if null or undefined',
-    constructorArgs: ['/xdg/base', null, '/xdg/path', '/proj/base', {}, '/proj/path', false],
+    description:
+      '1.6.1: should set xdgMainConfig to an empty object if null or undefined',
+    constructorArgs: [
+      '/xdg/base',
+      null,
+      '/xdg/path',
+      '/proj/base',
+      {},
+      '/proj/path',
+      false,
+    ],
     assertion: (loader, mocks, constants, expect) => {
       expect(loader.xdgMainConfig).to.deep.equal({});
     },
   }),
   makePluginConfigLoaderScenario({
-    description: '1.6.1: should set projectMainConfig to an empty object if null or undefined',
-    constructorArgs: ['/xdg/base', {}, '/xdg/path', '/proj/base', null, '/proj/path', false],
+    description:
+      '1.6.1: should set projectMainConfig to an empty object if null or undefined',
+    constructorArgs: [
+      '/xdg/base',
+      {},
+      '/xdg/path',
+      '/proj/base',
+      null,
+      '/proj/path',
+      false,
+    ],
     assertion: (loader, mocks, constants, expect) => {
       expect(loader.projectMainConfig).to.deep.equal({});
     },

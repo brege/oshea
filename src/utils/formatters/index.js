@@ -27,7 +27,7 @@ const {
   formatValidationHeader,
   formatValidationStep,
   formatValidationTest,
-  formatValidationSummary
+  formatValidationSummary,
 } = require(validationFormatterPath);
 const {
   formatWorkflowSuiteHeader,
@@ -41,7 +41,7 @@ const {
   formatYamlShowScenario,
   formatYamlShowSeparator,
   formatYamlShowOutput,
-  formatYamlShowError
+  formatYamlShowError,
 } = require(yamlTestFormatterPath);
 
 // Export formatters
@@ -70,5 +70,5 @@ module.exports = {
   'yaml-show-scenario': formatYamlShowScenario,
   'yaml-show-separator': formatYamlShowSeparator,
   'yaml-show-output': formatYamlShowOutput,
-  'yaml-show-error': formatYamlShowError
+  'yaml-show-error': formatYamlShowError,
 };

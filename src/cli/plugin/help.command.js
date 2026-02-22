@@ -8,12 +8,11 @@ module.exports = {
   command: 'help <pluginName>',
   describe: 'display detailed help for a plugin',
   builder: (yargs) => {
-    yargs
-      .positional('pluginName', {
-        describe: 'name of plugin to display help for',
-        type: 'string',
-        completionKey: 'usablePlugins'
-      });
+    yargs.positional('pluginName', {
+      describe: 'name of plugin to display help for',
+      type: 'string',
+      completionKey: 'usablePlugins',
+    });
   },
   handler: async (args) => {
     // This guard prevents the handler from running during any completion activity.
@@ -25,9 +24,11 @@ module.exports = {
       args.isLazyLoad = false;
       await displayPluginHelp(args.pluginName, args.manager, args);
     } catch (error) {
-      logger.error(`ERROR displaying help for plugin '${args.pluginName}': ${error.message}`);
+      logger.error(
+        `ERROR displaying help for plugin '${args.pluginName}': ${error.message}`,
+      );
       if (error.stack) logger.error(error.stack);
       process.exit(1);
     }
-  }
+  },
 };

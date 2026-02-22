@@ -9,47 +9,63 @@ const yaml = require('js-yaml');
 // Load versioned validators
 const v1Validator = require(v1Path);
 
-
 function resolvePluginPath(pluginIdentifier) {
   logger.debug('Attempting to resolve plugin path', {
     context: 'PluginValidator',
-    pluginIdentifier: pluginIdentifier
+    pluginIdentifier: pluginIdentifier,
   });
 
   const resolvedIdentifier = path.resolve(pluginIdentifier);
-  if (fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory()) {
+  if (
+    fs.existsSync(resolvedIdentifier) &&
+    fs.statSync(resolvedIdentifier).isDirectory()
+  ) {
     logger.debug('Plugin path resolved as absolute directory', {
       context: 'PluginValidator',
-      resolvedPath: resolvedIdentifier
+      resolvedPath: resolvedIdentifier,
     });
-    return { pluginDirectoryPath: resolvedIdentifier, pluginName: path.basename(resolvedIdentifier) };
+    return {
+      pluginDirectoryPath: resolvedIdentifier,
+      pluginName: path.basename(resolvedIdentifier),
+    };
   }
 
   const { projectRoot } = require('@paths'); // Dynamically loaded to avoid circular deps if @paths points back to here
-  const pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
-  logger.debug('Plugin path not absolute, attempting to resolve from project plugins directory', {
-    context: 'PluginValidator',
-    pluginIdentifier: pluginIdentifier,
-    projectRoot: projectRoot,
-    derivedPath: pluginDirectoryPath
-  });
+  const pluginDirectoryPath = path.join(
+    projectRoot,
+    'plugins',
+    pluginIdentifier,
+  );
+  logger.debug(
+    'Plugin path not absolute, attempting to resolve from project plugins directory',
+    {
+      context: 'PluginValidator',
+      pluginIdentifier: pluginIdentifier,
+      projectRoot: projectRoot,
+      derivedPath: pluginDirectoryPath,
+    },
+  );
 
-  if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
+  if (
+    !fs.existsSync(pluginDirectoryPath) ||
+    !fs.statSync(pluginDirectoryPath).isDirectory()
+  ) {
     logger.error('Plugin directory not found', {
       context: 'PluginValidator',
       pluginIdentifier: pluginIdentifier,
       checkedPaths: [resolvedIdentifier, pluginDirectoryPath],
-      error: `Plugin directory not found for identifier: '${pluginIdentifier}'.`
+      error: `Plugin directory not found for identifier: '${pluginIdentifier}'.`,
     });
-    throw new Error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'.`);
+    throw new Error(
+      `Error: Plugin directory not found for identifier: '${pluginIdentifier}'.`,
+    );
   }
   logger.debug('Plugin path resolved from project plugins directory', {
     context: 'PluginValidator',
-    resolvedPath: pluginDirectoryPath
+    resolvedPath: pluginDirectoryPath,
   });
   return { pluginDirectoryPath, pluginName: pluginIdentifier };
 }
-
 
 function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
   const metadata = {
@@ -61,7 +77,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
   logger.debug('Resolving plugin metadata for plugin', {
     context: 'PluginValidator',
     pluginName: pluginName,
-    pluginDirectoryPath: pluginDirectoryPath
+    pluginDirectoryPath: pluginDirectoryPath,
   });
 
   const readYamlFile = (filePath) => {
@@ -70,15 +86,17 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
         const content = yaml.load(fs.readFileSync(filePath, 'utf8'));
         logger.debug('Read YAML from file', {
           context: 'PluginValidator',
-          file: path.basename(filePath)
+          file: path.basename(filePath),
         });
         return content;
       } catch (e) {
-        warnings.push(`Could not parse YAML from '${path.basename(filePath)}': ${e.message}`);
+        warnings.push(
+          `Could not parse YAML from '${path.basename(filePath)}': ${e.message}`,
+        );
         logger.warn('Could not parse YAML from file', {
           context: 'PluginValidator',
           file: path.basename(filePath),
-          error: e.message
+          error: e.message,
         });
       }
     }
@@ -86,12 +104,15 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
   };
 
   // --- Check .config.yaml ---
-  const configPath = path.join(pluginDirectoryPath, `${pluginName}.config.yaml`);
+  const configPath = path.join(
+    pluginDirectoryPath,
+    `${pluginName}.config.yaml`,
+  );
   const configContent = readYamlFile(configPath);
   if (configContent) {
     logger.debug('Config file found and parsed', {
       context: 'PluginValidator',
-      configPath: configPath
+      configPath: configPath,
     });
     if (configContent.plugin_name) {
       metadata.plugin_name.value = configContent.plugin_name;
@@ -108,7 +129,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
   } else {
     logger.debug('Config file not found or could not be parsed', {
       context: 'PluginValidator',
-      configPath: configPath
+      configPath: configPath,
     });
   }
 
@@ -116,12 +137,17 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
   if (metadata.plugin_name.value === undefined) {
     metadata.plugin_name.value = pluginName; // Default to directory name if not found anywhere
     metadata.plugin_name.source = 'default (directory name)';
-    warnings.push(`Plugin name not found in config. Defaulting to directory name: '${pluginName}'.`);
-    logger.warn('Plugin name not found in config, defaulting to directory name', {
-      context: 'PluginValidator',
-      pluginName: pluginName,
-      source: 'directory name'
-    });
+    warnings.push(
+      `Plugin name not found in config. Defaulting to directory name: '${pluginName}'.`,
+    );
+    logger.warn(
+      'Plugin name not found in config, defaulting to directory name',
+      {
+        context: 'PluginValidator',
+        pluginName: pluginName,
+        source: 'directory name',
+      },
+    );
   }
   if (metadata.version.value === undefined) {
     metadata.version.source = 'default';
@@ -129,18 +155,18 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     logger.warn('Plugin version not found in config', {
       context: 'PluginValidator',
       pluginName: pluginName,
-      source: 'default'
+      source: 'default',
     });
   }
   if (metadata.protocol.value === undefined) {
     metadata.protocol.value = 'v1'; // Default to v1 as per requirements
     metadata.protocol.source = 'default (v1)';
-    warnings.push('Plugin protocol not found in config. Defaulting to \'v1\'.');
+    warnings.push("Plugin protocol not found in config. Defaulting to 'v1'.");
     logger.warn('Plugin protocol not found in config, defaulting to v1', {
       context: 'PluginValidator',
       pluginName: pluginName,
       protocol: 'v1',
-      source: 'default'
+      source: 'default',
     });
   }
 
@@ -154,13 +180,11 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     version: metadata.version.value || 'N/A (Warning)',
     versionSource: metadata.version.source,
     protocol: metadata.protocol.value,
-    protocolSource: metadata.protocol.source
+    protocolSource: metadata.protocol.source,
   });
 
   return metadata;
 }
-
-
 
 function validate(pluginIdentifier) {
   const errors = [];
@@ -168,7 +192,7 @@ function validate(pluginIdentifier) {
 
   logger.debug('Starting plugin validation for identifier', {
     context: 'PluginValidator',
-    pluginIdentifier: pluginIdentifier
+    pluginIdentifier: pluginIdentifier,
   });
 
   let pluginDirectoryPath, pluginName;
@@ -177,18 +201,22 @@ function validate(pluginIdentifier) {
     logger.debug('Plugin path successfully resolved for validation', {
       context: 'PluginValidator',
       pluginDirectoryPath: pluginDirectoryPath,
-      pluginName: pluginName
+      pluginName: pluginName,
     });
   } catch (error) {
     logger.error('Failed to resolve plugin path for validation', {
       context: 'PluginValidator',
       pluginIdentifier: pluginIdentifier,
-      error: error.message
+      error: error.message,
     });
     return { isValid: false, errors: [error.message], warnings: [] };
   }
 
-  const pluginMetadata = getPluginMetadata(pluginDirectoryPath, pluginName, warnings);
+  const pluginMetadata = getPluginMetadata(
+    pluginDirectoryPath,
+    pluginName,
+    warnings,
+  );
 
   // Ensure plugin_name derived from metadata matches the directory name for core consistency
   if (pluginMetadata.plugin_name.value !== pluginName) {
@@ -197,80 +225,81 @@ function validate(pluginIdentifier) {
       context: 'PluginValidator',
       resolvedPluginName: pluginMetadata.plugin_name.value,
       directoryName: pluginName,
-      error: nameMismatchError
+      error: nameMismatchError,
     });
     errors.push(nameMismatchError);
     return {
       isValid: false,
       errors: errors,
-      warnings: warnings
+      warnings: warnings,
     };
   }
   logger.debug('Plugin name matches directory name', {
     context: 'PluginValidator',
-    pluginName: pluginName
+    pluginName: pluginName,
   });
-
 
   let validationResult;
   switch (pluginMetadata.protocol.value.toLowerCase()) {
-  case 'v1':
-    logger.info('Delegating validation to V1 protocol validator', {
-      context: 'PluginValidator',
-      protocol: 'v1',
-      pluginName: pluginName
-    });
-    validationResult = v1Validator.validateV1(pluginDirectoryPath, pluginMetadata);
-    break;
-  default:
-  {
-    const errorMsg = `Unsupported plugin protocol '${pluginMetadata.protocol.value}' for plugin '${pluginName}'.`;
-    logger.error('✗ Plugin is INVALID: Unsupported protocol', {
-      context: 'PluginValidator',
-      pluginName: pluginName,
-      protocol: pluginMetadata.protocol.value,
-      error: errorMsg
-    });
-    errors.push(errorMsg);
-    validationResult = { isValid: false, errors: [errorMsg], warnings: [] };
-    break;
-  }
+    case 'v1':
+      logger.info('Delegating validation to V1 protocol validator', {
+        context: 'PluginValidator',
+        protocol: 'v1',
+        pluginName: pluginName,
+      });
+      validationResult = v1Validator.validateV1(
+        pluginDirectoryPath,
+        pluginMetadata,
+      );
+      break;
+    default: {
+      const errorMsg = `Unsupported plugin protocol '${pluginMetadata.protocol.value}' for plugin '${pluginName}'.`;
+      logger.error('✗ Plugin is INVALID: Unsupported protocol', {
+        context: 'PluginValidator',
+        pluginName: pluginName,
+        protocol: pluginMetadata.protocol.value,
+        error: errorMsg,
+      });
+      errors.push(errorMsg);
+      validationResult = { isValid: false, errors: [errorMsg], warnings: [] };
+      break;
+    }
   }
 
   // Merge warnings from internal validation steps
   validationResult.warnings = [...warnings, ...validationResult.warnings];
   // Final validity is true only if no errors accumulated anywhere
-  validationResult.isValid = validationResult.isValid && (errors.length === 0);
+  validationResult.isValid = validationResult.isValid && errors.length === 0;
 
   logger.validation('--- Validation Summary ---', {
     //context: 'PluginValidator',
     pluginName: pluginName,
     isValid: validationResult.isValid,
     errorCount: validationResult.errors.length,
-    warningCount: validationResult.warnings.length
-
+    warningCount: validationResult.warnings.length,
   });
   if (validationResult.isValid) {
     if (validationResult.warnings.length === 0) {
       logger.success(`✓ Plugin '${pluginName}' is VALID.`, {
         context: 'PluginValidator',
         pluginName: pluginName,
-        status: 'valid'
+        status: 'valid',
       });
     } else {
       logger.warn('Plugin is usable with warnings', {
         context: 'PluginValidator',
         pluginName: pluginName,
         status: 'valid_with_warnings',
-        warningCount: validationResult.warnings.length
+        warningCount: validationResult.warnings.length,
       });
     }
   } else {
-    logger.error('Plugin is invalid', { // No symbol here, matches current example output
+    logger.error('Plugin is invalid', {
+      // No symbol here, matches current example output
       context: 'PluginValidator',
       pluginName: pluginName,
       status: 'invalid',
-      errorCount: validationResult.errors.length
+      errorCount: validationResult.errors.length,
     });
   }
 
@@ -278,13 +307,13 @@ function validate(pluginIdentifier) {
     logger.error('Errors found during validation:', {
       context: 'PluginValidator',
       pluginName: pluginName,
-      errorCount: validationResult.errors.length
+      errorCount: validationResult.errors.length,
     });
     validationResult.errors.forEach((error) => {
       logger.error(`✗ ${error}`, {
         context: 'PluginValidator',
         pluginName: pluginName,
-        format: 'inline_list_item'
+        format: 'inline_list_item',
       });
     });
   }
@@ -293,19 +322,19 @@ function validate(pluginIdentifier) {
     logger.warn('Warnings found during validation:', {
       context: 'PluginValidator',
       pluginName: pluginName,
-      warningCount: validationResult.warnings.length
+      warningCount: validationResult.warnings.length,
     });
     validationResult.warnings.forEach((warning) => {
       logger.warn(`○ ${warning}`, {
         context: 'PluginValidator',
         pluginName: pluginName,
-        format: 'inline_list_item'
+        format: 'inline_list_item',
       });
     });
   } else if (validationResult.isValid) {
     logger.validation('No warnings found.', {
       //context: 'PluginValidator',
-      pluginName: pluginName
+      pluginName: pluginName,
     });
   }
 

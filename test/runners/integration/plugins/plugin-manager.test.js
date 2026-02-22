@@ -4,7 +4,7 @@ const {
   pluginManagerPath,
   pluginManagerManifestPath,
   captureLogsPath,
-  projectRoot
+  projectRoot,
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -14,12 +14,12 @@ const os = require('os');
 const { logs, clearLogs } = require(captureLogsPath);
 const testManifest = require(pluginManagerManifestPath);
 
-describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot, pluginManagerPath)}`, function() {
+describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot, pluginManagerPath)}`, () => {
   let tempDir;
   let originalPathsModule;
   let PluginManager;
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'plugin-manager-test-'));
 
@@ -31,13 +31,13 @@ describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot,
     // Inject loggerPath for log capturing
     const testLoggerPath = captureLogsPath;
     require.cache[pathsPath] = {
-      exports: { ...require(pathsPath), loggerPath: testLoggerPath }
+      exports: { ...require(pathsPath), loggerPath: testLoggerPath },
     };
 
     PluginManager = require(pluginManagerPath);
   });
 
-  afterEach(function() {
+  afterEach(() => {
     fs.rmSync(tempDir, { recursive: true, force: true });
     sinon.restore();
     if (originalPathsModule) {
@@ -46,7 +46,7 @@ describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot,
     delete require.cache[pluginManagerPath];
   });
 
-  testManifest.forEach(testCase => {
+  testManifest.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
     const {
       description,
@@ -57,7 +57,7 @@ describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot,
       ...scenarioConfig
     } = testCase;
 
-    it_(description, async function() {
+    it_(description, async () => {
       const mocks = { handlerScriptPath: null };
       const constants = { tempDir };
       const pluginManager = new PluginManager();
@@ -66,10 +66,13 @@ describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot,
         try {
           await pluginManager.invokeHandler(
             'test-plugin',
-            { ...scenarioConfig.effectiveConfig, handlerScriptPath: mocks.handlerScriptPath },
+            {
+              ...scenarioConfig.effectiveConfig,
+              handlerScriptPath: mocks.handlerScriptPath,
+            },
             scenarioConfig.data,
             scenarioConfig.outputDir,
-            scenarioConfig.outputFilenameOpt
+            scenarioConfig.outputFilenameOpt,
           );
           throw new Error('Expected an error to be thrown, but it was not.');
         } catch (error) {
@@ -83,10 +86,13 @@ describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot,
 
       const result = await pluginManager.invokeHandler(
         'test-plugin',
-        { ...scenarioConfig.effectiveConfig, handlerScriptPath: mocks.handlerScriptPath },
+        {
+          ...scenarioConfig.effectiveConfig,
+          handlerScriptPath: mocks.handlerScriptPath,
+        },
         scenarioConfig.data,
         scenarioConfig.outputDir,
-        scenarioConfig.outputFilenameOpt
+        scenarioConfig.outputFilenameOpt,
       );
 
       if (assert) {
@@ -95,4 +101,3 @@ describe(`plugin-manager (Module Integration Tests) ${path.relative(projectRoot,
     });
   });
 });
-

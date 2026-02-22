@@ -2,7 +2,12 @@
 // scripts/linting/lint.js
 require('module-alias/register');
 
-const { lintingConfigPath, lintHelpersPath, lintHarnessPath, loggerPath } = require('@paths');
+const {
+  lintingConfigPath,
+  lintHelpersPath,
+  lintHarnessPath,
+  loggerPath,
+} = require('@paths');
 
 const { loadLintConfig, parseCliArgs } = require(lintHelpersPath);
 const { runHarness } = require(lintHarnessPath);
@@ -64,28 +69,35 @@ function main() {
       logger.info('Available Linter Steps:');
 
       const filtered = only
-        ? harnessSteps.filter(step =>
-          (step.key || '').toLowerCase().includes(only.toLowerCase()) ||
-          (step.label || '').toLowerCase().includes(only.toLowerCase()))
+        ? harnessSteps.filter(
+            (step) =>
+              (step.key || '').toLowerCase().includes(only.toLowerCase()) ||
+              (step.label || '').toLowerCase().includes(only.toLowerCase()),
+          )
         : harnessSteps;
 
       if (filtered.length > 0) {
-        filtered.forEach(step => {
-          logger.info(`  ${step.key ? step.key.padEnd(20) : ''} ${step.label || ''}`);
+        filtered.forEach((step) => {
+          logger.info(
+            `  ${step.key ? step.key.padEnd(20) : ''} ${step.label || ''}`,
+          );
         });
       } else {
         logger.info('No matching steps found.');
       }
 
-      logger.info('\nUsage: node scripts/linting/lint.js --only <key_or_group>');
-      logger.detail('Tip: Use \'node scripts/linting/lint.js --help\' for all options.');
+      logger.info(
+        '\nUsage: node scripts/linting/lint.js --only <key_or_group>',
+      );
+      logger.detail(
+        "Tip: Use 'node scripts/linting/lint.js --help' for all options.",
+      );
       process.exit(0);
     }
 
     // Run harness
     const config = fullConfig.harness;
     runHarness(config, flags, targets, only);
-
   } catch (error) {
     logger.error(`Error running lint harness: ${error.message}`);
     logger.error(`Stack: ${error.stack}`);

@@ -32,10 +32,6 @@
       }
     }
   },
-  "required": [
-    "plugin_name",
-    "protocol",
-    "version"
-  ],
+  "required": ["plugin_name", "protocol", "version"],
   "additionalProperties": true
 }

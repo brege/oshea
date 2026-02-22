@@ -11,7 +11,16 @@ const fs = require('fs');
 const readline = require('readline');
 
 // Logger levels to detect
-const LOG_LEVELS = ['info', 'debug', 'warn', 'error', 'fatal', 'success', 'detail', 'validation'];
+const LOG_LEVELS = [
+  'info',
+  'debug',
+  'warn',
+  'error',
+  'fatal',
+  'success',
+  'detail',
+  'validation',
+];
 
 // Parse CLI args: --only=filename, --info, --warn ..., --stats, --no-stats
 function parseArgs(argv) {
@@ -40,7 +49,13 @@ function parseArgs(argv) {
       filesOrGlobs.push(arg);
     }
   }
-  return { onlyMatchingFrom, showStatsOnly, suppressStats, levelsFilter, filesOrGlobs };
+  return {
+    onlyMatchingFrom,
+    showStatsOnly,
+    suppressStats,
+    levelsFilter,
+    filesOrGlobs,
+  };
 }
 
 function buildLoggerRegex(levels) {
@@ -67,14 +82,22 @@ function printMatch(filePath, startLine, linesBuffer) {
   const firstLine = linesBuffer[0];
   const indentMatch = firstLine.match(/^(\s*)/);
   const baseIndent = indentMatch ? indentMatch[1] : '';
-  const codeBlock = linesBuffer.map(line =>
-    line.startsWith(baseIndent) ? line.slice(baseIndent.length) : line
-  ).join('\n');
+  const codeBlock = linesBuffer
+    .map((line) =>
+      line.startsWith(baseIndent) ? line.slice(baseIndent.length) : line,
+    )
+    .join('\n');
   logger.info(codeBlock, { format: 'js' });
   logger.info(''); // Empty line separator
 }
 
-async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, showStatsOnly) {
+async function surfaceLoggerCalls(
+  filePath,
+  stats,
+  matcherSet,
+  levelsFilter,
+  showStatsOnly,
+) {
   const levelsArray = Array.from(levelsFilter);
   const loggerRegex = buildLoggerRegex(levelsArray);
 
@@ -104,7 +127,8 @@ async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, sho
 
         // Update stats always
         if (!stats[filePath]) stats[filePath] = {};
-        stats[filePath][currentLogLevel] = (stats[filePath][currentLogLevel] || 0) + 1;
+        stats[filePath][currentLogLevel] =
+          (stats[filePath][currentLogLevel] || 0) + 1;
 
         const idx = line.indexOf(match[0]);
         const afterLoggerCall = line.slice(idx);
@@ -122,7 +146,6 @@ async function surfaceLoggerCalls(filePath, stats, matcherSet, levelsFilter, sho
           capturing = false;
           buffer = [];
         }
-        continue;
       }
     } else {
       parenDepth += (line.match(/\(/g) || []).length;
@@ -157,23 +180,36 @@ function printStats(stats, levelsFilter) {
 }
 
 async function main() {
-  const { onlyMatchingFrom, showStatsOnly, suppressStats, levelsFilter, filesOrGlobs } = parseArgs(process.argv.slice(2));
+  const {
+    onlyMatchingFrom,
+    showStatsOnly,
+    suppressStats,
+    levelsFilter,
+    filesOrGlobs,
+  } = parseArgs(process.argv.slice(2));
   if (filesOrGlobs.length === 0) {
-    logger.error('Usage: logger-surfacer.js <file|dir|glob> [--only=file] [--stats] [--no-stats] [--info] [--warn] ...');
+    logger.error(
+      'Usage: logger-surfacer.js <file|dir|glob> [--only=file] [--stats] [--no-stats] [--info] [--warn] ...',
+    );
     process.exit(1);
   }
   let matcherSet = null;
   if (onlyMatchingFrom) {
     try {
-      const lines = fs.readFileSync(onlyMatchingFrom, 'utf8')
-        .split('\n').map(s => s.trim()).filter(Boolean);
+      const lines = fs
+        .readFileSync(onlyMatchingFrom, 'utf8')
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
       matcherSet = new Set(lines);
       if (!lines.length) {
         logger.warn(`Warning: matcher file ${onlyMatchingFrom} is empty!`);
         matcherSet = null;
       }
     } catch (err) {
-      logger.error(`Failed to read only file ${onlyMatchingFrom}: ${err.message}`);
+      logger.error(
+        `Failed to read only file ${onlyMatchingFrom}: ${err.message}`,
+      );
       process.exit(1);
     }
   }
@@ -183,7 +219,13 @@ async function main() {
   });
   const stats = {};
   for (const file of files) {
-    await surfaceLoggerCalls(file, stats, matcherSet, levelsFilter, showStatsOnly);
+    await surfaceLoggerCalls(
+      file,
+      stats,
+      matcherSet,
+      levelsFilter,
+      showStatsOnly,
+    );
   }
   if (!suppressStats) {
     printStats(stats, levelsFilter);
@@ -191,7 +233,7 @@ async function main() {
 }
 
 if (require.main === module) {
-  main().catch(err => {
+  main().catch((err) => {
     logger.error(`Error: ${err.message}`);
     process.exit(1);
   });

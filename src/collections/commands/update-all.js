@@ -4,7 +4,7 @@ module.exports = async function updateAllCollections(dependencies) {
   const { fss, fs, path, logger, collectionsUserPluginsDirname } = dependencies;
 
   logger.debug('Initiating update for all collections', {
-    context: 'UpdateAllCollectionsCommand'
+    context: 'UpdateAllCollectionsCommand',
   });
 
   let allOverallSuccess = true;
@@ -15,44 +15,60 @@ module.exports = async function updateAllCollections(dependencies) {
   if (!downloadedCollectionInfos || downloadedCollectionInfos.length === 0) {
     logger.warn('No collections are currently downloaded. Nothing to update.', {
       context: 'UpdateAllCollectionsCommand',
-      status: 'No collections downloaded'
+      status: 'No collections downloaded',
     });
-    return { success: true, messages: ['No collections downloaded.']};
+    return { success: true, messages: ['No collections downloaded.'] };
   }
 
   logger.debug('Processing updates for downloaded collections', {
     context: 'UpdateAllCollectionsCommand',
-    totalCollections: downloadedCollectionInfos.length
+    totalCollections: downloadedCollectionInfos.length,
   });
 
   for (const collectionInfo of downloadedCollectionInfos) {
     const collectionName = collectionInfo.name;
     logger.debug('Processing collection for update', {
       context: 'UpdateAllCollectionsCommand',
-      collectionName: collectionName
+      collectionName: collectionName,
     });
 
     if (collectionName === collectionsUserPluginsDirname) {
-      const singletonsBasePath = path.join(this.collRoot, collectionsUserPluginsDirname);
+      const singletonsBasePath = path.join(
+        this.collRoot,
+        collectionsUserPluginsDirname,
+      );
       logger.debug('Processing user-added plugins container', {
         context: 'UpdateAllCollectionsCommand',
-        containerPath: singletonsBasePath
+        containerPath: singletonsBasePath,
       });
       try {
-        if (fss.existsSync(singletonsBasePath) && fss.lstatSync(singletonsBasePath).isDirectory()) {
-          const singletonPluginDirs = await fs.readdir(singletonsBasePath, { withFileTypes: true });
+        if (
+          fss.existsSync(singletonsBasePath) &&
+          fss.lstatSync(singletonsBasePath).isDirectory()
+        ) {
+          const singletonPluginDirs = await fs.readdir(singletonsBasePath, {
+            withFileTypes: true,
+          });
           for (const dirent of singletonPluginDirs) {
             if (dirent.isDirectory()) {
               const singletonPluginId = dirent.name;
-              const singletonCollectionNameForUpdate = path.join(collectionsUserPluginsDirname, singletonPluginId);
+              const singletonCollectionNameForUpdate = path.join(
+                collectionsUserPluginsDirname,
+                singletonPluginId,
+              );
 
-              logger.debug('Processing individual singleton plugin for update', {
-                context: 'UpdateAllCollectionsCommand',
-                pluginId: singletonPluginId,
-                collectionIdentifier: singletonCollectionNameForUpdate
-              });
+              logger.debug(
+                'Processing individual singleton plugin for update',
+                {
+                  context: 'UpdateAllCollectionsCommand',
+                  pluginId: singletonPluginId,
+                  collectionIdentifier: singletonCollectionNameForUpdate,
+                },
+              );
               try {
-                const result = await this.updateCollection(singletonCollectionNameForUpdate);
+                const result = await this.updateCollection(
+                  singletonCollectionNameForUpdate,
+                );
                 updateMessages.push(result.message);
                 if (!result.success) {
                   allOverallSuccess = false;
@@ -60,13 +76,16 @@ module.exports = async function updateAllCollections(dependencies) {
                     context: 'UpdateAllCollectionsCommand',
                     pluginId: singletonPluginId,
                     collectionIdentifier: singletonCollectionNameForUpdate,
-                    message: result.message
+                    message: result.message,
                   });
                 } else {
-                  logger.info(`Singleton plugin updated successfully: ${singletonPluginId}`, {
-                    context: 'UpdateAllCollectionsCommand',
-                    collectionIdentifier: singletonCollectionNameForUpdate
-                  });
+                  logger.info(
+                    `Singleton plugin updated successfully: ${singletonPluginId}`,
+                    {
+                      context: 'UpdateAllCollectionsCommand',
+                      collectionIdentifier: singletonCollectionNameForUpdate,
+                    },
+                  );
                 }
               } catch (singletonError) {
                 const errMsg = `Failed to process update for singleton ${singletonCollectionNameForUpdate}: ${singletonError.message}`;
@@ -74,7 +93,7 @@ module.exports = async function updateAllCollections(dependencies) {
                   context: 'UpdateAllCollectionsCommand',
                   collectionIdentifier: singletonCollectionNameForUpdate,
                   error: singletonError.message,
-                  stack: singletonError.stack
+                  stack: singletonError.stack,
                 });
                 updateMessages.push(errMsg);
                 allOverallSuccess = false;
@@ -82,9 +101,12 @@ module.exports = async function updateAllCollections(dependencies) {
             }
           }
         } else {
-          logger.info(`User-added plugins directory does not exist: ${singletonsBasePath}, skipping.`, {
-            context: 'UpdateAllCollectionsCommand'
-          });
+          logger.info(
+            `User-added plugins directory does not exist: ${singletonsBasePath}, skipping.`,
+            {
+              context: 'UpdateAllCollectionsCommand',
+            },
+          );
         }
       } catch (error) {
         const errMsg = `Error processing directory ${collectionsUserPluginsDirname}: ${error.message}`;
@@ -92,7 +114,7 @@ module.exports = async function updateAllCollections(dependencies) {
           context: 'UpdateAllCollectionsCommand',
           directory: collectionsUserPluginsDirname,
           error: error.message,
-          stack: error.stack
+          stack: error.stack,
         });
         updateMessages.push(errMsg);
         allOverallSuccess = false;
@@ -109,12 +131,12 @@ module.exports = async function updateAllCollections(dependencies) {
         logger.warn('Collection update failed', {
           context: 'UpdateAllCollectionsCommand',
           collectionName: collectionName,
-          message: result.message
+          message: result.message,
         });
       } else {
         logger.debug('Collection updated successfully', {
           context: 'UpdateAllCollectionsCommand',
-          collectionName: collectionName
+          collectionName: collectionName,
         });
       }
     } catch (error) {
@@ -123,7 +145,7 @@ module.exports = async function updateAllCollections(dependencies) {
         context: 'UpdateAllCollectionsCommand',
         collectionName: collectionName,
         error: error.message,
-        stack: error.stack
+        stack: error.stack,
       });
       updateMessages.push(errMsg);
       allOverallSuccess = false;
@@ -131,7 +153,7 @@ module.exports = async function updateAllCollections(dependencies) {
   }
   logger.debug('Finished attempting to update all collections.', {
     context: 'UpdateAllCollectionsCommand',
-    overallSuccess: allOverallSuccess
+    overallSuccess: allOverallSuccess,
   });
   return { success: allOverallSuccess, messages: updateMessages };
 };

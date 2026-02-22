@@ -18,7 +18,7 @@ function slugify(text) {
 // Parse TOC block
 function parseTocBlock(lines) {
   const toc = {};
-  lines.forEach(line => {
+  lines.forEach((line) => {
     const match = line.match(/\[([^\]]+)]\(#([^)]+)\)/);
     if (match) {
       toc[match[2]] = { text: match[1], raw: line };
@@ -29,7 +29,9 @@ function parseTocBlock(lines) {
 
 // Find TOC block indices and extract level from marker
 function findTocBlockIndices(lines) {
-  let start = -1, end = -1, level = 4;
+  let start = -1,
+    end = -1,
+    level = 4;
   for (let i = 0; i < lines.length; ++i) {
     if (start === -1 && /toc-start/i.test(lines[i])) {
       start = i;
@@ -46,7 +48,9 @@ function findTocBlockIndices(lines) {
 // Parse CLI args for -L flag
 function parseArgs() {
   const args = process.argv.slice(2);
-  let filePath = null, maxLevel = null, help = false;
+  let filePath = null,
+    maxLevel = null,
+    help = false;
   for (let i = 0; i < args.length; ++i) {
     if (args[i] === '-L' || args[i] === '--level') {
       maxLevel = parseInt(args[i + 1], 10);
@@ -73,7 +77,7 @@ function parseHeadings(lines, startLine) {
           level: heading[1].length,
           text: heading[2].replace(/[*_~`]+/g, '').trim(),
           anchor: slugify(heading[2].replace(/[*_~`]+/g, '').trim()),
-          idx: idx + startLine + 1
+          idx: idx + startLine + 1,
         };
       }
       return null;
@@ -119,24 +123,28 @@ const md = fs.readFileSync(filePath, 'utf8');
 const lines = md.split('\n');
 
 const [tocStart, tocEnd, markerLevel] = findTocBlockIndices(lines);
-const tocLines = tocStart !== -1 && tocEnd !== -1 && tocEnd > tocStart ? lines.slice(tocStart + 1, tocEnd) : [];
+const tocLines =
+  tocStart !== -1 && tocEnd !== -1 && tocEnd > tocStart
+    ? lines.slice(tocStart + 1, tocEnd)
+    : [];
 const tocMap = parseTocBlock(tocLines);
 
 // Only parse headings after TOC start (or from 0 if no TOC)
-const headings = tocStart !== -1 ? parseHeadings(lines, tocStart) : parseHeadings(lines, -1);
+const headings =
+  tocStart !== -1 ? parseHeadings(lines, tocStart) : parseHeadings(lines, -1);
 
 // Determine maxLevel: CLI flag > marker > default
 const maxLevel = cliLevel || markerLevel || 4;
 const baseLevel = 3;
 
 // Build new TOC
-let output = [];
-headings.forEach(h => {
+const output = [];
+headings.forEach((h) => {
   if (h.level > maxLevel) return;
   const indent = '  '.repeat(Math.max(0, h.level - baseLevel));
   const anchor = h.anchor;
   let line;
-  if (tocMap.hasOwnProperty(anchor)) {
+  if (Object.hasOwn(tocMap, anchor)) {
     line = `${indent}- [ ] [${tocMap[anchor].text}](#${anchor})`;
   } else {
     line = `${indent}- [ ] [${h.text}](#${anchor})`;
@@ -151,7 +159,7 @@ if (tocStart !== -1 && tocEnd !== -1 && tocEnd > tocStart) {
   newLines = [
     ...lines.slice(0, tocStart + 1),
     ...output,
-    ...lines.slice(tocEnd)
+    ...lines.slice(tocEnd),
   ];
 } else {
   // No TOC found: insert at top
@@ -160,11 +168,12 @@ if (tocStart !== -1 && tocEnd !== -1 && tocEnd > tocStart) {
     ...output,
     '<!-- toc-end -->',
     '',
-    ...lines
+    ...lines,
   ];
 }
 
 // Write back to file
 fs.writeFileSync(filePath, newLines.join('\n'), 'utf8');
-logger.info(`TOC updated in ${filePath} (up to level ${maxLevel}, baseLevel ${baseLevel})`);
-
+logger.info(
+  `TOC updated in ${filePath} (up to level ${maxLevel}, baseLevel ${baseLevel})`,
+);

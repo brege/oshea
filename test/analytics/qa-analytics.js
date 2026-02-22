@@ -10,7 +10,8 @@ const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
 function getTestResultsPath() {
-  const xdgDataHome = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
+  const xdgDataHome =
+    process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
   return path.join(xdgDataHome, 'oshea', 'test-analytics', 'test-results.json');
 }
 
@@ -53,7 +54,7 @@ function analyzeTestBrittleness(testResults) {
     const failureRate = data.fail_count / totalRuns;
     const volatility = calculateVolatility(data);
     const daysSinceFirstSeen = Math.floor(
-      (new Date() - new Date(data.first_seen)) / (1000 * 60 * 60 * 24)
+      (new Date() - new Date(data.first_seen)) / (1000 * 60 * 60 * 24),
     );
 
     analysis.push({
@@ -65,7 +66,7 @@ function analyzeTestBrittleness(testResults) {
       last_status: data.last_status,
       last_run: data.last_run,
       days_tracked: daysSinceFirstSeen,
-      last_error: data.last_error || null
+      last_error: data.last_error || null,
     });
   }
 
@@ -80,7 +81,7 @@ function generateReport(analysis, options = {}) {
 
   // Filter and get top brittle tests
   const brittleTests = analysis
-    .filter(test => test.total_runs >= minRuns)
+    .filter((test) => test.total_runs >= minRuns)
     .slice(0, limit);
 
   if (brittleTests.length === 0) {
@@ -88,17 +89,25 @@ function generateReport(analysis, options = {}) {
     return;
   }
 
-  logger.info(`Top ${brittleTests.length} Most Brittle Tests (min ${minRuns} runs):\n`);
+  logger.info(
+    `Top ${brittleTests.length} Most Brittle Tests (min ${minRuns} runs):\n`,
+  );
 
   brittleTests.forEach((test, index) => {
     const volatilityLabels = ['stable', 'flaky', 'unstable'];
-    const status = test.failure_rate > 0.5 ? '✖' :
-      test.failure_rate > 0.1 ? '○' : '●';
+    const status =
+      test.failure_rate > 0.5 ? '✖' : test.failure_rate > 0.1 ? '○' : '●';
 
     logger.info(`${index + 1}. ${status} ${test.test_key}`);
-    logger.info(`   Failure Rate: ${(test.failure_rate * 100).toFixed(1)}% (${test.fail_count}/${test.total_runs})`);
-    logger.info(`   Volatility: ${volatilityLabels[test.volatility]} (level ${test.volatility})`);
-    logger.info(`   Last Status: ${test.last_status} | Tracked: ${test.days_tracked} days`);
+    logger.info(
+      `   Failure Rate: ${(test.failure_rate * 100).toFixed(1)}% (${test.fail_count}/${test.total_runs})`,
+    );
+    logger.info(
+      `   Volatility: ${volatilityLabels[test.volatility]} (level ${test.volatility})`,
+    );
+    logger.info(
+      `   Last Status: ${test.last_status} | Tracked: ${test.days_tracked} days`,
+    );
     if (test.last_error) {
       logger.info(`   Last Error: ${test.last_error.substring(0, 80)}...`);
     }
@@ -107,22 +116,28 @@ function generateReport(analysis, options = {}) {
 
   // Summary statistics
   const totalTests = analysis.length;
-  const stableTests = analysis.filter(t => t.volatility === 0).length;
-  const flakyTests = analysis.filter(t => t.volatility === 1).length;
-  const unstableTests = analysis.filter(t => t.volatility === 2).length;
+  const stableTests = analysis.filter((t) => t.volatility === 0).length;
+  const flakyTests = analysis.filter((t) => t.volatility === 1).length;
+  const unstableTests = analysis.filter((t) => t.volatility === 2).length;
 
   logger.info('--- Summary Statistics ---');
   logger.info(`Total tracked tests: ${totalTests}`);
-  logger.info(`Stable (volatility0): ${stableTests} (${((stableTests/totalTests)*100).toFixed(1)}%)`);
-  logger.info(`Flaky (volatility1): ${flakyTests} (${((flakyTests/totalTests)*100).toFixed(1)}%)`);
-  logger.info(`Unstable (volatility2): ${unstableTests} (${((unstableTests/totalTests)*100).toFixed(1)}%)`);
+  logger.info(
+    `Stable (volatility0): ${stableTests} (${((stableTests / totalTests) * 100).toFixed(1)}%)`,
+  );
+  logger.info(
+    `Flaky (volatility1): ${flakyTests} (${((flakyTests / totalTests) * 100).toFixed(1)}%)`,
+  );
+  logger.info(
+    `Unstable (volatility2): ${unstableTests} (${((unstableTests / totalTests) * 100).toFixed(1)}%)`,
+  );
 }
 
 function main() {
   const args = process.argv.slice(2);
   const options = {
     limit: 20,
-    minRuns: 5
+    minRuns: 5,
   };
 
   // Parse simple args
@@ -163,5 +178,5 @@ module.exports = {
   loadTestResults,
   calculateVolatility,
   analyzeTestBrittleness,
-  generateReport
+  generateReport,
 };

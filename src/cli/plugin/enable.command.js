@@ -48,7 +48,7 @@ async function enableUserPlugin(pluginName, manager) {
   const updatedManifest = {
     version: '1.0',
     migrated_on: parsed?.migrated_on,
-    plugins: pluginStates
+    plugins: pluginStates,
   };
 
   fs.writeFileSync(pluginsManifestPath, yaml.dump(updatedManifest));
@@ -63,34 +63,35 @@ module.exports = {
   builder: (yargsCmd) => {
     yargsCmd
       .positional('target', {
-        describe: 'plugin to enable (e.g., "collection/plugin_id"), \n or collection name (with --all)',
+        describe:
+          'plugin to enable (e.g., "collection/plugin_id"), \n or collection name (with --all)',
         type: 'string',
         demandOption: true,
-        completionKey: 'availablePlugins'
+        completionKey: 'availablePlugins',
       })
       .option('name', {
         alias: 'as',
         describe: 'set a custom "invoke_name" for the plugin',
-        type: 'string'
+        type: 'string',
       })
       .option('all', {
         describe: 'enable all available plugins from a collection.',
         type: 'boolean',
-        default: false
+        default: false,
       })
       .option('prefix', {
         describe: 'prefix for invoke names when using --all',
-        type: 'string'
+        type: 'string',
       })
       .option('no-prefix', {
         describe: 'disable invoke name prefixing when using --all',
         type: 'boolean',
-        default: false
+        default: false,
       })
       .option('bypass-validation', {
         describe: 'skip plugin validation during enablements',
         type: 'boolean',
-        default: false
+        default: false,
       })
       .epilogue(`
 Default prefixing behavior for --all:
@@ -103,19 +104,27 @@ you must re-run this command to enable any new plugins.`);
   },
   handler: async (args) => {
     if (!args.manager) {
-      logger.fatal('FATAL ERROR: CollectionsManager instance not found in CLI arguments.');
+      logger.fatal(
+        'FATAL ERROR: CollectionsManager instance not found in CLI arguments.',
+      );
       process.exit(1);
     }
     const manager = args.manager;
 
     try {
       if (args.all) {
-        logger.info('oshea plugin: Attempting to enable all plugins in collection...');
+        logger.info(
+          'oshea plugin: Attempting to enable all plugins in collection...',
+        );
         logger.detail(`  Collection Name: ${args.target}`);
 
         let originalSourceForPrefixFallback = '';
         try {
-          const metadataPath = path.join(manager.collRoot, args.target, '.collection-metadata.yaml');
+          const metadataPath = path.join(
+            manager.collRoot,
+            args.target,
+            '.collection-metadata.yaml',
+          );
           if (fs.existsSync(metadataPath)) {
             const metaContent = await fsp.readFile(metadataPath, 'utf8');
             const metadata = yaml.load(metaContent);
@@ -128,11 +137,17 @@ you must re-run this command to enable any new plugins.`);
         }
 
         if (args.prefix) {
-          logger.detail(`  Using custom prefix for invoke names: ${args.prefix}`);
+          logger.detail(
+            `  Using custom prefix for invoke names: ${args.prefix}`,
+          );
         } else if (args.noPrefix) {
-          logger.warn('  --no-prefix specified: Attempting to enable plugins with their original IDs as invoke names.');
+          logger.warn(
+            '  --no-prefix specified: Attempting to enable plugins with their original IDs as invoke names.',
+          );
         } else {
-          logger.info('  Using default prefixing strategy for invoke names (see help for details).');
+          logger.info(
+            '  Using default prefixing strategy for invoke names (see help for details).',
+          );
         }
 
         await manager.enableAllPluginsInCollection(args.target, {
@@ -140,7 +155,7 @@ you must re-run this command to enable any new plugins.`);
           noPrefix: args.noPrefix,
           isCliCall: true,
           originalSourceForPrefixFallback,
-          bypassValidation: args.bypassValidation
+          bypassValidation: args.bypassValidation,
         });
       } else {
         logger.info('oshea plugin: Attempting to enable plugin...');
@@ -148,16 +163,23 @@ you must re-run this command to enable any new plugins.`);
         if (args.name) {
           logger.detail(`  Requested invoke name: ${args.name}`);
         }
-        if (args.prefix || args.noPrefix){
-          logger.warn('WARN: --prefix and --no-prefix options are ignored when not using --all.');
+        if (args.prefix || args.noPrefix) {
+          logger.warn(
+            'WARN: --prefix and --no-prefix options are ignored when not using --all.',
+          );
         }
 
         // Check if this is a user plugin (no slash in name)
         if (!args.target.includes('/')) {
-          const enabledUserPlugin = await enableUserPlugin(args.target, manager);
+          const enabledUserPlugin = await enableUserPlugin(
+            args.target,
+            manager,
+          );
           if (enabledUserPlugin) {
             logger.success('Plugin enabled successfully');
-            logger.info(`\nTo use this plugin with oshea, invoke it as: oshea convert ... --plugin ${args.target}`);
+            logger.info(
+              `\nTo use this plugin with oshea, invoke it as: oshea convert ... --plugin ${args.target}`,
+            );
             return; // Early return, skip CM-based enabling
           }
         }
@@ -165,24 +187,28 @@ you must re-run this command to enable any new plugins.`);
         // Handle CM-managed plugin enable
         const result = await manager.enablePlugin(args.target, {
           name: args.name,
-          bypassValidation: args.bypassValidation
+          bypassValidation: args.bypassValidation,
         });
         if (result && result.success) {
-          const finalInvokeName = result.invoke_name || args.target.split('/')[1];
-          logger.info(`\nTo use this plugin with oshea, invoke it as: oshea convert ... --plugin ${finalInvokeName}`);
+          const finalInvokeName =
+            result.invoke_name || args.target.split('/')[1];
+          logger.info(
+            `\nTo use this plugin with oshea, invoke it as: oshea convert ... --plugin ${finalInvokeName}`,
+          );
         }
       }
 
       try {
         execSync(`node "${cliPath}" _tab_cache`);
       } catch {
-        logger.warn('WARN: Failed to regenerate completion cache. This is not a fatal error.');
+        logger.warn(
+          'WARN: Failed to regenerate completion cache. This is not a fatal error.',
+        );
       }
-
     } catch (error) {
       const commandType = args.all ? 'plugin enable --all' : 'plugin enable';
       logger.error(`\nERROR in '${commandType}' command: ${error.message}`);
       process.exit(1);
     }
-  }
+  },
 };

@@ -47,7 +47,7 @@ async function disableUserPlugin(pluginName, manager) {
   const updatedManifest = {
     version: '1.0',
     migrated_on: parsed?.migrated_on,
-    plugins: pluginStates
+    plugins: pluginStates,
   };
 
   fs.writeFileSync(pluginsManifestPath, yaml.dump(updatedManifest));
@@ -60,17 +60,18 @@ module.exports = {
   command: 'disable <invoke_name>',
   describe: 'disables an active plugin',
   builder: (yargsCmd) => {
-    yargsCmd
-      .positional('invoke_name', {
-        describe: 'current \'invoke_name\' of plugin to disable',
-        type: 'string',
-        demandOption: true,
-        completionKey: 'enabledPlugins'
-      });
+    yargsCmd.positional('invoke_name', {
+      describe: "current 'invoke_name' of plugin to disable",
+      type: 'string',
+      demandOption: true,
+      completionKey: 'enabledPlugins',
+    });
   },
   handler: async (args) => {
     if (!args.manager || !args.configResolver) {
-      logger.fatal('FATAL ERROR: CollectionsManager or ConfigResolver instance not found in CLI arguments.');
+      logger.fatal(
+        'FATAL ERROR: CollectionsManager or ConfigResolver instance not found in CLI arguments.',
+      );
       process.exit(1);
     }
     const manager = args.manager;
@@ -82,15 +83,25 @@ module.exports = {
     try {
       // First check if it's a user plugin
       await configResolver._initializeResolverIfNeeded();
-      const pluginRegistryEntry = configResolver.mergedPluginRegistry[args.invoke_name];
+      const pluginRegistryEntry =
+        configResolver.mergedPluginRegistry[args.invoke_name];
 
-      if (pluginRegistryEntry && pluginRegistryEntry.sourceType && pluginRegistryEntry.sourceType.startsWith('User (')) {
+      if (
+        pluginRegistryEntry &&
+        pluginRegistryEntry.sourceType &&
+        pluginRegistryEntry.sourceType.startsWith('User (')
+      ) {
         // Handle user plugin disable using unified architecture
-        const disabledUserPlugin = await disableUserPlugin(args.invoke_name, manager);
+        const disabledUserPlugin = await disableUserPlugin(
+          args.invoke_name,
+          manager,
+        );
         if (disabledUserPlugin) {
           logger.success('Plugin disabled successfully');
         } else {
-          logger.warn('Plugin was not found in user plugins manifest or already disabled');
+          logger.warn(
+            'Plugin was not found in user plugins manifest or already disabled',
+          );
         }
       } else {
         // Handle CM-managed plugin disable
@@ -100,11 +111,13 @@ module.exports = {
       try {
         execSync(`node "${cliPath}" _tab_cache`);
       } catch {
-        logger.warn('WARN: Failed to regenerate completion cache. This is not a fatal error.');
+        logger.warn(
+          'WARN: Failed to regenerate completion cache. This is not a fatal error.',
+        );
       }
     } catch (error) {
       logger.error(`\nERROR in 'plugin disable' command: ${error.message}`);
       process.exit(1);
     }
-  }
+  },
 };

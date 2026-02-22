@@ -13,7 +13,7 @@ const PLUGINS_DIR = 'plugins';
 
 const REQUIRED_DOCS = [
   path.join(DOCS_DIR, 'ai', 'interaction-spec.md'),
-  path.join(DOCS_DIR, 'refs', 'plugin-contract.md')
+  path.join(DOCS_DIR, 'refs', 'plugin-contract.md'),
 ];
 
 const REQUIRED_PLUGIN_FILES = [
@@ -21,7 +21,7 @@ const REQUIRED_PLUGIN_FILES = [
   '{plugin}.css',
   '{plugin}-example.md',
   'index.js',
-  'README.md'
+  'README.md',
 ];
 
 // --- Parse CLI args ---
@@ -57,7 +57,7 @@ function docBreak(filePath, width = 65) {
   const label = `[ ${filePath} ]`;
   const padLen = Math.max(0, Math.floor((width - label.length) / 2));
   const pad = '='.repeat(padLen);
-  const line = `${pad} ${label} ${pad}${(label.length + padLen * 2 + 2 < width ? '=' : '')}`;
+  const line = `${pad} ${label} ${pad}${label.length + padLen * 2 + 2 < width ? '=' : ''}`;
   return `${line}\n`;
 }
 
@@ -86,8 +86,11 @@ function readFileOrWarn(filePath) {
     pluginDir = path.join(PLUGINS_DIR, 'default');
     pluginName = 'default';
   } else {
-    let possiblePath = path.resolve(pluginArg);
-    if (fs.existsSync(possiblePath) && fs.lstatSync(possiblePath).isDirectory()) {
+    const possiblePath = path.resolve(pluginArg);
+    if (
+      fs.existsSync(possiblePath) &&
+      fs.lstatSync(possiblePath).isDirectory()
+    ) {
       pluginDir = possiblePath;
       pluginName = path.basename(pluginDir);
     } else {
@@ -97,7 +100,9 @@ function readFileOrWarn(filePath) {
   }
 
   if (!fs.existsSync(pluginDir) || !fs.lstatSync(pluginDir).isDirectory()) {
-    logger.error(`Plugin directory not found: ${pluginDir}`, { context: 'AIContext' });
+    logger.error(`Plugin directory not found: ${pluginDir}`, {
+      context: 'AIContext',
+    });
     process.exit(1);
   }
 
@@ -121,4 +126,3 @@ function readFileOrWarn(filePath) {
   const estTokens = Math.ceil(output.length / 4);
   logger.detail(`Estimated tokens in output: ${estTokens}`);
 })();
-

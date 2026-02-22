@@ -20,7 +20,11 @@ const {
   checkFile,
 } = require(testFileHelpersPath);
 
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', 'recipe-book-e2e');
+const TEST_OUTPUT_DIR = path.join(
+  os.tmpdir(),
+  'oshea-test-output',
+  'recipe-book-e2e',
+);
 const HUGO_EXAMPLE_PATH = path.join(fixturesDir, 'hugo-example');
 
 describe('plugins/recipe-book (in-situ Self-Activation Test) .contract/test/recipe-book-e2e.test.js', function () {
@@ -47,7 +51,11 @@ describe('plugins/recipe-book (in-situ Self-Activation Test) .contract/test/reci
       '--no-open',
     ];
 
-    const { success, stdout, stderr } = await runCliCommand(commandArgs, cliPath, projectRoot);
+    const { success, stdout, stderr } = await runCliCommand(
+      commandArgs,
+      cliPath,
+      projectRoot,
+    );
 
     if (!success) {
       logger.error('CLI command failed. STDOUT:', stdout);

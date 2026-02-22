@@ -12,17 +12,19 @@ const {
 
 const logger = require(loggerPath);
 
-const {
-  runCliCommand,
-  setupTestDirectory,
-  cleanupTestDirectory,
-} = require(testFileHelpersPath);
+const { runCliCommand, setupTestDirectory, cleanupTestDirectory } = require(
+  testFileHelpersPath,
+);
 
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', 'recipe-plugin-e2e');
+const TEST_OUTPUT_DIR = path.join(
+  os.tmpdir(),
+  'oshea-test-output',
+  'recipe-plugin-e2e',
+);
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'recipe-example.md');
 
-describe('plugins/recipe (in-situ Self-Activation Test) .contract/test/recipe-e2e.test.js', function() {
+describe('plugins/recipe (in-situ Self-Activation Test) .contract/test/recipe-e2e.test.js', function () {
   this.timeout(15000);
 
   before(async () => {
@@ -37,7 +39,7 @@ describe('plugins/recipe (in-situ Self-Activation Test) .contract/test/recipe-e2
     const { success, stdout, stderr } = await runCliCommand(
       ['convert', EXAMPLE_MD, '--outdir', TEST_OUTPUT_DIR, '--no-open'],
       cliPath,
-      projectRoot
+      projectRoot,
     );
 
     if (!success) {

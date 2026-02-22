@@ -4,19 +4,23 @@ module.exports = async function disablePlugin(dependencies, invokeName) {
 
   logger.debug('Attempting to disable plugin', {
     context: 'DisablePluginCommand',
-    invokeName: invokeName
+    invokeName: invokeName,
   });
 
   const manifest = await this._readEnabledManifest();
-  const pluginIndex = manifest.enabled_plugins.findIndex(p => p.invoke_name === invokeName);
+  const pluginIndex = manifest.enabled_plugins.findIndex(
+    (p) => p.invoke_name === invokeName,
+  );
 
   if (pluginIndex === -1) {
     logger.error('Plugin not found in enabled manifest', {
       context: 'DisablePluginCommand',
       invokeName: invokeName,
-      error: `Plugin with invoke_name "${invokeName}" not found in the enabled manifest.`
+      error: `Plugin with invoke_name "${invokeName}" not found in the enabled manifest.`,
     });
-    throw new Error(`Plugin with invoke_name "${invokeName}" not found in the enabled manifest.`);
+    throw new Error(
+      `Plugin with invoke_name "${invokeName}" not found in the enabled manifest.`,
+    );
   }
 
   // Remove the plugin from the array
@@ -25,14 +29,14 @@ module.exports = async function disablePlugin(dependencies, invokeName) {
     context: 'DisablePluginCommand',
     invokeName: invokeName,
     collectionName: disabledPlugin.collection_name,
-    pluginId: disabledPlugin.plugin_id
+    pluginId: disabledPlugin.plugin_id,
   });
 
   await this._writeEnabledManifest(manifest);
 
   logger.success('Plugin disabled successfully', {
     context: 'DisablePluginCommand',
-    invokeName: invokeName
+    invokeName: invokeName,
   });
 
   return { success: true, message: `Plugin "${invokeName}" disabled.` };

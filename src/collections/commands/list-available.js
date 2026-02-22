@@ -1,10 +1,25 @@
 // src/collections/commands/list-available.js
 
-async function _findPluginsInCollectionDir(dependencies, collectionPath, collectionName, _readCollectionMetadataFunc) {
-  const { fss, fs, path, yaml, collectionsMetadataFilename, collectionsUserPluginsDirname } = dependencies;
+async function _findPluginsInCollectionDir(
+  dependencies,
+  collectionPath,
+  collectionName,
+  _readCollectionMetadataFunc,
+) {
+  const {
+    fss,
+    fs,
+    path,
+    yaml,
+    collectionsMetadataFilename,
+    collectionsUserPluginsDirname,
+  } = dependencies;
 
   const availablePlugins = [];
-  if (!fss.existsSync(collectionPath) || !fss.lstatSync(collectionPath).isDirectory()) {
+  if (
+    !fss.existsSync(collectionPath) ||
+    !fss.lstatSync(collectionPath).isDirectory()
+  ) {
     // No logger call here, as it's an internal helper and the calling function
     // is expected to handle the outer level logging for non-existent paths.
     return [];
@@ -14,19 +29,32 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
   for (const pluginDir of pluginDirs) {
     if (pluginDir.isDirectory()) {
       const pluginId = pluginDir.name;
-      if (pluginId === '.git' || pluginId === collectionsMetadataFilename) continue;
+      if (pluginId === '.git' || pluginId === collectionsMetadataFilename)
+        continue;
 
       const pluginItselfPath = path.join(collectionPath, pluginId);
       let actualConfigPath = '';
       let foundConfig = false;
 
-      const standardConfigPath = path.join(pluginItselfPath, `${pluginId}.config.yaml`);
-      const alternativeYamlPath = path.join(pluginItselfPath, `${pluginId}.yaml`);
+      const standardConfigPath = path.join(
+        pluginItselfPath,
+        `${pluginId}.config.yaml`,
+      );
+      const alternativeYamlPath = path.join(
+        pluginItselfPath,
+        `${pluginId}.yaml`,
+      );
 
-      if (fss.existsSync(standardConfigPath) && fss.lstatSync(standardConfigPath).isFile()) {
+      if (
+        fss.existsSync(standardConfigPath) &&
+        fss.lstatSync(standardConfigPath).isFile()
+      ) {
         actualConfigPath = standardConfigPath;
         foundConfig = true;
-      } else if (fss.existsSync(alternativeYamlPath) && fss.lstatSync(alternativeYamlPath).isFile()) {
+      } else if (
+        fss.existsSync(alternativeYamlPath) &&
+        fss.lstatSync(alternativeYamlPath).isFile()
+      ) {
         actualConfigPath = alternativeYamlPath;
         foundConfig = true;
       }
@@ -36,13 +64,14 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
           collection: collectionName,
           plugin_id: pluginId,
           config_path: path.resolve(actualConfigPath),
-          base_path: path.resolve(pluginItselfPath)
+          base_path: path.resolve(pluginItselfPath),
         };
 
         try {
           const configFileContent = await fs.readFile(actualConfigPath, 'utf8');
           const pluginConfigData = yaml.load(configFileContent);
-          pluginInfoBase.description = pluginConfigData.description || 'Plugin description not available.';
+          pluginInfoBase.description =
+            pluginConfigData.description || 'Plugin description not available.';
         } catch (e) {
           pluginInfoBase.description = `Error loading plugin config: ${e.message.substring(0, 50)}...`;
           // No logger call here; this is an internal detail property being set.
@@ -50,17 +79,22 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
           // or a higher level is responsible for reporting these details to the user.
         }
 
-        if (collectionName === collectionsUserPluginsDirname && _readCollectionMetadataFunc) {
+        if (
+          collectionName === collectionsUserPluginsDirname &&
+          _readCollectionMetadataFunc
+        ) {
           pluginInfoBase.is_singleton = true;
           try {
-            const metadata = await _readCollectionMetadataFunc(path.join(collectionsUserPluginsDirname, pluginId));
+            const metadata = await _readCollectionMetadataFunc(
+              path.join(collectionsUserPluginsDirname, pluginId),
+            );
             if (metadata) {
               pluginInfoBase.original_source = metadata.source;
               pluginInfoBase.added_on = metadata.added_on;
               pluginInfoBase.updated_on = metadata.updated_on;
             }
           } catch (metaError) {
-            pluginInfoBase.metadata_error = `Metadata unreadable: ${metaError.message.substring(0,30)}...`;
+            pluginInfoBase.metadata_error = `Metadata unreadable: ${metaError.message.substring(0, 30)}...`;
             // No logger call here; this is an internal detail property being set.
           }
         }
@@ -76,7 +110,10 @@ async function _findPluginsInCollectionDir(dependencies, collectionPath, collect
   return availablePlugins;
 }
 
-module.exports = async function listAvailablePlugins(dependencies, collectionNameFilter = null) {
+module.exports = async function listAvailablePlugins(
+  dependencies,
+  collectionNameFilter = null,
+) {
   const { fss, fs, path } = dependencies;
   // No logger calls here, as this function is usually called by other commands
   // like 'enable-all' or 'list' that handle the user-facing logging.
@@ -89,7 +126,9 @@ module.exports = async function listAvailablePlugins(dependencies, collectionNam
 
   // Look for collections in collections/ subdirectory or directly if collRoot ends with 'collections'
   // This matches the same logic used in other collection commands like list.js
-  const collectionsPath = this.collRoot.endsWith('collections') ? this.collRoot : path.join(this.collRoot, 'collections');
+  const collectionsPath = this.collRoot.endsWith('collections')
+    ? this.collRoot
+    : path.join(this.collRoot, 'collections');
 
   if (!fss.existsSync(collectionsPath)) {
     return [];
@@ -98,24 +137,42 @@ module.exports = async function listAvailablePlugins(dependencies, collectionNam
   const readMetadataFunc = this._readCollectionMetadata.bind(this);
 
   if (collectionNameFilter) {
-    const singleCollectionPath = path.join(collectionsPath, collectionNameFilter);
-    if (!fss.existsSync(singleCollectionPath) || !fss.lstatSync(singleCollectionPath).isDirectory()) {
+    const singleCollectionPath = path.join(
+      collectionsPath,
+      collectionNameFilter,
+    );
+    if (
+      !fss.existsSync(singleCollectionPath) ||
+      !fss.lstatSync(singleCollectionPath).isDirectory()
+    ) {
       return [];
     }
-    allAvailablePlugins = await _findPluginsInCollectionDir(dependencies, singleCollectionPath, collectionNameFilter, readMetadataFunc);
+    allAvailablePlugins = await _findPluginsInCollectionDir(
+      dependencies,
+      singleCollectionPath,
+      collectionNameFilter,
+      readMetadataFunc,
+    );
   } else {
-    const collectionDirs = (await fs.readdir(collectionsPath, { withFileTypes: true }))
-      .filter(dirent => dirent.isDirectory())
-      .map(dirent => dirent.name);
+    const collectionDirs = (
+      await fs.readdir(collectionsPath, { withFileTypes: true })
+    )
+      .filter((dirent) => dirent.isDirectory())
+      .map((dirent) => dirent.name);
 
     for (const collectionName of collectionDirs) {
       const collectionPath = path.join(collectionsPath, collectionName);
-      const pluginsInCollection = await _findPluginsInCollectionDir(dependencies, collectionPath, collectionName, readMetadataFunc);
+      const pluginsInCollection = await _findPluginsInCollectionDir(
+        dependencies,
+        collectionPath,
+        collectionName,
+        readMetadataFunc,
+      );
       allAvailablePlugins.push(...pluginsInCollection);
     }
   }
 
-  allAvailablePlugins.sort((a,b) => {
+  allAvailablePlugins.sort((a, b) => {
     const collA = a.collection.toLowerCase();
     const collB = b.collection.toLowerCase();
     if (collA < collB) return -1;

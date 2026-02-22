@@ -4,19 +4,24 @@
 /* ('valid-collection-plugin-2.css') will be replaced with '<new-plugin-name>.css'. */
 
 body {
-    font-family: sans-serif;
-    line-height: 1.5;
-    margin: 1in; /* A common default margin */
+  font-family: sans-serif;
+  line-height: 1.5;
+  margin: 1in; /* A common default margin */
 }
 
-h1, h2, h3, h4, h5, h6 {
-    margin-top: 1.2em;
-    margin-bottom: 0.5em;
-    line-height: 1.2;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
 }
 
 p {
-    margin-bottom: 0.8em;
+  margin-bottom: 0.8em;
 }
 
 /* Add more specific styles for your new 'valid-collection-plugin-2' plugin below */

@@ -1,12 +1,7 @@
 // test/runners/linting/docs-linting.manifest.js
 const fs = require('fs-extra');
 const path = require('path');
-const {
-  postmanPath,
-  librarianPath,
-  janitorPath,
-  yamlPath
-} = require('@paths');
+const { postmanPath, librarianPath, janitorPath, yamlPath } = require('@paths');
 
 module.exports = [
   {
@@ -14,12 +9,17 @@ module.exports = [
     scriptPath: postmanPath,
     sandboxPrefix: 'docs-postman-',
     setup: async (sandboxDir) => {
-      await fs.writeFile(path.join(sandboxDir, 'test-doc.md'), '[broken](./non-existent.md)');
+      await fs.writeFile(
+        path.join(sandboxDir, 'test-doc.md'),
+        '[broken](./non-existent.md)',
+      );
     },
     args: (sandboxDir) => ['test-doc.md'],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(1);
-      expect(stdout).to.match(/orphan reference: '\.\/non-existent\.md' not found/i);
+      expect(stdout).to.match(
+        /orphan reference: '\.\/non-existent\.md' not found/i,
+      );
       expect(stdout).to.match(/orphan-link/);
     },
   },
@@ -28,7 +28,10 @@ module.exports = [
     scriptPath: janitorPath,
     sandboxPrefix: 'docs-janitor-',
     setup: async (sandboxDir) => {
-      await fs.writeFile(path.join(sandboxDir, 'bad-file.md'), 'This has a forbidden emoji: ❌'); // lint-skip-line janitor
+      await fs.writeFile(
+        path.join(sandboxDir, 'bad-file.md'),
+        'This has a forbidden emoji: ❌',
+      ); // lint-skip-line janitor
     },
     args: (sandboxDir) => [sandboxDir],
     assert: async ({ exitCode, stdout }) => {
@@ -37,13 +40,17 @@ module.exports = [
     },
   },
   {
-    describe: 'M.0.2.3 librarian linter should warn for dummy .js not listed in local scripts/index.md',
+    describe:
+      'M.0.2.3 librarian linter should warn for dummy .js not listed in local scripts/index.md',
     scriptPath: librarianPath,
     sandboxPrefix: 'docs-librarian-dummy-',
     setup: async (sandboxDir) => {
       const scriptsDir = path.join(sandboxDir, 'scripts');
       await fs.mkdir(scriptsDir, { recursive: true });
-      await fs.writeFile(path.join(scriptsDir, 'dummy.js'), '// not yet indexed!\n');
+      await fs.writeFile(
+        path.join(scriptsDir, 'dummy.js'),
+        '// not yet indexed!\n',
+      );
       await fs.writeFile(
         path.join(scriptsDir, 'index.md'),
         [
@@ -52,7 +59,7 @@ module.exports = [
           '<!-- uncategorized-start -->',
           // blank section: dummy.js is missing
           '<!-- uncategorized-end -->',
-        ].join('\n')
+        ].join('\n'),
       );
     },
     //args: (sandboxDir) => ['--group=scripts'],
@@ -64,24 +71,30 @@ module.exports = [
     },
   },
   {
-    describe: 'M.0.2.4 yaml linter should reorder fields and detect formatting issues',
+    describe:
+      'M.0.2.4 yaml linter should reorder fields and detect formatting issues',
     scriptPath: yamlPath,
     sandboxPrefix: 'docs-yaml-',
     setup: async (sandboxDir) => {
-      await fs.writeFile(path.join(sandboxDir, 'test.yaml'), [
-        '# Test YAML file',
-        'database:',
-        '  host: localhost',
-        'config:',
-        '  env: development',
-        'api:',
-        '  timeout: 30'
-      ].join('\n'));
+      await fs.writeFile(
+        path.join(sandboxDir, 'test.yaml'),
+        [
+          '# Test YAML file',
+          'database:',
+          '  host: localhost',
+          'config:',
+          '  env: development',
+          'api:',
+          '  timeout: 30',
+        ].join('\n'),
+      );
     },
     args: (sandboxDir) => [path.join(sandboxDir, 'test.yaml')],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(0);
-      expect(stdout).to.match(/YAML field ordering or formatting needs correction/i);
+      expect(stdout).to.match(
+        /YAML field ordering or formatting needs correction/i,
+      );
       expect(stdout).to.match(/yaml-format/);
     },
   },

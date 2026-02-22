@@ -21,14 +21,14 @@ let debugMode = false;
 
 // Logger formatting configuration
 const loggerConfig = {
-  showContext: true,      // Show context in formatted output
-  showTimestamp: false,   // Show timestamp in formatted output
+  showContext: true, // Show context in formatted output
+  showTimestamp: false, // Show timestamp in formatted output
   contextStyle: 'prefix', // 'prefix', 'suffix', 'none'
   // Enhanced debugging features
-  showCaller: false,      // Show file:line caller info
-  showStack: false,       // Show stack traces for errors
-  enrichErrors: false,    // Auto-categorize errors and add hints
-  stackDepth: 3           // Number of stack frames to show
+  showCaller: false, // Show file:line caller info
+  showStack: false, // Show stack traces for errors
+  enrichErrors: false, // Auto-categorize errors and add hints
+  stackDepth: 3, // Number of stack frames to show
 };
 
 // Error categorization is now handled in logger-enhancer.js with built-in patterns
@@ -71,7 +71,11 @@ function logger(message, options = {}) {
   meta.config = loggerConfig;
 
   // Apply enhanced debugging if any enhancement features are enabled
-  if (loggerConfig.showCaller || loggerConfig.showStack || loggerConfig.enrichErrors) {
+  if (
+    loggerConfig.showCaller ||
+    loggerConfig.showStack ||
+    loggerConfig.enrichErrors
+  ) {
     const enhanced = enhanceMessage(message, options, level, loggerConfig);
     Object.assign(meta, enhanced);
   }
@@ -95,7 +99,7 @@ function logger(message, options = {}) {
         type: 'lint-output',
         data: message,
         ...meta,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
       fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
       return;
@@ -120,14 +124,20 @@ function logger(message, options = {}) {
 
 // Convenience aliases for each level (backward compatibility)
 // Now support context: logger.info('message', { context: 'MyContext' })
-const info      = (msg, options = {}) => logger(msg, { ...options, level: 'info' });
-const warn      = (msg, options = {}) => logger(msg, { ...options, level: 'warn' });
-const error     = (msg, options = {}) => logger(msg, { ...options, level: 'error' });
-const success   = (msg, options = {}) => logger(msg, { ...options, level: 'success' });
-const detail    = (msg, options = {}) => logger(msg, { ...options, level: 'detail' });
-const fatal     = (msg, options = {}) => logger(msg, { ...options, level: 'fatal' });
-const debug     = (msg, options = {}) => logger(msg, { ...options, level: 'debug' });
-const validation= (msg, options = {}) => logger(msg, { ...options, level: 'validation' });
+const info = (msg, options = {}) => logger(msg, { ...options, level: 'info' });
+const warn = (msg, options = {}) => logger(msg, { ...options, level: 'warn' });
+const error = (msg, options = {}) =>
+  logger(msg, { ...options, level: 'error' });
+const success = (msg, options = {}) =>
+  logger(msg, { ...options, level: 'success' });
+const detail = (msg, options = {}) =>
+  logger(msg, { ...options, level: 'detail' });
+const fatal = (msg, options = {}) =>
+  logger(msg, { ...options, level: 'fatal' });
+const debug = (msg, options = {}) =>
+  logger(msg, { ...options, level: 'debug' });
+const validation = (msg, options = {}) =>
+  logger(msg, { ...options, level: 'validation' });
 
 // writeFunction aliases removed - all migrated to { format: 'inline' } pattern
 
@@ -139,16 +149,24 @@ function formatLint(structuredData, meta = {}) {
 // Convenience method for pre-configured loggers with context
 function createLoggerFor(context) {
   return {
-    info: (msg, options = {}) => logger(msg, { ...options, level: 'info', context }),
-    warn: (msg, options = {}) => logger(msg, { ...options, level: 'warn', context }),
-    error: (msg, options = {}) => logger(msg, { ...options, level: 'error', context }),
-    success: (msg, options = {}) => logger(msg, { ...options, level: 'success', context }),
-    detail: (msg, options = {}) => logger(msg, { ...options, level: 'detail', context }),
-    fatal: (msg, options = {}) => logger(msg, { ...options, level: 'fatal', context }),
-    debug: (msg, options = {}) => logger(msg, { ...options, level: 'debug', context }),
-    validation: (msg, options = {}) => logger(msg, { ...options, level: 'validation', context }),
+    info: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'info', context }),
+    warn: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'warn', context }),
+    error: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'error', context }),
+    success: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'success', context }),
+    detail: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'detail', context }),
+    fatal: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'fatal', context }),
+    debug: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'debug', context }),
+    validation: (msg, options = {}) =>
+      logger(msg, { ...options, level: 'validation', context }),
     // Main logger with context pre-filled
-    log: (msg, options = {}) => logger(msg, { ...options, context })
+    log: (msg, options = {}) => logger(msg, { ...options, context }),
   };
 }
 
@@ -172,5 +190,5 @@ module.exports = {
   debug,
   validation,
   // Legacy specialized formatters (backward compatibility)
-  formatLint
+  formatLint,
 };

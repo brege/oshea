@@ -3,7 +3,7 @@ const {
   collectionsAddCommandPath,
   collectionsListCommandPath,
   collectionsRemoveCommandPath,
-  collectionsUpdateCommandPath
+  collectionsUpdateCommandPath,
 } = require('@paths');
 const addCommand = require(collectionsAddCommandPath);
 const listCommand = require(collectionsListCommandPath);
@@ -22,5 +22,5 @@ module.exports = {
       .demandCommand(1, 'A subcommand (add, list, remove, update) is required.')
       .strict();
   },
-  handler: (argv) => {}
+  handler: (argv) => {},
 };

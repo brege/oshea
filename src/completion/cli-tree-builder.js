@@ -8,45 +8,55 @@ const logger = require(loggerPath);
 
 // --- Dynamic Proxy Yargs Stub ---
 function createYargsStub() {
-  const stub = new Proxy({
-    options: {},
-    positionals: [],
-    option(key, opt) {
-      this.options[key] = {
-        ...opt,
-        completionKey: opt.completionKey,
-        choices: opt.choices
-      };
-      return stub;
+  const stub = new Proxy(
+    {
+      options: {},
+      positionals: [],
+      option(key, opt) {
+        this.options[key] = {
+          ...opt,
+          completionKey: opt.completionKey,
+          choices: opt.choices,
+        };
+        return stub;
+      },
+      positional(key, opt) {
+        this.positionals.push({
+          key,
+          ...opt,
+          completionKey: opt.completionKey,
+          choices: opt.choices,
+        });
+        return stub;
+      },
     },
-    positional(key, opt) {
-      this.positionals.push({
-        key,
-        ...opt,
-        completionKey: opt.completionKey,
-        choices: opt.choices
-      });
-      return stub;
-    }
-  }, {
-    get(target, prop) {
-      if (prop in target) return target[prop];
-      const yargsChainableMethods = [
-        'command', 'demandCommand', 'epilog', 'help', 'version',
-        'alias', 'strictCommands', 'usage', 'middleware',
-        'completion', 'fail'
-      ];
-      if (yargsChainableMethods.includes(prop)) {
+    {
+      get(target, prop) {
+        if (prop in target) return target[prop];
+        const yargsChainableMethods = [
+          'command',
+          'demandCommand',
+          'epilog',
+          'help',
+          'version',
+          'alias',
+          'strictCommands',
+          'usage',
+          'middleware',
+          'completion',
+          'fail',
+        ];
+        if (yargsChainableMethods.includes(prop)) {
+          return (...args) => stub;
+        }
+        if (prop === 'argv') return {};
+        if (prop === 'showHelp') return () => {};
         return (...args) => stub;
-      }
-      if (prop === 'argv') return {};
-      if (prop === 'showHelp') return () => {};
-      return (...args) => stub;
-    }
-  });
+      },
+    },
+  );
   return stub;
 }
-
 
 // --- Command Tree Discovery ---
 function parseBaseCommand(commandDef) {
@@ -60,9 +70,14 @@ function discoverCommandTree(dir, prefixParts = []) {
   const entries = fs.readdirSync(dir);
 
   if (prefixParts.length === 0) {
-    let globalOptionsList = [
-      'config', 'factory-defaults', 'coll-root',
-      'help', 'version', 'h', 'v'
+    const globalOptionsList = [
+      'config',
+      'factory-defaults',
+      'coll-root',
+      'help',
+      'version',
+      'h',
+      'v',
     ];
     let defaultCommandPositionals = [];
     let defaultCommandOptions = [];
@@ -73,36 +88,42 @@ function discoverCommandTree(dir, prefixParts = []) {
       if (typeof convertCommandModule.defaultCommand.builder === 'function') {
         convertCommandModule.defaultCommand.builder(defaultCommandStub);
       }
-      defaultCommandPositionals =
-        (defaultCommandStub.positionals || []).map(p => ({
+      defaultCommandPositionals = (defaultCommandStub.positionals || []).map(
+        (p) => ({
           key: p.key,
           completionKey: p.completionKey,
-          choices: p.choices
-        }));
-      defaultCommandOptions =
-        Object.keys(defaultCommandStub.options || {}).map(optKey => ({
+          choices: p.choices,
+        }),
+      );
+      defaultCommandOptions = Object.keys(defaultCommandStub.options || {}).map(
+        (optKey) => ({
           name: optKey,
           completionKey: defaultCommandStub.options[optKey].completionKey,
-          choices: defaultCommandStub.options[optKey].choices
-        }));
+          choices: defaultCommandStub.options[optKey].choices,
+        }),
+      );
     } catch (builderError) {
       logger.warn('Could not extract default command builder info', {
         context: 'CLITreeBuilder',
         node: '$0',
-        error: builderError.message
+        error: builderError.message,
       });
     }
 
-    const globalOptionsFormatted = globalOptionsList.map(name => ({name}));
-    const allOptionsFor$0 = [...new Set([...globalOptionsFormatted, ...defaultCommandOptions])];
-    const finalOptionsFor$0 = allOptionsFor$0.sort((a, b) => a.name.localeCompare(b.name));
+    const globalOptionsFormatted = globalOptionsList.map((name) => ({ name }));
+    const allOptionsFor$0 = [
+      ...new Set([...globalOptionsFormatted, ...defaultCommandOptions]),
+    ];
+    const finalOptionsFor$0 = allOptionsFor$0.sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
     const finalPositionalsFor$0 = [...new Set([...defaultCommandPositionals])];
 
     nodesMap.set('$0', {
       name: '$0',
       options: finalOptionsFor$0,
       positionals: finalPositionalsFor$0,
-      children: []
+      children: [],
     });
   }
 
@@ -114,7 +135,7 @@ function discoverCommandTree(dir, prefixParts = []) {
         name: groupName,
         children: discoverCommandTree(fullPath, [...prefixParts, groupName]),
         options: [],
-        positionals: []
+        positionals: [],
       });
     } else if (entry.endsWith('.command.js')) {
       const commandModule = require(fullPath);
@@ -130,41 +151,43 @@ function discoverCommandTree(dir, prefixParts = []) {
           try {
             cmdObj.builder(yargsStub);
           } catch {
-          // logger.warn(`Could not extract command builder info for ${commandName} node: ${e.message}`, { module: 'src/completion/cli-tree-builder.js' });
+            // logger.warn(`Could not extract command builder info for ${commandName} node: ${e.message}`, { module: 'src/completion/cli-tree-builder.js' });
           }
         }
-        const options =
-          Object.keys(yargsStub.options || {}).map(optKey => ({
-            name: optKey,
-            completionKey: yargsStub.options[optKey].completionKey,
-            choices: yargsStub.options[optKey].choices
-          }));
-        const positionals =
-          (yargsStub.positionals || []).map(p => ({
-            key: p.key,
-            completionKey: p.completionKey,
-            choices: p.choices
-          }));
+        const options = Object.keys(yargsStub.options || {}).map((optKey) => ({
+          name: optKey,
+          completionKey: yargsStub.options[optKey].completionKey,
+          choices: yargsStub.options[optKey].choices,
+        }));
+        const positionals = (yargsStub.positionals || []).map((p) => ({
+          key: p.key,
+          completionKey: p.completionKey,
+          choices: p.choices,
+        }));
 
         let children = [];
-        if (/<subcommand>/.test(commandDefinition) &&
-            fs.existsSync(path.join(dir, commandName))) {
-          children = discoverCommandTree(
-            path.join(dir, commandName),
-            [...prefixParts, commandName]
-          );
+        if (
+          /<subcommand>/.test(commandDefinition) &&
+          fs.existsSync(path.join(dir, commandName))
+        ) {
+          children = discoverCommandTree(path.join(dir, commandName), [
+            ...prefixParts,
+            commandName,
+          ]);
         }
 
         if (nodesMap.has(commandName)) {
           const existingNode = nodesMap.get(commandName);
           const mergedOptions = new Map();
-          ([...existingNode.options, ...options]).forEach(opt =>
-            mergedOptions.set(opt.name, opt));
+          [...existingNode.options, ...options].forEach((opt) =>
+            mergedOptions.set(opt.name, opt),
+          );
           existingNode.options = Array.from(mergedOptions.values());
 
           const mergedPositionals = new Map();
-          ([...existingNode.positionals, ...positionals]).forEach(pos =>
-            mergedPositionals.set(pos.key, pos));
+          [...existingNode.positionals, ...positionals].forEach((pos) =>
+            mergedPositionals.set(pos.key, pos),
+          );
           existingNode.positionals = Array.from(mergedPositionals.values());
 
           if (children.length > 0 && existingNode.children.length === 0) {
@@ -175,19 +198,18 @@ function discoverCommandTree(dir, prefixParts = []) {
             name: commandName,
             options,
             positionals,
-            children
+            children,
           });
         }
       };
 
-      const isMultiCommandModule = (
+      const isMultiCommandModule =
         typeof commandModule === 'object' &&
         !Array.isArray(commandModule) &&
         Object.keys(commandModule).length > 0 &&
-        Object.values(commandModule).every(v =>
-          v && typeof v === 'object' && 'command' in v
-        )
-      );
+        Object.values(commandModule).every(
+          (v) => v && typeof v === 'object' && 'command' in v,
+        );
 
       if (isMultiCommandModule) {
         for (const cmdObj of Object.values(commandModule)) {

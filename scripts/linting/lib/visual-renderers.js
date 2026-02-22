@@ -4,11 +4,15 @@ require('module-alias/register');
 const { dataAdaptersPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-
-function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} }, formatter = 'stylish') {
+function renderLintOutput(
+  { issues = [], summary = {}, results = [], flags = {} },
+  formatter = 'stylish',
+) {
   // If called by harness but in debug mode, allow debug output to flow first
   if (process.env.CALLED_BY_HARNESS && !flags.debug) {
-    logger.info(JSON.stringify({ issues, summary, results }), { format: 'raw' });
+    logger.info(JSON.stringify({ issues, summary, results }), {
+      format: 'raw',
+    });
     return;
   } else if (process.env.CALLED_BY_HARNESS && flags.debug) {
     // In debug mode: show formatted output AND return JSON for harness
@@ -17,13 +21,17 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
 
   // If user explicitly requested JSON, output formatted JSON
   if (flags.json) {
-    logger.info(`${JSON.stringify({ issues, summary, results }, null, 2)}\n`, { format: 'inline' });
+    logger.info(`${JSON.stringify({ issues, summary, results }, null, 2)}\n`, {
+      format: 'inline',
+    });
     return;
   }
 
   if (flags.quiet && summary.errorCount === 0) return;
 
-  const { adaptRawIssuesToEslintFormat, transformToStructuredData } = require(dataAdaptersPath);
+  const { adaptRawIssuesToEslintFormat, transformToStructuredData } = require(
+    dataAdaptersPath,
+  );
   const { success } = require(loggerPath);
 
   const adaptedIssues = adaptRawIssuesToEslintFormat(issues);
@@ -52,10 +60,12 @@ function renderLintOutput({ issues = [], summary = {}, results = [], flags = {} 
 
   // If called by harness in debug mode, output JSON for parsing after debug output
   if (process.env.CALLED_BY_HARNESS && flags.debug) {
-    logger.info(JSON.stringify({ issues, summary, results }), { format: 'raw' });
+    logger.info(JSON.stringify({ issues, summary, results }), {
+      format: 'raw',
+    });
   }
 }
 
 module.exports = {
-  renderLintOutput
+  renderLintOutput,
 };

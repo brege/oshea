@@ -13,7 +13,8 @@ const { discoverCommandTree } = require(cliTreeBuilderPath);
 const COMMANDS_DIR = cliRoot;
 
 function getCachePath() {
-  const xdgCacheHome = process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
+  const xdgCacheHome =
+    process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache');
   const cacheDir = path.join(xdgCacheHome, 'oshea');
   return path.join(cacheDir, 'cli-tree.json');
 }
@@ -27,9 +28,14 @@ function main() {
     fs.mkdirSync(path.dirname(cachePath), { recursive: true });
     fs.writeFileSync(cachePath, JSON.stringify(commandTree, null, 2));
 
-    logger.success(`Completion cache successfully written to: ${cachePath}\n`, { format: 'inline' });
+    logger.success(`Completion cache successfully written to: ${cachePath}\n`, {
+      format: 'inline',
+    });
   } catch (error) {
-    logger.error(`ERROR: Failed to generate completion cache: ${error.message}\n`, { format: 'inline' });
+    logger.error(
+      `ERROR: Failed to generate completion cache: ${error.message}\n`,
+      { format: 'inline' },
+    );
     if (error.stack) {
       logger.error(`${error.stack}\n`, { format: 'inline' });
     }
@@ -40,4 +46,3 @@ function main() {
 if (require.main === module) {
   main();
 }
-

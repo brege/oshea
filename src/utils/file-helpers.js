@@ -14,44 +14,29 @@ const DEFAULT_GLOB_IGNORES = [
 ];
 
 // Directory names to ignore (non-glob)
-const DEFAULT_DIR_IGNORES = [
-  'node_modules',
-  '.git',
-  'assets',
-  '*-devel'
-];
+const DEFAULT_DIR_IGNORES = ['node_modules', '.git', 'assets', '*-devel'];
 
 // Centralized glob patterns for JS files
 const DEFAULT_PATTERNS = ['**/*.{js,mjs}'];
 
 // below i am replacing JSDoc with single-line comments
 
-
-
 // Returns normalized glob patterns based on CLI args or defaults
 function getPatternsFromArgs(argv) {
   if (!argv.length) return DEFAULT_PATTERNS;
-  return argv.map(p =>
-    p.endsWith('/') ? `${p}**/*.{js,mjs}` : p
-  );
+  return argv.map((p) => (p.endsWith('/') ? `${p}**/*.{js,mjs}` : p));
 }
-
-
 
 // Returns the default ignore patterns for glob
 function getDefaultGlobIgnores() {
   return DEFAULT_GLOB_IGNORES;
 }
 
-
-
 // Checks if a string is a glob pattern
 function isGlobPattern(str) {
   // Matches *, ?, [, ], {, }, (, ), !
   return /[*?[\]{}()!]/.test(str);
 }
-
-
 
 // Recursively yields all files matching the filter, skipping ignored directories
 // - if the input is a file, yields only that file (if it matches the filter)
@@ -66,7 +51,9 @@ function* findFiles(inputPath, opts = {}) {
   } catch {
     // Only warn for actual files/dirs, not glob patterns!
     if (!isGlobPattern(inputPath)) {
-      console.warn(`Warning: ${inputPath} does not exist or is not accessible.`);
+      console.warn(
+        `Warning: ${inputPath} does not exist or is not accessible.`,
+      );
     }
     return;
   }
@@ -92,17 +79,17 @@ function* findFiles(inputPath, opts = {}) {
   }
 }
 
-
-
 // Accepts an array of inputs (globs, files, dirs) and returns a flat array of files
 // - expands glob patterns to files
 // - only calls findFiles on real files/dirs
 function findFilesArray(inputs, opts = {}) {
-  let files = [];
+  const files = [];
   for (const input of Array.isArray(inputs) ? inputs : [inputs]) {
     if (isGlobPattern(input)) {
       // Expand glob pattern to files
-      files.push(...glob.sync(input, { nodir: true, ignore: opts.ignores || [] }));
+      files.push(
+        ...glob.sync(input, { nodir: true, ignore: opts.ignores || [] }),
+      );
     } else {
       // Only call findFiles on real files/dirs
       files.push(...Array.from(findFiles(input, opts)));

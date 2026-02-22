@@ -12,7 +12,8 @@ class TreeRenderer {
   render() {
     const visited = new Set();
     this.trees.forEach((tree, index) => {
-      if (tree) this._printNode(tree, visited, '', index === this.trees.length - 1);
+      if (tree)
+        this._printNode(tree, visited, '', index === this.trees.length - 1);
     });
   }
 
@@ -23,14 +24,16 @@ class TreeRenderer {
     const nodeLabel = node.file;
     let varLabel = '';
 
-    if(node.isPreset){
+    if (node.isPreset) {
       varLabel = '(preset)';
-    } else if (node.registryVar){
+    } else if (node.registryVar) {
       varLabel = `(${node.registryVar})`;
     }
 
     if (visited.has(nodeLabel) && !node.isPreset) {
-      logger.detail(`${prefix}${nodeLabel} ${varLabel} (collapsed)\n`, { format: 'inline' });
+      logger.detail(`${prefix}${nodeLabel} ${varLabel} (collapsed)\n`, {
+        format: 'inline',
+      });
       return;
     }
 
@@ -40,7 +43,12 @@ class TreeRenderer {
     if (Array.isArray(node.dependencies)) {
       const newIndent = indent + (isLast ? '    ' : '│   ');
       node.dependencies.forEach((dep, index) => {
-        this._printNode(dep, visited, newIndent, index === node.dependencies.length - 1);
+        this._printNode(
+          dep,
+          visited,
+          newIndent,
+          index === node.dependencies.length - 1,
+        );
       });
     }
   }

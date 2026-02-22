@@ -11,7 +11,7 @@ const {
   collectionsManagerListManifestPath,
   collectionsManagerEnableDisableManifestPath,
   collectionsManagerConstructorManifestPath,
-  collectionsManagerDisableManifestPath
+  collectionsManagerDisableManifestPath,
 } = require('@paths');
 
 const { expect } = require('chai');
@@ -24,7 +24,9 @@ const addManifest = require(collectionsManagerAddManifestPath);
 const removeManifest = require(collectionsManagerRemoveManifestPath);
 const updateManifest = require(collectionsManagerUpdateManifestPath);
 const listManifest = require(collectionsManagerListManifestPath);
-const enableDisableManifest = require(collectionsManagerEnableDisableManifestPath);
+const enableDisableManifest = require(
+  collectionsManagerEnableDisableManifestPath,
+);
 const constructorManifest = require(collectionsManagerConstructorManifestPath);
 const disableManifest = require(collectionsManagerDisableManifestPath);
 
@@ -40,11 +42,11 @@ const allTestCases = [
 
 const FAKE_COLL_ROOT = '/fake/collRoot';
 
-describe(`collections-manager (Subsystem Integration Tests) ${path.relative(projectRoot, collectionsIndexPath)}`, function() {
+describe(`collections-manager (Subsystem Integration Tests) ${path.relative(projectRoot, collectionsIndexPath)}`, () => {
   let mockDependencies;
   let CollectionsManager;
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
 
     mockDependencies = {
@@ -63,8 +65,8 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
       },
       path: {
         join: (...args) => args.join('/'),
-        resolve: p => p.startsWith('/') ? p : `/resolved/${p}`,
-        basename: p => p.split('/').pop(),
+        resolve: (p) => (p.startsWith('/') ? p : `/resolved/${p}`),
+        basename: (p) => p.split('/').pop(),
         sep: '/',
       },
       os: {
@@ -72,7 +74,7 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
         homedir: sinon.stub().returns('/home/user'),
       },
       process: {
-        env: {}
+        env: {},
       },
       cmUtils: {
         deriveCollectionName: sinon.stub(),
@@ -80,19 +82,25 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
       },
       yaml: { load: sinon.stub().returns({}) },
       chalk: {
-        blue: str => str, yellow: str => str, red: str => str,
-        magenta: str => str, green: str => str, underline: str => str,
-        greenBright: str => str, blueBright: str => str, gray: str => str,
-      }
+        blue: (str) => str,
+        yellow: (str) => str,
+        red: (str) => str,
+        magenta: (str) => str,
+        green: (str) => str,
+        underline: (str) => str,
+        greenBright: (str) => str,
+        blueBright: (str) => str,
+        gray: (str) => str,
+      },
     };
 
     const collectionsManagerModule = proxyquire(collectionsIndexPath, {
-      'fs': mockDependencies.fss,
+      fs: mockDependencies.fss,
       'fs/promises': mockDependencies.fs,
       'fs-extra': mockDependencies.fsExtra,
-      'path': mockDependencies.path,
-      'os': mockDependencies.os,
-      'process': mockDependencies.process,
+      path: mockDependencies.path,
+      os: mockDependencies.os,
+      process: mockDependencies.process,
       '@paths': {
         ...require('@paths'),
         loggerPath: testLoggerPath,
@@ -102,11 +110,11 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
     CollectionsManager = collectionsManagerModule;
   });
 
-  afterEach(function() {
+  afterEach(() => {
     sinon.restore();
   });
 
-  allTestCases.forEach(testCase => {
+  allTestCases.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
     const {
       description,
@@ -119,7 +127,7 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
       assertion,
     } = testCase;
 
-    it_(description, async function() {
+    it_(description, async () => {
       const mocks = { mockDependencies };
 
       if (stubs.fss) {
@@ -135,32 +143,45 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
         }
       }
       if (stubs.fs) {
-        if(stubs.fs.readdir && stubs.fs.readdir.resolves)
+        if (stubs.fs.readdir && stubs.fs.readdir.resolves)
           mockDependencies.fs.readdir.resolves(stubs.fs.readdir.resolves);
-        if(stubs.fs.readdir && stubs.fs.readdir.rejects)
-          mockDependencies.fs.readdir.rejects(new Error(stubs.fs.readdir.rejects));
+        if (stubs.fs.readdir && stubs.fs.readdir.rejects)
+          mockDependencies.fs.readdir.rejects(
+            new Error(stubs.fs.readdir.rejects),
+          );
       }
       if (stubs.fsExtra && stubs.fsExtra.rm && stubs.fsExtra.rm.rejects) {
-        mockDependencies.fsExtra.rm.rejects(new Error(stubs.fsExtra.rm.rejects));
+        mockDependencies.fsExtra.rm.rejects(
+          new Error(stubs.fsExtra.rm.rejects),
+        );
       }
       if (stubs.cmUtils && stubs.cmUtils.deriveCollectionName) {
-        mockDependencies.cmUtils.deriveCollectionName.returns(stubs.cmUtils.deriveCollectionName);
+        mockDependencies.cmUtils.deriveCollectionName.returns(
+          stubs.cmUtils.deriveCollectionName,
+        );
       }
       if (stubs.process && stubs.process.env) {
         Object.assign(mockDependencies.process.env, stubs.process.env);
       }
       if (stubs.os) {
-        if (stubs.os.platform) mockDependencies.os.platform.returns(stubs.os.platform.returns);
-        if (stubs.os.homedir) mockDependencies.os.homedir.returns(stubs.os.homedir.returns);
+        if (stubs.os.platform)
+          mockDependencies.os.platform.returns(stubs.os.platform.returns);
+        if (stubs.os.homedir)
+          mockDependencies.os.homedir.returns(stubs.os.homedir.returns);
       }
 
-      const manager = new CollectionsManager({ collRootFromMainConfig: FAKE_COLL_ROOT, ...managerOptions }, mockDependencies);
+      const manager = new CollectionsManager(
+        { collRootFromMainConfig: FAKE_COLL_ROOT, ...managerOptions },
+        mockDependencies,
+      );
 
       if (stubs.internal) {
         for (const method of Object.keys(stubs.internal)) {
           mocks[method] = sinon.stub(manager, method);
-          if (stubs.internal[method].resolves !== undefined) mocks[method].resolves(stubs.internal[method].resolves);
-          if (stubs.internal[method].rejects) mocks[method].rejects(new Error(stubs.internal[method].rejects));
+          if (stubs.internal[method].resolves !== undefined)
+            mocks[method].resolves(stubs.internal[method].resolves);
+          if (stubs.internal[method].rejects)
+            mocks[method].rejects(new Error(stubs.internal[method].rejects));
         }
       }
 
@@ -172,7 +193,7 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
           result = manager;
         }
 
-        if(isNegativeTest) {
+        if (isNegativeTest) {
           throw new Error('Expected method to throw, but it did not.');
         }
 
@@ -193,4 +214,3 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
     });
   });
 });
-

@@ -1,7 +1,6 @@
 // src/collections/cm-utils.js
 const path = require('path');
 
-
 function deriveCollectionName(source) {
   if (!source || typeof source !== 'string') {
     return ''; // Or throw an error, depending on desired strictness
@@ -22,12 +21,13 @@ function deriveCollectionName(source) {
   return sanitized;
 }
 
-
 function toPascalCase(str) {
   if (!str) return '';
-  return str.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
+  return str
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
 }
-
 
 function isValidPluginName(pluginName) {
   if (!pluginName || typeof pluginName !== 'string') {

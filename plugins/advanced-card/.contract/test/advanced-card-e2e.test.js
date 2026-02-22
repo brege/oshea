@@ -21,12 +21,16 @@ const {
 
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
 const PLUGIN_NAME = path.basename(PLUGIN_ROOT);
-const TEST_OUTPUT_DIR = path.join(os.tmpdir(), 'oshea-test-output', `${PLUGIN_NAME}-plugin-e2e`);
+const TEST_OUTPUT_DIR = path.join(
+  os.tmpdir(),
+  'oshea-test-output',
+  `${PLUGIN_NAME}-plugin-e2e`,
+);
 const EXAMPLE_MD = path.join(PLUGIN_ROOT, `${PLUGIN_NAME}-example.md`);
 const EXPECTED_PDF_BASENAME = 'dr-eleanor-vance.pdf';
 const MIN_PDF_SIZE = 1000;
 
-describe('plugins/advanced-card (in-situ Self-Activation Test) .contract/test/advanced-card-e2e.test.js', function() {
+describe('plugins/advanced-card (in-situ Self-Activation Test) .contract/test/advanced-card-e2e.test.js', function () {
   this.timeout(20000);
 
   before(async () => {
@@ -51,9 +55,16 @@ describe('plugins/advanced-card (in-situ Self-Activation Test) .contract/test/ad
     const result = await runCliCommand(commandArgs, cliPath, projectRoot);
 
     if (!result.success) {
-      const errorMessage = result.stderr || (result.error ? result.error.message : 'Unknown error');
-      logger.error('CLI command failed', { context: `${PLUGIN_NAME}-e2e`, error: errorMessage });
-      throw new Error(`CLI command failed for ${PLUGIN_NAME}:\n${errorMessage}`);
+      const errorMessage =
+        result.stderr ||
+        (result.error ? result.error.message : 'Unknown error');
+      logger.error('CLI command failed', {
+        context: `${PLUGIN_NAME}-e2e`,
+        error: errorMessage,
+      });
+      throw new Error(
+        `CLI command failed for ${PLUGIN_NAME}:\n${errorMessage}`,
+      );
     }
 
     expect(result.success, 'CLI command should succeed').to.be.true;

@@ -10,12 +10,14 @@ module.exports = [
     expectedResult: { success: true },
   }),
   makePluginManagerScenario({
-    description: '1.5.2: should correctly pass coreUtils to a class-based plugin constructor',
+    description:
+      '1.5.2: should correctly pass coreUtils to a class-based plugin constructor',
     pluginType: 'class',
     expectedResult: { success: true, coreUtilsReceived: true },
   }),
   makePluginManagerScenario({
-    description: '1.5.3: should correctly pass all arguments to the plugin\'s generate method',
+    description:
+      "1.5.3: should correctly pass all arguments to the plugin's generate method",
     pluginType: 'class',
     data: { markdownContent: '## Test' },
     effectiveConfig: {
@@ -28,7 +30,8 @@ module.exports = [
     expectedResult: { success: true },
   }),
   makePluginManagerScenario({
-    description: '1.5.4: should invoke an object-based plugin and log a warning',
+    description:
+      '1.5.4: should invoke an object-based plugin and log a warning',
     pluginType: 'object',
     expectedResult: { success: true },
     expectedLog: /Plugin 'test-plugin' is not a class/,
@@ -41,22 +44,26 @@ module.exports = [
     expectedErrorMessage: /Handler script path not available/,
   }),
   makePluginManagerScenario({
-    description: '1.5.6: should return null and log an error for an invalid handler module (plain function)',
+    description:
+      '1.5.6: should return null and log an error for an invalid handler module (plain function)',
     pluginType: 'function',
-    expectedError: 'does not have a \'generate\' method',
+    expectedError: "does not have a 'generate' method",
   }),
   makePluginManagerScenario({
-    description: '1.5.7: should return null and log an error if a class instance has no generate method',
+    description:
+      '1.5.7: should return null and log an error if a class instance has no generate method',
     pluginType: 'class-no-generate',
-    expectedError: 'does not have a \'generate\' method',
+    expectedError: "does not have a 'generate' method",
   }),
   makePluginManagerScenario({
-    description: '1.5.8: should return null and log an error if the plugin\'s generate method throws',
+    description:
+      "1.5.8: should return null and log an error if the plugin's generate method throws",
     pluginType: 'throwing',
     expectedError: 'Simulated error from plugin',
   }),
   makePluginManagerScenario({
-    description: '1.5.9: should return the promise resolution from a successful generate method',
+    description:
+      '1.5.9: should return the promise resolution from a successful generate method',
     pluginType: 'class',
     expectedResult: { status: 'complete', path: '/path/to/file.pdf' },
   }),

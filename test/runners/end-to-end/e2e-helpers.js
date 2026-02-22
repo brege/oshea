@@ -14,50 +14,52 @@ const {
   simpleMdFixture,
   simpleMdFixtureWithFm,
   hugoExampleFixturePath,
-  fixturesDir
+  fixturesDir,
 } = require('@paths');
 const logger = require(loggerPath);
-
 
 // Execute a shell command and return promise with result
 function executeCommand(command) {
   return new Promise((resolve, reject) => {
-    exec(command, {
-      env: {
-        ...process.env,
-        FORCE_COLOR: '0',
-        NO_COLOR: '1',
-        GIT_TERMINAL_PROMPT: '0',
-        GIT_CONFIG_GLOBAL: '/dev/null',
-        GIT_CONFIG_SYSTEM: '/dev/null',
-        GIT_ASKPASS: 'echo',
-        SSH_ASKPASS: 'echo'
-      }
-    }, (error, stdout, stderr) => {
-      if (error) {
-        reject({ error, stdout, stderr, message: error.message });
-        return;
-      }
+    exec(
+      command,
+      {
+        env: {
+          ...process.env,
+          FORCE_COLOR: '0',
+          NO_COLOR: '1',
+          GIT_TERMINAL_PROMPT: '0',
+          GIT_CONFIG_GLOBAL: '/dev/null',
+          GIT_CONFIG_SYSTEM: '/dev/null',
+          GIT_ASKPASS: 'echo',
+          SSH_ASKPASS: 'echo',
+        },
+      },
+      (error, stdout, stderr) => {
+        if (error) {
+          reject({ error, stdout, stderr, message: error.message });
+          return;
+        }
 
-      if (stderr && stderr.trim()) {
-        logger.warn({ stderr }, { format: 'smoke-warning' });
-      }
+        if (stderr && stderr.trim()) {
+          logger.warn({ stderr }, { format: 'smoke-warning' });
+        }
 
-      resolve({ stdout, stderr });
-    });
+        resolve({ stdout, stderr });
+      },
+    );
   });
 }
-
 
 // Validation functions for different expect types
 const validators = {
   contains: (text) => (stdout) => stdout.includes(text),
 
   contains_all: (textArray) => (stdout) =>
-    textArray.every(text => stdout.includes(text)),
+    textArray.every((text) => stdout.includes(text)),
 
   contains_any: (textArray) => (stdout) =>
-    textArray.some(text => stdout.includes(text)),
+    textArray.some((text) => stdout.includes(text)),
 
   yaml_has_key: (key) => (stdout) => {
     try {
@@ -83,7 +85,9 @@ const validators = {
 
   file_min_size: (filePathAndSize) => () => {
     try {
-      const [filePath, minSize] = Array.isArray(filePathAndSize) ? filePathAndSize : [filePathAndSize, 1000];
+      const [filePath, minSize] = Array.isArray(filePathAndSize)
+        ? filePathAndSize
+        : [filePathAndSize, 1000];
       if (!fs.existsSync(filePath)) {
         return false;
       }
@@ -92,9 +96,8 @@ const validators = {
     } catch {
       return false;
     }
-  }
+  },
 };
-
 
 // Discovery functions for dynamic scenario generation
 const discoverers = {
@@ -105,7 +108,7 @@ const discoverers = {
     }
 
     function discoverCommands(dir, prefixParts = []) {
-      let commands = [];
+      const commands = [];
       const entries = fs.readdirSync(dir);
 
       for (const entry of entries) {
@@ -113,13 +116,18 @@ const discoverers = {
         if (fs.statSync(fullPath).isDirectory()) {
           const groupName = path.basename(fullPath);
           commands.push([...prefixParts, groupName]);
-          commands.push(...discoverCommands(fullPath, [...prefixParts, groupName]));
+          commands.push(
+            ...discoverCommands(fullPath, [...prefixParts, groupName]),
+          );
         } else if (entry.endsWith('.command.js')) {
           const commandModule = require(fullPath);
           if (!commandModule.command) continue;
 
           let commandDefinition = commandModule.command;
-          if (commandModule.explicitConvert && commandModule.explicitConvert.command) {
+          if (
+            commandModule.explicitConvert &&
+            commandModule.explicitConvert.command
+          ) {
             commandDefinition = commandModule.explicitConvert.command;
           }
 
@@ -136,32 +144,35 @@ const discoverers = {
     const commandPartsList = discoverCommands(cliRoot);
     commandPartsList.push([]);
 
-    return Array.from(new Set(commandPartsList.map(p => p.join(' ')))).sort();
+    return Array.from(new Set(commandPartsList.map((p) => p.join(' ')))).sort();
   },
 
   directory_scan: (config) => {
     const scanPath = path.resolve(projectRoot, config.source);
-    return fs.readdirSync(scanPath, { withFileTypes: true })
-      .filter(dirent => {
+    return fs
+      .readdirSync(scanPath, { withFileTypes: true })
+      .filter((dirent) => {
         if (config.filter === 'directories') return dirent.isDirectory();
         if (config.filter === 'files') return dirent.isFile();
         return true;
       })
-      .map(dirent => dirent.name)
+      .map((dirent) => dirent.name)
       .sort();
-  }
+  },
 };
-
 
 // Test workspace manager for isolated test environments
 class TestWorkspace {
-  constructor(basePath = '/tmp/oshea-workspace', customOutdir = null, customCollRoot = null) {
+  constructor(
+    basePath = '/tmp/oshea-workspace',
+    customOutdir = null,
+    customCollRoot = null,
+  ) {
     this.basePath = basePath;
     // Allow custom paths for user-specified --outdir and --coll-root
     this.outdir = customOutdir || path.join(basePath, 'outdir');
     this.collRoot = customCollRoot || path.join(basePath, 'coll-root');
   }
-
 
   // Create clean workspace directories
   setup() {
@@ -172,9 +183,11 @@ class TestWorkspace {
       fs.mkdirSync(dir, { recursive: true });
     }
 
-    logger.debug(`Test workspace setup: OUTDIR=${this.outdir}, COLL_ROOT=${this.collRoot}`, { format: 'workflow-debug' });
+    logger.debug(
+      `Test workspace setup: OUTDIR=${this.outdir}, COLL_ROOT=${this.collRoot}`,
+      { format: 'workflow-debug' },
+    );
   }
-
 
   // Clean up workspace directories
   teardown() {
@@ -183,10 +196,8 @@ class TestWorkspace {
     }
   }
 
-
   // Note: Legacy getEnvVars() removed - now using template expansion directly
 }
-
 
 // Expand scenarios with discovery for dynamic test generation
 function expandScenarios(testSuite) {
@@ -205,14 +216,20 @@ function expandScenarios(testSuite) {
   for (const item of items) {
     for (const scenarioTemplate of testSuite.scenarios) {
       const scenario = {
-        description: scenarioTemplate.description.replace('{command}', item).replace('{item}', item),
-        args: scenarioTemplate.args.replace('{command}', item).replace('{item}', item),
-        expect: scenarioTemplate.expect
+        description: scenarioTemplate.description
+          .replace('{command}', item)
+          .replace('{item}', item),
+        args: scenarioTemplate.args
+          .replace('{command}', item)
+          .replace('{item}', item),
+        expect: scenarioTemplate.expect,
       };
 
       // Handle test_id expansion
       if (scenarioTemplate.test_id) {
-        scenario.test_id = scenarioTemplate.test_id.replace('{command}', item).replace('{item}', item);
+        scenario.test_id = scenarioTemplate.test_id
+          .replace('{command}', item)
+          .replace('{item}', item);
       }
 
       expandedScenarios.push(scenario);
@@ -221,7 +238,6 @@ function expandScenarios(testSuite) {
 
   return expandedScenarios;
 }
-
 
 // Expand template variables in any string
 function expandTemplates(str, workspace) {
@@ -236,7 +252,12 @@ function expandTemplates(str, workspace) {
 }
 
 // Create a display-friendly command for copy-paste with rendered templates
-function createDisplayCommand(baseCommand, args, workspace, isWorkflowTest = false) {
+function createDisplayCommand(
+  baseCommand,
+  args,
+  workspace,
+  isWorkflowTest = false,
+) {
   if (!workspace) {
     return `${baseCommand} ${args}`.trim();
   }
@@ -268,7 +289,10 @@ function processCommandArgs(args, workspace, isWorkflowTest = false) {
     // For workflow tests, ensure --outdir and --coll-root are properly set
     if (processedArgs.includes('plugin create')) {
       if (/--outdir\s+\S+/.test(processedArgs)) {
-        processedArgs = processedArgs.replace(/--outdir\s+\S+/g, `--outdir "${workspace.outdir}"`);
+        processedArgs = processedArgs.replace(
+          /--outdir\s+\S+/g,
+          `--outdir "${workspace.outdir}"`,
+        );
       } else {
         processedArgs += ` --outdir "${workspace.outdir}"`;
       }
@@ -283,9 +307,13 @@ function processCommandArgs(args, workspace, isWorkflowTest = false) {
   return processedArgs;
 }
 
-
 // Validate test result against expected criteria
-function validateResult(result, expectCriteria, expectNotCriteria = null, workspace = null) {
+function validateResult(
+  result,
+  expectCriteria,
+  expectNotCriteria = null,
+  workspace = null,
+) {
   let testPassed = true;
   let failureReason = null;
 
@@ -297,11 +325,11 @@ function validateResult(result, expectCriteria, expectNotCriteria = null, worksp
       const validator = validators[expectType];
       if (validator) {
         // Expand templates in expectValue if workspace is provided
-        const expandedValue = workspace ?
-          (Array.isArray(expectValue) ?
-            expectValue.map(v => expandTemplates(v, workspace)) :
-            expandTemplates(expectValue, workspace)
-          ) : expectValue;
+        const expandedValue = workspace
+          ? Array.isArray(expectValue)
+            ? expectValue.map((v) => expandTemplates(v, workspace))
+            : expandTemplates(expectValue, workspace)
+          : expectValue;
 
         if (!validator(expandedValue)(result.stdout)) {
           testPassed = false;
@@ -330,7 +358,7 @@ function validateResult(result, expectCriteria, expectNotCriteria = null, worksp
 // Shared argument parsing for smoke and workflow test runners
 function parseArgs(args, options = {}) {
   const {
-    supportsYamlFile = false  // Only smoke-test-runner supports yamlFile
+    supportsYamlFile = false, // Only smoke-test-runner supports yamlFile
   } = options;
 
   const result = {
@@ -338,7 +366,7 @@ function parseArgs(args, options = {}) {
     listMode: false,
     grepPattern: null,
     targetBlock: null,
-    testId: null
+    testId: null,
   };
 
   // Add yamlFile support if requested
@@ -385,29 +413,33 @@ function parseArgs(args, options = {}) {
 function executeCommandWithColors(command) {
   return new Promise((resolve, reject) => {
     const { exec } = require('child_process');
-    exec(command, {
-      env: {
-        ...process.env,
-        FORCE_COLOR: '1', // Ensure colors are preserved
-        GIT_TERMINAL_PROMPT: '0',
-        GIT_CONFIG_GLOBAL: '/dev/null',
-        GIT_CONFIG_SYSTEM: '/dev/null',
-        GIT_ASKPASS: 'echo',
-        SSH_ASKPASS: 'echo'
+    exec(
+      command,
+      {
+        env: {
+          ...process.env,
+          FORCE_COLOR: '1', // Ensure colors are preserved
+          GIT_TERMINAL_PROMPT: '0',
+          GIT_CONFIG_GLOBAL: '/dev/null',
+          GIT_CONFIG_SYSTEM: '/dev/null',
+          GIT_ASKPASS: 'echo',
+          SSH_ASKPASS: 'echo',
+        },
+        maxBuffer: 1024 * 1024, // 1MB buffer for large outputs
       },
-      maxBuffer: 1024 * 1024 // 1MB buffer for large outputs
-    }, (error, stdout, stderr) => {
-      if (error) {
-        reject({ error, stdout, stderr, message: error.message });
-        return;
-      }
+      (error, stdout, stderr) => {
+        if (error) {
+          reject({ error, stdout, stderr, message: error.message });
+          return;
+        }
 
-      if (stderr && stderr.trim()) {
-        logger.warn({ stderr }, { format: 'workflow-warning' });
-      }
+        if (stderr && stderr.trim()) {
+          logger.warn({ stderr }, { format: 'workflow-warning' });
+        }
 
-      resolve({ stdout, stderr });
-    });
+        resolve({ stdout, stderr });
+      },
+    );
   });
 }
 
@@ -423,30 +455,43 @@ function matchesGrep(grepPattern, testSuite) {
   }
 
   // Match against suite-level test_id
-  if (testSuite.test_id && testSuite.test_id.toString().toLowerCase().includes(lowerPattern)) {
+  if (
+    testSuite.test_id &&
+    testSuite.test_id.toString().toLowerCase().includes(lowerPattern)
+  ) {
     return true;
   }
 
   // Match against tags
   if (testSuite.tags && Array.isArray(testSuite.tags)) {
-    if (testSuite.tags.some(tag => tag.toLowerCase().includes(lowerPattern))) {
+    if (
+      testSuite.tags.some((tag) => tag.toLowerCase().includes(lowerPattern))
+    ) {
       return true;
     }
   }
 
   // Match against scenario descriptions and test_ids (from expanded scenarios)
   const scenarios = expandScenarios(testSuite);
-  if (scenarios.some(scenario => {
-    // Match scenario description
-    if (scenario.description && scenario.description.toLowerCase().includes(lowerPattern)) {
-      return true;
-    }
-    // Match scenario test_id
-    if (scenario.test_id && scenario.test_id.toString().toLowerCase().includes(lowerPattern)) {
-      return true;
-    }
-    return false;
-  })) {
+  if (
+    scenarios.some((scenario) => {
+      // Match scenario description
+      if (
+        scenario.description &&
+        scenario.description.toLowerCase().includes(lowerPattern)
+      ) {
+        return true;
+      }
+      // Match scenario test_id
+      if (
+        scenario.test_id &&
+        scenario.test_id.toString().toLowerCase().includes(lowerPattern)
+      ) {
+        return true;
+      }
+      return false;
+    })
+  ) {
     return true;
   }
 
@@ -459,12 +504,12 @@ function listTestSuites(yamlFilePath, useWorkflowFormatter = true) {
   const documents = yaml.loadAll(content);
 
   const blocks = documents
-    .filter(doc => doc && doc.name)
+    .filter((doc) => doc && doc.name)
     .map((doc, index) => ({
       index: index + 1,
       name: doc.name,
       stepCount: doc.scenarios ? doc.scenarios.length : 0,
-      tags: doc.tags || []
+      tags: doc.tags || [],
     }));
 
   if (useWorkflowFormatter) {
@@ -472,11 +517,17 @@ function listTestSuites(yamlFilePath, useWorkflowFormatter = true) {
   } else {
     // Replaced legacy console output with logger.info (format: 'console-legacy')
     logger.info('\nAvailable test blocks:\n', { format: 'console-legacy' });
-    blocks.forEach(block => {
-      logger.info(`  ${block.index}. ${block.name}`, { format: 'console-legacy' });
-      logger.info(`     Steps: ${block.stepCount}`, { format: 'console-legacy' });
+    blocks.forEach((block) => {
+      logger.info(`  ${block.index}. ${block.name}`, {
+        format: 'console-legacy',
+      });
+      logger.info(`     Steps: ${block.stepCount}`, {
+        format: 'console-legacy',
+      });
       if (block.tags.length > 0) {
-        logger.info(`     Tags: ${block.tags.join(', ')}`, { format: 'console-legacy' });
+        logger.info(`     Tags: ${block.tags.join(', ')}`, {
+          format: 'console-legacy',
+        });
       }
       logger.info('', { format: 'console-legacy' });
     });
@@ -495,5 +546,5 @@ module.exports = {
   validateResult,
   parseArgs,
   matchesGrep,
-  listTestSuites
+  listTestSuites,
 };

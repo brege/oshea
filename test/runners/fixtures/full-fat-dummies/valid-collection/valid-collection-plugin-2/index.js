@@ -16,12 +16,28 @@ class ValidCollectionPlugin2Handler {
     this.handler = new coreUtils.DefaultHandler();
   }
 
-  async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
+  async generate(
+    data,
+    pluginSpecificConfig,
+    globalConfig,
+    outputDir,
+    outputFilenameOpt,
+    pluginBasePath,
+  ) {
     // Example of logging specific to this plugin.
-    logger.info(`(ValidCollectionPlugin2Handler): Processing for plugin '${pluginSpecificConfig.description || 'valid-collection-plugin-2'}'`);
+    logger.info(
+      `(ValidCollectionPlugin2Handler): Processing for plugin '${pluginSpecificConfig.description || 'valid-collection-plugin-2'}'`,
+    );
 
     // Most simple plugins will delegate directly to the DefaultHandler.
-    return this.handler.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath);
+    return this.handler.generate(
+      data,
+      pluginSpecificConfig,
+      globalConfig,
+      outputDir,
+      outputFilenameOpt,
+      pluginBasePath,
+    );
   }
 }
 

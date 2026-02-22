@@ -11,7 +11,10 @@ const execAsync = util.promisify(exec);
 logger.debug('Loaded from file', { context: 'test-helpers', file: __filename });
 
 async function readFileContent(filePath) {
-  logger.debug('Reading file content', { context: 'readFileContent', file: filePath });
+  logger.debug('Reading file content', {
+    context: 'readFileContent',
+    file: filePath,
+  });
   if (!fss.existsSync(filePath)) {
     throw new Error(`File not found for content check: ${filePath}`);
   }
@@ -19,30 +22,56 @@ async function readFileContent(filePath) {
 }
 
 async function checkFile(baseDir, relativeFilePath, minSize) {
-  logger.debug('Checking file', { context: 'checkFile', baseDir, relativeFilePath, minSize });
+  logger.debug('Checking file', {
+    context: 'checkFile',
+    baseDir,
+    relativeFilePath,
+    minSize,
+  });
   const fullPath = path.join(baseDir, relativeFilePath);
   try {
     await fsPromises.access(fullPath, fss.constants.F_OK);
   } catch (e) {
-    throw new Error(`File not found or not accessible: ${fullPath} - ${e.message}`, { cause: e });
+    throw new Error(
+      `File not found or not accessible: ${fullPath} - ${e.message}`,
+      { cause: e },
+    );
   }
   const stats = await fsPromises.stat(fullPath);
   if (stats.size < minSize) {
-    throw new Error(`File ${fullPath} is too small (${stats.size} bytes, expected >= ${minSize} bytes).`);
+    throw new Error(
+      `File ${fullPath} is too small (${stats.size} bytes, expected >= ${minSize} bytes).`,
+    );
   }
-  logger.debug(`  OK: File ${relativeFilePath} (at ${fullPath}) exists and size (${stats.size} bytes) is sufficient.`);
+  logger.debug(
+    `  OK: File ${relativeFilePath} (at ${fullPath}) exists and size (${stats.size} bytes) is sufficient.`,
+  );
   return true;
 }
 
-async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPath) {
-  logger.debug('Running CLI command', { context: 'runCliCommand', argsArray, cliScriptPath, projectRoot, testConfigPath });
+async function runCliCommand(
+  argsArray,
+  cliScriptPath,
+  projectRoot,
+  testConfigPath,
+) {
+  logger.debug('Running CLI command', {
+    context: 'runCliCommand',
+    argsArray,
+    cliScriptPath,
+    projectRoot,
+    testConfigPath,
+  });
   const cliArgs = [...argsArray];
-  const hasCustomConfig = cliArgs.some(arg => arg === '--config' || arg.startsWith('--config='));
+  const hasCustomConfig = cliArgs.some(
+    (arg) => arg === '--config' || arg.startsWith('--config='),
+  );
 
-  let applyTestConfig = !hasCustomConfig &&
-                         !cliArgs.includes('--factory-defaults') &&
-                         !cliArgs.includes('--factory-default') &&
-                         !cliArgs.includes('-fd');
+  let applyTestConfig =
+    !hasCustomConfig &&
+    !cliArgs.includes('--factory-defaults') &&
+    !cliArgs.includes('--factory-default') &&
+    !cliArgs.includes('-fd');
 
   if (cliArgs[0] === 'config' && applyTestConfig) {
     if (!cliArgs.includes('--plugin') && cliArgs.length === 1) {
@@ -51,7 +80,11 @@ async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPa
   }
 
   let command = `node "${cliScriptPath}" ${cliArgs.join(' ')}`;
-  if (applyTestConfig && typeof testConfigPath === 'string' && testConfigPath.length > 0) {
+  if (
+    applyTestConfig &&
+    typeof testConfigPath === 'string' &&
+    testConfigPath.length > 0
+  ) {
     command += ` --config "${testConfigPath}"`;
   }
 
@@ -61,8 +94,8 @@ async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPa
       cwd: projectRoot,
       env: {
         ...process.env,
-        NODE_PATH: nodeModulesPath
-      }
+        NODE_PATH: nodeModulesPath,
+      },
     });
     if (stdout) logger.debug('  stdout:\n', stdout);
     const stderrContent = stderr && stderr.trim();
@@ -71,23 +104,43 @@ async function runCliCommand(argsArray, cliScriptPath, projectRoot, testConfigPa
     }
     return { success: true, stdout, stderr };
   } catch (error) {
-    logger.error(`  Error executing command (cli.js likely exited with error): ${error.message}`);
-    if (error.stdout && error.stdout.trim()) logger.error('  stdout (on error):\n', error.stdout);
-    if (error.stderr && error.stderr.trim()) logger.error('  stderr (on error):\n', error.stderr);
-    return { success: false, error, stdout: error.stdout, stderr: error.stderr };
+    logger.error(
+      `  Error executing command (cli.js likely exited with error): ${error.message}`,
+    );
+    if (error.stdout && error.stdout.trim())
+      logger.error('  stdout (on error):\n', error.stdout);
+    if (error.stderr && error.stderr.trim())
+      logger.error('  stderr (on error):\n', error.stderr);
+    return {
+      success: false,
+      error,
+      stdout: error.stdout,
+      stderr: error.stderr,
+    };
   }
 }
 
 async function setupTestDirectory(testOutputBaseDir, createdPluginsDir) {
-  logger.debug('Setting up test directory', { context: 'setupTestDirectory', testOutputBaseDir, createdPluginsDir });
-  logger.debug('Setup test directory filename', { context: 'setupTestDirectory', file: __filename });
+  logger.debug('Setting up test directory', {
+    context: 'setupTestDirectory',
+    testOutputBaseDir,
+    createdPluginsDir,
+  });
+  logger.debug('Setup test directory filename', {
+    context: 'setupTestDirectory',
+    file: __filename,
+  });
   if (!testOutputBaseDir) {
-    logger.error('testOutputBaseDir is undefined!', { context: 'setupTestDirectory' });
+    logger.error('testOutputBaseDir is undefined!', {
+      context: 'setupTestDirectory',
+    });
     throw new Error('setupTestDirectory: testOutputBaseDir is required');
   }
   try {
     if (fss.existsSync(testOutputBaseDir)) {
-      logger.debug(`Removing existing test output directory: ${testOutputBaseDir}`);
+      logger.debug(
+        `Removing existing test output directory: ${testOutputBaseDir}`,
+      );
       await fsPromises.rm(testOutputBaseDir, { recursive: true, force: true });
     }
     logger.debug(`Creating test output directory: ${testOutputBaseDir}`);
@@ -97,15 +150,24 @@ async function setupTestDirectory(testOutputBaseDir, createdPluginsDir) {
       await fsPromises.mkdir(createdPluginsDir, { recursive: true });
     }
   } catch (error) {
-    logger.error('Error setting up test directory', { context: 'setupTestDirectory', error: error && error.message });
+    logger.error('Error setting up test directory', {
+      context: 'setupTestDirectory',
+      error: error && error.message,
+    });
     throw error;
   }
 }
 
 async function cleanupTestDirectory(testOutputBaseDir, keepOutput = false) {
-  logger.debug('Cleaning up test directory', { context: 'cleanupTestDirectory', testOutputBaseDir, keepOutput });
+  logger.debug('Cleaning up test directory', {
+    context: 'cleanupTestDirectory',
+    testOutputBaseDir,
+    keepOutput,
+  });
   if (keepOutput) {
-    logger.info(`KEEP_OUTPUT is true. Skipping cleanup of ${testOutputBaseDir}.`);
+    logger.info(
+      `KEEP_OUTPUT is true. Skipping cleanup of ${testOutputBaseDir}.`,
+    );
     return;
   }
   try {
@@ -114,12 +176,19 @@ async function cleanupTestDirectory(testOutputBaseDir, keepOutput = false) {
       await fsPromises.rm(testOutputBaseDir, { recursive: true, force: true });
     }
   } catch (error) {
-    logger.warn('Could not clean up test directory', { context: 'cleanupTestDirectory', dir: testOutputBaseDir, error: error && error.message });
+    logger.warn('Could not clean up test directory', {
+      context: 'cleanupTestDirectory',
+      dir: testOutputBaseDir,
+      error: error && error.message,
+    });
   }
 }
 
 async function checkFileExists(filePath) {
-  logger.debug('Checking file exists', { context: 'checkFileExists', file: filePath });
+  logger.debug('Checking file exists', {
+    context: 'checkFileExists',
+    file: filePath,
+  });
   if (!fss.existsSync(filePath)) {
     throw new Error(`File not found: ${filePath}`);
   }
@@ -128,12 +197,17 @@ async function checkFileExists(filePath) {
 }
 
 async function cleanupDir(dirPath) {
-  logger.debug('Cleaning up directory', { context: 'cleanupDir', dir: dirPath });
+  logger.debug('Cleaning up directory', {
+    context: 'cleanupDir',
+    dir: dirPath,
+  });
   if (fss.existsSync(dirPath)) {
     try {
       await fsPromises.rm(dirPath, { recursive: true, force: true });
     } catch (e) {
-      logger.warn(`  WARN: Could not fully cleanup directory ${dirPath}: ${e.message}`);
+      logger.warn(
+        `  WARN: Could not fully cleanup directory ${dirPath}: ${e.message}`,
+      );
     }
   }
 }

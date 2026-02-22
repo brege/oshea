@@ -5,7 +5,6 @@ const path = require('path');
 const proxyquire = require('proxyquire');
 const { mathIntegrationPath } = require('@paths');
 
-
 function makeMathIntegrationScenario({
   test_id, // eslint-disable-line camelcase
   description,
@@ -18,7 +17,6 @@ function makeMathIntegrationScenario({
   return { test_id, description, scenario, assertion, only, skip };
 }
 
-
 function buildMocks(scenario, constants) {
   // FS and path stubs
   const mockFsPromises = { readFile: sinon.stub() };
@@ -30,12 +28,19 @@ function buildMocks(scenario, constants) {
     dirname: path.dirname,
   };
 
-  const mathConfig = scenario.mathConfig !== undefined
-    ? scenario.mathConfig
-    : { enabled: true, engine: 'katex', katex_options: { throwOnError: false } };
+  const mathConfig =
+    scenario.mathConfig !== undefined
+      ? scenario.mathConfig
+      : {
+          enabled: true,
+          engine: 'katex',
+          katex_options: { throwOnError: false },
+        };
 
-  const cssExists = scenario.cssExists !== undefined ? scenario.cssExists : false;
-  const cssContent = scenario.cssContent !== undefined ? scenario.cssContent : '';
+  const cssExists =
+    scenario.cssExists !== undefined ? scenario.cssExists : false;
+  const cssContent =
+    scenario.cssContent !== undefined ? scenario.cssContent : '';
   if (cssExists) {
     mockFsSync.existsSync.withArgs(constants.KATEX_CSS_PATH).returns(true);
     if (scenario.cssReadError) {
@@ -48,7 +53,7 @@ function buildMocks(scenario, constants) {
     mockFsPromises.readFile.resolves('');
   }
 
-  let mockKatexPluginFunction = sinon.stub();
+  const mockKatexPluginFunction = sinon.stub();
   let mockKatexPluginModule;
   if (scenario.katexPluginModule === null) {
     mockKatexPluginModule = {};

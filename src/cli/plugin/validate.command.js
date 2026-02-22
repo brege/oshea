@@ -12,12 +12,15 @@ module.exports = {
   builder: (yargs) => {
     yargs
       .positional('pluginIdentifier', {
-        describe: 'name or path of plugin e.g. \'cv\'',
+        describe: "name or path of plugin e.g. 'cv'",
         type: 'string',
         demandOption: true,
-        completionKey: 'usablePlugins'
+        completionKey: 'usablePlugins',
       })
-      .demandOption('pluginIdentifier', 'Please provide a plugin name or path to validate.');
+      .demandOption(
+        'pluginIdentifier',
+        'Please provide a plugin name or path to validate.',
+      );
   },
   handler: async (argv) => {
     const { pluginIdentifier } = argv;
@@ -25,30 +28,44 @@ module.exports = {
 
     try {
       const resolvedIdentifier = path.resolve(pluginIdentifier);
-      const isPath = fs.existsSync(resolvedIdentifier) && fs.statSync(resolvedIdentifier).isDirectory();
+      const isPath =
+        fs.existsSync(resolvedIdentifier) &&
+        fs.statSync(resolvedIdentifier).isDirectory();
 
       if (isPath) {
         pluginDirectoryPath = resolvedIdentifier;
       } else {
         // First try bundled plugins directory
-        pluginDirectoryPath = path.join(projectRoot, 'plugins', pluginIdentifier);
+        pluginDirectoryPath = path.join(
+          projectRoot,
+          'plugins',
+          pluginIdentifier,
+        );
 
-        if (!fs.existsSync(pluginDirectoryPath) || !fs.statSync(pluginDirectoryPath).isDirectory()) {
+        if (
+          !fs.existsSync(pluginDirectoryPath) ||
+          !fs.statSync(pluginDirectoryPath).isDirectory()
+        ) {
           // Not found in bundled plugins, check if it's a user-added plugin via manager
           if (!argv.manager || !argv.configResolver) {
-            logger.error(`Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`);
+            logger.error(
+              `Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`,
+            );
             process.exit(1);
             return;
           }
 
           const configResolver = argv.configResolver;
           await configResolver._initializeResolverIfNeeded();
-          const pluginRegistryEntry = configResolver.mergedPluginRegistry[pluginIdentifier];
+          const pluginRegistryEntry =
+            configResolver.mergedPluginRegistry[pluginIdentifier];
 
           if (pluginRegistryEntry && pluginRegistryEntry.configPath) {
             pluginDirectoryPath = path.dirname(pluginRegistryEntry.configPath);
           } else {
-            logger.error(`Error: Plugin '${pluginIdentifier}' not found. Checked bundled plugins and user-added plugins.`);
+            logger.error(
+              `Error: Plugin '${pluginIdentifier}' not found. Checked bundled plugins and user-added plugins.`,
+            );
             process.exit(1);
             return;
           }
@@ -60,9 +77,10 @@ module.exports = {
       if (!validationResult.isValid) {
         process.exit(1);
       }
-
     } catch (error) {
-      logger.error(`An unexpected error occurred during validation: ${error.message}`);
+      logger.error(
+        `An unexpected error occurred during validation: ${error.message}`,
+      );
       if (error.stack) {
         logger.error(error.stack);
       }

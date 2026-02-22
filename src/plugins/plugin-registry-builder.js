@@ -2,7 +2,11 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { markdownUtilsPath, loggerPath, collectionsEnabledManifestFilename } = require('@paths');
+const {
+  markdownUtilsPath,
+  loggerPath,
+  collectionsEnabledManifestFilename,
+} = require('@paths');
 const logger = require(loggerPath);
 const { loadConfig: loadYamlConfig } = require(markdownUtilsPath);
 const yaml = require('js-yaml');
@@ -19,51 +23,77 @@ class PluginRegistryBuilder {
     isLazyLoadMode = false,
     primaryMainConfigLoadReason = null,
     collectionsManagerInstance = null,
-    dependencies = {}
+    dependencies = {},
   ) {
-    const defaultDependencies = { fs, fsPromises: fs.promises, path, os, loadYamlConfig, yaml, process };
+    const defaultDependencies = {
+      fs,
+      fsPromises: fs.promises,
+      path,
+      os,
+      loadYamlConfig,
+      yaml,
+      process,
+    };
     this.dependencies = { ...defaultDependencies, ...dependencies };
 
     this.projectRoot = projectRoot;
     if (!this.projectRoot || typeof this.projectRoot !== 'string') {
-      logger.error('PluginRegistryBuilder: projectRoot must be a valid path string.', {
-        context: 'PluginRegistryBuilder',
-        error: 'Invalid projectRoot provided',
-        projectRoot: this.projectRoot
-      });
-      throw new Error('PluginRegistryBuilder: projectRoot must be a valid path string.');
+      logger.error(
+        'PluginRegistryBuilder: projectRoot must be a valid path string.',
+        {
+          context: 'PluginRegistryBuilder',
+          error: 'Invalid projectRoot provided',
+          projectRoot: this.projectRoot,
+        },
+      );
+      throw new Error(
+        'PluginRegistryBuilder: projectRoot must be a valid path string.',
+      );
     }
     logger.debug('PluginRegistryBuilder initialized with projectRoot', {
       context: 'PluginRegistryBuilder',
-      projectRoot: this.projectRoot
+      projectRoot: this.projectRoot,
     });
 
     this.isLazyLoadMode = isLazyLoadMode;
     this.primaryMainConfigLoadReason = primaryMainConfigLoadReason;
 
     if (!xdgBaseDir || typeof xdgBaseDir !== 'string') {
-      const xdgConfigHome = this.dependencies.process.env.XDG_CONFIG_HOME || this.dependencies.path.join(this.dependencies.os.homedir(), '.config');
-      this.xdgBaseDir = this.dependencies.path.join(xdgConfigHome, XDG_CONFIG_DIR_NAME);
+      const xdgConfigHome =
+        this.dependencies.process.env.XDG_CONFIG_HOME ||
+        this.dependencies.path.join(this.dependencies.os.homedir(), '.config');
+      this.xdgBaseDir = this.dependencies.path.join(
+        xdgConfigHome,
+        XDG_CONFIG_DIR_NAME,
+      );
       logger.debug('XDG base directory determined automatically', {
         context: 'PluginRegistryBuilder',
-        xdgBaseDir: this.xdgBaseDir
+        xdgBaseDir: this.xdgBaseDir,
       });
     } else {
       this.xdgBaseDir = xdgBaseDir;
       logger.debug('XDG base directory provided manually', {
         context: 'PluginRegistryBuilder',
-        xdgBaseDir: this.xdgBaseDir
+        xdgBaseDir: this.xdgBaseDir,
       });
     }
-    this.xdgGlobalConfigPath = this.dependencies.path.join(this.xdgBaseDir, 'config.yaml');
+    this.xdgGlobalConfigPath = this.dependencies.path.join(
+      this.xdgBaseDir,
+      'config.yaml',
+    );
 
     this.projectManifestConfigPath = projectManifestConfigPath;
-    this.projectManifestBaseDir = this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && this.dependencies.fs.existsSync(this.projectManifestConfigPath) ? this.dependencies.path.dirname(this.projectManifestConfigPath) : null;
+    this.projectManifestBaseDir =
+      this.projectManifestConfigPath &&
+      typeof this.projectManifestConfigPath === 'string' &&
+      this.dependencies.fs.existsSync(this.projectManifestConfigPath)
+        ? this.dependencies.path.dirname(this.projectManifestConfigPath)
+        : null;
     if (this.projectManifestConfigPath) {
       logger.debug('Project manifest config path set', {
         context: 'PluginRegistryBuilder',
         path: this.projectManifestConfigPath,
-        baseDir: this.projectManifestBaseDir
+        baseDir: this.projectManifestBaseDir,
       });
     }
 
@@ -73,17 +103,25 @@ class PluginRegistryBuilder {
 
     this.cmCollRoot = this.dependencies.collRoot;
     if (!this.cmCollRoot) {
-      logger.error('PluginRegistryBuilder requires collections root (collRoot).', {
-        context: 'PluginRegistryBuilder',
-        error: 'Missing collRoot dependency'
-      });
-      throw new Error('PluginRegistryBuilder requires a collections root (collRoot) to be provided.');
+      logger.error(
+        'PluginRegistryBuilder requires collections root (collRoot).',
+        {
+          context: 'PluginRegistryBuilder',
+          error: 'Missing collRoot dependency',
+        },
+      );
+      throw new Error(
+        'PluginRegistryBuilder requires a collections root (collRoot) to be provided.',
+      );
     }
-    this.cmEnabledManifestPath = this.dependencies.path.join(this.cmCollRoot, collectionsEnabledManifestFilename);
+    this.cmEnabledManifestPath = this.dependencies.path.join(
+      this.cmCollRoot,
+      collectionsEnabledManifestFilename,
+    );
     logger.debug('Collections Manager root and enabled manifest path set', {
       context: 'PluginRegistryBuilder',
       cmCollRoot: this.cmCollRoot,
-      cmEnabledManifestPath: this.cmEnabledManifestPath
+      cmEnabledManifestPath: this.cmEnabledManifestPath,
     });
   }
 
@@ -94,14 +132,14 @@ class PluginRegistryBuilder {
 
     logger.debug('Attempting to register bundled plugins', {
       context: 'PluginRegistryBuilder',
-      bundledPluginsPath: bundledPluginsPath
+      bundledPluginsPath: bundledPluginsPath,
     });
 
     if (!fs.existsSync(bundledPluginsPath)) {
       logger.warn('Bundled plugins directory not found.', {
         context: 'PluginRegistryBuilder',
         path: bundledPluginsPath,
-        suggestion: 'No bundled plugins will be registered.'
+        suggestion: 'No bundled plugins will be registered.',
       });
       return registrations;
     }
@@ -111,31 +149,34 @@ class PluginRegistryBuilder {
       if (pluginName === 'index.md') continue; // Skip index.md, it's not a plugin directory
       const pluginDir = path.join(bundledPluginsPath, pluginName);
       if (fs.statSync(pluginDir).isDirectory()) {
-        const configPath = path.join(pluginDir, `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
+        const configPath = path.join(
+          pluginDir,
+          `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+        );
         if (fs.existsSync(configPath)) {
           registrations[pluginName] = {
             configPath: configPath,
             definedIn: bundledPluginsPath,
-            sourceType: 'Bundled (Auto-discovered)'
+            sourceType: 'Bundled (Auto-discovered)',
           };
           logger.debug('Found bundled plugin', {
             context: 'PluginRegistryBuilder',
             pluginName: pluginName,
-            configPath: configPath
+            configPath: configPath,
           });
         } else {
           logger.warn('Bundled plugin directory found but no config file', {
             context: 'PluginRegistryBuilder',
             pluginDir: pluginDir,
             expectedConfig: `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
-            suggestion: 'Skipping registration for this directory.'
+            suggestion: 'Skipping registration for this directory.',
           });
         }
       }
     }
     logger.debug('Bundled plugins registration complete', {
       context: 'PluginRegistryBuilder',
-      registeredCount: Object.keys(registrations).length
+      registeredCount: Object.keys(registrations).length,
     });
     return registrations;
   }
@@ -145,20 +186,21 @@ class PluginRegistryBuilder {
     const registrations = {};
 
     // Determine user-plugins directory location based on collections manager root
-    const userPluginsPath = (this.collectionsManager && this.collectionsManager.collRoot) ?
-      path.join(this.collectionsManager.collRoot, 'user-plugins') :
-      path.join(this.xdgBaseDir, 'oshea', 'user-plugins');
+    const userPluginsPath =
+      this.collectionsManager && this.collectionsManager.collRoot
+        ? path.join(this.collectionsManager.collRoot, 'user-plugins')
+        : path.join(this.xdgBaseDir, 'oshea', 'user-plugins');
 
     logger.debug('Attempting to register user-plugins directory', {
       context: 'PluginRegistryBuilder',
-      userPluginsPath: userPluginsPath
+      userPluginsPath: userPluginsPath,
     });
 
     if (!fs.existsSync(userPluginsPath)) {
       logger.debug('User-plugins directory not found', {
         context: 'PluginRegistryBuilder',
         path: userPluginsPath,
-        suggestion: 'No user plugins will be registered.'
+        suggestion: 'No user plugins will be registered.',
       });
       return registrations;
     }
@@ -175,7 +217,7 @@ class PluginRegistryBuilder {
         logger.warn('Could not read user plugins manifest', {
           context: 'PluginRegistryBuilder',
           path: pluginsManifestPath,
-          error: e.message
+          error: e.message,
         });
       }
     }
@@ -187,9 +229,15 @@ class PluginRegistryBuilder {
 
       const pluginDir = path.join(userPluginsPath, pluginName);
       if (fs.statSync(pluginDir).isDirectory()) {
-        const configPath = path.join(pluginDir, `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
+        const configPath = path.join(
+          pluginDir,
+          `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+        );
         if (fs.existsSync(configPath)) {
-          const pluginState = pluginStates[pluginName] || { enabled: true, type: 'unknown' };
+          const pluginState = pluginStates[pluginName] || {
+            enabled: true,
+            type: 'unknown',
+          };
           const isEnabled = pluginState.enabled !== false;
           const pluginType = pluginState.type || 'unknown';
 
@@ -198,7 +246,7 @@ class PluginRegistryBuilder {
             definedIn: userPluginsPath,
             sourceType: `User (${pluginType})`,
             isEnabled: isEnabled,
-            pluginType: pluginType
+            pluginType: pluginType,
           };
 
           logger.debug('Found user plugin', {
@@ -206,14 +254,14 @@ class PluginRegistryBuilder {
             pluginName: pluginName,
             configPath: configPath,
             enabled: isEnabled,
-            type: pluginType
+            type: pluginType,
           });
         } else {
           logger.debug('User plugin directory found but no config file', {
             context: 'PluginRegistryBuilder',
             pluginDir: pluginDir,
             expectedConfig: `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
-            suggestion: 'Skipping registration for this directory.'
+            suggestion: 'Skipping registration for this directory.',
           });
         }
       }
@@ -221,7 +269,7 @@ class PluginRegistryBuilder {
 
     logger.debug('User-plugins registration complete', {
       context: 'PluginRegistryBuilder',
-      registeredCount: Object.keys(registrations).length
+      registeredCount: Object.keys(registrations).length,
     });
     return registrations;
   }
@@ -232,7 +280,7 @@ class PluginRegistryBuilder {
       context: 'PluginRegistryBuilder',
       alias: alias,
       aliasValue: aliasValue,
-      basePathDefiningAlias: basePathDefiningAlias
+      basePathDefiningAlias: basePathDefiningAlias,
     });
 
     if (typeof aliasValue !== 'string' || aliasValue.trim() === '') {
@@ -240,18 +288,24 @@ class PluginRegistryBuilder {
         context: 'PluginRegistryBuilder',
         alias: alias,
         aliasValue: aliasValue,
-        reason: 'Empty or non-string alias value.'
+        reason: 'Empty or non-string alias value.',
       });
       return null;
     }
 
     let resolvedAliasPath = aliasValue;
-    if (resolvedAliasPath.startsWith('~/') || resolvedAliasPath.startsWith('~\\')) {
-      resolvedAliasPath = path.join(os.homedir(), resolvedAliasPath.substring(2));
+    if (
+      resolvedAliasPath.startsWith('~/') ||
+      resolvedAliasPath.startsWith('~\\')
+    ) {
+      resolvedAliasPath = path.join(
+        os.homedir(),
+        resolvedAliasPath.substring(2),
+      );
       logger.debug('Resolved alias path using homedir (~)', {
         context: 'PluginRegistryBuilder',
         alias: alias,
-        resolvedPath: resolvedAliasPath
+        resolvedPath: resolvedAliasPath,
       });
     }
 
@@ -261,22 +315,25 @@ class PluginRegistryBuilder {
           context: 'PluginRegistryBuilder',
           alias: alias,
           aliasValue: aliasValue,
-          reason: 'Base path defining the alias is unknown.'
+          reason: 'Base path defining the alias is unknown.',
         });
         return null;
       }
-      resolvedAliasPath = path.resolve(basePathDefiningAlias, resolvedAliasPath);
+      resolvedAliasPath = path.resolve(
+        basePathDefiningAlias,
+        resolvedAliasPath,
+      );
       logger.debug('Resolved alias path as relative to base path', {
         context: 'PluginRegistryBuilder',
         alias: alias,
         resolvedPath: resolvedAliasPath,
-        basePath: basePathDefiningAlias
+        basePath: basePathDefiningAlias,
       });
     }
     logger.debug('Alias resolution successful', {
       context: 'PluginRegistryBuilder',
       alias: alias,
-      resolvedPath: resolvedAliasPath
+      resolvedPath: resolvedAliasPath,
     });
     return resolvedAliasPath;
   }
@@ -286,21 +343,25 @@ class PluginRegistryBuilder {
     logger.debug('Attempting to resolve plugin config path', {
       context: 'PluginRegistryBuilder',
       rawPath: rawPath,
-      basePathForMainConfig: basePathForMainConfig
+      basePathForMainConfig: basePathForMainConfig,
     });
 
     if (typeof rawPath !== 'string' || rawPath.trim() === '') {
       logger.warn('Invalid raw plugin path provided for resolution', {
         context: 'PluginRegistryBuilder',
         rawPath: rawPath,
-        reason: 'Empty or non-string raw path.'
+        reason: 'Empty or non-string raw path.',
       });
       return null;
     }
 
     let resolvedPath = rawPath;
     const aliasParts = rawPath.split(':');
-    if (aliasParts.length > 1 && currentAliases && currentAliases[aliasParts[0]]) {
+    if (
+      aliasParts.length > 1 &&
+      currentAliases &&
+      currentAliases[aliasParts[0]]
+    ) {
       const aliasName = aliasParts[0];
       const pathWithinAlias = aliasParts.slice(1).join(':'); // Re-join if path itself contains colons
       const resolvedAliasBasePath = currentAliases[aliasName];
@@ -310,43 +371,55 @@ class PluginRegistryBuilder {
           context: 'PluginRegistryBuilder',
           aliasName: aliasName,
           pathWithinAlias: pathWithinAlias,
-          resolvedPath: resolvedPath
+          resolvedPath: resolvedPath,
         });
       } else {
-        logger.warn('Alias used in plugin path could not be resolved to a base path', {
-          context: 'PluginRegistryBuilder',
-          aliasName: aliasName,
-          rawPath: rawPath,
-          suggestion: 'Check alias definition. Skipping registration.'
-        });
+        logger.warn(
+          'Alias used in plugin path could not be resolved to a base path',
+          {
+            context: 'PluginRegistryBuilder',
+            aliasName: aliasName,
+            rawPath: rawPath,
+            suggestion: 'Check alias definition. Skipping registration.',
+          },
+        );
         return null;
       }
-    }
-    else if (resolvedPath.startsWith('~/') || resolvedPath.startsWith('~\\')) {
+    } else if (
+      resolvedPath.startsWith('~/') ||
+      resolvedPath.startsWith('~\\')
+    ) {
       resolvedPath = path.join(os.homedir(), resolvedPath.substring(2));
       logger.debug('Resolved plugin path using homedir (~)', {
         context: 'PluginRegistryBuilder',
         rawPath: rawPath,
-        resolvedPath: resolvedPath
+        resolvedPath: resolvedPath,
       });
     }
 
     if (!path.isAbsolute(resolvedPath)) {
       if (!basePathForMainConfig) {
-        logger.warn('Cannot resolve relative plugin config path, base path unknown', {
-          context: 'PluginRegistryBuilder',
-          rawPath: rawPath,
-          reason: 'Base path for main config could not be determined. Skipping registration.'
-        });
+        logger.warn(
+          'Cannot resolve relative plugin config path, base path unknown',
+          {
+            context: 'PluginRegistryBuilder',
+            rawPath: rawPath,
+            reason:
+              'Base path for main config could not be determined. Skipping registration.',
+          },
+        );
         return null;
       }
       resolvedPath = path.resolve(basePathForMainConfig, resolvedPath);
-      logger.debug('Resolved plugin path as relative to main config base path', {
-        context: 'PluginRegistryBuilder',
-        rawPath: rawPath,
-        resolvedPath: resolvedPath,
-        basePath: basePathForMainConfig
-      });
+      logger.debug(
+        'Resolved plugin path as relative to main config base path',
+        {
+          context: 'PluginRegistryBuilder',
+          rawPath: rawPath,
+          resolvedPath: resolvedPath,
+          basePath: basePathForMainConfig,
+        },
+      );
     }
 
     try {
@@ -354,23 +427,37 @@ class PluginRegistryBuilder {
         logger.debug('Plugin config path resolved to an existing file', {
           context: 'PluginRegistryBuilder',
           rawPath: rawPath,
-          resolvedPath: resolvedPath
+          resolvedPath: resolvedPath,
         });
         return resolvedPath;
-      } else if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
+      } else if (
+        fs.existsSync(resolvedPath) &&
+        fs.statSync(resolvedPath).isDirectory()
+      ) {
         const dirName = path.basename(resolvedPath);
-        const conventionalConfigPath = path.join(resolvedPath, `${dirName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
-        if (fs.existsSync(conventionalConfigPath) && fs.statSync(conventionalConfigPath).isFile()) {
-          logger.debug('Plugin config path resolved to directory, found conventional config file', {
-            context: 'PluginRegistryBuilder',
-            rawPath: rawPath,
-            resolvedPath: resolvedPath,
-            conventionalConfigPath: conventionalConfigPath
-          });
+        const conventionalConfigPath = path.join(
+          resolvedPath,
+          `${dirName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+        );
+        if (
+          fs.existsSync(conventionalConfigPath) &&
+          fs.statSync(conventionalConfigPath).isFile()
+        ) {
+          logger.debug(
+            'Plugin config path resolved to directory, found conventional config file',
+            {
+              context: 'PluginRegistryBuilder',
+              rawPath: rawPath,
+              resolvedPath: resolvedPath,
+              conventionalConfigPath: conventionalConfigPath,
+            },
+          );
           return conventionalConfigPath;
         }
         const filesInDir = fs.readdirSync(resolvedPath);
-        const alternativeConfig = filesInDir.find(f => f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX));
+        const alternativeConfig = filesInDir.find((f) =>
+          f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX),
+        );
         if (alternativeConfig) {
           const altPath = path.join(resolvedPath, alternativeConfig);
           logger.info('Using alternative config file for plugin directory', {
@@ -378,24 +465,27 @@ class PluginRegistryBuilder {
             rawPath: rawPath,
             resolvedDirectory: resolvedPath,
             alternativeConfigFound: alternativeConfig,
-            finalPath: altPath
+            finalPath: altPath,
           });
           return altPath;
         }
-        logger.warn('Plugin configuration path (directory) does not contain a suitable config file', {
-          context: 'PluginRegistryBuilder',
-          rawPath: rawPath,
-          resolvedPath: resolvedPath,
-          suffix: PLUGIN_CONFIG_FILENAME_SUFFIX,
-          suggestion: 'Skipping registration for this entry.'
-        });
+        logger.warn(
+          'Plugin configuration path (directory) does not contain a suitable config file',
+          {
+            context: 'PluginRegistryBuilder',
+            rawPath: rawPath,
+            resolvedPath: resolvedPath,
+            suffix: PLUGIN_CONFIG_FILENAME_SUFFIX,
+            suggestion: 'Skipping registration for this entry.',
+          },
+        );
         return null;
       } else {
         logger.warn('Plugin configuration path does not exist', {
           context: 'PluginRegistryBuilder',
           rawPath: rawPath,
           resolvedPath: resolvedPath,
-          suggestion: 'Skipping registration for this entry.'
+          suggestion: 'Skipping registration for this entry.',
         });
         return null;
       }
@@ -406,62 +496,82 @@ class PluginRegistryBuilder {
         resolvedPath: resolvedPath,
         error: e.message,
         stack: e.stack,
-        suggestion: 'Skipping registration for this entry.'
+        suggestion: 'Skipping registration for this entry.',
       });
       return null;
     }
   }
 
-  async _getPluginRegistrationsFromFile(mainConfigFilePath, basePathForMainConfig, sourceType) {
+  async _getPluginRegistrationsFromFile(
+    mainConfigFilePath,
+    basePathForMainConfig,
+    sourceType,
+  ) {
     const { fs, loadYamlConfig } = this.dependencies;
     logger.debug('Attempting to get plugin registrations from file', {
       context: 'PluginRegistryBuilder',
       mainConfigFilePath: mainConfigFilePath,
-      sourceType: sourceType
+      sourceType: sourceType,
     });
 
     if (!mainConfigFilePath || !fs.existsSync(mainConfigFilePath)) {
       logger.debug('Main config file for plugin registrations not found', {
         context: 'PluginRegistryBuilder',
         mainConfigFilePath: mainConfigFilePath,
-        reason: 'File does not exist.'
+        reason: 'File does not exist.',
       });
       return {};
     }
     try {
       const config = await loadYamlConfig(mainConfigFilePath);
       const registrations = {};
-      let currentAliases = {};
+      const currentAliases = {};
 
-      if (config && config.plugin_directory_aliases && typeof config.plugin_directory_aliases === 'object') {
-        for (const [alias, aliasPathRaw] of Object.entries(config.plugin_directory_aliases)) {
-          const resolvedAliasTarget = this._resolveAlias(alias, aliasPathRaw, basePathForMainConfig);
+      if (
+        config &&
+        config.plugin_directory_aliases &&
+        typeof config.plugin_directory_aliases === 'object'
+      ) {
+        for (const [alias, aliasPathRaw] of Object.entries(
+          config.plugin_directory_aliases,
+        )) {
+          const resolvedAliasTarget = this._resolveAlias(
+            alias,
+            aliasPathRaw,
+            basePathForMainConfig,
+          );
           if (resolvedAliasTarget) {
             currentAliases[alias] = resolvedAliasTarget;
             logger.debug('Registered plugin directory alias', {
               context: 'PluginRegistryBuilder',
               alias: alias,
               target: resolvedAliasTarget,
-              definedIn: mainConfigFilePath
+              definedIn: mainConfigFilePath,
             });
           }
         }
       }
 
       if (config && config.plugins && typeof config.plugins === 'object') {
-        for (const [pluginName, pluginConfPathRaw] of Object.entries(config.plugins)) {
-          const resolvedPath = this._resolvePluginConfigPath(pluginConfPathRaw, basePathForMainConfig, currentAliases);
+        for (const [pluginName, pluginConfPathRaw] of Object.entries(
+          config.plugins,
+        )) {
+          const resolvedPath = this._resolvePluginConfigPath(
+            pluginConfPathRaw,
+            basePathForMainConfig,
+            currentAliases,
+          );
           if (resolvedPath) {
             registrations[pluginName] = {
               configPath: resolvedPath,
               definedIn: mainConfigFilePath,
-              sourceType: sourceType
+              sourceType: sourceType,
             };
             logger.debug('Registered plugin from config file', {
               context: 'PluginRegistryBuilder',
               pluginName: pluginName,
               configPath: resolvedPath,
-              definedIn: mainConfigFilePath
+              definedIn: mainConfigFilePath,
             });
           }
         }
@@ -469,7 +579,7 @@ class PluginRegistryBuilder {
       logger.debug('Plugin registrations from file complete', {
         context: 'PluginRegistryBuilder',
         sourceFile: mainConfigFilePath,
-        registeredCount: Object.keys(registrations).length
+        registeredCount: Object.keys(registrations).length,
       });
       return registrations;
     } catch (error) {
@@ -478,36 +588,46 @@ class PluginRegistryBuilder {
         file: mainConfigFilePath,
         error: error.message,
         stack: error.stack,
-        operation: '_getPluginRegistrationsFromFile'
+        operation: '_getPluginRegistrationsFromFile',
       });
       return {};
     }
   }
 
-  async _getPluginRegistrationsFromCmManifest(cmEnabledManifestPath, sourceType) {
+  async _getPluginRegistrationsFromCmManifest(
+    cmEnabledManifestPath,
+    sourceType,
+  ) {
     const { fs, fsPromises, yaml } = this.dependencies;
     const registrations = {};
     logger.debug('Attempting to get plugin registrations from CM manifest', {
       context: 'PluginRegistryBuilder',
       cmEnabledManifestPath: cmEnabledManifestPath,
-      sourceType: sourceType
+      sourceType: sourceType,
     });
 
     if (!fs.existsSync(cmEnabledManifestPath)) {
       logger.debug('CM enabled manifest not found', {
         context: 'PluginRegistryBuilder',
         path: cmEnabledManifestPath,
-        reason: 'File does not exist.'
+        reason: 'File does not exist.',
       });
       return registrations;
     }
     try {
-      const manifestContent = await fsPromises.readFile(cmEnabledManifestPath, 'utf8');
+      const manifestContent = await fsPromises.readFile(
+        cmEnabledManifestPath,
+        'utf8',
+      );
       const parsedManifest = yaml.load(manifestContent);
 
       if (parsedManifest && Array.isArray(parsedManifest.enabled_plugins)) {
         for (const pluginEntry of parsedManifest.enabled_plugins) {
-          if (pluginEntry && pluginEntry.invoke_name && pluginEntry.config_path) {
+          if (
+            pluginEntry &&
+            pluginEntry.invoke_name &&
+            pluginEntry.config_path
+          ) {
             if (fs.existsSync(pluginEntry.config_path)) {
               registrations[pluginEntry.invoke_name] = {
                 configPath: pluginEntry.config_path,
@@ -516,28 +636,28 @@ class PluginRegistryBuilder {
                 cmOriginalCollection: pluginEntry.collection_name,
                 cmOriginalPluginId: pluginEntry.plugin_id,
                 cmAddedOn: pluginEntry.added_on,
-                cmStatus: 'Enabled (CM)'
+                cmStatus: 'Enabled (CM)',
               };
               logger.debug('Registered plugin from CM manifest', {
                 context: 'PluginRegistryBuilder',
                 invokeName: pluginEntry.invoke_name,
                 configPath: pluginEntry.config_path,
                 collection: pluginEntry.collection_name,
-                pluginId: pluginEntry.plugin_id
+                pluginId: pluginEntry.plugin_id,
               });
             } else {
               logger.warn('Config path for CM-enabled plugin does not exist', {
                 context: 'PluginRegistryBuilder',
                 invokeName: pluginEntry.invoke_name,
                 configPath: pluginEntry.config_path,
-                suggestion: 'Skipping registration for this entry.'
+                suggestion: 'Skipping registration for this entry.',
               });
             }
           } else {
             logger.warn('Invalid entry in CM manifest', {
               context: 'PluginRegistryBuilder',
               invalidEntry: pluginEntry,
-              suggestion: 'Skipping invalid manifest entry.'
+              suggestion: 'Skipping invalid manifest entry.',
             });
           }
         }
@@ -545,7 +665,7 @@ class PluginRegistryBuilder {
       logger.debug('Plugin registrations from CM manifest complete', {
         context: 'PluginRegistryBuilder',
         sourceFile: cmEnabledManifestPath,
-        registeredCount: Object.keys(registrations).length
+        registeredCount: Object.keys(registrations).length,
       });
     } catch (error) {
       logger.error('Error reading or parsing CM manifest', {
@@ -553,7 +673,7 @@ class PluginRegistryBuilder {
         file: cmEnabledManifestPath,
         error: error.message,
         stack: error.stack,
-        operation: '_getPluginRegistrationsFromCmManifest'
+        operation: '_getPluginRegistrationsFromCmManifest',
       });
     }
     return registrations;
@@ -566,13 +686,13 @@ class PluginRegistryBuilder {
     const collectionsDir = path.join(this.cmCollRoot, 'collections');
     logger.debug('Scanning collections directory for available plugins', {
       context: 'PluginRegistryBuilder',
-      collectionsDir: collectionsDir
+      collectionsDir: collectionsDir,
     });
 
     if (!fs.existsSync(collectionsDir)) {
       logger.debug('Collections directory not found', {
         context: 'PluginRegistryBuilder',
-        path: collectionsDir
+        path: collectionsDir,
       });
       return registrations;
     }
@@ -589,7 +709,7 @@ class PluginRegistryBuilder {
         logger.debug('Scanning collection for plugins', {
           context: 'PluginRegistryBuilder',
           collection: collectionName,
-          path: collectionPath
+          path: collectionPath,
         });
 
         const plugins = await fsPromises.readdir(collectionPath);
@@ -604,7 +724,9 @@ class PluginRegistryBuilder {
 
           // Look for config file
           const pluginFiles = await fsPromises.readdir(pluginPath);
-          const configFile = pluginFiles.find(file => file.endsWith('.config.yaml'));
+          const configFile = pluginFiles.find((file) =>
+            file.endsWith('.config.yaml'),
+          );
 
           if (configFile) {
             const configPath = path.join(pluginPath, configFile);
@@ -618,13 +740,13 @@ class PluginRegistryBuilder {
                 sourceType: `CollectionsManager (CM: ${collectionName}/${pluginDir})`,
                 cmOriginalCollection: collectionName,
                 cmOriginalPluginId: pluginDir,
-                cmStatus: 'Available (CM)'
+                cmStatus: 'Available (CM)',
               };
 
               logger.debug('Registered available plugin from collection', {
                 context: 'PluginRegistryBuilder',
                 pluginId: pluginId,
-                configPath: configPath
+                configPath: configPath,
               });
             }
           }
@@ -634,7 +756,7 @@ class PluginRegistryBuilder {
       logger.warn('Error scanning collections directory', {
         context: 'PluginRegistryBuilder',
         error: error.message,
-        collectionsDir: collectionsDir
+        collectionsDir: collectionsDir,
       });
     }
 
@@ -644,21 +766,21 @@ class PluginRegistryBuilder {
   async buildRegistry() {
     if (this._builtRegistry) {
       logger.debug('Returning cached plugin registry', {
-        context: 'PluginRegistryBuilder'
+        context: 'PluginRegistryBuilder',
       });
       return this._builtRegistry.registry;
     }
 
     logger.debug('Building new plugin registry', {
       context: 'PluginRegistryBuilder',
-      useFactoryDefaultsOnly: this.useFactoryDefaultsOnly
+      useFactoryDefaultsOnly: this.useFactoryDefaultsOnly,
     });
 
     const { fs } = this.dependencies;
     const registry = await this._registerBundledPlugins();
     logger.debug('Initial registry size after bundled plugins', {
       context: 'PluginRegistryBuilder',
-      count: Object.keys(registry).length
+      count: Object.keys(registry).length,
     });
 
     // Register user-plugins directory plugins (unified created + added plugins)
@@ -666,55 +788,78 @@ class PluginRegistryBuilder {
     Object.assign(registry, userPluginsRegistrations);
     logger.debug('Registry size after user-plugins', {
       context: 'PluginRegistryBuilder',
-      count: Object.keys(registry).length
+      count: Object.keys(registry).length,
     });
 
     if (!this.useFactoryDefaultsOnly) {
-      const cmEnabledRegistrations = await this._getPluginRegistrationsFromCmManifest(this.cmEnabledManifestPath, 'CollectionsManager');
+      const cmEnabledRegistrations =
+        await this._getPluginRegistrationsFromCmManifest(
+          this.cmEnabledManifestPath,
+          'CollectionsManager',
+        );
       Object.assign(registry, cmEnabledRegistrations);
       logger.debug('Registry size after CM enabled plugins', {
         context: 'PluginRegistryBuilder',
-        count: Object.keys(registry).length
+        count: Object.keys(registry).length,
       });
 
       // Register all available plugins from collections (not just enabled ones)
-      const cmAvailableRegistrations = await this._getPluginRegistrationsFromCollections();
+      const cmAvailableRegistrations =
+        await this._getPluginRegistrationsFromCollections();
       Object.assign(registry, cmAvailableRegistrations);
       logger.debug('Registry size after CM available plugins', {
         context: 'PluginRegistryBuilder',
-        count: Object.keys(registry).length
+        count: Object.keys(registry).length,
       });
     }
 
     if (!this.useFactoryDefaultsOnly) {
       if (fs.existsSync(this.xdgGlobalConfigPath)) {
-        const xdgRegistrations = await this._getPluginRegistrationsFromFile(this.xdgGlobalConfigPath, this.xdgBaseDir, 'XDG Global');
+        const xdgRegistrations = await this._getPluginRegistrationsFromFile(
+          this.xdgGlobalConfigPath,
+          this.xdgBaseDir,
+          'XDG Global',
+        );
         Object.assign(registry, xdgRegistrations);
         logger.debug('Registry size after XDG global configs', {
           context: 'PluginRegistryBuilder',
-          count: Object.keys(registry).length
+          count: Object.keys(registry).length,
         });
       } else {
-        logger.debug('XDG global config path not found, skipping registrations', {
-          context: 'PluginRegistryBuilder',
-          path: this.xdgGlobalConfigPath
-        });
+        logger.debug(
+          'XDG global config path not found, skipping registrations',
+          {
+            context: 'PluginRegistryBuilder',
+            path: this.xdgGlobalConfigPath,
+          },
+        );
       }
     }
 
     if (!this.useFactoryDefaultsOnly) {
-      if (this.projectManifestConfigPath && typeof this.projectManifestConfigPath === 'string' && fs.existsSync(this.projectManifestConfigPath)) {
-        const projectRegistrations = await this._getPluginRegistrationsFromFile(this.projectManifestConfigPath, this.projectManifestBaseDir, 'Project Manifest (--config)');
+      if (
+        this.projectManifestConfigPath &&
+        typeof this.projectManifestConfigPath === 'string' &&
+        fs.existsSync(this.projectManifestConfigPath)
+      ) {
+        const projectRegistrations = await this._getPluginRegistrationsFromFile(
+          this.projectManifestConfigPath,
+          this.projectManifestBaseDir,
+          'Project Manifest (--config)',
+        );
         Object.assign(registry, projectRegistrations);
         logger.debug('Registry size after project manifest configs', {
           context: 'PluginRegistryBuilder',
-          count: Object.keys(registry).length
+          count: Object.keys(registry).length,
         });
       } else {
-        logger.debug('Project manifest config path not found or invalid, skipping registrations', {
-          context: 'PluginRegistryBuilder',
-          path: this.projectManifestConfigPath
-        });
+        logger.debug(
+          'Project manifest config path not found or invalid, skipping registrations',
+          {
+            context: 'PluginRegistryBuilder',
+            path: this.projectManifestConfigPath,
+          },
+        );
       }
     }
 
@@ -724,12 +869,12 @@ class PluginRegistryBuilder {
       projectManifestPathUsed: this.projectManifestConfigPath,
       isLazyLoadMode: this.isLazyLoadMode,
       primaryMainConfigLoadReason: this.primaryMainConfigLoadReason,
-      collectionsManagerInstance: this.collectionsManager
+      collectionsManagerInstance: this.collectionsManager,
     };
     logger.debug('Plugin registry built successfully', {
       context: 'PluginRegistryBuilder',
       totalPlugins: Object.keys(registry).length,
-      builtWithFactoryDefaults: this.useFactoryDefaultsOnly
+      builtWithFactoryDefaults: this.useFactoryDefaultsOnly,
     });
     return registry;
   }
@@ -737,32 +882,39 @@ class PluginRegistryBuilder {
   async getAllPluginDetails() {
     const { fs, path, loadYamlConfig } = this.dependencies;
     logger.debug('Retrieving all plugin details', {
-      context: 'PluginRegistryBuilder'
+      context: 'PluginRegistryBuilder',
     });
 
     const pluginDetailsMap = new Map();
     const traditionalRegistry = await this.buildRegistry();
 
     for (const pluginName in traditionalRegistry) {
-      if (Object.prototype.hasOwnProperty.call(traditionalRegistry, pluginName)) {
+      if (Object.hasOwn(traditionalRegistry, pluginName)) {
         const regInfo = traditionalRegistry[pluginName];
         let description;
         try {
-          if (regInfo.configPath && fs.existsSync(regInfo.configPath) && fs.statSync(regInfo.configPath).isFile()) {
+          if (
+            regInfo.configPath &&
+            fs.existsSync(regInfo.configPath) &&
+            fs.statSync(regInfo.configPath).isFile()
+          ) {
             const pluginConfig = await loadYamlConfig(regInfo.configPath);
             description = pluginConfig.description || 'N/A';
             logger.debug('Loaded plugin description from config', {
               context: 'PluginRegistryBuilder',
               pluginName: pluginName,
-              configPath: regInfo.configPath
+              configPath: regInfo.configPath,
             });
           } else {
             description = `Error: Config path '${regInfo.configPath || 'undefined'}' not found or not a file.`;
-            logger.warn('Plugin config path not found or not a file when getting details', {
-              context: 'PluginRegistryBuilder',
-              pluginName: pluginName,
-              configPath: regInfo.configPath
-            });
+            logger.warn(
+              'Plugin config path not found or not a file when getting details',
+              {
+                context: 'PluginRegistryBuilder',
+                pluginName: pluginName,
+                configPath: regInfo.configPath,
+              },
+            );
           }
         } catch (e) {
           description = `Error loading config: ${e.message.substring(0, 50)}...`;
@@ -770,24 +922,28 @@ class PluginRegistryBuilder {
             context: 'PluginRegistryBuilder',
             pluginName: pluginName,
             configPath: regInfo.configPath,
-            error: e.message
+            error: e.message,
           });
         }
 
         let regSourceDisplay = regInfo.sourceType;
         if (regInfo.definedIn) {
           const definedInFilename = path.basename(regInfo.definedIn);
-          if (regInfo.sourceType.startsWith('Project Manifest')) regSourceDisplay = `Project (--config: ${definedInFilename})`;
-          else if (regInfo.sourceType === 'XDG Global') regSourceDisplay = `XDG (${definedInFilename})`;
-          else if (regInfo.sourceType.includes('Bundled Definitions')) regSourceDisplay = `Bundled (${definedInFilename})`;
-          else if (regInfo.sourceType.includes('Factory Default')) regSourceDisplay = `Factory (${definedInFilename})`;
+          if (regInfo.sourceType.startsWith('Project Manifest'))
+            regSourceDisplay = `Project (--config: ${definedInFilename})`;
+          else if (regInfo.sourceType === 'XDG Global')
+            regSourceDisplay = `XDG (${definedInFilename})`;
+          else if (regInfo.sourceType.includes('Bundled Definitions'))
+            regSourceDisplay = `Bundled (${definedInFilename})`;
+          else if (regInfo.sourceType.includes('Factory Default'))
+            regSourceDisplay = `Factory (${definedInFilename})`;
         }
         logger.debug('Processed plugin registration source display', {
           context: 'PluginRegistryBuilder',
           pluginName: pluginName,
           sourceType: regInfo.sourceType,
           definedIn: regInfo.definedIn,
-          display: regSourceDisplay
+          display: regSourceDisplay,
         });
 
         // Determine status based on plugin type
@@ -795,39 +951,50 @@ class PluginRegistryBuilder {
         if (regInfo.cmStatus) {
           // CM-managed plugins use their CM status
           status = regInfo.cmStatus;
-        } else if (regInfo.sourceType && regInfo.sourceType.startsWith('User (')) {
+        } else if (
+          regInfo.sourceType &&
+          regInfo.sourceType.startsWith('User (')
+        ) {
           // User plugins from new unified architecture
           const isEnabled = regInfo.isEnabled !== false;
           const pluginType = regInfo.pluginType || 'unknown';
-          status = isEnabled ? `Enabled (${pluginType.charAt(0).toUpperCase() + pluginType.slice(1)})` : `Available (${pluginType.charAt(0).toUpperCase() + pluginType.slice(1)})`;
+          status = isEnabled
+            ? `Enabled (${pluginType.charAt(0).toUpperCase() + pluginType.slice(1)})`
+            : `Available (${pluginType.charAt(0).toUpperCase() + pluginType.slice(1)})`;
         } else {
           // Bundled and other registered plugins
           status = `Registered (${regInfo.sourceType.split('(')[0].trim()})`;
         }
 
         pluginDetailsMap.set(pluginName, {
-          name: pluginName, description, configPath: regInfo.configPath,
+          name: pluginName,
+          description,
+          configPath: regInfo.configPath,
           registrationSourceDisplay: regSourceDisplay,
           status: status,
-          cmCollection: regInfo.cmOriginalCollection, cmPluginId: regInfo.cmOriginalPluginId,
-          cmInvokeName: regInfo.cmStatus === 'Enabled (CM)' ? pluginName : undefined,
-          cmAddedOn: regInfo.cmAddedOn
+          cmCollection: regInfo.cmOriginalCollection,
+          cmPluginId: regInfo.cmOriginalPluginId,
+          cmInvokeName:
+            regInfo.cmStatus === 'Enabled (CM)' ? pluginName : undefined,
+          cmAddedOn: regInfo.cmAddedOn,
         });
       }
     }
     logger.debug('Finished processing traditional registry details', {
       context: 'PluginRegistryBuilder',
-      count: pluginDetailsMap.size
+      count: pluginDetailsMap.size,
     });
 
     if (this.collectionsManager) {
       logger.debug('Fetching details from Collections Manager', {
-        context: 'PluginRegistryBuilder'
+        context: 'PluginRegistryBuilder',
       });
-      const cmAvailable = await this.collectionsManager.listAvailablePlugins(null) || [];
-      const cmEnabled = await this.collectionsManager.listCollections('enabled', null) || [];
+      const cmAvailable =
+        (await this.collectionsManager.listAvailablePlugins(null)) || [];
+      const cmEnabled =
+        (await this.collectionsManager.listCollections('enabled', null)) || [];
       const cmEnabledDetailsMap = new Map();
-      cmEnabled.forEach(enabledPlugin => {
+      cmEnabled.forEach((enabledPlugin) => {
         const fullCmId = `${enabledPlugin.collection_name}/${enabledPlugin.plugin_id}`;
         if (!cmEnabledDetailsMap.has(fullCmId)) {
           cmEnabledDetailsMap.set(fullCmId, []);
@@ -835,12 +1002,12 @@ class PluginRegistryBuilder {
         cmEnabledDetailsMap.get(fullCmId).push({
           invokeName: enabledPlugin.invoke_name,
           configPath: enabledPlugin.config_path,
-          addedOn: enabledPlugin.added_on
+          addedOn: enabledPlugin.added_on,
         });
         logger.debug('Mapped CM enabled plugin instance', {
           context: 'PluginRegistryBuilder',
           fullCmId: fullCmId,
-          invokeName: enabledPlugin.invoke_name
+          invokeName: enabledPlugin.invoke_name,
         });
       });
 
@@ -849,34 +1016,43 @@ class PluginRegistryBuilder {
         const enabledInstances = cmEnabledDetailsMap.get(fullCmId);
 
         if (enabledInstances && enabledInstances.length > 0) {
-          enabledInstances.forEach(instance => {
+          enabledInstances.forEach((instance) => {
             pluginDetailsMap.set(instance.invokeName, {
-              name: instance.invokeName, description: availableCmPlugin.description,
+              name: instance.invokeName,
+              description: availableCmPlugin.description,
               configPath: instance.config_path,
               registrationSourceDisplay: `CollectionsManager (CM: ${fullCmId})`,
-              status: 'Enabled (CM)', cmCollection: availableCmPlugin.collection,
-              cmPluginId: availableCmPlugin.plugin_id, cmInvokeName: instance.invokeName,
-              cmAddedOn: instance.addedOn
+              status: 'Enabled (CM)',
+              cmCollection: availableCmPlugin.collection,
+              cmPluginId: availableCmPlugin.plugin_id,
+              cmInvokeName: instance.invokeName,
+              cmAddedOn: instance.addedOn,
             });
             logger.debug('Added CM enabled plugin detail to map', {
               context: 'PluginRegistryBuilder',
-              invokeName: instance.invokeName
+              invokeName: instance.invokeName,
             });
           });
         } else {
           // Only add if not already present from traditional registry or another CM instance
-          if (!pluginDetailsMap.has(fullCmId) && !pluginDetailsMap.has(availableCmPlugin.plugin_id)) {
+          if (
+            !pluginDetailsMap.has(fullCmId) &&
+            !pluginDetailsMap.has(availableCmPlugin.plugin_id)
+          ) {
             pluginDetailsMap.set(fullCmId, {
-              name: fullCmId, description: availableCmPlugin.description,
+              name: fullCmId,
+              description: availableCmPlugin.description,
               configPath: availableCmPlugin.config_path,
               registrationSourceDisplay: `CollectionsManager (CM: ${fullCmId})`,
-              status: 'Available (CM)', cmCollection: availableCmPlugin.collection,
-              cmPluginId: availableCmPlugin.plugin_id, cmInvokeName: undefined,
-              cmAddedOn: undefined
+              status: 'Available (CM)',
+              cmCollection: availableCmPlugin.collection,
+              cmPluginId: availableCmPlugin.plugin_id,
+              cmInvokeName: undefined,
+              cmAddedOn: undefined,
             });
             logger.debug('Added CM available plugin detail to map', {
               context: 'PluginRegistryBuilder',
-              fullCmId: fullCmId
+              fullCmId: fullCmId,
             });
           }
         }
@@ -884,14 +1060,16 @@ class PluginRegistryBuilder {
       logger.debug('Finished processing Collections Manager plugin details', {
         context: 'PluginRegistryBuilder',
         cmAvailableCount: cmAvailable.length,
-        cmEnabledCount: cmEnabled.length
+        cmEnabledCount: cmEnabled.length,
       });
     }
 
-    const finalDetails = Array.from(pluginDetailsMap.values()).sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    const finalDetails = Array.from(pluginDetailsMap.values()).sort((a, b) =>
+      (a.name || '').localeCompare(b.name || ''),
+    );
     logger.debug('Successfully retrieved all plugin details', {
       context: 'PluginRegistryBuilder',
-      totalDetailsCount: finalDetails.length
+      totalDetailsCount: finalDetails.length,
     });
     return finalDetails;
   }

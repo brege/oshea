@@ -6,8 +6,14 @@ const { JSDOM } = require('jsdom');
 
 module.exports = [
   makePdfGeneratorScenario({
-    description: '2.3.1: should successfully launch Puppeteer and generate a basic PDF',
-    assertion: (result, { mockPuppeteer, mockPage }, { outputPdfPath, cssFileContentsArray, htmlBodyContent }, expect) => {
+    description:
+      '2.3.1: should successfully launch Puppeteer and generate a basic PDF',
+    assertion: (
+      result,
+      { mockPuppeteer, mockPage },
+      { outputPdfPath, cssFileContentsArray, htmlBodyContent },
+      expect,
+    ) => {
       expect(mockPuppeteer.launch.calledOnce).to.be.true;
       expect(mockPuppeteer.mockBrowser.newPage.calledOnce).to.be.true;
       expect(mockPage.setContent.calledOnce).to.be.true;
@@ -16,18 +22,29 @@ module.exports = [
 
       const actualHtml = mockPage.setContent.getCall(0).args[0];
       const dom = new JSDOM(actualHtml);
-      expect(dom.window.document.body.innerHTML.trim()).to.equal(htmlBodyContent);
-      const styleContent = dom.window.document.querySelector('style').textContent;
+      expect(dom.window.document.body.innerHTML.trim()).to.equal(
+        htmlBodyContent,
+      );
+      const styleContent =
+        dom.window.document.querySelector('style').textContent;
       expect(styleContent).to.include(cssFileContentsArray[0]);
     },
   }),
 
   makePdfGeneratorScenario({
-    description: '2.3.2: should correctly apply format, printBackground, and scale options',
-    assertion: (result, { mockPage }, { pdfOptionsFromConfig, outputPdfPath }, expect) => {
+    description:
+      '2.3.2: should correctly apply format, printBackground, and scale options',
+    assertion: (
+      result,
+      { mockPage },
+      { pdfOptionsFromConfig, outputPdfPath },
+      expect,
+    ) => {
       const calledPdfOptions = mockPage.pdf.getCall(0).args[0];
       expect(calledPdfOptions.format).to.equal(pdfOptionsFromConfig.format);
-      expect(calledPdfOptions.printBackground).to.equal(pdfOptionsFromConfig.printBackground);
+      expect(calledPdfOptions.printBackground).to.equal(
+        pdfOptionsFromConfig.printBackground,
+      );
       expect(calledPdfOptions.scale).to.equal(pdfOptionsFromConfig.scale);
       expect(calledPdfOptions.path).to.equal(outputPdfPath);
     },
@@ -37,7 +54,9 @@ module.exports = [
     description: '2.3.3: should correctly apply margin options',
     assertion: (result, { mockPage }, { pdfOptionsFromConfig }, expect) => {
       const calledPdfOptions = mockPage.pdf.getCall(0).args[0];
-      expect(calledPdfOptions.margin).to.deep.equal(pdfOptionsFromConfig.margin);
+      expect(calledPdfOptions.margin).to.deep.equal(
+        pdfOptionsFromConfig.margin,
+      );
     },
   }),
 
@@ -46,8 +65,11 @@ module.exports = [
     assertion: (result, { mockPage }, { cssFileContentsArray }, expect) => {
       const actualHtml = mockPage.setContent.getCall(0).args[0];
       const dom = new JSDOM(actualHtml);
-      const combinedCss = cssFileContentsArray.join('\n\n/* --- Next CSS File --- */\n\n');
-      const styleContent = dom.window.document.querySelector('style').textContent;
+      const combinedCss = cssFileContentsArray.join(
+        '\n\n/* --- Next CSS File --- */\n\n',
+      );
+      const styleContent =
+        dom.window.document.querySelector('style').textContent;
       expect(styleContent).to.include(combinedCss);
     },
   }),
@@ -57,8 +79,12 @@ module.exports = [
     assertion: (result, { mockPage }, { pdfOptionsFromConfig }, expect) => {
       const calledPdfOptions = mockPage.pdf.getCall(0).args[0];
       expect(calledPdfOptions.displayHeaderFooter).to.be.true;
-      expect(calledPdfOptions.headerTemplate).to.equal(pdfOptionsFromConfig.headerTemplate);
-      expect(calledPdfOptions.footerTemplate).to.equal(pdfOptionsFromConfig.footerTemplate);
+      expect(calledPdfOptions.headerTemplate).to.equal(
+        pdfOptionsFromConfig.headerTemplate,
+      );
+      expect(calledPdfOptions.footerTemplate).to.equal(
+        pdfOptionsFromConfig.footerTemplate,
+      );
     },
   }),
 
@@ -67,8 +93,9 @@ module.exports = [
     stubs: { launchRejects: 'Mock Puppeteer launch error' },
     assertion: (result, mocks, constants, expect, logs) => {
       expect(result).to.be.an('error');
-      const errorLog = logs.find(log => log.level === 'error');
-      expect(errorLog, 'Expected an error log for Puppeteer launch failure').to.not.be.undefined;
+      const errorLog = logs.find((log) => log.level === 'error');
+      expect(errorLog, 'Expected an error log for Puppeteer launch failure').to
+        .not.be.undefined;
       expect(errorLog.msg).to.equal('Error during PDF generation');
       expect(errorLog.data.context).to.equal('PDFGenerator');
       expect(errorLog.data.error).to.include('Mock Puppeteer launch error');
@@ -81,8 +108,9 @@ module.exports = [
     stubs: { setContentRejects: 'Mock page.setContent error' },
     assertion: (result, mocks, constants, expect, logs) => {
       expect(result).to.be.an('error');
-      const errorLog = logs.find(log => log.level === 'error');
-      expect(errorLog, 'Expected an error log for setContent failure').to.not.be.undefined;
+      const errorLog = logs.find((log) => log.level === 'error');
+      expect(errorLog, 'Expected an error log for setContent failure').to.not.be
+        .undefined;
       expect(errorLog.msg).to.equal('Error during PDF generation');
       expect(errorLog.data.context).to.equal('PDFGenerator');
       expect(errorLog.data.error).to.include('Mock page.setContent error');
@@ -95,8 +123,9 @@ module.exports = [
     stubs: { pdfRejects: 'Mock PDF generation error' },
     assertion: (result, mocks, constants, expect, logs) => {
       expect(result).to.be.an('error');
-      const errorLog = logs.find(log => log.level === 'error');
-      expect(errorLog, 'Expected an error log for PDF generation failure').to.not.be.undefined;
+      const errorLog = logs.find((log) => log.level === 'error');
+      expect(errorLog, 'Expected an error log for PDF generation failure').to
+        .not.be.undefined;
       expect(errorLog.msg).to.equal('Error during PDF generation');
       expect(errorLog.data.context).to.equal('PDFGenerator');
       expect(errorLog.data.error).to.include('Mock PDF generation error');
@@ -116,7 +145,7 @@ module.exports = [
       outputPdfPath: '/tmp/empty-content.pdf',
       pdfOptionsFromConfig: {},
       cssFileContentsArray: [],
-    }
+    },
   }),
   makePdfGeneratorScenario({
     description: '2.3.10b: should handle null htmlContent without crashing',
@@ -130,11 +159,12 @@ module.exports = [
       outputPdfPath: '/tmp/null-html-content.pdf',
       pdfOptionsFromConfig: {},
       cssFileContentsArray: [],
-    }
+    },
   }),
 
   makePdfGeneratorScenario({
-    description: '2.3.9a: should close browser and page after successful PDF generation',
+    description:
+      '2.3.9a: should close browser and page after successful PDF generation',
     assertion: (result, { mockPuppeteer }, constants, expect) => {
       expect(mockPuppeteer.mockPage.close.called).to.be.true;
       expect(mockPuppeteer.mockBrowser.close.called).to.be.true;
@@ -142,7 +172,8 @@ module.exports = [
   }),
 
   makePdfGeneratorScenario({
-    description: '2.3.9b: should close browser and page even if an error occurs during PDF generation',
+    description:
+      '2.3.9b: should close browser and page even if an error occurs during PDF generation',
     stubs: { pdfRejects: 'Simulated PDF error' },
     assertion: (result, { mockPuppeteer }, constants, expect) => {
       expect(result).to.be.an('error');
@@ -150,5 +181,4 @@ module.exports = [
       expect(mockPuppeteer.mockBrowser.close.called).to.be.true;
     },
   }),
-
 ];

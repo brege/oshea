@@ -5,9 +5,22 @@ class PluginRecipeHandler {
     this.handler = new coreUtils.DefaultHandler();
   }
 
-
-  async generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath) {
-    return this.handler.generate(data, pluginSpecificConfig, globalConfig, outputDir, outputFilenameOpt, pluginBasePath);
+  async generate(
+    data,
+    pluginSpecificConfig,
+    globalConfig,
+    outputDir,
+    outputFilenameOpt,
+    pluginBasePath,
+  ) {
+    return this.handler.generate(
+      data,
+      pluginSpecificConfig,
+      globalConfig,
+      outputDir,
+      outputFilenameOpt,
+      pluginBasePath,
+    );
   }
 }
 

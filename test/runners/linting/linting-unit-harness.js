@@ -48,4 +48,3 @@ class UnitTestHarness {
 }
 
 module.exports = { UnitTestHarness };
-

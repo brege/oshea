@@ -20,9 +20,17 @@ function formatGlobalConfig(level, message, meta = {}) {
 
     if (sources.mainConfigPath) {
       const sourceTypeMessage = formatSourceTypeMessage(sources);
-      console.log(theme.detail(`#   Primary Main Config Loaded: ${sources.mainConfigPath} ${sourceTypeMessage}`));
+      console.log(
+        theme.detail(
+          `#   Primary Main Config Loaded: ${sources.mainConfigPath} ${sourceTypeMessage}`,
+        ),
+      );
     } else {
-      console.log(theme.detail('#   Primary Main Config: (Using internal defaults as no file was loaded/found)'));
+      console.log(
+        theme.detail(
+          '#   Primary Main Config: (Using internal defaults as no file was loaded/found)',
+        ),
+      );
     }
 
     // Display considered paths
@@ -39,13 +47,21 @@ function formatGlobalConfig(level, message, meta = {}) {
     indent: 2,
     sortKeys: false,
     lineWidth: -1,
-    noRefs: true
+    noRefs: true,
   });
   console.log(yamlOutput);
 
   if (!isPure) {
-    console.log(theme.detail('\n# Note: This shows the global settings from the primary main configuration file.'));
-    console.log(theme.detail('# To see the full effective configuration for a specific plugin, use \'oshea config --plugin <pluginName>\'.'));
+    console.log(
+      theme.detail(
+        '\n# Note: This shows the global settings from the primary main configuration file.',
+      ),
+    );
+    console.log(
+      theme.detail(
+        "# To see the full effective configuration for a specific plugin, use 'oshea config --plugin <pluginName>'.",
+      ),
+    );
   }
 }
 
@@ -59,7 +75,9 @@ function formatPluginConfig(level, message, meta = {}) {
   }
 
   if (!isPure) {
-    console.log(theme.info(`# Effective configuration for plugin: ${pluginName}\n`));
+    console.log(
+      theme.info(`# Effective configuration for plugin: ${pluginName}\n`),
+    );
   }
 
   // Output the plugin-specific configuration YAML
@@ -67,7 +85,7 @@ function formatPluginConfig(level, message, meta = {}) {
     indent: 2,
     sortKeys: true,
     lineWidth: -1,
-    noRefs: true
+    noRefs: true,
   });
   console.log(yamlOutput);
 
@@ -101,40 +119,79 @@ function formatSourceTypeMessage(sources) {
 function displayConsideredPaths(sources) {
   const { mainConfigPath, xdgConfigDetails, projectConfigDetails } = sources;
 
-  if (projectConfigDetails?.path && projectConfigDetails.pathExists && projectConfigDetails.path !== mainConfigPath) {
-    console.log(theme.detail(`#   Considered Project Manifest (--config): ${projectConfigDetails.path}`));
+  if (
+    projectConfigDetails?.path &&
+    projectConfigDetails.pathExists &&
+    projectConfigDetails.path !== mainConfigPath
+  ) {
+    console.log(
+      theme.detail(
+        `#   Considered Project Manifest (--config): ${projectConfigDetails.path}`,
+      ),
+    );
   }
 
-  if (xdgConfigDetails?.path && xdgConfigDetails.pathExists &&
-      xdgConfigDetails.path !== mainConfigPath &&
-      (!projectConfigDetails?.path || projectConfigDetails.path !== xdgConfigDetails.path)) {
-    console.log(theme.detail(`#   Considered XDG Global Config: ${xdgConfigDetails.path}`));
+  if (
+    xdgConfigDetails?.path &&
+    xdgConfigDetails.pathExists &&
+    xdgConfigDetails.path !== mainConfigPath &&
+    (!projectConfigDetails?.path ||
+      projectConfigDetails.path !== xdgConfigDetails.path)
+  ) {
+    console.log(
+      theme.detail(
+        `#   Considered XDG Global Config: ${xdgConfigDetails.path}`,
+      ),
+    );
   }
 }
 
 // Helper: Display bundled config information
 function displayBundledConfigInfo(sources) {
-  const { bundledMainDefaultPath, mainConfigPath, factoryDefaultMainConfigPath } = sources;
+  const {
+    bundledMainDefaultPath,
+    mainConfigPath,
+    factoryDefaultMainConfigPath,
+  } = sources;
 
-  if (bundledMainDefaultPath && bundledMainDefaultPath.exists &&
-      bundledMainDefaultPath.path !== mainConfigPath &&
-      mainConfigPath !== factoryDefaultMainConfigPath) {
-    console.log(theme.detail(`#   Considered Bundled Main Config (${path.basename(bundledMainDefaultPath.path)}): ${bundledMainDefaultPath.path}`));
+  if (
+    bundledMainDefaultPath &&
+    bundledMainDefaultPath.exists &&
+    bundledMainDefaultPath.path !== mainConfigPath &&
+    mainConfigPath !== factoryDefaultMainConfigPath
+  ) {
+    console.log(
+      theme.detail(
+        `#   Considered Bundled Main Config (${path.basename(bundledMainDefaultPath.path)}): ${bundledMainDefaultPath.path}`,
+      ),
+    );
   }
 }
 
 // Helper: Display plugin source information
 function displayPluginSourceInfo(effectiveConfig, configSources) {
   console.log(theme.info('\n# Source Information:'));
-  console.log(theme.detail(`#   Plugin Base Path: ${effectiveConfig.pluginBasePath}`));
-  console.log(theme.detail(`#   Handler Script Path: ${effectiveConfig.handlerScriptPath}`));
+  console.log(
+    theme.detail(`#   Plugin Base Path: ${effectiveConfig.pluginBasePath}`),
+  );
+  console.log(
+    theme.detail(
+      `#   Handler Script Path: ${effectiveConfig.handlerScriptPath}`,
+    ),
+  );
 
-  console.log(theme.detail('#   Contributing Configuration Files (most specific last):'));
+  console.log(
+    theme.detail('#   Contributing Configuration Files (most specific last):'),
+  );
   if (configSources.mainConfigPath) {
-    console.log(theme.detail(`#     - Primary Main Config (for global settings): ${configSources.mainConfigPath}`));
+    console.log(
+      theme.detail(
+        `#     - Primary Main Config (for global settings): ${configSources.mainConfigPath}`,
+      ),
+    );
   }
-  configSources.pluginConfigPaths.forEach(p =>
-    console.log(theme.detail(`#     - ${p}`))
+  configSources.pluginConfigPaths.forEach((p) =>
+    console.log(theme.detail(`#     - ${p}`)),
   );
 }
 
@@ -142,13 +199,19 @@ function displayPluginSourceInfo(effectiveConfig, configSources) {
 function displayResolvedCssFiles(effectiveConfig) {
   console.log(theme.info('\n# Resolved CSS Files (order matters):'));
 
-  if (effectiveConfig.pluginSpecificConfig.css_files &&
-      effectiveConfig.pluginSpecificConfig.css_files.length > 0) {
-    effectiveConfig.pluginSpecificConfig.css_files.forEach(p =>
-      console.log(theme.detail(`#     - ${p}`))
+  if (
+    effectiveConfig.pluginSpecificConfig.css_files &&
+    effectiveConfig.pluginSpecificConfig.css_files.length > 0
+  ) {
+    effectiveConfig.pluginSpecificConfig.css_files.forEach((p) =>
+      console.log(theme.detail(`#     - ${p}`)),
     );
   } else {
-    console.log(theme.detail('#     (No CSS files resolved for this plugin configuration)'));
+    console.log(
+      theme.detail(
+        '#     (No CSS files resolved for this plugin configuration)',
+      ),
+    );
   }
 }
 
@@ -159,5 +222,5 @@ module.exports = {
   displayConsideredPaths,
   displayBundledConfigInfo,
   displayPluginSourceInfo,
-  displayResolvedCssFiles
+  displayResolvedCssFiles,
 };

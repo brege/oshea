@@ -1,6 +1,12 @@
 // test/archive/scripts/qa-dashboard.js
 require('module-alias/register');
-const { integrationTestDir, e2eTestDir, docsTestDir, testRoot, loggerPath } = require('@paths');
+const {
+  integrationTestDir,
+  e2eTestDir,
+  docsTestDir,
+  testRoot,
+  loggerPath,
+} = require('@paths');
 
 const fs = require('fs');
 const path = require('path');
@@ -11,16 +17,19 @@ const logger = require(loggerPath);
 // 1. Build testId -> testTarget, checklistStatus for ALL checklist entries
 function getChecklistStatuses() {
   const DOCS_DIR = docsTestDir;
-  const checklistFiles = fs.readdirSync(DOCS_DIR)
-    .filter(f => /^checklist-level-(\d+|m\d+)\.md$/i.test(f))
-    .map(f => path.join(DOCS_DIR, f));
+  const checklistFiles = fs
+    .readdirSync(DOCS_DIR)
+    .filter((f) => /^checklist-level-(\d+|m\d+)\.md$/i.test(f))
+    .map((f) => path.join(DOCS_DIR, f));
 
   const allChecklistStatuses = {};
   for (const file of checklistFiles) {
     const lines = fs.readFileSync(file, 'utf8').split('\n');
     for (let i = 0; i < lines.length; i++) {
       // Capture the test ID and its status marker [ ], [x], [S], [?]
-      const checklistMatch = lines[i].match(/^\*\s*\[(\s*|x|S|\?)\s*\]\s+(\d+\.\d+\.\d+|M\.\d+\.\d+(\.\d+)?)/);
+      const checklistMatch = lines[i].match(
+        /^\*\s*\[(\s*|x|S|\?)\s*\]\s+(\d+\.\d+\.\d+|M\.\d+\.\d+(\.\d+)?)/,
+      );
       if (checklistMatch) {
         const marker = checklistMatch[1].trim();
         const testId = checklistMatch[2];
@@ -68,13 +77,10 @@ function findAllJsFiles(dir) {
   return results;
 }
 function getTestIdToFileAndSkipMap() {
-  const dirs = [
-    integrationTestDir,
-    e2eTestDir
-  ];
+  const dirs = [integrationTestDir, e2eTestDir];
   const testIdToFile = {};
-  dirs.forEach(dir => {
-    findAllJsFiles(dir).forEach(file => {
+  dirs.forEach((dir) => {
+    findAllJsFiles(dir).forEach((file) => {
       const match = file.match(/\.test\.((?:\d+\.)*\d+|M\.(?:\d+\.)*\d+)\.js$/);
       if (match) {
         const testId = match[1];
@@ -82,7 +88,8 @@ function getTestIdToFileAndSkipMap() {
         const relPath = idx !== -1 ? file.slice(idx + 1) : file;
         const content = fs.readFileSync(file, 'utf8');
         const skips = (content.match(/it\.skip\s*\(/g) || []).length;
-        if (skips > 0) { // Only add if skips exist
+        if (skips > 0) {
+          // Only add if skips exist
           testIdToFile[testId] = { testFilePath: relPath, skips };
         }
       }
@@ -107,12 +114,18 @@ function getAuditLogMap() {
         const tidMatch = lines[j].match(/- \*\*test_id:\*\* (.+)$/);
         if (tidMatch) testIdRaw = tidMatch[1].trim();
         const statusMatch = lines[j].match(/- \*\*status:\*\*\s*(.+)$/);
-        if (statusMatch) { status = statusMatch[1].trim().toUpperCase(); break; }
+        if (statusMatch) {
+          status = statusMatch[1].trim().toUpperCase();
+          break;
+        }
         if (lines[j].startsWith('## Entry:')) break;
       }
       // Only add to auditMap if status is NOT 'CLOSED'
       if (status !== 'CLOSED') {
-        const testIds = testIdRaw.split(',').map(s => s.trim()).filter(Boolean);
+        const testIds = testIdRaw
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
         for (const testId of testIds) {
           if (!/^(\d+(\.\d+)*|M\.(\d+\.)*\d+)$/.test(testId)) continue; // Only codes like 1.2.3 or M.1.2.3
           auditMap[testId] = `audit-log:${entryLineNum}`;
@@ -133,7 +146,7 @@ function generateDashboardContent() {
   const allTestIds = new Set([
     ...Object.keys(checklistStatuses),
     ...Object.keys(testIdToFile),
-    ...Object.keys(auditMap)
+    ...Object.keys(auditMap),
   ]);
 
   const sortedIds = Array.from(allTestIds).sort((a, b) => {
@@ -160,8 +173,12 @@ function generateDashboardContent() {
   });
 
   const outputLines = [];
-  outputLines.push('| Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |');
-  outputLines.push('|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|');
+  outputLines.push(
+    '| Test Code | Test Target         | Checklist | # it.skip() | Audit Log      | Test File Path                                         |',
+  );
+  outputLines.push(
+    '|-----------|---------------------|-----------|-------------|---------------|--------------------------------------------------------|',
+  );
 
   for (const testId of sortedIds) {
     const checklistEntry = checklistStatuses[testId] || {};
@@ -178,13 +195,14 @@ function generateDashboardContent() {
       const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
       const testFilePath = f.testFilePath || '';
       outputLines.push(
-        `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
+        `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`,
       );
-    } else if (!checklistStatus && (f.skips || a)) { // For tests not in checklist but in skips or audit
+    } else if (!checklistStatus && (f.skips || a)) {
+      // For tests not in checklist but in skips or audit
       const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
       const testFilePath = f.testFilePath || '';
       outputLines.push(
-        `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`
+        `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`,
       );
     }
   }
@@ -204,23 +222,19 @@ function updateIndex(dashboardLines) {
     return;
   }
 
-  const newContent = [
-    startMarker,
-    ...dashboardLines,
-    endMarker
-  ].join('\n');
+  const newContent = [startMarker, ...dashboardLines, endMarker].join('\n');
 
   function escapeRegex(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
   const regex = new RegExp(
     `${escapeRegex(startMarker)}[\\s\\S]*${escapeRegex(endMarker)}`,
-    'g'
+    'g',
   );
 
   if (!regex.test(indexContent)) {
     logger.error(
-      `ERROR: Could not find dashboard markers in ${indexPath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`
+      `ERROR: Could not find dashboard markers in ${indexPath}. Please ensure these markers exist:\n${startMarker}\n...\n${endMarker}`,
     );
     return;
   }
@@ -232,7 +246,6 @@ function updateIndex(dashboardLines) {
   logger.success(`Successfully updated dashboard in ${indexPath}`);
 }
 
-
 // --- Check command line arguments to determine action ---
 if (process.argv.includes('update')) {
   const dashboardLines = generateDashboardContent();
@@ -242,4 +255,3 @@ if (process.argv.includes('update')) {
   const dashboardLines = generateDashboardContent();
   logger.info(dashboardLines.join('\n'));
 }
-

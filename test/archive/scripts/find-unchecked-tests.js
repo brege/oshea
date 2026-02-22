@@ -1,6 +1,11 @@
 // test/archive/scripts/find-unchecked-tests.js
 require('module-alias/register');
-const { integrationTestDir, e2eTestDir, docsTestDir, loggerPath } = require('@paths');
+const {
+  integrationTestDir,
+  e2eTestDir,
+  docsTestDir,
+  loggerPath,
+} = require('@paths');
 
 const fs = require('fs');
 const path = require('path');
@@ -23,13 +28,10 @@ function findAllJsFiles(dir) {
   return results;
 }
 function buildTestIdToPathMap() {
-  const dirs = [
-    integrationTestDir,
-    e2eTestDir
-  ];
+  const dirs = [integrationTestDir, e2eTestDir];
   const testIdToPath = {};
-  dirs.forEach(dir => {
-    findAllJsFiles(dir).forEach(file => {
+  dirs.forEach((dir) => {
+    findAllJsFiles(dir).forEach((file) => {
       const match = file.match(/\.test\.((?:\d+\.)*\d+|M\.(?:\d+\.)*\d+)\.js$/);
       if (match) {
         const testId = match[1];
@@ -44,16 +46,19 @@ function buildTestIdToPathMap() {
 const testIdToPath = buildTestIdToPathMap();
 
 const DOCS_DIR = docsTestDir;
-const checklistFiles = fs.readdirSync(DOCS_DIR)
-  .filter(f => /^checklist-level-(\d+|m\d+)\.md$/i.test(f)) // support meta checklists
-  .map(f => path.join(DOCS_DIR, f));
+const checklistFiles = fs
+  .readdirSync(DOCS_DIR)
+  .filter((f) => /^checklist-level-(\d+|m\d+)\.md$/i.test(f)) // support meta checklists
+  .map((f) => path.join(DOCS_DIR, f));
 
 const openTests = [];
 for (const file of checklistFiles) {
   const lines = fs.readFileSync(file, 'utf8').split('\n');
   for (let i = 0; i < lines.length; i++) {
     // Support both numeric and meta test ID
-    const checklistMatch = lines[i].match(/^\*\s*\[\s*\]\s+(\d+\.\d+\.\d+|M\.\d+\.\d+(\.\d+)?)/);
+    const checklistMatch = lines[i].match(
+      /^\*\s*\[\s*\]\s+(\d+\.\d+\.\d+|M\.\d+\.\d+(\.\d+)?)/,
+    );
     if (checklistMatch) {
       const testId = checklistMatch[1];
       let isOpen = false;
@@ -61,7 +66,10 @@ for (const file of checklistFiles) {
       // Look ahead for status and test_target
       for (let j = i + 1; j < lines.length; j++) {
         const statusLine = lines[j].trim();
-        if (statusLine.startsWith('- **status:**') && statusLine.match(/OPEN/i)) {
+        if (
+          statusLine.startsWith('- **status:**') &&
+          statusLine.match(/OPEN/i)
+        ) {
           isOpen = true;
         }
         const targetMatch = lines[j].match(/- \*\*test_target:\*\*\s*(.*)/);
@@ -71,7 +79,11 @@ for (const file of checklistFiles) {
         if (lines[j].startsWith('* [')) break;
       }
       if (isOpen) {
-        openTests.push({ testId, testTarget, testPath: testIdToPath[testId] || '' });
+        openTests.push({
+          testId,
+          testTarget,
+          testPath: testIdToPath[testId] || '',
+        });
       }
     }
   }
@@ -83,4 +95,3 @@ openTests.forEach(({ testId, testTarget, testPath }) => {
   // Add two spaces between columns 2 and 3 for clarity
   logger.info(`${tid}${tgt}  ${testPath}`);
 });
-

@@ -1,6 +1,11 @@
 // test/archive/scripts/find-nonclosed-audits.js
 require('module-alias/register');
-const { integrationTestDir, e2eTestDir, docsTestDir, loggerPath } = require('@paths');
+const {
+  integrationTestDir,
+  e2eTestDir,
+  docsTestDir,
+  loggerPath,
+} = require('@paths');
 
 const logger = require(loggerPath);
 const fs = require('fs');
@@ -21,13 +26,10 @@ function findAllJsFiles(dir) {
   return results;
 }
 function buildTestIdToPathMap() {
-  const dirs = [
-    integrationTestDir,
-    e2eTestDir
-  ];
+  const dirs = [integrationTestDir, e2eTestDir];
   const testIdToPath = {};
-  dirs.forEach(dir => {
-    findAllJsFiles(dir).forEach(file => {
+  dirs.forEach((dir) => {
+    findAllJsFiles(dir).forEach((file) => {
       const match = file.match(/\.test\.((?:\d+\.)*\d+)\.js$/);
       if (match) {
         const testId = match[1];
@@ -55,11 +57,17 @@ for (let i = 0; i < lines.length; i++) {
       const tidMatch = lines[j].match(/- \*\*test_id:\*\* (.+)$/);
       if (tidMatch) testIdRaw = tidMatch[1].trim();
       const statusMatch = lines[j].match(/- \*\*status:\*\* (.+)$/);
-      if (statusMatch) { status = statusMatch[1].trim().toUpperCase(); break; }
+      if (statusMatch) {
+        status = statusMatch[1].trim().toUpperCase();
+        break;
+      }
       if (lines[j].startsWith('## Entry:')) break;
     }
     if (status !== 'CLOSED') {
-      const testIds = testIdRaw.split(',').map(s => s.trim()).filter(Boolean);
+      const testIds = testIdRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       for (const testId of testIds) {
         if (!/^\d+(\.\d+)*$/.test(testId)) continue; // Only numeric codes
         const relPath = testIdToPath[testId] || '';

@@ -15,7 +15,7 @@ try {
     error: (msg) => console.error(`[ERROR] ${msg}`),
     success: (msg) => console.log(`[SUCCESS] ${msg}`),
     debug: (msg) => console.log(`[DEBUG] ${msg}`),
-    detail: (msg) => console.log(`[DETAIL] ${msg}`)
+    detail: (msg) => console.log(`[DETAIL] ${msg}`),
   };
 }
 
@@ -27,7 +27,8 @@ const yaml = require('js-yaml');
 class DeclarativePathsGenerator {
   constructor(configPath = null, projectRoot = process.cwd()) {
     this.projectRoot = projectRoot;
-    this.configPath = configPath || path.join(projectRoot, 'paths', 'paths-config.yaml');
+    this.configPath =
+      configPath || path.join(projectRoot, 'paths', 'paths-config.yaml');
     this.config = this.loadConfig();
   }
 
@@ -39,7 +40,9 @@ class DeclarativePathsGenerator {
       const configContent = fs.readFileSync(this.configPath, 'utf8');
       return yaml.load(configContent);
     } catch (error) {
-      throw new Error(`Failed to parse configuration: ${error.message}`, { cause: error });
+      throw new Error(`Failed to parse configuration: ${error.message}`, {
+        cause: error,
+      });
     }
   }
 
@@ -50,11 +53,12 @@ class DeclarativePathsGenerator {
     // Use Set to avoid duplicates across patterns
     const matchedFiles = new Set();
     for (const pattern of patterns) {
-      glob.sync(pattern, { cwd: this.projectRoot, absolute: false })
-        .forEach(f => matchedFiles.add(f));
+      glob
+        .sync(pattern, { cwd: this.projectRoot, absolute: false })
+        .forEach((f) => matchedFiles.add(f));
     }
 
-    return Array.from(matchedFiles).map(f => {
+    return Array.from(matchedFiles).map((f) => {
       const dir = path.dirname(f);
       const name = path.basename(f);
       return {
@@ -67,7 +71,8 @@ class DeclarativePathsGenerator {
   }
 
   scanDirectory(dir, featureName = '', fileExtensions = null) {
-    const extensions = fileExtensions || this.config.globals?.file_extensions || ['.js', '.sh'];
+    const extensions = fileExtensions ||
+      this.config.globals?.file_extensions || ['.js', '.sh'];
     const excludePatterns = this.config.globals?.exclude_patterns || [];
     const files = [];
     const fullPath = path.join(this.projectRoot, dir);
@@ -81,21 +86,25 @@ class DeclarativePathsGenerator {
       const stat = fs.statSync(itemPath);
       const relativePath = path.join(dir, item).replace(/\\/g, '/');
 
-      const isExcluded = excludePatterns.some(pattern => {
-        const regex = new RegExp(pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'));
+      const isExcluded = excludePatterns.some((pattern) => {
+        const regex = new RegExp(
+          pattern.replace(/\*\*/g, '.*').replace(/\*/g, '[^/]*'),
+        );
         return regex.test(relativePath);
       });
 
       if (isExcluded) continue;
 
       if (stat.isDirectory()) {
-        files.push(...this.scanDirectory(path.join(dir, item), featureName, extensions));
-      } else if (extensions.some(ext => item.endsWith(ext))) {
+        files.push(
+          ...this.scanDirectory(path.join(dir, item), featureName, extensions),
+        );
+      } else if (extensions.some((ext) => item.endsWith(ext))) {
         files.push({
           name: item,
           relativePath,
           directory: dir,
-          feature: featureName
+          feature: featureName,
         });
       }
     }
@@ -105,10 +114,11 @@ class DeclarativePathsGenerator {
 
   camelCase(str) {
     if (typeof str !== 'string') return '';
-    return str.replace(/[-_.]/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase())
+    return str
+      .replace(/[-_.]/g, ' ')
+      .replace(/\b\w/g, (l) => l.toUpperCase())
       .replace(/\s/g, '')
-      .replace(/^\w/, l => l.toLowerCase());
+      .replace(/^\w/, (l) => l.toLowerCase());
   }
 
   getVariableName(file, contextualNaming = {}) {
@@ -141,15 +151,19 @@ class DeclarativePathsGenerator {
 
     // Header with metadata
     content.push(`// ${registryConfig.output_file}`);
-    content.push(`// ${path.basename(registryConfig.output_file)} - ${registryConfig.title}`);
+    content.push(
+      `// ${path.basename(registryConfig.output_file)} - ${registryConfig.title}`,
+    );
     content.push(`// Generated: ${new Date().toISOString()}`);
     content.push(`// Architecture: ${registryConfig.architecture}`);
-    content.push(`// Regenerate: ${metadata.regenerate_command || 'npm run paths'}`);
+    content.push(
+      `// Regenerate: ${metadata.regenerate_command || 'npm run paths'}`,
+    );
     if (metadata.generated_warning) {
       content.push(`// ${metadata.generated_warning}`);
     }
     content.push('');
-    content.push('const path = require(\'path\');');
+    content.push("const path = require('path');");
 
     // Imports
     if (registryConfig.imports) {
@@ -160,14 +174,16 @@ class DeclarativePathsGenerator {
     content.push('');
 
     // Architecture section
-    const archSections = registryConfig.architecture_sections || registryConfig.architecture;
+    const archSections =
+      registryConfig.architecture_sections || registryConfig.architecture;
     if (archSections && typeof archSections === 'object') {
       content.push('// ==========================================');
       content.push('// Architecture');
       content.push('// ==========================================');
       content.push('');
 
-      for (const [_sectionName, section] of Object.entries(archSections)) { // eslint-disable-line no-unused-vars
+      for (const [_sectionName, section] of Object.entries(archSections)) {
+        // eslint-disable-line no-unused-vars
         if (section && section.comment && section.items) {
           content.push(`// --- ${section.comment} ---`);
           for (const [varName, pathDef] of Object.entries(section.items)) {
@@ -188,14 +204,17 @@ class DeclarativePathsGenerator {
       const baseVar = this.camelCase(registryConfig.base_var);
       const basePath = registryConfig.base_path;
       // Define the base variable relative to the output file's directory
-      content.push(`const ${baseVar} = path.join(path.dirname(__filename), '..', '${basePath}');`);
+      content.push(
+        `const ${baseVar} = path.join(path.dirname(__filename), '..', '${basePath}');`,
+      );
 
       const scannedFiles = this.scanDirectory(
         basePath,
         '',
-        registryConfig.file_extensions
-      ).filter(file =>
-        !(registryConfig.exclude_patterns || []).includes(file.relativePath)
+        registryConfig.file_extensions,
+      ).filter(
+        (file) =>
+          !(registryConfig.exclude_patterns || []).includes(file.relativePath),
       );
 
       const filesByDir = scannedFiles.reduce((acc, file) => {
@@ -207,10 +226,15 @@ class DeclarativePathsGenerator {
 
       for (const dir in filesByDir) {
         content.push(`// --- ${dir.replace(/\\/g, '/')} ---`);
-        filesByDir[dir].forEach(file => {
-          const varName = this.getVariableName(file, registryConfig.contextual_naming);
+        filesByDir[dir].forEach((file) => {
+          const varName = this.getVariableName(
+            file,
+            registryConfig.contextual_naming,
+          );
           const relPath = path.relative(basePath, file.relativePath);
-          content.push(`const ${varName} = path.join(${baseVar}, '${relPath.replace(/\\/g, '/')}');`);
+          content.push(
+            `const ${varName} = path.join(${baseVar}, '${relPath.replace(/\\/g, '/')}');`,
+          );
         });
         content.push('');
       }
@@ -225,16 +249,24 @@ class DeclarativePathsGenerator {
       content.push('');
 
       // Collect all feature files
-      for (const [featureName, feature] of Object.entries(registryConfig.features)) {
+      for (const [featureName, feature] of Object.entries(
+        registryConfig.features,
+      )) {
         featureFiles[featureName] = this.scanFeature(featureName, feature);
       }
 
       // Group by rank
       const ranks = {};
-      for (const [featureName, feature] of Object.entries(registryConfig.features)) {
+      for (const [featureName, feature] of Object.entries(
+        registryConfig.features,
+      )) {
         const rank = feature.rank || 0;
         if (!ranks[rank]) ranks[rank] = [];
-        ranks[rank].push({ featureName, feature, files: featureFiles[featureName] });
+        ranks[rank].push({
+          featureName,
+          feature,
+          files: featureFiles[featureName],
+        });
       }
 
       // Output by rank
@@ -250,7 +282,9 @@ class DeclarativePathsGenerator {
           content.push(`// ${feature.comment}`);
           const featureBaseDir = feature.pattern.split('**')[0];
           const rootVarName = `${this.camelCase(featureName)}Root`;
-          content.push(`const ${rootVarName} = path.join(projectRoot, '${featureBaseDir}');`);
+          content.push(
+            `const ${rootVarName} = path.join(projectRoot, '${featureBaseDir}');`,
+          );
 
           const sortedFiles = files.sort((a, b) => {
             const aDepth = a.directory.split('/').length;
@@ -260,8 +294,13 @@ class DeclarativePathsGenerator {
           });
 
           for (const file of sortedFiles) {
-            const varName = this.getVariableName(file, registryConfig.contextual_naming);
-            content.push(`const ${varName} = path.join(projectRoot, '${file.relativePath}');`);
+            const varName = this.getVariableName(
+              file,
+              registryConfig.contextual_naming,
+            );
+            content.push(
+              `const ${varName} = path.join(projectRoot, '${file.relativePath}');`,
+            );
           }
           content.push('');
         }
@@ -277,7 +316,8 @@ class DeclarativePathsGenerator {
     content.push('');
 
     // Export architecture variables
-    const archSectionsToExport = registryConfig.architecture_sections || registryConfig.architecture;
+    const archSectionsToExport =
+      registryConfig.architecture_sections || registryConfig.architecture;
     if (archSectionsToExport && typeof archSectionsToExport === 'object') {
       content.push('  // --- Architecture ---');
       for (const section of Object.values(archSectionsToExport)) {
@@ -293,12 +333,20 @@ class DeclarativePathsGenerator {
     // Export scanned variables
     if (registryConfig.scan_mode) {
       const baseVar = this.camelCase(registryConfig.base_var);
-      const scannedFiles = this.scanDirectory(registryConfig.base_path, '', registryConfig.file_extensions)
-        .filter(file => !(registryConfig.exclude_patterns || []).includes(file.relativePath));
+      const scannedFiles = this.scanDirectory(
+        registryConfig.base_path,
+        '',
+        registryConfig.file_extensions,
+      ).filter(
+        (file) =>
+          !(registryConfig.exclude_patterns || []).includes(file.relativePath),
+      );
 
       content.push(`  ${baseVar},`);
-      scannedFiles.forEach(file => {
-        content.push(`  ${this.getVariableName(file, registryConfig.contextual_naming)},`);
+      scannedFiles.forEach((file) => {
+        content.push(
+          `  ${this.getVariableName(file, registryConfig.contextual_naming)},`,
+        );
       });
       content.push('');
     }
@@ -306,10 +354,16 @@ class DeclarativePathsGenerator {
     // Export feature variables
     if (registryConfig.features) {
       const ranks = {};
-      for (const [featureName, feature] of Object.entries(registryConfig.features)) {
+      for (const [featureName, feature] of Object.entries(
+        registryConfig.features,
+      )) {
         const rank = feature.rank || 0;
         if (!ranks[rank]) ranks[rank] = [];
-        ranks[rank].push({ featureName, feature, files: featureFiles[featureName] });
+        ranks[rank].push({
+          featureName,
+          feature,
+          files: featureFiles[featureName],
+        });
       }
 
       const rankDefinitions = this.config.rank_definitions || {};
@@ -321,7 +375,10 @@ class DeclarativePathsGenerator {
           if (files.length === 0) continue;
           content.push(`  ${this.camelCase(featureName)}Root,`);
           for (const file of files) {
-            const varName = this.getVariableName(file, registryConfig.contextual_naming);
+            const varName = this.getVariableName(
+              file,
+              registryConfig.contextual_naming,
+            );
             content.push(`  ${varName},`);
           }
         }
@@ -347,7 +404,9 @@ class DeclarativePathsGenerator {
     const outputPath = path.join(this.projectRoot, registryConfig.output_file);
 
     if (dryRun) {
-      logger.info(`\n DRY RUN - Generated content for ${registryName} (${outputPath}):`);
+      logger.info(
+        `\n DRY RUN - Generated content for ${registryName} (${outputPath}):`,
+      );
       logger.info('='.repeat(60));
       logger.info(newContent);
       logger.info('='.repeat(60));
@@ -362,18 +421,28 @@ class DeclarativePathsGenerator {
     let shouldUpdate = true;
     if (fs.existsSync(outputPath) && !force) {
       // Extract variable names from old and new content
-      const oldVariables = this.extractVariableNames(fs.readFileSync(outputPath, 'utf8'));
+      const oldVariables = this.extractVariableNames(
+        fs.readFileSync(outputPath, 'utf8'),
+      );
       const newVariables = this.extractVariableNames(newContent);
 
       // Only update if there are new variables (additions)
-      const hasNewItems = newVariables.some(varName => !oldVariables.includes(varName));
+      const hasNewItems = newVariables.some(
+        (varName) => !oldVariables.includes(varName),
+      );
 
       if (!hasNewItems) {
         shouldUpdate = false;
-        logger.detail(`No new items detected in ${registryName} registry: ${outputPath}`);
+        logger.detail(
+          `No new items detected in ${registryName} registry: ${outputPath}`,
+        );
       } else {
-        const newItems = newVariables.filter(varName => !oldVariables.includes(varName));
-        logger.info(`New items detected in ${registryName}: ${newItems.join(', ')}`);
+        const newItems = newVariables.filter(
+          (varName) => !oldVariables.includes(varName),
+        );
+        logger.info(
+          `New items detected in ${registryName}: ${newItems.join(', ')}`,
+        );
       }
     } else if (force && fs.existsSync(outputPath)) {
       logger.info(`Force update enabled for ${registryName} registry`);
@@ -396,7 +465,16 @@ class DeclarativePathsGenerator {
       if (match && match[1]) {
         // Skip the common base variables that always exist
         const varName = match[1];
-        if (!['projectRoot', 'scriptsRoot', 'testRoot', 'srcRoot', 'assetsRoot', 'nodeModulesPath'].includes(varName)) {
+        if (
+          ![
+            'projectRoot',
+            'scriptsRoot',
+            'testRoot',
+            'srcRoot',
+            'assetsRoot',
+            'nodeModulesPath',
+          ].includes(varName)
+        ) {
           variables.push(varName);
         }
       }
@@ -417,7 +495,9 @@ class DeclarativePathsGenerator {
       return;
     }
 
-    logger.info(`Found ${registryNames.length} registries: ${registryNames.join(', ')}\n`);
+    logger.info(
+      `Found ${registryNames.length} registries: ${registryNames.join(', ')}\n`,
+    );
 
     for (const [registryName, registryConfig] of Object.entries(registries)) {
       try {
@@ -438,7 +518,9 @@ class DeclarativePathsGenerator {
       errors.push('Missing "registries" section in configuration');
     }
 
-    for (const [name, registry] of Object.entries(this.config.registries || {})) {
+    for (const [name, registry] of Object.entries(
+      this.config.registries || {},
+    )) {
       if (!registry.output_file) {
         errors.push(`Registry "${name}" missing output_file`);
       }
@@ -452,7 +534,9 @@ class DeclarativePathsGenerator {
 }
 
 if (require.main === module) {
-  const configPath = process.argv.find(arg => arg.startsWith('--config='))?.split('=')[1];
+  const configPath = process.argv
+    .find((arg) => arg.startsWith('--config='))
+    ?.split('=')[1];
   const dryRun = process.argv.includes('--dry-run');
   const validate = process.argv.includes('--validate');
   const force = process.argv.includes('--force');
@@ -464,7 +548,7 @@ if (require.main === module) {
       const errors = generator.validateConfig();
       if (errors.length > 0) {
         logger.error('Configuration validation failed:');
-        errors.forEach(error => logger.error(`  • ${error}`));
+        errors.forEach((error) => logger.error(`  • ${error}`));
         process.exit(1);
       } else {
         logger.success('Configuration is valid');

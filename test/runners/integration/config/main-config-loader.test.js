@@ -9,7 +9,7 @@ const {
   allPaths,
   mainConfigLoaderConstructorManifestPath,
   mainConfigLoaderInitializeManifestPath,
-  mainConfigLoaderGettersManifestPath
+  mainConfigLoaderGettersManifestPath,
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -35,11 +35,11 @@ const commonTestConstants = {
   FACTORY_DEFAULT_CONFIG_PATH: factoryDefaultConfigPath,
 };
 
-describe(`main-config-loader (Module Integration Tests) ${path.relative(projectRoot, mainConfigLoaderPath)}`, function() {
+describe(`main-config-loader (Module Integration Tests) ${path.relative(projectRoot, mainConfigLoaderPath)}`, () => {
   let mockDependencies;
   let MainConfigLoader;
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
 
     mockDependencies = {
@@ -62,7 +62,7 @@ describe(`main-config-loader (Module Integration Tests) ${path.relative(projectR
     });
   });
 
-  afterEach(function() {
+  afterEach(() => {
     sinon.restore();
   });
 
@@ -77,7 +77,7 @@ describe(`main-config-loader (Module Integration Tests) ${path.relative(projectR
       ...scenarioConfig
     } = testCase;
 
-    it_(description, async function() {
+    it_(description, async () => {
       const mocks = { mockDependencies };
 
       if (setup) {
@@ -85,12 +85,20 @@ describe(`main-config-loader (Module Integration Tests) ${path.relative(projectR
       }
 
       if (isNegativeTest) {
-        expect(() => new MainConfigLoader(...scenarioConfig.constructorArgs, mocks.mockDependencies))
-          .to.throw(expectedErrorMessage);
+        expect(
+          () =>
+            new MainConfigLoader(
+              ...scenarioConfig.constructorArgs,
+              mocks.mockDependencies,
+            ),
+        ).to.throw(expectedErrorMessage);
         return;
       }
 
-      const loader = new MainConfigLoader(...scenarioConfig.constructorArgs, mocks.mockDependencies);
+      const loader = new MainConfigLoader(
+        ...scenarioConfig.constructorArgs,
+        mocks.mockDependencies,
+      );
 
       if (assert) {
         await assert(loader, mocks, commonTestConstants, expect, logs);
@@ -98,4 +106,3 @@ describe(`main-config-loader (Module Integration Tests) ${path.relative(projectR
     });
   });
 });
-

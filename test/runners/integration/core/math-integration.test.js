@@ -7,7 +7,7 @@ const {
   mathIntegrationFactoryPath,
   mathIntegrationManifestPath,
   katexPath,
-  captureLogsPath
+  captureLogsPath,
 } = require('@paths');
 const { expect } = require('chai');
 const { logs, clearLogs } = require(captureLogsPath);
@@ -17,18 +17,18 @@ const testManifest = require(mathIntegrationManifestPath);
 const testLoggerPath = captureLogsPath;
 const commonTestConstants = {
   KATEX_CSS_PATH: katexPath,
-  TEST_LOGGER_PATH: testLoggerPath
+  TEST_LOGGER_PATH: testLoggerPath,
 };
 
-describe(`math-integration (Module Integration Tests) ${path.relative(projectRoot, mathIntegrationPath)}`, function() {
-  beforeEach(function() {
+describe(`math-integration (Module Integration Tests) ${path.relative(projectRoot, mathIntegrationPath)}`, () => {
+  beforeEach(() => {
     clearLogs();
   });
 
-  testManifest.forEach(testCase => {
+  testManifest.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
 
-    it_(`${testCase.test_id}: ${testCase.description}`, async function() {
+    it_(`${testCase.test_id}: ${testCase.description}`, async () => {
       // Build mocks and mathIntegration instance for this scenario
       const mocks = buildMocks(testCase.scenario, commonTestConstants);
 
@@ -37,4 +37,3 @@ describe(`math-integration (Module Integration Tests) ${path.relative(projectRoo
     });
   });
 });
-

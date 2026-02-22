@@ -5,12 +5,17 @@ body {
   font-size: 11pt;
   line-height: 1.5;
   margin: 0.5in; /* Note: Puppeteer margins from config.yaml will likely define the PDF's printable area. */
-                 /* This body margin primarily affects direct HTML viewing or if preferCSSPageSize is true. */
+  /* This body margin primarily affects direct HTML viewing or if preferCSSPageSize is true. */
   color: #000;
   background-color: #fff;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: #000;
   margin-top: 1em;
   margin-bottom: 0.5em;
@@ -25,10 +30,15 @@ h3 {
   margin-top: 1.5em; /* More space before major sections */
 }
 
-h1 { font-size: 1.8em; } /* Example, if H1 is used for main recipe title */
-h2 { font-size: 1.5em; } /* Example, if H2 is used */
+h1 {
+  font-size: 1.8em;
+} /* Example, if H1 is used for main recipe title */
+h2 {
+  font-size: 1.5em;
+} /* Example, if H2 is used */
 
-ul, ol {
+ul,
+ol {
   margin-top: 0.5em;
   margin-bottom: 1em;
   padding-left: 1.5em; /* Standard indent for lists */
@@ -38,7 +48,8 @@ li {
   margin-bottom: 0.5em;
 }
 
-p { /* Adding basic paragraph styling for completeness */
+p {
+  /* Adding basic paragraph styling for completeness */
   margin-top: 0;
   margin-bottom: 0.75em;
 }
@@ -55,7 +66,6 @@ a {
 
 /* Print specific styles */
 @media print {
-
   body {
     font-size: 11pt; /* Maintain recipe font size */
     color: #000 !important;
@@ -64,11 +74,20 @@ a {
     color-adjust: exact;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     page-break-after: avoid; /* Prevent page break immediately after a heading */
   }
 
-  p, ul, ol, li { /* Added p, li */
+  p,
+  ul,
+  ol,
+  li {
+    /* Added p, li */
     page-break-inside: avoid; /* Prevent these elements from breaking across pages */
   }
 

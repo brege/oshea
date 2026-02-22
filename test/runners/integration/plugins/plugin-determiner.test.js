@@ -5,7 +5,7 @@ const {
   captureLogsPath,
   pluginDeterminerPath,
   pluginDeterminerManifestPath,
-  projectRoot
+  projectRoot,
 } = require('@paths');
 const { logs, clearLogs } = require(captureLogsPath);
 const testLoggerPath = captureLogsPath;
@@ -15,7 +15,7 @@ const chai = require('chai');
 const expect = chai.expect;
 const sinon = require('sinon');
 
-describe(`plugin-determiner (Module Integration Tests) ${path.relative(projectRoot, pluginDeterminerPath)}`, function() {
+describe(`plugin-determiner (Module Integration Tests) ${path.relative(projectRoot, pluginDeterminerPath)}`, () => {
   let determinePluginToUse;
   let mockFsPromises;
   let mockFsSync;
@@ -32,7 +32,7 @@ describe(`plugin-determiner (Module Integration Tests) ${path.relative(projectRo
     DUMMY_MARKDOWN_FILENAME: 'my-document.md',
   };
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
 
     const pathsPath = require.resolve('@paths');
@@ -43,35 +43,44 @@ describe(`plugin-determiner (Module Integration Tests) ${path.relative(projectRo
     require.cache[pathsPath] = {
       exports: {
         ...require(pathsPath),
-        loggerPath: testLoggerPath
-      }
+        loggerPath: testLoggerPath,
+      },
     };
 
-    mockFsPromises = { readFile: sinon.stub(), };
-    mockFsSync = { existsSync: sinon.stub().returns(false), statSync: sinon.stub(), };
+    mockFsPromises = { readFile: sinon.stub() };
+    mockFsSync = {
+      existsSync: sinon.stub().returns(false),
+      statSync: sinon.stub(),
+    };
 
     mockPath = {
-      resolve: sinon.stub().callsFake((...args) => require('path').resolve(...args)),
+      resolve: sinon
+        .stub()
+        .callsFake((...args) => require('path').resolve(...args)),
       dirname: require('path').dirname,
       basename: require('path').basename,
       extname: require('path').extname,
       join: require('path').join,
     };
 
-    mockYaml = { load: sinon.stub(), };
-    mockMarkdownUtils = { extractFrontMatter: sinon.stub(), };
+    mockYaml = { load: sinon.stub() };
+    mockMarkdownUtils = { extractFrontMatter: sinon.stub() };
 
     mockProcessCwd = sinon.stub(process, 'cwd').callThrough();
 
     dependencies = {
-      fsPromises: mockFsPromises, fsSync: mockFsSync, path: mockPath,
-      yaml: mockYaml, markdownUtils: mockMarkdownUtils, processCwd: mockProcessCwd,
+      fsPromises: mockFsPromises,
+      fsSync: mockFsSync,
+      path: mockPath,
+      yaml: mockYaml,
+      markdownUtils: mockMarkdownUtils,
+      processCwd: mockProcessCwd,
     };
 
     determinePluginToUse = require(pluginDeterminerPath).determinePluginToUse;
   });
 
-  afterEach(function() {
+  afterEach(() => {
     if (originalPathsModule) {
       require.cache[require.resolve('@paths')] = originalPathsModule;
     }
@@ -79,22 +88,37 @@ describe(`plugin-determiner (Module Integration Tests) ${path.relative(projectRo
     delete process.env.DEBUG_PLUGIN_DETERMINER;
   });
 
-  testManifest.forEach(testCase => {
+  testManifest.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
 
-    it_(`${testCase.describe}`, async function() {
+    it_(`${testCase.describe}`, async () => {
       const currentMocks = {
-        mockFsPromises, mockFsSync, mockPath, mockYaml, mockMarkdownUtils, mockProcessCwd,
+        mockFsPromises,
+        mockFsSync,
+        mockPath,
+        mockYaml,
+        mockMarkdownUtils,
+        mockProcessCwd,
       };
 
       if (testCase.setup) {
         await testCase.setup(testCase.args, currentMocks, commonTestConstants);
       }
 
-      const result = await determinePluginToUse(testCase.args, dependencies, testCase.defaultPluginName || 'default');
+      const result = await determinePluginToUse(
+        testCase.args,
+        dependencies,
+        testCase.defaultPluginName || 'default',
+      );
 
-      await testCase.assert(result, testCase.args, currentMocks, commonTestConstants, expect, logs);
+      await testCase.assert(
+        result,
+        testCase.args,
+        currentMocks,
+        commonTestConstants,
+        expect,
+        logs,
+      );
     });
   });
 });
-

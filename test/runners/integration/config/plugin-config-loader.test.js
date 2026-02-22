@@ -7,7 +7,7 @@ const {
   allPaths,
   pluginConfigLoaderConstructorManifestPath,
   pluginConfigLoaderLoadSingleLayerManifestPath,
-  pluginConfigLoaderApplyOverridesManifestPath
+  pluginConfigLoaderApplyOverridesManifestPath,
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
@@ -17,8 +17,12 @@ const proxyquire = require('proxyquire');
 const testLoggerPath = captureLogsPath;
 
 const constructorManifest = require(pluginConfigLoaderConstructorManifestPath);
-const loadSingleLayerManifest = require(pluginConfigLoaderLoadSingleLayerManifestPath);
-const applyOverridesManifest = require(pluginConfigLoaderApplyOverridesManifestPath);
+const loadSingleLayerManifest = require(
+  pluginConfigLoaderLoadSingleLayerManifestPath,
+);
+const applyOverridesManifest = require(
+  pluginConfigLoaderApplyOverridesManifestPath,
+);
 
 const allTestCases = [
   ...constructorManifest,
@@ -33,11 +37,11 @@ const commonTestConstants = {
   PROJECT_MAIN_CONFIG_PATH: '/mock/project/config.yaml',
 };
 
-describe(`plugin-config-loader (Module Integration Tests) ${path.relative(projectRoot, pluginConfigLoaderPath)}`, function() {
+describe(`plugin-config-loader (Module Integration Tests) ${path.relative(projectRoot, pluginConfigLoaderPath)}`, () => {
   let mockDependencies;
   let PluginConfigLoader;
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
 
     mockDependencies = {
@@ -58,27 +62,25 @@ describe(`plugin-config-loader (Module Integration Tests) ${path.relative(projec
     });
   });
 
-  afterEach(function() {
+  afterEach(() => {
     sinon.restore();
   });
 
   allTestCases.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
-    const {
-      description,
-      setup,
-      assert,
-      ...scenarioConfig
-    } = testCase;
+    const { description, setup, assert, ...scenarioConfig } = testCase;
 
-    it_(description, async function() {
+    it_(description, async () => {
       const mocks = { mockDependencies };
 
       if (setup) {
         await setup(mocks, commonTestConstants, scenarioConfig);
       }
 
-      const loader = new PluginConfigLoader(...scenarioConfig.constructorArgs, mocks.mockDependencies);
+      const loader = new PluginConfigLoader(
+        ...scenarioConfig.constructorArgs,
+        mocks.mockDependencies,
+      );
 
       if (assert) {
         await assert(loader, mocks, commonTestConstants, expect, logs);
@@ -86,4 +88,3 @@ describe(`plugin-config-loader (Module Integration Tests) ${path.relative(projec
     });
   });
 });
-

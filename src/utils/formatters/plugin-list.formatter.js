@@ -26,19 +26,32 @@ function formatPluginEntry(plugin) {
     if (collection && pluginId) {
       lines.push(`    ${theme.detail('CM Origin:')} ${collection}/${pluginId}`);
     }
-    if (plugin.cmInvokeName && plugin.cmInvokeName !== plugin.name && plugin.status === 'Enabled (CM)') {
-      lines.push(`    ${theme.detail('CM Invoke Name:')} ${plugin.cmInvokeName}`);
+    if (
+      plugin.cmInvokeName &&
+      plugin.cmInvokeName !== plugin.name &&
+      plugin.status === 'Enabled (CM)'
+    ) {
+      lines.push(
+        `    ${theme.detail('CM Invoke Name:')} ${plugin.cmInvokeName}`,
+      );
     }
   }
 
   lines.push(`    ${theme.detail('Description:')} ${plugin.description}`);
 
   let sourceDisplayMessage;
-  if (plugin.status === 'Enabled (CM)' && plugin.cmCollection && plugin.cmPluginId) {
+  if (
+    plugin.status === 'Enabled (CM)' &&
+    plugin.cmCollection &&
+    plugin.cmPluginId
+  ) {
     sourceDisplayMessage = `CollectionsManager (CM: ${plugin.cmCollection}/${plugin.cmPluginId})`;
-  } else if (plugin.registrationSourceDisplay && plugin.registrationSourceDisplay.includes('(CM:')) {
+  } else if (
+    plugin.registrationSourceDisplay &&
+    plugin.registrationSourceDisplay.includes('(CM:')
+  ) {
     const parts = plugin.registrationSourceDisplay.split('(CM:');
-    const cmDetails = parts[1].replace(')','').split('/');
+    const cmDetails = parts[1].replace(')', '').split('/');
     const cmCollectionName = cmDetails[0];
     const cmPluginIdName = cmDetails.slice(1).join('/');
     sourceDisplayMessage = `${parts[0].trim()} (CM:${cmCollectionName}/${cmPluginIdName})`;
@@ -78,11 +91,17 @@ function generateContextMessage(listData) {
 
   // Default/all type
   if (listData.format === 'table') {
-    const context = filter ? `CM plugins in collection "${filter}"` : 'all known plugins';
+    const context = filter
+      ? `CM plugins in collection "${filter}"`
+      : 'all known plugins';
     return `Summary for ${context}`;
   } else {
-    const usableCount = plugins.filter(p =>
-      (p.status && p.status.startsWith('Registered')) || p.status === 'Enabled (CM)' || p.status === 'Enabled (Created)' || p.status === 'Enabled (Added)'
+    const usableCount = plugins.filter(
+      (p) =>
+        (p.status && p.status.startsWith('Registered')) ||
+        p.status === 'Enabled (CM)' ||
+        p.status === 'Enabled (Created)' ||
+        p.status === 'Enabled (Added)',
     ).length;
     return `Found ${usableCount} plugin(s) usable by oshea`;
   }
@@ -129,28 +148,37 @@ function formatPluginList(level, message, meta = {}) {
   // Format based on display type
   if (listData.format === 'table') {
     // Use existing table formatter with structured data
-    const rows = listData.plugins.map(plugin => {
+    const rows = listData.plugins.map((plugin) => {
       return {
         status: plugin.status || 'N/A',
-        statusType: plugin.status === 'Enabled (CM)' ? 'enabled'
-          : plugin.status === 'Enabled (Created)' ? 'enabled'
-            : plugin.status === 'Enabled (Added)' ? 'enabled'
-              : plugin.status && plugin.status.startsWith('Registered') ? 'registered'
-                : plugin.status === 'Available (CM)' ? 'available'
-                  : plugin.status === 'Available (Created)' ? 'available'
-                    : plugin.status === 'Available (Added)' ? 'available'
-                      : 'unknown',
+        statusType:
+          plugin.status === 'Enabled (CM)'
+            ? 'enabled'
+            : plugin.status === 'Enabled (Created)'
+              ? 'enabled'
+              : plugin.status === 'Enabled (Added)'
+                ? 'enabled'
+                : plugin.status && plugin.status.startsWith('Registered')
+                  ? 'registered'
+                  : plugin.status === 'Available (CM)'
+                    ? 'available'
+                    : plugin.status === 'Available (Created)'
+                      ? 'available'
+                      : plugin.status === 'Available (Added)'
+                        ? 'available'
+                        : 'unknown',
         name: plugin.name,
-        origin: (plugin.cmCollection && plugin.cmPluginId)
-          ? `${plugin.cmCollection}/${plugin.cmPluginId}`
-          : 'n/a'
+        origin:
+          plugin.cmCollection && plugin.cmPluginId
+            ? `${plugin.cmCollection}/${plugin.cmPluginId}`
+            : 'n/a',
       };
     });
 
     const columns = [
       { key: 'status', header: 'Status' },
       { key: 'name', header: 'Name/Invoke Key' },
-      { key: 'origin', header: 'CM Origin' }
+      { key: 'origin', header: 'CM Origin' },
     ];
 
     const tableFormatter = require(tableFormatterPath);
@@ -159,9 +187,8 @@ function formatPluginList(level, message, meta = {}) {
       rows,
       columns,
       showBorders: true,
-      title: tableTitle
+      title: tableTitle,
     });
-
   } else {
     // Detailed card view - show context header for non-table format
     const contextMsg = generateContextMessage(listData);
@@ -169,7 +196,7 @@ function formatPluginList(level, message, meta = {}) {
     console.log(theme.info(contextMsg));
     console.log(''); // spacing after header
 
-    listData.plugins.forEach(plugin => {
+    listData.plugins.forEach((plugin) => {
       console.log(formatPluginEntry(plugin));
     });
   }
@@ -179,5 +206,5 @@ module.exports = {
   formatPluginList,
   formatPluginEntry,
   generateContextMessage,
-  generateEmptyMessage
+  generateEmptyMessage,
 };

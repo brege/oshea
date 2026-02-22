@@ -1,5 +1,9 @@
 // src/cli/plugin/list.command.js
-const { pluginRegistryBuilderPath, projectRoot, loggerPath } = require('@paths');
+const {
+  pluginRegistryBuilderPath,
+  projectRoot,
+  loggerPath,
+} = require('@paths');
 const logger = require(loggerPath);
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
 
@@ -17,53 +21,69 @@ function filterPlugins(allPlugins, args) {
   const collectionFilter = args.collection_name_filter;
 
   if (listType === 'enabled') {
-    return allPlugins.filter(p => {
+    return allPlugins.filter((p) => {
       const isEnabledCM = p.status === 'Enabled (CM)';
-      const isEnabledUser = p.status === 'Enabled (Created)' || p.status === 'Enabled (Added)';
-      const isRegisteredTraditional = p.status && p.status.startsWith('Registered');
-      if (collectionFilter && isEnabledCM) return p.cmCollection === collectionFilter;
-      if (collectionFilter && (isRegisteredTraditional || isEnabledUser)) return false;
+      const isEnabledUser =
+        p.status === 'Enabled (Created)' || p.status === 'Enabled (Added)';
+      const isRegisteredTraditional =
+        p.status && p.status.startsWith('Registered');
+      if (collectionFilter && isEnabledCM)
+        return p.cmCollection === collectionFilter;
+      if (collectionFilter && (isRegisteredTraditional || isEnabledUser))
+        return false;
       return isEnabledCM || isRegisteredTraditional || isEnabledUser;
     });
   }
 
   if (listType === 'available') {
-    return allPlugins.filter(p => {
+    return allPlugins.filter((p) => {
       // Include CM-managed available/enabled plugins
-      const isCMPlugin = (p.status === 'Enabled (CM)' || p.status === 'Available (CM)') &&
-        p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter);
+      const isCMPlugin =
+        (p.status === 'Enabled (CM)' || p.status === 'Available (CM)') &&
+        p.cmCollection &&
+        (!collectionFilter || p.cmCollection === collectionFilter);
 
       // Include user available plugins (ignoring collection filter for user plugins)
-      const isUserAvailable = p.status === 'Available (Created)' || p.status === 'Available (Added)';
+      const isUserAvailable =
+        p.status === 'Available (Created)' || p.status === 'Available (Added)';
 
       return isCMPlugin || isUserAvailable;
     });
   }
 
   if (listType === 'disabled') {
-    return allPlugins.filter(p => {
+    return allPlugins.filter((p) => {
       // Include CM-managed disabled plugins
-      const isCMDisabled = p.status === 'Available (CM)' &&
-        p.cmCollection && (!collectionFilter || p.cmCollection === collectionFilter);
+      const isCMDisabled =
+        p.status === 'Available (CM)' &&
+        p.cmCollection &&
+        (!collectionFilter || p.cmCollection === collectionFilter);
 
       // Include user disabled plugins
-      const isUserDisabled = p.status === 'Available (Created)' || p.status === 'Available (Added)';
+      const isUserDisabled =
+        p.status === 'Available (Created)' || p.status === 'Available (Added)';
 
       return isCMDisabled || isUserDisabled;
     });
   }
 
   // Default/all type
-  let results = allPlugins.filter(p =>
-    (p.status && p.status.startsWith('Registered')) ||
-    p.status === 'Enabled (CM)' ||
-    p.status === 'Enabled (Created)' ||
-    p.status === 'Enabled (Added)' ||
-    (args.short && (p.status === 'Available (CM)' || p.status === 'Available (Created)' || p.status === 'Available (Added)'))
+  let results = allPlugins.filter(
+    (p) =>
+      (p.status && p.status.startsWith('Registered')) ||
+      p.status === 'Enabled (CM)' ||
+      p.status === 'Enabled (Created)' ||
+      p.status === 'Enabled (Added)' ||
+      (args.short &&
+        (p.status === 'Available (CM)' ||
+          p.status === 'Available (Created)' ||
+          p.status === 'Available (Added)')),
   );
 
   if (collectionFilter && args.short) {
-    results = results.filter(p => p.cmCollection === collectionFilter || !p.cmCollection);
+    results = results.filter(
+      (p) => p.cmCollection === collectionFilter || !p.cmCollection,
+    );
   }
 
   return results;
@@ -78,7 +98,7 @@ module.exports = {
         describe: 'filter CM-managed plugins by collection name',
         type: 'string',
         default: null,
-        completionKey: 'downloadedCollections'
+        completionKey: 'downloadedCollections',
       })
       .option('available', {
         describe: 'list all available plugins from managed collections',
@@ -101,12 +121,20 @@ module.exports = {
         default: false,
       })
       .check((argv) => {
-        const statusFlags = [argv.available, argv.enabled, argv.disabled].filter(Boolean).length;
+        const statusFlags = [
+          argv.available,
+          argv.enabled,
+          argv.disabled,
+        ].filter(Boolean).length;
         if (statusFlags > 1) {
-          throw new Error('Error: --available, --enabled, and --disabled flags are mutually exclusive.');
+          throw new Error(
+            'Error: --available, --enabled, and --disabled flags are mutually exclusive.',
+          );
         }
         if (argv.collection_name_filter && statusFlags === 0 && !argv.short) {
-          logger.warn('Warning: Filter is ignored unless a status flag (--available, --enabled, --disabled) or --short is used.');
+          logger.warn(
+            'Warning: Filter is ignored unless a status flag (--available, --enabled, --disabled) or --short is used.',
+          );
         }
         return true;
       })
@@ -118,9 +146,14 @@ For a list of collection names, use 'oshea collection list'.`);
     try {
       // 1. Fetch data
       const builderInstance = new PluginRegistryBuilder(
-        projectRoot, null, args.config, args.factoryDefaults,
-        args.isLazyLoadMode || false, null, args.manager,
-        { collRoot: args.manager.collRoot }
+        projectRoot,
+        null,
+        args.config,
+        args.factoryDefaults,
+        args.isLazyLoadMode || false,
+        null,
+        args.manager,
+        { collRoot: args.manager.collRoot },
       );
       const allPluginDetails = await builderInstance.getAllPluginDetails();
 
@@ -132,18 +165,23 @@ For a list of collection names, use 'oshea collection list'.`);
         type: determineListType(args),
         format: args.short ? 'table' : 'detailed',
         filter: args.collection_name_filter,
-        plugins: filteredPlugins
+        plugins: filteredPlugins,
       };
 
       // 4. Send to formatter
       logger.info(listData, { format: 'plugin-list' });
-
     } catch (error) {
       logger.error(`ERROR listing plugins: ${error.message}`);
-      if (error.stack && !(process.env.NODE_ENV === 'test' && error.message.includes('mutually exclusive'))) {
+      if (
+        error.stack &&
+        !(
+          process.env.NODE_ENV === 'test' &&
+          error.message.includes('mutually exclusive')
+        )
+      ) {
         logger.error(error.stack);
       }
       process.exit(1);
     }
-  }
+  },
 };

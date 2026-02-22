@@ -1,7 +1,7 @@
 // src/config/config-resolver.js
 const fs = require('fs');
 const path = require('path');
-const os =require('os');
+const os = require('os');
 const Ajv = require('ajv');
 const {
   configUtilsPath,
@@ -10,7 +10,7 @@ const {
   pluginConfigLoaderPath,
   assetResolverPath,
   basePluginSchemaPath,
-  loggerPath
+  loggerPath,
 } = require('@paths');
 
 const logger = require(loggerPath);
@@ -23,11 +23,22 @@ const AssetResolver = require(assetResolverPath);
 const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class ConfigResolver {
-  constructor(mainConfigPathFromCli, useFactoryDefaultsOnly = false, isLazyLoadMode = false, dependencies = {}) {
+  constructor(
+    mainConfigPathFromCli,
+    useFactoryDefaultsOnly = false,
+    isLazyLoadMode = false,
+    dependencies = {},
+  ) {
     const defaultDependencies = {
-      fs, path, os,
-      loadYamlConfig, deepMerge,
-      PluginRegistryBuilder, MainConfigLoader, PluginConfigLoader, AssetResolver
+      fs,
+      path,
+      os,
+      loadYamlConfig,
+      deepMerge,
+      PluginRegistryBuilder,
+      MainConfigLoader,
+      PluginConfigLoader,
+      AssetResolver,
     };
     this.dependencies = { ...defaultDependencies, ...dependencies };
     this.collectionsManager = dependencies.collectionsManager || null;
@@ -39,7 +50,7 @@ class ConfigResolver {
     this.mainConfigLoader = new this.dependencies.MainConfigLoader(
       this.projectRoot,
       mainConfigPathFromCli,
-      this._useFactoryDefaultsOnly
+      this._useFactoryDefaultsOnly,
     );
     this.pluginConfigLoader = null;
     this.mergedPluginRegistry = null;
@@ -56,12 +67,17 @@ class ConfigResolver {
     this.ajv = new Ajv({ allErrors: true });
     // Use the direct, canonical path from the registry
     if (this.dependencies.fs.existsSync(basePluginSchemaPath)) {
-      const baseSchema = JSON.parse(this.dependencies.fs.readFileSync(basePluginSchemaPath, 'utf8'));
+      const baseSchema = JSON.parse(
+        this.dependencies.fs.readFileSync(basePluginSchemaPath, 'utf8'),
+      );
       this.ajv.addSchema(baseSchema, 'base-plugin.schema.json');
     } else {
-      logger.error('CRITICAL: Base plugin schema not found. Validation will not work.', {
-        context: 'ConfigResolver'
-      });
+      logger.error(
+        'CRITICAL: Base plugin schema not found. Validation will not work.',
+        {
+          context: 'ConfigResolver',
+        },
+      );
     }
   }
 
@@ -91,26 +107,37 @@ class ConfigResolver {
   _validatePluginConfig(pluginName, configData, pluginConfigPath) {
     const baseSchema = this.ajv.getSchema('base-plugin.schema.json').schema;
     let specificSchema = {};
-    const pluginSchemaPath = this.dependencies.path.join(this.dependencies.path.dirname(pluginConfigPath), `.contract/${this.dependencies.path.basename(pluginConfigPath, '.config.yaml')}.schema.json`);
+    const pluginSchemaPath = this.dependencies.path.join(
+      this.dependencies.path.dirname(pluginConfigPath),
+      `.contract/${this.dependencies.path.basename(pluginConfigPath, '.config.yaml')}.schema.json`,
+    );
 
     if (this.dependencies.fs.existsSync(pluginSchemaPath)) {
       try {
-        specificSchema = JSON.parse(this.dependencies.fs.readFileSync(pluginSchemaPath, 'utf8'));
+        specificSchema = JSON.parse(
+          this.dependencies.fs.readFileSync(pluginSchemaPath, 'utf8'),
+        );
       } catch (e) {
         logger.warn('Could not read or parse plugin schema file', {
           context: 'ConfigResolver',
           path: pluginSchemaPath,
-          error: e.message
+          error: e.message,
         });
       }
     }
 
-    const strictSchema = this.dependencies.deepMerge(baseSchema, specificSchema);
+    const strictSchema = this.dependencies.deepMerge(
+      baseSchema,
+      specificSchema,
+    );
 
     const objectsToRestrict = ['pdf_options', 'params', 'math', 'toc_options'];
     if (strictSchema.properties) {
-      objectsToRestrict.forEach(key => {
-        if (strictSchema.properties[key] && strictSchema.properties[key].type === 'object') {
+      objectsToRestrict.forEach((key) => {
+        if (
+          strictSchema.properties[key] &&
+          strictSchema.properties[key].type === 'object'
+        ) {
           strictSchema.properties[key].additionalProperties = false;
         }
       });
@@ -120,46 +147,51 @@ class ConfigResolver {
     const isValid = validate(configData);
 
     if (!isValid) {
-      const typoErrors = validate.errors.filter(e => e.keyword === 'additionalProperties');
-      const otherErrors = validate.errors.filter(e => e.keyword !== 'additionalProperties');
+      const typoErrors = validate.errors.filter(
+        (e) => e.keyword === 'additionalProperties',
+      );
+      const otherErrors = validate.errors.filter(
+        (e) => e.keyword !== 'additionalProperties',
+      );
 
       if (typoErrors.length > 0) {
         logger.warn('Configuration has possible typos or unknown properties', {
           context: 'ConfigResolver',
-          plugin: pluginName
+          plugin: pluginName,
         });
-        typoErrors.forEach(err => {
+        typoErrors.forEach((err) => {
           const property = err.params.additionalProperty;
-          const path = err.instancePath ? `${err.instancePath.substring(1)}.${property}`.replace(/\//g, '.') : property;
+          const path = err.instancePath
+            ? `${err.instancePath.substring(1)}.${property}`.replace(/\//g, '.')
+            : property;
           logger.warn('Unknown property found in configuration', {
             context: 'ConfigResolver',
             property: path,
-            file: pluginConfigPath
+            file: pluginConfigPath,
           });
         });
         logger.debug('To see final applied settings, run the config command', {
           context: 'ConfigResolver',
           plugin: pluginName,
-          command: `oshea config --plugin ${pluginName}`
+          command: `oshea config --plugin ${pluginName}`,
         });
       }
 
       if (otherErrors.length > 0) {
         logger.warn('Configuration has validation errors', {
           context: 'ConfigResolver',
-          plugin: pluginName
+          plugin: pluginName,
         });
-        otherErrors.forEach(err => {
+        otherErrors.forEach((err) => {
           logger.warn('Validation error detail', {
             context: 'ConfigResolver',
             path: err.instancePath || '/',
-            message: err.message
+            message: err.message,
           });
         });
       }
     }
   }
-
 
   async _initializeResolverIfNeeded() {
     if (this._initialized) return;
@@ -177,21 +209,27 @@ class ConfigResolver {
     }
 
     this.pluginConfigLoader = new this.dependencies.PluginConfigLoader(
-      xdg.baseDir, xdg.config, xdg.path,
-      project.baseDir, project.config, project.path,
+      xdg.baseDir,
+      xdg.config,
+      xdg.path,
+      project.baseDir,
+      project.config,
+      project.path,
       this.useFactoryDefaultsOnly,
-      { logger: logger } // Pass logger dependency
+      { logger: logger }, // Pass logger dependency
     );
 
     const currentProjectManifestPath = project.path;
 
     const registryBuilder = new this.dependencies.PluginRegistryBuilder(
-      this.projectRoot, xdg.baseDir, currentProjectManifestPath,
+      this.projectRoot,
+      xdg.baseDir,
+      currentProjectManifestPath,
       this.useFactoryDefaultsOnly,
       this.isLazyLoadMode,
       this.primaryMainConfigLoadReason,
       this.collectionsManager,
-      { collRoot: this.resolvedCollRoot }
+      { collRoot: this.resolvedCollRoot },
     );
     this.mergedPluginRegistry = await registryBuilder.buildRegistry();
 
@@ -216,7 +254,7 @@ class ConfigResolver {
       logger.warn('Base config file path not provided or does not exist', {
         context: 'ConfigResolver',
         file: configFilePath,
-        plugin: pluginName
+        plugin: pluginName,
       });
       return null;
     }
@@ -225,12 +263,22 @@ class ConfigResolver {
 
       this._validatePluginConfig(pluginName, rawConfig, configFilePath);
 
-      const initialCssPaths = this.dependencies.AssetResolver.resolveAndMergeCss(
-        rawConfig.css_files, assetsBasePath, [], false,
-        pluginName, configFilePath
-      );
+      const initialCssPaths =
+        this.dependencies.AssetResolver.resolveAndMergeCss(
+          rawConfig.css_files,
+          assetsBasePath,
+          [],
+          false,
+          pluginName,
+          configFilePath,
+        );
       const inheritCss = rawConfig.inherit_css === true;
-      const result = { rawConfig, resolvedCssPaths: initialCssPaths, inheritCss, actualPath: configFilePath };
+      const result = {
+        rawConfig,
+        resolvedCssPaths: initialCssPaths,
+        inheritCss,
+        actualPath: configFilePath,
+      };
       this.pluginConfigLoader._rawPluginYamlCache[cacheKey] = result;
       return result;
     } catch (error) {
@@ -238,16 +286,28 @@ class ConfigResolver {
         context: 'ConfigResolver',
         configFile: configFilePath,
         plugin: pluginName,
-        error: error.message
+        error: error.message,
       });
-      return { rawConfig: {}, resolvedCssPaths: [], inheritCss: false, actualPath: null };
+      return {
+        rawConfig: {},
+        resolvedCssPaths: [],
+        inheritCss: false,
+        actualPath: null,
+      };
     }
   }
 
-  async getEffectiveConfig(pluginSpec, localConfigOverrides = null, markdownFilePath = null) {
+  async getEffectiveConfig(
+    pluginSpec,
+    localConfigOverrides = null,
+    markdownFilePath = null,
+  ) {
     await this._initializeResolverIfNeeded();
 
-    const isPathSpec = typeof pluginSpec === 'string' && (pluginSpec.includes(this.dependencies.path.sep) || pluginSpec.startsWith('.'));
+    const isPathSpec =
+      typeof pluginSpec === 'string' &&
+      (pluginSpec.includes(this.dependencies.path.sep) ||
+        pluginSpec.startsWith('.'));
     let nominalPluginNameForLookup;
     let pluginOwnConfigPath;
     let actualPluginBasePath;
@@ -255,60 +315,101 @@ class ConfigResolver {
     if (isPathSpec) {
       let resolvedPathSpec = pluginSpec;
       if (!this.dependencies.path.isAbsolute(resolvedPathSpec)) {
-        if (resolvedPathSpec.startsWith('~/') || resolvedPathSpec.startsWith('~\\')) {
-          resolvedPathSpec = this.dependencies.path.join(this.dependencies.os.homedir(), resolvedPathSpec.substring(2));
+        if (
+          resolvedPathSpec.startsWith('~/') ||
+          resolvedPathSpec.startsWith('~\\')
+        ) {
+          resolvedPathSpec = this.dependencies.path.join(
+            this.dependencies.os.homedir(),
+            resolvedPathSpec.substring(2),
+          );
         } else {
-          if (markdownFilePath && (pluginSpec.startsWith('./') || pluginSpec.startsWith('../'))) {
-            logger.warn('Relative plugin path spec provided; resolving from CWD', {
-              context: 'ConfigResolver',
-              pathSpec: pluginSpec,
-              suggestion: 'Path should ideally be absolute if from front matter or local config.'
-            });
+          if (
+            markdownFilePath &&
+            (pluginSpec.startsWith('./') || pluginSpec.startsWith('../'))
+          ) {
+            logger.warn(
+              'Relative plugin path spec provided; resolving from CWD',
+              {
+                context: 'ConfigResolver',
+                pathSpec: pluginSpec,
+                suggestion:
+                  'Path should ideally be absolute if from front matter or local config.',
+              },
+            );
             resolvedPathSpec = this.dependencies.path.resolve(pluginSpec);
           } else if (!this.dependencies.path.isAbsolute(resolvedPathSpec)) {
-            throw new Error(`Relative plugin path specification '${pluginSpec}' must be resolved to an absolute path before calling getEffectiveConfig if not from CLI CWD, or use a registered plugin name.`);
+            throw new Error(
+              `Relative plugin path specification '${pluginSpec}' must be resolved to an absolute path before calling getEffectiveConfig if not from CLI CWD, or use a registered plugin name.`,
+            );
           }
         }
       }
       if (!this.dependencies.fs.existsSync(resolvedPathSpec)) {
-        throw new Error(`Plugin configuration file or directory specified by path not found: '${resolvedPathSpec}'.`);
+        throw new Error(
+          `Plugin configuration file or directory specified by path not found: '${resolvedPathSpec}'.`,
+        );
       }
       const stats = this.dependencies.fs.statSync(resolvedPathSpec);
       if (stats.isDirectory()) {
         actualPluginBasePath = resolvedPathSpec;
         const dirName = this.dependencies.path.basename(actualPluginBasePath);
-        pluginOwnConfigPath = this.dependencies.path.join(actualPluginBasePath, `${dirName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`);
+        pluginOwnConfigPath = this.dependencies.path.join(
+          actualPluginBasePath,
+          `${dirName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+        );
         nominalPluginNameForLookup = dirName;
         if (!this.dependencies.fs.existsSync(pluginOwnConfigPath)) {
-          const filesInDir = this.dependencies.fs.readdirSync(actualPluginBasePath);
-          const alternativeConfig = filesInDir.find(f => f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX));
+          const filesInDir =
+            this.dependencies.fs.readdirSync(actualPluginBasePath);
+          const alternativeConfig = filesInDir.find((f) =>
+            f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX),
+          );
           if (alternativeConfig) {
-            pluginOwnConfigPath = this.dependencies.path.join(actualPluginBasePath, alternativeConfig);
+            pluginOwnConfigPath = this.dependencies.path.join(
+              actualPluginBasePath,
+              alternativeConfig,
+            );
           } else {
-            throw new Error(`Plugin directory '${actualPluginBasePath}' specified, but no *.config.yaml file found within it.`);
+            throw new Error(
+              `Plugin directory '${actualPluginBasePath}' specified, but no *.config.yaml file found within it.`,
+            );
           }
         }
       } else if (stats.isFile()) {
         pluginOwnConfigPath = resolvedPathSpec;
-        actualPluginBasePath = this.dependencies.path.dirname(pluginOwnConfigPath);
-        nominalPluginNameForLookup = this.dependencies.path.basename(actualPluginBasePath);
+        actualPluginBasePath =
+          this.dependencies.path.dirname(pluginOwnConfigPath);
+        nominalPluginNameForLookup =
+          this.dependencies.path.basename(actualPluginBasePath);
       } else {
-        throw new Error(`Plugin path specification '${resolvedPathSpec}' is neither a file nor a directory.`);
+        throw new Error(
+          `Plugin path specification '${resolvedPathSpec}' is neither a file nor a directory.`,
+        );
       }
     } else {
       nominalPluginNameForLookup = pluginSpec;
-      const pluginRegistryEntry = this.mergedPluginRegistry ? this.mergedPluginRegistry[nominalPluginNameForLookup] : null;
+      const pluginRegistryEntry = this.mergedPluginRegistry
+        ? this.mergedPluginRegistry[nominalPluginNameForLookup]
+        : null;
       if (!pluginRegistryEntry || !pluginRegistryEntry.configPath) {
-        throw new Error(`Plugin '${nominalPluginNameForLookup}' is not registered or its configuration path could not be resolved.`);
+        throw new Error(
+          `Plugin '${nominalPluginNameForLookup}' is not registered or its configuration path could not be resolved.`,
+        );
       }
       pluginOwnConfigPath = pluginRegistryEntry.configPath;
       if (!this.dependencies.fs.existsSync(pluginOwnConfigPath)) {
-        throw new Error(`Configuration file for plugin '${nominalPluginNameForLookup}' not found at registered path: '${pluginOwnConfigPath}'.`);
+        throw new Error(
+          `Configuration file for plugin '${nominalPluginNameForLookup}' not found at registered path: '${pluginOwnConfigPath}'.`,
+        );
       }
-      actualPluginBasePath = this.dependencies.path.dirname(pluginOwnConfigPath);
+      actualPluginBasePath =
+        this.dependencies.path.dirname(pluginOwnConfigPath);
     }
 
-    const localOverridesCacheKeyPart = localConfigOverrides ? JSON.stringify(localConfigOverrides) : 'noLocalOverrides';
+    const localOverridesCacheKeyPart = localConfigOverrides
+      ? JSON.stringify(localConfigOverrides)
+      : 'noLocalOverrides';
     const markdownFilePathCacheKeyPart = markdownFilePath || 'noMarkdownFile';
     const cacheKey = `${nominalPluginNameForLookup}-${isPathSpec ? 'pathspec' : 'namespec'}-${pluginOwnConfigPath}-${this.useFactoryDefaultsOnly}-${this.primaryMainConfigPathActual}-${localOverridesCacheKeyPart}-${markdownFilePathCacheKeyPart}`;
 
@@ -319,32 +420,45 @@ class ConfigResolver {
     const loadedConfigSourcePaths = {
       mainConfigPath: this.primaryMainConfigPathActual,
       pluginConfigPaths: [],
-      cssFiles: []
+      cssFiles: [],
     };
 
-    const layer0Data = await this._loadPluginBaseConfig(pluginOwnConfigPath, actualPluginBasePath, nominalPluginNameForLookup);
+    const layer0Data = await this._loadPluginBaseConfig(
+      pluginOwnConfigPath,
+      actualPluginBasePath,
+      nominalPluginNameForLookup,
+    );
     if (!layer0Data || !layer0Data.rawConfig) {
-      throw new Error(`Failed to load plugin's own base configuration for '${nominalPluginNameForLookup}' from '${pluginOwnConfigPath}'.`);
+      throw new Error(
+        `Failed to load plugin's own base configuration for '${nominalPluginNameForLookup}' from '${pluginOwnConfigPath}'.`,
+      );
     }
     loadedConfigSourcePaths.pluginConfigPaths.push(pluginOwnConfigPath);
 
     const originalHandlerScript = layer0Data.rawConfig.handler_script;
     if (!originalHandlerScript) {
-      throw new Error(`'handler_script' not defined in plugin '${nominalPluginNameForLookup}'s own configuration file: ${pluginOwnConfigPath}. This can happen if the YAML is invalid or fails schema validation. Please check the logs for warnings from the configuration loader.`);
+      throw new Error(
+        `'handler_script' not defined in plugin '${nominalPluginNameForLookup}'s own configuration file: ${pluginOwnConfigPath}. This can happen if the YAML is invalid or fails schema validation. Please check the logs for warnings from the configuration loader.`,
+      );
     }
 
     const {
       mergedConfig: configAfterXLPOlayers,
-      mergedCssPaths: cssAfterXLPOlayers
+      mergedCssPaths: cssAfterXLPOlayers,
     } = await this.pluginConfigLoader.applyOverrideLayers(
-      nominalPluginNameForLookup, layer0Data, loadedConfigSourcePaths.pluginConfigPaths
+      nominalPluginNameForLookup,
+      layer0Data,
+      loadedConfigSourcePaths.pluginConfigPaths,
     );
 
     let currentMergedConfig = configAfterXLPOlayers;
     let currentCssPaths = cssAfterXLPOlayers;
 
     if (localConfigOverrides && Object.keys(localConfigOverrides).length > 0) {
-      currentMergedConfig = this.dependencies.deepMerge(currentMergedConfig, localConfigOverrides);
+      currentMergedConfig = this.dependencies.deepMerge(
+        currentMergedConfig,
+        localConfigOverrides,
+      );
 
       if (localConfigOverrides.css_files && markdownFilePath) {
         const localConfigDir = this.dependencies.path.dirname(markdownFilePath);
@@ -354,11 +468,15 @@ class ConfigResolver {
           currentCssPaths,
           localConfigOverrides.inheritCss === true,
           nominalPluginNameForLookup,
-          `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}.config.yaml`
+          `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}.config.yaml`,
         );
       }
-      const localConfigFilenameForLog = markdownFilePath ? `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}.config.yaml` : '<filename>.config.yaml';
-      loadedConfigSourcePaths.pluginConfigPaths.push(`Local file override from '${localConfigFilenameForLog}'`);
+      const localConfigFilenameForLog = markdownFilePath
+        ? `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}.config.yaml`
+        : '<filename>.config.yaml';
+      loadedConfigSourcePaths.pluginConfigPaths.push(
+        `Local file override from '${localConfigFilenameForLog}'`,
+      );
     }
 
     currentMergedConfig.handler_script = originalHandlerScript;
@@ -366,36 +484,55 @@ class ConfigResolver {
     if (this.primaryMainConfig.global_pdf_options) {
       currentMergedConfig.pdf_options = this.dependencies.deepMerge(
         this.primaryMainConfig.global_pdf_options,
-        currentMergedConfig.pdf_options || {}
+        currentMergedConfig.pdf_options || {},
       );
-      if (this.primaryMainConfig.global_pdf_options.margin && (currentMergedConfig.pdf_options || {}).margin) {
+      if (
+        this.primaryMainConfig.global_pdf_options.margin &&
+        (currentMergedConfig.pdf_options || {}).margin
+      ) {
         currentMergedConfig.pdf_options.margin = this.dependencies.deepMerge(
           this.primaryMainConfig.global_pdf_options.margin,
-          currentMergedConfig.pdf_options.margin
+          currentMergedConfig.pdf_options.margin,
         );
       }
     }
 
     const pluginOwnMathConfig = currentMergedConfig.math || {};
     let effectiveMathConfig = this.primaryMainConfig.math || {};
-    effectiveMathConfig = this.dependencies.deepMerge(effectiveMathConfig, pluginOwnMathConfig);
-    if ((this.primaryMainConfig.math && this.primaryMainConfig.math.katex_options) || (pluginOwnMathConfig.katex_options)) {
+    effectiveMathConfig = this.dependencies.deepMerge(
+      effectiveMathConfig,
+      pluginOwnMathConfig,
+    );
+    if (
+      (this.primaryMainConfig.math &&
+        this.primaryMainConfig.math.katex_options) ||
+      pluginOwnMathConfig.katex_options
+    ) {
       effectiveMathConfig.katex_options = this.dependencies.deepMerge(
-        (this.primaryMainConfig.math && this.primaryMainConfig.math.katex_options) || {},
-        pluginOwnMathConfig.katex_options || {}
+        (this.primaryMainConfig.math &&
+          this.primaryMainConfig.math.katex_options) ||
+          {},
+        pluginOwnMathConfig.katex_options || {},
       );
     }
     currentMergedConfig.math = effectiveMathConfig;
 
-    currentMergedConfig.css_files = [...new Set(currentCssPaths.filter(p => p && this.dependencies.fs.existsSync(p)))];
+    currentMergedConfig.css_files = [
+      ...new Set(
+        currentCssPaths.filter((p) => p && this.dependencies.fs.existsSync(p)),
+      ),
+    ];
     loadedConfigSourcePaths.cssFiles = currentMergedConfig.css_files;
 
-    const handlerScriptPath = this.dependencies.path.resolve(actualPluginBasePath, currentMergedConfig.handler_script);
+    const handlerScriptPath = this.dependencies.path.resolve(
+      actualPluginBasePath,
+      currentMergedConfig.handler_script,
+    );
     if (!this.dependencies.fs.existsSync(handlerScriptPath)) {
       logger.error('Handler script not found', {
         context: 'ConfigResolver',
         plugin: nominalPluginNameForLookup,
-        handlerPath: handlerScriptPath
+        handlerPath: handlerScriptPath,
       });
       throw new Error('Handler script not found.');
     }
@@ -405,7 +542,7 @@ class ConfigResolver {
       mainConfig: this.primaryMainConfig,
       pluginBasePath: actualPluginBasePath,
       handlerScriptPath: handlerScriptPath,
-      _wasFactoryDefaults: this.useFactoryDefaultsOnly
+      _wasFactoryDefaults: this.useFactoryDefaultsOnly,
     };
 
     this.loadedPluginConfigsCache[cacheKey] = effectiveDetails;

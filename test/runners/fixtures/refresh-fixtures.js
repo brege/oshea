@@ -25,22 +25,31 @@ async function refreshFixtures() {
 
   // Create valid single plugin
   logger.info('Creating valid-plugin fixture');
-  execSync(`node cli.js plugin create valid-plugin --outdir "${FULL_FAT_DIR}"`, {
-    cwd: PROJECT_ROOT,
-    stdio: 'inherit'
-  });
+  execSync(
+    `node cli.js plugin create valid-plugin --outdir "${FULL_FAT_DIR}"`,
+    {
+      cwd: PROJECT_ROOT,
+      stdio: 'inherit',
+    },
+  );
 
   // Create valid collection with multiple plugins
   logger.info('Creating valid-collection fixture');
-  execSync(`node cli.js plugin create valid-collection-plugin-1 --outdir "${FULL_FAT_DIR}"`, {
-    cwd: PROJECT_ROOT,
-    stdio: 'inherit'
-  });
+  execSync(
+    `node cli.js plugin create valid-collection-plugin-1 --outdir "${FULL_FAT_DIR}"`,
+    {
+      cwd: PROJECT_ROOT,
+      stdio: 'inherit',
+    },
+  );
 
-  execSync(`node cli.js plugin create valid-collection-plugin-2 --outdir "${FULL_FAT_DIR}"`, {
-    cwd: PROJECT_ROOT,
-    stdio: 'inherit'
-  });
+  execSync(
+    `node cli.js plugin create valid-collection-plugin-2 --outdir "${FULL_FAT_DIR}"`,
+    {
+      cwd: PROJECT_ROOT,
+      stdio: 'inherit',
+    },
+  );
 
   // Move plugins into collection structure
   const collectionDir = path.join(FULL_FAT_DIR, 'valid-collection');
@@ -48,12 +57,12 @@ async function refreshFixtures() {
 
   await fs.move(
     path.join(FULL_FAT_DIR, 'valid-collection-plugin-1'),
-    path.join(collectionDir, 'valid-collection-plugin-1')
+    path.join(collectionDir, 'valid-collection-plugin-1'),
   );
 
   await fs.move(
     path.join(FULL_FAT_DIR, 'valid-collection-plugin-2'),
-    path.join(collectionDir, 'valid-collection-plugin-2')
+    path.join(collectionDir, 'valid-collection-plugin-2'),
   );
 
   logger.info('Fixtures refreshed successfully');
@@ -70,7 +79,7 @@ async function validateFixtures() {
   try {
     execSync(`node cli.js plugin validate "${validPluginDir}"`, {
       cwd: PROJECT_ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
     logger.success('valid-plugin fixture is valid');
   } catch (error) {
@@ -85,7 +94,7 @@ async function validateFixtures() {
   try {
     execSync(`node cli.js plugin validate "${plugin1Dir}"`, {
       cwd: PROJECT_ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
     logger.success('valid-collection-plugin-1 fixture is valid');
   } catch (error) {
@@ -96,7 +105,7 @@ async function validateFixtures() {
   try {
     execSync(`node cli.js plugin validate "${plugin2Dir}"`, {
       cwd: PROJECT_ROOT,
-      stdio: 'pipe'
+      stdio: 'pipe',
     });
     logger.success('valid-collection-plugin-2 fixture is valid');
   } catch (error) {
@@ -109,7 +118,7 @@ async function validateFixtures() {
 if (require.main === module) {
   refreshFixtures()
     .then(() => validateFixtures())
-    .catch(error => {
+    .catch((error) => {
       logger.error('Error refreshing fixtures:', error);
       process.exit(1);
     });

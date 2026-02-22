@@ -6,12 +6,12 @@ function logMethod(level) {
 }
 
 const logger = {
-  info:    logMethod('info'),
-  warn:    logMethod('warn'),
-  error:   logMethod('error'),
+  info: logMethod('info'),
+  warn: logMethod('warn'),
+  error: logMethod('error'),
   success: logMethod('success'),
-  debug:   logMethod('debug'),
-  fatal:   logMethod('fatal'),
+  debug: logMethod('debug'),
+  fatal: logMethod('fatal'),
 };
 
 function clearLogs() {

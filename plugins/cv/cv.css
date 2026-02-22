@@ -5,7 +5,7 @@ body {
   font-size: 9pt;
   line-height: 1.45;
   margin: 1cm; /* Note: Puppeteer margins from config.yaml will likely define the PDF's printable area. */
-              /* This body margin primarily affects direct HTML viewing. */
+  /* This body margin primarily affects direct HTML viewing. */
 }
 
 a {
@@ -13,26 +13,44 @@ a {
   text-decoration: none;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: #000;
   margin-top: 1em;
   margin-bottom: 0.5em;
   line-height: 1.2;
 }
 
-h1 { font-size: 1.8em; }
-h2 { font-size: 1.5em; }
-h3 { font-size: 1.2em; }
-h4 { font-size: 1em; }
-h5 { font-size: 0.9em; }
-h6 { font-size: 0.8em; }
+h1 {
+  font-size: 1.8em;
+}
+h2 {
+  font-size: 1.5em;
+}
+h3 {
+  font-size: 1.2em;
+}
+h4 {
+  font-size: 1em;
+}
+h5 {
+  font-size: 0.9em;
+}
+h6 {
+  font-size: 0.8em;
+}
 
 p {
   margin-top: 0; /* Consistent with other CSS files */
   margin-bottom: 1em;
 }
 
-ul, ol {
+ul,
+ol {
   margin-top: 0.8em;
   margin-bottom: 0.8em;
   padding-left: 1.5em;
@@ -48,7 +66,8 @@ strong {
 
 /* Consistent code block styling with default.css */
 code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+  font-family:
+    "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
   background-color: #f0f0f0;
   padding: 0.2em 0.4em;
   border-radius: 3px;
@@ -62,7 +81,7 @@ pre {
   overflow-x: auto;
   border-radius: 4px;
   font-size: 0.9em; /* Match code font size or set as desired */
-  margin-top: 0.5em;  /* Added for spacing */
+  margin-top: 0.5em; /* Added for spacing */
   margin-bottom: 1em; /* Added for spacing */
 }
 
@@ -97,15 +116,32 @@ blockquote {
   }
 
   a {
-    color: rgb(0, 0, 0, 0.75) !important; /* Maintain link color style for CV if desired, or use #000 */
+    color: rgb(
+      0,
+      0,
+      0,
+      0.75
+    ) !important; /* Maintain link color style for CV if desired, or use #000 */
     text-decoration: none !important;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     page-break-after: avoid; /* Good for headings */
   }
 
-  p, ul, ol, blockquote, pre, figure, table { /* Added p, figure, table */
+  p,
+  ul,
+  ol,
+  blockquote,
+  pre,
+  figure,
+  table {
+    /* Added p, figure, table */
     page-break-inside: avoid; /* Good for content blocks */
   }
 

@@ -32,7 +32,7 @@ function formatInline(level, message, meta = {}) {
       level,
       message,
       ...meta,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
     fs.appendFileSync(logFilePath, JSON.stringify(entry)); // no \n
   } else {
@@ -46,5 +46,5 @@ function formatInline(level, message, meta = {}) {
 
 module.exports = {
   formatInline,
-  colorForLevel
+  colorForLevel,
 };

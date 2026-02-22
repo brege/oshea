@@ -8,7 +8,7 @@ const {
   cliPath,
   colorThemePath,
   pluginRegistryBuilderPath,
-  projectRoot
+  projectRoot,
 } = require('@paths');
 const { execSync } = require('child_process');
 
@@ -72,7 +72,7 @@ async function removeUserPlugin(pluginName, manager) {
   const updatedManifest = {
     version: '1.0',
     migrated_on: parsed?.migrated_on,
-    plugins: pluginStates
+    plugins: pluginStates,
   };
 
   try {
@@ -95,21 +95,27 @@ async function removeUserPlugin(pluginName, manager) {
       const restoredManifest = {
         version: '1.0',
         migrated_on: parsed?.migrated_on,
-        plugins: pluginStates
+        plugins: pluginStates,
       };
       fs.writeFileSync(pluginsManifestPath, yaml.dump(restoredManifest));
-      logger.debug('Restored plugin entry in manifest due to directory removal failure');
+      logger.debug(
+        'Restored plugin entry in manifest due to directory removal failure',
+      );
     } catch (restoreError) {
       logger.error(`Failed to restore manifest entry: ${restoreError.message}`);
     }
-    return { success: false, reason: 'directory_removal_error', error: e.message };
+    return {
+      success: false,
+      reason: 'directory_removal_error',
+      error: e.message,
+    };
   }
 
   return {
     success: true,
     pluginType: pluginType,
     sourceInfo: sourceInfo,
-    removedPath: pluginDir
+    removedPath: pluginDir,
   };
 }
 
@@ -122,12 +128,12 @@ module.exports = {
         describe: 'name of the plugin to remove',
         type: 'string',
         demandOption: true,
-        completionKey: 'userPlugins'
+        completionKey: 'userPlugins',
       })
       .option('force', {
         describe: 'skip confirmation prompt',
         type: 'boolean',
-        default: false
+        default: false,
       })
       .epilogue(`
 This command removes user plugins (both created and added plugins) from the unified user-plugins structure.
@@ -141,7 +147,9 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
   },
   handler: async (args) => {
     if (!args.manager) {
-      logger.fatal('FATAL ERROR: CollectionsManager instance not found in CLI arguments.');
+      logger.fatal(
+        'FATAL ERROR: CollectionsManager instance not found in CLI arguments.',
+      );
       process.exit(1);
     }
 
@@ -154,28 +162,46 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
     try {
       // Get all plugin details to check if plugin exists and what type it is
       const builderInstance = new PluginRegistryBuilder(
-        projectRoot, null, args.config, args.factoryDefaults,
-        args.isLazyLoadMode || false, null, manager,
-        { collRoot: manager.collRoot }
+        projectRoot,
+        null,
+        args.config,
+        args.factoryDefaults,
+        args.isLazyLoadMode || false,
+        null,
+        manager,
+        { collRoot: manager.collRoot },
       );
       const allPluginDetails = await builderInstance.getAllPluginDetails();
-      const targetPlugin = allPluginDetails.find(p => p.name === pluginName);
+      const targetPlugin = allPluginDetails.find((p) => p.name === pluginName);
 
       if (targetPlugin) {
         // Check if it's a bundled plugin (which cannot be removed)
-        if (targetPlugin.source === 'bundled' || (targetPlugin.status && targetPlugin.status.includes('Bundled'))) {
-          logger.error(`Cannot remove '${pluginName}' - it's a bundled plugin.`);
-          logger.info('Only user plugins (created or added plugins) can be removed.');
-          logger.info('Use \'oshea plugin list\' to see what plugins you have.');
+        if (
+          targetPlugin.source === 'bundled' ||
+          (targetPlugin.status && targetPlugin.status.includes('Bundled'))
+        ) {
+          logger.error(
+            `Cannot remove '${pluginName}' - it's a bundled plugin.`,
+          );
+          logger.info(
+            'Only user plugins (created or added plugins) can be removed.',
+          );
+          logger.info("Use 'oshea plugin list' to see what plugins you have.");
           process.exit(1);
           return;
         }
 
         // Check if it's a collection-managed plugin (which also cannot be removed this way)
         if (targetPlugin.source === 'cm') {
-          logger.error(`Cannot remove '${pluginName}' - it's managed by a collection.`);
-          logger.info('Use \'oshea plugin disable\' to disable it, or remove the entire collection.');
-          logger.info('Use \'oshea plugin list --enabled\' to see what plugins you have.');
+          logger.error(
+            `Cannot remove '${pluginName}' - it's managed by a collection.`,
+          );
+          logger.info(
+            "Use 'oshea plugin disable' to disable it, or remove the entire collection.",
+          );
+          logger.info(
+            "Use 'oshea plugin list --enabled' to see what plugins you have.",
+          );
           process.exit(1);
           return;
         }
@@ -186,68 +212,91 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
 
       if (!result.success) {
         switch (result.reason) {
-        case 'no_user_plugins_dir':
-        case 'plugin_not_found':
-          if (!targetPlugin) {
-            logger.error(`Plugin '${pluginName}' not found.`);
-            logger.info('This plugin doesn\'t exist in your system.');
-          } else {
-            logger.error(`Plugin '${pluginName}' cannot be removed.`);
-            logger.info('This plugin exists but is not a user-created or user-added plugin.');
-          }
-          logger.info('Use \'oshea plugin list\' to see what plugins you have.');
-          break;
-        case 'no_manifest':
-          logger.error(`Plugins manifest not found. Cannot remove plugin '${pluginName}'.`);
-          break;
-        case 'not_in_manifest':
-          logger.error(`Plugin '${pluginName}' not found in plugins manifest.`);
-          logger.info('This plugin may have been manually added or the manifest may be corrupted.');
-          break;
-        case 'manifest_read_error':
-          logger.error(`Failed to read plugins manifest: ${result.error}`);
-          break;
-        case 'manifest_write_error':
-          logger.error(`Failed to update plugins manifest: ${result.error}`);
-          break;
-        case 'directory_removal_error':
-          logger.error(`Failed to remove plugin directory: ${result.error}`);
-          break;
-        default:
-          logger.error(`Unknown error removing plugin '${pluginName}': ${result.reason}`);
+          case 'no_user_plugins_dir':
+          case 'plugin_not_found':
+            if (!targetPlugin) {
+              logger.error(`Plugin '${pluginName}' not found.`);
+              logger.info("This plugin doesn't exist in your system.");
+            } else {
+              logger.error(`Plugin '${pluginName}' cannot be removed.`);
+              logger.info(
+                'This plugin exists but is not a user-created or user-added plugin.',
+              );
+            }
+            logger.info(
+              "Use 'oshea plugin list' to see what plugins you have.",
+            );
+            break;
+          case 'no_manifest':
+            logger.error(
+              `Plugins manifest not found. Cannot remove plugin '${pluginName}'.`,
+            );
+            break;
+          case 'not_in_manifest':
+            logger.error(
+              `Plugin '${pluginName}' not found in plugins manifest.`,
+            );
+            logger.info(
+              'This plugin may have been manually added or the manifest may be corrupted.',
+            );
+            break;
+          case 'manifest_read_error':
+            logger.error(`Failed to read plugins manifest: ${result.error}`);
+            break;
+          case 'manifest_write_error':
+            logger.error(`Failed to update plugins manifest: ${result.error}`);
+            break;
+          case 'directory_removal_error':
+            logger.error(`Failed to remove plugin directory: ${result.error}`);
+            break;
+          default:
+            logger.error(
+              `Unknown error removing plugin '${pluginName}': ${result.reason}`,
+            );
         }
         process.exit(1);
         return;
       }
 
       // Success case
-      logger.success(`\nPlugin '${theme.value(pluginName)}' removed successfully.`);
+      logger.success(
+        `\nPlugin '${theme.value(pluginName)}' removed successfully.`,
+      );
 
       if (result.sourceInfo) {
-        logger.info(`  Plugin Type: ${theme.value(result.pluginType)} ${result.sourceInfo}`);
+        logger.info(
+          `  Plugin Type: ${theme.value(result.pluginType)} ${result.sourceInfo}`,
+        );
       }
 
       logger.info(`  Removed: ${theme.path(result.removedPath)}`);
 
       logger.info('\nNext Steps:');
-      logger.info(`  • List remaining plugins: ${theme.highlight('oshea plugin list')}`);
+      logger.info(
+        `  • List remaining plugins: ${theme.highlight('oshea plugin list')}`,
+      );
 
       if (result.pluginType === 'added' && result.sourceInfo) {
-        logger.info(`  • To re-add this plugin: ${theme.highlight('oshea plugin add <original_path>')}`);
+        logger.info(
+          `  • To re-add this plugin: ${theme.highlight('oshea plugin add <original_path>')}`,
+        );
       } else if (result.pluginType === 'created') {
-        logger.info(`  • To recreate this plugin: ${theme.highlight('oshea plugin create ' + pluginName + ' --from <source>')}`);
+        logger.info(
+          `  • To recreate this plugin: ${theme.highlight('oshea plugin create ' + pluginName + ' --from <source>')}`,
+        );
       }
 
       // Update tab completion cache
       try {
         execSync(`node "${cliPath}" _tab_cache`);
       } catch {
-        logger.warn('WARN: Failed to regenerate completion cache. This is not a fatal error.');
+        logger.warn(
+          'WARN: Failed to regenerate completion cache. This is not a fatal error.',
+        );
       }
-
     } catch (error) {
       logger.error(`\nERROR in 'plugin remove' command: ${error.message}`);
       process.exit(1);
     }
-  }
+  },
 };

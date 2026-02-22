@@ -4,7 +4,8 @@ const { pluginRegistryBuilderFactoryPath } = require('@paths');
 const { makeResolveAliasScenario } = require(pluginRegistryBuilderFactoryPath);
 module.exports = [
   {
-    description: '1.2.4: Should resolve a tilde-prefixed alias value to an absolute path in the user\'s home directory',
+    description:
+      "1.2.4: Should resolve a tilde-prefixed alias value to an absolute path in the user's home directory",
     methodName: '_resolveAlias',
     ...makeResolveAliasScenario({
       methodArgs: ['myAlias', '~/some/path', '/fake/config-base'],
@@ -13,7 +14,8 @@ module.exports = [
     }),
   },
   {
-    description: '1.2.5: Should resolve a relative alias value against the provided base path',
+    description:
+      '1.2.5: Should resolve a relative alias value against the provided base path',
     methodName: '_resolveAlias',
     ...makeResolveAliasScenario({
       methodArgs: ['my-alias', './relative/path', '/path/to/config/dir'],
@@ -43,7 +45,8 @@ module.exports = [
     }),
   },
   {
-    description: '1.2.6: Should return null for a relative path when basePathDefiningAlias is missing',
+    description:
+      '1.2.6: Should return null for a relative path when basePathDefiningAlias is missing',
     methodName: '_resolveAlias',
     ...makeResolveAliasScenario({
       methodArgs: ['my-alias', './relative/path', null],

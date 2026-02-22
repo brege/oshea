@@ -10,13 +10,11 @@ const {
   fileHelpersPath,
   lintingConfigPath,
   projectRoot,
-  loggerPath
+  loggerPath,
 } = require('@paths');
-const {
-  findFiles,
-  getPatternsFromArgs,
-  getDefaultGlobIgnores
-} = require(fileHelpersPath);
+const { findFiles, getPatternsFromArgs, getDefaultGlobIgnores } = require(
+  fileHelpersPath,
+);
 const logger = require(loggerPath);
 
 function loadLintSection(section, configPath = lintingConfigPath) {
@@ -40,7 +38,9 @@ function loadLintConfig(configPath = lintingConfigPath) {
 
 function findFilesArray(inputs, opts = {}) {
   const { debug = false } = opts; // eslint-disable-line no-unused-vars
-  logger.debug(` Received inputs: ${JSON.stringify(inputs)}`, { context: 'LintHelpers' });
+  logger.debug(` Received inputs: ${JSON.stringify(inputs)}`, {
+    context: 'LintHelpers',
+  });
 
   const files = new Set();
   const inputsArray = Array.isArray(inputs) ? inputs : [inputs];
@@ -48,26 +48,41 @@ function findFilesArray(inputs, opts = {}) {
   for (const input of inputsArray) {
     logger.debug(` Processing input: '${input}'`, { context: 'LintHelpers' });
     if (fs.existsSync(input) && fs.statSync(input).isDirectory()) {
-      logger.debug(` Input '${input}' is a directory, walking it recursively...`, { context: 'LintHelpers' });
+      logger.debug(
+        ` Input '${input}' is a directory, walking it recursively...`,
+        { context: 'LintHelpers' },
+      );
       for (const file of findFiles(input, opts)) {
         files.add(file);
       }
     } else {
-      logger.debug(` Input '${input}' is being treated as a glob pattern.`, { context: 'LintHelpers' });
+      logger.debug(` Input '${input}' is being treated as a glob pattern.`, {
+        context: 'LintHelpers',
+      });
       const { glob } = require('glob');
-      const matches = glob.sync(input, { nodir: true, ignore: opts.ignores || [], dot: true, absolute: true, cwd: projectRoot });
-      logger.debug(` Glob '${input}' matched ${matches.length} files.`, { context: 'LintHelpers' });
-      matches.forEach(file => files.add(file));
+      const matches = glob.sync(input, {
+        nodir: true,
+        ignore: opts.ignores || [],
+        dot: true,
+        absolute: true,
+        cwd: projectRoot,
+      });
+      logger.debug(` Glob '${input}' matched ${matches.length} files.`, {
+        context: 'LintHelpers',
+      });
+      matches.forEach((file) => files.add(file));
     }
   }
   const finalFiles = Array.from(files);
-  logger.debug(` Finished, returning ${finalFiles.length} unique files.`, { context: 'LintHelpers' });
+  logger.debug(` Finished, returning ${finalFiles.length} unique files.`, {
+    context: 'LintHelpers',
+  });
   return finalFiles;
 }
 
 function isExcluded(filePath, patterns) {
   const relPath = path.relative(process.cwd(), filePath).replace(/\\/g, '/');
-  return patterns.some(pattern => minimatch(relPath, pattern));
+  return patterns.some((pattern) => minimatch(relPath, pattern));
 }
 
 function parseCliArgs(args) {
@@ -146,7 +161,7 @@ function parseCliArgs(args) {
   return {
     flags,
     targets,
-    only
+    only,
   };
 }
 
@@ -164,15 +179,16 @@ function filterSteps(steps, searchTerm) {
     return steps;
   }
 
-  return steps.filter(step => {
+  return steps.filter((step) => {
     if (!step) return false;
 
     const key = (step.key || '').toString();
     const label = (step.label || '').toString();
     const search = searchTerm.toString().toLowerCase();
 
-    return key.toLowerCase().includes(search) ||
-      label.toLowerCase().includes(search);
+    return (
+      key.toLowerCase().includes(search) || label.toLowerCase().includes(search)
+    );
   });
 }
 
@@ -181,7 +197,7 @@ function getStepInfo(step) {
     return {
       key: '',
       label: '',
-      valid: false
+      valid: false,
     };
   }
 
@@ -189,7 +205,7 @@ function getStepInfo(step) {
     key: step.key || '',
     label: step.label || '',
     valid: true,
-    ...step
+    ...step,
   };
 }
 
@@ -205,4 +221,3 @@ module.exports = {
   filterSteps,
   getStepInfo,
 };
-

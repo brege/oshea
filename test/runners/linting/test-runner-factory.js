@@ -10,7 +10,7 @@ function createUnitTestRunner(suiteName, manifestPath, options = {}) {
   const { timeout = 20000 } = options;
   const testManifest = require(manifestPath);
 
-  describe(`${suiteName} (Unit Tests) scripts/linting/${suiteName === 'Code Linters' ? 'code/' : 'docs/'}`, function() {
+  describe(`${suiteName} (Unit Tests) scripts/linting/${suiteName === 'Code Linters' ? 'code/' : 'docs/'}`, function () {
     this.timeout(timeout);
 
     for (const testCase of testManifest) {
@@ -19,7 +19,9 @@ function createUnitTestRunner(suiteName, manifestPath, options = {}) {
       testFn(testCase.describe, async () => {
         const harness = new UnitTestHarness();
         try {
-          const sandboxDir = await harness.createSandbox(testCase.sandboxPrefix);
+          const sandboxDir = await harness.createSandbox(
+            testCase.sandboxPrefix,
+          );
 
           if (typeof testCase.setup === 'function') {
             await testCase.setup(sandboxDir, harness);
@@ -32,7 +34,7 @@ function createUnitTestRunner(suiteName, manifestPath, options = {}) {
           const result = await harness.runScript(
             testCase.scriptPath,
             testCase.args(sandboxDir),
-            sandboxDir
+            sandboxDir,
           );
 
           await testCase.assert(result, sandboxDir, expect);
@@ -45,4 +47,3 @@ function createUnitTestRunner(suiteName, manifestPath, options = {}) {
 }
 
 module.exports = { createUnitTestRunner };
-

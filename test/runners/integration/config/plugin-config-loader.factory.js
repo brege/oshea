@@ -22,28 +22,41 @@ function makePluginConfigLoaderScenario({
     }
     for (const [path, stubValue] of Object.entries(loadYamlConfigStubs)) {
       if (stubValue instanceof Error) {
-        mockDependencies.configUtils.loadYamlConfig.withArgs(path).rejects(stubValue);
+        mockDependencies.configUtils.loadYamlConfig
+          .withArgs(path)
+          .rejects(stubValue);
       } else {
-        mockDependencies.configUtils.loadYamlConfig.withArgs(path).resolves(stubValue);
+        mockDependencies.configUtils.loadYamlConfig
+          .withArgs(path)
+          .resolves(stubValue);
       }
     }
     for (const [args, returns] of Object.entries(assetResolverStubs)) {
-      mockDependencies.AssetResolver.resolveAndMergeCss.withArgs(...JSON.parse(args)).returns(returns);
+      mockDependencies.AssetResolver.resolveAndMergeCss
+        .withArgs(...JSON.parse(args))
+        .returns(returns);
     }
     for (const [arg, returns] of Object.entries(isObjectStubs)) {
-      mockDependencies.configUtils.isObject.withArgs(JSON.parse(arg)).returns(returns);
+      mockDependencies.configUtils.isObject
+        .withArgs(JSON.parse(arg))
+        .returns(returns);
     }
 
-    mockDependencies.configUtils.deepMerge.callsFake((target, source) => ({...target, ...source}));
+    mockDependencies.configUtils.deepMerge.callsFake((target, source) => ({
+      ...target,
+      ...source,
+    }));
     for (const [args, returns] of Object.entries(deepMergeStubs)) {
-      mockDependencies.configUtils.deepMerge.withArgs(...JSON.parse(args)).returns(returns);
+      mockDependencies.configUtils.deepMerge
+        .withArgs(...JSON.parse(args))
+        .returns(returns);
     }
 
     for (const [method, stubs] of Object.entries(pathStubs)) {
       if (!mockDependencies.path[method].isSinonProxy) {
         sinon.stub(mockDependencies.path, method);
       }
-      for(const [arg, returns] of Object.entries(stubs)) {
+      for (const [arg, returns] of Object.entries(stubs)) {
         const argArray = arg.includes(',') ? arg.split(',') : [arg];
         mockDependencies.path[method].withArgs(...argArray).returns(returns);
       }

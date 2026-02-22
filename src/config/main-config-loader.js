@@ -4,22 +4,35 @@ const {
   defaultConfigPath,
   factoryDefaultConfigPath,
   configUtilsPath,
-  loggerPath
+  loggerPath,
 } = require('@paths');
 
 const logger = require(loggerPath);
 class MainConfigLoader {
-  constructor(projectRoot, mainConfigPathFromCli, useFactoryDefaultsOnly = false, xdgBaseDir = null, dependencies = {}) {
+  constructor(
+    projectRoot,
+    mainConfigPathFromCli,
+    useFactoryDefaultsOnly = false,
+    xdgBaseDir = null,
+    dependencies = {},
+  ) {
     this.fs = dependencies.fs || require('fs');
     this.path = dependencies.path || require('path');
     this.process = dependencies.process || process;
-    this.loadYamlConfig = dependencies.loadYamlConfig || require(configUtilsPath).loadYamlConfig;
+    this.loadYamlConfig =
+      dependencies.loadYamlConfig || require(configUtilsPath).loadYamlConfig;
 
     this.projectRoot = projectRoot;
     this.defaultMainConfigPath = defaultConfigPath;
     this.factoryDefaultMainConfigPath = factoryDefaultConfigPath;
 
-    this.xdgBaseDir = xdgBaseDir || this.path.join(this.process.env.XDG_CONFIG_HOME || this.path.join(os.homedir(), '.config'), 'oshea');
+    this.xdgBaseDir =
+      xdgBaseDir ||
+      this.path.join(
+        this.process.env.XDG_CONFIG_HOME ||
+          this.path.join(os.homedir(), '.config'),
+        'oshea',
+      );
     this.xdgGlobalConfigPath = this.path.join(this.xdgBaseDir, 'config.yaml');
 
     this.projectManifestConfigPath = mainConfigPathFromCli;
@@ -42,7 +55,10 @@ class MainConfigLoader {
     if (this.useFactoryDefaultsOnly) {
       configPathToLoad = this.factoryDefaultMainConfigPath;
       loadedFromReason = 'factory default';
-    } else if (this.projectManifestConfigPath && this.fs.existsSync(this.projectManifestConfigPath)) {
+    } else if (
+      this.projectManifestConfigPath &&
+      this.fs.existsSync(this.projectManifestConfigPath)
+    ) {
       configPathToLoad = this.projectManifestConfigPath;
       loadedFromReason = 'project (from --config)';
     } else if (this.fs.existsSync(this.xdgGlobalConfigPath)) {
@@ -68,7 +84,7 @@ class MainConfigLoader {
         logger.error('Failed to load primary main configuration', {
           context: 'MainConfigLoader',
           path: configPathToLoad,
-          error: error.message
+          error: error.message,
         });
         this.primaryConfig = {};
       }
@@ -76,9 +92,12 @@ class MainConfigLoader {
       this.primaryConfig = {};
       this.primaryConfigLoadReason = 'factory default fallback';
       this.primaryConfigPath = null;
-      logger.warn('Primary main configuration not found, using empty global settings', {
-        context: 'MainConfigLoader'
-      });
+      logger.warn(
+        'Primary main configuration not found, using empty global settings',
+        {
+          context: 'MainConfigLoader',
+        },
+      );
     }
     this.primaryConfig = this.primaryConfig || {};
 
@@ -88,13 +107,15 @@ class MainConfigLoader {
           if (this.xdgGlobalConfigPath === this.primaryConfigPath) {
             this.xdgConfigContents = this.primaryConfig;
           } else {
-            this.xdgConfigContents = await this.loadYamlConfig(this.xdgGlobalConfigPath);
+            this.xdgConfigContents = await this.loadYamlConfig(
+              this.xdgGlobalConfigPath,
+            );
           }
         } catch (e) {
           logger.warn('Could not load XDG main config', {
             context: 'MainConfigLoader',
             path: this.xdgGlobalConfigPath,
-            error: e.message
+            error: e.message,
           });
           this.xdgConfigContents = {};
         }
@@ -102,29 +123,33 @@ class MainConfigLoader {
         this.xdgConfigContents = {};
       }
 
-      if (this.projectManifestConfigPath && this.fs.existsSync(this.projectManifestConfigPath)) {
+      if (
+        this.projectManifestConfigPath &&
+        this.fs.existsSync(this.projectManifestConfigPath)
+      ) {
         try {
           if (this.projectManifestConfigPath === this.primaryConfigPath) {
             this.projectConfigContents = this.primaryConfig;
           } else {
-            this.projectConfigContents = await this.loadYamlConfig(this.projectManifestConfigPath);
+            this.projectConfigContents = await this.loadYamlConfig(
+              this.projectManifestConfigPath,
+            );
           }
         } catch (e) {
           logger.warn('Could not load project manifest', {
             context: 'MainConfigLoader',
             path: this.projectManifestConfigPath,
-            error: e.message
+            error: e.message,
           });
           this.projectConfigContents = {};
         }
       } else if (this.projectManifestConfigPath) {
         logger.warn('Project manifest not found at provided path', {
           context: 'MainConfigLoader',
-          path: this.projectManifestConfigPath
+          path: this.projectManifestConfigPath,
         });
         this.projectConfigContents = {};
-      }
-      else {
+      } else {
         this.projectConfigContents = null;
       }
     } else {
@@ -142,24 +167,28 @@ class MainConfigLoader {
     return {
       config: {
         ...this.primaryConfig,
-        projectRoot: this.projectRoot
+        projectRoot: this.projectRoot,
       },
       path: this.primaryConfigPath,
-      baseDir: this.primaryConfigPath ? this.path.dirname(this.primaryConfigPath) : null,
-      reason: this.primaryConfigLoadReason
+      baseDir: this.primaryConfigPath
+        ? this.path.dirname(this.primaryConfigPath)
+        : null,
+      reason: this.primaryConfigLoadReason,
     };
   }
 
   async getXdgMainConfig() {
     await this._initialize();
-    const xdgBase = this.xdgGlobalConfigPath ? this.path.dirname(this.xdgGlobalConfigPath) : this.xdgBaseDir;
+    const xdgBase = this.xdgGlobalConfigPath
+      ? this.path.dirname(this.xdgGlobalConfigPath)
+      : this.xdgBaseDir;
     return {
       config: {
         ...this.xdgConfigContents,
-        projectRoot: this.projectRoot
+        projectRoot: this.projectRoot,
       },
       path: this.xdgGlobalConfigPath,
-      baseDir: xdgBase
+      baseDir: xdgBase,
     };
   }
 
@@ -168,10 +197,14 @@ class MainConfigLoader {
     return {
       config: {
         ...(this.projectConfigContents || {}),
-        projectRoot: this.projectRoot
+        projectRoot: this.projectRoot,
       },
       path: this.projectManifestConfigPath,
-      baseDir: this.projectManifestConfigPath && this.fs.existsSync(this.projectManifestConfigPath) ? this.path.dirname(this.projectManifestConfigPath) : null
+      baseDir:
+        this.projectManifestConfigPath &&
+        this.fs.existsSync(this.projectManifestConfigPath)
+          ? this.path.dirname(this.projectManifestConfigPath)
+          : null,
     };
   }
 }

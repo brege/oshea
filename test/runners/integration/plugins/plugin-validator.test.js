@@ -5,7 +5,7 @@ const {
   projectRoot,
   pluginValidatorManifestPath,
   pluginValidatorPath,
-  v1Path
+  v1Path,
 } = require('@paths');
 const { logs, testLogger, clearLogs } = require(captureLogsPath);
 const testManifest = require(pluginValidatorManifestPath);
@@ -20,12 +20,12 @@ const fs = require('fs');
 
 const proxyquire = require('proxyquire');
 
-describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(projectRoot, pluginValidatorPath)}`, function() {
+describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(projectRoot, pluginValidatorPath)}`, function () {
   this.timeout(5000);
   let tempDir;
   let mockFs, mockExecSync, mockYaml, mockOs;
 
-  beforeEach(function() {
+  beforeEach(() => {
     clearLogs();
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'validator-test-'));
 
@@ -47,25 +47,20 @@ describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(project
     };
   });
 
-  afterEach(function() {
+  afterEach(() => {
     fs.rmSync(tempDir, { recursive: true, force: true });
     sinon.restore();
   });
 
-  testManifest.forEach(testCase => {
+  testManifest.forEach((testCase) => {
     const it_ = testCase.only ? it.only : testCase.skip ? it.skip : it;
-    const {
-      description,
-      setup,
-      assert,
-      pluginName,
-    } = testCase;
+    const { description, setup, assert, pluginName } = testCase;
 
-    it_(description, async function() {
+    it_(description, async () => {
       const v1Validator = proxyquire(v1Path, {
         fs: mockFs,
         path,
-        'child_process': { execSync: mockExecSync },
+        child_process: { execSync: mockExecSync },
         yaml: mockYaml,
         os: mockOs,
         '@paths': {
@@ -73,8 +68,8 @@ describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(project
           cliPath: '/fake/root/cli.js',
           mochaPath: '/fake/root/node_modules/mocha/bin/mocha',
           nodeModulesPath: '/fake/root/node_modules',
-          logger: testLogger
-        }
+          logger: testLogger,
+        },
       });
 
       const { validate } = proxyquire(pluginValidatorPath, {
@@ -85,8 +80,8 @@ describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(project
         '@paths': {
           projectRoot: '/fake/root',
           v1Path: v1Path,
-          logger: testLogger
-        }
+          logger: testLogger,
+        },
       });
 
       const mocks = { mockFs, mockExecSync, mockYaml, tempDir };

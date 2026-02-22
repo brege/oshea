@@ -11,7 +11,8 @@ function getReportPath() {
   if (process.env.MOCHA_JSON_REPORT_FILE) {
     return path.resolve(process.env.MOCHA_JSON_REPORT_FILE);
   }
-  const xdgDataHome = process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
+  const xdgDataHome =
+    process.env.XDG_DATA_HOME || path.join(os.homedir(), '.local', 'share');
   return path.join(xdgDataHome, 'oshea', 'test-analytics', 'test-results.json');
 }
 

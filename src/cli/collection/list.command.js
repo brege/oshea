@@ -21,16 +21,16 @@ module.exports = {
         type: 'string',
         choices: ['names', 'available', 'enabled', 'all'],
         default: 'names', // Set default type
-        completionKey: 'listTypes'
+        completionKey: 'listTypes',
       })
       .positional('collection_name', {
         describe: 'filter available/enabled plugins by collection name',
         type: 'string',
-        completionKey: 'downloadedCollections'
+        completionKey: 'downloadedCollections',
       })
       .option('short', {
         alias: 's',
-        describe: 'display condensed list of downloaded collection \'names\'',
+        describe: "display condensed list of downloaded collection 'names'",
         type: 'boolean',
         default: false,
       })
@@ -39,12 +39,20 @@ module.exports = {
         type: 'boolean',
         default: false,
       })
-      .example('$0 collection list available', 'list all available plugins from all collections')
-      .example('$0 collection list enabled my-collection', 'list enabled plugins from "my-collection"');
+      .example(
+        '$0 collection list available',
+        'list all available plugins from all collections',
+      )
+      .example(
+        '$0 collection list enabled my-collection',
+        'list enabled plugins from "my-collection"',
+      );
   },
   handler: async (args) => {
     if (!args.manager) {
-      logger.fatal('FATAL ERROR: CollectionsManager instance not found in CLI arguments.');
+      logger.fatal(
+        'FATAL ERROR: CollectionsManager instance not found in CLI arguments.',
+      );
       process.exit(1);
     }
 
@@ -64,17 +72,16 @@ module.exports = {
       // 3. Build structured data for formatter
       const listData = {
         type: listType,
-        format: (listType === 'downloaded' && args.short) ? 'table' : 'detailed',
+        format: listType === 'downloaded' && args.short ? 'table' : 'detailed',
         filter: collectionFilter,
-        items: results
+        items: results,
       };
 
       // 4. Send to formatter
       logger.info(listData, { format: 'collection-list' });
-
     } catch (error) {
       logger.error(`\nERROR in 'collection list' command: ${error.message}`);
       process.exit(1);
     }
-  }
+  },
 };

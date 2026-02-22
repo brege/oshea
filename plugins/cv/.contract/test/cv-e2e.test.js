@@ -1,9 +1,9 @@
 // plugins/cv/.contract/test/cv-e2e.test.js
 require('module-alias/register');
-const path = require('path');
-const os = require('os');
+const path = require('node:path');
+const os = require('node:os');
 const glob = require('glob');
-const fs = require('fs');
+const fs = require('node:fs');
 const {
   projectRoot,
   cliPath,

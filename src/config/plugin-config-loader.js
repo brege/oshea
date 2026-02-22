@@ -24,9 +24,9 @@ class PluginConfigLoader {
     this._rawPluginYamlCache = {};
 
     // Injected dependencies
-    this.fs = dependencies.fs || require('fs');
-    this.path = dependencies.path || require('path');
-    this.os = dependencies.os || require('os');
+    this.fs = dependencies.fs || require('node:fs');
+    this.path = dependencies.path || require('node:path');
+    this.os = dependencies.os || require('node:os');
     this.configUtils = dependencies.configUtils || require(configUtilsPath);
     this.AssetResolver =
       dependencies.AssetResolver || require(assetResolverPath);
@@ -108,7 +108,7 @@ class PluginConfigLoader {
         xdgPluginOverrideDir,
         pluginName,
       );
-      if (layer1Data && layer1Data.rawConfig) {
+      if (layer1Data?.rawConfig) {
         currentMergedConfig = this.configUtils.deepMerge(
           currentMergedConfig,
           layer1Data.rawConfig,
@@ -196,8 +196,7 @@ class PluginConfigLoader {
             pluginName,
           );
           if (
-            layer2Data &&
-            layer2Data.rawConfig &&
+            layer2Data?.rawConfig &&
             Object.keys(layer2Data.rawConfig).length > 0
           ) {
             currentMergedConfig = this.configUtils.deepMerge(

@@ -19,8 +19,8 @@ try {
   };
 }
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const glob = require('glob');
 const yaml = require('js-yaml');
 
@@ -55,7 +55,9 @@ class DeclarativePathsGenerator {
     for (const pattern of patterns) {
       glob
         .sync(pattern, { cwd: this.projectRoot, absolute: false })
-        .forEach((f) => matchedFiles.add(f));
+        .forEach((f) => {
+          matchedFiles.add(f);
+        });
     }
 
     return Array.from(matchedFiles).map((f) => {
@@ -123,7 +125,7 @@ class DeclarativePathsGenerator {
 
   getVariableName(file, contextualNaming = {}) {
     // Check contextual naming first
-    if (contextualNaming && contextualNaming[file.name]) {
+    if (contextualNaming?.[file.name]) {
       const contexts = contextualNaming[file.name];
       for (const [contextPath, varName] of Object.entries(contexts)) {
         if (file.directory.includes(contextPath)) {
@@ -145,7 +147,7 @@ class DeclarativePathsGenerator {
     return `${camelCaseName}${suffix.toLowerCase() === 'js' ? '' : suffixUpper}Path`;
   }
 
-  generateRegistry(registryName, registryConfig) {
+  generateRegistry(_registryName, registryConfig) {
     const content = [];
     const metadata = this.config.metadata || {};
 
@@ -184,7 +186,7 @@ class DeclarativePathsGenerator {
 
       for (const [_sectionName, section] of Object.entries(archSections)) {
         // eslint-disable-line no-unused-vars
-        if (section && section.comment && section.items) {
+        if (section?.comment && section.items) {
           content.push(`// --- ${section.comment} ---`);
           for (const [varName, pathDef] of Object.entries(section.items)) {
             content.push(`const ${this.camelCase(varName)} = ${pathDef};`);
@@ -321,7 +323,7 @@ class DeclarativePathsGenerator {
     if (archSectionsToExport && typeof archSectionsToExport === 'object') {
       content.push('  // --- Architecture ---');
       for (const section of Object.values(archSectionsToExport)) {
-        if (section && section.items) {
+        if (section?.items) {
           for (const varName of Object.keys(section.items)) {
             content.push(`  ${this.camelCase(varName)},`);
           }
@@ -462,7 +464,7 @@ class DeclarativePathsGenerator {
     // Find all 'const variableName = ' declarations
     for (const line of lines) {
       const match = line.match(/^const\s+(\w+)\s*=/);
-      if (match && match[1]) {
+      if (match?.[1]) {
         // Skip the common base variables that always exist
         const varName = match[1];
         if (
@@ -548,7 +550,9 @@ if (require.main === module) {
       const errors = generator.validateConfig();
       if (errors.length > 0) {
         logger.error('Configuration validation failed:');
-        errors.forEach((error) => logger.error(`  • ${error}`));
+        errors.forEach((error) => {
+          logger.error(`  • ${error}`);
+        });
         process.exit(1);
       } else {
         logger.success('Configuration is valid');

@@ -47,7 +47,7 @@ describe(`main-config-loader (Module Integration Tests) ${path.relative(projectR
         existsSync: sinon.stub(),
         readFile: sinon.stub().resolves(''),
       },
-      path: { ...require('path') }, // Use a mutable copy of the real path module
+      path: { ...require('node:path') }, // Use a mutable copy of the real path module
       os: {
         homedir: sinon.stub().returns(commonTestConstants.MOCK_OS_HOME_DIR),
         platform: sinon.stub().returns('linux'),
@@ -58,7 +58,7 @@ describe(`main-config-loader (Module Integration Tests) ${path.relative(projectR
 
     MainConfigLoader = proxyquire(mainConfigLoaderPath, {
       '@paths': { ...allPaths, loggerPath: testLoggerPath },
-      os: mockDependencies.os,
+      'node:os': mockDependencies.os,
     });
   });
 

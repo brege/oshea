@@ -1,6 +1,6 @@
 // src/cli/plugin/validate.command.js
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 const { pluginValidatorPath, loggerPath, projectRoot } = require('@paths');
 const { validate: pluginValidator } = require(pluginValidatorPath);
 
@@ -60,7 +60,7 @@ module.exports = {
           const pluginRegistryEntry =
             configResolver.mergedPluginRegistry[pluginIdentifier];
 
-          if (pluginRegistryEntry && pluginRegistryEntry.configPath) {
+          if (pluginRegistryEntry?.configPath) {
             pluginDirectoryPath = path.dirname(pluginRegistryEntry.configPath);
           } else {
             logger.error(

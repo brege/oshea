@@ -3,10 +3,10 @@ require('module-alias/register');
 const { loggerPath, cliPath } = require('@paths');
 const logger = require(loggerPath);
 
-const { exec } = require('child_process');
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
+const { exec } = require('node:child_process');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
+const path = require('node:path');
 const glob = require('glob');
 const matter = require('gray-matter');
 const yargs = require('yargs/yargs');
@@ -79,7 +79,7 @@ function generateSlug(text) {
 // Function to extract author from Markdown content (example, adapt as needed)
 function extractAuthorFromContent(content) {
   const chefMatch = content.match(/^\*\*Chef:\s*(.*)\*\*/im);
-  if (chefMatch && chefMatch[1]) {
+  if (chefMatch?.[1]) {
     return generateSlug(chefMatch[1].trim());
   }
   return '';
@@ -135,7 +135,7 @@ async function processRecipe(markdownFilePath) {
     logger.detail(`  Executing: ${osheaCommand}`);
 
     return new Promise((resolve, reject) => {
-      exec(osheaCommand, (error, stdout, stderr) => {
+      exec(osheaCommand, (error, _stdout, stderr) => {
         if (error) {
           logger.error(
             `  ERROR converting ${markdownFilePath}: ${error.message}`,

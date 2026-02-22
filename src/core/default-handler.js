@@ -1,7 +1,7 @@
 // src/core/default-handler.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
+const path = require('node:path');
 
 const {
   markdownUtilsPath,
@@ -110,7 +110,7 @@ class DefaultHandler {
           dateSlug,
         ];
 
-        finalOutputFilename = nameParts.filter(Boolean).join('-') + '.pdf';
+        finalOutputFilename = `${nameParts.filter(Boolean).join('-')}.pdf`;
         logger.debug('Generated output filename', {
           context: 'DefaultHandler',
           filename: finalOutputFilename,
@@ -151,8 +151,8 @@ class DefaultHandler {
         ...(globalConfig.global_pdf_options || {}),
         ...(pluginSpecificConfig.pdf_options || {}),
         margin: {
-          ...((globalConfig.global_pdf_options || {}).margin || {}),
-          ...((pluginSpecificConfig.pdf_options || {}).margin || {}),
+          ...(globalConfig.global_pdf_options?.margin || {}),
+          ...(pluginSpecificConfig.pdf_options?.margin || {}),
         },
       };
       logger.debug('Merged PDF options', {
@@ -173,7 +173,7 @@ class DefaultHandler {
       });
 
       const cssFileContentsArray = [];
-      if (pluginSpecificConfig.math && pluginSpecificConfig.math.enabled) {
+      if (pluginSpecificConfig.math?.enabled) {
         const mathCssStrings = await mathIntegration.getMathCssContent(
           pluginSpecificConfig.math,
         );

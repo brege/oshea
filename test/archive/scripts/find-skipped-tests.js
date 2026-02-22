@@ -2,8 +2,8 @@
 require('module-alias/register');
 const { integrationTestDir, e2eTestDir, loggerPath } = require('@paths');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const logger = require(loggerPath);
 

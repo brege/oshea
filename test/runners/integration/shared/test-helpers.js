@@ -1,9 +1,9 @@
 // test/runners/integration/shared/test-helpers.js
-const fsPromises = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
-const util = require('util');
+const fsPromises = require('node:fs').promises;
+const fss = require('node:fs');
+const path = require('node:path');
+const { exec } = require('node:child_process');
+const util = require('node:util');
 const { loggerPath, nodeModulesPath } = require('@paths');
 const logger = require(loggerPath);
 const execAsync = util.promisify(exec);
@@ -98,7 +98,7 @@ async function runCliCommand(
       },
     });
     if (stdout) logger.debug('  stdout:\n', stdout);
-    const stderrContent = stderr && stderr.trim();
+    const stderrContent = stderr?.trim();
     if (stderrContent) {
       logger.warn('  stderr:\n', stderr);
     }
@@ -107,9 +107,9 @@ async function runCliCommand(
     logger.error(
       `  Error executing command (cli.js likely exited with error): ${error.message}`,
     );
-    if (error.stdout && error.stdout.trim())
+    if (error.stdout?.trim())
       logger.error('  stdout (on error):\n', error.stdout);
-    if (error.stderr && error.stderr.trim())
+    if (error.stderr?.trim())
       logger.error('  stderr (on error):\n', error.stderr);
     return {
       success: false,
@@ -152,7 +152,7 @@ async function setupTestDirectory(testOutputBaseDir, createdPluginsDir) {
   } catch (error) {
     logger.error('Error setting up test directory', {
       context: 'setupTestDirectory',
-      error: error && error.message,
+      error: error?.message,
     });
     throw error;
   }
@@ -179,7 +179,7 @@ async function cleanupTestDirectory(testOutputBaseDir, keepOutput = false) {
     logger.warn('Could not clean up test directory', {
       context: 'cleanupTestDirectory',
       dir: testOutputBaseDir,
-      error: error && error.message,
+      error: error?.message,
     });
   }
 }

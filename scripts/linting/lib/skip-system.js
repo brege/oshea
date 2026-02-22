@@ -2,8 +2,8 @@
 // Centralized lint skip marker system
 
 require('module-alias/register');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const yaml = require('js-yaml');
 const { lintingConfigPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
@@ -130,7 +130,7 @@ function getLegacyMigrationMap() {
 }
 
 // Validate skip marker format
-function isValidSkipMarker(marker, linterKey = null) {
+function isValidSkipMarker(marker, _linterKey = null) {
   const standardPatterns = [
     /^lint-skip-file\s+[\w\s-]+$/,
     /^lint-skip-line\s+[\w-]+$/,

@@ -103,15 +103,15 @@ hr {
 
   body {
     font-size: 10.5pt; /* Ensure font size is maintained for print */
-    color: #000000 !important; /* Force black text for printing */
-    background-color: #ffffff !important; /* Force white background */
+    color: #000000; /* Force black text for printing */
+    background-color: #ffffff; /* Force white background */
     -webkit-print-color-adjust: exact; /* Ensure background/colors print in WebKit */
     color-adjust: exact; /* Standard property for color printing */
   }
 
   a {
-    color: #000000 !important; /* Make links black for print */
-    text-decoration: none !important; /* Avoid underlines on links in print */
+    color: #000000; /* Make links black for print */
+    text-decoration: none; /* Avoid underlines on links in print */
   }
 
   /* Avoid page breaks inside paragraphs or list items where possible */
@@ -133,6 +133,6 @@ hr {
   }
 
   .no-print {
-    display: none !important; /* Hide elements marked with .no-print */
+    display: none; /* Hide elements marked with .no-print */
   }
 }

@@ -3,4 +3,3 @@ repos:
     rev: v2.3.10
     hooks:
       - id: biome-check
-        args: [--write]

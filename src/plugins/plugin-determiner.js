@@ -41,7 +41,7 @@ async function determinePluginToUse(
         );
         const { data: frontMatter } =
           markdownUtils.extractFrontMatter(rawMarkdownContent);
-        if (frontMatter && frontMatter.oshea_plugin) {
+        if (frontMatter?.oshea_plugin) {
           fmPlugin = frontMatter.oshea_plugin;
           logger.debug('Plugin found in front matter', {
             context: 'PluginDeterminer',
@@ -79,7 +79,7 @@ async function determinePluginToUse(
             'utf8',
           );
           const parsedLocalConfig = yaml.load(localConfigContent);
-          if (parsedLocalConfig && parsedLocalConfig.plugin) {
+          if (parsedLocalConfig?.plugin) {
             localCfgPlugin = parsedLocalConfig.plugin;
             logger.debug('Plugin found in local config file', {
               context: 'PluginDeterminer',

@@ -1,8 +1,8 @@
 // src/completion/cli-tree-builder.js
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { convertCommandPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
@@ -47,11 +47,11 @@ function createYargsStub() {
           'fail',
         ];
         if (yargsChainableMethods.includes(prop)) {
-          return (...args) => stub;
+          return (..._args) => stub;
         }
         if (prop === 'argv') return {};
         if (prop === 'showHelp') return () => {};
-        return (...args) => stub;
+        return (..._args) => stub;
       },
     },
   );
@@ -179,15 +179,15 @@ function discoverCommandTree(dir, prefixParts = []) {
         if (nodesMap.has(commandName)) {
           const existingNode = nodesMap.get(commandName);
           const mergedOptions = new Map();
-          [...existingNode.options, ...options].forEach((opt) =>
-            mergedOptions.set(opt.name, opt),
-          );
+          [...existingNode.options, ...options].forEach((opt) => {
+            mergedOptions.set(opt.name, opt);
+          });
           existingNode.options = Array.from(mergedOptions.values());
 
           const mergedPositionals = new Map();
-          [...existingNode.positionals, ...positionals].forEach((pos) =>
-            mergedPositionals.set(pos.key, pos),
-          );
+          [...existingNode.positionals, ...positionals].forEach((pos) => {
+            mergedPositionals.set(pos.key, pos);
+          });
           existingNode.positionals = Array.from(mergedPositionals.values());
 
           if (children.length > 0 && existingNode.children.length === 0) {

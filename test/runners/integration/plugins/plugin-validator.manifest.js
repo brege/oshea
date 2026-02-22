@@ -6,7 +6,8 @@ const {
   setupPluginScenario,
   setupWellFormedPlugin,
 } = require(pluginValidatorFactoryPath);
-const path = require('path');
+const path = require('node:path');
+const sinon = require('sinon');
 
 module.exports = [
   makeValidatorScenario({

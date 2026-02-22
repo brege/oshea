@@ -86,9 +86,7 @@ module.exports = [
       expect(result.message).to.equal(
         'Collection "non-existent-collection" not found.',
       );
-      expect(
-        mocks._readCollectionMetadata && mocks._readCollectionMetadata.called,
-      ).to.not.be.true;
+      expect(mocks._readCollectionMetadata?.called).to.not.be.true;
     },
   }),
 

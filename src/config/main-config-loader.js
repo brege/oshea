@@ -1,5 +1,5 @@
 // src/config/main-config-loader.js
-const os = require('os');
+const os = require('node:os');
 const {
   defaultConfigPath,
   factoryDefaultConfigPath,
@@ -16,8 +16,8 @@ class MainConfigLoader {
     xdgBaseDir = null,
     dependencies = {},
   ) {
-    this.fs = dependencies.fs || require('fs');
-    this.path = dependencies.path || require('path');
+    this.fs = dependencies.fs || require('node:fs');
+    this.path = dependencies.path || require('node:path');
     this.process = dependencies.process || process;
     this.loadYamlConfig =
       dependencies.loadYamlConfig || require(configUtilsPath).loadYamlConfig;

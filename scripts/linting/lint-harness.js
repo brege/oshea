@@ -2,8 +2,8 @@
 // scripts/linting/lint-harness.js
 require('module-alias/register');
 
-const { spawnSync } = require('child_process');
-const { resolve } = require('path');
+const { spawnSync } = require('node:child_process');
+const { resolve } = require('node:path');
 const {
   projectRoot,
   eslintPath,
@@ -80,7 +80,7 @@ function runStep({
             if (fileResult.messages.length > 0) issues.push(fileResult);
           });
           stepSummary = { errorCount, warningCount, fixedCount: 0 }; // ESLint JSON format doesn't summarize fixes well.
-        } else if (parsed && parsed.summary) {
+        } else if (parsed?.summary) {
           stepSummary = parsed.summary;
           issues = parsed.issues || [];
         }
@@ -240,7 +240,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
         if (usingJson) {
           // Output partial JSON, abort
           logger.info(
-            JSON.stringify(
+            `${JSON.stringify(
               {
                 ok: false,
                 aborted: true,
@@ -261,7 +261,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
               },
               null,
               2,
-            ) + '\n',
+            )}\n`,
             { format: 'inline' },
           );
           process.exit(1);
@@ -291,7 +291,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
       0,
     );
     logger.info(
-      JSON.stringify(
+      `${JSON.stringify(
         {
           ok: totalErrors === 0,
           steps: stepSummaries,
@@ -303,7 +303,7 @@ function runHarness(config, globalFlags, targets = [], only = '') {
         },
         null,
         2,
-      ) + '\n',
+      )}\n`,
       { format: 'inline' },
     );
     process.exit(totalErrors === 0 ? 0 : 1);

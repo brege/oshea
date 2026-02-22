@@ -2,7 +2,7 @@
 require('module-alias/register');
 const { loggerPath } = require('@paths');
 const fs = require('fs-extra');
-const path = require('path');
+const path = require('node:path');
 const yaml = require('js-yaml');
 const logger = require(loggerPath);
 
@@ -156,7 +156,7 @@ async function breakProtocol(configPath, newConfigPath, pluginName) {
   }
 }
 
-async function breakPluginName(configPath, newConfigPath, pluginName) {
+async function breakPluginName(configPath, newConfigPath, _pluginName) {
   const config = yaml.load(await fs.readFile(configPath, 'utf8'));
   delete config.plugin_name; // Remove required field
 

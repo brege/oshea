@@ -1,8 +1,8 @@
 // plugins/advanced-card/index.js
 require('module-alias/register');
-const fs = require('fs').promises;
-const fss = require('fs'); // Synchronous for operations like existsSync
-const path = require('path');
+const fs = require('node:fs').promises;
+const fss = require('node:fs'); // Synchronous for operations like existsSync
+const path = require('node:path');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
@@ -84,8 +84,8 @@ class AdvancedCardHandler {
         ...(globalConfig.global_pdf_options || {}),
         ...(pluginSpecificConfig.pdf_options || {}),
         margin: {
-          ...((globalConfig.global_pdf_options || {}).margin || {}),
-          ...((pluginSpecificConfig.pdf_options || {}).margin || {}),
+          ...(globalConfig.global_pdf_options?.margin || {}),
+          ...(pluginSpecificConfig.pdf_options?.margin || {}),
         },
       };
       if (pdfOptions.width || pdfOptions.height) {

@@ -8,8 +8,8 @@ const {
   loggerPath,
 } = require('@paths');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const logger = require(loggerPath);
 
 // --- Helper functions for all three sources ---
@@ -192,14 +192,14 @@ function generateDashboardContent() {
     // OR if it's an audit entry not found in the checklist
     // OR if it has skips not found in the checklist
     if (checklistStatus !== 'CLOSED' && (checklistStatus || f.skips || a)) {
-      const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
+      const skips = f.skips > 0 ? `${f.skips} it.skip()` : '';
       const testFilePath = f.testFilePath || '';
       outputLines.push(
         `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`,
       );
     } else if (!checklistStatus && (f.skips || a)) {
       // For tests not in checklist but in skips or audit
-      const skips = f.skips > 0 ? f.skips + ' it.skip()' : '';
+      const skips = f.skips > 0 ? `${f.skips} it.skip()` : '';
       const testFilePath = f.testFilePath || '';
       outputLines.push(
         `| ${testId.padEnd(9)}| ${testTarget.padEnd(20)}| ${checklistStatus.padEnd(9)}| ${skips.padEnd(11)}| ${a.padEnd(13)}| ${testFilePath.padEnd(54)}|`,

@@ -2,8 +2,8 @@
 // scripts/linting/lib/find-lint-skips.js
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const {
   fileDiscoveryPath,
   loggerPath,
@@ -34,8 +34,11 @@ function findSkipsInFile(filePath) {
     lines.forEach((line, lineIndex) => {
       skipPatterns.forEach((pattern) => {
         pattern.lastIndex = 0; // Reset regex
-        let match;
-        while ((match = pattern.exec(line)) !== null) {
+        for (;;) {
+          const match = pattern.exec(line);
+          if (!match) {
+            break;
+          }
           const linterKey = extractLinterFromMarker(match[0]);
           const isStandard = isValidSkipMarker(match[0]);
 
@@ -69,17 +72,17 @@ function categorizeSkipsByLinter(skips, config) {
       categorized[linterKey] = [];
     }
   });
-  categorized['unknown'] = [];
-  categorized['legacy'] = [];
+  categorized.unknown = [];
+  categorized.legacy = [];
 
   skips.forEach((skip) => {
     if (skip.needsMigration) {
       migrationNeeded.push(skip);
-      categorized['legacy'].push(skip);
+      categorized.legacy.push(skip);
     } else if (skip.linterKey && categorized[skip.linterKey]) {
       categorized[skip.linterKey].push(skip);
     } else {
-      categorized['unknown'].push(skip);
+      categorized.unknown.push(skip);
     }
   });
 

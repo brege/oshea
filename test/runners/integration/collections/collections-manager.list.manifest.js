@@ -40,7 +40,7 @@ module.exports = [
         },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result).to.be.an('array').with.lengthOf(2);
       expect(result.map((r) => r.name)).to.deep.equal([
         'collection-a',
@@ -66,7 +66,7 @@ module.exports = [
         },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result).to.be.an('array').with.lengthOf(3);
       expect(result[0].invoke_name).to.equal('plugin-a');
     },
@@ -89,7 +89,7 @@ module.exports = [
         },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result).to.be.an('array').with.lengthOf(2);
       expect(result.every((p) => p.collection_name === 'collection-1')).to.be
         .true;
@@ -104,13 +104,9 @@ module.exports = [
     stubs: {
       fss: { existsSync: { returns: false } },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, mocks, _constants, expect) => {
       expect(result).to.be.an('array').that.is.empty;
-      if (
-        mocks.mockDependencies &&
-        mocks.mockDependencies.fs &&
-        mocks.mockDependencies.fs.readdir
-      ) {
+      if (mocks.mockDependencies?.fs?.readdir) {
         expect(mocks.mockDependencies.fs.readdir.called).to.be.false;
       }
     },
@@ -125,7 +121,7 @@ module.exports = [
       fss: { existsSync: { returns: true } },
       internal: { _readEnabledManifest: { resolves: { enabled_plugins: [] } } },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, mocks, _constants, expect) => {
       expect(result).to.be.an('array').that.is.empty;
       if (mocks._readEnabledManifest) {
         expect(mocks._readEnabledManifest.called).to.be.true;
@@ -151,7 +147,7 @@ module.exports = [
       yaml: { load: { returns: { description: 'Plugin 1' } } },
       internal: { _readCollectionMetadata: { resolves: { name: 'plugin-1' } } },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result).to.be.an('array').with.lengthOf(1);
       expect(result[0].plugin_id).to.equal('plugin-1');
     },
@@ -177,7 +173,7 @@ module.exports = [
         },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result).to.be.an('array').with.lengthOf(2);
     },
   }),
@@ -196,7 +192,7 @@ module.exports = [
         },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result).to.be.an('array').that.is.empty;
     },
   }),
@@ -218,7 +214,7 @@ module.exports = [
         },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result).to.be.an('array').that.is.empty;
     },
   }),
@@ -258,7 +254,7 @@ module.exports = [
       },
       yaml: { load: { returns: { description: 'My Test Plugin' } } },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result[0].description).to.equal('My Test Plugin');
     },
   }),
@@ -282,7 +278,7 @@ module.exports = [
       },
       yaml: { load: { returns: { version: '1.0' } } },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       expect(result[0].description).to.equal(
         'Plugin description not available.',
       );

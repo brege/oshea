@@ -68,8 +68,8 @@ a {
 @media print {
   body {
     font-size: 11pt; /* Maintain recipe font size */
-    color: #000 !important;
-    background-color: #fff !important;
+    color: #000;
+    background-color: #fff;
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
   }
@@ -92,13 +92,13 @@ a {
   }
 
   img {
-    max-width: 100% !important; /* Ensure images scale down */
+    max-width: 100%; /* Ensure images scale down */
     display: block;
     margin: 0.5em auto; /* Center images if they are block */
     page-break-inside: avoid;
   }
 
   .no-print {
-    display: none !important;
+    display: none;
   }
 }

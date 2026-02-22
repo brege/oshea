@@ -113,7 +113,7 @@ module.exports = [
         _writeCollectionMetadata: { resolves: true },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (_result, mocks, _constants, expect) => {
       expect(
         mocks.mockDependencies.cmUtils.deriveCollectionName.calledWith(
           FAKE_REPO_URL,
@@ -137,7 +137,7 @@ module.exports = [
         _writeCollectionMetadata: { resolves: true },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (_result, mocks, constants, expect) => {
       const { FAKE_COLL_ROOT } = constants;
       expect(mocks.mockDependencies.cmUtils.deriveCollectionName.called).to.be
         .false;

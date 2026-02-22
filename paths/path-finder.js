@@ -2,14 +2,11 @@
 // paths/path-finder.js
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const acorn = require('acorn');
 const walk = require('acorn-walk');
-const {
-  fileHelpersPath,
-  loggerPath
-} = require('@paths');
+const { fileHelpersPath, loggerPath } = require('@paths');
 const { findFilesArray } = require(fileHelpersPath);
 const logger = require(loggerPath);
 
@@ -19,7 +16,11 @@ function findVariableByPath(targetPath) {
 
   function* walkRegistry(obj) {
     for (const [key, value] of Object.entries(obj)) {
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         yield* walkRegistry(value);
       } else if (typeof value === 'string') {
         try {
@@ -40,7 +41,10 @@ function getFileExports(targetPath) {
 
   try {
     const content = fs.readFileSync(targetPath, 'utf8');
-    const ast = acorn.parse(content, { ecmaVersion: 'latest', sourceType: 'module' });
+    const ast = acorn.parse(content, {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+    });
 
     walk.simple(ast, {
       AssignmentExpression(node) {
@@ -51,23 +55,28 @@ function getFileExports(targetPath) {
           node.left.property.name === 'exports'
         ) {
           if (node.right.type === 'ObjectExpression') {
-            node.right.properties.forEach(prop => {
+            node.right.properties.forEach((prop) => {
               if (prop.type === 'Property' && prop.key.type === 'Identifier') {
                 exportsSet.add(prop.key.name);
-              } else if (prop.type === 'SpreadElement' && prop.argument.type === 'Identifier') {
+              } else if (
+                prop.type === 'SpreadElement' &&
+                prop.argument.type === 'Identifier'
+              ) {
                 exportsSet.add(`...${prop.argument.name}`);
               }
             });
           }
         }
-      }
+      },
     });
   } catch {}
   return Array.from(exportsSet).sort();
 }
 
 function findVariablesForTargets(targets) {
-  const fileList = findFilesArray(targets, { filter: fn => fn.endsWith('.js') || fn.endsWith('.mjs') });
+  const fileList = findFilesArray(targets, {
+    filter: (fn) => fn.endsWith('.js') || fn.endsWith('.mjs'),
+  });
   const results = [];
 
   for (const f of fileList) {
@@ -83,7 +92,9 @@ function findVariablesForTargets(targets) {
 if (require.main === module) {
   let rawTargets = process.argv.slice(2);
   if (!rawTargets.length) {
-    logger.error('Usage: node scripts/shared/path-finder.js <file|dir|glob> [--exports] [--reverse <var>] [--list]');
+    logger.error(
+      'Usage: node scripts/shared/path-finder.js <file|dir|glob> [--exports] [--reverse <var>] [--list]',
+    );
     process.exit(1);
   }
 
@@ -97,30 +108,32 @@ if (require.main === module) {
     }
     const results = getPathByVariable(variableName);
     if (results.length > 0) {
-      results.forEach(result => {
+      results.forEach((result) => {
         logger.info(`${result.variable}: ${result.path}`, { format: 'js' });
       });
     } else {
       logger.detail(`No path found for variable: ${variableName}`);
     }
-    return;
+    process.exit(0);
   }
 
   // Handle list all variables: --list
   if (rawTargets.includes('--list')) {
     const allVars = getAllPathVariables();
     logger.info('Available path variables:', { format: 'js' });
-    allVars.forEach(item => {
+    allVars.forEach((item) => {
       logger.info(`${item.variable} → ${item.path}`, { format: 'js' });
     });
-    return;
+    process.exit(0);
   }
 
   // If the last argument is --exports, print exports for each file
   const showExports = rawTargets.includes('--exports');
-  if (showExports) rawTargets = rawTargets.filter(arg => arg !== '--exports');
+  if (showExports) rawTargets = rawTargets.filter((arg) => arg !== '--exports');
 
-  const fileList = findFilesArray(rawTargets, { filter: fn => fn.endsWith('.js') || fn.endsWith('.mjs') });
+  const fileList = findFilesArray(rawTargets, {
+    filter: (fn) => fn.endsWith('.js') || fn.endsWith('.mjs'),
+  });
 
   // Collect all variables and map to their files
   const variableSet = new Set();
@@ -136,7 +149,7 @@ if (require.main === module) {
   if (variableSet.size > 0) {
     let output = '';
 
-    output += 'require(\'module-alias/register\');\n';
+    output += "require('module-alias/register');\n";
 
     const varsSorted = Array.from(variableSet).sort();
     const coloredVars = varsSorted.join(',\n  ');
@@ -173,7 +186,11 @@ function getPathByVariable(variableName) {
     for (const [key, value] of Object.entries(obj)) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
 
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         yield* walkRegistry(value, fullKey);
       } else if (typeof value === 'string' && key === variableName) {
         yield { variable: key, path: value, fullKey };
@@ -193,7 +210,11 @@ function getAllPathVariables() {
     for (const [key, value] of Object.entries(obj)) {
       const fullKey = prefix ? `${prefix}.${key}` : key;
 
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         walkRegistry(value, fullKey);
       } else if (typeof value === 'string') {
         variables.push({ variable: key, path: value, fullKey });

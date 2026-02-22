@@ -1,6 +1,6 @@
 // test/runners/integration/plugins/plugin-manager.factory.js
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 
 function makePluginManagerScenario({
   description,
@@ -73,7 +73,7 @@ function makePluginManagerScenario({
     }
   };
 
-  const assert = async (result, mocks, constants, expect, logs) => {
+  const assert = async (result, _mocks, _constants, expect, logs) => {
     if (isNegativeTest) return;
 
     if (expectedError) {

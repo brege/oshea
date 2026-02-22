@@ -1,5 +1,5 @@
 // src/cli/config.command.js
-const fs = require('fs');
+const fs = require('node:fs');
 
 const { loggerPath, configFormatterPath } = require('@paths');
 const logger = require(loggerPath);

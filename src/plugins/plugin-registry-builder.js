@@ -1,7 +1,7 @@
 // src/plugins/plugin-registry-builder.js
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const {
   markdownUtilsPath,
   loggerPath,
@@ -186,10 +186,9 @@ class PluginRegistryBuilder {
     const registrations = {};
 
     // Determine user-plugins directory location based on collections manager root
-    const userPluginsPath =
-      this.collectionsManager && this.collectionsManager.collRoot
-        ? path.join(this.collectionsManager.collRoot, 'user-plugins')
-        : path.join(this.xdgBaseDir, 'oshea', 'user-plugins');
+    const userPluginsPath = this.collectionsManager?.collRoot
+      ? path.join(this.collectionsManager.collRoot, 'user-plugins')
+      : path.join(this.xdgBaseDir, 'oshea', 'user-plugins');
 
     logger.debug('Attempting to register user-plugins directory', {
       context: 'PluginRegistryBuilder',
@@ -528,8 +527,7 @@ class PluginRegistryBuilder {
       const currentAliases = {};
 
       if (
-        config &&
-        config.plugin_directory_aliases &&
+        config?.plugin_directory_aliases &&
         typeof config.plugin_directory_aliases === 'object'
       ) {
         for (const [alias, aliasPathRaw] of Object.entries(
@@ -552,7 +550,7 @@ class PluginRegistryBuilder {
         }
       }
 
-      if (config && config.plugins && typeof config.plugins === 'object') {
+      if (config?.plugins && typeof config.plugins === 'object') {
         for (const [pluginName, pluginConfPathRaw] of Object.entries(
           config.plugins,
         )) {
@@ -623,11 +621,7 @@ class PluginRegistryBuilder {
 
       if (parsedManifest && Array.isArray(parsedManifest.enabled_plugins)) {
         for (const pluginEntry of parsedManifest.enabled_plugins) {
-          if (
-            pluginEntry &&
-            pluginEntry.invoke_name &&
-            pluginEntry.config_path
-          ) {
+          if (pluginEntry?.invoke_name && pluginEntry.config_path) {
             if (fs.existsSync(pluginEntry.config_path)) {
               registrations[pluginEntry.invoke_name] = {
                 configPath: pluginEntry.config_path,
@@ -951,10 +945,7 @@ class PluginRegistryBuilder {
         if (regInfo.cmStatus) {
           // CM-managed plugins use their CM status
           status = regInfo.cmStatus;
-        } else if (
-          regInfo.sourceType &&
-          regInfo.sourceType.startsWith('User (')
-        ) {
+        } else if (regInfo.sourceType?.startsWith('User (')) {
           // User plugins from new unified architecture
           const isEnabled = regInfo.isEnabled !== false;
           const pluginType = regInfo.pluginType || 'unknown';

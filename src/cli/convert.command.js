@@ -51,6 +51,6 @@ module.exports = {
     command: '$0 [markdownFile]',
     describe: 'convert a markdown file to PDF (default command)',
     builder: cliOptionsForConvert,
-    handler: async (args) => {},
+    handler: async (_args) => {},
   },
 };

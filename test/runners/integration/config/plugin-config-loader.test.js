@@ -46,7 +46,7 @@ describe(`plugin-config-loader (Module Integration Tests) ${path.relative(projec
 
     mockDependencies = {
       fs: { existsSync: sinon.stub() },
-      path: { ...require('path') },
+      path: { ...require('node:path') },
       os: { homedir: sinon.stub().returns('/fake/home') },
       configUtils: {
         loadYamlConfig: sinon.stub(),

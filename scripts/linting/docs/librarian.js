@@ -3,8 +3,8 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const yaml = require('js-yaml');
 const {
   lintingConfigPath,
@@ -38,8 +38,11 @@ function getExistingLinks(content, baseDir) {
   const endIdx = content.indexOf(END_MARKER);
   const hasBlock = startIdx !== -1 && endIdx !== -1 && endIdx > startIdx;
 
-  let match;
-  while ((match = linkRegex.exec(content)) !== null) {
+  for (;;) {
+    const match = linkRegex.exec(content);
+    if (!match) {
+      break;
+    }
     const rawLink = match[1];
     if (!rawLink || rawLink.startsWith('http')) continue;
     try {
@@ -192,7 +195,9 @@ function scanGroup(name, config, opts = {}) {
 
   if (missingInIndex.length > 0) {
     logger.debug('Missing file(s) from index:', { context: 'Librarian' });
-    missingInIndex.forEach((file) => logger.debug(`  - ${file}`));
+    missingInIndex.forEach((file) => {
+      logger.debug(`  - ${file}`);
+    });
   } else {
     logger.debug(
       `Found ${missingInIndex.length} files missing from the index for group '${name}'.`,
@@ -255,10 +260,10 @@ function scanGroup(name, config, opts = {}) {
 }
 
 async function runLibrarian(options = {}) {
-  const { group = null, debug = false, targets = [], force = false } = options; // eslint-disable-line no-unused-vars
+  const { group = null, targets = [] } = options;
   const configYaml = fs.readFileSync(lintingConfigPath, 'utf8');
   const parsedConfig = yaml.load(configYaml);
-  const groups = parsedConfig['librarian'] || {};
+  const groups = parsedConfig.librarian || {};
   const allIssues = [];
   let totalFixed = 0;
 

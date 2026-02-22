@@ -1,5 +1,5 @@
 // src/cli/plugin/create.command.js
-const path = require('path');
+const path = require('node:path');
 const {
   cmUtilsPath,
   pluginArchetyperPath,
@@ -9,14 +9,14 @@ const {
   collectionsMetadataFilename,
   collectionsDefaultArchetypeDirname,
 } = require('@paths');
-const { execSync } = require('child_process');
+const { execSync } = require('node:child_process');
 
 const logger = require(loggerPath);
 const { isValidPluginName } = require(cmUtilsPath);
 const { createArchetype } = require(pluginArchetyperPath);
 
-const fs = require('fs').promises;
-const fss = require('fs');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
@@ -77,7 +77,7 @@ module.exports = {
         const pluginRegistryEntry =
           configResolver.mergedPluginRegistry[args.from];
 
-        if (pluginRegistryEntry && pluginRegistryEntry.configPath) {
+        if (pluginRegistryEntry?.configPath) {
           sourceIdentifier = path.dirname(pluginRegistryEntry.configPath);
         } else {
           sourceIdentifier = args.from;
@@ -118,7 +118,7 @@ module.exports = {
         options,
       );
 
-      if (result && result.success && result.archetypePath) {
+      if (result?.success && result.archetypePath) {
         logger.success(`\nPlugin '${newPluginName}' created successfully.`);
         logger.info('Next steps:');
         logger.detail(

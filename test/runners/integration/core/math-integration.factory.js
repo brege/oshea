@@ -1,7 +1,7 @@
 // test/runners/integration/core/math-integration.factory.js
 require('module-alias/register');
 const sinon = require('sinon');
-const path = require('path');
+const path = require('node:path');
 const proxyquire = require('proxyquire');
 const { mathIntegrationPath } = require('@paths');
 

@@ -25,7 +25,7 @@ module.exports = [
         _writeEnabledManifest: { resolves: true },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, mocks, _constants, expect) => {
       expect(result.success).to.be.true;
       expect(mocks._writeEnabledManifest.calledOnce).to.be.true;
       const manifestWritten = mocks._writeEnabledManifest.firstCall.args[0];

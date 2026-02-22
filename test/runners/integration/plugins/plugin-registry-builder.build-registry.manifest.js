@@ -18,7 +18,7 @@ module.exports = [
           'bundled-plugin': { sourceType: 'Bundled' },
         },
       },
-      assertion: (result, { builderInstance }, constants, expect) => {
+      assertion: (result, { builderInstance }, _constants, expect) => {
         expect(builderInstance._registerBundledPlugins.calledOnce).to.be.true;
         expect(builderInstance._getPluginRegistrationsFromFile.notCalled).to.be
           .true;
@@ -65,7 +65,7 @@ module.exports = [
         .withArgs(builderInstance.projectManifestConfigPath)
         .resolves({ 'project-plugin': {} });
     },
-    assert: async (result, { builderInstance }, constants, expect) => {
+    assert: async (result, _mocks, _constants, expect) => {
       expect(result).to.have.property('bundled-plugin');
       expect(result).to.have.property('cm-plugin');
       expect(result).to.have.property('xdg-plugin');
@@ -93,7 +93,7 @@ module.exports = [
       );
       await builderInstance.buildRegistry(); // First call to cache
     },
-    assert: async (result, { builderInstance }) => {
+    assert: async (_result, { builderInstance }) => {
       await builderInstance.buildRegistry(); // Second call, should be cached
       expect(builderInstance.buildRegistrySpy.callCount).to.equal(1);
     },
@@ -182,7 +182,7 @@ module.exports = [
       registryStubs: {
         _getPluginRegistrationsFromCmManifest: { 'my-cm-plugin': {} },
       },
-      assertion: (result, { builderInstance }, constants, expect) => {
+      assertion: (result, { builderInstance }, _constants, expect) => {
         expect(builderInstance._getPluginRegistrationsFromCmManifest.calledOnce)
           .to.be.true;
         expect(result).to.have.property('my-cm-plugin');
@@ -210,7 +210,7 @@ module.exports = [
         .stub(builderInstance, '_getPluginRegistrationsFromCmManifest')
         .resolves({});
     },
-    assert: async (result, { builderInstance }, constants, expect) => {
+    assert: async (result, { builderInstance }, _constants, expect) => {
       expect(builderInstance.getFromFileSpy.called).to.be.false;
       expect(result).to.deep.equal({});
     },

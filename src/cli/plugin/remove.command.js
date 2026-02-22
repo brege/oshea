@@ -1,6 +1,6 @@
 // src/cli/plugin/remove.command.js
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const {
@@ -10,7 +10,7 @@ const {
   pluginRegistryBuilderPath,
   projectRoot,
 } = require('@paths');
-const { execSync } = require('child_process');
+const { execSync } = require('node:child_process');
 
 const logger = require(loggerPath);
 const { theme } = require(colorThemePath);
@@ -178,7 +178,7 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
         // Check if it's a bundled plugin (which cannot be removed)
         if (
           targetPlugin.source === 'bundled' ||
-          (targetPlugin.status && targetPlugin.status.includes('Bundled'))
+          targetPlugin.status?.includes('Bundled')
         ) {
           logger.error(
             `Cannot remove '${pluginName}' - it's a bundled plugin.`,
@@ -282,7 +282,7 @@ Bundled plugins and collection-managed plugins cannot be removed this way.`);
         );
       } else if (result.pluginType === 'created') {
         logger.info(
-          `  • To recreate this plugin: ${theme.highlight('oshea plugin create ' + pluginName + ' --from <source>')}`,
+          `  • To recreate this plugin: ${theme.highlight(`oshea plugin create ${pluginName} --from <source>`)}`,
         );
       }
 

@@ -158,7 +158,7 @@ function generateEmptyMessage(listData) {
 }
 
 // Main formatter function
-function formatCollectionList(level, message, meta = {}) {
+function formatCollectionList(level, message, _meta = {}) {
   const listData = message; // Structured data from command
 
   if (!listData || !listData.items) {

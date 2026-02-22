@@ -2,8 +2,8 @@
 const { mathIntegrationPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-const fs = require('fs').promises;
-const fss = require('fs');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
 const MarkdownIt = require('markdown-it');
@@ -263,7 +263,7 @@ function renderMarkdownToHtml(
     anchorOptions: anchorOptions,
   });
 
-  if (tocOptions && tocOptions.enabled) {
+  if (tocOptions?.enabled) {
     md.use(require(tocPlugin), {
       placeholder: tocOptions.placeholder || '%toc%',
       level: tocOptions.level || [1, 2, 3],
@@ -275,7 +275,7 @@ function renderMarkdownToHtml(
     });
   }
 
-  if (mathConfig && mathConfig.enabled) {
+  if (mathConfig?.enabled) {
     mathIntegration.configureMarkdownItForMath(md, mathConfig);
     logger.debug('Math integration configured', {
       context: 'MarkdownUtils',

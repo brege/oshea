@@ -21,8 +21,8 @@ module.exports = [
       null,
       null,
     ],
-    setup: async (mocks, constants) => {},
-    assert: async (builder, mocks, constants, expect, logs) => {
+    setup: async (_mocks, _constants) => {},
+    assert: async (builder, _mocks, constants, expect, logs) => {
       expect(builder.projectRoot).to.equal(constants.FAKE_PROJECT_ROOT);
       expect(builder.projectManifestConfigPath).to.equal(
         constants.FAKE_MANIFEST_PATH,
@@ -49,11 +49,11 @@ module.exports = [
       null,
       null,
     ],
-    setup: async (mocks, constants) => {
+    setup: async (mocks, _constants) => {
       const FAKE_XDG_CONFIG_HOME = '/fake/xdg_config';
       mocks.mockDependencies.process.env.XDG_CONFIG_HOME = FAKE_XDG_CONFIG_HOME;
     },
-    assert: async (builder, mocks, constants, expect, logs) => {
+    assert: async (builder, _mocks, _constants, expect, logs) => {
       const FAKE_XDG_CONFIG_HOME = '/fake/xdg_config';
       expect(builder.xdgBaseDir).to.equal(`${FAKE_XDG_CONFIG_HOME}/oshea`);
       expect(logs.length).to.be.greaterThan(0);
@@ -67,7 +67,7 @@ module.exports = [
     isNegativeTest: true,
     expectedErrorMessage:
       'PluginRegistryBuilder: projectRoot must be a valid path string.',
-    assert: async (builder, mocks, constants, expect, logs) => {},
+    assert: async (_builder, _mocks, _constants, _expect, _logs) => {},
   },
   {
     description:
@@ -76,7 +76,7 @@ module.exports = [
     isNegativeTest: true,
     expectedErrorMessage:
       'PluginRegistryBuilder: projectRoot must be a valid path string.',
-    assert: async (builder, mocks, constants, expect, logs) => {},
+    assert: async (_builder, _mocks, _constants, _expect, _logs) => {},
   },
   {
     description: '1.2.2: Should throw an error if projectRoot is not a string',
@@ -84,7 +84,7 @@ module.exports = [
     isNegativeTest: true,
     expectedErrorMessage:
       'PluginRegistryBuilder: projectRoot must be a valid path string.',
-    assert: async (builder, mocks, constants, expect, logs) => {},
+    assert: async (_builder, _mocks, _constants, _expect, _logs) => {},
   },
   {
     description:
@@ -98,8 +98,8 @@ module.exports = [
       null,
       null,
     ],
-    setup: async (mocks, constants) => {},
-    assert: async (builder, mocks, constants, expect, logs) => {
+    setup: async (_mocks, _constants) => {},
+    assert: async (builder, _mocks, constants, expect, logs) => {
       expect(builder.cmCollRoot).to.equal(constants.FAKE_COLL_ROOT);
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some((log) => log.level === 'debug')).to.be.true;
@@ -117,10 +117,10 @@ module.exports = [
       null,
       null,
     ],
-    setup: async (mocks, constants) => {
+    setup: async (mocks, _constants) => {
       mocks.mockDependencies.os.platform.returns('linux');
     },
-    assert: async (builder, mocks, constants, expect, logs) => {
+    assert: async (builder, _mocks, constants, expect, logs) => {
       expect(builder.cmCollRoot).to.equal(constants.FAKE_COLL_ROOT);
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some((log) => log.level === 'debug')).to.be.true;
@@ -138,10 +138,10 @@ module.exports = [
       null,
       null,
     ],
-    setup: async (mocks, constants) => {
+    setup: async (mocks, _constants) => {
       mocks.mockDependencies.os.platform.returns('win32');
     },
-    assert: async (builder, mocks, constants, expect, logs) => {
+    assert: async (builder, _mocks, constants, expect, logs) => {
       expect(builder.cmCollRoot).to.equal(constants.FAKE_COLL_ROOT);
       expect(logs.length).to.be.greaterThan(0);
       expect(logs.some((log) => log.level === 'debug')).to.be.true;

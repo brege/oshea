@@ -1,5 +1,5 @@
 // src/collections/cm-utils.js
-const path = require('path');
+const path = require('node:path');
 
 function deriveCollectionName(source) {
   if (!source || typeof source !== 'string') {

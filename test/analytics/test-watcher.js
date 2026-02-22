@@ -8,8 +8,8 @@ const {
   loggerPath,
 } = require('@paths');
 const chokidar = require('chokidar');
-const path = require('path');
-const { spawn } = require('child_process');
+const path = require('node:path');
+const { spawn } = require('node:child_process');
 const glob = require('glob');
 const logger = require(loggerPath);
 
@@ -79,11 +79,11 @@ function printInstrumentation(map) {
   for (const target of sortedTargets) {
     const testPathsInfo = map.get(target);
     logger.success(`\n  ◉ ${target}\n`, { format: 'inline' });
-    testPathsInfo.forEach((info) =>
+    testPathsInfo.forEach((info) => {
       logger.detail(`    └─ ${info.path} (Found via: ${info.reason})\n`, {
         format: 'inline',
-      }),
-    );
+      });
+    });
   }
   logger.info('\nEnd of Instrumentation\n\n', { format: 'inline' });
 }

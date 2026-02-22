@@ -2,8 +2,8 @@
 // scripts/ai/ai-context-generator.js
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { loggerPath, fileHelpersPath } = require('@paths');
 const logger = require(loggerPath);
 const { findFiles } = require(fileHelpersPath);
@@ -76,7 +76,7 @@ function readFileOrWarn(filePath) {
   for (const doc of REQUIRED_DOCS) {
     for (const found of findFiles(doc)) {
       output += docBreak(found);
-      output += readFileOrWarn(found) + '\n';
+      output += `${readFileOrWarn(found)}\n`;
     }
   }
 
@@ -110,7 +110,7 @@ function readFileOrWarn(filePath) {
     const pluginFile = template.replace(/{plugin}/g, pluginName);
     for (const found of findFiles(path.join(pluginDir, pluginFile))) {
       output += docBreak(found);
-      output += readFileOrWarn(found) + '\n';
+      output += `${readFileOrWarn(found)}\n`;
     }
   }
 

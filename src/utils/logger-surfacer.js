@@ -7,8 +7,8 @@ const { fileHelpersPath, loggerPath } = require('@paths');
 const { findFilesArray, getDefaultGlobIgnores } = require(fileHelpersPath);
 const logger = require(loggerPath);
 
-const fs = require('fs');
-const readline = require('readline');
+const fs = require('node:fs');
+const readline = require('node:readline');
 
 // Logger levels to detect
 const LOG_LEVELS = [

@@ -2,8 +2,8 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const yaml = require('js-yaml');
 const { minimatch } = require('minimatch');
 const {
@@ -37,7 +37,6 @@ function loadLintConfig(configPath = lintingConfigPath) {
 }
 
 function findFilesArray(inputs, opts = {}) {
-  const { debug = false } = opts; // eslint-disable-line no-unused-vars
   logger.debug(` Received inputs: ${JSON.stringify(inputs)}`, {
     context: 'LintHelpers',
   });
@@ -70,7 +69,9 @@ function findFilesArray(inputs, opts = {}) {
       logger.debug(` Glob '${input}' matched ${matches.length} files.`, {
         context: 'LintHelpers',
       });
-      matches.forEach((file) => files.add(file));
+      matches.forEach((file) => {
+        files.add(file);
+      });
     }
   }
   const finalFiles = Array.from(files);

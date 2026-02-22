@@ -3,8 +3,8 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const {
   lintHelpersPath,
   lintingConfigPath,
@@ -74,7 +74,7 @@ function parseRulesFile(filename) {
 
     const whitelistMatch = line.match(WHITELIST_RE);
     if (whitelistMatch) {
-      const [, type, filetypes] = whitelistMatch; // eslint-disable-line no-unused-vars
+      const [, type, _filetypes] = whitelistMatch; // eslint-disable-line no-unused-vars
       currentMode = `whitelist:${type}`;
       if (!customWhitelists.has(type)) {
         customWhitelists.set(type, new Set());
@@ -113,11 +113,7 @@ function parseRulesFile(filename) {
 
     if (currentMode === 'emoji' && !line.startsWith('[')) {
       emojiWhitelist.push(line);
-    } else if (
-      currentMode &&
-      currentMode.startsWith('whitelist:') &&
-      !line.startsWith('[')
-    ) {
+    } else if (currentMode?.startsWith('whitelist:') && !line.startsWith('[')) {
       const type = currentMode.split(':')[1];
       customWhitelists.get(type).add(line);
     }
@@ -186,10 +182,7 @@ function scanFileForLitter(filePath, config) {
         subject = line.slice(commentIdx + 2).trim();
 
         if (CAPS_COMMENT_REGEX.test(subject)) {
-          if (
-            commentCapsWhitelist &&
-            commentCapsWhitelist.some((re) => re.test(subject))
-          ) {
+          if (commentCapsWhitelist?.some((re) => re.test(subject))) {
             continue;
           }
         }
@@ -235,10 +228,7 @@ function scanFileForLitter(filePath, config) {
       const subject = line.slice(commentIdx + 2).trim();
       if (
         CAPS_COMMENT_REGEX.test(subject) &&
-        !(
-          commentCapsWhitelist &&
-          commentCapsWhitelist.some((re) => re.test(subject))
-        )
+        !commentCapsWhitelist?.some((re) => re.test(subject))
       ) {
         issues.push({
           line: index + 1,

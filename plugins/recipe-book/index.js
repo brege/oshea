@@ -1,7 +1,7 @@
 // plugins/recipe-book/index.js
-const fs = require('fs').promises;
-const fss = require('fs'); // Synchronous for operations like existsSync
-const path = require('path');
+const fs = require('node:fs').promises;
+const fss = require('node:fs'); // Synchronous for operations like existsSync
+const path = require('node:path');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
@@ -20,7 +20,7 @@ class RecipeBookHandler {
     pluginBasePath,
   ) {
     // Gracefully handle the validator's self-activation test, which uses 'convert'.
-    if (data && data.markdownFilePath) {
+    if (data?.markdownFilePath) {
       logger.info(
         '(RecipeBookHandler): Self-activation check called via "convert". Skipping book generation. This is normal during validation.',
       );
@@ -35,7 +35,7 @@ class RecipeBookHandler {
     } = this.markdownUtils;
     const { generatePdf } = this.pdfGenerator;
 
-    const recipesBaseDir = data.cliArgs && data.cliArgs.recipesBaseDir;
+    const recipesBaseDir = data.cliArgs?.recipesBaseDir;
 
     if (!recipesBaseDir) {
       throw new Error(
@@ -77,10 +77,7 @@ class RecipeBookHandler {
       );
     }
 
-    if (
-      pluginSpecificConfig.cover_page &&
-      pluginSpecificConfig.cover_page.enabled
-    ) {
+    if (pluginSpecificConfig.cover_page?.enabled) {
       const {
         title = 'Recipe Book',
         subtitle = '',
@@ -98,8 +95,7 @@ class RecipeBookHandler {
     }
 
     if (
-      pluginSpecificConfig.toc_options &&
-      pluginSpecificConfig.toc_options.enabled &&
+      pluginSpecificConfig.toc_options?.enabled &&
       pluginSpecificConfig.toc_options.placeholder
     ) {
       combinedMarkdown += `${pluginSpecificConfig.toc_options.placeholder}\n\n`;
@@ -140,8 +136,8 @@ class RecipeBookHandler {
       ...(globalConfig.global_pdf_options || {}),
       ...(pluginSpecificConfig.pdf_options || {}),
       margin: {
-        ...((globalConfig.global_pdf_options || {}).margin || {}),
-        ...((pluginSpecificConfig.pdf_options || {}).margin || {}),
+        ...(globalConfig.global_pdf_options?.margin || {}),
+        ...(pluginSpecificConfig.pdf_options?.margin || {}),
       },
     };
 

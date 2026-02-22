@@ -1,8 +1,8 @@
 // src/completion/engine.js
 const { trackerPath } = require('@paths');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const completionTracker = require(trackerPath);
 
 const CACHE_PATH = path.join(
@@ -87,7 +87,7 @@ function getSuggestions(argv, current) {
       suggestions.push(
         ...cache.filter((n) => n.name !== '$0').map((n) => n.name),
       );
-      if (globalNode && globalNode.positionals) {
+      if (globalNode?.positionals) {
         suggestions.push(...globalNode.positionals.map((p) => p.key));
       }
     }
@@ -103,13 +103,13 @@ function getSuggestions(argv, current) {
   ];
   const previousArg = process.argv[process.argv.length - 2];
 
-  if (previousArg && previousArg.startsWith('--')) {
+  if (previousArg?.startsWith('--')) {
     const prevOptionName = previousArg.substring(2);
     const prevOptionDef = allOptions.find((opt) => opt.name === prevOptionName);
 
-    if (prevOptionDef && prevOptionDef.completionKey) {
+    if (prevOptionDef?.completionKey) {
       targetCompletionKey = prevOptionDef.completionKey;
-    } else if (prevOptionDef && prevOptionDef.choices) {
+    } else if (prevOptionDef?.choices) {
       targetChoices = prevOptionDef.choices;
     }
   }
@@ -126,10 +126,7 @@ function getSuggestions(argv, current) {
       // It's the total args minus the script name and the command parts.
       const positionalIndexInNode = rawArgv.length - 1 - numCommandPartsInArgv;
 
-      if (
-        currentNode.positionals &&
-        currentNode.positionals[positionalIndexInNode]
-      ) {
+      if (currentNode.positionals?.[positionalIndexInNode]) {
         const positionalDef = currentNode.positionals[positionalIndexInNode];
         if (positionalDef.choices) {
           targetChoices = positionalDef.choices;

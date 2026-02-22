@@ -3,9 +3,9 @@
 // QA analytics tool for analyzing test brittleness and failure patterns
 
 require('module-alias/register');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
@@ -54,7 +54,7 @@ function analyzeTestBrittleness(testResults) {
     const failureRate = data.fail_count / totalRuns;
     const volatility = calculateVolatility(data);
     const daysSinceFirstSeen = Math.floor(
-      (new Date() - new Date(data.first_seen)) / (1000 * 60 * 60 * 24),
+      (Date.now() - new Date(data.first_seen)) / (1000 * 60 * 60 * 24),
     );
 
     analysis.push({

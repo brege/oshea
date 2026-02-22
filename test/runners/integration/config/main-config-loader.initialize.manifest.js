@@ -2,7 +2,7 @@
 require('module-alias/register');
 const { mainConfigLoaderFactoryPath } = require('@paths');
 const { makeMainConfigLoaderScenario } = require(mainConfigLoaderFactoryPath);
-const path = require('path');
+const path = require('node:path');
 
 module.exports = [
   makeMainConfigLoaderScenario({
@@ -13,7 +13,7 @@ module.exports = [
     loadYamlConfigStubs: {
       [path.join(process.cwd(), 'config.example.yaml')]: { isFactory: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal('factory default');
       expect(loader.primaryConfig).to.deep.equal({ isFactory: true });
@@ -25,7 +25,7 @@ module.exports = [
     constructorArgs: ['/root', '/project/oshea.config.yaml', false, null],
     fsExistsStubs: { '/project/oshea.config.yaml': true },
     loadYamlConfigStubs: { '/project/oshea.config.yaml': { isProject: true } },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal(
         'project (from --config)',
@@ -40,7 +40,7 @@ module.exports = [
     loadYamlConfigStubs: {
       '/home/user/.config/oshea/config.yaml': { isXdg: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal('XDG global');
       expect(loader.primaryConfig).to.deep.equal({ isXdg: true });
@@ -54,7 +54,7 @@ module.exports = [
     loadYamlConfigStubs: {
       [path.join(process.cwd(), 'config.yaml')]: { isBundled: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal('bundled main');
       expect(loader.primaryConfig).to.deep.equal({ isBundled: true });
@@ -68,7 +68,7 @@ module.exports = [
     loadYamlConfigStubs: {
       [path.join(process.cwd(), 'config.example.yaml')]: { isFallback: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal(
         'factory default fallback',
@@ -84,7 +84,7 @@ module.exports = [
     loadYamlConfigStubs: {
       [path.join(process.cwd(), 'config.yaml')]: { isPrimary: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfigLoadReason).to.equal('bundled main');
       expect(loader.primaryConfig).to.deep.equal({ isPrimary: true });
@@ -95,7 +95,7 @@ module.exports = [
       '1.4.11.a: Should set primaryConfig to empty object if config path does not exist',
     constructorArgs: ['/root', '/non/existent.yaml', false, null],
     fsExistsStubs: { '/non/existent.yaml': false },
-    assertion: async (loader, mocks, constants, expect, logs) => {
+    assertion: async (loader, _mocks, _constants, expect, logs) => {
       await loader._initialize();
       expect(loader.primaryConfig).to.deep.equal({});
       expect(loader.primaryConfigLoadReason).to.equal(
@@ -116,7 +116,7 @@ module.exports = [
     constructorArgs: ['/root', '/bad/config.yaml', false, null],
     fsExistsStubs: { '/bad/config.yaml': true },
     loadYamlConfigStubs: { '/bad/config.yaml': new Error('YAML Parse Error') },
-    assertion: async (loader, mocks, constants, expect, logs) => {
+    assertion: async (loader, _mocks, _constants, expect, logs) => {
       await loader._initialize();
       expect(loader.primaryConfig).to.deep.equal({});
       expect(
@@ -136,7 +136,7 @@ module.exports = [
       '/project/config.yaml': { isProject: true },
       '/xdg/config.yaml': { isXdg: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfig.isProject).to.be.true;
       expect(loader.xdgConfigContents.isXdg).to.be.true;
@@ -148,7 +148,7 @@ module.exports = [
     constructorArgs: ['/root', '/project/config.yaml', false, '/xdg'],
     fsExistsStubs: { '/project/config.yaml': true, '/xdg/config.yaml': false },
     loadYamlConfigStubs: { '/project/config.yaml': { isProject: true } },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.xdgConfigContents).to.deep.equal({});
     },
@@ -162,7 +162,7 @@ module.exports = [
       '/project/config.yaml': { isProject: true },
       '/xdg/config.yaml': new Error('XDG Load Error'),
     },
-    assertion: async (loader, mocks, constants, expect, logs) => {
+    assertion: async (loader, _mocks, _constants, expect, logs) => {
       await loader._initialize();
       expect(loader.xdgConfigContents).to.deep.equal({});
       expect(
@@ -183,7 +183,7 @@ module.exports = [
       '/xdg/config.yaml': { isXdg: true },
       '/project/config.yaml': { isProject: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       await loader._initialize();
       expect(loader.primaryConfig.isProject).to.be.true;
       expect(loader.projectConfigContents.isProject).to.be.true;
@@ -195,7 +195,7 @@ module.exports = [
     constructorArgs: ['/root', '/project/config.yaml', false, '/xdg'],
     fsExistsStubs: { '/xdg/config.yaml': true, '/project/config.yaml': false },
     loadYamlConfigStubs: { '/xdg/config.yaml': { isXdg: true } },
-    assertion: async (loader, mocks, constants, expect, logs) => {
+    assertion: async (loader, _mocks, _constants, expect, logs) => {
       await loader._initialize();
       expect(loader.projectConfigContents).to.deep.equal({});
       expect(
@@ -216,7 +216,7 @@ module.exports = [
       '/xdg/config.yaml': { isXdg: true },
       '/project/config.yaml': new Error('Project Load Error'),
     },
-    assertion: async (loader, mocks, constants, expect, logs) => {
+    assertion: async (loader, _mocks, _constants, expect, logs) => {
       await loader._initialize();
       expect(loader.primaryConfig).to.deep.equal({});
       expect(loader.projectConfigContents).to.deep.equal({});
@@ -232,7 +232,7 @@ module.exports = [
   makeMainConfigLoaderScenario({
     description: '1.4.16: Should set _initialized to true after completion',
     constructorArgs: ['/root', null, false, null],
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       expect(loader._initialized).to.be.false;
       await loader._initialize();
       expect(loader._initialized).to.be.true;

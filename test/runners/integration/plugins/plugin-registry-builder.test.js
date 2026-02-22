@@ -14,7 +14,7 @@ const {
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const path = require('path');
+const path = require('node:path');
 const { logs, clearLogs } = require(captureLogsPath);
 
 const getTestCases = (manifest) => {

@@ -1,12 +1,12 @@
 // src/utils/formatters/config.formatter.js
 // Configuration display formatter - handles both global and plugin config formatting
 const yaml = require('js-yaml');
-const path = require('path');
+const path = require('node:path');
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 
 // Format global configuration display
-function formatGlobalConfig(level, message, meta = {}) {
+function formatGlobalConfig(_level, _message, meta = {}) {
   const { configData, sources, isPure = false } = meta;
 
   if (!configData) {
@@ -66,7 +66,7 @@ function formatGlobalConfig(level, message, meta = {}) {
 }
 
 // Format plugin configuration display
-function formatPluginConfig(level, message, meta = {}) {
+function formatPluginConfig(_level, _message, meta = {}) {
   const { effectiveConfig, configSources, pluginName, isPure = false } = meta;
 
   if (!effectiveConfig) {
@@ -155,8 +155,7 @@ function displayBundledConfigInfo(sources) {
   } = sources;
 
   if (
-    bundledMainDefaultPath &&
-    bundledMainDefaultPath.exists &&
+    bundledMainDefaultPath?.exists &&
     bundledMainDefaultPath.path !== mainConfigPath &&
     mainConfigPath !== factoryDefaultMainConfigPath
   ) {
@@ -190,9 +189,9 @@ function displayPluginSourceInfo(effectiveConfig, configSources) {
       ),
     );
   }
-  configSources.pluginConfigPaths.forEach((p) =>
-    console.log(theme.detail(`#     - ${p}`)),
-  );
+  configSources.pluginConfigPaths.forEach((p) => {
+    console.log(theme.detail(`#     - ${p}`));
+  });
 }
 
 // Helper: Display resolved CSS files
@@ -203,9 +202,9 @@ function displayResolvedCssFiles(effectiveConfig) {
     effectiveConfig.pluginSpecificConfig.css_files &&
     effectiveConfig.pluginSpecificConfig.css_files.length > 0
   ) {
-    effectiveConfig.pluginSpecificConfig.css_files.forEach((p) =>
-      console.log(theme.detail(`#     - ${p}`)),
-    );
+    effectiveConfig.pluginSpecificConfig.css_files.forEach((p) => {
+      console.log(theme.detail(`#     - ${p}`));
+    });
   } else {
     console.log(
       theme.detail(

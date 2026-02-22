@@ -56,11 +56,11 @@ describe(`plugin-determiner (Module Integration Tests) ${path.relative(projectRo
     mockPath = {
       resolve: sinon
         .stub()
-        .callsFake((...args) => require('path').resolve(...args)),
-      dirname: require('path').dirname,
-      basename: require('path').basename,
-      extname: require('path').extname,
-      join: require('path').join,
+        .callsFake((...args) => require('node:path').resolve(...args)),
+      dirname: require('node:path').dirname,
+      basename: require('node:path').basename,
+      extname: require('node:path').extname,
+      join: require('node:path').join,
     };
 
     mockYaml = { load: sinon.stub() };

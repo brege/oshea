@@ -11,7 +11,7 @@ function makeConfigResolverScenario({
   assertion, // discouraged; only for rare, complex cases
 }) {
   // Setup function: apply main config stubs
-  const setup = async (mocks, constants, resolver) => {
+  const setup = async (mocks, _constants, _resolver) => {
     const { mockMainConfigLoaderInstance } = mocks;
     if (mainConfigStubs.getPrimaryMainConfig) {
       mockMainConfigLoaderInstance.getPrimaryMainConfig.resolves(

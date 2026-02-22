@@ -25,7 +25,7 @@ module.exports = [
         resolveAndMergeCss: sinon.stub(),
       };
     },
-    assertion: async (resolver, mocks, constants, expect) => {
+    assertion: async (resolver, mocks, _constants, expect) => {
       const { mockDependencies } = mocks;
       const fakeConfigPath = '/fake/plugin/plugin.config.yaml';
       const fakeAssetsPath = '/fake/plugin';

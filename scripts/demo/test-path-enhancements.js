@@ -7,7 +7,7 @@ const { pathFinderPath } = require('@paths');
 const { findVariableByPath, getPathByVariable, getAllPathVariables } = require(
   pathFinderPath,
 );
-const path = require('path');
+const path = require('node:path');
 
 console.log('=== Testing Path System Enhancements ===\n');
 
@@ -124,7 +124,7 @@ sampleVars.forEach((variable) => {
   const results = getPathByVariable(variable);
   if (results.length > 0) {
     const resolvedPath = path.resolve(results[0].path);
-    const fs = require('fs');
+    const fs = require('node:fs');
     if (fs.existsSync(resolvedPath)) {
       console.log(
         `✓ ${variable} → file exists at ${path.relative(process.cwd(), resolvedPath)}`,

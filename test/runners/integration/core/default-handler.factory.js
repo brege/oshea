@@ -1,5 +1,5 @@
 // test/runners/integration/core/default-handler.factory.js
-const path = require('path'); // Ensure path is required for path.resolve
+const path = require('node:path'); // Ensure path is required for path.resolve
 
 function makeDefaultHandlerScenario({
   description,
@@ -15,7 +15,7 @@ function makeDefaultHandlerScenario({
   expectedError,
   expectedLogs = [],
 }) {
-  const setup = (DefaultHandler, mockStubs) => {
+  const setup = (_DefaultHandler, mockStubs) => {
     // File system stubs
     if (stubs.existsSync !== false) {
       mockStubs.existsSyncStub.withArgs(markdownFilePath).returns(true);

@@ -22,7 +22,7 @@ function formatLine(line) {
   return line;
 }
 
-function formatPathFinderOutput(level, message, meta = {}) {
+function formatPathFinderOutput(_level, message, _meta = {}) {
   if (!message || typeof message !== 'string') return message;
 
   const highlightedOutput = message

@@ -6,7 +6,7 @@ function makePdfGeneratorScenario({
   assertion,
   constants,
 }) {
-  const setup = (mocks, constantsArg) => {
+  const setup = (mocks, _constantsArg) => {
     const { mockPuppeteer } = mocks;
 
     // Apply scenario-specific stub behaviors

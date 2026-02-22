@@ -4,7 +4,7 @@ const { collectionsManagerFactoryPath } = require('@paths');
 const { makeCollectionsManagerScenario } = require(
   collectionsManagerFactoryPath,
 );
-const path = require('path');
+const path = require('node:path');
 
 module.exports = [
   makeCollectionsManagerScenario({
@@ -16,7 +16,7 @@ module.exports = [
         env: { XDG_DATA_HOME: '/fake/xdg_data_home' },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       const manager = result;
       const expectedPath = path.join(
         '/fake/xdg_data_home',
@@ -37,7 +37,7 @@ module.exports = [
         homedir: { returns: '/fake/home' },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       const manager = result;
       const expectedPath = path.join(
         '/fake/home',
@@ -67,7 +67,7 @@ module.exports = [
         sep: '\\',
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       const manager = result;
       // The test runner uses path.join which will use the OS separator.
       // We need to construct the expected path in the same way.
@@ -93,7 +93,7 @@ module.exports = [
         env: { XDG_DATA_HOME: '/should/be/ignored' },
       },
     },
-    assertion: (result, mocks, constants, expect) => {
+    assertion: (result, _mocks, _constants, expect) => {
       const manager = result;
       expect(manager.collRoot).to.equal('/path/from/cli');
     },

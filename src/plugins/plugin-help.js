@@ -1,7 +1,7 @@
 // src/plugins/plugin-help.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
+const path = require('node:path');
 const {
   markdownUtilsPath,
   pluginRegistryBuilderPath,
@@ -53,7 +53,7 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
           'utf8',
         );
         const pluginConfig = yaml.load(pluginConfigContent);
-        if (pluginConfig && pluginConfig.description) {
+        if (pluginConfig?.description) {
           logger.info(`  ${pluginConfig.description}`);
         } else {
           logger.info("  No description found in plugin's config file either.");
@@ -67,7 +67,7 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
     const readmeContent = await fs.readFile(readmePath, 'utf8');
     const { data: frontMatter } = extractFrontMatter(readmeContent);
 
-    if (frontMatter && frontMatter.cli_help) {
+    if (frontMatter?.cli_help) {
       logger.info('\n--- Plugin Help ---\n');
       logger.info(frontMatter.cli_help.trim());
       logger.info('\n-------------------\n');
@@ -84,7 +84,7 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
           'utf8',
         );
         const pluginConfig = yaml.load(pluginConfigContent);
-        if (pluginConfig && pluginConfig.description) {
+        if (pluginConfig?.description) {
           logger.info(`  ${pluginConfig.description}`);
         } else {
           logger.info("  No description found in plugin's config file.");

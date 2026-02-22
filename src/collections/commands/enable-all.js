@@ -43,7 +43,7 @@ module.exports = async function enableAllPluginsInCollection(
     !(options.prefix && typeof options.prefix === 'string')
   ) {
     const metadata = await this._readCollectionMetadata(collectionName); // Uses private method
-    if (metadata && metadata.source) {
+    if (metadata?.source) {
       const source = metadata.source;
       const gitHubHttpsMatch = source.match(
         /^https?:\/\/github\.com\/([^/]+)\/[^/.]+(\.git)?$/,
@@ -52,9 +52,9 @@ module.exports = async function enableAllPluginsInCollection(
         /^git@github\.com:([^/]+)\/[^/.]+(\.git)?$/,
       );
 
-      if (gitHubHttpsMatch && gitHubHttpsMatch[1]) {
+      if (gitHubHttpsMatch?.[1]) {
         defaultPrefixToUse = `${gitHubHttpsMatch[1]}-`;
-      } else if (gitHubSshMatch && gitHubSshMatch[1]) {
+      } else if (gitHubSshMatch?.[1]) {
         defaultPrefixToUse = `${gitHubSshMatch[1]}-`;
       } else if (/^(http(s)?:\/\/|git@)/.test(source)) {
         defaultPrefixToUse = `${collectionName}-`;
@@ -105,18 +105,18 @@ module.exports = async function enableAllPluginsInCollection(
           invokeName: invokeName,
         });
         // Log validator's output as it's typically more detailed
-        validationResult.errors.forEach((e) =>
+        validationResult.errors.forEach((e) => {
           logger.error('Validation error detail', {
             context: 'CollectionEnableAll',
             errorDetail: e,
-          }),
-        );
-        validationResult.warnings.forEach((w) =>
+          });
+        });
+        validationResult.warnings.forEach((w) => {
           logger.warn('Validation warning detail', {
             context: 'CollectionEnableAll',
             warningDetail: w,
-          }),
-        );
+          });
+        });
         continue; // Continue to the next plugin in the batch
       }
     }

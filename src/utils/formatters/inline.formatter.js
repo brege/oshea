@@ -1,8 +1,8 @@
 // src/utils/formatters/inline.formatter.js
 // Inline formatter with no newline (for prompts/results on same line)
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 

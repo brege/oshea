@@ -1,14 +1,14 @@
 // src/core/watch-handler.js
 const { configResolverPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 const chokidar = require('chokidar');
 const ConfigResolver = require(configResolverPath);
 
 async function setupWatch(
   args,
-  configResolverForInitialPaths,
+  _configResolverForInitialPaths,
   commandExecutor,
 ) {
   let isProcessing = false;
@@ -23,7 +23,7 @@ async function setupWatch(
     try {
       // Resolve relative plugin paths to absolute paths
       let pluginSpec = currentArgs.plugin || currentArgs.pluginName;
-      if (pluginSpec && pluginSpec.startsWith('./')) {
+      if (pluginSpec?.startsWith('./')) {
         pluginSpec = path.resolve(pluginSpec);
       }
 
@@ -80,8 +80,11 @@ async function setupWatch(
             // Placeholder substitution for paths like "{{ cliArgs.someDir }}/data.json"
             let pathValue = sourceEntry.path;
             const placeholderRegex = /\{\{\s*cliArgs\.([\w-]+)\s*\}\}/g;
-            let match;
-            while ((match = placeholderRegex.exec(pathValue)) !== null) {
+            for (;;) {
+              const match = placeholderRegex.exec(pathValue);
+              if (!match) {
+                break;
+              }
               const argName = match[1];
               if (currentArgs[argName] !== undefined) {
                 pathValue = pathValue.replace(match[0], currentArgs[argName]);
@@ -118,8 +121,11 @@ async function setupWatch(
 
             // Placeholder substitution for glob patterns and base paths
             const placeholderRegex = /\{\{\s*cliArgs\.([\w-]+)\s*\}\}/g;
-            let match;
-            while ((match = placeholderRegex.exec(globPattern)) !== null) {
+            for (;;) {
+              const match = placeholderRegex.exec(globPattern);
+              if (!match) {
+                break;
+              }
               const argName = match[1];
               if (currentArgs[argName] !== undefined) {
                 globPattern = globPattern.replace(
@@ -449,9 +455,9 @@ async function setupWatch(
       fileCount: watchedPaths.length,
     },
   );
-  watchedPaths.forEach((f) =>
-    logger.info('  - ' + f, { context: 'WatchHandler', type: 'watched_path' }),
-  );
+  watchedPaths.forEach((f) => {
+    logger.info(`  - ${f}`, { context: 'WatchHandler', type: 'watched_path' });
+  });
   logger.info('Press Ctrl+C to exit.', { context: 'WatchHandler' });
 
   watcher = chokidar.watch(watchedPaths, {

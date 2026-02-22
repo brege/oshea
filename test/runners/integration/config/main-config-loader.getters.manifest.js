@@ -2,7 +2,7 @@
 require('module-alias/register');
 const { mainConfigLoaderFactoryPath } = require('@paths');
 const { makeMainConfigLoaderScenario } = require(mainConfigLoaderFactoryPath);
-const path = require('path');
+const path = require('node:path');
 
 module.exports = [
   makeMainConfigLoaderScenario({
@@ -13,7 +13,7 @@ module.exports = [
     loadYamlConfigStubs: {
       [path.join(process.cwd(), 'config.yaml')]: { isPrimary: true },
     },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       const result = await loader.getPrimaryMainConfig();
       expect(result.config).to.deep.equal({
         isPrimary: true,
@@ -29,7 +29,7 @@ module.exports = [
     constructorArgs: ['/root', null, false, '/xdg/config/dir'],
     fsExistsStubs: { '/xdg/config/dir/config.yaml': true },
     loadYamlConfigStubs: { '/xdg/config/dir/config.yaml': { isXdg: true } },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       const result = await loader.getXdgMainConfig();
       expect(result.config).to.deep.equal({
         isXdg: true,
@@ -44,7 +44,7 @@ module.exports = [
     constructorArgs: ['/root', '/project/config.file', false, null],
     fsExistsStubs: { '/project/config.file': true },
     loadYamlConfigStubs: { '/project/config.file': { isProject: true } },
-    assertion: async (loader, mocks, constants, expect) => {
+    assertion: async (loader, _mocks, _constants, expect) => {
       const result = await loader.getProjectManifestConfig();
       expect(result.config).to.deep.equal({
         isProject: true,

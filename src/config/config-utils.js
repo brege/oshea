@@ -1,5 +1,5 @@
 // src/config/config-utils.js
-const fs = require('fs'); // Used by _loadYamlConfig (moved from ConfigResolver for broader use if needed)
+const fs = require('node:fs'); // Used by _loadYamlConfig (moved from ConfigResolver for broader use if needed)
 const yaml = require('js-yaml'); // Used by _loadYamlConfig
 
 function isObject(item) {

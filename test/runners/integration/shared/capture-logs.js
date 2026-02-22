@@ -11,6 +11,7 @@ const logger = {
   error: logMethod('error'),
   success: logMethod('success'),
   debug: logMethod('debug'),
+  validation: logMethod('validation'),
   fatal: logMethod('fatal'),
 };
 

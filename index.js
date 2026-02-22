@@ -3,11 +3,11 @@
 
 require('module-alias')(__dirname);
 
-const os = require('os');
-const fs = require('fs');
-const fsp = require('fs').promises;
-const path = require('path');
-const { spawn } = require('child_process');
+const os = require('node:os');
+const fs = require('node:fs');
+const fsp = require('node:fs').promises;
+const path = require('node:path');
+const { spawn } = require('node:child_process');
 const yaml = require('js-yaml');
 
 const {

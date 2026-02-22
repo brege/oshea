@@ -16,7 +16,7 @@ module.exports = [
       { rawConfig: { setting: 'base' }, resolvedCssPaths: ['/base.css'] },
       ['/base.config.yaml'],
     ],
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, _loader, mocks, _constants, expect) => {
       expect(result.mergedConfig).to.deep.equal({ setting: 'base' });
       expect(result.mergedCssPaths).to.deep.equal(['/base.css']);
       expect(mocks.mockDependencies.configUtils.deepMerge.called).to.be.false;
@@ -46,7 +46,7 @@ module.exports = [
         setting1: 'xdg-override',
       },
     },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, _loader, _mocks, _constants, expect) => {
       expect(result.mergedConfig).to.deep.equal({ setting1: 'xdg-override' });
     },
   }),
@@ -68,7 +68,7 @@ module.exports = [
       ['/base.config.yaml'],
     ],
     isObjectStubs: { '{"setting1":"inline-xdg"}': true },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, _loader, _mocks, _constants, expect) => {
       expect(result.mergedConfig).to.deep.equal({ setting1: 'inline-xdg' });
     },
   }),
@@ -103,7 +103,7 @@ module.exports = [
           '/proj/base/configs/proj-plugin.config.yaml',
       },
     },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, _loader, _mocks, _constants, expect) => {
       expect(result.mergedConfig).to.deep.equal({
         setting1: 'project-file-override',
       });
@@ -127,7 +127,7 @@ module.exports = [
       ['/base.config.yaml'],
     ],
     isObjectStubs: { '{"setting1":"inline-project"}': true },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, _loader, _mocks, _constants, expect) => {
       expect(result.mergedConfig).to.deep.equal({ setting1: 'inline-project' });
     },
   }),
@@ -181,7 +181,7 @@ module.exports = [
       '{"css_files":["inline-xdg.css"],"inherit_css":false}': true,
       '{"css_files":["inline-project.css"],"inherit_css":false}': true,
     },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (_result, _loader, mocks, _constants, expect) => {
       expect(
         mocks.mockDependencies.AssetResolver.resolveAndMergeCss.callCount,
       ).to.be.greaterThan(0);
@@ -221,7 +221,7 @@ module.exports = [
       },
     },
     osStubs: { homedir: '/fake/home' },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (_result, loader, mocks, _constants, expect) => {
       // Test tilde path resolution
       await loader.applyOverrideLayers(
         'tilde-plugin',
@@ -279,7 +279,7 @@ module.exports = [
       isAbsolute: { 'conf/p.yaml': false },
       resolve: { '/proj,conf/p.yaml': '/proj/conf/p.yaml' },
     },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, _loader, _mocks, _constants, expect) => {
       expect(result.contributingPaths).to.have.length(5);
       expect(result.contributingPaths).to.include('/base.config.yaml');
       expect(result.contributingPaths).to.include(
@@ -322,7 +322,7 @@ module.exports = [
           '/proj/base/configs/missing.config.yaml',
       },
     },
-    assertion: async (result, loader, mocks, constants, expect, logs) => {
+    assertion: async (_result, _loader, _mocks, _constants, expect, logs) => {
       expect(
         logs.some(
           (log) =>
@@ -369,7 +369,7 @@ module.exports = [
       isAbsolute: { 'conf/p.yaml': false },
       resolve: { '/proj,conf/p.yaml': '/proj/conf/p.yaml' },
     },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, _loader, mocks, _constants, expect) => {
       expect(result.mergedConfig.common).to.equal('proj-inline');
       expect(result.mergedConfig.base_only).to.be.true;
       expect(result.mergedConfig.xdg_only).to.be.true;

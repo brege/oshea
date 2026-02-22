@@ -3,9 +3,9 @@
 // Preserves existing results when running partial test groups
 require('module-alias/register');
 const Mocha = require('mocha');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 

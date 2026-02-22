@@ -3,9 +3,9 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
-const { exec } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const { exec } = require('node:child_process');
 const yaml = require('js-yaml');
 const {
   cliRoot,
@@ -41,7 +41,7 @@ function executeCommand(command) {
           return;
         }
 
-        if (stderr && stderr.trim()) {
+        if (stderr?.trim()) {
           logger.warn({ stderr }, { format: 'smoke-warning' });
         }
 
@@ -124,15 +124,12 @@ const discoverers = {
           if (!commandModule.command) continue;
 
           let commandDefinition = commandModule.command;
-          if (
-            commandModule.explicitConvert &&
-            commandModule.explicitConvert.command
-          ) {
+          if (commandModule.explicitConvert?.command) {
             commandDefinition = commandModule.explicitConvert.command;
           }
 
           const commandName = parseBaseCommand(commandDefinition);
-          if (config.exclude && config.exclude.includes(commandName)) {
+          if (config.exclude?.includes(commandName)) {
             continue;
           }
           commands.push([...prefixParts, commandName]);
@@ -344,7 +341,7 @@ function validateResult(
   if (expectNotCriteria && testPassed) {
     for (const [expectType, expectValue] of Object.entries(expectNotCriteria)) {
       const validator = validators[expectType];
-      if (validator && validator(expectValue)(result.stdout)) {
+      if (validator?.(expectValue)(result.stdout)) {
         testPassed = false;
         failureReason = `Validation failed for expect_not.${expectType}`;
         break;
@@ -412,7 +409,7 @@ function parseArgs(args, options = {}) {
 // Enhanced command execution that preserves colors for --show mode
 function executeCommandWithColors(command) {
   return new Promise((resolve, reject) => {
-    const { exec } = require('child_process');
+    const { exec } = require('node:child_process');
     exec(
       command,
       {
@@ -433,7 +430,7 @@ function executeCommandWithColors(command) {
           return;
         }
 
-        if (stderr && stderr.trim()) {
+        if (stderr?.trim()) {
           logger.warn({ stderr }, { format: 'workflow-warning' });
         }
 
@@ -450,15 +447,12 @@ function matchesGrep(grepPattern, testSuite) {
   const lowerPattern = grepPattern.toLowerCase();
 
   // Match against suite name
-  if (testSuite.name && testSuite.name.toLowerCase().includes(lowerPattern)) {
+  if (testSuite.name?.toLowerCase().includes(lowerPattern)) {
     return true;
   }
 
   // Match against suite-level test_id
-  if (
-    testSuite.test_id &&
-    testSuite.test_id.toString().toLowerCase().includes(lowerPattern)
-  ) {
+  if (testSuite.test_id?.toString().toLowerCase().includes(lowerPattern)) {
     return true;
   }
 
@@ -476,17 +470,11 @@ function matchesGrep(grepPattern, testSuite) {
   if (
     scenarios.some((scenario) => {
       // Match scenario description
-      if (
-        scenario.description &&
-        scenario.description.toLowerCase().includes(lowerPattern)
-      ) {
+      if (scenario.description?.toLowerCase().includes(lowerPattern)) {
         return true;
       }
       // Match scenario test_id
-      if (
-        scenario.test_id &&
-        scenario.test_id.toString().toLowerCase().includes(lowerPattern)
-      ) {
+      if (scenario.test_id?.toString().toLowerCase().includes(lowerPattern)) {
         return true;
       }
       return false;
@@ -504,7 +492,7 @@ function listTestSuites(yamlFilePath, useWorkflowFormatter = true) {
   const documents = yaml.loadAll(content);
 
   const blocks = documents
-    .filter((doc) => doc && doc.name)
+    .filter((doc) => doc?.name)
     .map((doc, index) => ({
       index: index + 1,
       name: doc.name,

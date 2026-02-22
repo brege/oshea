@@ -6,13 +6,13 @@ const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 
 // Format workflow test suite header
-function formatWorkflowSuiteHeader(level, message, meta = {}) {
+function formatWorkflowSuiteHeader(level, message, _meta = {}) {
   const { suiteName } = message;
   console.log(colorForLevel(level, `${suiteName}...`));
 }
 
 // Format individual workflow step (inline progress with atomic numbering)
-function formatWorkflowStep(level, message, meta = {}) {
+function formatWorkflowStep(_level, message, _meta = {}) {
   const { description, command, status, reason, test_id } = message;
 
   if (status === 'testing') {
@@ -49,7 +49,7 @@ function formatWorkflowStep(level, message, meta = {}) {
 }
 
 // Format workflow session header
-function formatWorkflowHeader(level, message, meta = {}) {
+function formatWorkflowHeader(level, message, _meta = {}) {
   const { title = 'YAML Tests' } = message;
   console.log(''); // spacing before header
   console.log(colorForLevel(level, '─'.repeat(60)));
@@ -59,14 +59,14 @@ function formatWorkflowHeader(level, message, meta = {}) {
 }
 
 // Format workflow warnings (stderr output)
-function formatWorkflowWarning(level, message, meta = {}) {
+function formatWorkflowWarning(level, message, _meta = {}) {
   const { stderr } = message;
   const stderrText = stderr ? stderr.trim() : 'No stderr provided';
   console.log(`    ${colorForLevel(level, `Warning (stderr): ${stderrText}`)}`);
 }
 
 // Format workflow test list (--list output)
-function formatWorkflowList(level, message, meta = {}) {
+function formatWorkflowList(_level, message, _meta = {}) {
   const { blocks } = message;
 
   console.log(''); // spacing before list
@@ -92,7 +92,7 @@ function formatWorkflowList(level, message, meta = {}) {
 }
 
 // Format final workflow results summary
-function formatWorkflowResults(level, message, meta = {}) {
+function formatWorkflowResults(_level, message, _meta = {}) {
   const { suiteCount, failedScenarios = [], allResults } = message;
 
   // Handle both data formats
@@ -166,7 +166,7 @@ function colorForLevel(level, message) {
 // ============================================================================
 
 // Format session header once (Level 3/4 Tests)
-function formatYamlShowSession(level, message, meta = {}) {
+function formatYamlShowSession(_level, message, _meta = {}) {
   const { title } = message;
   console.log(''); // spacing
   console.log('─'.repeat(60));
@@ -175,14 +175,14 @@ function formatYamlShowSession(level, message, meta = {}) {
 }
 
 // Format test suite name with minimal separator
-function formatYamlShowSuite(level, message, meta = {}) {
+function formatYamlShowSuite(_level, message, _meta = {}) {
   const { suiteName } = message;
   console.log(suiteName);
   console.log('─'.repeat(38)); // shorter separator
 }
 
 // Format scenario with grey command
-function formatYamlShowScenario(level, message, meta = {}) {
+function formatYamlShowScenario(_level, message, _meta = {}) {
   const { description, command, test_id } = message;
 
   // Show test_id and description
@@ -198,12 +198,12 @@ function formatYamlShowScenario(level, message, meta = {}) {
 }
 
 // Format separator between scenarios
-function formatYamlShowSeparator(level, message, meta = {}) {
+function formatYamlShowSeparator(_level, _message, _meta = {}) {
   console.log('─'.repeat(38));
 }
 
 // Format command output with preserved colors (no extra formatting)
-function formatYamlShowOutput(level, message, meta = {}) {
+function formatYamlShowOutput(_level, message, _meta = {}) {
   const { result } = message;
   if (result.stdout) {
     console.log(result.stdout); // lint-skip-line no-console
@@ -215,7 +215,7 @@ function formatYamlShowOutput(level, message, meta = {}) {
 }
 
 // Format error information cleanly
-function formatYamlShowError(level, message, meta = {}) {
+function formatYamlShowError(_level, message, _meta = {}) {
   const { error } = message;
   console.error(`Failed to execute: ${error.message}`); // lint-skip-line no-console
   if (error.stdout) {

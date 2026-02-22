@@ -18,7 +18,7 @@ module.exports = [
       '/proj/path',
       false,
     ],
-    assertion: (loader, mocks, constants, expect) => {
+    assertion: (loader, _mocks, _constants, expect) => {
       expect(loader.xdgBaseDir).to.equal('/xdg/base');
       expect(loader.xdgMainConfig).to.deep.equal({ xdg: 'config' });
       expect(loader.xdgMainConfigPath).to.equal('/xdg/path');
@@ -41,7 +41,7 @@ module.exports = [
       '/proj/path',
       false,
     ],
-    assertion: (loader, mocks, constants, expect) => {
+    assertion: (loader, _mocks, _constants, expect) => {
       expect(loader.xdgMainConfig).to.deep.equal({});
     },
   }),
@@ -57,7 +57,7 @@ module.exports = [
       '/proj/path',
       false,
     ],
-    assertion: (loader, mocks, constants, expect) => {
+    assertion: (loader, _mocks, _constants, expect) => {
       expect(loader.projectMainConfig).to.deep.equal({});
     },
   }),

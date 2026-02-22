@@ -119,7 +119,7 @@ module.exports = [
     pathStubs: {
       dirname: {
         [FAKE_CONFIG_PATH]: FAKE_BASE_PATH,
-        ['/path/to/markdown/file.md']: '/path/to/markdown',
+        '/path/to/markdown/file.md': '/path/to/markdown',
       },
     },
     baseConfigStubs: {
@@ -219,7 +219,7 @@ module.exports = [
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
     pathStubs: {
       dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH },
-      resolve: { [FAKE_BASE_PATH + ',handler.js']: FAKE_RESOLVED_HANDLER_PATH },
+      resolve: { [`${FAKE_BASE_PATH},handler.js`]: FAKE_RESOLVED_HANDLER_PATH },
     },
     pluginConfigLoaderStubs: {
       applyOverrideLayers: {
@@ -256,7 +256,7 @@ module.exports = [
     pathStubs: {
       dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH },
       resolve: {
-        [FAKE_BASE_PATH + ',' + FAKE_HANDLER_SCRIPT_NAME]:
+        [`${FAKE_BASE_PATH},${FAKE_HANDLER_SCRIPT_NAME}`]:
           FAKE_RESOLVED_HANDLER_PATH,
       },
     },
@@ -281,7 +281,7 @@ module.exports = [
     localConfigOverrides: { some: 'override' },
     registryStubs: { [FAKE_PLUGIN_NAME]: { configPath: FAKE_CONFIG_PATH } },
     pathStubs: { dirname: { [FAKE_CONFIG_PATH]: FAKE_BASE_PATH } },
-    setup: (mocks, constants, resolver) => {
+    setup: (_mocks, _constants, resolver) => {
       sinon.stub(resolver, '_loadPluginBaseConfig').resolves({
         rawConfig: { handler_script: 'index.js' },
         resolvedCssPaths: [],

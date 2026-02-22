@@ -8,9 +8,9 @@ const {
 } = require('@paths');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const { logs, clearLogs } = require(captureLogsPath);
 const testManifest = require(pluginManagerManifestPath);
 

@@ -1,6 +1,6 @@
 // test/runners/integration/core/math-integration.test.js
 require('module-alias/register');
-const path = require('path');
+const path = require('node:path');
 const {
   projectRoot,
   mathIntegrationPath,

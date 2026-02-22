@@ -7,14 +7,14 @@ const KATEX_CSS_PATH = katexPath;
 
 // Factory function to create the math integration module, allowing dependency injection
 function createMathIntegration(dependencies = {}) {
-  const fsPromises = dependencies.fsPromises || require('fs').promises;
-  const fss = dependencies.fsSync || require('fs');
+  const fsPromises = dependencies.fsPromises || require('node:fs').promises;
+  const fss = dependencies.fsSync || require('node:fs');
 
   const katexPluginModule =
     dependencies.katexPluginModule || require('@vscode/markdown-it-katex');
 
   function configureMarkdownItForMath(mdInstance, mathConfig) {
-    if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
+    if (mathConfig?.enabled && mathConfig.engine === 'katex') {
       let pluginFunction;
       if (typeof katexPluginModule === 'function') {
         pluginFunction = katexPluginModule;
@@ -53,7 +53,7 @@ function createMathIntegration(dependencies = {}) {
   }
 
   async function getMathCssContent(mathConfig) {
-    if (mathConfig && mathConfig.enabled && mathConfig.engine === 'katex') {
+    if (mathConfig?.enabled && mathConfig.engine === 'katex') {
       logger.debug('Checking for KaTeX CSS', {
         context: 'MathIntegration',
         path: KATEX_CSS_PATH,

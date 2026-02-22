@@ -2,8 +2,8 @@
 // Default app theme formatter with colored output
 // lint-skip-file no-console
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 
@@ -52,7 +52,7 @@ function formatApp(level, message, meta = {}) {
       ...meta,
       timestamp: new Date().toISOString(),
     };
-    fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+    fs.appendFileSync(logFilePath, `${JSON.stringify(entry)}\n`);
   } else {
     const contextPrefix = formatContext(context, config);
     let formattedMessage =

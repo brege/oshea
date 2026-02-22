@@ -1,8 +1,8 @@
 // scripts/linting/lib/file-discovery.js
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const glob = require('glob');
 const { minimatch } = require('minimatch');
 const { projectRoot, fileHelpersPath, loggerPath } = require('@paths');
@@ -133,7 +133,6 @@ function findFiles(options = {}) {
     respectDocignore = false,
     docignoreRoot = projectRoot,
     skipTag = null,
-    debug = false, // eslint-disable-line no-unused-vars
   } = options;
 
   logger.debug(` Received targets: ${JSON.stringify(targets)}`, {

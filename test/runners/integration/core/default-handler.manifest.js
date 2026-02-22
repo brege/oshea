@@ -167,7 +167,7 @@ module.exports = [
     pluginBasePath: '/plugins/my-plugin',
     stubs: {
       generateSlug: { ...alwaysTestSlug },
-      expectations: (stubs, expect) => {
+      expectations: (stubs, _expect) => {
         stubs.existsSyncStub
           .withArgs('/plugins/my-plugin/style.css')
           .returns(true);

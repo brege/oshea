@@ -17,15 +17,15 @@ function colorForLevel(level, message) {
 }
 
 // Format validation session header
-function formatValidationHeader(level, message, meta = {}) {
-  const { protocol, pluginName } = message; // eslint-disable-line no-unused-vars
+function formatValidationHeader(level, message, _meta = {}) {
+  const { protocol } = message;
   console.log(
     colorForLevel(level, `Starting ${protocol} plugin validation checks`),
   );
 }
 
 // Format validation step progress (inline updates)
-function formatValidationStep(level, message, meta = {}) {
+function formatValidationStep(_level, message, _meta = {}) {
   const { stepName, status, details = [] } = message;
 
   if (status === 'testing') {
@@ -76,7 +76,7 @@ function formatValidationStep(level, message, meta = {}) {
 }
 
 // Format test output (mocha results)
-function formatValidationTest(level, message, meta = {}) {
+function formatValidationTest(_level, message, _meta = {}) {
   const { testOutput } = message;
   // For now, pass through test output as-is since mocha has its own formatting
   // TODO: Could parse and reformat mocha output for consistency
@@ -84,7 +84,7 @@ function formatValidationTest(level, message, meta = {}) {
 }
 
 // Format validation summary and final result
-function formatValidationSummary(level, message, meta = {}) {
+function formatValidationSummary(level, message, _meta = {}) {
   const {
     pluginName,
     isValid,

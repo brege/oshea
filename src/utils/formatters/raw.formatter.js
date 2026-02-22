@@ -1,8 +1,8 @@
 // src/utils/formatters/raw.formatter.js
 // Raw formatter with no coloring or formatting (for JSON/structured data)
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 // Ensure log directory exists
 const logDir = path.join(process.cwd(), 'logs');
@@ -21,7 +21,7 @@ function formatRaw(level, message, meta = {}) {
       ...meta,
       timestamp: new Date().toISOString(),
     };
-    fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+    fs.appendFileSync(logFilePath, `${JSON.stringify(entry)}\n`);
     return;
   }
 

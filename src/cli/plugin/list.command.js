@@ -25,8 +25,7 @@ function filterPlugins(allPlugins, args) {
       const isEnabledCM = p.status === 'Enabled (CM)';
       const isEnabledUser =
         p.status === 'Enabled (Created)' || p.status === 'Enabled (Added)';
-      const isRegisteredTraditional =
-        p.status && p.status.startsWith('Registered');
+      const isRegisteredTraditional = p.status?.startsWith('Registered');
       if (collectionFilter && isEnabledCM)
         return p.cmCollection === collectionFilter;
       if (collectionFilter && (isRegisteredTraditional || isEnabledUser))
@@ -70,7 +69,7 @@ function filterPlugins(allPlugins, args) {
   // Default/all type
   let results = allPlugins.filter(
     (p) =>
-      (p.status && p.status.startsWith('Registered')) ||
+      p.status?.startsWith('Registered') ||
       p.status === 'Enabled (CM)' ||
       p.status === 'Enabled (Created)' ||
       p.status === 'Enabled (Added)' ||

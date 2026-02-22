@@ -1,8 +1,8 @@
 // src/cli/plugin/add.command.js
-const path = require('path');
-const fss = require('fs');
+const path = require('node:path');
+const fss = require('node:fs');
 const { loggerPath, cliPath, colorThemePath } = require('@paths');
-const { execSync } = require('child_process');
+const { execSync } = require('node:child_process');
 
 const logger = require(loggerPath);
 const { theme } = require(colorThemePath);
@@ -76,7 +76,7 @@ module.exports = {
         addSingletonOptions,
       );
 
-      if (result && result.success) {
+      if (result?.success) {
         logger.success(
           `\nSuccessfully processed 'plugin add' for '${theme.value(result.invoke_name)}'.`,
         );
@@ -94,7 +94,7 @@ module.exports = {
           '  • To sync any changes from your original plugin into the managed version:',
         );
         logger.info(
-          `    ${theme.highlight('oshea plugin add ' + absolutePluginPath + ' --name ' + result.invoke_name)}`,
+          `    ${theme.highlight(`oshea plugin add ${absolutePluginPath} --name ${result.invoke_name}`)}`,
         );
         logger.detail(
           '    (Re-run the add command to sync changes from your original source)',
@@ -105,7 +105,7 @@ module.exports = {
           `  • List active plugins: ${theme.highlight('oshea plugin list')}`,
         );
         logger.info(
-          `  • Use your new plugin: ${theme.highlight('oshea convert mydoc.md --plugin ' + result.invoke_name)}`,
+          `  • Use your new plugin: ${theme.highlight(`oshea convert mydoc.md --plugin ${result.invoke_name}`)}`,
         );
       } else if (result && !result.success) {
         logger.error(

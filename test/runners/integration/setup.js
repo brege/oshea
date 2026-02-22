@@ -2,9 +2,9 @@
 require('module-alias/register');
 const { expect } = require('chai');
 const sinon = require('sinon');
-const path = require('path');
-const fs = require('fs').promises;
-const fss = require('fs');
+const path = require('node:path');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
 
 const {
   markdownUtilsPath,

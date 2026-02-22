@@ -1,7 +1,7 @@
 // src/config/config-resolver.js
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const Ajv = require('ajv');
 const {
   configUtilsPath,
@@ -488,7 +488,7 @@ class ConfigResolver {
       );
       if (
         this.primaryMainConfig.global_pdf_options.margin &&
-        (currentMergedConfig.pdf_options || {}).margin
+        currentMergedConfig.pdf_options?.margin
       ) {
         currentMergedConfig.pdf_options.margin = this.dependencies.deepMerge(
           this.primaryMainConfig.global_pdf_options.margin,
@@ -504,14 +504,11 @@ class ConfigResolver {
       pluginOwnMathConfig,
     );
     if (
-      (this.primaryMainConfig.math &&
-        this.primaryMainConfig.math.katex_options) ||
+      this.primaryMainConfig.math?.katex_options ||
       pluginOwnMathConfig.katex_options
     ) {
       effectiveMathConfig.katex_options = this.dependencies.deepMerge(
-        (this.primaryMainConfig.math &&
-          this.primaryMainConfig.math.katex_options) ||
-          {},
+        this.primaryMainConfig.math?.katex_options || {},
         pluginOwnMathConfig.katex_options || {},
       );
     }

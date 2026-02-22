@@ -1,9 +1,9 @@
 // src/collections/index.js
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
-const os = require('os');
-const { spawn } = require('child_process');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const { spawn } = require('node:child_process');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');

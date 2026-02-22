@@ -1,9 +1,9 @@
 // src/validators/v1.js
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
 const yaml = require('js-yaml');
-const os = require('os');
+const os = require('node:os');
 const {
   projectRoot,
   cliPath,
@@ -83,7 +83,7 @@ const checkFileStructureV1 = (
   pluginDirectoryPath,
   pluginName,
   errors,
-  warnings,
+  _warnings,
 ) => {
   const requiredFiles = [
     'index.js',

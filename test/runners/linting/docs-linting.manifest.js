@@ -1,6 +1,6 @@
 // test/runners/linting/docs-linting.manifest.js
 const fs = require('fs-extra');
-const path = require('path');
+const path = require('node:path');
 const { postmanPath, librarianPath, janitorPath, yamlPath } = require('@paths');
 
 module.exports = [
@@ -14,7 +14,7 @@ module.exports = [
         '[broken](./non-existent.md)',
       );
     },
-    args: (sandboxDir) => ['test-doc.md'],
+    args: (_sandboxDir) => ['test-doc.md'],
     assert: async ({ exitCode, stdout }) => {
       expect(exitCode).to.equal(1);
       expect(stdout).to.match(

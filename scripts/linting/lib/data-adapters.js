@@ -1,7 +1,7 @@
 // scripts/linting/lib/data-adapters.js
 // Pure data transformation functions - no styling, no console output
 
-const path = require('path');
+const path = require('node:path');
 
 function padRight(str = '', len) {
   return str.length >= len ? str : str + ' '.repeat(len - str.length);

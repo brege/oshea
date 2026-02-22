@@ -238,7 +238,7 @@ module.exports = async function updateCollection(dependencies, collectionName) {
           );
           if (revListResult.success && revListResult.stdout) {
             localCommitsAhead = parseInt(revListResult.stdout.trim(), 10);
-            if (isNaN(localCommitsAhead)) localCommitsAhead = 0;
+            if (Number.isNaN(localCommitsAhead)) localCommitsAhead = 0;
           }
           logger.debug('Checked for local commits ahead of remote', {
             context: 'UpdateCollectionCommand',

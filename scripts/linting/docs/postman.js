@@ -4,8 +4,8 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { minimatch } = require('minimatch');
 const {
   lintHelpersPath,
@@ -147,7 +147,7 @@ function isLineAlreadyLinked(line, rel) {
   const linkRegex = /\[[^\]]*]\(([^)]+)\)/g;
   return [...line.matchAll(linkRegex)].some((m) => {
     const target = m[1].replace(/\\/g, '/');
-    return target === rel || target.endsWith('/' + path.basename(rel));
+    return target === rel || target.endsWith(`/${path.basename(rel)}`);
   });
 }
 
@@ -272,8 +272,8 @@ async function runLinter(options = {}) {
         if (isLineAlreadyLinked(oldLine, rel)) continue;
 
         const replacement = oldLine.replace(
-          '`' + r.target + '`',
-          '[`' + r.target + '`](' + rel + ')',
+          `\`${r.target}\``,
+          `[\`${r.target}\`](${rel})`,
         );
 
         if (fix) {

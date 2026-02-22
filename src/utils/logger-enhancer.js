@@ -2,7 +2,7 @@
 // Enhanced debugging utilities extracted from logger.js
 
 // Enhanced logging functions with improved caller detection
-function getCallerInfo(stackDepth = 3) {
+function getCallerInfo(_stackDepth = 3) {
   const stack = new Error().stack;
   const lines = stack.split('\n');
 
@@ -69,7 +69,7 @@ function categorizeError(message, customPatterns = {}) {
 
 function enhanceMessage(
   message,
-  options = {},
+  _options = {},
   level = 'info',
   loggerConfig = {},
 ) {

@@ -5,8 +5,8 @@
 require('module-alias/register');
 const { loggerPath, projectRoot } = require('@paths');
 const fs = require('fs-extra');
-const path = require('path');
-const { execSync } = require('child_process');
+const path = require('node:path');
+const { execSync } = require('node:child_process');
 const logger = require(loggerPath);
 const FIXTURES_DIR = __dirname;
 const FULL_FAT_DIR = path.join(FIXTURES_DIR, 'full-fat-dummies');

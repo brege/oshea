@@ -22,5 +22,5 @@ module.exports = {
       .demandCommand(1, 'A subcommand (add, list, remove, update) is required.')
       .strict();
   },
-  handler: (argv) => {},
+  handler: (_argv) => {},
 };

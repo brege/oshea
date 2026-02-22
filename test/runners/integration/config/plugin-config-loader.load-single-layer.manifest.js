@@ -27,7 +27,7 @@ module.exports = [
       '[["main.css","theme.css"],"/path/to/plugin",[],false,"my-plugin","/path/to/plugin/my-plugin.config.yaml"]':
         ['/resolved/main.css', '/resolved/theme.css'],
     },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (result, loader, _mocks, _constants, expect) => {
       expect(result).to.deep.equal({
         rawConfig: {
           css_files: ['main.css', 'theme.css'],
@@ -52,7 +52,7 @@ module.exports = [
     loadYamlConfigStubs: {
       '/path/to/cached.config.yaml': { setting: 'value' },
     },
-    assertion: async (result, loader, mocks, constants, expect) => {
+    assertion: async (_result, loader, mocks, _constants, expect) => {
       await loader._loadSingleConfigLayer(
         '/path/to/cached.config.yaml',
         '/path/to',
@@ -72,7 +72,7 @@ module.exports = [
       'non-existent-plugin',
     ],
     fsExistsStubs: { '/path/to/non-existent.config.yaml': false },
-    assertion: async (result, loader, mocks, constants, expect, logs) => {
+    assertion: async (result, _loader, _mocks, _constants, expect, logs) => {
       expect(result).to.be.null;
       expect(
         logs.some(
@@ -89,7 +89,7 @@ module.exports = [
     constructorArgs: [null, {}, null, null, {}, null, false],
     methodName: '_loadSingleConfigLayer',
     methodArgs: [null, '/path/to', 'null-path-plugin'],
-    assertion: async (result, loader, mocks, constants, expect, logs) => {
+    assertion: async (result, loader, _mocks, _constants, expect, logs) => {
       expect(result).to.be.null;
       expect(
         logs.some(
@@ -124,7 +124,7 @@ module.exports = [
     loadYamlConfigStubs: {
       '/path/to/bad.config.yaml': new Error('YAML Parse Error'),
     },
-    assertion: async (result, loader, mocks, constants, expect, logs) => {
+    assertion: async (result, _loader, _mocks, _constants, expect, logs) => {
       expect(result).to.deep.equal({
         rawConfig: {},
         resolvedCssPaths: [],

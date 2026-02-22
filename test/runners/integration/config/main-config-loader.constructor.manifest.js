@@ -3,14 +3,14 @@ require('module-alias/register');
 const { mainConfigLoaderFactoryPath } = require('@paths');
 const { makeMainConfigLoaderScenario } = require(mainConfigLoaderFactoryPath);
 
-const path = require('path');
+const path = require('node:path');
 
 module.exports = [
   makeMainConfigLoaderScenario({
     description:
       '1.4.1: Should correctly initialize path properties based on projectRoot',
     constructorArgs: ['/test/project/root'],
-    assertion: (loader, mocks, constants, expect) => {
+    assertion: (loader, _mocks, constants, expect) => {
       expect(loader.projectRoot).to.equal('/test/project/root');
       expect(loader.defaultMainConfigPath).to.equal(
         constants.DEFAULT_CONFIG_PATH,
@@ -25,7 +25,7 @@ module.exports = [
       '1.4.2: Should determine xdgBaseDir using XDG_CONFIG_HOME if set',
     constructorArgs: ['/app/test-root', null, false, null],
     envStubs: { XDG_CONFIG_HOME: '/custom/xdg/config' },
-    assertion: (loader, mocks, constants, expect) => {
+    assertion: (loader, mocks, _constants, expect) => {
       const expectedXdgBaseDir = path.join('/custom/xdg/config', 'oshea');
       expect(loader.xdgBaseDir).to.equal(expectedXdgBaseDir);
       expect(loader.xdgGlobalConfigPath).to.equal(
@@ -53,7 +53,7 @@ module.exports = [
       '1.4.3: Should use the provided xdgBaseDir parameter over environment variables',
     constructorArgs: ['/app/test-root', null, false, '/custom/path/to/xdg'],
     envStubs: { XDG_CONFIG_HOME: '/should/be/ignored' },
-    assertion: (loader, mocks, constants, expect) => {
+    assertion: (loader, mocks, _constants, expect) => {
       expect(loader.xdgBaseDir).to.equal('/custom/path/to/xdg');
       expect(mocks.mockDependencies.os.homedir.called).to.be.false;
     },
@@ -62,7 +62,7 @@ module.exports = [
     description:
       '1.4.4: Should correctly set properties from constructor arguments',
     constructorArgs: ['/root', '/cli/config.yaml', true, '/xdg/dir'],
-    assertion: (loader, mocks, constants, expect) => {
+    assertion: (loader, _mocks, _constants, expect) => {
       expect(loader.projectManifestConfigPath).to.equal('/cli/config.yaml');
       expect(loader.useFactoryDefaultsOnly).to.be.true;
     },

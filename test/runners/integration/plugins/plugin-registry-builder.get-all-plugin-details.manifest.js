@@ -31,7 +31,7 @@ module.exports = [
           invoke_name: 'enabled-plugin',
         },
       ],
-      assertion: (result, mocks, constants, expect) => {
+      assertion: (result, _mocks, _constants, expect) => {
         expect(result).to.be.an('array').with.lengthOf(3);
         const names = result.map((p) => p.name).sort();
         expect(names).to.deep.equal([
@@ -72,7 +72,7 @@ module.exports = [
           .withArgs('/path/to/traditional.config.yaml')
           .resolves({ description: 'A traditional plugin.' });
       },
-      assertion: (result, mocks, constants, expect) => {
+      assertion: (result, _mocks, _constants, expect) => {
         const traditionalPlugin = result.find(
           (p) => p.name === 'traditional-plugin',
         );
@@ -101,7 +101,7 @@ module.exports = [
           definedIn: '/path/to/bundled.yaml',
         },
       },
-      assertion: (result, mocks, constants, expect) => {
+      assertion: (result, _mocks, _constants, expect) => {
         const projectPlugin = result.find((p) => p.name === 'project-plugin');
         const xdgPlugin = result.find((p) => p.name === 'xdg-plugin');
         const bundledPlugin = result.find((p) => p.name === 'bundled-plugin');
@@ -140,7 +140,7 @@ module.exports = [
           invoke_name: 'enabled-plugin-b',
         },
       ],
-      assertion: (result, mocks, constants, expect) => {
+      assertion: (result, _mocks, _constants, expect) => {
         const availablePlugin = result.find(
           (p) => p.name === 'coll-1/plugin-a',
         );
@@ -174,7 +174,7 @@ module.exports = [
           invoke_name: 'instance-two',
         },
       ],
-      assertion: (result, mocks, constants, expect) => {
+      assertion: (result, _mocks, _constants, expect) => {
         const instanceOne = result.find((p) => p.name === 'instance-one');
         const instanceTwo = result.find((p) => p.name === 'instance-two');
         expect(instanceOne.status).to.equal('Enabled (CM)');
@@ -207,7 +207,7 @@ module.exports = [
           invoke_name: 'b-plugin',
         },
       ],
-      assertion: (result, mocks, constants, expect) => {
+      assertion: (result, _mocks, _constants, expect) => {
         const names = result.map((p) => p.name);
         expect(names).to.deep.equal([
           'apple-plugin',

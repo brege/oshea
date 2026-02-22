@@ -131,14 +131,14 @@ th {
 @media print {
   body {
     font-size: 10pt; /* Adjust for print if necessary */
-    color: #000000 !important;
-    background-color: #ffffff !important;
+    color: #000000;
+    background-color: #ffffff;
     -webkit-print-color-adjust: exact;
     color-adjust: exact;
   }
   a {
-    color: #000000 !important;
-    text-decoration: none !important;
+    color: #000000;
+    text-decoration: none;
   }
   h1,
   h2,
@@ -161,6 +161,6 @@ th {
     page-break-after: avoid;
   }
   img {
-    max-width: 100% !important;
+    max-width: 100%;
   }
 }

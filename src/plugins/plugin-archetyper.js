@@ -2,9 +2,9 @@
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-const fs = require('fs').promises;
-const fss = require('fs');
-const path = require('path');
+const fs = require('node:fs').promises;
+const fss = require('node:fs');
+const path = require('node:path');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');

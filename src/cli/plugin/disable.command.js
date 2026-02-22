@@ -1,8 +1,8 @@
 // src/cli/plugin/disable.command.js
 const { loggerPath, cliPath } = require('@paths');
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
 const yaml = require('js-yaml');
 
 const logger = require(loggerPath);
@@ -86,11 +86,7 @@ module.exports = {
       const pluginRegistryEntry =
         configResolver.mergedPluginRegistry[args.invoke_name];
 
-      if (
-        pluginRegistryEntry &&
-        pluginRegistryEntry.sourceType &&
-        pluginRegistryEntry.sourceType.startsWith('User (')
-      ) {
+      if (pluginRegistryEntry?.sourceType?.startsWith('User (')) {
         // Handle user plugin disable using unified architecture
         const disabledUserPlugin = await disableUserPlugin(
           args.invoke_name,

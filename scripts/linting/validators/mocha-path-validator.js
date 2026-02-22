@@ -3,7 +3,7 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
+const fs = require('node:fs');
 const glob = require('glob');
 const {
   mocharcPath,
@@ -33,7 +33,7 @@ function* extractJsPatterns(obj) {
 }
 
 function runValidator(options = {}) {
-  const { config = {}, debug = false } = options; // eslint-disable-line no-unused-vars
+  const { config = {} } = options;
   const issues = [];
   const results = [];
 
@@ -59,22 +59,10 @@ function runValidator(options = {}) {
   try {
     mochaConfig = require(mocharcPath);
   } catch (e) {
-    logger.debug(
-      `Failed to require .mocharc.js, falling back to manual parse. Error: ${e.message}`,
-      { context: 'MochaValidator' },
-    );
-    try {
-      const content = fs.readFileSync(mocharcPath, 'utf8');
-      mochaConfig = eval(
-        `(() => (${content.replace(/^module\.exports\s*=\s*/, '')}))()`,
-      );
-    } catch (evalError) {
-      logger.debug(
-        `Manual parsing of .mocharc.js failed. Error: ${evalError.message}`,
-        { context: 'MochaValidator' },
-      );
-      mochaConfig = {};
-    }
+    logger.debug(`Failed to require .mocharc.js. Error: ${e.message}`, {
+      context: 'MochaValidator',
+    });
+    mochaConfig = {};
   }
 
   const excludes = config.excludes || [];

@@ -4,8 +4,8 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const yaml = require('js-yaml');
 const { expect } = require('chai');
 const {
@@ -35,7 +35,7 @@ function discoverAllTestIds() {
 
   for (const yamlFile of yamlFiles) {
     const content = fs.readFileSync(yamlFile, 'utf8');
-    const testSuites = yaml.loadAll(content).filter((doc) => doc && doc.name);
+    const testSuites = yaml.loadAll(content).filter((doc) => doc?.name);
 
     for (const suite of testSuites) {
       // Skip entire test suite if marked with skip: true

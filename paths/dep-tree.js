@@ -2,8 +2,8 @@
 // paths/dep-tree.js
 
 require('module-alias/register');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const { DependencyTreeTracer } = require('./lib/dependency-tracer');
 const { findFilesArray } = require('../scripts/shared/file-helpers');
 const { loggerPath } = require('@paths');

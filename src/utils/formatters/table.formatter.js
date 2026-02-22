@@ -2,11 +2,11 @@
 
 // Table formatter for user-facing CLI outputs
 // Formats tabular data for CLI display with proper column alignment
-const { stripVTControlCharacters } = require('util');
+const { stripVTControlCharacters } = require('node:util');
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
 
-function formatTable(level, message, meta = {}) {
+function formatTable(_level, _message, meta = {}) {
   const { rows = [], columns = [], title, showBorders = true } = meta;
 
   if (rows.length === 0 || columns.length === 0) {
@@ -14,7 +14,7 @@ function formatTable(level, message, meta = {}) {
   }
 
   // Calculate column widths
-  const columnWidths = columns.map((col, index) => {
+  const columnWidths = columns.map((col, _index) => {
     const headerWidth = stripVTControlCharacters(col.header || col).length;
     const maxDataWidth = Math.max(
       ...rows.map((row) => {

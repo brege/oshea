@@ -3,7 +3,7 @@ require('module-alias/register');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
-const fs = require('fs');
+const fs = require('node:fs');
 
 // GitHub anchor generator
 function slugify(text) {

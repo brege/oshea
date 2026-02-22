@@ -1,9 +1,9 @@
 // test/runners/integration/plugins/plugin-validator.factory.js
-const path = require('path');
+const path = require('node:path');
 const sinon = require('sinon');
 
 function setupPluginScenario({ files = {}, yaml = {}, exec = {} }) {
-  return (pluginDir, pluginName, { mockFs, mockYaml, mockExecSync }) => {
+  return (pluginDir, _pluginName, { mockFs, mockYaml, mockExecSync }) => {
     Object.entries(files).forEach(([file, value]) => {
       const fullPath = path.join(pluginDir, file);
       if (typeof value === 'object' && value !== null) {
@@ -21,7 +21,7 @@ function setupPluginScenario({ files = {}, yaml = {}, exec = {} }) {
       }
     });
 
-    Object.entries(yaml).forEach(([file, value]) => {
+    Object.entries(yaml).forEach(([_file, value]) => {
       if (value instanceof Error) {
         mockYaml.load.withArgs(sinon.match.any).throws(value);
       } else {
@@ -95,7 +95,7 @@ function makeValidatorScenario({
     }
   };
 
-  const assert = async (result, mocks, constants, expect, logs) => {
+  const assert = async (result, _mocks, _constants, expect, logs) => {
     if (expectedResult) {
       expect(result.isValid).to.equal(expectedResult.isValid);
 
@@ -128,7 +128,9 @@ function makeValidatorScenario({
 
     if (expectedLogs.length > 0) {
       const relevantLogs = logs.map((l) => ({ level: l.level, msg: l.msg }));
-      expectedLogs.forEach((log) => expect(relevantLogs).to.deep.include(log));
+      expectedLogs.forEach((log) => {
+        expect(relevantLogs).to.deep.include(log);
+      });
     }
   };
 

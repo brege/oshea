@@ -13,7 +13,7 @@ function formatPluginEntry(plugin) {
   let statusText = plugin.status || 'N/A';
   if (plugin.status === 'Enabled (CM)') {
     statusText = plugin.status;
-  } else if (plugin.status && plugin.status.startsWith('Registered')) {
+  } else if (plugin.status?.startsWith('Registered')) {
     statusText = plugin.status;
   } else if (plugin.status === 'Available (CM)') {
     statusText = plugin.status;
@@ -46,10 +46,7 @@ function formatPluginEntry(plugin) {
     plugin.cmPluginId
   ) {
     sourceDisplayMessage = `CollectionsManager (CM: ${plugin.cmCollection}/${plugin.cmPluginId})`;
-  } else if (
-    plugin.registrationSourceDisplay &&
-    plugin.registrationSourceDisplay.includes('(CM:')
-  ) {
+  } else if (plugin.registrationSourceDisplay?.includes('(CM:')) {
     const parts = plugin.registrationSourceDisplay.split('(CM:');
     const cmDetails = parts[1].replace(')', '').split('/');
     const cmCollectionName = cmDetails[0];
@@ -98,7 +95,7 @@ function generateContextMessage(listData) {
   } else {
     const usableCount = plugins.filter(
       (p) =>
-        (p.status && p.status.startsWith('Registered')) ||
+        p.status?.startsWith('Registered') ||
         p.status === 'Enabled (CM)' ||
         p.status === 'Enabled (Created)' ||
         p.status === 'Enabled (Added)',
@@ -130,7 +127,7 @@ function generateEmptyMessage(listData) {
 }
 
 // Main formatter function
-function formatPluginList(level, message, meta = {}) {
+function formatPluginList(level, message, _meta = {}) {
   const listData = message; // Structured data from command
 
   if (!listData || !listData.plugins) {
@@ -158,7 +155,7 @@ function formatPluginList(level, message, meta = {}) {
               ? 'enabled'
               : plugin.status === 'Enabled (Added)'
                 ? 'enabled'
-                : plugin.status && plugin.status.startsWith('Registered')
+                : plugin.status?.startsWith('Registered')
                   ? 'registered'
                   : plugin.status === 'Available (CM)'
                     ? 'available'

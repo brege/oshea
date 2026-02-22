@@ -1,10 +1,10 @@
 // test/runners/linting/linting-unit-harness.js
 require('module-alias/register');
 
-const { spawn } = require('child_process');
+const { spawn } = require('node:child_process');
 const fs = require('fs-extra');
-const path = require('path');
-const os = require('os');
+const path = require('node:path');
+const os = require('node:os');
 const { cliPath, projectRoot } = require('@paths');
 
 class UnitTestHarness {
@@ -22,8 +22,12 @@ class UnitTestHarness {
       const proc = spawn('node', [cliPath, ...args], { cwd });
       let stdout = '';
       let stderr = '';
-      proc.stdout.on('data', (data) => (stdout += data.toString()));
-      proc.stderr.on('data', (data) => (stderr += data.toString()));
+      proc.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+      proc.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
       proc.on('close', (exitCode) => resolve({ exitCode, stdout, stderr }));
     });
   }
@@ -33,8 +37,12 @@ class UnitTestHarness {
       const proc = spawn('node', [scriptPath, ...args], { cwd });
       let stdout = '';
       let stderr = '';
-      proc.stdout.on('data', (data) => (stdout += data.toString()));
-      proc.stderr.on('data', (data) => (stderr += data.toString()));
+      proc.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+      proc.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
       proc.on('close', (exitCode) => resolve({ exitCode, stdout, stderr }));
     });
   }

@@ -1,6 +1,6 @@
 // src/cli/collection/remove.command.js
 const { loggerPath, cliPath } = require('@paths');
-const { execSync } = require('child_process');
+const { execSync } = require('node:child_process');
 
 const logger = require(loggerPath);
 

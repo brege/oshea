@@ -7,16 +7,17 @@ const {
   pluginValidatorPath,
   v1Path,
 } = require('@paths');
-const { logs, testLogger, clearLogs } = require(captureLogsPath);
+const testLogger = require(captureLogsPath);
+const { logs, clearLogs } = testLogger;
 const testManifest = require(pluginValidatorManifestPath);
 
 require('chalk').level = 0; // Disable all chalk colors for this test run
 
 const { expect } = require('chai');
 const sinon = require('sinon');
-const path = require('path');
-const os = require('os');
-const fs = require('fs');
+const path = require('node:path');
+const os = require('node:os');
+const fs = require('node:fs');
 
 const proxyquire = require('proxyquire');
 
@@ -58,29 +59,29 @@ describe(`plugin-validator (Subsystem Integration Tests) ${path.relative(project
 
     it_(description, async () => {
       const v1Validator = proxyquire(v1Path, {
-        fs: mockFs,
-        path,
-        child_process: { execSync: mockExecSync },
-        yaml: mockYaml,
-        os: mockOs,
+        'node:fs': mockFs,
+        'node:path': path,
+        'node:child_process': { execSync: mockExecSync },
+        'js-yaml': mockYaml,
+        'node:os': mockOs,
         '@paths': {
           projectRoot: '/fake/root',
           cliPath: '/fake/root/cli.js',
           mochaPath: '/fake/root/node_modules/mocha/bin/mocha',
           nodeModulesPath: '/fake/root/node_modules',
-          logger: testLogger,
+          loggerPath: captureLogsPath,
         },
       });
 
       const { validate } = proxyquire(pluginValidatorPath, {
-        fs: mockFs,
-        path,
-        yaml: mockYaml,
+        'node:fs': mockFs,
+        'node:path': path,
+        'js-yaml': mockYaml,
         [v1Path]: v1Validator,
         '@paths': {
           projectRoot: '/fake/root',
           v1Path: v1Path,
-          logger: testLogger,
+          loggerPath: captureLogsPath,
         },
       });
 

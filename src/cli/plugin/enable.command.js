@@ -1,10 +1,10 @@
 // src/cli/plugin/enable.command.js
-const path = require('path');
-const fs = require('fs');
-const fsp = require('fs').promises;
+const path = require('node:path');
+const fs = require('node:fs');
+const fsp = require('node:fs').promises;
 const yaml = require('js-yaml');
 const { loggerPath, cliPath } = require('@paths');
-const { execSync } = require('child_process');
+const { execSync } = require('node:child_process');
 
 const logger = require(loggerPath);
 
@@ -128,7 +128,7 @@ you must re-run this command to enable any new plugins.`);
           if (fs.existsSync(metadataPath)) {
             const metaContent = await fsp.readFile(metadataPath, 'utf8');
             const metadata = yaml.load(metaContent);
-            if (metadata && metadata.source) {
+            if (metadata?.source) {
               originalSourceForPrefixFallback = metadata.source;
             }
           }
@@ -189,7 +189,7 @@ you must re-run this command to enable any new plugins.`);
           name: args.name,
           bypassValidation: args.bypassValidation,
         });
-        if (result && result.success) {
+        if (result?.success) {
           const finalInvokeName =
             result.invoke_name || args.target.split('/')[1];
           logger.info(

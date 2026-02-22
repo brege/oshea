@@ -1,9 +1,9 @@
 // test/analytics/run-last-fails.js
 require('module-alias/register');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { spawn } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const { spawn } = require('node:child_process');
 const { mochaPath, loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
@@ -33,8 +33,8 @@ function main() {
   try {
     const testData = JSON.parse(content);
     titles = Object.entries(testData)
-      .filter(([key, data]) => data.last_status === 'failed')
-      .map(([key, data]) => {
+      .filter(([_key, data]) => data.last_status === 'failed')
+      .map(([key, _data]) => {
         // Extract title from key: "file::title" -> "title"
         const title = key.split('::').slice(1).join('::');
         return escapeRegex(title);

@@ -5,8 +5,8 @@ require('module-alias/register');
 require('module-alias')(__dirname);
 
 const { hideBin } = require('yargs/helpers');
-const path = require('path');
-const fs = require('fs');
+const path = require('node:path');
+const fs = require('node:fs');
 
 const {
   packageJsonPath,
@@ -111,9 +111,9 @@ if (
   argvRaw.length <= 3 &&
   !argvRaw.includes('--plugin')
 ) {
-  const fs = require('fs');
+  const fs = require('node:fs');
   const yaml = require('js-yaml');
-  const path = require('path');
+  const path = require('node:path');
   const { formatGlobalConfig } = require(configFormatterPath);
 
   try {
@@ -183,7 +183,7 @@ if (
   process.exit(0);
 }
 
-const { execSync } = require('child_process');
+const { execSync } = require('node:child_process');
 
 const ConfigResolver = require(configResolverPath);
 const CollectionsManager = require(collectionsIndexPath);
@@ -346,7 +346,7 @@ async function main() {
         process.exit(1);
         return;
       }
-      if (msg && msg.includes('Unknown argument')) {
+      if (msg?.includes('Unknown argument')) {
         const firstArg = process.argv[2];
         if (
           firstArg &&

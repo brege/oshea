@@ -1,6 +1,6 @@
 // src/core/pdf-generator.js
 const puppeteer = require('puppeteer');
-const path = require('path');
+const path = require('node:path');
 
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
@@ -47,7 +47,7 @@ async function generatePdf(
       ? `html, body { width: ${viewportWidth}px !important; height: ${viewportHeight}px !important; }`
       : '';
     const combinedCss =
-      (viewportCss ? viewportCss + '\n\n' : '') +
+      (viewportCss ? `${viewportCss}\n\n` : '') +
       (cssFileContentsArray || []).join('\n\n/* --- Next CSS File --- */\n\n');
     logger.debug('Combined CSS content', {
       context: 'PDFGenerator',
@@ -88,10 +88,9 @@ async function generatePdf(
       });
     }
 
-    const documentTitle =
-      pdfOptions && pdfOptions.title
-        ? pdfOptions.title
-        : path.basename(outputPdfPath, '.pdf');
+    const documentTitle = pdfOptions?.title
+      ? pdfOptions.title
+      : path.basename(outputPdfPath, '.pdf');
     logger.debug('Resolved document title for PDF', {
       context: 'PDFGenerator',
       title: documentTitle,
@@ -140,7 +139,7 @@ async function generatePdf(
       ...(pdfOptions || {}),
       margin: {
         ...defaultPdfOptions.margin,
-        ...((pdfOptions || {}).margin || {}),
+        ...(pdfOptions?.margin || {}),
       },
       path: outputPdfPath,
     };

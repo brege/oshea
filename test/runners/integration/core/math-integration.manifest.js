@@ -14,7 +14,7 @@ module.exports = [
         katex_options: { throwOnError: false, trust: false },
       },
     },
-    assertion: async (mocks, constants, expect, logs) => {
+    assertion: async (mocks, _constants, expect, logs) => {
       const {
         mathIntegration,
         mdInstance,
@@ -47,7 +47,7 @@ module.exports = [
         },
       },
     },
-    assertion: async (mocks, constants, expect, logs) => {
+    assertion: async (mocks, _constants, expect, logs) => {
       const {
         mathIntegration,
         mdInstance,
@@ -75,7 +75,7 @@ module.exports = [
     scenario: {
       mathConfig: { enabled: false, engine: 'katex' },
     },
-    assertion: async (mocks, constants, expect, logs) => {
+    assertion: async (mocks, _constants, expect, logs) => {
       const { mathIntegration, mdInstance } = mocks;
       mathIntegration.configureMarkdownItForMath(mdInstance, {
         enabled: false,
@@ -128,7 +128,7 @@ module.exports = [
       mathConfig: { enabled: false, engine: 'katex' },
       cssExists: false,
     },
-    assertion: async (mocks, constants, expect, logs) => {
+    assertion: async (mocks, _constants, expect, logs) => {
       const { mathIntegration } = mocks;
       const result1 = await mathIntegration.getMathCssContent({
         enabled: false,
@@ -210,7 +210,7 @@ module.exports = [
     scenario: {
       katexPluginModule: null,
     },
-    assertion: async (mocks, constants, expect, logs) => {
+    assertion: async (mocks, _constants, expect, logs) => {
       const { mathIntegration, mdInstance, mathConfig } = mocks;
       mathIntegration.configureMarkdownItForMath(mdInstance, mathConfig);
 

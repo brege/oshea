@@ -31,7 +31,7 @@ function processHighlights(text) {
   if (!text || typeof text !== 'string') return text;
   return text.replace(
     /<<HIGHLIGHT>>(.*?)<<ENDHIGHLIGHT>>/g,
-    (match, content) => {
+    (_match, content) => {
       return chalk.bgYellow.black(content);
     },
   );
@@ -55,8 +55,7 @@ function formatLint(structuredData) {
 
   // Render sections
   for (const section of structuredData.sections) {
-    output +=
-      '\n' + applyStyle(section.header.text, section.header.style) + '\n';
+    output += `\n${applyStyle(section.header.text, section.header.style)}\n`;
 
     for (const msg of section.messages) {
       const locationStr = applyStyle(msg.location.text, msg.location.style);
@@ -71,19 +70,19 @@ function formatLint(structuredData) {
         // Support both placeholder-based highlights and direct text highlighting
         if (highlight && typeof highlight === 'string') {
           // Direct text highlighting (used by visual-renderers)
-          output += '       ' + highlightMatch(sourceText, highlight) + '\n';
+          output += `       ${highlightMatch(sourceText, highlight)}\n`;
         } else if (highlight) {
           // Placeholder-based highlighting
-          output += '       ' + processHighlights(sourceText) + '\n';
+          output += `       ${processHighlights(sourceText)}\n`;
         } else {
-          output += '       ' + sourceText + '\n';
+          output += `       ${sourceText}\n`;
         }
       }
     }
   }
 
   // Render summary
-  if (structuredData.summary && structuredData.summary.hasSummary) {
+  if (structuredData.summary?.hasSummary) {
     const { totalErrors, totalWarnings, totalProblems } =
       structuredData.summary;
     output += '\n';

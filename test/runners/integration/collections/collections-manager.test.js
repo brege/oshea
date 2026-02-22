@@ -143,24 +143,24 @@ describe(`collections-manager (Subsystem Integration Tests) ${path.relative(proj
         }
       }
       if (stubs.fs) {
-        if (stubs.fs.readdir && stubs.fs.readdir.resolves)
+        if (stubs.fs.readdir?.resolves)
           mockDependencies.fs.readdir.resolves(stubs.fs.readdir.resolves);
-        if (stubs.fs.readdir && stubs.fs.readdir.rejects)
+        if (stubs.fs.readdir?.rejects)
           mockDependencies.fs.readdir.rejects(
             new Error(stubs.fs.readdir.rejects),
           );
       }
-      if (stubs.fsExtra && stubs.fsExtra.rm && stubs.fsExtra.rm.rejects) {
+      if (stubs.fsExtra?.rm?.rejects) {
         mockDependencies.fsExtra.rm.rejects(
           new Error(stubs.fsExtra.rm.rejects),
         );
       }
-      if (stubs.cmUtils && stubs.cmUtils.deriveCollectionName) {
+      if (stubs.cmUtils?.deriveCollectionName) {
         mockDependencies.cmUtils.deriveCollectionName.returns(
           stubs.cmUtils.deriveCollectionName,
         );
       }
-      if (stubs.process && stubs.process.env) {
+      if (stubs.process?.env) {
         Object.assign(mockDependencies.process.env, stubs.process.env);
       }
       if (stubs.os) {

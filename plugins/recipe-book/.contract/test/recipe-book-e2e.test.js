@@ -1,7 +1,7 @@
 // plugins/recipe-book/.contract/test/recipe-book-e2e.test.js
 require('module-alias/register');
-const path = require('path');
-const os = require('os');
+const path = require('node:path');
+const os = require('node:os');
 const { expect } = require('chai');
 const {
   projectRoot,

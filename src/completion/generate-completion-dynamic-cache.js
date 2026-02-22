@@ -2,9 +2,9 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
@@ -97,7 +97,7 @@ async function generateCache() {
       .map((p) => p.name);
 
     const enabledPlugins = allPlugins
-      .filter((p) => p.status && p.status.startsWith('Enabled ('))
+      .filter((p) => p.status?.startsWith('Enabled ('))
       .map((p) => p.name);
 
     const availableFromCM = allPlugins

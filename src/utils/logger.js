@@ -91,8 +91,8 @@ function logger(message, options = {}) {
   if (format === 'lint') {
     // Special handling for lint format with JSON mode support
     if (process.env.LOG_MODE === 'json') {
-      const fs = require('fs');
-      const path = require('path');
+      const fs = require('node:fs');
+      const path = require('node:path');
       const logFilePath = path.join(process.cwd(), 'logs', 'app.log');
       const entry = {
         level: 'info',
@@ -101,7 +101,7 @@ function logger(message, options = {}) {
         ...meta,
         timestamp: new Date().toISOString(),
       };
-      fs.appendFileSync(logFilePath, JSON.stringify(entry) + '\n');
+      fs.appendFileSync(logFilePath, `${JSON.stringify(entry)}\n`);
       return;
     }
 

@@ -1,5 +1,5 @@
 // test/runners/integration/plugins/plugin-registry-builder.factory.js
-const path = require('path');
+const path = require('node:path');
 const sinon = require('sinon');
 
 function makeCmManifestScenario({
@@ -24,7 +24,7 @@ function makeCmManifestScenario({
         .resolves('');
       mockDependencies.yaml.load.withArgs('').returns(fakeParsedData);
     },
-    assert: async (result, mocks, constants, expect, logs) => {
+    assert: async (result, _mocks, _constants, expect, logs) => {
       const finalResult = {};
       for (const key in result) {
         finalResult[key] = {
@@ -34,7 +34,7 @@ function makeCmManifestScenario({
         };
       }
       expect(finalResult).to.deep.equal(expectResult);
-      expectLogs.forEach((expected, index) => {
+      expectLogs.forEach((expected, _index) => {
         expect(
           logs.some((log) => {
             if (typeof expected === 'string') {
@@ -102,9 +102,9 @@ function makeFileRegistrationScenario({
         }
       }
     },
-    assert: async (result, mocks, constants, expect, logs) => {
+    assert: async (result, _mocks, _constants, expect, logs) => {
       expect(result).to.deep.equal(expectResult);
-      expectLogs.forEach((expected, index) => {
+      expectLogs.forEach((expected, _index) => {
         expect(
           logs.some((log) => {
             if (typeof expected === 'string') {
@@ -214,7 +214,7 @@ function makeCacheInvalidationScenario({
         '_registerBundledPlugins',
       );
     },
-    assert: async (result, { builderInstance }, constants, expect) => {
+    assert: async (_result, { builderInstance }, _constants, expect) => {
       await builderInstance.newInstance.buildRegistry();
       expect(builderInstance.buildRegistrySpy.callCount).to.equal(1);
       expect(builderInstance.newSpy.callCount).to.equal(1);
@@ -239,7 +239,7 @@ function makeResolveAliasScenario({
         mockDependencies.path.resolve.returns(pathMocks.resolve);
       }
     },
-    assert: async (result, { mockDependencies }, constants, expect, logs) => {
+    assert: async (result, { mockDependencies }, _constants, expect, logs) => {
       expect(result).to.equal(expectResult);
       if (expectHomedirCall) {
         expect(mockDependencies.os.homedir.calledOnce).to.be.true;
@@ -288,7 +288,7 @@ function makeResolveConfigPathScenario({
         }
       }
     },
-    assert: async (result, { mockDependencies }, constants, expect, logs) => {
+    assert: async (result, { mockDependencies }, _constants, expect, logs) => {
       expect(result).to.equal(expectResult);
       if (expectHomedirCall) {
         expect(mockDependencies.os.homedir.calledOnce).to.be.true;

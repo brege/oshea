@@ -2,7 +2,6 @@
 
 function makeMainConfigLoaderScenario({
   description,
-  methodName,
   constructorArgs,
   fsExistsStubs,
   loadYamlConfigStubs,
@@ -11,7 +10,7 @@ function makeMainConfigLoaderScenario({
   expectedErrorMessage,
   assertion,
 }) {
-  const setup = async (mocks, constants, scenarioConfig) => {
+  const setup = async (mocks, _constants, _scenarioConfig) => {
     const { mockDependencies } = mocks;
     mockDependencies.fs.existsSync.returns(false);
     if (fsExistsStubs) {

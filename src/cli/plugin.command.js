@@ -5,5 +5,5 @@ module.exports = {
   builder: (yargs) => {
     return yargs.commandDir('plugin');
   },
-  handler: (argv) => {},
+  handler: (_argv) => {},
 };

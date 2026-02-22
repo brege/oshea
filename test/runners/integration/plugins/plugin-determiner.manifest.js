@@ -1,7 +1,7 @@
 // test/runners/integration/plugins/plugin-determiner.manifest.js
 require('module-alias/register');
 const { pluginDeterminerFactoryPath } = require('@paths');
-const path = require('path');
+const path = require('node:path');
 const { setupTestFiles, assertCommonFileAndParsingInteractions } = require(
   pluginDeterminerFactoryPath,
 );
@@ -312,7 +312,7 @@ some_other_fm_key: fm_value
         .withArgs(fileContents.markdown)
         .throws(new Error(MALFORMED_FM_ERROR_MESSAGE));
     },
-    assert: async (result, args, mocks, constants, expect, logs) => {
+    assert: async (result, _args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('default');
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.be.null;
@@ -376,7 +376,7 @@ some_other_key: some_value
         .withArgs(fileContents.localConfig)
         .throws(new Error(MALFORMED_LOCAL_CONFIG_ERROR_MESSAGE));
     },
-    assert: async (result, args, mocks, constants, expect, logs) => {
+    assert: async (result, _args, mocks, constants, expect, logs) => {
       expect(result.pluginSpec).to.equal('default');
       expect(result.source).to.equal('default');
       expect(result.localConfigOverrides).to.be.null;
@@ -675,7 +675,7 @@ oshea_plugin: ${relativePluginPath}
       markdownFile: undefined,
     },
     defaultPluginName: 'default',
-    setup: async (args, mocks, constants) => {
+    setup: async (_args, mocks, constants) => {
       mocks.mockProcessCwd.returns('/mock/current/working/dir');
       setupTestFiles(mocks, constants, {
         markdownContent: undefined,
@@ -751,7 +751,7 @@ oshea_plugin: ${fmPluginName}
       isLazyLoad: true,
     },
     defaultPluginName: 'default',
-    setup: async (args, mocks, constants) => {
+    setup: async (_args, mocks, constants) => {
       setupTestFiles(mocks, constants, {
         markdownContent: undefined,
         localConfigContent: undefined,

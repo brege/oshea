@@ -15,7 +15,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const { logs, clearLogs } = require(captureLogsPath);
 const proxyquire = require('proxyquire');
-const nodePath = require('path');
+const nodePath = require('node:path');
 const _ = require('lodash');
 
 const constructorManifest = require(configResolverConstructorManifestPath);

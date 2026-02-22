@@ -2,9 +2,9 @@
 // This script generates a completion cache for the oshea CLI. This script is for development use only.
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 
 const { loggerPath, cliTreeBuilderPath, cliRoot } = require('@paths');
 const logger = require(loggerPath);

@@ -1,8 +1,8 @@
 // paths/lib/dependency-tracer.js
 
 require('module-alias/register');
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const acorn = require('acorn');
 const walk = require('acorn-walk');
 const { TreeRenderer } = require('./tree-renderer');
@@ -203,7 +203,7 @@ class DependencyTreeTracer {
       let resolved = path.resolve(baseDir, requirePath);
 
       if (!fs.existsSync(resolved) && !path.extname(resolved)) {
-        const withJs = resolved + '.js';
+        const withJs = `${resolved}.js`;
         if (fs.existsSync(withJs)) {
           resolved = withJs;
         }
@@ -302,15 +302,15 @@ class DependencyTreeTracer {
       trees.push(tree);
     }
 
-    trees.forEach((tree) =>
-      this._collectFilesFromTree(tree, allFiles, registryVars),
-    );
+    trees.forEach((tree) => {
+      this._collectFilesFromTree(tree, allFiles, registryVars);
+    });
 
     this.presetContextFiles.forEach((preset) => {
       if (preset.endsWith('/')) {
-        this._findFilesInDir(preset).forEach((file) =>
-          allFiles.add(file.replace(/\\/g, '/')),
-        );
+        this._findFilesInDir(preset).forEach((file) => {
+          allFiles.add(file.replace(/\\/g, '/'));
+        });
       } else if (fs.existsSync(preset)) {
         allFiles.add(preset);
       }

@@ -1,9 +1,9 @@
 // src/completion/tracker.js
 
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
-const { spawn } = require('child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const { spawn } = require('node:child_process');
 
 const CACHE_FRESHNESS_THRESHOLD = 5000;
 

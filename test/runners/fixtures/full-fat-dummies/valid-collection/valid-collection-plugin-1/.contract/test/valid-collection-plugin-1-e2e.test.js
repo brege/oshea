@@ -1,7 +1,7 @@
 // test/runners/fixtures/full-fat-dummies/valid-collection/valid-collection-plugin-1/.contract/test/valid-collection-plugin-1-e2e.test.js
 require('module-alias/register');
-const path = require('path');
-const os = require('os');
+const path = require('node:path');
+const os = require('node:os');
 const { expect } = require('chai');
 const {
   projectRoot,

@@ -29,11 +29,8 @@ module.exports = [
         },
       },
     },
-    assertion: (result, mocks) => {
-      expect(
-        mocks.disableAllPluginsFromCollection &&
-          mocks.disableAllPluginsFromCollection.called,
-      ).to.not.be.true;
+    assertion: (_result, mocks) => {
+      expect(mocks.disableAllPluginsFromCollection?.called).to.not.be.true;
       expect(mocks.mockDependencies.fsExtra.rm.called).to.be.false;
     },
   }),
@@ -102,7 +99,7 @@ module.exports = [
         _readEnabledManifest: { resolves: { enabled_plugins: [] } },
       },
     },
-    assertion: (result, mocks) => {
+    assertion: (_result, mocks) => {
       expect(mocks.mockDependencies.fsExtra.rm.called).to.be.true;
     },
   }),

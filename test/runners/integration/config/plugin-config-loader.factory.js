@@ -15,7 +15,7 @@ function makePluginConfigLoaderScenario({
   osStubs = {},
   assertion,
 }) {
-  const setup = async (mocks, constants, scenarioConfig) => {
+  const setup = async (mocks, _constants, _scenarioConfig) => {
     const { mockDependencies } = mocks;
     for (const [path, returns] of Object.entries(fsExistsStubs)) {
       mockDependencies.fs.existsSync.withArgs(path).returns(returns);

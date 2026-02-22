@@ -4,8 +4,8 @@
 
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const yaml = require('js-yaml');
 const {
   cliPath,
@@ -76,7 +76,7 @@ class YamlTestRunner {
   getSessionTitleFromPath() {
     const { pathsConfigPath } = require('@paths');
     const yaml = require('js-yaml');
-    const fs = require('fs');
+    const fs = require('node:fs');
     const { minimatch } = require('minimatch');
 
     // Load paths config and get test features
@@ -85,7 +85,7 @@ class YamlTestRunner {
 
     // Find matching pattern and return its comment
     // eslint-disable-next-line no-unused-vars
-    for (const [featureName, featureConfig] of Object.entries(testFeatures)) {
+    for (const [_featureName, featureConfig] of Object.entries(testFeatures)) {
       if (featureConfig.pattern && featureConfig.comment) {
         if (minimatch(this.yamlFilePath, featureConfig.pattern)) {
           return featureConfig.comment;
@@ -486,9 +486,7 @@ class YamlTestRunner {
   ) {
     // Use the yamlFilePath set in constructor
     const yamlContent = fs.readFileSync(this.yamlFilePath, 'utf8');
-    const testSuites = yaml
-      .loadAll(yamlContent)
-      .filter((doc) => doc && doc.name);
+    const testSuites = yaml.loadAll(yamlContent).filter((doc) => doc?.name);
 
     // Auto-detect YAML capabilities
     this.detectCapabilities(testSuites);
@@ -510,9 +508,8 @@ class YamlTestRunner {
 
         if (
           !looksLikeTestId &&
-          ((suite.name && suite.name.toLowerCase().includes(lowerPattern)) ||
-            (suite.test_id &&
-              suite.test_id.toString().toLowerCase().includes(lowerPattern)) ||
+          (suite.name?.toLowerCase().includes(lowerPattern) ||
+            suite.test_id?.toString().toLowerCase().includes(lowerPattern) ||
             (suite.tags &&
               Array.isArray(suite.tags) &&
               suite.tags.some((tag) =>
@@ -534,10 +531,8 @@ class YamlTestRunner {
             return true;
           }
           return (
-            (scenario.description &&
-              scenario.description.toLowerCase().includes(lowerPattern)) ||
-            (scenario.test_id &&
-              scenario.test_id.toString().toLowerCase().includes(lowerPattern))
+            scenario.description?.toLowerCase().includes(lowerPattern) ||
+            scenario.test_id?.toString().toLowerCase().includes(lowerPattern)
           );
         });
 
@@ -575,8 +570,12 @@ class YamlTestRunner {
 
     // Then apply target block filtering
     if (targetBlock) {
-      const blockNum = parseInt(targetBlock);
-      if (!isNaN(blockNum) && blockNum > 0 && blockNum <= suitesToRun.length) {
+      const blockNum = parseInt(targetBlock, 10);
+      if (
+        !Number.isNaN(blockNum) &&
+        blockNum > 0 &&
+        blockNum <= suitesToRun.length
+      ) {
         suitesToRun = [suitesToRun[blockNum - 1]];
       } else {
         const foundSuite = suitesToRun.find((suite) =>

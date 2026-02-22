@@ -2,8 +2,8 @@
 // scripts/linting/docs/yaml.js
 require('module-alias/register');
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 const YAML = require('yaml');
 const {
   lintHelpersPath,
@@ -22,7 +22,7 @@ const { findFiles } = require(fileDiscoveryPath);
 const { renderLintOutput } = require(visualRenderersPath);
 
 // Process a single YAML file and return formatting issues
-function processYamlFile(filePath, fieldOrder, yamlOptions = {}) {
+function processYamlFile(filePath, fieldOrder, _yamlOptions = {}) {
   try {
     logger.debug(`Processing YAML file: ${filePath}`, {
       context: 'YamlLinter',
@@ -37,7 +37,7 @@ function processYamlFile(filePath, fieldOrder, yamlOptions = {}) {
 
     // Default YAML formatting options (can be overridden by config)
     // eslint-disable-next-line no-unused-vars
-    const defaultYamlOptions = {
+    const _defaultYamlOptions = {
       lineWidth: 80,
       indent: 2,
       quotingType: '"',
@@ -51,8 +51,7 @@ function processYamlFile(filePath, fieldOrder, yamlOptions = {}) {
     const validDocs = docs.filter((doc) => {
       // Check if document has actual content
       return (
-        doc &&
-        doc.contents &&
+        doc?.contents &&
         ((doc.contents.items && doc.contents.items.length > 0) ||
           (doc.contents.value !== null && doc.contents.value !== undefined))
       );
@@ -65,11 +64,7 @@ function processYamlFile(filePath, fieldOrder, yamlOptions = {}) {
     const processedDocs = validDocs.map((doc) => {
       try {
         // Apply field ordering by sorting existing items (preserves comments)
-        if (
-          doc.contents &&
-          doc.contents.items &&
-          Object.keys(fieldOrder).length > 0
-        ) {
+        if (doc.contents?.items && Object.keys(fieldOrder).length > 0) {
           logger.debug(
             `Applying field ordering to ${doc.contents.items.length} items`,
             { context: 'YamlLinter' },
@@ -127,7 +122,7 @@ function processYamlFile(filePath, fieldOrder, yamlOptions = {}) {
 
       if (hasLeadingSeparator || hasTrailingSeparator) {
         // Original had separators, preserve them
-        formatted = '---\n' + processedDocs[0].toString();
+        formatted = `---\n${processedDocs[0].toString()}`;
       } else {
         // No separators in original
         formatted = processedDocs[0].toString();

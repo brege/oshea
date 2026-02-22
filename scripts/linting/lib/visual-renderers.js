@@ -6,7 +6,7 @@ const logger = require(loggerPath);
 
 function renderLintOutput(
   { issues = [], summary = {}, results = [], flags = {} },
-  formatter = 'stylish',
+  _formatter = 'stylish',
 ) {
   // If called by harness but in debug mode, allow debug output to flow first
   if (process.env.CALLED_BY_HARNESS && !flags.debug) {

@@ -3,7 +3,6 @@ require('module-alias/register');
 
 const {
   lintingTestRunnerFactory,
-  codeLintingManifestPath,
   docsLintingManifestPath
 } = require('@paths');
 const {
@@ -11,7 +10,6 @@ const {
 } = require(lintingTestRunnerFactory);
 
 const testSuites = [
-  { name: 'Code Linters', manifest: codeLintingManifestPath },
   { name: 'Docs Linters', manifest: docsLintingManifestPath },
 ];
 

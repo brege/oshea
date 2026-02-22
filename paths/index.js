@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2025-08-08T05:17:48.449Z
+// Generated: 2026-02-22T07:42:33.258Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -88,16 +88,16 @@ const convertCommandPath = path.join(projectRoot, 'src/cli/convert.command.js');
 const generateCommandPath = path.join(projectRoot, 'src/cli/generate.command.js');
 const pluginCommandPath = path.join(projectRoot, 'src/cli/plugin.command.js');
 const updateCommandPath = path.join(projectRoot, 'src/cli/update.command.js');
-const collectionsAddCommandPath = path.join(projectRoot, 'src/cli/collection/add.command.js');
 const pluginAddCommandPath = path.join(projectRoot, 'src/cli/plugin/add.command.js');
+const collectionsAddCommandPath = path.join(projectRoot, 'src/cli/collection/add.command.js');
 const createCommandPath = path.join(projectRoot, 'src/cli/plugin/create.command.js');
 const disableCommandPath = path.join(projectRoot, 'src/cli/plugin/disable.command.js');
 const enableCommandPath = path.join(projectRoot, 'src/cli/plugin/enable.command.js');
 const helpCommandPath = path.join(projectRoot, 'src/cli/plugin/help.command.js');
-const collectionsListCommandPath = path.join(projectRoot, 'src/cli/collection/list.command.js');
 const pluginListCommandPath = path.join(projectRoot, 'src/cli/plugin/list.command.js');
-const collectionsRemoveCommandPath = path.join(projectRoot, 'src/cli/collection/remove.command.js');
+const collectionsListCommandPath = path.join(projectRoot, 'src/cli/collection/list.command.js');
 const pluginRemoveCommandPath = path.join(projectRoot, 'src/cli/plugin/remove.command.js');
+const collectionsRemoveCommandPath = path.join(projectRoot, 'src/cli/collection/remove.command.js');
 const collectionsUpdateCommandPath = path.join(projectRoot, 'src/cli/collection/update.command.js');
 const validateCommandPath = path.join(projectRoot, 'src/cli/plugin/validate.command.js');
 
@@ -148,15 +148,6 @@ const makeScreenshotsShPath = path.join(projectRoot, 'scripts/batch/make-screens
 // Documentation Helpers
 const docsRoot = path.join(projectRoot, 'scripts/docs/');
 const generateTocPath = path.join(projectRoot, 'scripts/docs/generate-toc.js');
-
-// Code Quality Linters
-const lintingCodeRoot = path.join(projectRoot, 'scripts/linting/code/');
-const noBadHeadersPath = path.join(projectRoot, 'scripts/linting/code/no-bad-headers.js');
-const noConsolePath = path.join(projectRoot, 'scripts/linting/code/no-console.js');
-const noJsdocPath = path.join(projectRoot, 'scripts/linting/code/no-jsdoc.js');
-const noOldProjectNamePath = path.join(projectRoot, 'scripts/linting/code/no-old-project-name.js');
-const noRelativePathsPath = path.join(projectRoot, 'scripts/linting/code/no-relative-paths.js');
-const noTrailingWhitespacePath = path.join(projectRoot, 'scripts/linting/code/no-trailing-whitespace.js');
 
 // Documentation Linters
 const lintingDocsRoot = path.join(projectRoot, 'scripts/linting/docs/');
@@ -290,7 +281,6 @@ const e2eRunnerPath = path.join(projectRoot, 'test/runners/end-to-end/e2e-runner
 // Linting Tests
 const lintingTestsRoot = path.join(projectRoot, 'test/runners/linting/');
 const allLintingTestPath = path.join(projectRoot, 'test/runners/linting/all-linting.test.js');
-const codeLintingManifestPath = path.join(projectRoot, 'test/runners/linting/code-linting.manifest.js');
 const docsLintingManifestPath = path.join(projectRoot, 'test/runners/linting/docs-linting.manifest.js');
 const lintingUnitHarnessPath = path.join(projectRoot, 'test/runners/linting/linting-unit-harness.js');
 const testRunnerFactoryPath = path.join(projectRoot, 'test/runners/linting/test-runner-factory.js');
@@ -401,16 +391,16 @@ module.exports = {
   generateCommandPath,
   pluginCommandPath,
   updateCommandPath,
-  collectionsAddCommandPath,
   pluginAddCommandPath,
+  collectionsAddCommandPath,
   createCommandPath,
   disableCommandPath,
   enableCommandPath,
   helpCommandPath,
-  collectionsListCommandPath,
   pluginListCommandPath,
-  collectionsRemoveCommandPath,
+  collectionsListCommandPath,
   pluginRemoveCommandPath,
+  collectionsRemoveCommandPath,
   collectionsUpdateCommandPath,
   validateCommandPath,
   aiRoot,
@@ -447,13 +437,6 @@ module.exports = {
   makeScreenshotsShPath,
   docsRoot,
   generateTocPath,
-  lintingCodeRoot,
-  noBadHeadersPath,
-  noConsolePath,
-  noJsdocPath,
-  noOldProjectNamePath,
-  noRelativePathsPath,
-  noTrailingWhitespacePath,
   lintingDocsRoot,
   janitorPath,
   librarianPath,
@@ -561,7 +544,6 @@ module.exports = {
   e2eRunnerPath,
   lintingTestsRoot,
   allLintingTestPath,
-  codeLintingManifestPath,
   docsLintingManifestPath,
   lintingUnitHarnessPath,
   testRunnerFactoryPath,

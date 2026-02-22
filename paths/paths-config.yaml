@@ -134,10 +134,6 @@ registries:
         comment: Core Linting Infrastructure
         pattern: scripts/linting/**.js
         rank: 0
-      linting_code:
-        comment: Code Quality Linters
-        pattern: scripts/linting/code/**/*.js
-        rank: 1
       linting_docs:
         comment: Documentation Linters
         pattern: scripts/linting/docs/**/*.js

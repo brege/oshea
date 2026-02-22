@@ -18,8 +18,7 @@
     "test:report": "MOCHA_JSON_REPORT_FILE=./test-report.json mocha",
     "test:watch": "node test/analytics/test-watcher.js",
     "dep-tree": "madge --json src/",
-    "lint": "node scripts/linting/lint.js",
-    "prepare": "husky"
+    "lint": "biome check --write ."
   },
   "_moduleAliases": {
     "@paths": "paths/index.js"
@@ -65,13 +64,10 @@
     "yargs": "^18.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@biomejs/biome": "^2.3.10",
     "acorn": "^8.16.0",
     "acorn-walk": "^8.3.5",
     "chai": "^6.2.2",
-    "eslint": "^10.0.1",
-    "globals": "^17.3.0",
-    "husky": "^9.1.7",
     "jsdom": "^28.1.0",
     "json-diff": "^1.0.6",
     "lodash": "^4.17.23",
@@ -83,6 +79,6 @@
     "unist-util-visit-parents": "^6.0.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }

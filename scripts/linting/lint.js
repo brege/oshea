@@ -17,7 +17,7 @@ Usage:
   node scripts/linting/lint.js --list
 
 Description:
-  The main orchestrator for running code quality and documentation linters.
+  The main orchestrator for running documentation and validation linters.
   Reads steps from 'scripts/linting/config.yaml' and executes them in order.
 
 Options:
@@ -38,14 +38,9 @@ Options:
 Examples:
   # Run all configured linters
   $ node scripts/linting/lint.js
-  # or
-  $ npm run lint
 
-  # Run only the ESLint step
-  $ node scripts/linting/lint.js --only eslint
-
-  # Run all linters in the 'code' group
-  $ node scripts/linting/lint.js --only code
+  # Run all linters in the 'docs' group
+  $ node scripts/linting/lint.js --only docs
 
   # Try fixing everything
   $ node scripts/linting/lint.js --fix
@@ -103,4 +98,3 @@ if (require.main === module) {
 }
 
 module.exports = { main };
-

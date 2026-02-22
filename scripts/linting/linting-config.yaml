@@ -18,78 +18,6 @@
 #   node scripts/linting/lib/find-lint-skips.js
 # for multi-level excludes (line, block, file, directory).
 
-# --- Code ---
-
-# scripts/linting/code/no-jsdoc.js
-no-jsdoc:
-  group: code
-  filetypes: [ ".js" ]
-  targets:
-    - "."
-  excludes: []
-
-# scripts/linting/code/no-console.js
-no-console:
-  group: code
-  filetypes: [ ".js" ]
-  targets:
-    - "."
-  excludes:
-    - scripts/demo
-    - src/utils/formatters
-
-# scripts/linting/code/no-bad-headers.js
-no-bad-headers:
-  group: code
-  filetypes: [ ".js" ]
-  targets:
-    - "."
-  excludes: []
-
-# scripts/linting/code/no-trailing-whitespace.js
-no-trailing-whitespace:
-  group: code
-  filetypes: [ ".css", ".js", ".json", ".yaml" ]
-  targets: [ "." ]
-  excludes: []
-
-# scripts/linting/code/no-relative-paths.js
-no-relative-paths:
-  group: code
-  filetypes: [ ".js" ]
-  targets: [ "." ]
-  excludes:
-    - paths
-
-# scripts/linting/code/no-old-project-name.js
-no-old-project-name:
-  group: code
-  filetypes: [ ".*" ]
-  targets: [ "." ]
-  excludes:
-    - node_modules
-    - .git
-    - assets
-    - docs/archive
-    - test/archive
-    - scripts/linting/linting-config.yaml
-  # Project name patterns to find and replace
-  old_names:
-    primary: md-to-pdf
-    constant: MD_TO_PDF
-    camelCase: mdToPdf
-    snake_case: md_to_pdf
-  # New name replacements (leave empty to require --new-name flag)
-  new_names:
-    primary: oshea
-    constant: OSHEA
-    camelCase: oshea
-    snake_case: oshea
-  # Ignore specific matches (whitelist these patterns to skip linting)
-  ignore_matches:
-    #- "md-to-pdf-plugins"
-    #- "Markdown to PDF"
-
 # --- Docs ---
 
 # scripts/linting/docs/janitor.js
@@ -224,32 +152,6 @@ validate-mocha:
 harness:
   continueOnError: false
   steps:
-    # --- Code ---
-    - key: 'no-trailing-whitespace'
-      alias: 'ws'
-      label: 'Code: Check for trailing whitespace'
-      scriptPath: scripts/linting/code/no-trailing-whitespace.js
-    - key: 'no-bad-headers'
-      alias: 'headers'
-      label: 'Code: Check for bad file headers'
-      scriptPath: scripts/linting/code/no-bad-headers.js
-    - key: 'no-console'
-      alias: 'chalk'
-      label: 'Code: Check for console/chalk usage'
-      scriptPath: scripts/linting/code/no-console.js
-    - key: 'no-jsdoc'
-      alias: 'jsdoc'
-      label: 'Code: Check for JSdoc comments'
-      scriptPath: scripts/linting/code/no-jsdoc.js
-    - key: 'no-relative-paths'
-      alias: 'paths'
-      label: 'Code: Check for relative paths'
-      scriptPath: scripts/linting/code/no-relative-paths.js
-    - key: 'no-old-project-name'
-      alias: 'rename'
-      label: 'Code: Check for old project name references'
-      scriptPath: scripts/linting/code/no-old-project-name.js
-
     # --- Validators ---
     - key: 'validate-mocha'
       alias: 'mocha'
@@ -272,10 +174,3 @@ harness:
     - key: 'yaml'
       label: 'Docs: Check YAML Format'
       scriptPath: scripts/linting/docs/yaml.js
-
-    # --- Harness ---
-    - key: 'eslint'
-      label: 'ESLint'
-      quiet: false
-      command: 'eslint'
-      defaultTargets: [ '.' ]

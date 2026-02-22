@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// scripts/ai/ai-context-generator.js
+// scripts/ai-context-generator.js
 require('module-alias/register');
 
 const fs = require('node:fs');
@@ -38,15 +38,15 @@ for (let i = 0; i < args.length; i++) {
     i++;
   } else if (args[i] === '-h' || args[i] === '--help') {
     logger.info(`
-Usage: node scripts/ai/ai-context-generator.js [--plugin <name-or-path>] [--filename <outputfile>]
+Usage: node scripts/ai-context-generator.js [--plugin <name-or-path>] [--filename <outputfile>]
 
 --plugin <name-or-path>  Specify plugin name (e.g. "cv") or path (e.g. "plugins/cv" or "../other/myplugin")
 --filename <file>        Write output to a file instead of stdout
 -h, --help               Show this help message
 
 To copy output to clipboard, pipe to xclip or pbcopy, e.g.:
-  node scripts/ai/ai-context-generator.js --plugin cv | xclip -selection clipboard
-  node scripts/ai/ai-context-generator.js --plugin cv | pbcopy
+  node scripts/ai-context-generator.js --plugin cv | xclip -selection clipboard
+  node scripts/ai-context-generator.js --plugin cv | pbcopy
 `);
     process.exit(0);
   }

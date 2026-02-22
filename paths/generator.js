@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // paths/generator.js
-// lint-skip-file no-console
+// console-ok
 // Bootstrap logger with fallback for when @paths doesn't exist yet
 let logger;
 try {
@@ -185,7 +185,6 @@ class DeclarativePathsGenerator {
       content.push('');
 
       for (const [_sectionName, section] of Object.entries(archSections)) {
-        // eslint-disable-line no-unused-vars
         if (section?.comment && section.items) {
           content.push(`// --- ${section.comment} ---`);
           for (const [varName, pathDef] of Object.entries(section.items)) {

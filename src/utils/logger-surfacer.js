@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // src/utils/logger-surfacer.js
-// lint-skip-file no-console
+// console-ok
 
 require('module-alias/register');
 const { fileHelpersPath, loggerPath } = require('@paths');

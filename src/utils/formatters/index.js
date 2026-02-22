@@ -3,7 +3,6 @@
 require('module-alias/register');
 const {
   appFormatterPath,
-  lintFormatterPath,
   inlineFormatterPath,
   pathsFormatterPath,
   rawFormatterPath,
@@ -14,7 +13,6 @@ const {
   yamlTestFormatterPath,
   jsFormatterPath,
 } = require('@paths');
-const { formatLint } = require(lintFormatterPath);
 const { formatApp } = require(appFormatterPath);
 const { formatInline } = require(inlineFormatterPath);
 const { formatRaw } = require(rawFormatterPath);
@@ -47,7 +45,6 @@ const {
 // Export formatters
 module.exports = {
   app: formatApp,
-  lint: formatLint,
   inline: formatInline,
   raw: formatRaw,
   paths: formatPathFinderOutput,

@@ -1,6 +1,6 @@
 // src/utils/formatters/app.formatter.js
 // Default app theme formatter with colored output
-// lint-skip-file no-console
+// console-ok
 
 const fs = require('node:fs');
 const path = require('node:path');

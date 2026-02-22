@@ -3,42 +3,14 @@
 This document is a central index for all documentation within the `oshea` repo.
 It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk](https://diataxis.fr/) taxonomy),
 
-**Active Documents and Checklists** \
-*For convenience, these are symlinks to the latest version of each document below.*
-
-- [**Next-Generation Test Framework**](v0.11/next-generation-testing.md):
-  **Testing.** Improving the separation of static testing metadata from dynamic test-job results.
-- [**Tasklist v0.11**](tasklist-v0.11.md):
-  **Everything else.** Logger, linting, app-side integrations, refactors and reorganizations. 
-
-
-**Next-gen Features** \
-*These are the core documents for the next-gen features of the project.*
-
-- [**Polish Checklist**](archive/v0.10/polish-checklist.md):
-  **Polishing.** Aggregates all loose ends from previous checklists.
-- [Planning for ErrorManager Groups via Paths Registry](v0.11/error-group-registry-from-paths.md):
-  Plans for the ErrorManager framework to be refactored to use the Paths Registry.
-- [The Logger-Renderer-Adapter Model](v0.11/logger-renderer-adapter.md):
-  Graphical overview of how the architecture in [`src/utils/`](../src/utils/) changed from v0.10 to v0.11.
-
-There are also several indexes for the main components of the project.
-
 **Indexes** -
 [ [**Docs**](index.md) ]
-[ [**Linting**](../scripts/linting/index.md) ]
 [ [**Paths**](../paths/index.md) ]
 [ [**Plugins**](../plugins/index.md) ]
 [ [**Scripts**](../scripts/index.md) ]
 [ [**Tests**](../test/index.md) ]
 [ [**Utils**](../src/utils/index.md) ]
 
-These indices are automatically managed by
-[**the librarian**](../scripts/linting/docs/librarian.js)
-and configured via
-[`scripts/linting/linting-config.yaml`](../scripts/linting/linting-config.yaml)
-at the project root.
-The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-to-date.
 
 ---
 
@@ -59,7 +31,7 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 * [Plugin Contract](refs/plugin-contract.md): 
   Formalizes the contract that all plugins should adhere to--metadata, structure, validity.
 * [**Scripts Index**](../scripts/index.md):
-  An index of tools and utilities used by the project, from analysis to guides, documentation, linting, and more.
+  An index of tools and utilities used by the project, from analysis to guides, documentation, and more.
     
 ---
 
@@ -155,7 +127,6 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 * [Level 2 Tests](config/metadata-level-2.yaml): Subsystem integration scenarios  
 * [Level 3 Tests](config/metadata-level-3.yaml): End-to-End CLI scenarios
 * [Level 4 Tests](config/metadata-level-4.yaml): End-to-End lifecycle scenarios
-* [Level M0 Tests](config/metadata-level-m0.yaml): Unit tests for linters and validators
 
 ---
 
@@ -169,13 +140,3 @@ The [**postman**](../scripts/linting/docs/postman.js) ensures all links are up-t
 
 * [AI Interaction Specification](ai/interaction-spec.md):
   The core technical details of the plugin API, optimized for human consumption.
-
----
-
-## Uncategorized Documents
-*A dynamically generated list of documents that have not yet been categorized.* \
-*This list is automatically updated by [`scripts/linting/docs/librarian.js`](../scripts/linting/docs/librarian.js)*
-
-<!-- uncategorized-start -->
-<!-- uncategorized-end -->
-

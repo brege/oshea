@@ -123,10 +123,10 @@ This allows for great flexibility and re-usability. Plugins are portable and can
 
 ### Creating Plugins with AI
 
-Use the [helper script](scripts/ai/ai-context-generator.js) to build a context package for an AI prompt.
+Use the [helper script](scripts/ai-context-generator.js) to build a context package for an AI prompt.
 
 ```bash
-node scripts/ai/ai-context-generator.js --plugin default --filename ai-context.txt
+node scripts/ai-context-generator.js --plugin default --filename ai-context.txt
 ```
 
 See the [**AI Assisted Plugin Development Guide**](docs/ai/ai-assisted-plugin-development-guide.md) for more information. This uses built-in assets like the [**Plugin Contract**](docs/refs/plugin-contract.md), appends all plugin files, and [an interaction spec](docs/ai/interaction-spec.md) to onboard and guide the AI.
@@ -201,17 +201,13 @@ oshea update                                                   # Update plugins/
 
 ### Project Structure
 
-The project and all its documentation (and many supporting files) is all indexed by [the librarian](scripts/linting/docs/librarian.js).
-Each directory below has a mini-README (cf. main [`index.md`](docs/index.md)) that links to **all** documentation within the directory.
-
-The librarian, together with the [**postman**](scripts/linting/docs/postman.js), ensures all documentation is properly indexed and linked.
+The project and all its documentation (and many supporting files) are all indexed by `index.md` files
 
 - [**Docs**](docs/index.md) - Documentation index (guides, reference, walkthroughs, vision, development sequence)
-- [**Linting**](scripts/linting/index.md) - Scripts to improve code quality and document indexes and interlinking
 - [**Paths**](paths/index.md) - The centralized path registry used by all app, test and auxiliary modules
 - [**Plugins**](plugins/index.md) - Bundled plugins, and a higher level plugin overview
 - [**Scripts**](scripts/index.md) - Utility scripts (using AI, batch processing, project management, etc.)
-- [**Tests**](test/index.md) - Unit, integration and end-to-end tests. Life cycle, smoke, and linting tests. The test framework and how to use [mocha](https://mochajs.org/)
+- [**Tests**](test/index.md) - Unit, integration and end-to-end tests. Life cycle, and smoke tests. The test framework and how to use [mocha](https://mochajs.org/)
 
 ---
 
@@ -221,7 +217,6 @@ The librarian, together with the [**postman**](scripts/linting/docs/postman.js),
 - **Plugin precedence:** `--plugin` flag > front matter > local `*.config.yaml` > default
 
 * [`test/index.md`](test/index.md)
-* [`linting/index.md`](scripts/linting/index.md)
 * [`.mocharc.js`](.mocharc.js)
 
 This project has a rich testing framework. In addition to the in-situ tests bundled with each plugin, there are over 300 tests, ranging from unit, integration, end-to-end, and lifecycle tests, in a declarative, manifest-driven harness and factory mocking system. The best place to start is the [Test Index](test/index.md).

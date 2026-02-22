@@ -1,5 +1,5 @@
 // src/utils/file-helpers.js
-// lint-skip-file no-console
+// console-ok
 const fs = require('node:fs');
 const path = require('node:path');
 const glob = require('glob');

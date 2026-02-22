@@ -1,6 +1,5 @@
 // src/utils/formatters/yaml-test.formatter.js
 // YAML-based test result formatter - unified formatter for smoke tests and workflow tests
-/* eslint-disable camelcase */
 
 const { colorThemePath } = require('@paths');
 const { theme } = require(colorThemePath);
@@ -206,24 +205,24 @@ function formatYamlShowSeparator(_level, _message, _meta = {}) {
 function formatYamlShowOutput(_level, message, _meta = {}) {
   const { result } = message;
   if (result.stdout) {
-    console.log(result.stdout); // lint-skip-line no-console
+    console.log(result.stdout); // console-ok
   }
   if (result.stderr) {
-    console.warn('\nSTDERR:'); // lint-skip-line no-console
-    console.log(result.stderr); // lint-skip-line no-console
+    console.warn('\nSTDERR:'); // console-ok
+    console.log(result.stderr); // console-ok
   }
 }
 
 // Format error information cleanly
 function formatYamlShowError(_level, message, _meta = {}) {
   const { error } = message;
-  console.error(`Failed to execute: ${error.message}`); // lint-skip-line no-console
+  console.error(`Failed to execute: ${error.message}`); // console-ok
   if (error.stdout) {
-    console.log(error.stdout); // lint-skip-line no-console
+    console.log(error.stdout); // console-ok
   }
   if (error.stderr) {
-    console.warn('STDERR:'); // lint-skip-line no-console
-    console.log(error.stderr); // lint-skip-line no-console
+    console.warn('STDERR:'); // console-ok
+    console.log(error.stderr); // console-ok
   }
 }
 

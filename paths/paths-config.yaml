@@ -33,8 +33,6 @@ registries:
       tooling:
         comment: Development & Build Tools
         items:
-          scripts_shared_root: path.join(scriptsRoot, 'shared')
-          eslint_path: path.join(nodeModulesPath, '.bin', 'eslint')
           mocha_path: path.join(nodeModulesPath, '.bin', 'mocha')
           mocharc_path: path.join(projectRoot, '.mocharc.js')
       statics:
@@ -104,18 +102,6 @@ registries:
       validators:
         comment: Validation Framework
         pattern: src/validators/**/*.js
-        rank: 2
-      ai:
-        comment: AI Tooling
-        pattern: scripts/ai/**/*.js
-        rank: 0
-      docs:
-        comment: Documentation Helpers
-        pattern: scripts/docs/**/*.js
-        rank: 1
-      script_shared:
-        comment: Shared Script Utilities
-        pattern: scripts/shared/**/*.js
         rank: 2
       core_integration:
         comment: Core Module Integration Tests

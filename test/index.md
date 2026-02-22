@@ -162,9 +162,3 @@ All formation-era documentation and deprecated tools are preserved in the archiv
 * [Archive Index](archive/index.md): Complete historical documentation
 * [Legacy QA Tools](archive/scripts/): Deprecated analysis scripts  
 * [Original Checklists](archive/docs/): Markdown-based test checklists
-
----
-
-## Uncategorized Test Scripts
-<!-- uncategorized-start -->
-<!-- uncategorized-end -->

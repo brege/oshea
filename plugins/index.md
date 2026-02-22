@@ -89,10 +89,3 @@ You can change the styles (CSS) and PDF settings (page size, margins, etc.) of t
 Want to create a plugin for a document type not covered here, or build your own collection of plugins? `oshea` is designed for extensibility!
 
 **For a comprehensive guide on building your own plugins from scratch (including directory structure, handler scripts, and registration), please refer to the [Plugin Development Guide](../docs/guides/plugin-development.md).**
-
-
-
-<!-- uncategorized-start -->
-<!-- uncategorized-end -->
-
-

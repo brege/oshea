@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-22T19:24:23.276Z
+// Generated: 2026-02-22T20:15:15.317Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -31,8 +31,6 @@ const testRoot = path.join(projectRoot, 'test');
 const collectionsCommandsRoot = path.join(srcRoot, 'collections', 'commands');
 
 // --- Development & Build Tools ---
-const scriptsSharedRoot = path.join(scriptsRoot, 'shared');
-const eslintPath = path.join(nodeModulesPath, '.bin', 'eslint');
 const mochaPath = path.join(nodeModulesPath, '.bin', 'mocha');
 const mocharcPath = path.join(projectRoot, '.mocharc.js');
 
@@ -93,10 +91,6 @@ const collectionsRemoveCommandPath = path.join(projectRoot, 'src/cli/collection/
 const collectionsUpdateCommandPath = path.join(projectRoot, 'src/cli/collection/update.command.js');
 const validateCommandPath = path.join(projectRoot, 'src/cli/plugin/validate.command.js');
 
-// AI Tooling
-const aiRoot = path.join(projectRoot, 'scripts/ai/');
-const aiContextGeneratorPath = path.join(projectRoot, 'scripts/ai/ai-context-generator.js');
-
 // Core Module Integration Tests
 const coreIntegrationRoot = path.join(projectRoot, 'test/runners/integration/core/');
 const defaultHandlerFactoryPath = path.join(projectRoot, 'test/runners/integration/core/default-handler.factory.js');
@@ -125,10 +119,6 @@ const configResolverPath = path.join(projectRoot, 'src/config/config-resolver.js
 const configUtilsPath = path.join(projectRoot, 'src/config/config-utils.js');
 const mainConfigLoaderPath = path.join(projectRoot, 'src/config/main-config-loader.js');
 const pluginConfigLoaderPath = path.join(projectRoot, 'src/config/plugin-config-loader.js');
-
-// Documentation Helpers
-const docsRoot = path.join(projectRoot, 'scripts/docs/');
-const generateTocPath = path.join(projectRoot, 'scripts/docs/generate-toc.js');
 
 // Configuration System Integration Tests
 const configIntegrationRoot = path.join(projectRoot, 'test/runners/integration/config/');
@@ -272,7 +262,6 @@ const configFormatterPath = path.join(projectRoot, 'src/utils/formatters/config.
 const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
 const inlineFormatterPath = path.join(projectRoot, 'src/utils/formatters/inline.formatter.js');
 const jsFormatterPath = path.join(projectRoot, 'src/utils/formatters/js.formatter.js');
-const lintFormatterPath = path.join(projectRoot, 'src/utils/formatters/lint.formatter.js');
 const pathsFormatterPath = path.join(projectRoot, 'src/utils/formatters/paths.formatter.js');
 const pluginListFormatterPath = path.join(projectRoot, 'src/utils/formatters/plugin-list.formatter.js');
 const rawFormatterPath = path.join(projectRoot, 'src/utils/formatters/raw.formatter.js');
@@ -306,8 +295,6 @@ module.exports = {
   scriptsRoot,
   testRoot,
   collectionsCommandsRoot,
-  scriptsSharedRoot,
-  eslintPath,
   mochaPath,
   mocharcPath,
   pathsConfigPath,
@@ -351,8 +338,6 @@ module.exports = {
   collectionsRemoveCommandPath,
   collectionsUpdateCommandPath,
   validateCommandPath,
-  aiRoot,
-  aiContextGeneratorPath,
   coreIntegrationRoot,
   defaultHandlerFactoryPath,
   defaultHandlerManifestPath,
@@ -376,8 +361,6 @@ module.exports = {
   configUtilsPath,
   mainConfigLoaderPath,
   pluginConfigLoaderPath,
-  docsRoot,
-  generateTocPath,
   configIntegrationRoot,
   configResolverConstructorManifestPath,
   configResolverFactoryPath,
@@ -497,7 +480,6 @@ module.exports = {
   formattersIndexPath,
   inlineFormatterPath,
   jsFormatterPath,
-  lintFormatterPath,
   pathsFormatterPath,
   pluginListFormatterPath,
   rawFormatterPath,

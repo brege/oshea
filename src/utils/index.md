@@ -35,7 +35,6 @@ logger(message, options) → formatter → console/file output
 | [`table.formatter.js`](formatters/table.formatter.js) | `plugin list --short` |
 | [`collection-list.formatter.js`](formatters/collection-list.formatter.js) | `collection list` |
 | **Test-side**      |                                    |
-| [`lint.formatter.js`](formatters/lint.formatter.js) | `node scripts/linting/lint.js` |
 | [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js) | `node ...e2e-runner.js` |
 | [`config.formatter.js`](formatters/config.formatter.js) | `oshea config` |
 | [`js.formatter.js`](formatters/js.formatter.js) | `node ...path-finder.js <path>` | 
@@ -137,7 +136,6 @@ logger.info(`Source is a Git repository, attempting to clone: ${sourceUrl}`, {
 | `app`    | General logging         | Colored, with newlines   |
 | `table`  | Structured data         | Aligned columns          |
 | `inline` | Prompts, partial output | No newline               |
-| `lint`   | Linting results         | Special lint formatting  |
 | `raw`    | Unformatted output      | Plain text               |
 | `paths`  | Path-related output     | Path-specific formatting |
 
@@ -258,13 +256,3 @@ logger.debug('Configuration resolution started', {
   // Rich context for error correlation
 });
 ```
-
-
-### Uncategorized Scripts
-
-New scripts or new script locations will appear below after running
-**`node scripts/linting/docs/librarian.js`**.
-
-<!-- uncategorized-start -->
-<!-- uncategorized-end -->
-

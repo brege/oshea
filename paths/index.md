@@ -45,7 +45,7 @@ const __dirname = ...;                                      // ✖ redeclaration
 
 For any given file, you can generate the above code with the following command:
 ```bash
-node paths/path-finder.js scripts/linting/lint.js
+node paths/path-finder.js src/completion/engine.js
 ```
 
 [This tool](path-finder.js) helps build the import statements in the above example.
@@ -53,39 +53,23 @@ node paths/path-finder.js scripts/linting/lint.js
 Use on multiple files or directories as needed.
 
 ```bash
-node paths/path-finder.js scripts/linting/lint.js scripts/linting/lib/
+node paths/path-finder.js src/completion/
 ```
 ```js
+node paths/path-finder.js src/completion/
 require('module-alias/register');
-const { 
-  formattersPath,
-  lintHelpersPath,
-  lintPath
+const {
+  cliTreeBuilderPath,
+  enginePath,
+  generateCompletionCachePath,
+  generateCompletionDynamicCachePath,
+  trackerPath
 } = require('@paths');
-// File: scripts/linting/lint.js
-// File: scripts/linting/lib/formatters.js
-// File: scripts/linting/lib/lint-helpers.js
-```
-Since the [`no-relative-paths` linter](../scripts/linting/code/no-relative-paths.js) will catch unused imports, it's often easier to add all then remove later.
-```bash
-node paths/path-finder.js src/collections/commands/
-```
-```js
-require('module-alias/register');
-const { 
-  addPath,
-  addSingletonPath,
-  disablePath,
-  enableAllPath,
-  enablePath,
-  listAvailablePath,
-  listPath,
-  removePath,
-  updateAllPath,
-  updatePath
-} = require('@paths');
-// File: src/collections/commands/add.js
-// ... 
+// File: src/completion/cli-tree-builder.js
+// File: src/completion/engine.js
+// File: src/completion/generate-completion-cache.js
+// File: src/completion/generate-completion-dynamic-cache.js
+// File: src/completion/tracker.js
 ```
 
 As a companion to [`path-finder.js`](path-finder.js),
@@ -109,7 +93,6 @@ the following files can be used to generate the dependency tree from the pathing
   └── src/cli/commands/collection.command.js (collectionCommandPath)
       ├── paths/index.js (pathsPath)
       │   ├── paths/scripts.js 
-      │   ├── paths/linters.js 
       │   └── paths/tests.js 
       ├── src/cli/commands/collection/add.command.js (collectionsAddCommandPath)
       │   ├── paths/index.js  (collapsed)
@@ -117,7 +100,6 @@ the following files can be used to generate the dependency tree from the pathing
       │       ├── paths/index.js  (collapsed)
       │       └── src/utils/formatters/index.js (formattersIndexPath)
       │           ├── paths/index.js  (collapsed)
-      │           ├── src/utils/formatters/lint.formatter.js (lintFormatterPath)
       │           ├── src/utils/formatters/app.formatter.js (appFormatterPath)
       │           ├── src/utils/formatters/inline.formatter.js (inlineFormatterPath)
       │           ├── src/utils/formatters/raw.formatter.js (rawFormatterPath)
@@ -139,12 +121,3 @@ the following files can be used to generate the dependency tree from the pathing
   These files construct the dependency graph and render it as a tree diagram, respectively.
     - [ [`dependency-tracer.js`](lib/dependency-tracer.js) ]
     - [ [`tree-renderer.js`](lib/tree-renderer.js) ]
-
-<details> 
-<summary>Untracked Files</summary>
-
-<!-- uncategorized-start -->
-
-<!-- uncategorized-end -->
-
-</details>

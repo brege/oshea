@@ -84,7 +84,6 @@ class YamlTestRunner {
     const testFeatures = pathsConfig.registries.main.features;
 
     // Find matching pattern and return its comment
-    // eslint-disable-next-line no-unused-vars
     for (const [_featureName, featureConfig] of Object.entries(testFeatures)) {
       if (featureConfig.pattern && featureConfig.comment) {
         if (minimatch(this.yamlFilePath, featureConfig.pattern)) {

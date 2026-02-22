@@ -178,8 +178,7 @@ if (
   }
 
   const suggestions = getSuggestions(completionArgv, currentWord);
-  // lint-skip-next-line no-console
-  console.log(suggestions.join('\n'));
+  console.log(suggestions.join('\n')); // console-ok
   process.exit(0);
 }
 
@@ -193,7 +192,7 @@ const {
   commonCommandHandler,
   executeConversion,
   executeGeneration,
-} = require('./index.js'); // lint-skip-line no-relative-paths
+} = require('./index.js'); // relative-path-ok
 
 const configCommand = require(configCommandPath);
 const pluginCommand = require(pluginCommandPath);

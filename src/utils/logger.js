@@ -1,5 +1,5 @@
 // src/utils/logger.js
-// lint-skip-file no-console
+// console-ok
 // Slim routing layer - all formatting logic delegated to formatters/
 const { formattersIndexPath, loggerEnhancerPath } = require('@paths');
 
@@ -51,13 +51,10 @@ function setDebugMode(enabled) {
 // Import enhancement utilities
 const { enhanceMessage } = require(loggerEnhancerPath);
 
-// Unified logger interface with CSS-like format parameter
-// Pure routing - delegates all formatting to formatters/
+// Delegates all formatting to formatters/
 // Usage examples:
 //   logger('message')                                    // same as logger.info('message')
 //   logger('message', { level: 'debug' })                // same as logger.debug('message')
-//   logger(lintData, { format: 'lint' })                 // lint formatting with info level
-//   logger('debug msg', { level: 'debug', format: 'lint' }) // lint formatting with debug level
 //   logger('inline', { format: 'inline' })               // no newline, same as writeInfo()
 function logger(message, options = {}) {
   const { format = 'default', level = 'info', context, meta = {} } = options;
@@ -88,30 +85,6 @@ function logger(message, options = {}) {
     return getFormatter('app')(level, message, meta);
   }
 
-  if (format === 'lint') {
-    // Special handling for lint format with JSON mode support
-    if (process.env.LOG_MODE === 'json') {
-      const fs = require('node:fs');
-      const path = require('node:path');
-      const logFilePath = path.join(process.cwd(), 'logs', 'app.log');
-      const entry = {
-        level: 'info',
-        type: 'lint-output',
-        data: message,
-        ...meta,
-        timestamp: new Date().toISOString(),
-      };
-      fs.appendFileSync(logFilePath, `${JSON.stringify(entry)}\n`);
-      return;
-    }
-
-    const formatted = getFormatter('lint')(message);
-    if (formatted) {
-      console.log(formatted);
-    }
-    return;
-  }
-
   // For all other formatters, use lazy loading
   try {
     const formatter = getFormatter(format);
@@ -123,7 +96,6 @@ function logger(message, options = {}) {
 }
 
 // Convenience aliases for each level (backward compatibility)
-// Now support context: logger.info('message', { context: 'MyContext' })
 const info = (msg, options = {}) => logger(msg, { ...options, level: 'info' });
 const warn = (msg, options = {}) => logger(msg, { ...options, level: 'warn' });
 const error = (msg, options = {}) =>
@@ -138,13 +110,6 @@ const debug = (msg, options = {}) =>
   logger(msg, { ...options, level: 'debug' });
 const validation = (msg, options = {}) =>
   logger(msg, { ...options, level: 'validation' });
-
-// writeFunction aliases removed - all migrated to { format: 'inline' } pattern
-
-// Legacy specialized formatter methods (maintained for backward compatibility)
-function formatLint(structuredData, meta = {}) {
-  return logger(structuredData, { format: 'lint', meta });
-}
 
 // Convenience method for pre-configured loggers with context
 function createLoggerFor(context) {
@@ -189,6 +154,4 @@ module.exports = {
   fatal,
   debug,
   validation,
-  // Legacy specialized formatters (backward compatibility)
-  formatLint,
 };

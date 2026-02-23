@@ -1,6 +1,7 @@
 ## Claude Skills
 
-Examples of Claude skills to build plugins for oshea.
+Examples of Claude skills to build plugins for oshea. 
+See [create-oshea-plugin/SKILL.md](../../.claude/skills/create-oshea-plugin/SKILL.md) for more information.
 
 ## 1) Thank You Card
 

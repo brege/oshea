@@ -124,4 +124,4 @@ if [ "$SAVE_PDFS_FOR_DEBUGGING" = false ]; then
   rm -f "$SCREENSHOTS_DIR"/*.pdf
 fi
 
-echo "--- Screenshot generation complete."
+echo "=== Screenshot generation complete. ==="

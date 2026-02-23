@@ -132,11 +132,10 @@ It organizes Markdown files by categorical purpose and voicing (cf. [Diátaxisk]
 
 ## AI & Automation
 
-*Guides and specifications for programmatic interaction with the plugin system.*
+*Guides and specifications for skill-driven plugin generation and programmatic interaction with the plugin system.*
 
-* [AI-Assisted Plugin Development Guide](ai/ai-assisted-plugin-development-guide.md):
-  A how-to guide for using an AI to create new plugins.
-  The core technical details of the plugin API, optimized for machine consumption.
+* [Claude Skills](ai/claude-skills.md):
+  Skill-run examples and reproducible prompt/model metadata for generated plugins.
 
 * [AI Interaction Specification](ai/interaction-spec.md):
-  The core technical details of the plugin API, optimized for human consumption.
+  The core technical details of the plugin API.

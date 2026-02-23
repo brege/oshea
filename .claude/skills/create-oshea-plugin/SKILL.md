@@ -1,6 +1,6 @@
 ---
 name: create-oshea-plugin
-description: Create or update oshea plugins from a visual reference image or concise design brief by using the built-in plugin archetyper workflow (`node cli.js plugin create --from ...`) instead of the AI context package + giant paste method. Use when a Claude-style agent must generate a functioning plugin and prove it by running `oshea convert`.
+description: Create or update oshea plugins from a visual reference image or concise design brief by using the built-in plugin archetyper workflow (`node cli.js plugin create --from ...`). Use when a Claude-style agent must generate a functioning plugin and prove it by running `oshea convert`.
 ---
 
 # Objective

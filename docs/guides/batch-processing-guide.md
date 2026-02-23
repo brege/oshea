@@ -1,12 +1,12 @@
 # Batch Processing Guide
 
-This guide explains how to perform batch conversions of multiple Markdown files to individual PDFs using `oshea`. The recommended approach is using YAML workflows, which provide a declarative, maintainable solution that integrates with the existing test infrastructure.
+This guide explains how to perform batch conversions of multiple Markdown files to individual PDFs using **oshea**. The recommended approach is using YAML workflows, which provide a declarative, maintainable solution that integrates with the existing test infrastructure.
 
 ## YAML Workflows (Recommended)
 
 The recommended approach for batch processing is using YAML workflows, which provide a declarative, self-documenting method that integrates seamlessly with the existing test infrastructure.
 
-In due time, this approach will be mainlined into the `oshea` CLI once stability for v0.11 is achieved.
+In due time, this approach will be mainlined into the **oshea** CLI once stability for v0.11 is achieved.
 
 ### Example: Batch Processing Hugo Recipes
 

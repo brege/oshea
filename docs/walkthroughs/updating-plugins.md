@@ -124,7 +124,7 @@ p:last-of-type {
 
 ### Step 3: Add Your Local Plugin to be Managed
 
-Now, tell `oshea` about your local plugin. This command copies your plugin into the managed collections directory and enables it.
+Now, tell **oshea** about your local plugin. This command copies your plugin into the managed collections directory and enables it.
 
 **Command:**
 
@@ -211,4 +211,4 @@ Now, run the conversion again:
 oshea convert my-flyer/my-flyer-example.md --outdir ./output
 ```
 
-Open the newly generated PDF. You will see it now has the "sunset" theme (cream background, red heading), confirming that your local changes were successfully synced and applied. This workflow allows you to develop plugins in any directory you choose while still leveraging the power of `oshea`'s management system.
+Open the newly generated PDF. You will see it now has the "sunset" theme (cream background, red heading), confirming that your local changes were successfully synced and applied. This workflow allows you to develop plugins in any directory you choose while still leveraging the power of **oshea**'s management system.

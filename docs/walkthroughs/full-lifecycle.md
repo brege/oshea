@@ -1,6 +1,6 @@
 # Walkthrough: A Plugin's Full Lifecycle
 
-This guide demonstrates a complete, real-world workflow for managing plugins in `oshea`. You will add a plugin collection from a remote Git repository, enable a specific plugin, use it to convert a document, and then clean up by disabling the plugin and removing the collection.
+This guide demonstrates a complete, real-world workflow for managing plugins in **oshea**. You will add a plugin collection from a remote Git repository, enable a specific plugin, use it to convert a document, and then clean up by disabling the plugin and removing the collection.
 
 This entire process is automated and verified by the test at
 [`test/runners/end-to-end/workflows/workflow-tests.yaml`](../../test/runners/end-to-end/workflows/workflow-tests.yaml),

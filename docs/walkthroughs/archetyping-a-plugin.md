@@ -170,7 +170,7 @@ blockquote {
 
 ### Step 3: Add and Enable the Custom Plugin
 
-Now, add your new, locally-modified plugin to `oshea`'s managed collection. This command will copy your plugin into the collections directory and automatically enable it for use.
+Now, add your new, locally-modified plugin to **oshea**'s managed collection. This command will copy your plugin into the collections directory and automatically enable it for use.
 
 **Command:**
 

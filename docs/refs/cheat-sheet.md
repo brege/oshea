@@ -1,8 +1,8 @@
 # oshea Cheat Sheet
 
-Quick examples and syntax for `oshea` commands and configurations.
+Quick examples and syntax for **oshea** commands and configurations.
 
-**Index of all Documentation: [`docs/index.md`](../index.md).**
+**Index of all Documentation: [`docs/README.md`](../README.md).**
 
 ## Core Commands
 
@@ -151,7 +151,7 @@ oshea convert plugins/recipe/recipe-example.md --plugin recipe --watch
 
 ## Tab-Completion
 
-`oshea` has dynamic tab-completion for commands and options.
+**oshea** has dynamic tab-completion for commands and options.
 
 A hidden command that is ran during state-change operations like `update`, `add`, `enable`, etc:
 

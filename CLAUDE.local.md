@@ -30,11 +30,11 @@ node cli.js --watch                           # Watch mode
 - `docs/refs/cheat-sheet.md`
 - `docs/refs/plugin-contract.md`
 
-Documentation is indexed by `index.md`'s throughout the repository. These offer one-line summaries of each topic. 
+Documentation is indexed by `README.md`'s throughout the repository. These offer one-line summaries of each topic. 
 
 ## Architecture
 
-**Path System**: All imports use centralized path registry at `paths/index.js` (auto-generated from `paths/paths-config.yaml`). Use `@paths` alias, never relative paths. See `paths/index.md` for details.
+**Path System**: All imports use centralized path registry at `paths/index.js` (auto-generated from `paths/paths-config.yaml`). Use `@paths` alias, never relative paths. See `paths/README.md` for details.
 
 **Core Structure**:
 - `src/cli/` - Command definitions and CLI logic
@@ -44,7 +44,7 @@ Documentation is indexed by `index.md`'s throughout the repository. These offer 
 - `src/collections/` - Plugin collection management
 - `plugins/` - Built-in plugins (cv, cover-letter, recipe, etc.)
 
-**Testing**: Manifest-driven test harness with factory mocking. See `test/index.md` for details.
+**Testing**: Manifest-driven test harness with factory mocking. See `test/README.md` for details.
 
 ## Configuration Hierarchy
 

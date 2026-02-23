@@ -1,6 +1,6 @@
 # Configuration, Plugins, and Data Hierarchies
 
-`oshea` uses a layered system for settings, allowing for global defaults, user-specific preferences, and project-level configurations. This guide details how configurations are loaded, how plugin behavior is determined, and how settings and data are merged.
+**oshea** uses a layered system for settings, allowing for global defaults, user-specific preferences, and project-level configurations. This guide details how configurations are loaded, how plugin behavior is determined, and how settings and data are merged.
 
 ---
 
@@ -10,7 +10,7 @@ The tool loads settings from multiple sources. Higher levels in this list take p
 
 ### Main `config.yaml` Locations
 
-`oshea` looks for a main `config.yaml` file to load global settings (like `pdf_viewer`) and register plugin collections. The **first file found** in the following order is used:
+**oshea** looks for a main `config.yaml` file to load global settings (like `pdf_viewer`) and register plugin collections. The **first file found** in the following order is used:
 
 1. **Project-Specific (`--config`)** \
    A path passed via the `--config <your-project-config.yaml>` CLI option. This is the most specific and has the highest precedence.

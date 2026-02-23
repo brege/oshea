@@ -1,8 +1,8 @@
 > #### Draft: [`docs/ai/interaction-spec.md`](interaction-spec.md)
 
-# AI Interaction Specification for `oshea` Plugins
+# AI Interaction Specification for **oshea** Plugins
 
-This document provides the core technical details required to programmatically generate a plugin for the `oshea` system.
+This document provides the core technical details required to programmatically generate a plugin for the **oshea** system.
 
 ## 1\. Plugin Handler Interface
 

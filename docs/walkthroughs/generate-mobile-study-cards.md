@@ -171,7 +171,7 @@ Contains the cell's genetic material and controls its growth and reproduction.
 
 ### Step 3: Add and Generate Your Notecard Deck
 
-First, add your new `notecard-deck` plugin so `oshea` can use it.
+First, add your new `notecard-deck` plugin so **oshea** can use it.
 
 **Command:**
 

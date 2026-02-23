@@ -1,6 +1,6 @@
 # Plugin Development Guide
 
-This guide explains the basics of creating, configuring, and managing plugins for `oshea`. 
+This guide explains the basics of creating, configuring, and managing plugins for **oshea**. 
 Plugins are the core of the tool's extensibility, allowing you to define custom processing, styling, and PDF generation options for any type of Markdown document.
 
 ---

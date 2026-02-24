@@ -7,7 +7,7 @@ Built on [markdown-it](https://github.com/markdown-it/markdown-it) for Markdown 
 
 ---
 
-> [!NOTE] Markdown and AI
+> [!NOTE]
 > The rise of AI tooling has brought enormous growth to universal Markdown usage. **oshea** is ideal for anyone who writes in Markdown but needs polished, professional, reproducible output for resumes, reports, presentations, and more.
 > 
 > See [Creating Plugins with Claude Skills](#creating-plugins-with-claude-skills) for Claude and Codex.

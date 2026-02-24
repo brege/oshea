@@ -10,48 +10,41 @@ logger(message, options) → formatter → console/file output
 
 ### Script Directory
 
-*Core.*
+#### Core
+- [`logger.js`](logger.js) is the pure routing layer for message delegation to formatters
+- [`formatters/`](formatters/) contains specialized output formatting (app, table, inline, etc.)
+- [`logger-enhancer.js`](logger-enhancer.js) provides debugging enhancements (caller info, stack traces, error categories)
 
-- [ [**`logger.js`**](logger.js) ]
-  -- Pure routing layer for message delegation to formatters.
-- [ [`formatters/`](formatters/) ]
-  -- Specialized output formatting (app, table, inline, etc.)
-- [ [`logger-enhancer.js`](logger-enhancer.js) ]
-  -- Optional debugging enhancements (caller info, stack traces, error categorization).
+#### Formatters
 
-*Formatters.*
-
-| Formatter         | Description                        |
-|------------------:|:-----------------------------------|
-| [`index.js`](formatters/index.js) | orchestrator for all formatters |
-| [`color-theme.js`](formatters/color-theme.js) | color palette for CLI output |
-| **App-side**      |                                    |
-| [`app.formatter.js`](formatters/app.formatter.js) | **default output format** |
-| [`inline.formatter.js`](formatters/inline.formatter.js) | --consider pruning-- |
-| [`paths.formatter.js`](formatters/paths.formatter.js) | --consider pruning-- |
-| [`raw.formatter.js`](formatters/raw.formatter.js) | raw unformatted output |
-| [`validation.formatter.js`](formatters/validation.formatter.js) | `plugin validate` |
-| [`plugin-list.formatter.js`](formatters/plugin-list.formatter.js) | `plugin list` |
-| [`table.formatter.js`](formatters/table.formatter.js) | `plugin list --short` |
+| Formatter         | Description                                                               |
+|------------------:|:--------------------------------------------------------------------------|
+| [`index.js`](formatters/index.js)                           | orchestrator for all formatters |
+| [`color-theme.js`](formatters/color-theme.js)                  | color palette for CLI output |
+| **App Code**      |                                                                           |
+| [`app.formatter.js`](formatters/app.formatter.js)                 | **default output format** |
+| [`inline.formatter.js`](formatters/inline.formatter.js)                | --consider pruning-- |
+| [`paths.formatter.js`](formatters/paths.formatter.js)                  | --consider pruning-- |
+| [`raw.formatter.js`](formatters/raw.formatter.js)                    | raw unformatted output |
+| [`validation.formatter.js`](formatters/validation.formatter.js)           | `plugin validate` |
+| [`plugin-list.formatter.js`](formatters/plugin-list.formatter.js)             | `plugin list` |
+| [`table.formatter.js`](formatters/table.formatter.js)                 | `plugin list --short` |
 | [`collection-list.formatter.js`](formatters/collection-list.formatter.js) | `collection list` |
-| **Test-side**      |                                    |
-| [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js) | `node ...e2e-runner.js` |
-| [`config.formatter.js`](formatters/config.formatter.js) | `oshea config` |
-| [`js.formatter.js`](formatters/js.formatter.js) | `node ...path-finder.js <path>` | 
+| **Test Code**      |                                                                          |
+| [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js)       | `node ...e2e-runner.js` |
+| [`config.formatter.js`](formatters/config.formatter.js)                      | `oshea config` |
+| [`js.formatter.js`](formatters/js.formatter.js)             | `node ...path-finder.js <path>` | 
 
-**see [scripts/demo/](../../scripts/demo/) for examples**
+See [`scripts/demo/`](../../scripts/demo/) for examples.
 
-*Others.*
+### Others
 
-- [ [`asset-resolver.js`](asset-resolver.js) ]
-  -- Loading CSS properties, like Katex styles.
-- [ [`file-helpers.js`](file-helpers.js) ]
-  -- Makes the rest of the Node.js scripts easier to point and shoot at file(s) and directories.
-- [ [`logger-surfacer.js`](logger-surfacer.js) ]
-  -- Useful for surfacing how console output is being formed, without syntax distractions.
+- [`asset-resolver.js`](asset-resolver.js) for loading CSS properties, like Katex styles
+- [`file-helpers.js`](file-helpers.js) ] makes it easier  for scripts to point and shoot at files or directories 
+- [`logger-surfacer.js`](logger-surfacer.js) surfaces console outputters
 
 
-### Canonical Usage Patterns
+### Canonical Usage
 
 #### Template Literals for User-Facing Values
 
@@ -92,7 +85,7 @@ logger.error(`Failed to load plugin: ${error.message}`, {
 | `success`    | Suppressed | Positive outcomes              | Completion messages       |
 | `warn`       | Full       | Issues requiring attention     | User warnings             |
 | `error`      | Full       | Failures and problems          | Error reporting           |
-| `validation` | Full       | Validation results             | Plugin validation output   |
+| `validation` | Full       | Validation results             | Plugin validation output  |
 
 ### Layer-Specific Patterns
 

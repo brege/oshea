@@ -5,7 +5,7 @@ This document is a central index for all documentation within the **oshea** repo
 ## Indexes
 * [Docs](README.md): This document
 * [Paths](../paths/README.md) registry index
-* [Plugins](../plugins/README.md) registry
+* [Plugins](../plugins/README.md) bundled with oshea
 * [Scripts](../scripts/README.md) for maintenance
 * [Tests](../test/README.md) system overview
 * [Utils](../src/utils/README.md) like formatters, loggers, etc.
@@ -17,9 +17,9 @@ This document is a central index for all documentation within the **oshea** repo
 * [Configuration Hierarchies](guides/configuration-hierarchies.md): Config and Plugin hierarchies
 
 ## Reference
-* [Cheat Sheet](refs/cheat-sheet.md): Compactly list of commands and options
+* [Cheat Sheet](refs/cheat-sheet.md): A list of commands and options
 * [Plugin Contract](refs/plugin-contract.md): Formalizes plugin metadata, structure, validity
-* [Interaction Specification](refs/interaction-spec.md): Used for LLM's
+* [Interaction Specification](refs/interaction-spec.md): Used for LLM's/AI Agents
     
 ## Tutorials
 * [Walkthrough: A Plugin's Full Lifecycle](walkthroughs/full-lifecycle.md)
@@ -38,7 +38,7 @@ This document is a central index for all documentation within the **oshea** repo
 
 ### [v0.10](archive/v0.10/)
 * [Release Candidate Checklist](archive/v0.10/rc-checklist.md) focuses on hygiene and code quality
-* [Polish Checklist](archive/v0.10/polish-checklist.md).
+* [Polish Checklist](archive/v0.10/polish-checklist.md)
 * [Reorganization Planner](archive/v0.10/reorganization-planner.md) for v0.10 refactoring efforts
 * [An Argument for Adding a Pathing Registry](archive/v0.10/why-i-should-make-a-pathing-registry.md)
 * [Fixing `test/` paths after re-organizing `src/`](archive/v0.10/test-refactor-require-path-progress.md)

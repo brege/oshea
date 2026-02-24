@@ -1,4 +1,4 @@
-# CLAUDE.local.md
+# CLAUDE.md
 
 Project-specific guidance for the [oshea](https://github.com/brege/oshea) repository.
 

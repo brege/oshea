@@ -421,29 +421,29 @@ class DeclarativePathsGenerator {
 
     let shouldUpdate = true;
     if (fs.existsSync(outputPath) && !force) {
-      // Extract variable names from old and new content
-      const oldVariables = this.extractVariableNames(
-        fs.readFileSync(outputPath, 'utf8'),
-      );
-      const newVariables = this.extractVariableNames(newContent);
+      const oldContent = fs.readFileSync(outputPath, 'utf8');
+      const normalizedOld = this.normalizeGeneratedContent(oldContent);
+      const normalizedNew = this.normalizeGeneratedContent(newContent);
 
-      // Only update if there are new variables (additions)
-      const hasNewItems = newVariables.some(
-        (varName) => !oldVariables.includes(varName),
-      );
-
-      if (!hasNewItems) {
+      if (normalizedOld === normalizedNew) {
         shouldUpdate = false;
         logger.detail(
-          `No new items detected in ${registryName} registry: ${outputPath}`,
+          `No changes detected in ${registryName} registry: ${outputPath}`,
         );
       } else {
+        const oldVariables = this.extractVariableNames(oldContent);
+        const newVariables = this.extractVariableNames(newContent);
         const newItems = newVariables.filter(
           (varName) => !oldVariables.includes(varName),
         );
-        logger.info(
-          `New items detected in ${registryName}: ${newItems.join(', ')}`,
-        );
+
+        if (newItems.length > 0) {
+          logger.info(
+            `New items detected in ${registryName}: ${newItems.join(', ')}`,
+          );
+        } else {
+          logger.info(`Content changes detected in ${registryName} registry`);
+        }
       }
     } else if (force && fs.existsSync(outputPath)) {
       logger.info(`Force update enabled for ${registryName} registry`);
@@ -482,6 +482,13 @@ class DeclarativePathsGenerator {
     }
 
     return variables;
+  }
+
+  normalizeGeneratedContent(content) {
+    return content.replace(
+      /^\/\/ Generated:.*$/m,
+      '// Generated: <normalized>',
+    );
   }
 
   run(dryRun = false, force = false) {
@@ -540,7 +547,7 @@ if (require.main === module) {
     ?.split('=')[1];
   const dryRun = process.argv.includes('--dry-run');
   const validate = process.argv.includes('--validate');
-  const force = process.argv.includes('--force');
+  const force = process.argv.includes('--force') || process.argv.includes('-f');
 
   try {
     const generator = new DeclarativePathsGenerator(configPath);

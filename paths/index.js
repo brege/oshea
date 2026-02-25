@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-22T20:15:15.317Z
+// Generated: 2026-02-25T04:13:17.681Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -36,7 +36,7 @@ const mocharcPath = path.join(projectRoot, '.mocharc.js');
 
 // --- Key Static File Paths ---
 const pathsConfigPath = path.join(projectRoot, 'paths', 'paths-config.yaml');
-const katexPath = path.join(assetsRoot, 'katex.min.css');
+const katexPath = path.join(nodeModulesPath, 'katex', 'dist', 'katex.min.css');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
 
 // --- Collections System Constants ---

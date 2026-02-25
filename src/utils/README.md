@@ -35,8 +35,6 @@ logger(message, options) → formatter → console/file output
 | [`config.formatter.js`](formatters/config.formatter.js)                      | `oshea config` |
 | [`js.formatter.js`](formatters/js.formatter.js)             | `node ...path-finder.js <path>` | 
 
-See [`scripts/demo/`](../../scripts/demo/) for examples.
-
 ### Others
 
 - [`asset-resolver.js`](asset-resolver.js) for loading CSS properties, like Katex styles

@@ -90,7 +90,7 @@ The `config/metadata-level-*.yaml` files provide static test classification incl
 ### Strategy & Process
 
 * [Test Generation Priority Order](archive/docs/test-generation-priority-order.md)
-* [Next-Generation Testing Framework](../docs/v0.11/next-generation-testing.md) toward a YAML manifest system
+* [Next-Generation Testing Framework](../docs/archive/v0.11/next-generation-testing.md) toward a YAML manifest system
 
 ### Test Metadata Registry
 

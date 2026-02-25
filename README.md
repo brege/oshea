@@ -120,7 +120,7 @@ Plugins are portable and can be shared across projects. See [Bundled Plugins](pl
 
 ### Creating Plugins with Claude and Codex Skills
 
-Use the skill-first workflow documented in [**docs/ai/claude-skills.md**](docs/ai/claude-skills.md). The technical contract that agents compose from in [Plugin Contract](docs/refs/plugin-contract.md), [AI Interaction Specification](docs/ai/interaction-spec.md), [Archetyping Walkthrough](docs/walkthroughs/archetyping-a-plugin.md).
+Use the skill-first workflow documented in the [**Claude Skills Guide**](docs/guides/claude-skills.md). The technical contract that agents compose from in [Plugin Contract](docs/refs/plugin-contract.md), [AI Interaction Specification](docs/refs/interaction-spec.md), [Archetyping Walkthrough](docs/walkthroughs/archetyping-a-plugin.md).
 
 Iterate with your agent on the plugin until you find your document satisfactory! As of February 2026, this process takes about 5 minutes.
 

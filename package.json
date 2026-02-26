@@ -8,8 +8,6 @@
   },
   "scripts": {
     "start": "node cli.js",
-    "convert": "node cli.js convert",
-    "generate": "node cli.js generate",
     "paths": "node paths/generator.js",
     "postinstall": "npx puppeteer browsers install chrome",
     "test": "mocha",
@@ -17,7 +15,6 @@
     "test:last-fails": "node test/analytics/run-last-fails.js",
     "test:report": "MOCHA_JSON_REPORT_FILE=./test-report.json mocha",
     "test:watch": "node test/analytics/test-watcher.js",
-    "dep-tree": "madge --json src/",
     "lint": "biome check --write ."
   },
   "_moduleAliases": {

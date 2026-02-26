@@ -41,6 +41,7 @@ registries:
           paths_config_path: path.join(projectRoot, 'paths', 'paths-config.yaml')
           katex_path: path.join(nodeModulesPath, 'katex', 'dist', 'katex.min.css')
           base_plugin_schema_path: path.join(srcRoot, 'validators', 'base-plugin.schema.json')
+          plugin_installer_path: path.join(srcRoot, 'plugins', 'installer.js')
       collections:
         comment: Collections System Constants
         items:

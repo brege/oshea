@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-25T04:13:17.681Z
+// Generated: 2026-02-26T05:50:19.295Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -38,6 +38,7 @@ const mocharcPath = path.join(projectRoot, '.mocharc.js');
 const pathsConfigPath = path.join(projectRoot, 'paths', 'paths-config.yaml');
 const katexPath = path.join(nodeModulesPath, 'katex', 'dist', 'katex.min.css');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
+const pluginInstallerPath = path.join(srcRoot, 'plugins', 'installer.js');
 
 // --- Collections System Constants ---
 const collectionsMetadataFilename = '.collection-metadata.yaml';
@@ -197,6 +198,7 @@ const pluginValidateManifestYamlPath = path.join(projectRoot, 'test/runners/end-
 
 // Plugin System
 const pluginsRoot = path.join(projectRoot, 'src/plugins/');
+const installerPath = path.join(projectRoot, 'src/plugins/installer.js');
 const pluginArchetyperPath = path.join(projectRoot, 'src/plugins/plugin-archetyper.js');
 const pluginDeterminerPath = path.join(projectRoot, 'src/plugins/plugin-determiner.js');
 const pluginHelpPath = path.join(projectRoot, 'src/plugins/plugin-help.js');
@@ -300,6 +302,7 @@ module.exports = {
   pathsConfigPath,
   katexPath,
   basePluginSchemaPath,
+  pluginInstallerPath,
   collectionsMetadataFilename,
   collectionsEnabledManifestFilename,
   collectionsDefaultArchetypeDirname,
@@ -429,6 +432,7 @@ module.exports = {
 
   // --- supportive operations ---
   pluginsRoot,
+  installerPath,
   pluginArchetyperPath,
   pluginDeterminerPath,
   pluginHelpPath,

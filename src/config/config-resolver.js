@@ -41,7 +41,7 @@ class ConfigResolver {
       AssetResolver,
     };
     this.dependencies = { ...defaultDependencies, ...dependencies };
-    this.collectionsManager = dependencies.collectionsManager || null;
+    this.pluginInstaller = dependencies.pluginInstaller || null;
 
     this.projectRoot = require('@paths').projectRoot;
     this._useFactoryDefaultsOnly = useFactoryDefaultsOnly;
@@ -62,7 +62,7 @@ class ConfigResolver {
     this.primaryMainConfigPathActual = null;
     this.primaryMainConfigLoadReason = null;
 
-    this.resolvedCollRoot = this.dependencies.collRoot || null;
+    this.resolvedPluginsRoot = this.dependencies.pluginsRoot || null;
 
     this.ajv = new Ajv({ allErrors: true });
     // Use the direct, canonical path from the registry
@@ -204,8 +204,8 @@ class ConfigResolver {
     const xdg = await this.mainConfigLoader.getXdgMainConfig();
     const project = await this.mainConfigLoader.getProjectManifestConfig();
 
-    if (!this.resolvedCollRoot) {
-      this.resolvedCollRoot = this.primaryMainConfig.collections_root || null;
+    if (!this.resolvedPluginsRoot) {
+      this.resolvedPluginsRoot = this.primaryMainConfig.plugins_root || null;
     }
 
     this.pluginConfigLoader = new this.dependencies.PluginConfigLoader(
@@ -228,8 +228,8 @@ class ConfigResolver {
       this.useFactoryDefaultsOnly,
       this.isLazyLoadMode,
       this.primaryMainConfigLoadReason,
-      this.collectionsManager,
-      { collRoot: this.resolvedCollRoot },
+      this.pluginInstaller,
+      { pluginsRoot: this.resolvedPluginsRoot },
     );
     this.mergedPluginRegistry = await registryBuilder.buildRegistry();
 
@@ -549,7 +549,7 @@ class ConfigResolver {
 
   async getResolvedCollRoot() {
     await this._initializeResolverIfNeeded();
-    return this.resolvedCollRoot;
+    return this.resolvedPluginsRoot;
   }
 }
 

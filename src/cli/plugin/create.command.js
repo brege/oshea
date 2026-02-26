@@ -7,7 +7,6 @@ const {
   templateBasicPlugin,
   cliPath,
   collectionsMetadataFilename,
-  collectionsDefaultArchetypeDirname,
 } = require('@paths');
 const { execSync } = require('node:child_process');
 
@@ -32,8 +31,7 @@ module.exports = {
         type: 'string',
       })
       .option('from', {
-        describe:
-          "source to archetype from (registered plugin name, 'collection/id', or path)",
+        describe: 'source to archetype from (registered plugin name or path)',
         type: 'string',
         alias: 'f',
         completionKey: 'usablePlugins',
@@ -101,13 +99,10 @@ module.exports = {
         matter,
         path,
         collectionsMetadataFilename,
-        collectionsDefaultArchetypeDirname,
+        collectionsDefaultArchetypeDirname: 'plugins',
       }; // Pass null for chalk
       const managerContext = {
-        collRoot: args.manager.collRoot,
-        listAvailablePlugins: args.manager.listAvailablePlugins.bind(
-          args.manager,
-        ),
+        collRoot: path.dirname(args.manager.pluginsRoot),
       };
 
       const result = await createArchetype(

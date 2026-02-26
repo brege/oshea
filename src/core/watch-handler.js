@@ -309,8 +309,8 @@ async function setupWatch(
         args.isLazyLoad || false,
         args.manager
           ? {
-              collRoot: args.manager.collRoot,
-              collectionsManager: args.manager,
+              pluginsRoot: args.manager.pluginsRoot,
+              pluginInstaller: args.manager,
             }
           : {},
       );
@@ -395,7 +395,10 @@ async function setupWatch(
       args.factoryDefaults,
       args.isLazyLoad || false,
       args.manager
-        ? { collRoot: args.manager.collRoot, collectionsManager: args.manager }
+        ? {
+            pluginsRoot: args.manager.pluginsRoot,
+            pluginInstaller: args.manager,
+          }
         : {},
     );
     watchedPaths = await collectWatchablePaths(initialConfigResolver, args);

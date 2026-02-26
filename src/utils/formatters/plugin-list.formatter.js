@@ -11,56 +11,20 @@ function formatPluginEntry(plugin) {
   lines.push(`  ${theme.success('Name:')} ${plugin.name}`);
 
   let statusText = plugin.status || 'N/A';
-  if (plugin.status === 'Enabled (CM)') {
+  if (plugin.status === 'Enabled (Installed)') {
     statusText = plugin.status;
   } else if (plugin.status?.startsWith('Registered')) {
     statusText = plugin.status;
-  } else if (plugin.status === 'Available (CM)') {
+  } else if (plugin.status === 'Available (Installed)') {
     statusText = plugin.status;
   }
   lines.push(`    ${theme.info('Status:')} ${statusText}`);
 
-  if (plugin.cmCollection || plugin.cmOriginalCollection) {
-    const collection = plugin.cmCollection || plugin.cmOriginalCollection;
-    const pluginId = plugin.cmPluginId || plugin.cmOriginalPluginId;
-    if (collection && pluginId) {
-      lines.push(`    ${theme.detail('CM Origin:')} ${collection}/${pluginId}`);
-    }
-    if (
-      plugin.cmInvokeName &&
-      plugin.cmInvokeName !== plugin.name &&
-      plugin.status === 'Enabled (CM)'
-    ) {
-      lines.push(
-        `    ${theme.detail('CM Invoke Name:')} ${plugin.cmInvokeName}`,
-      );
-    }
-  }
-
   lines.push(`    ${theme.detail('Description:')} ${plugin.description}`);
 
-  let sourceDisplayMessage;
-  if (
-    plugin.status === 'Enabled (CM)' &&
-    plugin.cmCollection &&
-    plugin.cmPluginId
-  ) {
-    sourceDisplayMessage = `CollectionsManager (CM: ${plugin.cmCollection}/${plugin.cmPluginId})`;
-  } else if (plugin.registrationSourceDisplay?.includes('(CM:')) {
-    const parts = plugin.registrationSourceDisplay.split('(CM:');
-    const cmDetails = parts[1].replace(')', '').split('/');
-    const cmCollectionName = cmDetails[0];
-    const cmPluginIdName = cmDetails.slice(1).join('/');
-    sourceDisplayMessage = `${parts[0].trim()} (CM:${cmCollectionName}/${cmPluginIdName})`;
-  } else {
-    sourceDisplayMessage = plugin.registrationSourceDisplay;
-  }
+  const sourceDisplayMessage = plugin.registrationSourceDisplay;
   lines.push(`    ${theme.detail('Source:')} ${sourceDisplayMessage}`);
   lines.push(`    ${theme.detail('Config Path:')} ${plugin.configPath}`);
-
-  if (plugin.cmAddedOn && plugin.status === 'Enabled (CM)') {
-    lines.push(`    ${theme.detail('CM Enabled On:')} ${plugin.cmAddedOn}`);
-  }
 
   lines.push(`  ${theme.info('---')}`);
 
@@ -72,33 +36,26 @@ function generateContextMessage(listData) {
   const { type, filter, plugins } = listData;
 
   if (type === 'enabled') {
-    const filterMsg = filter ? ` (filtered for CM collection '${filter}')` : '';
-    return `Enabled plugins${filterMsg}`;
+    return 'Enabled plugins';
   }
 
   if (type === 'available') {
-    const filterMsg = filter ? ` in collection "${filter}"` : '';
-    return `Available CM-managed plugins${filterMsg}`;
+    return 'Installed plugins (enabled and disabled)';
   }
 
   if (type === 'disabled') {
-    const filterMsg = filter ? ` in collection "${filter}"` : '';
-    return `Disabled (but available) CM-managed plugins${filterMsg}`;
+    return 'Disabled installed plugins';
   }
 
   // Default/all type
   if (listData.format === 'table') {
-    const context = filter
-      ? `CM plugins in collection "${filter}"`
-      : 'all known plugins';
+    const context = 'all known plugins';
     return `Summary for ${context}`;
   } else {
     const usableCount = plugins.filter(
       (p) =>
         p.status?.startsWith('Registered') ||
-        p.status === 'Enabled (CM)' ||
-        p.status === 'Enabled (Created)' ||
-        p.status === 'Enabled (Added)',
+        p.status === 'Enabled (Installed)',
     ).length;
     return `Found ${usableCount} plugin(s) usable by oshea`;
   }
@@ -109,18 +66,15 @@ function generateEmptyMessage(listData) {
   const { type, filter } = listData;
 
   if (type === 'enabled') {
-    const filterMsg = filter ? ` matching filter '${filter}'` : '';
-    return `No plugins are currently enabled${filterMsg}.`;
+    return 'No plugins are currently enabled.';
   }
 
   if (type === 'available') {
-    const filterMsg = filter ? ` in collection "${filter}"` : '';
-    return `No CM-managed plugins found${filterMsg}.`;
+    return 'No installed plugins found.';
   }
 
   if (type === 'disabled') {
-    const filterMsg = filter ? ` in collection "${filter}"` : '';
-    return `No disabled (but available) CM-managed plugins found${filterMsg}.`;
+    return 'No disabled installed plugins found.';
   }
 
   return 'No plugins found or registered as usable.';
@@ -149,33 +103,22 @@ function formatPluginList(level, message, _meta = {}) {
       return {
         status: plugin.status || 'N/A',
         statusType:
-          plugin.status === 'Enabled (CM)'
+          plugin.status === 'Enabled (Installed)'
             ? 'enabled'
-            : plugin.status === 'Enabled (Created)'
-              ? 'enabled'
-              : plugin.status === 'Enabled (Added)'
-                ? 'enabled'
-                : plugin.status?.startsWith('Registered')
-                  ? 'registered'
-                  : plugin.status === 'Available (CM)'
-                    ? 'available'
-                    : plugin.status === 'Available (Created)'
-                      ? 'available'
-                      : plugin.status === 'Available (Added)'
-                        ? 'available'
-                        : 'unknown',
+            : plugin.status?.startsWith('Registered')
+              ? 'registered'
+              : plugin.status === 'Available (Installed)'
+                ? 'available'
+                : 'unknown',
         name: plugin.name,
-        origin:
-          plugin.cmCollection && plugin.cmPluginId
-            ? `${plugin.cmCollection}/${plugin.cmPluginId}`
-            : 'n/a',
+        origin: 'n/a',
       };
     });
 
     const columns = [
       { key: 'status', header: 'Status' },
       { key: 'name', header: 'Name/Invoke Key' },
-      { key: 'origin', header: 'CM Origin' },
+      { key: 'origin', header: 'Origin' },
     ];
 
     const tableFormatter = require(tableFormatterPath);

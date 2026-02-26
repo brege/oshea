@@ -1,10 +1,8 @@
-# oshea - Markdown to PDF Converter
+# oshea
 
 A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs.
 
 It features a powerful, extensible plugin system, making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports. Built on [markdown-it](https://github.com/markdown-it/markdown-it) for Markdown parsing and [puppeteer](https://pptr.dev/) for PDF generation.
-
----
 
 > [!TIP]
 > The rise of AI tooling has brought enormous growth to universal Markdown usage. **oshea** is ideal for anyone who writes in Markdown but needs polished, professional, reproducible output for resumes, reports, presentations, and more.
@@ -159,8 +157,6 @@ See the [Plugins Index](plugins/README.md) for more information. There is also a
 This project has a rich testing framework based on its [`.mocharc.js`](.mocharc.js). In addition to the in-situ tests bundled with each plugin, there are over 300 tests, ranging from unit, integration, end-to-end, and lifecycle tests, in a declarative, manifest-driven harness and factory mocking system.
 
 See the [Test Index](test/README.md) for all test suite documentation.
-
----
 
 ## License
 

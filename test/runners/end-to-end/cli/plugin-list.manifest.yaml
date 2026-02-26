@@ -22,15 +22,15 @@ scenarios:
     args: plugin list --disabled
     expect:
       contains_any:
-        - Disabled (but available) CM-managed plugins
-        - No disabled (but available) CM-managed plugins found.
+        - Disabled installed plugins
+        - No disabled installed plugins found.
   - description: should list all available plugins
     test_id: 3.4.4
     args: plugin list --available
     expect:
       contains_any:
-        - Available CM-managed plugins
-        - No CM-managed plugins found
+        - Installed plugins (enabled and disabled)
+        - No installed plugins found.
   - description: should list all plugins in a condensed table format
     test_id: 3.4.5
     args: plugin list --short
@@ -45,7 +45,7 @@ scenarios:
     visual_check: Clean empty state with consistent theming and helpful messaging
   - description: should gracefully handle missing collection root on plugin list
     test_id: 3.4.7
-    args: plugin list --coll-root /tmp/nonexistent
+    args: plugin list --plugins-root /tmp/nonexistent
     expect:
       executes: true
-    visual_check: Graceful handling of missing collection root with clear messaging
+    visual_check: Graceful handling of missing plugin root with clear messaging

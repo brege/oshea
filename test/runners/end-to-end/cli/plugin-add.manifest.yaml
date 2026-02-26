@@ -16,9 +16,9 @@ scenarios:
       contains: created successfully
   - description: should successfully add (and enable) a singleton plugin from a local path
     test_id: 3.6.1.2
-    args: plugin add {{tmpdir}}/my-local-plugin-src --bypass-validation
+    args: plugin add {{tmpdir}}/my-local-plugin-src
     expect:
       executes: true
       contains_all:
         - Successfully processed 'plugin add'
-        - Attempting to add and enable plugin from local path
+        - oshea plugin: Attempting to add and enable plugin

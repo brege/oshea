@@ -49,8 +49,10 @@ function makeConfigResolverScenario({
           expectations.primaryMainConfigPathActual,
         );
       }
-      if ('resolvedCollRoot' in expectations) {
-        expect(result.resolvedCollRoot).to.equal(expectations.resolvedCollRoot);
+      if ('resolvedPluginsRoot' in expectations) {
+        expect(result.resolvedPluginsRoot).to.equal(
+          expectations.resolvedPluginsRoot,
+        );
       }
       if ('pluginConfigLoaderCalled' in expectations) {
         expect(mockDependencies.PluginConfigLoader.calledOnce).to.equal(

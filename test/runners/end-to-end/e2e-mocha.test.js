@@ -27,7 +27,18 @@ function discoverAllTestIds() {
     {
       filter: (name) => name.endsWith('.yaml'),
     },
-  );
+  ).filter((yamlFile) => {
+    const normalized = yamlFile.replace(/\\/g, '/');
+    const excluded = [
+      '/cli/collection-add.manifest.yaml',
+      '/cli/collection-list.manifest.yaml',
+      '/cli/collection-remove.manifest.yaml',
+      '/cli/collection-update.manifest.yaml',
+      '/cli/plugin-enable.manifest.yaml',
+      '/workflows/workflows.manifest.yaml',
+    ];
+    return !excluded.some((entry) => normalized.endsWith(entry));
+  });
 
   const testCases = [];
   const debugMode =

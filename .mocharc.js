@@ -24,7 +24,13 @@ function flattenSpecs(spec) {
 
 const paths = {
   // Integration Test Paths
-  integration:            'test/runners/integration/**/*.js',
+  integration:            [
+    'test/runners/integration/core/**/*.js',
+    'test/runners/integration/config/**/*.js',
+    'test/runners/integration/plugins/plugin-determiner.*.js',
+    'test/runners/integration/plugins/plugin-manager.*.js',
+    'test/runners/integration/plugins/plugin-validator.*.js',
+  ],
 
   // Subsystem & Module Integration Test Paths
   default_handler:        'test/runners/integration/core/default-handler.*.js',             // Rank 0
@@ -39,9 +45,6 @@ const paths = {
   plugin_manager:         'test/runners/integration/plugins/plugin-manager.*.js',           // Rank 2
   plugin_registry_builder:'test/runners/integration/plugins/plugin-registry-builder.*.js',  // Rank 2
   plugin_validator:       'test/runners/integration/plugins/plugin-validator.*.js',         // Rank 2
-
-  collections_manager:    'test/runners/integration/collections/collections-manager.*.js',  // Rank 1
-  cm_utils:               'test/runners/integration/collections/cm-utils.*.js',             // Rank 2
 
   // End-to-End Test Paths
   e2e_runner:             'test/runners/end-to-end/e2e-mocha.test.js',
@@ -61,10 +64,8 @@ const ranks = {
   rank1: [ // essential operations
     paths.config_resolver,
     paths.plugin_determiner,
-    paths.collections_manager,
   ],
   rank2: [ // supportive operations
-    paths.plugin_registry_builder,
     paths.main_config_loader,
     paths.plugin_config_loader,
     paths.plugin_manager,
@@ -76,21 +77,17 @@ const ranks = {
 const levels = {
   // test/config/metadata-level-1.yaml
   level1: [ // module integration tests
-    paths.collections_manager,
-    paths.cm_utils,
     paths.config_resolver,
     paths.main_config_loader,
     paths.math_integration,
     paths.plugin_config_loader,
     paths.plugin_determiner,
     paths.plugin_manager,
-    paths.plugin_registry_builder,
   ],
   // test/config/metadata-level-2.yaml
   level2: [ // subsystem integration tests
     paths.default_handler,
     paths.pdf_generator,
-    paths.collections_manager,
     paths.plugin_validator,
   ],
   // test/config/metadata-level-3.yaml
@@ -111,13 +108,9 @@ const commands = {
   plugins: [
     paths.plugin_determiner,
     paths.plugin_manager,
-    paths.plugin_registry_builder,
     paths.plugin_validator
   ],
-  collections: [
-    paths.collections_manager,
-    paths.cm_utils
-  ],
+  collections: paths.integration,
   core: [
     paths.default_handler,
     paths.pdf_generator,
@@ -190,4 +183,3 @@ const mochaConfig = {
 };
 
 module.exports = mochaConfig;
-

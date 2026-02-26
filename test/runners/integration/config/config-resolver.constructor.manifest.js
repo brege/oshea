@@ -12,7 +12,7 @@ module.exports = [
     mainConfigStubs: {
       getPrimaryMainConfig: {
         config: {
-          collections_root: '/fake/collections/root',
+          plugins_root: '/fake/plugins/root',
           some_other_key: 'value',
         },
         path: '/fake/path/to/main-config.yaml',
@@ -24,11 +24,11 @@ module.exports = [
     expectations: {
       getPrimaryMainConfigCalled: true,
       primaryMainConfig: {
-        collections_root: '/fake/collections/root',
+        plugins_root: '/fake/plugins/root',
         some_other_key: 'value',
       },
       primaryMainConfigPathActual: '/fake/path/to/main-config.yaml',
-      resolvedCollRoot: '/fake/collections/root',
+      resolvedPluginsRoot: '/fake/plugins/root',
       pluginConfigLoaderCalled: true,
       pluginRegistryBuilderCalled: true,
     },

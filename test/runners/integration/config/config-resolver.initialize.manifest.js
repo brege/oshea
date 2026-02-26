@@ -6,7 +6,7 @@ const { makeConfigResolverScenario } = require(configResolverFactoryPath);
 
 const mainConfigStubs = {
   getPrimaryMainConfig: {
-    config: { collections_root: '/fake/collections/root' },
+    config: { plugins_root: '/fake/plugins/root' },
     path: '/fake/path/to/main-config.yaml',
     reason: 'test',
   },

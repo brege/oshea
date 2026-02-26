@@ -1,196 +1,32 @@
+'# Level 4 - Test Metadata Registry': null
+'# Advanced workflow and lifecycle metadata': null
 metadata:
   level: 4
   scope: Advanced End-to-End scenarios
+  type: Workflow and Demo Tests
   description: >-
-    Advanced end-to-end scenarios testing complex multi-command workflows,
-    stateful operations, watch mode functionality, and comprehensive error
-    handling across the entire application
+    Multi-step workflows that exercise command composition across conversion and
+    plugin systems.
+  runner: test/runners/end-to-end/e2e-mocha.test.js
+  notes:
+    - `workflows/workflows.manifest.yaml` is currently excluded from active e2e execution.
+    - Active Level 4 coverage is driven by batch conversion demo workflows.
 tests:
-  4.1.1:
-    description: >
-      A user can successfully perform the entire lifecycle of adding a plugin
-      collection, enabling a plugin from it, using that plugin to convert a
-      document, disabling the plugin, and finally removing the collection. This
-      verifies the integrity of the collections manager state across multiple
-      commands.
+  4.2:
+    description: >-
+      Batch conversion demo scenarios for Hugo recipe documents, including
+      front-matter naming and custom filename generation paths.
     commands:
-      - collection add
-      - collection enable
       - convert
-      - collection disable
-      - collection remove
-    runner: test/runners/e2e/workflow-lifecycle.test.js
-    manifest: test/runners/e2e/workflow-lifecycle.test.js
-    reference: docs/walkthroughs/full-lifecycle.md
+    manifest: test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml
+    test_ids:
+      - 4.2.1
+      - 4.2.2
     mocha_groups:
-      - level4
+      - workflows
       - e2e
       - all
     app_files:
-      - src/collections/
-      - src/plugins/plugin-manager.js
-  4.1.2:
-    description: >
-      A user can successfully archetype a plugin from a managed collection, add
-      it back as a new managed plugin, and use it for a conversion.
-    commands:
-      - collection add
-      - plugin create --from
-      - convert
-    runner: test/runners/e2e/workflow-lifecycle.test.js
-    manifest: test/runners/e2e/workflow-lifecycle.test.js
-    reference: docs/walkthroughs/archetyping-a-plugin.md
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/collections/
-      - src/plugins/
-  4.1.3:
-    description: >
-      A user can create a custom plugin (e.g., notecard-deck), add it to the
-      system, generate a PDF from multiple Markdown files, and reformat the
-      output for another device (e.g., mobile) by updating the plugin's
-      configuration.
-    commands:
-      - plugin create
-      - convert
-    runner: null
-    manifest: null
-    reference: docs/walkthroughs/generate-mobile-study-cards.md
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/plugins/
-      - src/core/
-  4.1.4:
-    description: >
-      A user can update an existing local plugin, sync the changes to the
-      managed collection, and verify that subsequent conversions use the updated
-      plugin code and styles.
-    commands:
-      - plugin update
-      - convert
-    runner: null
-    manifest: null
-    reference: docs/walkthroughs/updating-plugins.md
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/plugins/
-  4.2.1:
-    description: >
-      (Happy Path) The `--watch` flag successfully triggers an initial
-      conversion, and upon modification of the source Markdown file,
-      automatically triggers a re-conversion.
-    commands:
-      - convert --watch
-    runner: null
-    manifest: null
-    reference: null
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/cli/commands/convert.js
-      - src/core/watch-handler.js
-  4.2.2:
-    description: >
-      (Dependency Change) When a file that a plugin depends on (e.g., a CSS file
-      or a data source listed in `watch_sources`) is modified, the `--watch`
-      mode successfully triggers a re-conversion.
-    commands:
-      - convert --watch
-    runner: null
-    manifest: null
-    reference: null
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/cli/commands/convert.js
-      - src/core/watch-handler.js
-  4.3.1:
-    description: >
-      The `collection update` command correctly fails with a non-zero exit code
-      and an informative error message when attempting to update a Git-based
-      collection that has local, uncommitted changes.
-    commands:
-      - collection update
-    runner: test/runners/e2e/all-e2e.test.js
-    manifest: test/runners/e2e/sad-paths.manifest.js
-    reference: null
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/collections/
-    deprecated: true
-    notes: >-
-      This test validated git working directory state handling during collection
-      updates. While technically correct, it tests git behavior rather than user
-      workflow patterns. Such validation belongs in the existing comprehensive
-      smoke test suite, not in workflow demonstrations. Users benefit more from
-      learning successful update patterns than observing git error conditions
-      they should avoid through proper workflow habits.
-
-  4.3.2:
-    description: >
-      The `plugin create --from <source>` command fails gracefully with a
-      non-zero exit code when the `<source>` path points to a directory that is
-      not a valid plugin (e.g., is missing a `*.config.yaml` or `index.js`).
-    commands:
-      - plugin create --from
-    runner: test/runners/e2e/all-e2e.test.js
-    manifest: test/runners/e2e/sad-paths.manifest.js
-    reference: null
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/cli/commands/plugin/create.command.js
-    deprecated: true
-    notes: >-
-      This test validated error handling when creating plugins from nonexistent
-      sources. However, it tests input validation logic rather than
-      demonstrating useful workflow patterns. Modern users benefit more from
-      seeing successful plugin creation workflows with proper source selection
-      than edge case error scenarios. Input validation is thoroughly covered by
-      the existing smoke test infrastructure.
-
-  4.1.5:
-    description: >
-      A user can successfully perform the complete unified plugin architecture
-      workflow including adding collections, creating plugins from multiple
-      sources, adding external plugins, managing plugin states (enable/disable),
-      and using plugins for document conversion. This verifies the integrity of
-      the new unified user-plugins structure and separation from collections.
-    commands:
-      - collection add
-      - plugin create --from
-      - plugin add
-      - plugin enable
-      - plugin disable
-      - plugin list
-      - convert
-      - collection update
-    runner: test/runners/e2e/unified-plugin-workflow.test.js
-    manifest: test/runners/e2e/unified-plugin-workflow.test.js
-    reference: null
-    mocha_groups:
-      - level4
-      - e2e
-      - all
-    app_files:
-      - src/collections/
-      - src/plugins/
-      - src/cli/commands/plugin/
+      - src/cli/convert.command.js
+      - src/core/default-handler.js
+      - src/config/config-resolver.js

@@ -43,7 +43,6 @@ const paths = {
 
   plugin_determiner:      'test/runners/integration/plugins/plugin-determiner.*.js',        // Rank 1
   plugin_manager:         'test/runners/integration/plugins/plugin-manager.*.js',           // Rank 2
-  plugin_registry_builder:'test/runners/integration/plugins/plugin-registry-builder.*.js',  // Rank 2
   plugin_validator:       'test/runners/integration/plugins/plugin-validator.*.js',         // Rank 2
 
   // End-to-End Test Paths

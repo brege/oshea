@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-26T06:57:12.241Z
+// Generated: 2026-02-26T09:02:49.117Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -135,25 +135,12 @@ const pluginDeterminerTestPath = path.join(projectRoot, 'test/runners/integratio
 const pluginManagerFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.factory.js');
 const pluginManagerManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.manifest.js');
 const pluginManagerTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.test.js');
-const pluginRegistryBuilderBuildRegistryManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.build-registry.manifest.js');
-const pluginRegistryBuilderCmManifestsManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js');
-const pluginRegistryBuilderConstructorManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.constructor.manifest.js');
-const pluginRegistryBuilderFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.factory.js');
-const pluginRegistryBuilderGetAllPluginDetailsManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js');
-const pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js');
-const pluginRegistryBuilderResolveAliasManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js');
-const pluginRegistryBuilderResolvePluginConfigPathManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js');
-const pluginRegistryBuilderTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.test.js');
 const pluginValidatorFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-validator.factory.js');
 const pluginValidatorManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-validator.manifest.js');
 const pluginValidatorTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-validator.test.js');
 
 // End-to-End CLI Tests
 const e2eCliTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/cli/');
-const collectionAddManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-add.manifest.yaml');
-const collectionListManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-list.manifest.yaml');
-const collectionRemoveManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-remove.manifest.yaml');
-const collectionUpdateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-update.manifest.yaml');
 const configManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/config.manifest.yaml');
 const convertManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/convert.manifest.yaml');
 const generateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/generate.manifest.yaml');
@@ -185,7 +172,6 @@ const v1Path = path.join(projectRoot, 'src/validators/v1.js');
 // End-to-End Workflow Tests
 const e2eWorkflowTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/workflows/');
 const demoHugoBatchConvertManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml');
-const workflowsManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/workflows/workflows.manifest.yaml');
 
 // End-to-End Bundled Plugin Tests
 const e2eValidatorTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/validators/');
@@ -333,23 +319,10 @@ module.exports = {
   pluginManagerFactoryPath,
   pluginManagerManifestPath,
   pluginManagerTestPath,
-  pluginRegistryBuilderBuildRegistryManifestPath,
-  pluginRegistryBuilderCmManifestsManifestPath,
-  pluginRegistryBuilderConstructorManifestPath,
-  pluginRegistryBuilderFactoryPath,
-  pluginRegistryBuilderGetAllPluginDetailsManifestPath,
-  pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath,
-  pluginRegistryBuilderResolveAliasManifestPath,
-  pluginRegistryBuilderResolvePluginConfigPathManifestPath,
-  pluginRegistryBuilderTestPath,
   pluginValidatorFactoryPath,
   pluginValidatorManifestPath,
   pluginValidatorTestPath,
   e2eCliTestsRoot,
-  collectionAddManifestYamlPath,
-  collectionListManifestYamlPath,
-  collectionRemoveManifestYamlPath,
-  collectionUpdateManifestYamlPath,
   configManifestYamlPath,
   convertManifestYamlPath,
   generateManifestYamlPath,
@@ -375,7 +348,6 @@ module.exports = {
   v1Path,
   e2eWorkflowTestsRoot,
   demoHugoBatchConvertManifestYamlPath,
-  workflowsManifestYamlPath,
   e2eValidatorTestsRoot,
   bundledPluginsManifestYamlPath,
   e2eRunnersRoot,

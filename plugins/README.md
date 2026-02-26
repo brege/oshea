@@ -1,6 +1,6 @@
 # Bundled Plugins
 
-These are the bundled plugins that come with **oshea**. This may be used as a quick **reference example** for how external plugins can be structured and documented.
+These are the bundled plugins that come with **oshea**. This can be used as a quick **reference example** for how external plugins can be structured and documented.
 
 These plugins provide out-of-the-box functionality for various document types, demonstrating the power and flexibility of the **oshea** plugin system.
 
@@ -72,7 +72,7 @@ See [Cheat Sheet](../docs/refs/cheat-sheet.md) for a comprehensive list of all *
 
 ### Customizing Bundled Plugins
 
-You can change the styles (CSS) and PDF settings (page size, margins, etc.) of any plugins without altering original files. This is done using oshea's flexible configuration system.
+You can change the styles (CSS) and PDF settings (page size, margins, etc.) of any plugins without altering the original files. This is done using oshea's flexible configuration system.
 
 See the [Plugin Development Guide](../docs/guides/plugin-development.md) for more information.
 

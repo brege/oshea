@@ -2,7 +2,7 @@
 
 Examples of Claude skills to build plugins for oshea. See [create-oshea-plugin/SKILL.md](../../.claude/skills/create-oshea-plugin/SKILL.md) for more information.
 
-This also applies for Codex CLI. The repo contains a symlink for Codex CLI.
+This also applies to Codex CLI. The repo contains a symlink for Codex CLI.
 ```
 .agents/skills/create-oshea-plugin -> .claude/skills/create-oshea-plugin
 ```
@@ -43,7 +43,7 @@ output pdf:     /tmp/oshea-output/thank-you-card.pdf
 
 ## 2) Study Cards
 
-Building a plugins from a prompt alone. The agent did not use [`docs/walkthroughs/generate-mobile-study-cards.md`](../walkthroughs/generate-mobile-study-cards.md).
+Building a plugin from a prompt alone. The agent did not use [`docs/walkthroughs/generate-mobile-study-cards.md`](../walkthroughs/generate-mobile-study-cards.md).
 
 ### Prompt
 

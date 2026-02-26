@@ -1,17 +1,23 @@
-# Test Harness and QA Analytics
+# Testing & QA
 
 This directory contains the testing and Quality Assurance infrastructure for **oshea**, including test execution, analytics, and intelligent monitoring systems. Test scenarios are defined in YAML manifests `*.manifest.yaml`, while the test runner dynamically instantiates test cases from manifests, applying stubs, mocks, and asserts.
 
-## Testing Levels & Coverage Strategy
+## Depth and Coverage
 
-Tests are organized by increasing scope and integration complexity:
+Specifications are defined in structured YAML metadata where tests are organized by increasing scope and integration complexity.
 
-- **Level 1**: Module integration scenarios  
-- **Level 2**: Subsystem integration scenarios
-- **Level 3**: End-to-end CLI scenarios
-- **Level 4**: Full lifecycle workflows
+* [Level 1 Tests](config/metadata-level-1.yaml): Module integration scenarios
+* [Level 2 Tests](config/metadata-level-2.yaml): Subsystem integration scenarios  
+* [Level 3 Tests](config/metadata-level-3.yaml): End-to-End CLI scenarios
+* [Level 4 Tests](config/metadata-level-4.yaml): End-to-End lifecycle scenarios
 
-Traditional unit tests are intentionally minimal. CLI applications derive more value from integration-level testing, as meaningful behavior occurs at module boundaries, file system operations, and cross-system coordination rather than isolated function calls.
+CLI applications derive more value from integration-level testing, as meaningful behavior occurs at module boundaries, file system operations, and cross-system coordination rather than isolated function calls.
+
+Together with [`.mocharc.js`](../.mocharc.js), these manifests provide a strategic mechanism of the CI: 
+- Test levels, ranks, and groups
+- Source file mappings
+- Command specifications
+- Documentation references
 
 ## Testing Framework
 
@@ -49,7 +55,7 @@ Tests can be executed in a variety of ways to target specific groups, levels, or
        # --debug  # Show intermediate steps
   ```
 
-## QA Analytics and Intelligence
+## QA and Telemetry
 
 The analytics system provides intelligent insights into test performance, brittleness, and historical patterns to optimize development workflows.
 
@@ -77,34 +83,12 @@ Test analytics data is stored in `~/.local/share/oshea/test-analytics/test-resul
 - temporal tracking (first seen, last run)
 - performance metrics (duration, error patterns)
 
-### Test Metadata
-
-The `config/metadata-level-*.yaml` files provide static test classification including:
-- Test levels, ranks, and groups
-- Source file mappings
-- Command specifications
-- Documentation references
-
-## Testing & Quality Assurance
-
-### Strategy & Process
-
-* [Test Generation Priority Order](archive/docs/test-generation-priority-order.md)
-* [Next-Generation Testing Framework](../docs/archive/v0.11/next-generation-testing.md) toward a YAML manifest system
-
-### Test Metadata Registry
-
-Specifications are defined in structured YAML metadata.
-
-* [Level 1 Tests](config/metadata-level-1.yaml): Module integration scenarios
-* [Level 2 Tests](config/metadata-level-2.yaml): Subsystem integration scenarios  
-* [Level 3 Tests](config/metadata-level-3.yaml): End-to-End CLI scenarios
-* [Level 4 Tests](config/metadata-level-4.yaml): End-to-End lifecycle scenarios
-
-### Historical Documentation
+## Historical
 
 All formation-era test documentation and deprecated tools are preserved in the archive.
 
 * [Archive Index](archive/README.md): Complete historical documentation
 * [Legacy QA Tools](archive/scripts/): Deprecated analysis scripts  
 * [Original Checklists](archive/docs/): Markdown-based test checklists
+* [Test Generation Priority Order](archive/docs/test-generation-priority-order.md)
+* [Next-Generation Testing Framework](../docs/archive/v0.11/next-generation-testing.md) toward a YAML manifest system

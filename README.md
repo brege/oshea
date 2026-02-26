@@ -1,16 +1,15 @@
 # oshea - Markdown to PDF Converter
 
-A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs. It features a powerful, extensible plugin system making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports.
+A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs.
 
-Built on [markdown-it](https://github.com/markdown-it/markdown-it) for Markdown parsing and
-[puppeteer](https://pptr.dev/) for PDF generation.
+It features a powerful, extensible plugin system, making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports. Built on [markdown-it](https://github.com/markdown-it/markdown-it) for Markdown parsing and [puppeteer](https://pptr.dev/) for PDF generation.
 
 ---
 
-> [!NOTE]
+> [!TIP]
 > The rise of AI tooling has brought enormous growth to universal Markdown usage. **oshea** is ideal for anyone who writes in Markdown but needs polished, professional, reproducible output for resumes, reports, presentations, and more.
 > 
-> See [Creating Plugins with Claude Skills](#creating-plugins-with-claude-skills) for Claude and Codex.
+> See [Creating Plugins with Claude Skills](#creating-plugins-with-claude-skills) for building plugins with Claude or Codex.
 
 
 ## Quick Start
@@ -52,11 +51,11 @@ oshea my-letter.md --plugin cover-letter
       <img src="docs/images/screenshots/advanced-business-card.png" width="300">
       <br><strong>Business Card</strong></a>
     </td>
-    <td><a href="https://github.com/brege/oshea-plugins/tree/main/restaurant-menu">
+    <td><a href="https://github.com/brege/restaurant-menu">
       <img src="docs/images/screenshots/restaurant-menu.png" width="300">
       <br><strong>Restaurant Menu</strong></a>
     </td>
-    <td><a href="https://github.com/brege/oshea-plugins/tree/main/d3-histogram-slide">
+    <td><a href="https://github.com/brege/d3-histogram-slide">
       <img src="docs/images/screenshots/d3-histogram-slide.png" width="300">
       <br><strong>D3.js Slide</strong></a>
     </td>
@@ -120,15 +119,15 @@ Plugins are portable and can be shared across projects. See [Bundled Plugins](pl
 
 ### Creating Plugins with Claude and Codex Skills
 
-Use the skill-first workflow documented in the [**Claude Skills Guide**](docs/guides/claude-skills.md). The technical contract that agents compose from in [Plugin Contract](docs/refs/plugin-contract.md), [AI Interaction Specification](docs/refs/interaction-spec.md), [Archetyping Walkthrough](docs/walkthroughs/archetyping-a-plugin.md).
+Use the skill-first workflow documented in the [**Claude Skills Guide**](docs/guides/claude-skills.md). The technical contract that agents compose plugins from is in: [Plugin Contract](docs/refs/plugin-contract.md), [AI Interaction Specification](docs/refs/interaction-spec.md), and [Archetyping Walkthrough](docs/walkthroughs/archetyping-a-plugin.md).
 
-Iterate with your agent on the plugin until you find your document satisfactory! As of February 2026, this process takes about 5 minutes.
+Iterate with your agent on the plugin until your document is satisfactory. As of February 2026, this process takes about 5 minutes.
 
 ## Usage & Commands
 
 ### Cheat Sheet
 
-See [docs/refs/cheat-sheet.md](docs/refs/cheat-sheet.md).
+See [Cheat Sheet](docs/refs/cheat-sheet.md) for many, many examples.
 
 ### Tab-completion
 ```bash
@@ -136,27 +135,30 @@ echo 'source <(oshea completion)' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### Plugin Commands
+### Managing Plugins
 ```bash
 oshea plugin help cv              # plugin-specific help
 oshea plugin list                 # list all plugins (add --short for brief)
 oshea plugin validate my-plugin   # validate plugin structure and tests
 ```
 
-### Plugin Install/Runtime Commands
+### Installing Plugins
+Install a local plugin
 ```bash
-oshea plugin add ./my-plugin                         # install + enable local plugin
-oshea plugin add https://github.com/user/my-plugin   # install + enable from git
-oshea plugin enable my-plugin                        # enable plugin
-oshea plugin disable my-plugin                       # disable plugin
-oshea plugin remove my-plugin                        # remove installed plugin
+oshea plugin add ./my-plugin
 ```
+Install a plugin from GitHub
+```bash
+oshea plugin add https://github.com/user/my-plugin
+```
+
+See the [Plugins Index](plugins/README.md) for more information. There is also an index of known external plugins at [github.com/brege/oshea-plugins](https://github.com/brege/oshea-plugins).
 
 ## Testing
 
 This project has a rich testing framework based on its [`.mocharc.js`](.mocharc.js). In addition to the in-situ tests bundled with each plugin, there are over 300 tests, ranging from unit, integration, end-to-end, and lifecycle tests, in a declarative, manifest-driven harness and factory mocking system.
 
-The best place to start is the [Test Index](test/README.md).
+See the [Test Index](test/README.md) for all test suite documentation.
 
 ---
 

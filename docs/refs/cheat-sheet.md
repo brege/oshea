@@ -1,4 +1,4 @@
-# oshea Cheat Sheet
+# Cheat Sheet
 
 Quick examples and syntax for **oshea** commands and configurations.
 
@@ -42,7 +42,7 @@ oshea convert plugins/recipe/recipe-example.md --plugin recipe --watch
 
 **Create a new plugin** from the default template:
 ```bash
-oshea plugin create my-new-plugin --target-dir ./my-plugins
+oshea plugin create my-new-plugin --outdir ./my-plugins
 ```
 **Create a plugin from an existing one** (archetyping):
 ```bash
@@ -52,7 +52,7 @@ oshea plugin create my-custom-cv --from cv
 ```bash
 oshea plugin validate plugins/cv # [ my-plugins/my-custom-cv ]
 ```
-or, since bundled's are registered:
+or, since bundled plugins are registered:
 ```bash
 oshea plugin validate cv # [ my-custom-cv ]
 ```
@@ -107,14 +107,14 @@ pdf_viewer: xdg-open # Linux
 **Define Global `params`:**
 ```yaml
 params:
-author: "Your Name"
+  author: "Your Name"
 ```
 **Override Plugin Settings:**
 ```yaml
 cv:
-pdf_options:
-  format: "A5"
-css_files: ["./styles/custom-cv.css"]
+  pdf_options:
+    format: "A5"
+  css_files: ["./styles/custom-cv.css"]
 ```
 
 ## Markdown & Front Matter Essentials

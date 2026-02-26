@@ -1,4 +1,4 @@
-## Logger System Reference Documentation
+## Logger System Reference
 
 ### Architecture
 
@@ -36,9 +36,9 @@ logger(message, options) → formatter → console/file output
 
 ### Others
 
-- [`asset-resolver.js`](asset-resolver.js) for loading CSS properties, like Katex styles
-- [`file-helpers.js`](file-helpers.js) ] makes it easier  for scripts to point and shoot at files or directories 
-- [`logger-surfacer.js`](logger-surfacer.js) surfaces console outputters
+- [`asset-resolver.js`](asset-resolver.js) for loading CSS properties, like KaTeX styles
+- [`file-helpers.js`](file-helpers.js) makes it easier for scripts to point and shoot at files or directories
+- [`logger-surfacer.js`](logger-surfacer.js) surfaces console output
 
 
 ### Canonical Usage

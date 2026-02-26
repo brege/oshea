@@ -1,6 +1,6 @@
 # Plugin Development Guide
 
-This guide explains the basics of creating, configuring, and managing plugins for **oshea**. 
+This guide explains the basics of creating, configuring, and managing plugins for **oshea**.
 Plugins are the core of the tool's extensibility, allowing you to define custom processing, styling, and PDF generation options for any type of Markdown document.
 
 ---
@@ -13,7 +13,7 @@ The easiest and most reliable way to start a new plugin is with the built-in `pl
 
 ```bash
 oshea plugin create <new-plugin-name> \
-        [ --output-dir <path> ] \
+        [ --outdir <path> ] \
         [ --from <source-plugin> ] \
         [ --force ]
 ```
@@ -21,17 +21,17 @@ oshea plugin create <new-plugin-name> \
 **`plugin create`**
 
 - **`<new-plugin-name>`**: The name for your new plugin (e.g., `technical-report`).
-- `--output-dir <path>` (Optional): The directory where the new plugin folder will be created. Defaults to `./`.
+- `--outdir <path>` (Optional): The directory where the new plugin folder will be created. Defaults to a local `my-plugins` directory in your project.
 - `--from <source>` (Optional): Use an existing plugin as a template. The source can be a registered plugin name (e.g., `cv`) or a path to a plugin directory.
 - `--force` (Optional): Overwrite the target directory if it already exists.
 
-This command creates a fully functional plugin with a standard structure, including a `.contract/` directory for in-situ testing, and a machine-readable schema file which helps ensure forward compatibility.
+This command creates a fully functional plugin with a standard structure, including a `.contract/` directory for in-situ testing and a machine-readable schema file, which helps ensure forward compatibility.
 
-**Example** \ 
+**Example**
 To create a plugin based on the `cv` plugin, run the following command:
 
 ```bash
-oshea plugin create my-plugin --from cv --target-dir ./my-plugins
+oshea plugin create my-plugin --from cv --outdir ./my-plugins
 ```
 
 ---
@@ -116,7 +116,7 @@ oshea plugin add ./my-plugins/business-card
 
 Having registered your plugin, you can now convert a document using your plugin by name. The `plugin enable` command (which `plugin add` uses internally) automatically runs the validator, ensuring that only safe and valid plugins are activated.
 ```bash
-oshea document.md --plugin business-card
+oshea convert document.md --plugin business-card
 ```
 
 In local development, the tight loop is `plugin validate` plus `plugin remove`/`plugin add` when you want to refresh the installed copy.

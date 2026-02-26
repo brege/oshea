@@ -6,4 +6,5 @@ node_modules/
 
 # user data
 config.yaml
+.env
 

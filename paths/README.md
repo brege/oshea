@@ -1,6 +1,6 @@
 # Path Registry
 
-This directory contains the project's centralized pathing registry. 
+This directory contains the project's centralized path registry.
 
 This system eliminates brittle, relative `require()` paths in favor of a single, aliased source of truth (`@paths`), making the codebase more robust and easier to refactor.
 
@@ -13,7 +13,7 @@ This system eliminates brittle, relative `require()` paths in favor of a single,
 
 [index.js](index.js) is **automatically generated** from [paths-config.yaml](paths-config.yaml). Do not edit it directly. 
 
-To update it,
+To update it:
 1. Edit [paths-config.yaml](./paths-config.yaml)
 2. Run `node paths/generator.js -f`
 
@@ -35,7 +35,7 @@ const __dirname = ...;                                      // ✖ redeclaration
 ``` 
 
 ### Path Finder
-For any given file, use the Path Finder [`path-finder.js`](path-finder.js) to generate the above code on directories, files, or globs.
+For any given file, use the Path Finder [`path-finder.js`](path-finder.js) to generate the above code for directories, files, or globs.
 
 ### Command
 ```bash

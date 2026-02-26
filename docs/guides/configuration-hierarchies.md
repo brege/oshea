@@ -1,4 +1,4 @@
-# Configuration, Plugins, and Data Hierarchies
+# Configuration & Plugin Hierarchies
 
 **oshea** uses a layered system for settings, allowing for global defaults, user-specific preferences, and project-level configurations. This guide details how configurations are loaded, how plugin behavior is determined, and how settings and data are merged.
 
@@ -54,9 +54,9 @@ Once a plugin is chosen (e.g., `cv`), its settings are merged from multiple laye
 
 Placeholder data is merged from multiple sources with the same precedence as settings overrides, with **document front matter being the highest**.
 
-  - **Precedence** -- Front Matter . Local Config `params` . Project Config `params` . etc.
-  - **Merging** -- Objects are merged deeply. A `contact_info` object in front matter will be merged with, not replace, a `contact_info` object from a global config.
-  - **Syntax** -- `{{ .key }}` or `{{ .path.to.key }}`. The leading `.` refers to the root of the final merged data context.
+- **Precedence** -- Front Matter > Local Config `params` > Project Config `params` > etc.
+- **Merging** -- Objects are merged deeply. A `contact_info` object in front matter will be merged with, not replace, a `contact_info` object from a global config.
+- **Syntax** -- `{{ .key }}` or `{{ .path.to.key }}`. The leading `.` refers to the root of the final merged data context.
 
 ---
 
@@ -69,12 +69,12 @@ See the final, merged settings for any context:
 oshea config
 ```
 
-See the final, merged settings for the 'cv' plugin
+See the final, merged settings for the `cv` plugin:
 ```bash
 oshea config --plugin cv
 ```
 
-Get the raw YAML output for scripting
+Get the raw YAML output for scripting:
 ```bash
 oshea config --plugin cv --pure
 ```

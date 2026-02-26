@@ -6,8 +6,15 @@ set -e
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 PLUGINS_DIR="$REPO_ROOT/plugins"
 SCREENSHOTS_DIR="$REPO_ROOT/docs/images/screenshots"
-# The external plugins directory is a sibling to the project root
-PLUGIN_DIR_EXTERNAL="$REPO_ROOT/../extra/oshea-plugins"
+
+# Load environment overrides from repo root.
+if [ -f "$REPO_ROOT/.env" ]; then
+  set -a
+  . "$REPO_ROOT/.env"
+  set +a
+fi
+
+: "${PLUGIN_DIR_EXTERNAL:?PLUGIN_DIR_EXTERNAL must be set (e.g. in .env)}"
 
 # Change to the project root to ensure all paths are resolved correctly
 cd "$REPO_ROOT" || exit 1

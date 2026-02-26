@@ -41,7 +41,6 @@ Documentation is indexed by `README.md`'s throughout the repository. These offer
 - `src/core/` - PDF generation and markdown processing pipeline
 - `src/config/` - Hierarchical configuration system
 - `src/plugins/` - Plugin management (PluginManager, registry, archetyper)
-- `src/collections/` - Plugin collection management
 - `plugins/` - Built-in plugins (cv, cover-letter, recipe, etc.)
 
 **Testing**: Manifest-driven test harness with factory mocking. See `test/README.md` for details.

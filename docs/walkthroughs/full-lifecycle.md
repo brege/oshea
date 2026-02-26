@@ -1,12 +1,6 @@
 # Walkthrough: A Plugin's Full Lifecycle
 
-This guide demonstrates a complete, real-world workflow for managing plugins in **oshea**. You will add a plugin collection from a remote Git repository, enable a specific plugin, use it to convert a document, and then clean up by disabling the plugin and removing the collection.
-
-**Command.**
-```bash
-node test/runners/end-to-end/workflows/workflow-test-runner.js --show
-```
-This will run the whole process, showing output as it happens, leaving your user-data untouched.
+This guide demonstrates a complete, real-world workflow for managing plugins in **oshea**. You will add a plugin from a remote Git repository, enable it, use it to convert a document, and then clean up by disabling and removing it.
 
 ### Prerequisites
 
@@ -16,38 +10,37 @@ This will run the whole process, showing output as it happens, leaving your user
 
 ---
 
-### Step 1: Add a Plugin Collection
+### Step 1: Add a Plugin
 
-First, add a collection of plugins from a remote Git repository. This command clones the repository into your managed collections directory, making its plugins available to be enabled.
+First, add a single plugin from a remote Git repository.
 
 **Command:**
 
 ```bash
-oshea collection add https://github.com/brege/oshea-plugins.git --name lifecycle-collection
+oshea plugin add https://github.com/user/restaurant-menu-plugin
 ```
 
 **Explanation:**
 
-  * `collection add`: The command to add a new source of plugins.
-  * `https://github.com/brege/oshea-plugins.git`: The URL of the remote Git repository containing the plugins.
-  * `--name lifecycle-collection`: Assigns a local, memorable name to this collection.
+  * `plugin add`: Installs and enables a plugin from a local path or Git URL.
+  * `https://github.com/user/restaurant-menu-plugin`: A repository containing one oshea plugin.
 
 ---
 
 ### Step 2: Enable a Plugin
 
-Now that the collection is available, you can enable a specific plugin from it. We'll enable the `restaurant-menu` plugin.
+Now that the plugin is installed, ensure it is enabled.
 
 **Command:**
 
 ```bash
-oshea plugin enable lifecycle-collection/restaurant-menu
+oshea plugin enable restaurant-menu
 ```
 
 **Explanation:**
 
   * `plugin enable`: The command to activate a plugin.
-  * `lifecycle-collection/restaurant-menu`: The unique identifier for the plugin, in the format `<collection_name>/<plugin_id>`.
+  * `restaurant-menu`: The plugin invoke name.
 
 By default, the plugin's "invoke name" will be `restaurant-menu`.
 
@@ -87,22 +80,22 @@ oshea plugin disable restaurant-menu
 
   * `plugin disable`: The command to deactivate a plugin by its invoke name.
 
-The plugin is no longer active, but its source files still exist within the collection on your machine.
+The plugin is no longer active, but its files still exist in your managed plugin root.
 
 ---
 
-### Step 5: Remove the Collection
+### Step 5: Remove the Plugin
 
-Finally, to completely remove the plugin and all others from the `lifecycle-collection`, you can remove the entire collection.
+Finally, remove the installed plugin from your system.
 
 **Command:**
 
 ```bash
-oshea collection remove lifecycle-collection
+oshea plugin remove restaurant-menu
 ```
 
 **Explanation:**
 
-  * `collection remove`: The command to delete a collection and all its contents from your system.
+  * `plugin remove`: Deletes an installed user plugin.
 
-This completes the full lifecycle. You have successfully added a source of plugins, used one, and cleaned up your environment.
+This completes the full lifecycle. You installed a plugin, used it, and cleaned up your environment.

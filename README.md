@@ -143,11 +143,13 @@ oshea plugin list                 # list all plugins (add --short for brief)
 oshea plugin validate my-plugin   # validate plugin structure and tests
 ```
 
-### Collection Commands
+### Plugin Install/Runtime Commands
 ```bash
-oshea collection list                                          # list collections
-oshea collection add https://github.com/brege/oshea-plugins    # add remote collection
-oshea update                                                   # update plugins/collections
+oshea plugin add ./my-plugin                         # install + enable local plugin
+oshea plugin add https://github.com/user/my-plugin   # install + enable from git
+oshea plugin enable my-plugin                        # enable plugin
+oshea plugin disable my-plugin                       # disable plugin
+oshea plugin remove my-plugin                        # remove installed plugin
 ```
 
 ## Testing

@@ -1,6 +1,6 @@
 # Bundled Plugins
 
-These are the bundled plugins that come with **oshea**. This may be used as a quick **reference example** for how other external plugin collections can be structured and documented.
+These are the bundled plugins that come with **oshea**. This may be used as a quick **reference example** for how external plugins can be structured and documented.
 
 These plugins provide out-of-the-box functionality for various document types, demonstrating the power and flexibility of the **oshea** plugin system.
 
@@ -26,7 +26,7 @@ You can easily explore the bundled plugins and any other registered plugins dire
 oshea plugin list
 ```
 
-This command will show all plugins that **oshea** can find, including those from this bundled collection, any user-added collections, and individual plugins.
+This command will show all plugins that **oshea** can find, including bundled plugins and installed user plugins.
 
 ### Per-Plugin Help
 
@@ -97,25 +97,19 @@ oshea my-plugin-example.md
 
 ### Add a Plugin
 ```bash
-oshea plugin add my-better-letter
+oshea plugin add ./my-better-letter
+# or from git
+oshea plugin add https://github.com/user/my-better-letter
 ```
 
 ### Enable Plugins
 ```bash
-oshea plugin enable my-plugin-group/my-better-letter
-# or enable entire collections
-oshea collection enable my-plugin-group
+oshea plugin enable my-better-letter
 ```
 
-### Collections and Plugin Management
+### Disable or Remove Plugins
 
-The collections manager makes it easy to manage plugins and collections of plugins.
-
-### Add a Collection
 ```bash
-oshea collection add my-plugin-group
-# or add from GitHub
-oshea collection add https://github.com/brege/oshea-plugins
-# or add individual plugins
-oshea plugin add my-plugin-group/my-better-letter
+oshea plugin disable my-better-letter
+oshea plugin remove my-better-letter
 ```

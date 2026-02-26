@@ -229,12 +229,13 @@ watch_sources:
 
 ### Step 5: Sync and Re-Generate
 
-Sync the configuration change to your managed plugin.
+Reinstall the plugin so the managed copy picks up your local changes.
 
 **Command:**
 
 ```bash
-oshea collection update _user_added_plugins
+oshea plugin remove notecard-deck
+oshea plugin add ./notecard-deck
 ```
 
 Now, run the `generate` command again, but give the output a new name.

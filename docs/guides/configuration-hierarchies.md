@@ -10,7 +10,7 @@ The tool loads settings from multiple sources. Higher levels in this list take p
 
 ### Main `config.yaml` Locations
 
-**oshea** looks for a main `config.yaml` file to load global settings (like `pdf_viewer`) and register plugin collections. The **first file found** in the following order is used:
+**oshea** looks for a main `config.yaml` file to load global settings (like `pdf_viewer`). The **first file found** in the following order is used:
 
 1. **Project-Specific (`--config`)** \
    A path passed via the `--config <your-project-config.yaml>` CLI option. This is the most specific and has the highest precedence.
@@ -19,23 +19,6 @@ The tool loads settings from multiple sources. Higher levels in this list take p
 
 > **Factory Defaults Flag**
 > The `--factory-defaults` flag forces the tool to ignore all other configurations and use only the bundled defaults, which is useful for troubleshooting.
-
-### The `collections_root`: An Exclusive Context Switch
-
-While the main `config.yaml` provides a merging hierarchy for *settings*, the `collections_root` path provides an **exclusive context switch** for the *source* of plugins.
-
-You can set this path in any `config.yaml` under the `paths:` key:
-
-```yaml
-# config.yaml
-collections_root: ./my-company-plugins
-```
-
-When this is set, the application operates **exclusively** within that "universe" of plugins for the command's duration (this universe also contains the bundled default plugins). 
-
-This is a useful way for developers to manage distinct sets of plugins for different projects, completely separate from the default user-level collection located at `~/.local/share/oshea/collections/`.
-
----
 
 ## Plugin Resolution and Settings Overrides
 
@@ -46,7 +29,7 @@ When you run `oshea convert <file>`, the tool determines which plugin to use bas
 1. **`--plugin` CLI Option** \
    Directly specifies a plugin by name or path.
 2. **`oshea_plugin` Front Matter** \
-   A key in the Markdown file's YAML front matter.
+   A key in the Markdown file's YAML front matter. This is the primary self-activation path for documents and may be a registered plugin name or plugin config path.
 3. **Local `<filename>.config.yaml`** \
    An accompanying config file (e.g., `my-doc.config.yaml` for `my-doc.md`) with a `plugin:` key.
 4. **`default` Plugin** \
@@ -95,4 +78,3 @@ Get the raw YAML output for scripting
 ```bash
 oshea config --plugin cv --pure
 ```
-

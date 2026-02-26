@@ -64,37 +64,21 @@ As a companion to [`path-finder.js`](path-finder.js), use [dep-tree.js](dep-tree
 
 ### Command
 ```bash
-node paths/dep-tree.js src/cli/commands/collection.command.js --tree
+node paths/dep-tree.js src/cli/plugin.command.js --tree
 ```
 
 ### Output
 ```
-Tracing dependencies for: src/cli/commands/collection.command.js
+Tracing dependencies for: src/cli/plugin.command.js
 ============================================================
 
 Dependency Tree:
 ----------------------------------------
-└── src/cli/commands/collection.command.js (collectionCommandPath)
+└── src/cli/plugin.command.js (pluginCommandPath)
     ├── paths/index.js (pathsPath)
     │   ├── paths/scripts.js 
     │   └── paths/tests.js 
-    ├── src/cli/commands/collection/add.command.js (collectionsAddCommandPath)
-    │   ├── paths/index.js  (collapsed)
-    │   └── src/utils/logger.js (loggerPath)
-    │       ├── paths/index.js  (collapsed)
-    │       └── src/utils/formatters/index.js (formattersIndexPath)
-    │           ├── paths/index.js  (collapsed)
-    │           ├── src/utils/formatters/app.formatter.js (appFormatterPath)
-    │           ├── src/utils/formatters/inline.formatter.js (inlineFormatterPath)
-    │           ├── src/utils/formatters/raw.formatter.js (rawFormatterPath)
-    │           └── src/utils/formatters/paths.formatter.js (pathsFormatterPath)
-    ├── src/cli/commands/collection/list.command.js (collectionsListCommandPath)
-    │   ├── paths/index.js  (collapsed)
-    │   └── src/utils/logger.js  (collapsed)
-    ├── src/cli/commands/collection/remove.command.js (collectionsRemoveCommandPath)
-    │   ├── paths/index.js  (collapsed)
-    │   └── src/utils/logger.js  (collapsed)
-    └── src/cli/commands/collection/update.command.js (collectionsUpdateCommandPath)
+    └── src/cli/plugin/add.command.js (pluginAddCommandPath)
         ├── paths/index.js  (collapsed)
         └── src/utils/logger.js  (collapsed)
 ```

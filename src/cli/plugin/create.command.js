@@ -102,7 +102,7 @@ module.exports = {
 
       const dependencies = {
         chalk: null,
-        cmUtils: { toPascalCase },
+        pluginNameUtils: { toPascalCase },
         fs,
         fss,
         fsExtra,
@@ -110,15 +110,15 @@ module.exports = {
         matter,
         path,
         sourceMetadataFilename: '.source.yaml',
-        collectionsDefaultArchetypeDirname: 'plugins',
+        defaultArchetypeDirname: 'plugins',
       }; // Pass null for chalk
-      const managerContext = {
-        collRoot: path.dirname(args.manager.pluginsRoot),
+      const archetyperContext = {
+        pluginsHomeRoot: path.dirname(args.manager.pluginsRoot),
       };
 
       const result = await createArchetype(
         dependencies,
-        managerContext,
+        archetyperContext,
         sourceIdentifier,
         newPluginName,
         options,

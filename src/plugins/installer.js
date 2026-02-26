@@ -6,8 +6,7 @@ const fsPromises = require('node:fs').promises;
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const { spawn } = require('node:child_process');
-const { loggerPath } = require('@paths');
-const logger = require(loggerPath);
+const { projectRoot } = require('@paths');
 
 const MANIFEST_FILENAME = 'plugins.yaml';
 
@@ -46,6 +45,10 @@ class PluginInstaller {
     this.manifestPath = this.dependencies.path.join(
       this.pluginsRoot,
       MANIFEST_FILENAME,
+    );
+    this.bundledPluginsRoot = this.dependencies.path.join(
+      projectRoot,
+      'plugins',
     );
   }
 
@@ -152,11 +155,42 @@ class PluginInstaller {
       );
     }
 
+    const configPath = path.join(dir, configFile);
+    const raw = await fsPromises.readFile(configPath, 'utf8');
+    const config = this.dependencies.yaml.load(raw) || {};
+    const handlerScript = config.handler_script;
+
+    if (typeof handlerScript !== 'string' || handlerScript.trim() === '') {
+      throw new Error(
+        `Plugin config '${configPath}' must define a non-empty 'handler_script'.`,
+      );
+    }
+
+    const handlerPath = path.join(dir, handlerScript);
+    if (!this.dependencies.fs.existsSync(handlerPath)) {
+      throw new Error(
+        `Plugin handler '${handlerScript}' not found at '${handlerPath}'.`,
+      );
+    }
+
     return {
       pluginId,
       basePath: dir,
-      configPath: path.join(dir, configFile),
+      configPath,
     };
+  }
+
+  _isBundledPluginName(pluginName) {
+    const { fs, path } = this.dependencies;
+    const bundledPath = path.join(this.bundledPluginsRoot, pluginName);
+    if (!fs.existsSync(bundledPath)) {
+      return false;
+    }
+    try {
+      return fs.statSync(bundledPath).isDirectory();
+    } catch {
+      return false;
+    }
   }
 
   async _resolveSource(source) {
@@ -207,6 +241,11 @@ class PluginInstaller {
       if (!isValidPluginName(invokeName)) {
         throw new Error(
           `Invalid plugin name '${invokeName}'. Use alphanumeric and hyphens only.`,
+        );
+      }
+      if (this._isBundledPluginName(invokeName)) {
+        throw new Error(
+          `Plugin name '${invokeName}' conflicts with a bundled plugin name.`,
         );
       }
 

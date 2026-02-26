@@ -51,7 +51,7 @@ function createBaseYargs() {
       type: 'boolean',
       default: false,
     })
-    .option('coll-root', {
+    .option('plugins-root', {
       describe: 'overrides the managed plugins directory',
       type: 'string',
       normalize: true,
@@ -218,7 +218,7 @@ async function main() {
     );
     const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
     const pluginsRootFromMainConfig = primaryConfig.config.plugins_root || null;
-    const pluginsRootCliOverride = argv['coll-root'] || null;
+    const pluginsRootCliOverride = argv['plugins-root'] || null;
 
     installerInstance = new PluginInstaller({
       pluginsRootFromMainConfig: pluginsRootFromMainConfig,
@@ -247,7 +247,7 @@ async function main() {
     builder: (yargsCommand) => {
       yargsCommand
         .option('config', { type: 'string' })
-        .option('coll-root', { type: 'string' });
+        .option('plugins-root', { type: 'string' });
     },
     handler: (args) => {
       const {
@@ -347,7 +347,7 @@ async function main() {
             '-v',
             '--config',
             '--factory-defaults',
-            '--coll-root',
+            '--plugins-root',
           ].includes(firstArg) &&
           (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))
         ) {

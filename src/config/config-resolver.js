@@ -547,7 +547,7 @@ class ConfigResolver {
     return effectiveDetails;
   }
 
-  async getResolvedCollRoot() {
+  async getResolvedPluginsRoot() {
     await this._initializeResolverIfNeeded();
     return this.resolvedPluginsRoot;
   }

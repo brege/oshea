@@ -33,7 +33,7 @@ function formatPluginEntry(plugin) {
 
 // Generate context message based on list type and filter
 function generateContextMessage(listData) {
-  const { type, filter, plugins } = listData;
+  const { type, plugins } = listData;
 
   if (type === 'enabled') {
     return 'Enabled plugins';
@@ -63,7 +63,7 @@ function generateContextMessage(listData) {
 
 // Generate empty state message
 function generateEmptyMessage(listData) {
-  const { type, filter } = listData;
+  const { type } = listData;
 
   if (type === 'enabled') {
     return 'No plugins are currently enabled.';

@@ -1,17 +1,14 @@
 // src/cli/plugin/create.command.js
 const path = require('node:path');
 const {
-  cmUtilsPath,
   pluginArchetyperPath,
   loggerPath,
   templateBasicPlugin,
   cliPath,
-  collectionsMetadataFilename,
 } = require('@paths');
 const { execSync } = require('node:child_process');
 
 const logger = require(loggerPath);
-const { isValidPluginName } = require(cmUtilsPath);
 const { createArchetype } = require(pluginArchetyperPath);
 
 const fs = require('node:fs').promises;
@@ -19,7 +16,21 @@ const fss = require('node:fs');
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
-const cmUtils = require(cmUtilsPath);
+
+function isValidPluginName(pluginName) {
+  if (!pluginName || typeof pluginName !== 'string') {
+    return false;
+  }
+  return /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/.test(pluginName);
+}
+
+function toPascalCase(str) {
+  if (!str) return '';
+  return str
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join('');
+}
 
 module.exports = {
   command: 'create <pluginName>',
@@ -91,14 +102,14 @@ module.exports = {
 
       const dependencies = {
         chalk: null,
-        cmUtils,
+        cmUtils: { toPascalCase },
         fs,
         fss,
         fsExtra,
         yaml,
         matter,
         path,
-        collectionsMetadataFilename,
+        sourceMetadataFilename: '.source.yaml',
         collectionsDefaultArchetypeDirname: 'plugins',
       }; // Pass null for chalk
       const managerContext = {

@@ -6,12 +6,18 @@ const fsPromises = require('node:fs').promises;
 const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const { spawn } = require('node:child_process');
-const { cmUtilsPath, loggerPath } = require('@paths');
-
-const { isValidPluginName } = require(cmUtilsPath);
+const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
 const MANIFEST_FILENAME = 'plugins.yaml';
+
+function isValidPluginName(pluginName) {
+  if (!pluginName || typeof pluginName !== 'string') {
+    return false;
+  }
+  const regex = /^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$/;
+  return regex.test(pluginName);
+}
 
 function isGitSource(source) {
   return (
@@ -37,7 +43,6 @@ class PluginInstaller {
       options.pluginsRootCliOverride,
       options.pluginsRootFromMainConfig,
     );
-    this.collRoot = this.pluginsRoot;
     this.manifestPath = this.dependencies.path.join(
       this.pluginsRoot,
       MANIFEST_FILENAME,

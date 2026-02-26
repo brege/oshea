@@ -8,7 +8,6 @@ const {
   rawFormatterPath,
   tableFormatterPath,
   pluginListFormatterPath,
-  collectionListFormatterPath,
   validationFormatterPath,
   yamlTestFormatterPath,
   jsFormatterPath,
@@ -20,7 +19,6 @@ const { formatPathFinderOutput } = require(pathsFormatterPath);
 const { formatJs } = require(jsFormatterPath);
 const { formatTable } = require(tableFormatterPath);
 const { formatPluginList } = require(pluginListFormatterPath);
-const { formatCollectionList } = require(collectionListFormatterPath);
 const {
   formatValidationHeader,
   formatValidationStep,
@@ -51,7 +49,6 @@ module.exports = {
   js: formatJs,
   table: formatTable,
   'plugin-list': formatPluginList,
-  'collection-list': formatCollectionList,
   'validation-header': formatValidationHeader,
   'validation-step': formatValidationStep,
   'validation-test': formatValidationTest,

@@ -18,10 +18,10 @@ async function createArchetype(
 ) {
   const {
     cmUtils,
-    collectionsMetadataFilename,
+    sourceMetadataFilename,
     collectionsDefaultArchetypeDirname,
   } = dependencies;
-  const { collRoot } = managerContext;
+  const { collRoot: pluginsHomeRoot } = managerContext;
 
   let sourcePluginInfo;
   let sourcePluginIdForReplacement = '';
@@ -76,7 +76,7 @@ async function createArchetype(
 
   const targetBaseDir = options.targetDir
     ? path.resolve(options.targetDir)
-    : path.join(collRoot, collectionsDefaultArchetypeDirname);
+    : path.join(pluginsHomeRoot, collectionsDefaultArchetypeDirname);
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
   if (fss.existsSync(archetypePath) && !options.force) {
@@ -90,7 +90,7 @@ async function createArchetype(
 
   await fs.mkdir(targetBaseDir, { recursive: true });
   await fsExtra.copy(sourcePluginBasePath, archetypePath, {
-    filter: (src) => !src.includes(collectionsMetadataFilename),
+    filter: (src) => !src.includes(sourceMetadataFilename),
   });
 
   const sourcePluginIdPascal = cmUtils.toPascalCase(

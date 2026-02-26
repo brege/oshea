@@ -46,7 +46,7 @@ module.exports = {
           !fs.existsSync(pluginDirectoryPath) ||
           !fs.statSync(pluginDirectoryPath).isDirectory()
         ) {
-          // Not found in bundled plugins, check if it's a user-added plugin via manager
+          // Not found in bundled plugins, check installed plugins from registry
           if (!argv.manager || !argv.configResolver) {
             logger.error(
               `Error: Plugin directory not found for identifier: '${pluginIdentifier}'. Expected path: '${pluginDirectoryPath}'.`,
@@ -64,7 +64,7 @@ module.exports = {
             pluginDirectoryPath = path.dirname(pluginRegistryEntry.configPath);
           } else {
             logger.error(
-              `Error: Plugin '${pluginIdentifier}' not found. Checked bundled plugins and user-added plugins.`,
+              `Error: Plugin '${pluginIdentifier}' not found. Checked bundled and installed plugins.`,
             );
             process.exit(1);
             return;

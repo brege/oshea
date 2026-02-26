@@ -67,7 +67,7 @@ const theme = {
   border: chalk.hex(gruvbox.bg4),
 
   // Status indicators
-  enabled: chalk.hex(gruvbox.bright_green).bold, // For CM-managed plugins
+  enabled: chalk.hex(gruvbox.bright_green).bold,
   registered: chalk.hex(gruvbox.bright_aqua),
   disabled: chalk.hex(gruvbox.gray),
   pending: chalk.hex(gruvbox.bright_yellow),

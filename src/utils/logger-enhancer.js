@@ -47,7 +47,7 @@ const defaultErrorPatterns = {
   filesystem:
     /(?:Could not read|Failed to write|Failed to remove|directory|file|path|Permission denied|ENOENT|EACCES)/i,
   plugin:
-    /(?:plugin|Plugin|bundled plugin|collection.*managed|validation failed|contract|registry)/i,
+    /(?:plugin|Plugin|bundled plugin|installed plugin|validation failed|contract|registry)/i,
   config: /(?:configuration|config|yaml|json|CONFIG|settings|manifest)/i,
   network: /(?:fetch|download|git|url|connection|timeout|DNS|certificate)/i,
   validation: /(?:validation|validate|schema|invalid|missing.*field|required)/i,

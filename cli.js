@@ -326,8 +326,7 @@ async function main() {
     .fail((msg, err, yargsInstance) => {
       if (err) {
         logger.error(msg || err.message);
-        if (process.env.DEBUG_CM === 'true' && err.stack)
-          logger.error(err.stack);
+        if (process.env.DEBUG === 'true' && err.stack) logger.error(err.stack);
         yargsInstance.showHelp();
         process.exit(1);
         return;

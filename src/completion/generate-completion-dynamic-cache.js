@@ -122,7 +122,12 @@ async function generateCache() {
     fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
     logger.debug(`Dynamic completion cache written to: ${cachePath}`);
   } catch (err) {
-    logger.error('Failed to generate dynamic completion cache:', err);
+    logger.error(
+      `Failed to generate dynamic completion cache: ${err?.message || String(err)}`,
+    );
+    if (err?.stack) {
+      logger.error(err.stack);
+    }
     process.exit(1);
   }
 }

@@ -109,6 +109,7 @@ oshea_plugin: ${fmPluginName}
   {
     describe:
       '1.3.3: Should prioritize local config plugin when no CLI or front matter plugin is present',
+    skip: true,
     args: {
       markdownFile: undefined,
     },
@@ -193,6 +194,7 @@ some_other_key: some_value
   {
     describe:
       '1.3.5: Should extract localConfigOverrides from local config file, excluding the plugin field',
+    skip: true,
     args: {
       markdownFile: undefined,
     },
@@ -238,6 +240,95 @@ some_other_fm_key: fm_value
         true,
       );
 
+      expect(logs.length).to.be.greaterThan(0);
+    },
+  },
+  {
+    describe:
+      '1.3.15: Should use default plugin when only local config plugin is present',
+    args: {
+      markdownFile: undefined,
+    },
+    defaultPluginName: 'default',
+    setup: async (args, mocks, constants) => {
+      const localCfgPluginName = 'local-config-only-plugin';
+
+      args.markdownFile = constants.DUMMY_MARKDOWN_FILE_PATH;
+
+      const fileContents = {
+        markdown: '# Just Markdown Content',
+        localConfig: `plugin: ${localCfgPluginName}\nanotherSetting: anotherValue`,
+      };
+      const parsedContents = {
+        fmData: {},
+        parsedLocalConfig: {
+          plugin: localCfgPluginName,
+          anotherSetting: 'anotherValue',
+        },
+      };
+      setupTestFiles(mocks, constants, fileContents, parsedContents);
+    },
+    assert: async (result, args, mocks, constants, expect, logs) => {
+      expect(result.pluginSpec).to.equal('default');
+      expect(result.source).to.equal('default');
+      expect(result.localConfigOverrides).to.deep.equal({
+        anotherSetting: 'anotherValue',
+      });
+      assertCommonFileAndParsingInteractions(
+        mocks,
+        constants,
+        args,
+        true,
+        true,
+      );
+      expect(logs.length).to.be.greaterThan(0);
+    },
+  },
+  {
+    describe:
+      '1.3.16: Should extract localConfigOverrides while ignoring local plugin field for selection',
+    args: {
+      markdownFile: undefined,
+    },
+    defaultPluginName: 'default',
+    setup: async (args, mocks, constants) => {
+      const localCfgPluginName = 'plugin-with-overrides';
+
+      args.markdownFile = constants.DUMMY_MARKDOWN_FILE_PATH;
+
+      const fileContents = {
+        markdown: `---
+some_other_fm_key: fm_value
+---
+# Markdown Content`,
+        localConfig: `plugin: ${localCfgPluginName}\nheader: true\nfooter: false\nmargin:\n  top: 1in\n  bottom: 0.5in\n  left: 0.75in`,
+      };
+      const parsedContents = {
+        fmData: { some_other_fm_key: 'fm_value' },
+        parsedLocalConfig: {
+          plugin: localCfgPluginName,
+          header: true,
+          footer: false,
+          margin: { top: '1in', bottom: '0.5in', left: '0.75in' },
+        },
+      };
+      setupTestFiles(mocks, constants, fileContents, parsedContents);
+    },
+    assert: async (result, args, mocks, constants, expect, logs) => {
+      expect(result.pluginSpec).to.equal('default');
+      expect(result.source).to.equal('default');
+      expect(result.localConfigOverrides).to.deep.equal({
+        header: true,
+        footer: false,
+        margin: { top: '1in', bottom: '0.5in', left: '0.75in' },
+      });
+      assertCommonFileAndParsingInteractions(
+        mocks,
+        constants,
+        args,
+        true,
+        true,
+      );
       expect(logs.length).to.be.greaterThan(0);
     },
   },

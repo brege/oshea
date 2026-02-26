@@ -6,7 +6,6 @@ tags:
   - enable
   - cli
   - smoke
-  - collection
   - happy-path
 scenarios:
   - description: should successfully add a plugin

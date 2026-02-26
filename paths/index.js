@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-25T04:13:17.681Z
+// Generated: 2026-02-26T09:02:49.117Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -28,7 +28,6 @@ const srcRoot = path.join(projectRoot, 'src');
 const assetsRoot = path.join(projectRoot, 'assets');
 const scriptsRoot = path.join(projectRoot, 'scripts');
 const testRoot = path.join(projectRoot, 'test');
-const collectionsCommandsRoot = path.join(srcRoot, 'collections', 'commands');
 
 // --- Development & Build Tools ---
 const mochaPath = path.join(nodeModulesPath, '.bin', 'mocha');
@@ -38,12 +37,7 @@ const mocharcPath = path.join(projectRoot, '.mocharc.js');
 const pathsConfigPath = path.join(projectRoot, 'paths', 'paths-config.yaml');
 const katexPath = path.join(nodeModulesPath, 'katex', 'dist', 'katex.min.css');
 const basePluginSchemaPath = path.join(srcRoot, 'validators', 'base-plugin.schema.json');
-
-// --- Collections System Constants ---
-const collectionsMetadataFilename = '.collection-metadata.yaml';
-const collectionsEnabledManifestFilename = 'enabled.yaml';
-const collectionsDefaultArchetypeDirname = 'user-plugins';
-const collectionsUserPluginsDirname = 'user-plugins';
+const pluginInstallerPath = path.join(srcRoot, 'plugins', 'installer.js');
 
 // --- Test Organization ---
 const testRunnersDir = path.join(testRoot, 'runners');
@@ -72,23 +66,17 @@ const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
 
 // Command Line Interface
 const cliRoot = path.join(projectRoot, 'src/cli/');
-const collectionCommandPath = path.join(projectRoot, 'src/cli/collection.command.js');
 const configCommandPath = path.join(projectRoot, 'src/cli/config.command.js');
 const convertCommandPath = path.join(projectRoot, 'src/cli/convert.command.js');
 const generateCommandPath = path.join(projectRoot, 'src/cli/generate.command.js');
 const pluginCommandPath = path.join(projectRoot, 'src/cli/plugin.command.js');
-const updateCommandPath = path.join(projectRoot, 'src/cli/update.command.js');
 const pluginAddCommandPath = path.join(projectRoot, 'src/cli/plugin/add.command.js');
-const collectionsAddCommandPath = path.join(projectRoot, 'src/cli/collection/add.command.js');
 const createCommandPath = path.join(projectRoot, 'src/cli/plugin/create.command.js');
 const disableCommandPath = path.join(projectRoot, 'src/cli/plugin/disable.command.js');
 const enableCommandPath = path.join(projectRoot, 'src/cli/plugin/enable.command.js');
 const helpCommandPath = path.join(projectRoot, 'src/cli/plugin/help.command.js');
 const pluginListCommandPath = path.join(projectRoot, 'src/cli/plugin/list.command.js');
-const collectionsListCommandPath = path.join(projectRoot, 'src/cli/collection/list.command.js');
 const pluginRemoveCommandPath = path.join(projectRoot, 'src/cli/plugin/remove.command.js');
-const collectionsRemoveCommandPath = path.join(projectRoot, 'src/cli/collection/remove.command.js');
-const collectionsUpdateCommandPath = path.join(projectRoot, 'src/cli/collection/update.command.js');
 const validateCommandPath = path.join(projectRoot, 'src/cli/plugin/validate.command.js');
 
 // Core Module Integration Tests
@@ -147,40 +135,12 @@ const pluginDeterminerTestPath = path.join(projectRoot, 'test/runners/integratio
 const pluginManagerFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.factory.js');
 const pluginManagerManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.manifest.js');
 const pluginManagerTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.test.js');
-const pluginRegistryBuilderBuildRegistryManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.build-registry.manifest.js');
-const pluginRegistryBuilderCmManifestsManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js');
-const pluginRegistryBuilderConstructorManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.constructor.manifest.js');
-const pluginRegistryBuilderFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.factory.js');
-const pluginRegistryBuilderGetAllPluginDetailsManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.get-all-plugin-details.manifest.js');
-const pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.get-plugin-registrations-from-file.manifest.js');
-const pluginRegistryBuilderResolveAliasManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js');
-const pluginRegistryBuilderResolvePluginConfigPathManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.resolve-plugin-config-path.manifest.js');
-const pluginRegistryBuilderTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-registry-builder.test.js');
 const pluginValidatorFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-validator.factory.js');
 const pluginValidatorManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-validator.manifest.js');
 const pluginValidatorTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-validator.test.js');
 
-// Collections System Integration Tests
-const collectionsIntegrationRoot = path.join(projectRoot, 'test/runners/integration/collections/');
-const cmUtilsFactoryPath = path.join(projectRoot, 'test/runners/integration/collections/cm-utils.factory.js');
-const cmUtilsManifestPath = path.join(projectRoot, 'test/runners/integration/collections/cm-utils.manifest.js');
-const cmUtilsTestPath = path.join(projectRoot, 'test/runners/integration/collections/cm-utils.test.js');
-const collectionsManagerAddManifestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.add.manifest.js');
-const collectionsManagerConstructorManifestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.constructor.manifest.js');
-const collectionsManagerDisableManifestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.disable.manifest.js');
-const collectionsManagerEnableDisableManifestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.enable-disable.manifest.js');
-const collectionsManagerFactoryPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.factory.js');
-const collectionsManagerListManifestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.list.manifest.js');
-const collectionsManagerRemoveManifestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.remove.manifest.js');
-const collectionsManagerTestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.test.js');
-const collectionsManagerUpdateManifestPath = path.join(projectRoot, 'test/runners/integration/collections/collections-manager.update.manifest.js');
-
 // End-to-End CLI Tests
 const e2eCliTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/cli/');
-const collectionAddManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-add.manifest.yaml');
-const collectionListManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-list.manifest.yaml');
-const collectionRemoveManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-remove.manifest.yaml');
-const collectionUpdateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/collection-update.manifest.yaml');
 const configManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/config.manifest.yaml');
 const convertManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/convert.manifest.yaml');
 const generateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/generate.manifest.yaml');
@@ -197,27 +157,13 @@ const pluginValidateManifestYamlPath = path.join(projectRoot, 'test/runners/end-
 
 // Plugin System
 const pluginsRoot = path.join(projectRoot, 'src/plugins/');
+const installerPath = path.join(projectRoot, 'src/plugins/installer.js');
 const pluginArchetyperPath = path.join(projectRoot, 'src/plugins/plugin-archetyper.js');
 const pluginDeterminerPath = path.join(projectRoot, 'src/plugins/plugin-determiner.js');
 const pluginHelpPath = path.join(projectRoot, 'src/plugins/plugin-help.js');
 const pluginManagerPath = path.join(projectRoot, 'src/plugins/plugin-manager.js');
 const pluginRegistryBuilderPath = path.join(projectRoot, 'src/plugins/plugin-registry-builder.js');
 const pluginValidatorPath = path.join(projectRoot, 'src/plugins/plugin-validator.js');
-
-// Collections Management
-const collectionsRoot = path.join(projectRoot, 'src/collections/');
-const cmUtilsPath = path.join(projectRoot, 'src/collections/cm-utils.js');
-const collectionsIndexPath = path.join(projectRoot, 'src/collections/index.js');
-const addSingletonPath = path.join(projectRoot, 'src/collections/commands/add-singleton.js');
-const addPath = path.join(projectRoot, 'src/collections/commands/add.js');
-const disablePath = path.join(projectRoot, 'src/collections/commands/disable.js');
-const enableAllPath = path.join(projectRoot, 'src/collections/commands/enable-all.js');
-const enablePath = path.join(projectRoot, 'src/collections/commands/enable.js');
-const listAvailablePath = path.join(projectRoot, 'src/collections/commands/list-available.js');
-const listPath = path.join(projectRoot, 'src/collections/commands/list.js');
-const removePath = path.join(projectRoot, 'src/collections/commands/remove.js');
-const updateAllPath = path.join(projectRoot, 'src/collections/commands/update-all.js');
-const updatePath = path.join(projectRoot, 'src/collections/commands/update.js');
 
 // Validation Framework
 const validatorsRoot = path.join(projectRoot, 'src/validators/');
@@ -226,7 +172,6 @@ const v1Path = path.join(projectRoot, 'src/validators/v1.js');
 // End-to-End Workflow Tests
 const e2eWorkflowTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/workflows/');
 const demoHugoBatchConvertManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml');
-const workflowsManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/workflows/workflows.manifest.yaml');
 
 // End-to-End Bundled Plugin Tests
 const e2eValidatorTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/validators/');
@@ -256,7 +201,6 @@ const loggerEnhancerPath = path.join(projectRoot, 'src/utils/logger-enhancer.js'
 const loggerSurfacerPath = path.join(projectRoot, 'src/utils/logger-surfacer.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
 const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app.formatter.js');
-const collectionListFormatterPath = path.join(projectRoot, 'src/utils/formatters/collection-list.formatter.js');
 const colorThemePath = path.join(projectRoot, 'src/utils/formatters/color-theme.js');
 const configFormatterPath = path.join(projectRoot, 'src/utils/formatters/config.formatter.js');
 const formattersIndexPath = path.join(projectRoot, 'src/utils/formatters/index.js');
@@ -294,16 +238,12 @@ module.exports = {
   assetsRoot,
   scriptsRoot,
   testRoot,
-  collectionsCommandsRoot,
   mochaPath,
   mocharcPath,
   pathsConfigPath,
   katexPath,
   basePluginSchemaPath,
-  collectionsMetadataFilename,
-  collectionsEnabledManifestFilename,
-  collectionsDefaultArchetypeDirname,
-  collectionsUserPluginsDirname,
+  pluginInstallerPath,
   testRunnersDir,
   e2eTestDir,
   integrationTestDir,
@@ -320,23 +260,17 @@ module.exports = {
 
   // --- user-facing interfaces ---
   cliRoot,
-  collectionCommandPath,
   configCommandPath,
   convertCommandPath,
   generateCommandPath,
   pluginCommandPath,
-  updateCommandPath,
   pluginAddCommandPath,
-  collectionsAddCommandPath,
   createCommandPath,
   disableCommandPath,
   enableCommandPath,
   helpCommandPath,
   pluginListCommandPath,
-  collectionsListCommandPath,
   pluginRemoveCommandPath,
-  collectionsRemoveCommandPath,
-  collectionsUpdateCommandPath,
   validateCommandPath,
   coreIntegrationRoot,
   defaultHandlerFactoryPath,
@@ -385,36 +319,10 @@ module.exports = {
   pluginManagerFactoryPath,
   pluginManagerManifestPath,
   pluginManagerTestPath,
-  pluginRegistryBuilderBuildRegistryManifestPath,
-  pluginRegistryBuilderCmManifestsManifestPath,
-  pluginRegistryBuilderConstructorManifestPath,
-  pluginRegistryBuilderFactoryPath,
-  pluginRegistryBuilderGetAllPluginDetailsManifestPath,
-  pluginRegistryBuilderGetPluginRegistrationsFromFileManifestPath,
-  pluginRegistryBuilderResolveAliasManifestPath,
-  pluginRegistryBuilderResolvePluginConfigPathManifestPath,
-  pluginRegistryBuilderTestPath,
   pluginValidatorFactoryPath,
   pluginValidatorManifestPath,
   pluginValidatorTestPath,
-  collectionsIntegrationRoot,
-  cmUtilsFactoryPath,
-  cmUtilsManifestPath,
-  cmUtilsTestPath,
-  collectionsManagerAddManifestPath,
-  collectionsManagerConstructorManifestPath,
-  collectionsManagerDisableManifestPath,
-  collectionsManagerEnableDisableManifestPath,
-  collectionsManagerFactoryPath,
-  collectionsManagerListManifestPath,
-  collectionsManagerRemoveManifestPath,
-  collectionsManagerTestPath,
-  collectionsManagerUpdateManifestPath,
   e2eCliTestsRoot,
-  collectionAddManifestYamlPath,
-  collectionListManifestYamlPath,
-  collectionRemoveManifestYamlPath,
-  collectionUpdateManifestYamlPath,
   configManifestYamlPath,
   convertManifestYamlPath,
   generateManifestYamlPath,
@@ -429,30 +337,17 @@ module.exports = {
 
   // --- supportive operations ---
   pluginsRoot,
+  installerPath,
   pluginArchetyperPath,
   pluginDeterminerPath,
   pluginHelpPath,
   pluginManagerPath,
   pluginRegistryBuilderPath,
   pluginValidatorPath,
-  collectionsRoot,
-  cmUtilsPath,
-  collectionsIndexPath,
-  addSingletonPath,
-  addPath,
-  disablePath,
-  enableAllPath,
-  enablePath,
-  listAvailablePath,
-  listPath,
-  removePath,
-  updateAllPath,
-  updatePath,
   validatorsRoot,
   v1Path,
   e2eWorkflowTestsRoot,
   demoHugoBatchConvertManifestYamlPath,
-  workflowsManifestYamlPath,
   e2eValidatorTestsRoot,
   bundledPluginsManifestYamlPath,
   e2eRunnersRoot,
@@ -474,7 +369,6 @@ module.exports = {
   loggerSurfacerPath,
   loggerPath,
   appFormatterPath,
-  collectionListFormatterPath,
   colorThemePath,
   configFormatterPath,
   formattersIndexPath,

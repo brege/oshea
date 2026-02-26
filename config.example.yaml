@@ -39,15 +39,15 @@ math:
 #     name: "Default Author"
 #     email: "contact@example.com"
 
-# --- Collections Root Directory (Optional) ---
-# Overrides the default location for storing managed plugin collections.
-# Precedence: --coll-root > env var > this key > OS default.
-# collections_root: "~/my-oshea-collections"
+# --- Plugins Root Directory (Optional) ---
+# Overrides the default location for storing managed plugins.
+# Precedence: --plugins-root > env var > this key > OS default.
+# plugins_root: "~/.config/oshea/plugins"
 
 # --- Plugin Management Notes ---
 # Bundled plugins (default, cv, recipe, etc.) are now auto-discovered.
 # Custom plugins should be managed via the CLI:
-#   - oshea collection add <git-url-or-path>
+#   - oshea plugin add <git-url-or-path>
 #   - oshea plugin add <local-plugin-path>
 #
 # Use `oshea config --plugin <name>` to see a plugin's final settings.

@@ -1,84 +1,83 @@
-name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
+name: plugin enable (End-to-End Test) src/cli/plugin/enable.command.js
 test_id: 3.7.1
+skip: true
+base_command: oshea
+scenarios: []
+tags:
+  - plugin
+  - enable
+  - cli
+---
+name: plugin enable (End-to-End Test) src/cli/plugin/enable.command.js
+test_id: 3.7.2
+skip: true
+base_command: oshea
+scenarios: []
+tags:
+  - plugin
+  - enable
+  - cli
+---
+name: plugin enable (End-to-End Test) src/cli/plugin/enable.command.js
+test_id: 3.7.3
+skip: true
+base_command: oshea
+scenarios: []
+tags:
+  - plugin
+  - enable
+  - cli
+---
+name: plugin enable (End-to-End Test) src/cli/plugin/enable.command.js
+test_id: 3.7.4
 base_command: oshea
 tags:
   - plugin
   - enable
   - cli
   - smoke
-  - collection
-  - happy-path
 workflow: true
 scenarios:
-  - description: should create a collection with a plugin to enable
-    test_id: 3.7.1.1
-    args: >-
-      collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
-      --name test-collection
+  - description: should create a local plugin
+    test_id: 3.7.4.1
+    args: plugin create my-plugin-enable-src --outdir {{tmpdir}}
     expect:
       executes: true
-      contains: Successfully
-  - description: should successfully enable a plugin from a collection without validation
-    test_id: 3.7.1.2
-    args: >-
-      plugin enable test-collection/valid-collection-plugin-1 --bypass-validation
+      contains: created successfully
+  - description: should add and enable a plugin
+    test_id: 3.7.4.2
+    args: plugin add {{tmpdir}}/my-plugin-enable-src
     expect:
       executes: true
-      contains: Attempting to enable plugin
----
-name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
-test_id: 3.7.2
-base_command: oshea
-tags:
-  - plugin
-  - enable
-  - cli
-  - smoke
-  - collection
-  - validation
-  - happy-path
-scenarios:
-  - description: should successfully create a collection with a valid plugin
-    test_id: 3.7.2.1
-    args: >-
-      collection add {{paths.fixturesDir}}/full-fat-dummies/valid-collection
-      --name valid-coll
+      contains: Successfully processed 'plugin add'
+  - description: should disable plugin before re-enable
+    test_id: 3.7.4.3
+    args: plugin disable my-plugin-enable-src
     expect:
       executes: true
-      contains: Successfully
-  - description: should successfully enable a valid plugin from a collection
-    test_id: 3.7.2.2
-    args: plugin enable valid-coll/valid-collection-plugin-1
+      contains: disabled successfully
+  - description: should successfully enable a disabled plugin by name
+    test_id: 3.7.4.4
+    args: plugin enable my-plugin-enable-src
     expect:
       executes: true
-      contains: Attempting to enable plugin
----
-name: plugin enable (End-to-End Test) src/cli/commands/plugin/enable.test.js
-test_id: 3.7.3
-base_command: oshea
-tags:
-  - plugin
-  - enable
-  - cli
-  - smoke
-  - validation
-  - sad-path
-scenarios:
-  - description: should create a collection with an invalid plugin
-    test_id: 3.7.3.1
-    args: collection add {{tmpdir}}/invalid-coll --name invalid-coll
-    expect:
-      executes: true
-      contains: Successfully
-    breakage:
-      plugin: invalid-plugin
-      type: missing-handler
-      collection: invalid-coll
-  - description: should fail to enable an invalid plugin and reports validation errors
-    test_id: 3.7.3.2
-    args: plugin enable invalid-coll/invalid-plugin
-    expect:
-      executes: false
       contains_all:
-        - Plugin validation failed
-        - Missing required file
+        - Attempting to enable plugin
+        - Plugin enabled successfully
+---
+name: plugin enable (End-to-End Test) src/cli/plugin/enable.command.js
+test_id: 3.7.5
+base_command: oshea
+tags:
+  - plugin
+  - enable
+  - cli
+  - smoke
+  - error
+scenarios:
+  - description: should fail when trying to enable a non-installed plugin
+    test_id: 3.7.5.1
+    args: plugin enable non-existent-plugin
+    expect_failure:
+      exit_code: 1
+      contains: is not installed

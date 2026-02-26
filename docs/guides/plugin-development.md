@@ -1,6 +1,6 @@
 # Plugin Development Guide
 
-This guide explains the basics of creating, configuring, and managing plugins for **oshea**. 
+This guide explains the basics of creating, configuring, and managing plugins for **oshea**.
 Plugins are the core of the tool's extensibility, allowing you to define custom processing, styling, and PDF generation options for any type of Markdown document.
 
 ---
@@ -13,7 +13,7 @@ The easiest and most reliable way to start a new plugin is with the built-in `pl
 
 ```bash
 oshea plugin create <new-plugin-name> \
-        [ --output-dir <path> ] \
+        [ --outdir <path> ] \
         [ --from <source-plugin> ] \
         [ --force ]
 ```
@@ -21,17 +21,17 @@ oshea plugin create <new-plugin-name> \
 **`plugin create`**
 
 - **`<new-plugin-name>`**: The name for your new plugin (e.g., `technical-report`).
-- `--output-dir <path>` (Optional): The directory where the new plugin folder will be created. Defaults to `./`.
+- `--outdir <path>` (Optional): The directory where the new plugin folder will be created. Defaults to a local `my-plugins` directory in your project.
 - `--from <source>` (Optional): Use an existing plugin as a template. The source can be a registered plugin name (e.g., `cv`) or a path to a plugin directory.
 - `--force` (Optional): Overwrite the target directory if it already exists.
 
-This command creates a fully functional plugin with a standard structure, including a `.contract/` directory for in-situ testing, and a machine-readable schema file which helps ensure forward compatibility.
+This command creates a fully functional plugin with a standard structure, including a `.contract/` directory for in-situ testing and a machine-readable schema file, which helps ensure forward compatibility.
 
-**Example** \ 
+**Example**
 To create a plugin based on the `cv` plugin, run the following command:
 
 ```bash
-oshea plugin create my-plugin --from cv --target-dir ./my-plugins
+oshea plugin create my-plugin --from cv --outdir ./my-plugins
 ```
 
 ---
@@ -91,72 +91,37 @@ The `plugin validate` command is your primary tool for ensuring your plugin meet
 oshea plugin validate my-plugins/business-card
 ```
 
-### Step 2: Register and Use Your Plugin
+### Step 2: Install and Use Your Plugin
 
-There are two primary ways to make your plugin available to the CLI:
-
-#### Method A: Standard Usage with `plugin add` and `collection add`
-
-This is the recommended method for both end-users and developers. The `add` commands can accept a local path or a remote Git repository URL.
-
-**For a single plugin** 
-
-Use `plugin add` to copy your local plugin directory into the tool's managed collections and make it globally available by name.
+Use `plugin add` to install a single plugin into oshea's managed plugin root and enable it.
 
 Add from a local directory
 ```bash
 oshea plugin add ./my-plugins/business-card
 ```
 
-Or, add directly from a GitHub repository
+Or add from a Git repository that contains one plugin
 ```bash
 oshea plugin add https://github.com/user/my-awesome-plugin
 ```
 
-**For a collection of plugins**
-
-If you have a repository containing multiple plugins, users can add the entire set with a single command. This is ideal for distributing themes, variants, or related toolsets.
-
-Add a collection from a local directory
-```bash
-oshea collection add https://github.com/brege/oshea-plugins
-```
-
-#### Method B: Developer Convenience with `collections_root`
-
-For developers managing multiple, distinct *sets* of plugins, the `collections_root` setting in `config.yaml` provides an **exclusive context switch**. 
-When you run a command with this configuration, the application operates *exclusively* within that universe of plugins.
-
-Different scenarios involving i/o of both `--config` and `--coll-root` may creatively provide or lead to different results.
-
-This allows you to maintain isolated environments for different projects without affecting your global configuration.
-
-**`my-project/config.yaml`**
-```yaml
-collections_root: ./my-company-plugins
-```
-
 ### Step 3: Iterate and Update
 
-After modifying your source files in some local development directory like `./my-plugins/business-card`, you can update your plugin with the following commands:
+After modifying your source plugin files in `./my-plugins/business-card`, reinstall to refresh the managed copy:
 
 ```bash
-oshea collection update _user_added_plugins
+oshea plugin remove business-card
+oshea plugin add ./my-plugins/business-card
 ```
 
 Having registered your plugin, you can now convert a document using your plugin by name. The `plugin enable` command (which `plugin add` uses internally) automatically runs the validator, ensuring that only safe and valid plugins are activated.
 ```bash
-oshea document.md --plugin business-card
+oshea convert document.md --plugin business-card
 ```
 
-In your local environment, you may find yourself using `plugin validate` locally and `collection update` globally to smoke test a plugin in different states of development and production.
+In local development, the tight loop is `plugin validate` plus `plugin remove`/`plugin add` when you want to refresh the installed copy.
 
 ### A Flexible and Portable System
 
-This dual system for plugin management was a foundational design goal. 
-It provides flexibility for users to easily consume plugins from anywhere, 
-while giving developers useful switches like `collections_root` and hierarchical configuration states to manage complex, project-specific contexts.
-
-The plugin architecture provides portability and extensibility through these two logical switches,
-making it easier to manage local development or distribution to a wider audience.
-
+This plugin system is intentionally narrow: install single-plugin sources, validate, and run.
+That keeps document behavior easier to reason about while preserving portability.

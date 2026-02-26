@@ -29,7 +29,6 @@ registries:
           assets_root: path.join(projectRoot, 'assets')
           scripts_root: path.join(projectRoot, 'scripts')
           test_root: path.join(projectRoot, 'test')
-          collections_commands_root: path.join(srcRoot, 'collections', 'commands')
       tooling:
         comment: Development & Build Tools
         items:
@@ -41,13 +40,7 @@ registries:
           paths_config_path: path.join(projectRoot, 'paths', 'paths-config.yaml')
           katex_path: path.join(nodeModulesPath, 'katex', 'dist', 'katex.min.css')
           base_plugin_schema_path: path.join(srcRoot, 'validators', 'base-plugin.schema.json')
-      collections:
-        comment: Collections System Constants
-        items:
-          collections_metadata_filename: "'.collection-metadata.yaml'"
-          collections_enabled_manifest_filename: "'enabled.yaml'"
-          collections_default_archetype_dirname: "'user-plugins'"
-          collections_user_plugins_dirname: "'user-plugins'"
+          plugin_installer_path: path.join(srcRoot, 'plugins', 'installer.js')
       test_directories:
         comment: Test Organization
         items:
@@ -83,10 +76,6 @@ registries:
         comment: Plugin System
         pattern: src/plugins/**/*.js
         rank: 2
-      collections:
-        comment: Collections Management
-        pattern: src/collections/**/*.js
-        rank: 2
       config:
         comment: Configuration System
         pattern: src/config/**/*.js
@@ -115,10 +104,6 @@ registries:
         comment: Plugin System Integration Tests
         pattern: test/runners/integration/plugins/**/*.js
         rank: 1
-      collections_integration:
-        comment: Collections System Integration Tests
-        pattern: test/runners/integration/collections/**/*.js
-        rank: 1
       shared_utilities:
         comment: Shared Test Utilities & Helpers
         pattern: test/runners/integration/shared/**/*.js
@@ -141,27 +126,13 @@ registries:
         rank: 2
     contextual_naming:
       add.command.js:
-        cli/collection: collections_add_command
         cli/plugin: plugin_add_command
       list.command.js:
-        cli/collection: collections_list_command
         cli/plugin: plugin_list_command
       remove.command.js:
-        cli/collection: collections_remove_command
         cli/plugin: plugin_remove_command
-      update.command.js:
-        cli/collection: collections_update_command
-      add:
-        collections/commands: collections_add
-      list:
-        collections/commands: collections_list
-      remove:
-        collections/commands: collections_remove
-      update:
-        collections/commands: collections_update
       index.js:
         paths: paths_index
-        src/collections: collections_index
         src/utils/formatters: formatters_index
 rank_definitions:
   "0": user-facing interfaces

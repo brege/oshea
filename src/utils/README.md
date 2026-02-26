@@ -1,4 +1,4 @@
-## Logger System Reference Documentation
+## Logger System Reference
 
 ### Architecture
 
@@ -29,7 +29,6 @@ logger(message, options) → formatter → console/file output
 | [`validation.formatter.js`](formatters/validation.formatter.js)           | `plugin validate` |
 | [`plugin-list.formatter.js`](formatters/plugin-list.formatter.js)             | `plugin list` |
 | [`table.formatter.js`](formatters/table.formatter.js)                 | `plugin list --short` |
-| [`collection-list.formatter.js`](formatters/collection-list.formatter.js) | `collection list` |
 | **Test Code**      |                                                                          |
 | [`yaml-test.formatter.js`](formatters/yaml-test.formatter.js)       | `node ...e2e-runner.js` |
 | [`config.formatter.js`](formatters/config.formatter.js)                      | `oshea config` |
@@ -37,9 +36,9 @@ logger(message, options) → formatter → console/file output
 
 ### Others
 
-- [`asset-resolver.js`](asset-resolver.js) for loading CSS properties, like Katex styles
-- [`file-helpers.js`](file-helpers.js) ] makes it easier  for scripts to point and shoot at files or directories 
-- [`logger-surfacer.js`](logger-surfacer.js) surfaces console outputters
+- [`asset-resolver.js`](asset-resolver.js) for loading CSS properties, like KaTeX styles
+- [`file-helpers.js`](file-helpers.js) makes it easier for scripts to point and shoot at files or directories
+- [`logger-surfacer.js`](logger-surfacer.js) surfaces console output
 
 
 ### Canonical Usage
@@ -94,15 +93,15 @@ logger.error(`Failed to load plugin: ${error.message}`, {
 // [✔] Keep - user-facing interface text
 logger.info('Important Notes:');
 logger.warn('WARN: Plugin validation failed');
-logger.error('ERROR: Collection not found');
+logger.error('ERROR: Plugin not found');
 
 // [✔] Convert to debug - operational noise
-logger.debug('Attempting to update collection...');
+logger.debug('Attempting to install plugin...');
 ```
 
 **Principle.** CLI commands communicate with users. Only convert obvious operational noise.
 
-#### `src/core/`, `src/collections/`, `src/plugins/` -- Internal Modules
+#### `src/core/`, `src/plugins/` -- Internal Modules
 
 **Convert operational logging to debug**
 ```javascript
@@ -114,7 +113,7 @@ logger.debug('Configuration loaded successfully', {
 
 // [✔] Keep as info - user transparency (like LaTeX verbose output)
 logger.info(`Source is a Git repository, attempting to clone: ${sourceUrl}`, {
-  context: 'CollectionManager'
+  context: 'PluginInstaller'
 });
 ```
 
@@ -188,7 +187,7 @@ logger.configureLogger({
 #### [✖] Wrong -- Values in Metadata (Expecting Display)
 ```javascript
 // This broke user output during refactoring
-logger.info('Collection name', { collectionName: name });
+logger.info('Plugin name', { pluginName: name });
 // User sees: "Collection name" (missing the actual name!)
 ```
 
@@ -216,13 +215,13 @@ logger.success(`✓ Found required file: '${filename}'`, {
 });
 ```
 
-#### Collection Management
+#### Plugin Installation
 ```javascript
-logger.info(`Adding collection from source: ${source}`, {
-  context: 'CollectionManager'
+logger.info(`Adding plugin from source: ${source}`, {
+  context: 'PluginInstaller'
 });
 logger.success(`Successfully cloned: ${source} -> ${targetPath}`, {
-  context: 'CollectionManager'
+  context: 'PluginInstaller'
 });
 ```
 

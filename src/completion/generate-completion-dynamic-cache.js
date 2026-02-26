@@ -12,18 +12,17 @@ const logger = require(loggerPath);
 const {
   projectRoot,
   pluginRegistryBuilderPath,
-  collectionsIndexPath,
+  pluginInstallerPath,
   mainConfigLoaderPath,
 } = require('@paths');
 
 const PluginRegistryBuilder = require(pluginRegistryBuilderPath);
-const CollectionsManager = require(collectionsIndexPath);
+const PluginInstaller = require(pluginInstallerPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
 
-async function getUserPluginsFromManifest(collRoot) {
+async function getUserPluginsFromManifest(pluginsRoot) {
   const yaml = require('js-yaml');
-  const userPluginsPath = path.join(collRoot, 'user-plugins');
-  const pluginsManifestPath = path.join(userPluginsPath, 'plugins.yaml');
+  const pluginsManifestPath = path.join(pluginsRoot, 'plugins.yaml');
 
   if (!fs.existsSync(pluginsManifestPath)) {
     return [];
@@ -55,14 +54,13 @@ function getCachePath() {
 async function generateCache() {
   try {
     logger.debug('Starting dynamic completion cache generation...');
-    // We cannot rely on CLI args here, so we load config to find collRoot
+    // We cannot rely on CLI args here, so we load config to find pluginsRoot
     const mainConfigLoader = new MainConfigLoader(projectRoot, null, false);
     const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
-    const collRootFromMainConfig =
-      primaryConfig.config.collections_root || null;
-    logger.debug(`collections_root resolved: ${collRootFromMainConfig}`);
+    const pluginsRootFromMainConfig = primaryConfig.config.plugins_root || null;
+    logger.debug(`plugins_root resolved: ${pluginsRootFromMainConfig}`);
 
-    const manager = new CollectionsManager({ collRootFromMainConfig });
+    const manager = new PluginInstaller({ pluginsRootFromMainConfig });
     const builder = new PluginRegistryBuilder(
       projectRoot,
       null,
@@ -71,22 +69,18 @@ async function generateCache() {
       false,
       null,
       manager,
-      { collRoot: manager.collRoot },
+      { pluginsRoot: manager.pluginsRoot },
     );
 
     // 1. Get all plugin details
     const allPlugins = await builder.getAllPluginDetails();
     logger.debug(`Discovered ${allPlugins.length} plugins.`);
 
-    // 2. Get all downloaded collection names
-    const allCollections = await manager.listCollections('downloaded');
-    logger.debug(`Discovered ${allCollections.length} downloaded collections.`);
-
-    // 3. Get user plugins from unified manifest
-    const userPlugins = await getUserPluginsFromManifest(manager.collRoot);
+    // 2. Get user plugins from manifest
+    const userPlugins = await getUserPluginsFromManifest(manager.pluginsRoot);
     logger.debug(`Discovered ${userPlugins.length} user plugins.`);
 
-    // 4. Process the data into simple lists for completion
+    // 3. Process the data into simple lists for completion
     const usablePlugins = allPlugins
       .filter(
         (p) =>
@@ -100,17 +94,14 @@ async function generateCache() {
       .filter((p) => p.status?.startsWith('Enabled ('))
       .map((p) => p.name);
 
-    const availableFromCM = allPlugins
-      .filter((p) => p.status === 'Available (CM)')
+    const availableInstalled = allPlugins
+      .filter((p) => p.status === 'Available (Installed)')
       .map((p) => p.name);
-
-    const downloadedCollections = allCollections.map((c) => c.name);
 
     const cacheStats = [
       `usablePlugins(${usablePlugins.length})`,
       `enabledPlugins(${enabledPlugins.length})`,
-      `availablePlugins(${availableFromCM.length})`,
-      `downloadedCollections(${downloadedCollections.length})`,
+      `availablePlugins(${availableInstalled.length})`,
       `userPlugins(${userPlugins.length})`,
     ].join(', ');
     logger.debug(`Cache data will include: ${cacheStats}`);
@@ -119,8 +110,8 @@ async function generateCache() {
     const cacheData = {
       usablePlugins,
       enabledPlugins,
-      availablePlugins: availableFromCM,
-      downloadedCollections,
+      availablePlugins: availableInstalled,
+      downloadedCollections: [],
       userPlugins,
       lastUpdated: new Date().toISOString(),
     };
@@ -131,7 +122,12 @@ async function generateCache() {
     fs.writeFileSync(cachePath, JSON.stringify(cacheData, null, 2));
     logger.debug(`Dynamic completion cache written to: ${cachePath}`);
   } catch (err) {
-    logger.error('Failed to generate dynamic completion cache:', err);
+    logger.error(
+      `Failed to generate dynamic completion cache: ${err?.message || String(err)}`,
+    );
+    if (err?.stack) {
+      logger.error(err.stack);
+    }
     process.exit(1);
   }
 }

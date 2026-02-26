@@ -23,14 +23,14 @@ node cli.js --watch                           # Watch mode
 ## Essential Documentation
 
 - `README.md`
-- `docs/ai/claude-skills.md`
-- `docs/ai/interaction-spec.md`
+- `docs/guides/claude-skills.md`
+- `docs/refs/interaction-spec.md`
 - `docs/guides/configuration-hierarchies.md`
 - `docs/guides/plugin-development.md`
 - `docs/refs/cheat-sheet.md`
 - `docs/refs/plugin-contract.md`
 
-Documentation is indexed by `README.md`'s throughout the repository. These offer one-line summaries of each topic. 
+Documentation is indexed by `README.md` files throughout the repository. These offer one-line summaries of each topic.
 
 ## Architecture
 
@@ -41,7 +41,6 @@ Documentation is indexed by `README.md`'s throughout the repository. These offer
 - `src/core/` - PDF generation and markdown processing pipeline
 - `src/config/` - Hierarchical configuration system
 - `src/plugins/` - Plugin management (PluginManager, registry, archetyper)
-- `src/collections/` - Plugin collection management
 - `plugins/` - Built-in plugins (cv, cover-letter, recipe, etc.)
 
 **Testing**: Manifest-driven test harness with factory mocking. See `test/README.md` for details.
@@ -68,7 +67,7 @@ See `docs/guides/configuration-hierarchies.md` for details.
 
 - File headers are required in JavaScript files: first comment must match the workspace-relative path (shebang may appear first).
 - Do not call `console.*` for logging; use the project logger
-- Only use `console.*` for temporary development instrumentation. Remove before committing. Don't remove console's marked with `console-ok` at file head or single line.
+- Only use `console.*` for temporary development instrumentation. Remove before committing. Don't remove consoles marked with `console-ok` at file head or single line.
 - Do not call `chalk.*` in application code; use the project formatters. Formatters call chalk.
 - Do not add JSDoc block comments (`/** ... @param ... */`) to source files.
 - Do not use relative import/require paths or relative path fragments in path resolution; use `@paths`.

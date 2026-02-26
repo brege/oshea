@@ -195,9 +195,7 @@ async function createMinimalLegacyPlugin(pluginDir, pluginName) {
 }
 
 function getOriginalPluginName(baseFixture) {
-  return baseFixture === 'valid-collection'
-    ? 'valid-collection-plugin-1'
-    : baseFixture;
+  return baseFixture;
 }
 
 async function findConfigFile(pluginDir) {
@@ -211,42 +209,6 @@ async function findExampleFile(pluginDir) {
   return exampleFile ? path.join(pluginDir, exampleFile) : null;
 }
 
-// Create a collection with multiple plugins, optionally broken
-async function createDummyCollection(
-  collectionName,
-  destinationDir,
-  options = {},
-) {
-  const { pluginBreakages = [] } = options;
-
-  const collectionDir = path.join(destinationDir, collectionName);
-  await fs.ensureDir(collectionDir);
-
-  // Copy the valid collection fixture
-  const fixtureRoot = path.join(__dirname, 'full-fat-dummies');
-  const sourceCollectionPath = path.join(fixtureRoot, 'valid-collection');
-
-  await fs.copy(sourceCollectionPath, collectionDir);
-
-  // Apply any plugin-specific breakages
-  for (const pluginBreakage of pluginBreakages) {
-    const { pluginName, breakage } = pluginBreakage;
-    const pluginDir = path.join(collectionDir, pluginName);
-
-    for (const breakageType of breakage) {
-      await applyBreakage(
-        pluginDir,
-        pluginName,
-        breakageType,
-        'valid-collection-plugin-1',
-      );
-    }
-  }
-
-  return collectionDir;
-}
-
 module.exports = {
   createDummyPlugin,
-  createDummyCollection,
 };

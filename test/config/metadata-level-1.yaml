@@ -8,13 +8,16 @@ metadata:
     Module integration tests verifying core components work correctly in
     isolation - configuration resolution, plugin management, registry building,
     and utility functions
+  notes:
+    - The active Level 1 integration group currently runs config/core/plugin determiner, manager, and validator coverage.
+    - Legacy collection-era registry utility entries remain documented here but are not in active Mocha groups.
 tests:
   1.1.1:
     description: >-
       Verify that `_initializeResolverIfNeeded` correctly loads and merges
       primary, XDG, and project main configurations, and sets
       `primaryMainConfig`, `primaryMainConfigPathActual`, and
-      `resolvedCollRoot`.
+      `resolvedPluginsRoot`.
     commands: []
     runner: test/runners/integration/config/config-resolver.test.js
     manifest: test/runners/integration/config/config-resolver.initialize.manifest.js
@@ -1906,38 +1909,10 @@ tests:
     app_files:
       - src/core/math-integration.js
   1.8.1:
-    description: Verify `deriveCollectionName` correctly sanitizes a URL or path.
-    commands:
-      - collection
-    runner: test/runners/integration/collections/cm-utils.test.js
-    manifest: test/runners/integration/collections/cm-utils.manifest.js
-    reference: test/archive/docs/test-generation-priority-order.md
-    mocha_groups:
-      - level1
-      - collections
-      - integration
-      - all
-      - rank2
-    app_files:
-      - src/collections/cm-utils.js
-  1.8.2:
-    description: Test `toPascalCase` correctly converts various hyphenated strings
-      to PascalCase.
-    commands:
-      - convert
-    runner: test/runners/integration/collections/cm-utils.test.js
-    manifest: test/runners/integration/collections/cm-utils.manifest.js
-    reference: test/archive/docs/test-generation-priority-order.md
-    mocha_groups:
-      - level1
-      - collections
-      - integration
-      - all
-      - rank2
-    app_files:
-      - src/collections/cm-utils.js
-  1.8.3:
-    description: Verify `isValidPluginName` correctly validates plugin names.
+    description: >-
+      Legacy collection utility coverage retained for historical reference;
+      inactive under installer-only runtime.
+    status: inactive
     commands:
       - plugin
     runner: test/runners/integration/collections/cm-utils.test.js
@@ -1950,4 +1925,40 @@ tests:
       - all
       - rank2
     app_files:
-      - src/collections/cm-utils.js
+      - src/plugins/installer.js
+  1.8.2:
+    description: >-
+      Legacy collection utility coverage retained for historical reference;
+      inactive under installer-only runtime.
+    status: inactive
+    commands:
+      - plugin create
+    runner: test/runners/integration/collections/cm-utils.test.js
+    manifest: test/runners/integration/collections/cm-utils.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - collections
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/cli/plugin/create.command.js
+  1.8.3:
+    description: >-
+      Legacy collection utility coverage retained for historical reference;
+      inactive under installer-only runtime.
+    status: inactive
+    commands:
+      - plugin
+    runner: test/runners/integration/collections/cm-utils.test.js
+    manifest: test/runners/integration/collections/cm-utils.manifest.js
+    reference: test/archive/docs/test-generation-priority-order.md
+    mocha_groups:
+      - level1
+      - collections
+      - integration
+      - all
+      - rank2
+    app_files:
+      - src/plugins/installer.js

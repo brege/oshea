@@ -73,7 +73,7 @@ function discoverCommandTree(dir, prefixParts = []) {
     const globalOptionsList = [
       'config',
       'factory-defaults',
-      'coll-root',
+      'plugins-root',
       'help',
       'version',
       'h',

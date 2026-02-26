@@ -163,17 +163,17 @@ class TestWorkspace {
   constructor(
     basePath = '/tmp/oshea-workspace',
     customOutdir = null,
-    customCollRoot = null,
+    customPluginsRoot = null,
   ) {
     this.basePath = basePath;
-    // Allow custom paths for user-specified --outdir and --coll-root
+    // Allow custom paths for user-specified --outdir and --plugins-root
     this.outdir = customOutdir || path.join(basePath, 'outdir');
-    this.collRoot = customCollRoot || path.join(basePath, 'coll-root');
+    this.pluginsRoot = customPluginsRoot || path.join(basePath, 'plugins-root');
   }
 
   // Create clean workspace directories
   setup() {
-    for (const dir of [this.outdir, this.collRoot]) {
+    for (const dir of [this.outdir, this.pluginsRoot]) {
       if (fs.existsSync(dir)) {
         fs.rmSync(dir, { recursive: true, force: true });
       }
@@ -181,7 +181,7 @@ class TestWorkspace {
     }
 
     logger.debug(
-      `Test workspace setup: OUTDIR=${this.outdir}, COLL_ROOT=${this.collRoot}`,
+      `Test workspace setup: OUTDIR=${this.outdir}, PLUGINS_ROOT=${this.pluginsRoot}`,
       { format: 'workflow-debug' },
     );
   }
@@ -263,15 +263,15 @@ function createDisplayCommand(
   let displayArgs = expandTemplates(args, workspace);
 
   if (isWorkflowTest) {
-    // Show the actual --outdir and --coll-root values that would be used
+    // Show the actual --outdir and --plugins-root values that would be used
     if (displayArgs.includes('plugin create')) {
       if (!/--outdir\s+\S+/.test(displayArgs)) {
         displayArgs += ` --outdir "${workspace.outdir}"`;
       }
     }
 
-    if (!/--coll-root\s+\S+/.test(displayArgs)) {
-      displayArgs += ` --coll-root "${workspace.collRoot}"`;
+    if (!/--plugins-root\s+\S+/.test(displayArgs)) {
+      displayArgs += ` --plugins-root "${workspace.pluginsRoot}"`;
     }
   }
 
@@ -283,7 +283,7 @@ function processCommandArgs(args, workspace, isWorkflowTest = false) {
   let processedArgs = expandTemplates(args, workspace);
 
   if (isWorkflowTest) {
-    // For workflow tests, ensure --outdir and --coll-root are properly set
+    // For workflow tests, ensure --outdir and --plugins-root are properly set
     if (processedArgs.includes('plugin create')) {
       if (/--outdir\s+\S+/.test(processedArgs)) {
         processedArgs = processedArgs.replace(
@@ -295,9 +295,9 @@ function processCommandArgs(args, workspace, isWorkflowTest = false) {
       }
     }
 
-    // Append --coll-root unless already present
-    if (!/--coll-root\s+\S+/.test(processedArgs)) {
-      processedArgs += ` --coll-root "${workspace.collRoot}"`;
+    // Append --plugins-root unless already present
+    if (!/--plugins-root\s+\S+/.test(processedArgs)) {
+      processedArgs += ` --plugins-root "${workspace.pluginsRoot}"`;
     }
   }
 

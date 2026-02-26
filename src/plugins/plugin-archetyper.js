@@ -11,90 +11,56 @@ const matter = require('gray-matter');
 
 async function createArchetype(
   dependencies,
-  managerContext,
+  archetyperContext,
   sourcePluginIdentifier,
   newArchetypeName,
   options = {},
 ) {
-  const {
-    cmUtils,
-    collectionsMetadataFilename,
-    collectionsDefaultArchetypeDirname,
-  } = dependencies;
-  const { collRoot, listAvailablePlugins } = managerContext;
+  const { pluginNameUtils, sourceMetadataFilename, defaultArchetypeDirname } =
+    dependencies;
+  const { pluginsHomeRoot } = archetyperContext;
 
   let sourcePluginInfo;
   let sourcePluginIdForReplacement = '';
 
-  const idParts = sourcePluginIdentifier.split('/');
-  const isPotentiallyCmIdentifier =
-    idParts.length === 2 &&
-    idParts[0] &&
-    idParts[1] &&
-    !sourcePluginIdentifier.startsWith('.') &&
-    !sourcePluginIdentifier.startsWith('~') &&
-    !path.isAbsolute(sourcePluginIdentifier);
-
-  if (isPotentiallyCmIdentifier) {
-    const [sourceCollectionName, sourcePluginId] = idParts;
-    const availableSourcePlugins =
-      await listAvailablePlugins(sourceCollectionName);
-    const foundPlugin = availableSourcePlugins.find(
-      (p) =>
-        p.plugin_id === sourcePluginId && p.collection === sourceCollectionName,
+  const resolvedSourcePath = path.resolve(sourcePluginIdentifier);
+  if (
+    !fss.existsSync(resolvedSourcePath) ||
+    !fss.lstatSync(resolvedSourcePath).isDirectory()
+  ) {
+    throw new Error(
+      `Source plugin path "${resolvedSourcePath}" not found or is not a directory.`,
     );
-
-    if (!foundPlugin) {
-      throw new Error(
-        `Source plugin "${sourcePluginId}" in collection "${sourceCollectionName}" not found via CollectionsManager.`,
-      );
-    }
-    sourcePluginInfo = { ...foundPlugin };
-    sourcePluginIdForReplacement = sourcePluginId;
-  } else {
-    const resolvedSourcePath = path.resolve(sourcePluginIdentifier);
-    if (
-      !fss.existsSync(resolvedSourcePath) ||
-      !fss.lstatSync(resolvedSourcePath).isDirectory()
-    ) {
-      throw new Error(
-        `Source plugin path "${resolvedSourcePath}" not found or is not a directory.`,
-      );
-    }
-    sourcePluginIdForReplacement = path.basename(resolvedSourcePath);
-    const configFileName = [
-      `${sourcePluginIdForReplacement}.config.yaml`,
-      `${sourcePluginIdForReplacement}.yaml`,
-    ].find((cfg) => fss.existsSync(path.join(resolvedSourcePath, cfg)));
-    if (!configFileName) {
-      throw new Error(
-        `Config file (.config.yaml or .yaml) not found in source plugin directory "${resolvedSourcePath}".`,
-      );
-    }
-    sourcePluginInfo = {
-      collection: '[direct path source]',
-      plugin_id: sourcePluginIdForReplacement,
-      base_path: resolvedSourcePath,
-      config_path: path.join(resolvedSourcePath, configFileName),
-    };
-    try {
-      const sourceConfigContent = await fs.readFile(
-        sourcePluginInfo.config_path,
-        'utf8',
-      );
-      sourcePluginInfo.description =
-        yaml.load(sourceConfigContent).description ||
-        `Plugin from path: ${sourcePluginIdForReplacement}`;
-    } catch {
-      logger.warn(
-        'Could not read description from direct path source config.',
-        {
-          context: 'PluginArchetyper',
-          configPath: sourcePluginInfo.config_path,
-          suggestion: 'Ensure the config file is a valid YAML format.',
-        },
-      );
-    }
+  }
+  sourcePluginIdForReplacement = path.basename(resolvedSourcePath);
+  const configFileName = [
+    `${sourcePluginIdForReplacement}.config.yaml`,
+    `${sourcePluginIdForReplacement}.yaml`,
+  ].find((cfg) => fss.existsSync(path.join(resolvedSourcePath, cfg)));
+  if (!configFileName) {
+    throw new Error(
+      `Config file (.config.yaml or .yaml) not found in source plugin directory "${resolvedSourcePath}".`,
+    );
+  }
+  sourcePluginInfo = {
+    plugin_id: sourcePluginIdForReplacement,
+    base_path: resolvedSourcePath,
+    config_path: path.join(resolvedSourcePath, configFileName),
+  };
+  try {
+    const sourceConfigContent = await fs.readFile(
+      sourcePluginInfo.config_path,
+      'utf8',
+    );
+    sourcePluginInfo.description =
+      yaml.load(sourceConfigContent).description ||
+      `Plugin from path: ${sourcePluginIdForReplacement}`;
+  } catch {
+    logger.warn('Could not read description from direct path source config.', {
+      context: 'PluginArchetyper',
+      configPath: sourcePluginInfo.config_path,
+      suggestion: 'Ensure the config file is a valid YAML format.',
+    });
   }
 
   const sourcePluginBasePath = sourcePluginInfo.base_path;
@@ -106,7 +72,7 @@ async function createArchetype(
 
   const targetBaseDir = options.targetDir
     ? path.resolve(options.targetDir)
-    : path.join(collRoot, collectionsDefaultArchetypeDirname);
+    : path.join(pluginsHomeRoot, defaultArchetypeDirname);
   const archetypePath = path.join(targetBaseDir, newArchetypeName);
 
   if (fss.existsSync(archetypePath) && !options.force) {
@@ -120,13 +86,13 @@ async function createArchetype(
 
   await fs.mkdir(targetBaseDir, { recursive: true });
   await fsExtra.copy(sourcePluginBasePath, archetypePath, {
-    filter: (src) => !src.includes(collectionsMetadataFilename),
+    filter: (src) => !src.includes(sourceMetadataFilename),
   });
 
-  const sourcePluginIdPascal = cmUtils.toPascalCase(
+  const sourcePluginIdPascal = pluginNameUtils.toPascalCase(
     sourcePluginIdForReplacement,
   );
-  const newArchetypeNamePascal = cmUtils.toPascalCase(newArchetypeName);
+  const newArchetypeNamePascal = pluginNameUtils.toPascalCase(newArchetypeName);
   const filesToProcessForStringReplacement = [];
   const processExtensions = ['.js', '.yaml', '.yml', '.css', '.md', '.json'];
 
@@ -310,20 +276,11 @@ async function createArchetype(
     }
   }
 
-  // Add to unified plugins manifest if using default location
-  if (!options.targetDir) {
-    await addToUserPluginsManifest(
-      targetBaseDir,
-      newArchetypeName,
-      sourcePluginIdentifier,
-    );
-  }
-
   // Create source metadata for the plugin
   const sourceMetadata = {
     source_type: 'created',
     created_from: sourcePluginIdentifier,
-    archetype_source: isPotentiallyCmIdentifier ? 'collection' : 'bundled',
+    archetype_source: 'plugin',
     created_on: new Date().toISOString(),
   };
 
@@ -341,54 +298,6 @@ async function createArchetype(
     message: `Archetype '${newArchetypeName}' created successfully.`,
     archetypePath,
   };
-}
-
-// Helper function to add created plugin to unified manifest
-async function addToUserPluginsManifest(
-  userPluginsDir,
-  pluginName,
-  sourceIdentifier,
-) {
-  const pluginsManifestPath = path.join(userPluginsDir, 'plugins.yaml');
-
-  let pluginStates = {};
-
-  // Read existing manifest if it exists
-  if (fss.existsSync(pluginsManifestPath)) {
-    try {
-      const content = await fs.readFile(pluginsManifestPath, 'utf8');
-      const parsed = yaml.load(content);
-      pluginStates = parsed?.plugins || {};
-    } catch (e) {
-      logger.warn('Could not read existing plugins manifest', {
-        context: 'PluginArchetyper',
-        path: pluginsManifestPath,
-        error: e.message,
-      });
-    }
-  }
-
-  // Add the new plugin
-  pluginStates[pluginName] = {
-    type: 'created',
-    enabled: true,
-    created_from: sourceIdentifier,
-    created_on: new Date().toISOString(),
-  };
-
-  // Write updated manifest
-  const updatedManifest = {
-    version: '1.0',
-    plugins: pluginStates,
-  };
-
-  await fs.writeFile(pluginsManifestPath, yaml.dump(updatedManifest));
-
-  logger.debug('Added plugin to unified manifest', {
-    context: 'PluginArchetyper',
-    pluginName: pluginName,
-    manifestPath: pluginsManifestPath,
-  });
 }
 
 module.exports = {

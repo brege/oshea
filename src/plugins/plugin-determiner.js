@@ -16,7 +16,6 @@ async function determinePluginToUse(
   const cliPluginArg = args.plugin;
 
   let fmPlugin = null;
-  let localCfgPlugin = null;
   let markdownFilePathAbsolute = null;
   let localConfigFileNameForLogging = null;
 
@@ -79,14 +78,6 @@ async function determinePluginToUse(
             'utf8',
           );
           const parsedLocalConfig = yaml.load(localConfigContent);
-          if (parsedLocalConfig?.plugin) {
-            localCfgPlugin = parsedLocalConfig.plugin;
-            logger.debug('Plugin found in local config file', {
-              context: 'PluginDeterminer',
-              plugin: localCfgPlugin,
-              localConfigFile: localConfigFileNameForLogging,
-            });
-          }
           if (parsedLocalConfig) {
             const overrides = { ...parsedLocalConfig };
             delete overrides.plugin;
@@ -121,7 +112,7 @@ async function determinePluginToUse(
     }
   }
 
-  // Precedence: CLI > Front Matter > Local Config File > Default
+  // Precedence: CLI > Front Matter > Default
   if (cliPluginArg) {
     pluginSpec = cliPluginArg;
     determinationSource = 'CLI option';
@@ -131,26 +122,10 @@ async function determinePluginToUse(
         cliPlugin: cliPluginArg,
         frontMatterPlugin: fmPlugin,
       });
-    } else if (!fmPlugin && localCfgPlugin && cliPluginArg !== localCfgPlugin) {
-      logger.info('Plugin specified via CLI, overriding local config plugin', {
-        context: 'PluginDeterminer',
-        cliPlugin: cliPluginArg,
-        localConfigPlugin: localCfgPlugin,
-      });
     }
   } else if (fmPlugin) {
     pluginSpec = fmPlugin;
     determinationSource = `front matter in '${path.basename(args.markdownFile)}'`;
-    if (localCfgPlugin && fmPlugin !== localCfgPlugin) {
-      logger.info('Plugin from front matter, overriding local config plugin', {
-        context: 'PluginDeterminer',
-        frontMatterPlugin: fmPlugin,
-        localConfigPlugin: localCfgPlugin,
-      });
-    }
-  } else if (localCfgPlugin) {
-    pluginSpec = localCfgPlugin;
-    determinationSource = `local '${localConfigFileNameForLogging}'`;
   }
   // If still defaultPluginName, determinationSource remains 'default'
   logger.debug('Initial plugin determination', {

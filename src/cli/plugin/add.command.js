@@ -1,6 +1,5 @@
 // src/cli/plugin/add.command.js
 const path = require('node:path');
-const fss = require('node:fs');
 const { loggerPath, cliPath, colorThemePath } = require('@paths');
 const { execSync } = require('node:child_process');
 
@@ -8,73 +7,43 @@ const logger = require(loggerPath);
 const { theme } = require(colorThemePath);
 
 module.exports = {
-  command: 'add <path_to_plugin_dir>',
-  describe: 'add and enable a local plugin directory',
+  command: 'add <source>',
+  describe: 'add and enable a plugin from a local path or git URL',
   builder: (yargsCmd) => {
     yargsCmd
-      .positional('path_to_plugin_dir', {
-        describe: 'path to local plugin directory',
+      .positional('source', {
+        describe: 'path or git URL for a single-plugin source',
         type: 'string',
       })
       .option('name', {
-        alias: 'n',
         describe: 'set a custom invoke name for this plugin',
         type: 'string',
       })
-      .option('bypass-validation', {
-        describe: 'skip plugin validation during enablement',
-        type: 'boolean',
-        default: false,
-      })
       .epilogue(
-        'If --name is omitted, the plugin directory name will be used as the invoke name.' +
+        'If --name is omitted, the plugin id from <plugin>.config.yaml is used as the invoke name.' +
           '\n' +
           "Tip: Use 'oshea plugin list' to see all currently enabled plugins.",
       );
   },
   handler: async (args) => {
-    if (
-      !args.manager ||
-      typeof args.manager.addSingletonPlugin !== 'function'
-    ) {
+    if (!args.manager || typeof args.manager.addPlugin !== 'function') {
       logger.fatal(
-        'FATAL ERROR: CollectionsManager or addSingletonPlugin method not available.',
+        'FATAL ERROR: PluginInstaller or addPlugin method not available.',
       );
       return;
     }
+    const source = args.source;
+    const invokeNameAttempt = args.name || path.basename(source);
 
-    const pluginPathSourceArg = args.path_to_plugin_dir;
-    const absolutePluginPath = path.resolve(pluginPathSourceArg);
-
-    if (
-      !fss.existsSync(absolutePluginPath) ||
-      !fss.lstatSync(absolutePluginPath).isDirectory()
-    ) {
-      logger.error(
-        `ERROR: Source plugin path "${absolutePluginPath}" (from argument "${pluginPathSourceArg}") not found or is not a directory.`,
-      );
-      process.exit(1);
-      return;
-    }
-
-    const derivedPluginId = path.basename(absolutePluginPath);
-    const invokeNameAttempt = args.name || derivedPluginId;
-
-    logger.info(
-      'oshea plugin: Attempting to add and enable plugin from local path...',
-    );
-    logger.info(`  Source Path: ${theme.path(absolutePluginPath)}`);
+    logger.info('oshea plugin: Attempting to add and enable plugin...');
+    logger.info(`  Source: ${theme.path(source)}`);
     logger.info(`  Requested Invoke Name: ${theme.value(invokeNameAttempt)}`);
 
     try {
-      const addSingletonOptions = {
+      const addOptions = {
         name: args.name,
-        bypassValidation: args.bypassValidation,
       };
-      const result = await args.manager.addSingletonPlugin(
-        absolutePluginPath,
-        addSingletonOptions,
-      );
+      const result = await args.manager.addPlugin(source, addOptions);
 
       if (result?.success) {
         logger.success(
@@ -82,23 +51,8 @@ module.exports = {
         );
 
         logger.info('\nImportant Notes:');
-        logger.info(
-          `  • A copy of your plugin from ${theme.path(absolutePluginPath)} is now managed by oshea at:`,
-        );
+        logger.info(`  • A managed copy of this plugin is now at:`);
         logger.info(`    ${theme.path(result.path)}`);
-        logger.info(
-          "  • For future development, it's recommended to edit your original plugin at:",
-        );
-        logger.info(`    ${theme.path(absolutePluginPath)}`);
-        logger.info(
-          '  • To sync any changes from your original plugin into the managed version:',
-        );
-        logger.info(
-          `    ${theme.highlight(`oshea plugin add ${absolutePluginPath} --name ${result.invoke_name}`)}`,
-        );
-        logger.detail(
-          '    (Re-run the add command to sync changes from your original source)',
-        );
 
         logger.info('\nNext Steps:');
         logger.info(
@@ -122,6 +76,7 @@ module.exports = {
       }
     } catch (error) {
       logger.error(`\nERROR in 'plugin add' command: ${error.message}`);
+      process.exit(1);
     }
   },
 };

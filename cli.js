@@ -13,14 +13,12 @@ const {
   loggerPath,
   configFormatterPath,
   configResolverPath,
-  collectionsIndexPath,
+  pluginInstallerPath,
   mainConfigLoaderPath,
   configCommandPath,
   pluginCommandPath,
   convertCommandPath,
   generateCommandPath,
-  collectionCommandPath,
-  updateCommandPath,
   enginePath,
 } = require('@paths');
 const logger = require(loggerPath);
@@ -53,8 +51,8 @@ function createBaseYargs() {
       type: 'boolean',
       default: false,
     })
-    .option('coll-root', {
-      describe: 'overrides the main collection directory',
+    .option('plugins-root', {
+      describe: 'overrides the managed plugins directory',
       type: 'string',
       normalize: true,
     })
@@ -93,11 +91,6 @@ if (argvRaw.includes('--help') || argvRaw.includes('-h')) {
       'generate a document from a complex plugin',
     )
     .command('plugin <command>', 'manage plugins')
-    .command('collection <subcommand>', 'manage plugin collections')
-    .command(
-      'update [<collection_name>]',
-      'update a git-based plugin collection',
-    )
     .command('config', 'display active configuration settings')
     .showHelp((output) => {
       logger.info(output);
@@ -185,7 +178,7 @@ if (
 const { execSync } = require('node:child_process');
 
 const ConfigResolver = require(configResolverPath);
-const CollectionsManager = require(collectionsIndexPath);
+const PluginInstaller = require(pluginInstallerPath);
 const MainConfigLoader = require(mainConfigLoaderPath);
 
 const {
@@ -198,11 +191,9 @@ const configCommand = require(configCommandPath);
 const pluginCommand = require(pluginCommandPath);
 const convertCommandModule = require(convertCommandPath);
 const generateCommand = require(generateCommandPath);
-const collectionCommand = require(collectionCommandPath);
-const updateCommand = require(updateCommandPath);
 
 async function main() {
-  let managerInstance;
+  let installerInstance;
 
   const argvBuilder = createBaseYargs();
 
@@ -226,25 +217,23 @@ async function main() {
       argv.factoryDefaults,
     );
     const primaryConfig = await mainConfigLoader.getPrimaryMainConfig();
-    const collRootFromMainConfig =
-      primaryConfig.config.collections_root || null;
-    const collRootCliOverride = argv['coll-root'] || null;
+    const pluginsRootFromMainConfig = primaryConfig.config.plugins_root || null;
+    const pluginsRootCliOverride = argv['plugins-root'] || null;
 
-    managerInstance = new CollectionsManager({
-      debug: argv.debug || process.env.DEBUG_CM === 'true',
-      collRootFromMainConfig: collRootFromMainConfig,
-      collRootCliOverride: collRootCliOverride,
+    installerInstance = new PluginInstaller({
+      pluginsRootFromMainConfig: pluginsRootFromMainConfig,
+      pluginsRootCliOverride: pluginsRootCliOverride,
     });
 
-    argv.manager = managerInstance;
+    argv.manager = installerInstance;
 
     const configResolver = new ConfigResolver(
       argv.config,
       argv.factoryDefaults,
       false,
       {
-        collRoot: managerInstance.collRoot,
-        collectionsManager: managerInstance,
+        pluginsRoot: installerInstance.pluginsRoot,
+        pluginInstaller: installerInstance,
       },
     );
     argv.configResolver = configResolver;
@@ -258,7 +247,7 @@ async function main() {
     builder: (yargsCommand) => {
       yargsCommand
         .option('config', { type: 'string' })
-        .option('coll-root', { type: 'string' });
+        .option('plugins-root', { type: 'string' });
     },
     handler: (args) => {
       const {
@@ -332,15 +321,12 @@ async function main() {
       },
     })
     .command(pluginCommand)
-    .command(collectionCommand)
-    .command(updateCommand)
     .command(configCommand)
     .strictCommands()
     .fail((msg, err, yargsInstance) => {
       if (err) {
         logger.error(msg || err.message);
-        if (process.env.DEBUG_CM === 'true' && err.stack)
-          logger.error(err.stack);
+        if (process.env.DEBUG === 'true' && err.stack) logger.error(err.stack);
         yargsInstance.showHelp();
         process.exit(1);
         return;
@@ -354,16 +340,13 @@ async function main() {
             'generate',
             'plugin',
             'config',
-            'collection',
-            'update',
-            'up',
             '--help',
             '-h',
             '--version',
             '-v',
             '--config',
             '--factory-defaults',
-            '--coll-root',
+            '--plugins-root',
           ].includes(firstArg) &&
           (fs.existsSync(path.resolve(firstArg)) || firstArg.endsWith('.md'))
         ) {

@@ -27,7 +27,9 @@ function discoverAllTestIds() {
     {
       filter: (name) => name.endsWith('.yaml'),
     },
-  );
+  ).filter((yamlFile) => {
+    return yamlFile.endsWith('.manifest.yaml');
+  });
 
   const testCases = [];
   const debugMode =

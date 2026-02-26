@@ -1,4 +1,4 @@
-# The **oshea** Plugin Contract
+# The Plugin Contract
 
 This document outlines the formal contract that all plugins for **oshea** must adhere to. It serves as a guide for plugin developers, ensuring that plugins are reliable, predictable, and integrate smoothly with the core application.
 
@@ -122,9 +122,9 @@ These are standard properties that plugins can use to hook into **oshea**'s func
 - **Example:**
    ```yaml
    watch_sources:
-    - path: "./assets"
+     - path: "./assets"
        type: "directory"
-    - path: "./data.json"
+     - path: "./data.json"
        type: "file"
    ```
 
@@ -136,7 +136,7 @@ These are standard properties that plugins can use to hook into **oshea**'s func
 
 #### `aggressiveHeadingCleanup`
 - **Type:** `boolean`
-- **Purpose:** If `true`, this option instructs **oshea** to remove any existing H1 (prefixed with ` #  `) or H2 (prefixed with ` ##  `) headings found within the Markdown content. This is useful when the plugin or other configurations are expected to generate the main headings.
+- **Purpose:** If `true`, this option instructs **oshea** to remove any existing H1 (prefixed with `#`) or H2 (prefixed with `##`) headings found within the Markdown content. This is useful when the plugin or other configurations are expected to generate the main headings.
 - **Example:** `aggressiveHeadingCleanup: false`
 
 ---

@@ -70,8 +70,8 @@ async function commonCommandHandler(args, executorFunction, commandType) {
           watchedArgs.factoryDefaults,
           watchedArgs.isLazyLoad || false,
           {
-            collRoot: watchedArgs.manager.collRoot,
-            collectionsManager: watchedArgs.manager,
+            pluginsRoot: watchedArgs.manager.pluginsRoot,
+            pluginInstaller: watchedArgs.manager,
           },
         );
         await executorFunction(watchedArgs, currentConfigResolver);

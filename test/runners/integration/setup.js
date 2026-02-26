@@ -105,7 +105,9 @@ module.exports = {
 
     afterEach(done) {
       // Restore the sandbox
-      this.sandbox.restore();
+      if (this.sandbox?.restore) {
+        this.sandbox.restore();
+      }
       // Clean up the require cache to prevent test pollution
       delete require.cache[require.resolve(mathIntegrationPath)];
       delete require.cache[require.resolve(defaultHandlerPath)];

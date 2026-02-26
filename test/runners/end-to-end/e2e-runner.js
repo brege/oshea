@@ -144,7 +144,7 @@ class YamlTestRunner {
       workspace = new TestWorkspace(
         this.options.basePath,
         this.options.outdir,
-        this.options.collRoot,
+        this.options.pluginsRoot,
       );
       workspace.setup();
     }
@@ -736,8 +736,8 @@ if (require.main === module) {
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
 
-    if (arg === '--coll-root' && i + 1 < args.length) {
-      options.collRoot = args[i + 1];
+    if (arg === '--plugins-root' && i + 1 < args.length) {
+      options.pluginsRoot = args[i + 1];
       i++;
     } else if (arg === '--outdir' && i + 1 < args.length) {
       options.outdir = args[i + 1];

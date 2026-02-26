@@ -1,25 +1,25 @@
-# oshea Project Documentation
+# Documentation Index
 
-This document is a central index for all documentation within the **oshea** repo.
+This document is a central index for all documentation within **oshea**'s repo. Major nodes are further indexed by child READMEs.
 
 ## Indexes
-* [Docs](README.md): This document
-* [Paths](../paths/README.md) registry index
+* [Docs](README.md) centralizes user docs and project indexes (this README)
+* [Paths](../paths/README.md) registry is a framework for non-relative pathing
 * [Plugins](../plugins/README.md) bundled with oshea
-* [Scripts](../scripts/README.md) for maintenance
-* [Tests](../test/README.md) system overview
-* [Utils](../src/utils/README.md) like formatters, loggers, etc.
+* [Scripts](../scripts/README.md) for standalone tools
+* [Tests](../test/README.md) & QA system overview
+* [Utils](../src/utils/README.md) like formatters, loggers, etc
 
 ## Guides
 * [Claude Skills](guides/claude-skills.md): Examples of Claude and Codex plugin generation
-* [Plugin Development Guide](guides/plugin-development.md): Building plugins form archetypes
+* [Plugin Development Guide](guides/plugin-development.md): Building plugins from archetypes
 * [Batch Processing Guide](guides/batch-processing-guide.md): Building books and decks
-* [Configuration Hierarchies](guides/configuration-hierarchies.md): Config and Plugin hierarchies
+* [Configuration Hierarchies](guides/configuration-hierarchies.md): Config and plugin hierarchies
 
 ## Reference
 * [Cheat Sheet](refs/cheat-sheet.md): A list of commands and options
 * [Plugin Contract](refs/plugin-contract.md): Formalizes plugin metadata, structure, validity
-* [Interaction Specification](refs/interaction-spec.md): Used for LLM's/AI Agents
+* [Interaction Specification](refs/interaction-spec.md): Created by and used for coding agents
     
 ## Tutorials
 * [Walkthrough: A Plugin's Full Lifecycle](walkthroughs/full-lifecycle.md)

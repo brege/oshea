@@ -25,7 +25,7 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
       false,
       null,
       manager,
-      { collRoot: manager.collRoot },
+      { pluginsRoot: manager.pluginsRoot },
     );
 
     const pluginRegistry = await registryBuilder.buildRegistry();

@@ -1,6 +1,6 @@
 ---
 name: create-oshea-plugin
-description: Create or update oshea plugins from a visual reference image or concise design brief by using the built-in plugin archetyper workflow (`node cli.js plugin create --from ...`). Use when a Claude-style agent must generate a functioning plugin and prove it by running `oshea convert`.
+description: Create or update oshea plugins from a visual reference image or concise design brief by using plugin archetyping (`node cli.js plugin create --from ...`). Use when a Claude-style agent must generate a functioning plugin and prove it by running `oshea convert`.
 ---
 
 # Objective
@@ -25,14 +25,14 @@ Create an [oshea](https://github.com/brege/oshea) plugin from a visual reference
 
 1. Bootstrap technical context (replacement for old harness)
 - Read:
-  - `docs/ai/interaction-spec.md`
+  - `docs/refs/interaction-spec.md`
   - `docs/refs/plugin-contract.md`
   - `docs/walkthroughs/archetyping-a-plugin.md`
   - `docs/refs/cheat-sheet.md`
 - Choose one built-in base plugin and read this exact file set from it:
-  - `<plugin>.config.yaml`
-  - `<plugin>.css`
-  - `<plugin>-example.md`
+  - `default.yaml`
+  - `style.css`
+  - `example.md`
   - `index.js`
   - `README.md`
 
@@ -42,23 +42,31 @@ Create an [oshea](https://github.com/brege/oshea) plugin from a visual reference
 
 3. Scaffold with archetyper
 - Choose a base plugin close to target shape.
-- For fixed-size cards/posters, use `advanced-card` unless a different built-in is explicitly required.
-- Use built-in sources only (`template-basic`, `default`, `advanced-card`, `cv`, `cover-letter`, `recipe`, `recipe-book`).
+- If the user provides an explicit GitHub plugin reference:
+  - run `node cli.js plugin list --short`
+  - if source plugin exists, update it (remove + add):
+    - `node cli.js plugin remove <source-plugin-name>`
+    - `node cli.js plugin add <github-url>`
+  - if source plugin does not exist, add it:
+    - `node cli.js plugin add <github-url>`
+  - run `node cli.js plugin create <new-plugin-name> --from <source-plugin-name> --outdir plugins`
+- If there is no explicit reference source, use built-in sources (`template-basic`, `default`, `advanced-card`, `cv`, `cover-letter`, `recipe`, `recipe-book`).
+- For fixed-size cards/posters without an explicit reference source, use `advanced-card` unless a different built-in is explicitly required.
 - Do not archetype from previously AI-generated plugin folders.
-- Run:
+- For local-path or built-in sources, run:
 ```bash
 node cli.js plugin create <new-plugin-name> --from <base-plugin> --outdir plugins
 ```
 - Prefer kebab-case names tied to the requested artifact.
 - Verify scaffold provenance in `plugins/<new-plugin-name>/.source.yaml`:
-  - `archetype_source` must be `bundled`
-  - `created_from` must point to a built-in plugin path
+  - built-in source: `archetype_source` should be `bundled`
+  - external/local plugin source: `archetype_source` should be `plugin`
 
 4. Implement plugin contract
 - Ensure required files exist (validator-critical):
   - `plugins/<new-plugin-name>/index.js`
-  - `plugins/<new-plugin-name>/<new-plugin-name>.config.yaml`
-  - `plugins/<new-plugin-name>/<new-plugin-name>-example.md`
+  - `plugins/<new-plugin-name>/default.yaml`
+  - `plugins/<new-plugin-name>/example.md`
   - `plugins/<new-plugin-name>/README.md`
 - Keep README YAML front matter valid.
 - Keep `plugin_name` equal to directory name.
@@ -88,7 +96,7 @@ if (pdfOptions.width || pdfOptions.height) {
 7. Validate with execution
 - Run conversion with the new plugin:
 ```bash
-node cli.js convert plugins/<new-plugin-name>/<new-plugin-name>-example.md --plugin <new-plugin-name> --outdir /tmp/oshea-skill-validate --open false
+node cli.js convert plugins/<new-plugin-name>/example.md --plugin <new-plugin-name> --outdir /tmp/oshea-skill-validate --open false
 ```
 - Run validator:
 ```bash
@@ -96,18 +104,22 @@ node cli.js plugin validate plugins/<new-plugin-name>
 ```
 - Run self-activation check (no explicit `--plugin`):
 ```bash
-node cli.js convert plugins/<new-plugin-name>/<new-plugin-name>-example.md --outdir /tmp/oshea-skill-validate --open false
+node cli.js convert plugins/<new-plugin-name>/example.md --outdir /tmp/oshea-skill-validate --open false
 ```
 - Verify command success and output file creation.
 - Inspect merged config if behavior is surprising:
 ```bash
 node cli.js config --plugin <new-plugin-name> --pure
 ```
-- If image comparison is requested, rasterize PDF and compare composition to the reference by structure (regions, spacing, alignment), not only exact pixel identity.
+- If using an explicit source plugin, this visual comparison is required (blocking):
+  - render source plugin reference output from `~/.config/oshea/plugins/<source-plugin-name>/example.md`
+  - rasterize both source and new plugin outputs
+  - verify matching canvas dimensions/aspect ratio and topological similarity (dominant regions, spacing, alignment)
+  - if major mismatch exists, iterate until aligned
 - Enforce page-size sanity check:
 ```bash
-pdftoppm -png -singlefile /tmp/oshea-skill-validate/<new-plugin-name>-example.pdf /tmp/oshea-skill-validate/<new-plugin-name>-example
-magick identify -format '%wx%h\n' /tmp/oshea-skill-validate/<new-plugin-name>-example.png
+pdftoppm -png -singlefile /tmp/oshea-skill-validate/<output-file>.pdf /tmp/oshea-skill-validate/<output-file>
+magick identify -format '%wx%h\n' /tmp/oshea-skill-validate/<output-file>.png
 ```
 - For a 6x8in card at default rasterization, expect roughly `900x1200` output. Reject outputs that look like letter page dimensions.
 - Run one visual sanity assertion before reporting success: ensure the rendered page has no large unused margin area relative to the target composition.
@@ -122,6 +134,9 @@ magick identify -format '%wx%h\n' /tmp/oshea-skill-validate/<new-plugin-name>-ex
   - Why the layout is topologically consistent with the reference
   - Exact convert command executed
   - Validation outcome
+  - Post-create plugin actions:
+    - install new plugin: `node cli.js plugin add ./plugins/<new-plugin-name>`
+    - optional cleanup of temporary source plugin (only if added during this run): `node cli.js plugin remove <source-plugin-name>`
 
 # Failure Handling
 

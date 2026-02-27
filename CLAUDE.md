@@ -51,7 +51,7 @@ Documentation is indexed by `README.md` files throughout the repository. These o
 2. User config (`~/.config/oshea/config.yaml`)
 3. `config.example.yaml` (lowest precedence)
 
-Plugin configs follow similar hierarchy with plugin-specific `.config.yaml` files.
+Plugin manifests/config defaults are defined in each plugin's `default.yaml`.
 
 See `docs/guides/configuration-hierarchies.md` for details.
 

@@ -1,4 +1,3 @@
-# plugins/recipe-book/recipe-book.config.yaml
 plugin_name: recipe-book
 version: 1.0.0
 protocol: v1
@@ -9,13 +8,6 @@ handler_script: index.js
 css_files:
   - "recipe.css"
   - "recipe-book.css"
-
-pdf_options:
-  margin:
-    top: 0.8in
-    right: 0.8in
-    bottom: 0.8in
-    left: 0.8in
 
 cover_page:
   enabled: true

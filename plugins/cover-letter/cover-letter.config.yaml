@@ -1,36 +1,12 @@
-# plugins/cover-letter/cover-letter.config.yaml
 plugin_name: cover-letter
 version: 1.0.0
 protocol: v1
 
 description: "Plugin for Cover Letter documents."
-# Points to the handler script within this plugin's directory (plugins/cover-letter/index.js).
-# This script will utilize the common src/default_handler.js for standard Markdown processing.
 handler_script: index.js
-
-# CSS file for this plugin, resolved relative to this plugin's directory.
 css_files:
   - "cover-letter.css"
-
-# PDF generation options specific to Cover Letters.
-pdf_options:
-  format: Letter # As per your original config.yaml for cover-letter
-  printBackground: true # Assuming true, consistent with other types
-  margin:
-    top: 1in
-    right: 1in
-    bottom: 1in
-    left: 1in
-
-# Table of Contents settings for Cover Letters (typically disabled).
 toc_options:
   enabled: false
-
-# Math rendering for this plugin (defaulting to disabled)
 math:
   enabled: false
-
-# Processing flags for Cover Letters.
-# Typically, the 'title' from front matter is for PDF metadata, not an H1 in the document.
-inject_fm_title_as_h1: false
-aggressiveHeadingCleanup: false

@@ -22,6 +22,13 @@ function parseViewportPixels(dimension) {
   return Number.isFinite(value) && value > 0 ? Math.round(value) : null;
 }
 
+function hasCssPageRules(cssText) {
+  if (typeof cssText !== 'string') {
+    return false;
+  }
+  return /@page\b/i.test(cssText);
+}
+
 async function generatePdf(
   htmlBodyContent,
   outputPdfPath,
@@ -133,16 +140,22 @@ async function generatePdf(
       context: 'PDFGenerator',
     });
 
+    const useCssPageGeometry = hasCssPageRules(combinedCss);
     const defaultPdfOptions = {
-      format: 'A4',
       printBackground: true,
-      margin: {
+    };
+
+    if (!useCssPageGeometry) {
+      defaultPdfOptions.format = 'A4';
+      defaultPdfOptions.margin = {
         top: '1cm',
         right: '1cm',
         bottom: '1cm',
         left: '1cm',
-      },
-    };
+      };
+    } else {
+      defaultPdfOptions.preferCSSPageSize = true;
+    }
 
     if (pdfOptions && (pdfOptions.width || pdfOptions.height)) {
       delete defaultPdfOptions.format;
@@ -156,12 +169,19 @@ async function generatePdf(
     const finalPdfOptions = {
       ...defaultPdfOptions,
       ...(pdfOptions || {}),
-      margin: {
-        ...defaultPdfOptions.margin,
-        ...(pdfOptions?.margin || {}),
-      },
       path: outputPdfPath,
     };
+
+    if (defaultPdfOptions.margin || pdfOptions?.margin) {
+      finalPdfOptions.margin = {
+        ...(defaultPdfOptions.margin || {}),
+        ...(pdfOptions?.margin || {}),
+      };
+    }
+
+    if (useCssPageGeometry && !pdfOptions?.margin) {
+      delete finalPdfOptions.margin;
+    }
     logger.debug('Final PDF options assembled', {
       context: 'PDFGenerator',
       options: finalPdfOptions,

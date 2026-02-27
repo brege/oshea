@@ -1,40 +1,15 @@
-# plugins/recipe/recipe.config.yaml
 plugin_name: recipe
 version: 1.0.0
 protocol: v1
 
 description: "Plugin for individual Recipe documents."
-# Points to the handler script within this plugin's directory (plugins/recipe/index.js).
 handler_script: index.js
-
-# CSS file for this plugin, resolved relative to this plugin's directory.
 css_files:
   - "recipe.css"
-
-# PDF generation options specific to Recipes.
-pdf_options:
-  margin:
-    top: 0.8in
-    right: 0.8in
-    bottom: 0.8in
-    left: 0.8in
-  # Inherits other global PDF options like format, printBackground.
-
-  # Table of Contents settings for individual recipes (typically disabled).
 toc_options:
   enabled: false
-
-# Math rendering for this plugin (defaulting to disabled)
 math:
   enabled: false
-
-# Shortcodes to remove for recipe files (e.g., Hugo's recipe shortcodes).
 remove_shortcodes_patterns:
   - "{{%\\s*recipe\\s*%}}"
   - "{{%\\s*/recipe\\s*%}}"
-
-# Processing flags for Recipes.
-# 'title' from front matter (e.g., recipe name) will be injected as the main H1.
-inject_fm_title_as_h1: true
-# Aggressively remove existing H1/H2 from content to avoid duplicate titles.
-aggressiveHeadingCleanup: true

@@ -1,4 +1,9 @@
 /* plugins/default/default.css */
+@page {
+  size: Letter;
+  margin: 1in;
+}
+
 body {
   font-family:
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,

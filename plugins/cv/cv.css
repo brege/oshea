@@ -4,8 +4,12 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 9pt;
   line-height: 1.45;
-  margin: 1cm; /* Note: Puppeteer margins from config.yaml will likely define the PDF's printable area. */
-  /* This body margin primarily affects direct HTML viewing. */
+  margin: 1cm;
+}
+
+@page {
+  size: A4;
+  margin: 1.5cm 1cm;
 }
 
 a {
@@ -101,10 +105,6 @@ blockquote {
 
 /* Print specific styles */
 @media print {
-  @page {
-    margin: 1cm; /* This should ideally match config.yaml for 'cv' type if preferCSSPageSize were true */
-  }
-
   body {
     font-size: 9pt; /* Maintain CV font size for print */
     color: #000;

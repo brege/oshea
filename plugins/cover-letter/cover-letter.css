@@ -9,7 +9,12 @@ body {
   line-height: 1.45; /* Comfortable line spacing */
   color: #333333; /* Dark gray for text, less harsh than pure black */
   background-color: #ffffff;
-  margin: 0; /* Page margins are controlled by Puppeteer options from config.yaml */
+  margin: 0;
+}
+
+@page {
+  size: Letter;
+  margin: 1in;
 }
 
 /* --- Links --- */
@@ -96,11 +101,6 @@ hr {
 
 /* --- Print-Specific Styles --- */
 @media print {
-  @page {
-    margin: 1in; /* This should align with 'cover-letter' type's margin in config.yaml */
-    /* if preferCSSPageSize were true. Currently, Puppeteer's options rule. */
-  }
-
   body {
     font-size: 10.5pt; /* Ensure font size is maintained for print */
     color: #000000; /* Force black text for printing */

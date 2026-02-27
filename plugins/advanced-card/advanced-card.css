@@ -1,4 +1,9 @@
 /* plugins/advanced-card/advanced-card.css */
+@page {
+  size: 3.5in 2in;
+  margin: 0.15in;
+}
+
 body {
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;

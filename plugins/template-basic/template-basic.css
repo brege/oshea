@@ -2,6 +2,10 @@
 /* This is a basic CSS template for new oshea plugins. */
 /* When a new plugin is created from this template, this filename */
 /* ('template-basic.css') will be replaced with '<new-plugin-name>.css'. */
+@page {
+  size: Letter;
+  margin: 1in;
+}
 
 body {
   font-family: sans-serif;

@@ -1,37 +1,12 @@
-# plugins/cv/cv.config.yaml
 plugin_name: cv
 version: 1.0.0
 protocol: v1
 
 description: "Plugin for Curriculum Vitae (CV) documents."
-# Points to the handler script within this plugin's directory (plugins/cv/index.js).
-# This script will utilize the common src/default_handler.js for standard Markdown processing.
 handler_script: index.js
-
-# CSS file for this plugin, resolved relative to this plugin's directory.
 css_files:
   - "cv.css"
-
-# PDF generation options specific to CVs.
-pdf_options:
-  format: A4 # As per your original config.yaml for cv
-  printBackground: true
-  margin:
-    top: 1.5cm
-    right: 1cm
-    bottom: 1.5cm
-    left: 1cm
-
-# Table of Contents settings for CVs (typically disabled).
 toc_options:
   enabled: false
-
-# Math rendering for this plugin (defaulting to disabled)
 math:
   enabled: false
-
-# Processing flags for CVs.
-# 'title' from front matter (e.g., your name) will be injected as the main H1.
-inject_fm_title_as_h1: true
-# Typically, aggressive cleanup of existing H1/H2 is not needed for CVs.
-aggressiveHeadingCleanup: false

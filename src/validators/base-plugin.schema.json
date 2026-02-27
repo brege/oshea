@@ -32,11 +32,6 @@
       },
       "additionalProperties": true
     },
-    "params": {
-      "description": "Defines default parameters specific to this plugin, which can be used as placeholders.",
-      "type": "object",
-      "additionalProperties": true
-    },
     "math": {
       "description": "Configuration for KaTeX math rendering.",
       "type": "object",
@@ -57,14 +52,6 @@
       "description": "Defines additional files or directories for oshea to monitor in --watch mode.",
       "type": "array",
       "items": { "type": "object" }
-    },
-    "inject_fm_title_as_h1": {
-      "description": "If true, injects the 'title' from front matter as the main H1 heading.",
-      "type": "boolean"
-    },
-    "aggressiveHeadingCleanup": {
-      "description": "If true, removes existing H1/H2 headings from the Markdown content.",
-      "type": "boolean"
     }
   },
   "required": ["description", "handler_script"]

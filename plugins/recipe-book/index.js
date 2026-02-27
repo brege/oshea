@@ -27,12 +27,8 @@ class RecipeBookHandler {
       return path.join(outputDir, 'validation_placeholder.pdf');
     }
 
-    const {
-      extractFrontMatter,
-      removeShortcodes,
-      renderMarkdownToHtml,
-      ensureAndPreprocessHeading,
-    } = this.markdownUtils;
+    const { extractFrontMatter, removeShortcodes, renderMarkdownToHtml } =
+      this.markdownUtils;
     const { generatePdf } = this.pdfGenerator;
 
     const recipesBaseDir = data.cliArgs?.recipesBaseDir;
@@ -122,11 +118,10 @@ class RecipeBookHandler {
         recipeDetail.slug
           .replace(/-/g, ' ')
           .replace(/\b\w/g, (l) => l.toUpperCase());
-      const processedRecipeMarkdown = ensureAndPreprocessHeading(
-        cleanedContent,
-        recipeTitle,
-        true,
-      );
+      const trimmedRecipeContent = cleanedContent.trim();
+      const processedRecipeMarkdown = trimmedRecipeContent.startsWith('# ')
+        ? trimmedRecipeContent
+        : `# ${recipeTitle}\n\n${trimmedRecipeContent}`;
       combinedMarkdown += processedRecipeMarkdown;
       combinedMarkdown +=
         '\n\n<div style="page-break-before: always;"></div>\n\n';

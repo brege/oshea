@@ -56,9 +56,6 @@ function makeDefaultHandlerScenario({
       },
     );
     mockStubs.removeShortcodesStub.returns(stubs.removeShortcodes || '');
-    mockStubs.ensureAndPreprocessHeadingStub.returns(
-      stubs.ensureAndPreprocessHeading || '',
-    );
 
     if (stubs.renderMarkdownToHtmlThrows) {
       mockStubs.renderMarkdownToHtmlStub.throws(new Error(expectedError));

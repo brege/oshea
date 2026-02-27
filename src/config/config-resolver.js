@@ -131,7 +131,7 @@ class ConfigResolver {
       specificSchema,
     );
 
-    const objectsToRestrict = ['pdf_options', 'params', 'math', 'toc_options'];
+    const objectsToRestrict = ['pdf_options', 'math', 'toc_options'];
     if (strictSchema.properties) {
       objectsToRestrict.forEach((key) => {
         if (

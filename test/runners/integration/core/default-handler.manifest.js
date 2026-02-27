@@ -26,7 +26,6 @@ module.exports = [
         processedContent: '# Hello World',
       },
       removeShortcodes: '# Hello World',
-      ensureAndPreprocessHeading: '# Hello World',
       renderMarkdownToHtml: '<h1>Hello World</h1>',
       generateSlug: { ...alwaysTestSlug, 'Test Doc': 'test-doc' },
       expectations: (stubs, expect) => {
@@ -70,10 +69,12 @@ module.exports = [
 
   makeDefaultHandlerScenario({
     description: '2.2.3: should correctly substitute placeholders',
-    markdownContent: 'Hello {{ .name }}!',
-    globalConfig: { params: { name: 'World' } },
+    markdownContent: '---\nname: World\n---\nHello {{ .name }}!',
     stubs: {
-      extractFrontMatter: { data: {}, content: 'Hello {{ .name }}!' },
+      extractFrontMatter: {
+        data: { name: 'World' },
+        content: 'Hello {{ .name }}!',
+      },
       substituteAllPlaceholders: {
         processedFmData: { name: 'World' },
         processedContent: 'Hello World!',
@@ -195,7 +196,6 @@ module.exports = [
         processedContent: 'Content',
       },
       removeShortcodes: 'Content',
-      ensureAndPreprocessHeading: '# Template Test\n\nContent',
       renderMarkdownToHtml: '<p>Content</p>',
       generateSlug: { 'Template Test': 'template-test' },
       fileMocks: [
@@ -333,11 +333,8 @@ module.exports = [
   }),
 
   makeDefaultHandlerScenario({
-    description: '2.2.15: should NOT inject H1 if omit_title_heading is true',
-    pluginSpecificConfig: {
-      inject_fm_title_as_h1: true,
-      omit_title_heading: true,
-    },
+    description:
+      '2.2.17: should not auto-inject a heading when markdown content is empty',
     markdownContent: '---\ntitle: My Title\n---',
     stubs: {
       extractFrontMatter: { data: { title: 'My Title' }, content: '' },
@@ -345,9 +342,13 @@ module.exports = [
         processedFmData: { title: 'My Title' },
         processedContent: '',
       },
+      removeShortcodes: '',
+      renderMarkdownToHtml: '',
       generateSlug: { ...alwaysTestSlug, 'My Title': 'my-title' },
       expectations: (stubs, expect) => {
-        expect(stubs.ensureAndPreprocessHeadingStub.notCalled).to.be.true;
+        expect(stubs.renderMarkdownToHtmlStub.calledOnce).to.be.true;
+        const [markdownInput] = stubs.renderMarkdownToHtmlStub.getCall(0).args;
+        expect(markdownInput).to.equal('');
       },
     },
     expectedResult: '/output/my-title.pdf',
@@ -355,24 +356,26 @@ module.exports = [
 
   makeDefaultHandlerScenario({
     description:
-      '2.2.15: should inject H1 title if omit_title_heading is false or undefined',
-    pluginSpecificConfig: {
-      inject_fm_title_as_h1: true,
-      omit_title_heading: false,
-    },
-    markdownContent: '---\ntitle: My Title\n---',
+      '2.2.18: should use front matter context only for placeholder substitution',
+    markdownContent: '---\nname: Alex\n---\nHello {{ .name }}',
     stubs: {
-      extractFrontMatter: { data: { title: 'My Title' }, content: '' },
-      substituteAllPlaceholders: {
-        processedFmData: { title: 'My Title' },
-        processedContent: '',
+      extractFrontMatter: {
+        data: { name: 'Alex' },
+        content: 'Hello {{ .name }}',
       },
-      generateSlug: { ...alwaysTestSlug, 'My Title': 'my-title' },
+      substituteAllPlaceholders: {
+        processedFmData: { name: 'Alex' },
+        processedContent: 'Hello Alex',
+      },
+      removeShortcodes: 'Hello Alex',
+      renderMarkdownToHtml: '<p>Hello Alex</p>',
+      generateSlug: { ...alwaysTestSlug },
       expectations: (stubs, expect) => {
-        expect(stubs.ensureAndPreprocessHeadingStub.called).to.be.true;
+        const [, context] = stubs.substituteAllPlaceholdersStub.getCall(0).args;
+        expect(context).to.deep.equal({ name: 'Alex' });
       },
     },
-    expectedResult: '/output/my-title.pdf',
+    expectedResult: '/output/test-slug.pdf',
   }),
 
   makeDefaultHandlerScenario({

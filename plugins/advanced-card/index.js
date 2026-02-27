@@ -36,8 +36,6 @@ class AdvancedCardHandler {
       const { data: fm, content: markdownBody } =
         this.markdownUtils.extractFrontMatter(rawMarkdownContent);
 
-      const globalParams = globalConfig.params || {};
-
       const pdfGenOptions = {
         ...(globalConfig.global_pdf_options || {}),
         ...(pluginSpecificConfig.pdf_options || {}),
@@ -49,15 +47,10 @@ class AdvancedCardHandler {
         pluginSpecificConfig.math,
       );
 
-      const qrDataSource =
-        fm.qr_data ||
-        fm.website ||
-        globalParams.defaultWebsite ||
-        'https://example.com';
+      const qrDataSource = fm.qr_data || fm.website || 'https://example.com';
       const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(qrDataSource)}`;
 
-      const cardBrandingColor =
-        fm.brandingColor || globalParams.defaultBrandingColor || '#333';
+      const cardBrandingColor = fm.brandingColor || '#333';
 
       const htmlBodyContent = `
                 <div class="card-container" style="border-top: 5px solid ${cardBrandingColor};">
@@ -67,7 +60,7 @@ class AdvancedCardHandler {
                     <div class="qr-code-section">
                         <img src="${qrCodeUrl}" alt="QR Code for ${qrDataSource}">
                     </div>
-                    ${globalParams.companyLogoUrl ? `<img src="${globalParams.companyLogoUrl}" alt="Company Logo" class="company-logo">` : ''}
+                    ${fm.companyLogoUrl ? `<img src="${fm.companyLogoUrl}" alt="Company Logo" class="company-logo">` : ''}
                 </div>
             `;
 

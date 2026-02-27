@@ -118,8 +118,6 @@ function getTypeConfig(fullConfig, docType) {
     remove_shortcodes_patterns: resolvedShortcodePatterns,
     hugo_specific_options: typeSettings.hugo_specific_options || {},
     pdf_viewer: fullConfig.pdf_viewer || null,
-    aggressiveHeadingCleanup: typeSettings.aggressiveHeadingCleanup || false,
-    inject_fm_title_as_h1: typeSettings.inject_fm_title_as_h1 || false,
   };
 }
 
@@ -317,51 +315,6 @@ function generateSlug(text) {
   return slug;
 }
 
-function ensureAndPreprocessHeading(
-  markdownContent,
-  title,
-  aggressiveCleanup = false,
-) {
-  let processedContent = markdownContent.trim();
-
-  if (title && typeof title === 'string' && title.trim() !== '') {
-    const newH1 = `# ${title.trim()}\n\n`;
-    if (aggressiveCleanup) {
-      processedContent = processedContent
-        .replace(/^#\s+.*(\r?\n|$)/m, '')
-        .trim();
-      processedContent = processedContent
-        .replace(/^##\s+.*(\r?\n|$)/m, '')
-        .trim();
-      logger.debug('Aggressively cleaned existing H1/H2 headings', {
-        context: 'MarkdownUtils',
-        aggressiveCleanup: aggressiveCleanup,
-      });
-    }
-    if (!processedContent.startsWith(newH1.trim())) {
-      logger.debug('Prepending new H1 heading', {
-        context: 'MarkdownUtils',
-        title: title,
-      });
-      return `${newH1}${processedContent}`;
-    }
-    logger.debug('H1 heading already present or not needed to prepend', {
-      context: 'MarkdownUtils',
-      title: title,
-    });
-    return processedContent;
-  } else {
-    if (!processedContent.match(/^#\s+/m) && !aggressiveCleanup) {
-      logger.warn('Markdown content does not start with an H1 heading', {
-        context: 'MarkdownUtils',
-        suggestion:
-          'No title was provided to prepend. Consider adding a title to the front matter or using the "inject_fm_title_as_h1" option.',
-      });
-    }
-    return processedContent;
-  }
-}
-
 // Placeholder Substitution Functions
 
 function resolvePath(object, pathStr) {
@@ -438,8 +391,7 @@ function substituteAllPlaceholders(mainContent, initialContextData) {
   });
   const isoDate = today.toISOString().split('T')[0];
 
-  // Start with the provided initial context (already merged global params + front matter)
-  // and add dynamic date placeholders.
+  // Start with front matter context and add dynamic date placeholders.
   let processingContext = {
     ...initialContextData,
     CurrentDateFormatted: formattedDate,
@@ -487,7 +439,7 @@ function substituteAllPlaceholders(mainContent, initialContextData) {
     logger.warn('Max substitution loops reached for context data', {
       context: 'MarkdownUtils',
       suggestion:
-        'Check for circular placeholder references in your front matter or global parameters.',
+        'Check for circular placeholder references in your front matter.',
     });
   }
 
@@ -514,6 +466,5 @@ module.exports = {
   removeShortcodes,
   renderMarkdownToHtml,
   generateSlug,
-  ensureAndPreprocessHeading,
   substituteAllPlaceholders,
 };

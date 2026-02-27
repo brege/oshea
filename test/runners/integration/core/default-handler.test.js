@@ -21,7 +21,6 @@ function collectStubs(ctx) {
     removeShortcodesStub: ctx.removeShortcodesStub,
     renderMarkdownToHtmlStub: ctx.renderMarkdownToHtmlStub,
     generateSlugStub: ctx.generateSlugStub,
-    ensureAndPreprocessHeadingStub: ctx.ensureAndPreprocessHeadingStub,
     substituteAllPlaceholdersStub: ctx.substituteAllPlaceholdersStub,
     getMathCssContentStub: ctx.getMathCssContentStub,
     configureMarkdownItForMathStub: ctx.configureMarkdownItForMathStub,

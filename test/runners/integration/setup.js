@@ -60,10 +60,6 @@ module.exports = {
         'renderMarkdownToHtml',
       );
       this.generateSlugStub = this.sandbox.stub(markdownUtils, 'generateSlug');
-      this.ensureAndPreprocessHeadingStub = this.sandbox.stub(
-        markdownUtils,
-        'ensureAndPreprocessHeading',
-      );
       this.substituteAllPlaceholdersStub = this.sandbox.stub(
         markdownUtils,
         'substituteAllPlaceholders',

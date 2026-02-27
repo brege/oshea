@@ -16,7 +16,6 @@ const {
   removeShortcodes,
   renderMarkdownToHtml,
   generateSlug,
-  ensureAndPreprocessHeading,
   substituteAllPlaceholders,
 } = require(markdownUtilsPath);
 
@@ -67,8 +66,6 @@ class DefaultHandler {
       });
 
       const contextForPlaceholders = {
-        ...(globalConfig.params || {}),
-        ...(pluginSpecificConfig.params || {}),
         ...initialFrontMatter,
       };
 
@@ -130,23 +127,6 @@ class DefaultHandler {
         outputPath: outputPdfPath,
       });
 
-      let markdownToRender = cleanedContent;
-      if (
-        pluginSpecificConfig.inject_fm_title_as_h1 &&
-        !pluginSpecificConfig.omit_title_heading &&
-        processedFmData.title
-      ) {
-        markdownToRender = ensureAndPreprocessHeading(
-          cleanedContent,
-          String(processedFmData.title),
-          !!pluginSpecificConfig.aggressiveHeadingCleanup,
-        );
-        logger.debug('Injected front matter title as H1', {
-          context: 'DefaultHandler',
-          title: processedFmData.title,
-        });
-      }
-
       const mergedPdfOptions = {
         ...(globalConfig.global_pdf_options || {}),
         ...(pluginSpecificConfig.pdf_options || {}),
@@ -160,7 +140,7 @@ class DefaultHandler {
       });
 
       const htmlBodyContent = renderMarkdownToHtml(
-        markdownToRender,
+        cleanedContent,
         pluginSpecificConfig.toc_options,
         mergedPdfOptions.anchor_options,
         pluginSpecificConfig.math,

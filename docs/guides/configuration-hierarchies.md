@@ -50,13 +50,13 @@ Once a plugin is chosen (e.g., `cv`), its settings are merged from multiple laye
 
 ---
 
-## Placeholder Data -- `params`
+## Placeholder Data
 
-Placeholder data is merged from multiple sources with the same precedence as settings overrides, with **document front matter being the highest**.
+Placeholder data comes from document front matter.
 
-- **Precedence** -- Front Matter > Local Config `params` > Project Config `params` > etc.
-- **Merging** -- Objects are merged deeply. A `contact_info` object in front matter will be merged with, not replace, a `contact_info` object from a global config.
-- **Syntax** -- `{{ .key }}` or `{{ .path.to.key }}`. The leading `.` refers to the root of the final merged data context.
+- **Source** -- Markdown front matter in the current document.
+- **Syntax** -- `{{ key }}` or `{{ .path.to.key }}`.
+- **Tip** -- Put document-specific values directly in front matter to keep behavior explicit.
 
 ---
 

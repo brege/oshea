@@ -84,17 +84,6 @@ These are standard properties that plugins can use to hook into **oshea**'s func
 - **Purpose:** A list of CSS files to be applied to the document. Paths are resolved relative to the plugin's configuration file.
 - **Example:** `css_files: ["cv.css"]`
 
-#### `params`
-
-- **Type:** `object`
-- **Purpose:** Defines default parameters (variables) that are specific to the plugin. These can be used as placeholders in Markdown files and will be replaced during processing.
-- **Example:**
-   ```yaml
-   params:
-     author: "Your Name"
-     primary_color: "#333333"
-   ```
-
 #### `math`
 
 - **Type:** `object`
@@ -128,16 +117,19 @@ These are standard properties that plugins can use to hook into **oshea**'s func
        type: "file"
    ```
 
-#### `inject_fm_title_as_h1`
+#### Front Matter Placeholders
 
-- **Type:** `boolean`
-- **Purpose:** If `true`, the `title` field from the Markdown file's front matter will be automatically injected as the main H1 heading at the beginning of the generated HTML.
-- **Example:** `inject_fm_title_as_h1: true`
-
-#### `aggressiveHeadingCleanup`
-- **Type:** `boolean`
-- **Purpose:** If `true`, this option instructs **oshea** to remove any existing H1 (prefixed with `#`) or H2 (prefixed with `##`) headings found within the Markdown content. This is useful when the plugin or other configurations are expected to generate the main headings.
-- **Example:** `aggressiveHeadingCleanup: false`
+- **Type:** Markdown front matter object
+- **Purpose:** Placeholder replacement uses document front matter values at render time (for example `{{ author }}` or `{{ .contact.email }}`).
+- **Example:**
+   ```yaml
+   ---
+   title: "My Document"
+   author: "Your Name"
+   contact:
+     email: "you@example.com"
+   ---
+   ```
 
 ---
 

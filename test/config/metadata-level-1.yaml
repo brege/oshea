@@ -10,7 +10,7 @@ metadata:
     and utility functions
   notes:
     - The active Level 1 integration group currently runs config/core/plugin determiner, manager, and validator coverage.
-    - Legacy collection-era registry utility entries remain documented here but are not in active Mocha groups.
+    - Legacy registry-builder utility entries remain documented here but are not in active Mocha groups.
 tests:
   1.1.1:
     description: >-
@@ -323,7 +323,7 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.4:
     description: >-
-      Test `_resolveAlias` resolves a tilde-prefixed alias value to an absolute
+      Test `_resolvePluginPath` resolves a tilde-prefixed plugin path value to an absolute
       path in the user's home directory.
     commands: []
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
@@ -339,8 +339,8 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.5:
     description: >-
-      Verify `_resolveAlias` resolves a relative alias value correctly against
-      the provided `basePathDefiningAlias`.
+      Verify `_resolvePluginPath` resolves a relative plugin path value correctly against
+      the provided `basePathDefiningPath`.
     commands: []
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
     manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
@@ -355,8 +355,8 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.6:
     description: >-
-      Test `_resolveAlias` returns `null` for invalid or empty `aliasValue` or
-      if `basePathDefiningAlias` is missing for a relative path.
+      Test `_resolvePluginPath` returns `null` for invalid or empty `aliasValue` or
+      if `basePathDefiningPath` is missing for a relative path.
     commands: []
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
     manifest: test/runners/integration/plugins/plugin-registry-builder.resolve-alias.manifest.js
@@ -371,8 +371,8 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.7:
     description: >-
-      Verify `_resolvePluginConfigPath` correctly resolves an alias-prefixed raw
-      path (e.g., `myAlias:path/to/plugin`) using provided `currentAliases`.
+      Verify `_resolvePluginConfigPath` correctly resolves an raw
+      path (e.g., `myAlias:path/to/plugin`) using provided `current plugin-path mappings`.
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
@@ -544,7 +544,7 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.17:
     description: >-
-      Verify aliases defined within the config file are correctly resolved and
+      Verify plugin path values defined within the config file are correctly resolved and
       used when resolving plugin paths.
     commands:
       - plugin
@@ -567,7 +567,7 @@ tests:
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.legacy-registry.manifest.js
     reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
@@ -584,7 +584,7 @@ tests:
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.legacy-registry.manifest.js
     reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
@@ -602,7 +602,7 @@ tests:
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.legacy-registry.manifest.js
     reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
@@ -614,12 +614,12 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.21:
     description: >-
-      Verify `_getPluginRegistrationsFromCmManifest` skips CM-enabled plugins
+      Verify `_getPluginRegistrationsFromCmManifest` skips legacy registry plugins
       whose `config_path` does not exist on the file system.
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js
-    manifest: test/runners/integration/plugins/plugin-registry-builder.cm-manifests.manifest.js
+    manifest: test/runners/integration/plugins/plugin-registry-builder.legacy-registry.manifest.js
     reference: test/archive/docs/test-generation-priority-order.md
     mocha_groups:
       - level1
@@ -681,8 +681,8 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.25:
     description: >-
-      Verify `buildRegistry` includes CM-enabled plugins from `enabled.yaml`
-      when `collectionsManager` is *not* provided to the constructor.
+      Verify `buildRegistry` includes legacy registry plugins from `enabled.yaml`
+      when `legacy registry manager` is *not* provided to the constructor.
     commands:
       - plugin
       - collection
@@ -716,7 +716,7 @@ tests:
   1.2.27:
     description: >-
       Verify `getAllPluginDetails` correctly combines plugins from traditional
-      config files and CM-enabled plugins (when `collectionsManager` is
+      config files and legacy registry plugins (when `legacy registry manager` is
       provided), providing comprehensive details.
     commands:
       - plugin
@@ -769,8 +769,8 @@ tests:
       - src/plugins/plugin-registry-builder.js
   1.2.30:
     description: >-
-      Test `getAllPluginDetails` correctly distinguishes between 'Enabled (CM)'
-      and 'Available (CM)' plugins when `collectionsManager` is provided.
+      Test `getAllPluginDetails` correctly distinguishes between 'Enabled (installed)'
+      and 'Available (installed)' plugins when `legacy registry manager` is provided.
     commands:
       - plugin
       - collection
@@ -788,7 +788,7 @@ tests:
   1.2.31:
     description: >-
       Verify `getAllPluginDetails` handles multiple enabled instances of the
-      same CM plugin (via different invoke names) and lists them separately.
+      same plugin (via different invoke names) and lists them separately.
     commands:
       - plugin
     runner: test/runners/integration/plugins/plugin-registry-builder.test.js

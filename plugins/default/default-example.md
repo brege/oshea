@@ -3,8 +3,7 @@ title: "Default Plugin Example Document"
 author: "A User"
 date: "{{ .CurrentDateISO }}"
 oshea_plugin: "./default.config.yaml"
-# You can add other params here that your 'default' plugin might use
-# from its 'params' section in default.config.yaml or from global params.
+# You can add other front matter fields used by your plugin/template.
 # example_param: "Hello from Default Example"
 ---
 
@@ -39,5 +38,4 @@ function greet(name) {
 ---
 
 For using the `default` plugin with *other* Markdown documents by its name from any directory (e.g., `oshea convert another.md --plugin default`), ensure it's registered in a main `oshea` configuration file. (It usually is by default in `config.example.yaml`).
-
 

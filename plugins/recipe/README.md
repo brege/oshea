@@ -18,8 +18,6 @@ cli_help: |
   Configuration Notes (recipe.config.yaml):
     - css_files: Specifies the CSS to use (e.g., "recipe.css").
     - pdf_options: Controls page size, margins, etc.
-    - inject_fm_title_as_h1: Typically true.
-    - aggressiveHeadingCleanup: Typically true to avoid duplicate titles if the Markdown also contains an H1.
     - remove_shortcodes_patterns: Can be used to clean Hugo-specific or other shortcodes.
 
   Example Usage:
@@ -30,4 +28,4 @@ cli_help: |
 
 This plugin is tailored for converting Markdown files formatted as individual recipes into well-structured PDF documents.
 
-It typically uses the `title` field from the front matter as the main H1 heading and applies specific styling to make ingredients, directions, and other recipe elements clear and easy to follow.
+It uses front matter for metadata/placeholders and applies specific styling to make ingredients, directions, and other recipe elements clear and easy to follow.

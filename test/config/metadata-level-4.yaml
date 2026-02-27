@@ -5,13 +5,41 @@ metadata:
   scope: Advanced End-to-End scenarios
   type: Workflow and Demo Tests
   description: >-
-    Multi-step workflows that exercise command composition across conversion and
-    plugin systems.
+    Multi-step workflows that exercise installer-based plugin lifecycles,
+    command composition, and conversion flows.
   runner: test/runners/end-to-end/e2e-mocha.test.js
   notes:
-    - `workflows/workflows.manifest.yaml` is currently excluded from active e2e execution.
-    - Active Level 4 coverage is driven by batch conversion demo workflows.
+    - Active Level 4 coverage includes plugin lifecycle workflows and batch conversion demos.
 tests:
+  4.1:
+    description: Installer-only plugin lifecycle workflows.
+    commands:
+      - plugin create --from
+      - plugin add
+      - plugin enable
+      - plugin disable
+      - plugin remove
+      - plugin list
+      - convert
+    manifest: test/runners/end-to-end/workflows/workflows.manifest.yaml
+    test_ids:
+      - 4.1.1
+      - 4.1.2
+      - 4.1.5
+      - 4.1.6
+    mocha_groups:
+      - workflows
+      - e2e
+      - all
+    app_files:
+      - src/cli/plugin/add.command.js
+      - src/cli/plugin/enable.command.js
+      - src/cli/plugin/disable.command.js
+      - src/cli/plugin/remove.command.js
+      - src/cli/plugin/create.command.js
+      - src/cli/convert.command.js
+      - src/plugins/installer.js
+      - src/plugins/archetyper.js
   4.2:
     description: >-
       Batch conversion demo scenarios for Hugo recipe documents, including
@@ -30,3 +58,23 @@ tests:
       - src/cli/convert.command.js
       - src/core/default-handler.js
       - src/config/config-resolver.js
+  4.3:
+    description: Lifecycle sad-path workflows for installer-managed plugins.
+    commands:
+      - plugin create --from
+      - plugin add
+      - plugin remove
+      - plugin enable
+    manifest: test/runners/end-to-end/workflows/workflows.manifest.yaml
+    test_ids:
+      - 4.3.1
+    mocha_groups:
+      - workflows
+      - e2e
+      - all
+    app_files:
+      - src/cli/plugin/create.command.js
+      - src/cli/plugin/add.command.js
+      - src/cli/plugin/remove.command.js
+      - src/cli/plugin/enable.command.js
+      - src/plugins/installer.js

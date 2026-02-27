@@ -104,11 +104,6 @@ oshea config --plugin cv --pure
 # In ~/.config/oshea/config.yaml
 pdf_viewer: xdg-open # Linux
 ```
-**Define Global `params`:**
-```yaml
-params:
-  author: "Your Name"
-```
 **Override Plugin Settings:**
 ```yaml
 cv:
@@ -123,7 +118,9 @@ cv:
 ```yaml
 ---
 title: "My Awesome Document"
-author: "{{ .author }}"
+author: "Your Name"
+contact:
+  email: "you@example.com"
 oshea_plugin: "cv"
 ---
 ```

@@ -17,7 +17,6 @@ cli_help: |
   Configuration Notes (template-basic.config.yaml):
     - css_files: Points to "template-basic.css". Modify this file for custom styling.
     - pdf_options: Adjust page size, margins, etc., as needed.
-    - inject_fm_title_as_h1: Set to true if you want the 'title' from front matter to be the main H1.
     - math: Configure KaTeX math rendering if required.
 
   Example Usage (after registration):
@@ -37,7 +36,7 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
 * **Customization**
 
   You are encouraged to modify:
-    * `template-basic.config.yaml`: Adjust `description`, `pdf_options`, `css_files`, `math` settings, `params`, etc.
+    * `template-basic.config.yaml`: Adjust `description`, `pdf_options`, `css_files`, `math` settings, etc.
     * `template-basic.css`: Add your custom CSS rules to style your documents.
     * `index.js`: For more advanced behavior, you can modify the `TemplateBasicHandler` class to implement custom logic, such as unique data processing or HTML generation, instead of just relying on `DefaultHandler`.
     * This `README.md`: Update the `cli_help` section above and the main content here to accurately describe your new plugin.
@@ -76,9 +75,6 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
    plugins:
      # ... other plugins ...
      template-basic: "/full/path/to/your/template-basic/template-basic.config.yaml"
-     # Or, if using plugin_directory_aliases:
-     # my_plugins_alias: "/full/path/to/your/plugins_base_dir/"
-     # template-basic: "my_plugins_alias:template-basic/template-basic.config.yaml"
    ```
 
 5. **Use Your Plugin Generally**

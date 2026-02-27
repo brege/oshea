@@ -6,8 +6,7 @@ date: "{{ .CurrentDateISO }}"
 # When 'plugin create' runs, 'template-basic' here will be replaced with the new plugin's name.
 oshea_plugin: "./template-basic.config.yaml"
 #
-# Add any other parameters your plugin might expect or use by default
-# from its params section in template-basic.config.yaml
+# Add any other front matter fields your plugin might use
 # default_greeting: "Custom Greeting for this Doc!"
 ---
 

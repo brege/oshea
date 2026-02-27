@@ -148,44 +148,35 @@ class PluginRegistryBuilder {
     return registrations;
   }
 
-  _resolveAlias(alias, aliasValue, basePathDefiningAlias) {
+  _resolvePluginPath(pluginName, pluginPathValue, basePathDefiningPath) {
     const { path, os } = this.dependencies;
 
-    if (typeof aliasValue !== 'string' || aliasValue.trim() === '') {
+    if (typeof pluginPathValue !== 'string' || pluginPathValue.trim() === '') {
       return null;
     }
 
-    let resolvedAliasPath = aliasValue;
-    if (
-      resolvedAliasPath.startsWith('~/') ||
-      resolvedAliasPath.startsWith('~\\')
-    ) {
-      resolvedAliasPath = path.join(
-        os.homedir(),
-        resolvedAliasPath.substring(2),
-      );
-    } else if (!path.isAbsolute(resolvedAliasPath)) {
-      resolvedAliasPath = path.resolve(
-        basePathDefiningAlias,
-        resolvedAliasPath,
-      );
+    let resolvedPath = pluginPathValue;
+    if (resolvedPath.startsWith('~/') || resolvedPath.startsWith('~\\')) {
+      resolvedPath = path.join(os.homedir(), resolvedPath.substring(2));
+    } else if (!path.isAbsolute(resolvedPath)) {
+      resolvedPath = path.resolve(basePathDefiningPath, resolvedPath);
     }
 
-    if (!path.isAbsolute(resolvedAliasPath)) {
-      logger.warn('Alias resolution resulted in non-absolute path', {
+    if (!path.isAbsolute(resolvedPath)) {
+      logger.warn('Plugin path resolution resulted in non-absolute path', {
         context: 'PluginRegistryBuilder',
-        alias,
-        value: aliasValue,
+        plugin: pluginName,
+        value: pluginPathValue,
       });
       return null;
     }
 
-    return resolvedAliasPath;
+    return resolvedPath;
   }
 
   async _getPluginRegistrationsFromFile(
     mainConfigFilePath,
-    basePathDefiningAliases,
+    basePathDefiningPaths,
     sourceType,
   ) {
     const { fs, loadYamlConfig } = this.dependencies;
@@ -204,11 +195,11 @@ class PluginRegistryBuilder {
       for (const pluginName in configData.plugins) {
         if (!Object.hasOwn(configData.plugins, pluginName)) continue;
 
-        const aliasValue = configData.plugins[pluginName];
-        const resolvedPath = this._resolveAlias(
+        const pluginPathValue = configData.plugins[pluginName];
+        const resolvedPath = this._resolvePluginPath(
           pluginName,
-          aliasValue,
-          basePathDefiningAliases,
+          pluginPathValue,
+          basePathDefiningPaths,
         );
         if (!resolvedPath) continue;
 

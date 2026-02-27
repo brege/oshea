@@ -56,7 +56,8 @@ This is the plugin's manifest. It defines the plugin's identity and default beha
   * `handler_script`: (string, required) Path to the Node.js handler script, relative to this config file (e.g., `"index.js"`).
   * `css_files`: (array) A list of CSS files to apply, relative to this config file.
   * `pdf_options`: (object) Default Puppeteer PDF options (e.g., `format`, `margin`).
-  * `inject_fm_title_as_h1`: (boolean) If `true`, injects the `title` from front matter as an H1 heading.
+  * `math`: (object) KaTeX options for math rendering.
+  * `toc_options`: (object) Table of contents behavior.
 
 ### The Handler Script (`index.js`)
 

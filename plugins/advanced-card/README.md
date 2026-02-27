@@ -18,7 +18,6 @@ cli_help: |
   Configuration Notes (advanced-card.config.yaml):
     - css_files: Specifies CSS for the custom HTML structure (e.g., "advanced-card.css").
     - pdf_options: Defines specific dimensions (width, height) for the card, small margins.
-    - inject_fm_title_as_h1: false (as H1 comes from Markdown body).
     - printBackground: true (important for card designs with background colors).
 
   Example Usage (assuming registered):

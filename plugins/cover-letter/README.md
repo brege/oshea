@@ -22,7 +22,6 @@ cli_help: |
   Configuration Notes (cover-letter.config.yaml):
     - css_files: Specifies CSS (e.g., "cover-letter.css").
     - pdf_options: Standard page size (Letter/A4), margins suitable for formal letters.
-    - inject_fm_title_as_h1: Typically false, as cover letters don't have a main H1 title in the document body. PDF metadata title comes from front matter.
 
   Example Usage:
     oshea convert my_application_letter.md --plugin cover-letter

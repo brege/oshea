@@ -1,0 +1,230 @@
+name: plugin lifecycle add/convert/disable/remove (Workflow Test)
+test_id: 4.1.1
+base_command: oshea
+tags:
+  - workflow
+  - plugin
+  - lifecycle
+  - add
+  - enable
+  - disable
+  - remove
+  - convert
+workflow: true
+scenarios:
+  - description: create a plugin from cv archetype
+    test_id: 4.1.1.1
+    args: plugin create lifecycle-plugin --from cv --outdir {{tmpdir}}
+    expect:
+      contains_all:
+        - created successfully
+        - lifecycle-plugin
+  - description: add and enable the plugin
+    test_id: 4.1.1.2
+    args: plugin add {{tmpdir}}/lifecycle-plugin
+    expect:
+      contains: Successfully processed 'plugin add'
+  - description: convert with the installed plugin
+    test_id: 4.1.1.3
+    args: >-
+      convert {{paths.simpleMdFixture}} --plugin lifecycle-plugin --outdir
+      {{tmpdir}} --filename lifecycle.pdf --no-open
+    expect:
+      executes: true
+      file_exists: "{{tmpdir}}/lifecycle.pdf"
+      file_min_size:
+        - "{{tmpdir}}/lifecycle.pdf"
+        - 3000
+  - description: disable the plugin
+    test_id: 4.1.1.4
+    args: plugin disable lifecycle-plugin
+    expect:
+      contains: disabled successfully
+  - description: remove the plugin
+    test_id: 4.1.1.5
+    args: plugin remove lifecycle-plugin
+    expect:
+      contains: removed successfully
+---
+name: plugin create from bundled source then convert (Workflow Test)
+test_id: 4.1.2
+base_command: oshea
+tags:
+  - workflow
+  - archetype
+  - plugin
+  - convert
+  - add
+workflow: true
+scenarios:
+  - description: create an archetyped plugin from bundled cv
+    test_id: 4.1.2.1
+    args: plugin create my-custom-cv --from cv --outdir {{tmpdir}}
+    expect:
+      contains_all:
+        - created successfully
+        - my-custom-cv
+  - description: add and enable the archetyped plugin
+    test_id: 4.1.2.2
+    args: plugin add {{tmpdir}}/my-custom-cv
+    expect:
+      contains: Successfully processed 'plugin add'
+  - description: convert using the archetyped plugin
+    test_id: 4.1.2.3
+    args: >-
+      convert {{paths.simpleMdFixture}} --plugin my-custom-cv --outdir
+      {{tmpdir}} --filename my-custom-cv.pdf --no-open
+    expect:
+      executes: true
+      file_exists: "{{tmpdir}}/my-custom-cv.pdf"
+      file_min_size:
+        - "{{tmpdir}}/my-custom-cv.pdf"
+        - 3000
+---
+name: multi-plugin lifecycle state checks (Workflow Test)
+test_id: 4.1.5
+base_command: oshea
+tags:
+  - workflow
+  - plugin
+  - lifecycle
+  - state
+workflow: true
+scenarios:
+  - description: create plugin-A from default
+    test_id: 4.1.5.1
+    args: plugin create plugin-A --from default --outdir {{tmpdir}}
+    expect:
+      contains_all:
+        - created successfully
+        - plugin-A
+  - description: create plugin-B from default
+    test_id: 4.1.5.2
+    args: plugin create plugin-B --from default --outdir {{tmpdir}}
+    expect:
+      contains_all:
+        - created successfully
+        - plugin-B
+  - description: add plugin-A
+    test_id: 4.1.5.3
+    args: plugin add {{tmpdir}}/plugin-A
+    expect:
+      contains: Successfully processed 'plugin add'
+  - description: add plugin-B
+    test_id: 4.1.5.4
+    args: plugin add {{tmpdir}}/plugin-B
+    expect:
+      contains: Successfully processed 'plugin add'
+  - description: list includes both plugins
+    test_id: 4.1.5.5
+    args: plugin list --short
+    expect:
+      contains_all:
+        - plugin-A
+        - plugin-B
+  - description: disable plugin-A
+    test_id: 4.1.5.6
+    args: plugin disable plugin-A
+    expect:
+      contains: disabled successfully
+  - description: re-enable plugin-A
+    test_id: 4.1.5.7
+    args: plugin enable plugin-A
+    expect:
+      contains_all:
+        - Attempting to enable plugin
+        - Plugin enabled successfully
+  - description: remove plugin-A
+    test_id: 4.1.5.8
+    args: plugin remove plugin-A
+    expect:
+      contains: removed successfully
+  - description: list does not include plugin-A after removal
+    test_id: 4.1.5.9
+    args: plugin list --short
+    expect_not:
+      contains: plugin-A
+  - description: list still includes plugin-B
+    test_id: 4.1.5.10
+    args: plugin list --short
+    expect:
+      contains: plugin-B
+---
+name: create from installed plugin and replace source plugin (Workflow Test)
+test_id: 4.1.6
+base_command: oshea
+tags:
+  - workflow
+  - plugin
+  - archetype
+  - replace
+workflow: true
+scenarios:
+  - description: create base plugin from bundled cv
+    test_id: 4.1.6.1
+    args: plugin create my-custom-cv --from cv --outdir {{tmpdir}}
+    expect:
+      contains_all:
+        - created successfully
+        - my-custom-cv
+  - description: add base plugin
+    test_id: 4.1.6.2
+    args: plugin add {{tmpdir}}/my-custom-cv
+    expect:
+      contains: Successfully processed 'plugin add'
+  - description: create second plugin from installed my-custom-cv
+    test_id: 4.1.6.3
+    args: plugin create my-custom-cv-2 --from my-custom-cv --outdir {{tmpdir}}
+    expect:
+      contains_all:
+        - created successfully
+        - my-custom-cv-2
+  - description: add second plugin
+    test_id: 4.1.6.4
+    args: plugin add {{tmpdir}}/my-custom-cv-2
+    expect:
+      contains: Successfully processed 'plugin add'
+  - description: remove the first plugin
+    test_id: 4.1.6.5
+    args: plugin remove my-custom-cv
+    expect:
+      contains: removed successfully
+  - description: list includes replacement plugin
+    test_id: 4.1.6.6
+    args: plugin list --short
+    expect:
+      contains: my-custom-cv-2
+---
+name: removed plugin cannot be re-enabled (Workflow Sad Path)
+test_id: 4.3.1
+base_command: oshea
+tags:
+  - workflow
+  - plugin
+  - lifecycle
+  - sad-path
+workflow: true
+scenarios:
+  - description: create plugin for removal test
+    test_id: 4.3.1.1
+    args: plugin create plugin-to-delete --from default --outdir {{tmpdir}}
+    expect:
+      contains_all:
+        - created successfully
+        - plugin-to-delete
+  - description: add plugin for removal test
+    test_id: 4.3.1.2
+    args: plugin add {{tmpdir}}/plugin-to-delete
+    expect:
+      contains: Successfully processed 'plugin add'
+  - description: remove plugin
+    test_id: 4.3.1.3
+    args: plugin remove plugin-to-delete
+    expect:
+      contains: removed successfully
+  - description: enabling removed plugin fails
+    test_id: 4.3.1.4
+    args: plugin enable plugin-to-delete
+    expect_failure:
+      exit_code: 1
+      contains: is not installed

@@ -9,15 +9,14 @@ cli_help: |
     - Supports standard front matter fields for metadata (title, author, date).
 
   Front Matter Fields:
-    - title: (string) Document title. Used for PDF metadata and often as the main H1 heading if 'inject_fm_title_as_h1' is true.
+    - title: (string) Document title. Used for PDF metadata and available to templates/placeholders.
     - author: (string) Document author. Used for PDF metadata.
     - date: (string or date) Document date. Used for PDF metadata.
-    - (Any other custom front matter fields can be used as placeholders in the Markdown content if using DefaultHandler)
+    - (Any other front matter fields can be used as placeholders in Markdown content)
 
   Configuration Notes (default.config.yaml):
     - css_files: Specifies the CSS to use (e.g., "default.css").
     - pdf_options: Controls page size (default Letter), margins, etc.
-    - inject_fm_title_as_h1: (boolean) If true, uses the 'title' from front matter as H1.
     - math: (object) KaTeX math rendering can be enabled/configured here.
     - toc_options: (object) Table of Contents generation can be enabled/configured.
 

@@ -32,13 +32,6 @@ math:
     macros:
       "\\RR": "\\mathbb{R}"
 
-# --- Global Parameters for Placeholders (`params`) ---
-# Reusable key-value pairs merged with document front matter.
-# params:
-#   authorInfo:
-#     name: "Default Author"
-#     email: "contact@example.com"
-
 # --- Plugins Root Directory (Optional) ---
 # Overrides the default location for storing managed plugins.
 # Precedence: --plugins-root > env var > this key > OS default.

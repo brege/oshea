@@ -6,6 +6,7 @@ require('module-alias/register');
 
 const fs = require('node:fs');
 const path = require('node:path');
+const { execSync } = require('node:child_process');
 const yaml = require('js-yaml');
 const { expect } = require('chai');
 const {
@@ -13,11 +14,20 @@ const {
   e2eTestDir,
   e2eHelpersPath,
   e2eRunnerPath,
+  fixtureBootstrapPath,
+  projectRoot,
 } = require('@paths');
 
 const { findFilesArray } = require(fileHelpersPath);
 const { YamlTestRunner } = require(e2eRunnerPath);
 const { expandScenarios } = require(e2eHelpersPath);
+
+function ensureFixtures() {
+  execSync(`node "${fixtureBootstrapPath}"`, {
+    cwd: projectRoot,
+    stdio: 'pipe',
+  });
+}
 
 // Discover all test_ids from all manifest YAML files
 function discoverAllTestIds() {
@@ -140,6 +150,7 @@ describe('End-to-End Tests (Mocha Runner)', function () {
   // Increase timeout for tests that involve workspace setup and command execution
   this.timeout(30000);
 
+  ensureFixtures();
   const testCases = discoverAllTestIds();
 
   // Group test cases by suite name to create nested describe blocks

@@ -1,28 +1,12 @@
 # config.example.yaml
-# Main configuration for oshea.
 
-# --- Global Settings ---
+# set to null or comment out to disable auto-opening
+pdf_viewer: xdg-open # or firefox, evince, null, etc
 
-# pdf_viewer: Command to open PDFs after generation (e.g., "xdg-open", "evince", "firefox").
-# Set to null or comment out to disable auto-opening.
-pdf_viewer: xdg-open
-
-# global_pdf_options: Default Puppeteer PDF options.
-# See https://pptr.dev/api/puppeteer.pdfoptions for all available options.
-global_pdf_options:
-  format: Letter
-  printBackground: true
-  margin:
-    top: 1in
-    right: 1in
-    bottom: 1in
-    left: 1in
-
-# global_remove_shortcodes: Array of regex patterns to remove content globally.
+# array of regex patterns to remove shortcodes globally
 global_remove_shortcodes:
   - ""
 
-# --- Math Rendering Settings (KaTeX) ---
 math:
   enabled: true
   engine: katex
@@ -32,22 +16,12 @@ math:
     macros:
       "\\RR": "\\mathbb{R}"
 
-# --- Plugins Root Directory (Optional) ---
-# Overrides the default location for storing managed plugins.
-# Precedence: --plugins-root > env var > this key > OS default.
+# precedence: --plugins-root > env var > this key > OS default
 # plugins_root: "~/.config/oshea/plugins"
 
-# --- Plugin Management Notes ---
-# Bundled plugins (default, cv, recipe, etc.) are now auto-discovered.
-# Custom plugins should be managed via the CLI:
-#   - oshea plugin add <git-url-or-path>
-#   - oshea plugin add <local-plugin-path>
-#
-# Use `oshea config --plugin <name>` to see a plugin's final settings.
-
-# --- Inline Plugin Overrides ---
 # Override settings for any registered or bundled plugin.
-# cv: # This 'cv' matches a bundled plugin
-#   description: "My Custom CV Style"
-#   pdf_options:
-#     format: "A5"
+# cv:                    # plugin's short-name
+#   description:         # "My Custom CV Style"
+#   toc_options:         # override plugin's default.yaml
+#     enabled: false
+#     ...

@@ -1,0 +1,119 @@
+version: 1
+
+bootstrap:
+  output_root: "{{tmp}}/oshea-fixtures"
+  clean_output_root: true
+  default_encoding: utf8
+
+groups:
+  markdown:
+    files:
+      - path: markdown/simple.md
+        content: |
+          # Simple Fixture
+
+          This is a simple markdown fixture for oshea tests.
+      - path: markdown/with-front-matter.md
+        content: |
+          ---
+          title: "Fixture Title"
+          author: "Fixture Author"
+          oshea_plugin: "default"
+          ---
+
+          # {{ title }}
+
+          Front matter fixture content.
+
+  hugo_example:
+    files:
+      - path: hugo-example/recipe-one/index.md
+        content: |
+          ---
+          title: "Recipe One"
+          ---
+
+          ## Ingredients
+          - one
+          - two
+      - path: hugo-example/recipe-two/index.md
+        content: |
+          ---
+          title: "Recipe Two"
+          ---
+
+          ## Directions
+          1. Step one
+          2. Step two
+      - path: hugo-example/recipe-three/index.md
+        content: |
+          ---
+          title: "Recipe Three"
+          ---
+
+          Notes for recipe three.
+
+  valid_plugin:
+    files:
+      - path: full-fat-dummies/valid-plugin/default.yaml
+        content: |
+          plugin_name: valid-plugin
+          version: "1.0.0"
+          protocol: v1
+          description: Fixture plugin for tests.
+          handler_script: index.js
+          css_files:
+            - style.css
+      - path: full-fat-dummies/valid-plugin/index.js
+        content: |
+          class ValidPluginHandler {
+            constructor(coreUtils) {
+              this.DefaultHandler = coreUtils.DefaultHandler;
+            }
+
+            async generate(data, pluginConfig, globalConfig, outputDir) {
+              const handler = new this.DefaultHandler();
+              return handler.generate(data, pluginConfig, globalConfig, outputDir);
+            }
+          }
+
+          module.exports = ValidPluginHandler;
+      - path: full-fat-dummies/valid-plugin/style.css
+        content: |
+          body {
+            font-size: 11pt;
+          }
+      - path: full-fat-dummies/valid-plugin/example.md
+        content: |
+          ---
+          title: "Valid Plugin Fixture"
+          oshea_plugin: "./default.yaml"
+          ---
+
+          # Fixture Example
+      - path: full-fat-dummies/valid-plugin/README.md
+        content: |
+          ---
+          cli_help: |
+            Plugin: valid-plugin
+          ---
+
+          # Valid Plugin Fixture
+      - path: full-fat-dummies/valid-plugin/.contract/schema.json
+        content: |
+          {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+            "type": "object"
+          }
+      - path: full-fat-dummies/valid-plugin/.contract/test/e2e.test.js
+        content: |
+          const assert = require("node:assert");
+
+          describe("valid-plugin fixture", () => {
+            it("loads", () => {
+              assert.ok(true);
+            });
+          });
+
+assets:
+  copies: []

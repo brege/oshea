@@ -447,8 +447,8 @@ class YamlTestRunner {
 
   // Handle breakage setup for scenarios that need broken plugins
   async handleBreakage(breakageConfig, workspace) {
-    const { createDummyPluginPath } = require('@paths');
-    const { createDummyPlugin } = require(createDummyPluginPath);
+    const { fixtureBootstrapPath } = require('@paths');
+    const { createDummyPlugin } = require(fixtureBootstrapPath);
 
     const plugin = breakageConfig.plugin;
     const type = breakageConfig.type;

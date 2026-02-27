@@ -8,3 +8,4 @@ node_modules/
 config.yaml
 .env
 
+test/runners/fixtures/

@@ -54,8 +54,7 @@ registries:
           simple_md_fixture: path.join(fixturesDir, 'markdown/simple.md')
           simple_md_fixture_with_fm: path.join(fixturesDir, 'markdown/with-front-matter.md')
           hugo_example_fixture_path: path.join(fixturesDir, 'hugo-example')
-          refresh_fixtures_path: path.join(fixturesDir, 'refresh-fixtures.js')
-          create_dummy_plugin_path: path.join(fixturesDir, 'create-dummy-plugin.js')
+          fixture_bootstrap_path: path.join(e2eTestDir, 'create-fixtures.js')
       test_integration:
         comment: Integration Testing Foundation
         items:

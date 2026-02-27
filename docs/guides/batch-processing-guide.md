@@ -12,7 +12,7 @@ In due time, this approach will be mainlined into the **oshea** CLI once stabili
 
 #### Workflow Location
 ```bash
-test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml
+test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml
 ```
 
 #### Output
@@ -24,21 +24,21 @@ PDFs will be generated in isolated test workspaces, with automatic discovery of 
 1.  **Basic execution** - Run the workflow directly:
 
     ```bash
-    node test/runners/smoke/yaml-test-runner.js \
-        test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml
+    node test/runners/end-to-end/e2e-runner.js \
+        test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml
     ```
 
 2.  **With visual inspection** - Use `--show` to see commands and output in real-time:
 
     ```bash
-    node test/runners/smoke/yaml-test-runner.js \
-        test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml --show
+    node test/runners/end-to-end/e2e-runner.js \
+        test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml --show
     ```
 
 3.  **Via mocha integration** - Run as part of the test suite:
 
     ```bash
-    npm test -- --group yaml --grep "4.2"
+    npm test -- --group e2e --grep "4.2"
     ```
 
 #### Features
@@ -57,8 +57,8 @@ To create your own batch processing workflows, you can modify the demo workflow 
 
 1. **Copy the demo workflow**:
    ```bash
-   cp test/runners/smoke/workflows/demo-hugo-batch-convert.manifest.yaml \
-      test/runners/smoke/workflows/my-custom-batch.manifest.yaml
+   cp test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml \
+      test/runners/end-to-end/workflows/my-custom-batch.manifest.yaml
    ```
 
 2. **Modify discovery settings**:
@@ -100,4 +100,3 @@ scenarios:
 > Legacy batch processing scripts have been deprecated in favor of YAML workflows. For historical reference, the previous approach using Node.js and Bash scripts can be found in this repository snapshot:
 > 
 > **Historical Reference**: [Legacy batch processing guide](https://github.com/brege/oshea/blob/4d1ceb01ed241e7c8e955ecc29e2e228ce3f0abe/docs/guides/batch-processing-guide.md)
-

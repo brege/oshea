@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-26T09:02:49.117Z
+// Generated: 2026-02-27T07:01:27.359Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -49,8 +49,7 @@ const fixturesDir = path.join(testRunnersDir, 'fixtures');
 const simpleMdFixture = path.join(fixturesDir, 'markdown/simple.md');
 const simpleMdFixtureWithFm = path.join(fixturesDir, 'markdown/with-front-matter.md');
 const hugoExampleFixturePath = path.join(fixturesDir, 'hugo-example');
-const refreshFixturesPath = path.join(fixturesDir, 'refresh-fixtures.js');
-const createDummyPluginPath = path.join(fixturesDir, 'create-dummy-plugin.js');
+const fixtureBootstrapPath = path.join(e2eTestDir, 'create-fixtures.js');
 
 // --- Integration Testing Foundation ---
 const setupFile = path.join(integrationTestDir, 'setup.js');
@@ -172,6 +171,7 @@ const v1Path = path.join(projectRoot, 'src/validators/v1.js');
 // End-to-End Workflow Tests
 const e2eWorkflowTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/workflows/');
 const demoHugoBatchConvertManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/workflows/demo-hugo-batch-convert.manifest.yaml');
+const workflowsManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/workflows/workflows.manifest.yaml');
 
 // End-to-End Bundled Plugin Tests
 const e2eValidatorTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/validators/');
@@ -179,6 +179,7 @@ const bundledPluginsManifestYamlPath = path.join(projectRoot, 'test/runners/end-
 
 // End-to-End Test Runners
 const e2eRunnersRoot = path.join(projectRoot, 'test/runners/end-to-end/');
+const createFixturesPath = path.join(projectRoot, 'test/runners/end-to-end/create-fixtures.js');
 const e2eHelpersPath = path.join(projectRoot, 'test/runners/end-to-end/e2e-helpers.js');
 const e2eMochaTestPath = path.join(projectRoot, 'test/runners/end-to-end/e2e-mocha.test.js');
 const e2eRunnerPath = path.join(projectRoot, 'test/runners/end-to-end/e2e-runner.js');
@@ -251,8 +252,7 @@ module.exports = {
   simpleMdFixture,
   simpleMdFixtureWithFm,
   hugoExampleFixturePath,
-  refreshFixturesPath,
-  createDummyPluginPath,
+  fixtureBootstrapPath,
   setupFile,
   testSharedRoot,
   testConfigPath,
@@ -348,9 +348,11 @@ module.exports = {
   v1Path,
   e2eWorkflowTestsRoot,
   demoHugoBatchConvertManifestYamlPath,
+  workflowsManifestYamlPath,
   e2eValidatorTestsRoot,
   bundledPluginsManifestYamlPath,
   e2eRunnersRoot,
+  createFixturesPath,
   e2eHelpersPath,
   e2eMochaTestPath,
   e2eRunnerPath,

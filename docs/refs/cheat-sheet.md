@@ -27,7 +27,7 @@ oshea convert plugins/cv/example.md --plugin cv --outdir ./output
 Used for plugins like `recipe-book` that require additional arguments.
 
 ```bash
-oshea generate recipe-book --recipes-base-dir ./test/fixtures/hugo-example --outdir ./output
+oshea generate recipe-book --recipes-base-dir ./test/runners/fixtures/hugo-example --outdir ./output
 ```
 
 ### Watch Mode for Live Reloading

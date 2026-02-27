@@ -4,7 +4,7 @@
     "enabled": false
   },
   "files": {
-    "includes": ["**", "!assets", "!.mocharc.js", "!paths/index.js"]
+    "includes": ["**", "!.mocharc.js", "!paths/index.js"]
   },
   "formatter": {
     "enabled": true,

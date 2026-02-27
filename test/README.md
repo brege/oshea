@@ -90,5 +90,5 @@ All formation-era test documentation and deprecated tools are preserved in the a
 * [Archive Index](archive/README.md): Complete historical documentation
 * [Legacy QA Tools](archive/scripts/): Deprecated analysis scripts  
 * [Original Checklists](archive/docs/): Markdown-based test checklists
-* [Test Generation Priority Order](archive/docs/test-generation-priority-order.md)
+* [Test Generation Priority Order](archive/docs/test-generation-priority-order.md): Test roll out implementation strategy
 * [Next-Generation Testing Framework](../docs/archive/v0.11/next-generation-testing.md) toward a YAML manifest system

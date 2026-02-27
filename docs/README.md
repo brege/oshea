@@ -28,7 +28,7 @@ This document is a central index for all documentation within **oshea**'s repo. 
 * [Walkthrough: Creating a Deck of Digital Notecards](walkthroughs/generate-mobile-study-cards.md)
 
 
-## Historical Documentation
+## Historical
 
 ### [v0.11](archive/v0.11/)
 * [Task List for v0.11](archive/v0.11/tasklist-v0.11.md)
@@ -49,7 +49,7 @@ This document is a central index for all documentation within **oshea**'s repo. 
 ### [v0.9](archive/v0.9/)
 * [Plugin Validation Philosophy](archive/v0.9/schema-validation-philosophy.md) for schema validation
 * [Tab Completion](archive/v0.9/tab-completion-assay.md) scheme that's better than Node.js's default
-* [Dream Board v0.9](archive/v0.9/dream-board-v0.9.md) **standardizes** testing and architecture
+* [Dream Board v0.9](archive/v0.9/dream-board-v0.9.md) standardizes testing and architecture
 
 ### [v0.8](archive/v0.8/)
 * [Purge Command Deferral](archive/v0.8/should-cm-purge-orphans.md) for a data safety decision

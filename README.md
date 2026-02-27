@@ -7,7 +7,7 @@ It features a powerful, extensible plugin system, making it incredibly versatile
 > [!TIP]
 > The rise of AI tooling has brought enormous growth to universal Markdown usage. **oshea** is ideal for anyone who writes in Markdown but needs polished, professional, reproducible output for resumes, reports, presentations, and more.
 > 
-> See [Creating Plugins with Claude Skills](#creating-plugins-with-claude-skills) for building plugins with Claude or Codex.
+> See [Creating Plugins with Claude Skills](#creating-plugins-with-claude-and-codex-skills) for building plugins with Claude or Codex.
 
 
 ## Quick Start

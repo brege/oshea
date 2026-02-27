@@ -528,7 +528,7 @@ oshea_plugin: ${pluginName}
       const expectedSubdirPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
         pluginName,
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
       mocks.mockFsSync.existsSync.withArgs(expectedSubdirPath).returns(true);
       mocks.mockFsSync.statSync
@@ -540,7 +540,7 @@ oshea_plugin: ${pluginName}
       const expectedSubdirPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
         pluginName,
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
 
       expect(result.pluginSpec).to.equal(expectedSubdirPath);
@@ -593,11 +593,11 @@ oshea_plugin: ${pluginName}
       const expectedSubdirPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
         pluginName,
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
       const expectedDirectPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
 
       mocks.mockFsSync.existsSync.withArgs(expectedSubdirPath).returns(false);
@@ -611,11 +611,11 @@ oshea_plugin: ${pluginName}
       const expectedSubdirPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
         pluginName,
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
       const expectedDirectPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
 
       expect(result.pluginSpec).to.equal(expectedDirectPath);
@@ -669,11 +669,11 @@ oshea_plugin: ${pluginName}
       const expectedSubdirPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
         pluginName,
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
       const expectedDirectPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
       mocks.mockFsSync.existsSync.withArgs(expectedSubdirPath).returns(false);
       mocks.mockFsSync.existsSync.withArgs(expectedDirectPath).returns(false);
@@ -683,11 +683,11 @@ oshea_plugin: ${pluginName}
       const expectedSubdirPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
         pluginName,
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
       const expectedDirectPath = path.join(
         path.dirname(constants.DUMMY_MARKDOWN_FILE_PATH),
-        `${pluginName}.config.yaml`,
+        `default.yaml`,
       );
 
       expect(result.pluginSpec).to.equal(pluginName);

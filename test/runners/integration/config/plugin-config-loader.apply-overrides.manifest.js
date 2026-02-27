@@ -40,9 +40,9 @@ module.exports = [
       { rawConfig: { setting1: 'initial' }, resolvedCssPaths: [] },
       ['/base.config.yaml'],
     ],
-    fsExistsStubs: { '/xdg/base/test-plugin/test-plugin.config.yaml': true },
+    fsExistsStubs: { '/xdg/base/test-plugin/default.yaml': true },
     loadYamlConfigStubs: {
-      '/xdg/base/test-plugin/test-plugin.config.yaml': {
+      '/xdg/base/test-plugin/default.yaml': {
         setting1: 'xdg-override',
       },
     },
@@ -164,11 +164,11 @@ module.exports = [
       [],
     ],
     fsExistsStubs: {
-      '/xdg/base/css-merge-plugin/css-merge-plugin.config.yaml': true,
+      '/xdg/base/css-merge-plugin/default.yaml': true,
       '/proj/base/project/override.yaml': true,
     },
     loadYamlConfigStubs: {
-      '/xdg/base/css-merge-plugin/css-merge-plugin.config.yaml': {
+      '/xdg/base/css-merge-plugin/default.yaml': {
         css_files: ['xdg.css'],
         inherit_css: true,
       },
@@ -268,7 +268,7 @@ module.exports = [
       ['/base.config.yaml'],
     ],
     fsExistsStubs: {
-      '/xdg/path-plugin/path-plugin.config.yaml': true,
+      '/xdg/path-plugin/default.yaml': true,
       '/proj/conf/p.yaml': true,
     },
     isObjectStubs: {
@@ -283,7 +283,7 @@ module.exports = [
       expect(result.contributingPaths).to.have.length(5);
       expect(result.contributingPaths).to.include('/base.config.yaml');
       expect(result.contributingPaths).to.include(
-        '/xdg/path-plugin/path-plugin.config.yaml',
+        '/xdg/path-plugin/default.yaml',
       );
       expect(result.contributingPaths).to.include(
         'Inline override from XDG main config: /xdg/main.yaml',
@@ -312,7 +312,7 @@ module.exports = [
     methodName: 'applyOverrideLayers',
     methodArgs: ['missing-plugin', { rawConfig: {}, resolvedCssPaths: [] }, []],
     fsExistsStubs: {
-      '/xdg/base/missing-plugin/missing-plugin.config.yaml': false,
+      '/xdg/base/missing-plugin/default.yaml': false,
       '/proj/base/configs/missing.config.yaml': false,
     },
     pathStubs: {
@@ -354,11 +354,11 @@ module.exports = [
       [],
     ],
     fsExistsStubs: {
-      '/xdg/prec-plugin/prec-plugin.config.yaml': true,
+      '/xdg/prec-plugin/default.yaml': true,
       '/proj/conf/p.yaml': true,
     },
     loadYamlConfigStubs: {
-      '/xdg/prec-plugin/prec-plugin.config.yaml': { common: 'xdg-file' },
+      '/xdg/prec-plugin/default.yaml': { common: 'xdg-file' },
       '/proj/conf/p.yaml': { common: 'proj-file', proj_only: true },
     },
     isObjectStubs: {

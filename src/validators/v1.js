@@ -13,6 +13,11 @@ const {
 } = require('@paths');
 const logger = require(loggerPath);
 
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
+const PLUGIN_EXAMPLE_FILENAME = 'example.md';
+const PLUGIN_SCHEMA_FILENAME = 'schema.json';
+const PLUGIN_E2E_TEST_FILENAME = 'e2e.test.js';
+
 function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
   const readmePath = path.join(pluginDirectoryPath, 'README.md');
 
@@ -87,8 +92,8 @@ const checkFileStructureV1 = (
 ) => {
   const requiredFiles = [
     'index.js',
-    `${pluginName}.config.yaml`,
-    `${pluginName}-example.md`,
+    PLUGIN_CONFIG_FILENAME,
+    PLUGIN_EXAMPLE_FILENAME,
     'README.md',
   ];
   const details = [];
@@ -98,7 +103,7 @@ const checkFileStructureV1 = (
     if (fs.existsSync(path.join(pluginDirectoryPath, file))) {
       details.push({
         type: 'success',
-        message: `Found required file: '${file}'`,
+        message: `Found required file for '${pluginName}': '${file}'`,
       });
     } else {
       errors.push(`Missing required file: '${file}'.`);
@@ -119,8 +124,7 @@ const checkFileStructureV1 = (
 const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
   const contractDir = path.join(pluginDirectoryPath, '.contract');
   const testDir = path.join(contractDir, 'test');
-  const schemaFileName = `${pluginName}.schema.json`;
-  const schemaPath = path.join(contractDir, schemaFileName);
+  const schemaPath = path.join(contractDir, PLUGIN_SCHEMA_FILENAME);
   const details = [];
 
   let optionalCount = 0;
@@ -128,7 +132,7 @@ const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
   if (fs.existsSync(testDir)) {
     details.push({
       type: 'success',
-      message: 'Found optional ".contract/test/" directory',
+      message: `Found optional ".contract/test/" directory for '${pluginName}'`,
     });
     optionalCount++;
   } else {
@@ -142,14 +146,16 @@ const checkOptionalFilesV1 = (pluginDirectoryPath, pluginName, warnings) => {
   if (fs.existsSync(schemaPath)) {
     details.push({
       type: 'success',
-      message: `Plugin has a schema file ('${schemaFileName}')`,
+      message: `Plugin '${pluginName}' has a schema file ('${PLUGIN_SCHEMA_FILENAME}')`,
     });
     optionalCount++;
   } else {
-    warnings.push(`Missing optional schema file ('${schemaFileName}').`);
+    warnings.push(
+      `Missing optional schema file ('${PLUGIN_SCHEMA_FILENAME}').`,
+    );
     details.push({
       type: 'warn',
-      message: `Missing optional schema file ('${schemaFileName}')`,
+      message: `Missing optional schema file ('${PLUGIN_SCHEMA_FILENAME}')`,
     });
   }
 
@@ -166,17 +172,20 @@ const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
     pluginDirectoryPath,
     '.contract',
     'test',
-    `${pluginName}-e2e.test.js`,
+    PLUGIN_E2E_TEST_FILENAME,
   );
 
   if (!fs.existsSync(e2eTestPath)) {
     warnings.push(
-      `Missing E2E test file, skipping test run: '${path.join('.contract/test', `${pluginName}-e2e.test.js`)}'.`,
+      `Missing E2E test file, skipping test run: '${path.join('.contract/test', PLUGIN_E2E_TEST_FILENAME)}'.`,
     );
     return {
       status: 'skipped',
       details: [
-        { type: 'info', message: 'Missing E2E test file, skipping run' },
+        {
+          type: 'info',
+          message: `Missing E2E test file for '${pluginName}', skipping run`,
+        },
       ],
     };
   }
@@ -243,14 +252,8 @@ const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
 };
 
 const runSelfActivationV1 = (pluginDirectoryPath, pluginName, errors) => {
-  const exampleMdPath = path.join(
-    pluginDirectoryPath,
-    `${pluginName}-example.md`,
-  );
-  const configYamlPath = path.join(
-    pluginDirectoryPath,
-    `${pluginName}.config.yaml`,
-  );
+  const exampleMdPath = path.join(pluginDirectoryPath, PLUGIN_EXAMPLE_FILENAME);
+  const configYamlPath = path.join(pluginDirectoryPath, PLUGIN_CONFIG_FILENAME);
 
   if (!fs.existsSync(exampleMdPath) || !fs.existsSync(configYamlPath)) {
     errors.push(

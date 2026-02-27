@@ -3,7 +3,7 @@ title: "Simple Pancakes - Example Recipe"
 author: "The Plugin Chef"
 date: "{{ .CurrentDateISO }}"
 tags: ["breakfast", "easy", "example"]
-oshea_plugin: "./recipe.config.yaml"
+oshea_plugin: "./default.yaml"
 
 # Other potential recipe-specific front matter fields:
 # prep_time: "10 minutes"
@@ -14,7 +14,7 @@ oshea_plugin: "./recipe.config.yaml"
 
 {{% recipe %}}
 
-This is an example recipe to demonstrate the **`recipe`** plugin. It uses the `oshea_plugin: "./recipe.config.yaml"` key in its front matter. This means it will automatically use the `recipe` plugin's specific configuration when you run `oshea recipe-example.md` from within the `plugins/recipe/` directory.
+This is an example recipe to demonstrate the **`recipe`** plugin. It uses the `oshea_plugin: "./default.yaml"` key in its front matter. This means it will automatically use the `recipe` plugin's specific configuration when you run `oshea example.md` from within the `plugins/recipe/` directory.
 
 The `recipe` plugin is designed for clear and readable recipe formatting.
 

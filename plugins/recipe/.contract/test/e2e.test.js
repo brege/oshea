@@ -1,4 +1,4 @@
-// plugins/cover-letter/.contract/test/cover-letter-e2e.test.js
+// plugins/recipe/.contract/test/e2e.test.js
 require('module-alias/register');
 const path = require('node:path');
 const os = require('node:os');
@@ -19,12 +19,12 @@ const { runCliCommand, setupTestDirectory, cleanupTestDirectory } = require(
 const TEST_OUTPUT_DIR = path.join(
   os.tmpdir(),
   'oshea-test-output',
-  'cover-letter-plugin-e2e',
+  'recipe-plugin-e2e',
 );
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
-const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'cover-letter-example.md');
+const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'example.md');
 
-describe('plugins/cover-letter (in-situ Self-Activation Test) .contract/test/cover-letter-e2e.test.js', function () {
+describe('plugins/recipe (in-situ Self-Activation Test) .contract/test/e2e.test.js', function () {
   this.timeout(15000);
 
   before(async () => {

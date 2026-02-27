@@ -7,7 +7,7 @@ We will create a custom CV plugin with a different color scheme.
 ### Prerequisites
 
   * `oshea` installed.
-  * A sample CV document. You can use the one from the bundled `cv` plugin located at [`plugins/cv/cv-example.md`](../../plugins/cv/cv-example.md). Copy it to your current directory and rename it to `my-cv.md`.
+  * A sample CV document. You can use the one from the bundled `cv` plugin located at [`plugins/cv/example.md`](../../plugins/cv/example.md). Copy it to your current directory and rename it to `my-cv.md`.
 
 ---
 
@@ -34,22 +34,22 @@ You now have a fully functional, independent plugin at `./my-cv/` that is a perf
 
 Now, let's customize the appearance. We'll edit the CSS file of our new plugin to change the color of the main heading.
 
-1.  **Open the CSS file:** `my-cv/my-cv.css`
+1.  **Open the CSS file:** `my-cv/style.css`
 2.  **Find the `h1` style definition.**
 3.  **Change the `color` property.**
 
-Here is the complete content for the modified `my-cv/my-cv.css` file. The only change is the `color` in the `h1, h2, h3, h4, h5, h6` block.
+Here is the complete content for the modified `my-cv/style.css` file. The only change is the `color` in the `h1, h2, h3, h4, h5, h6` block.
 
-**File: `my-cv/my-cv.css`**
+**File: `my-cv/style.css`**
 
 ```css
-/* css/cv.css */
+/* style.css */
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 9pt;
   line-height: 1.45;
-  margin: 1cm; /* Note: Puppeteer margins from config.yaml will likely define the PDF's printable area. */
+  margin: 1cm; /* Note: Puppeteer margins from default.yaml will likely define the PDF's printable area. */
               /* This body margin primarily affects direct HTML viewing. */
 }
 
@@ -91,7 +91,7 @@ strong {
   font-weight: bold;
 }
 
-/* Consistent code block styling with default.css */
+/* Consistent code block styling with style.css */
 code {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
   background-color: #f0f0f0;
@@ -130,7 +130,7 @@ blockquote {
 /* Print specific styles */
 @media print {
   @page {
-    margin: 1cm; /* This should ideally match config.yaml for 'cv' type if preferCSSPageSize were true */
+    margin: 1cm; /* This should ideally match default.yaml for 'cv' type if preferCSSPageSize were true */
   }
 
   body {

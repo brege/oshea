@@ -12,7 +12,7 @@ We will create a set of simple Markdown files, each representing a two-sided not
 
 First, create a new directory named `notecard-deck`. Inside this directory, create the following three files. These files will define the logic and style for our plugin.
 
-**File 1: `notecard-deck/notecard-deck.config.yaml`**
+**File 1: `notecard-deck/default.yaml`**
 
 This is the manifest for our plugin. It defines the handler and the initial PDF options for a standard letter-sized page.
 
@@ -25,7 +25,7 @@ description: "A plugin to compile a directory of Markdown notecards into a singl
 handler_script: "index.js"
 
 css_files:
-  - "notecard-deck.css"
+  - "style.css"
 
 pdf_options:
   format: "Letter"
@@ -41,12 +41,12 @@ watch_sources:
     path_from_cli_arg: "cardsDir"
 ```
 
-**File 2: `notecard-deck/notecard-deck.css`**
+**File 2: `notecard-deck/style.css`**
 
 This CSS will style our notecards. Crucially, it ensures that each notecard starts on a new page.
 
 ```css
-/* notecard-deck.css */
+/* style.css */
 .card {
   display: flex;
   flex-direction: column;
@@ -195,10 +195,10 @@ This will create a `notecard-deck.pdf` file in the `output/` directory, with eac
 
 This is where the power of the system shines. Let's change the layout for a phone screen without touching our Markdown files.
 
-1.  **Open your local plugin config:** `./notecard-deck/notecard-deck.config.yaml`
+1.  **Open your local plugin config:** `./notecard-deck/default.yaml`
 2.  **Modify the `pdf_options`** to use a vertical, phone-like aspect ratio.
 
-**File: `notecard-deck/notecard-deck.config.yaml` (Updated)**
+**File: `notecard-deck/default.yaml` (Updated)**
 
 ```yaml
 plugin_name: "notecard-deck"
@@ -209,7 +209,7 @@ description: "A plugin to compile a directory of Markdown notecards into a singl
 handler_script: "index.js"
 
 css_files:
-  - "notecard-deck.css"
+  - "style.css"
 
 pdf_options:
   # The only change is here: from 'format' to specific dimensions.

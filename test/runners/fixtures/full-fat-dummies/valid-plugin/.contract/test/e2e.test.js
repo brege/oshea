@@ -1,4 +1,4 @@
-// plugins/recipe/.contract/test/recipe-e2e.test.js
+// test/runners/fixtures/full-fat-dummies/valid-plugin/.contract/test/e2e.test.js
 require('module-alias/register');
 const path = require('node:path');
 const os = require('node:os');
@@ -19,12 +19,12 @@ const { runCliCommand, setupTestDirectory, cleanupTestDirectory } = require(
 const TEST_OUTPUT_DIR = path.join(
   os.tmpdir(),
   'oshea-test-output',
-  'recipe-plugin-e2e',
+  'valid-plugin-e2e',
 );
 const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
-const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'recipe-example.md');
+const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'example.md');
 
-describe('plugins/recipe (in-situ Self-Activation Test) .contract/test/recipe-e2e.test.js', function () {
+describe('plugins/valid-plugin (in-situ Self-Activation Test) .contract/test/e2e.test.js', function () {
   this.timeout(15000);
 
   before(async () => {

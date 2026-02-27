@@ -44,12 +44,12 @@ function setupWellFormedPlugin(
 ) {
   const files = {
     'index.js': 'module.exports = class {};',
-    [`${pluginName}.config.yaml`]: `plugin_name: ${pluginName}\nprotocol: v1\nversion: 1.0.0\ndescription: A valid plugin.`,
+    'default.yaml': `plugin_name: ${pluginName}\nversion: 1.0.0\nprotocol: v1\ndescription: A valid plugin.\nhandler_script: index.js`,
     'README.md': '---\ncli_help: "Help text"\n---',
-    [`${pluginName}-example.md`]: '# Example',
-    [`.contract/test/${pluginName}-e2e.test.js`]:
+    'example.md': '# Example',
+    '.contract/test/e2e.test.js':
       'const assert = require("assert"); describe("Passing Test", () => it("should pass", () => assert.strictEqual(1, 1)));',
-    [`.contract/${pluginName}.schema.json`]: '{}',
+    '.contract/schema.json': '{}',
   };
 
   for (const [file, content] of Object.entries(files)) {

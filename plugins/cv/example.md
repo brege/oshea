@@ -2,9 +2,9 @@
 title: "Jane Doe - Curriculum Vitae"
 author: "Jane Doe"
 date: "{{ .CurrentDateISO }}"
-oshea_plugin: "./cv.config.yaml"
-# Additional CV-specific front matter can be added here if your cv.config.yaml
-# or cv.css expects them, e.g., for placeholders.
+oshea_plugin: "./default.yaml"
+# Additional CV-specific front matter can be added here if your default.yaml
+# or style.css expects them, e.g., for placeholders.
 # contact_email: "jane.doe@example.com"
 # contact_phone: "555-123-4567"
 ---
@@ -13,7 +13,7 @@ oshea_plugin: "./cv.config.yaml"
 
 {{ author }} | {{ date }}
 
-This is an example CV document to demonstrate the **`cv`** plugin. It uses the `oshea_plugin: "./cv.config.yaml"` key in its front matter, so it will automatically use the `cv` plugin's configuration when you run `oshea cv-example.md` from within the `plugins/cv/` directory.
+This is an example CV document to demonstrate the **`cv`** plugin. It uses the `oshea_plugin: "./default.yaml"` key in its front matter, so it will automatically use the `cv` plugin's configuration when you run `oshea example.md` from within the `plugins/cv/` directory.
 
 The `cv` plugin is designed for creating professional-looking Curriculum Vitae documents.
 

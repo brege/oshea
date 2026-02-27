@@ -6,7 +6,7 @@ description: >-
   valid-plugin plugin for [describe your plugin's purpose here].
 handler_script: index.js
 css_files:
-  - valid-plugin.css
+  - style.css
 pdf_options:
   format: Letter
   printBackground: true
@@ -17,5 +17,3 @@ pdf_options:
     left: 1in
 math:
   enabled: false
-inject_fm_title_as_h1: true
-aggressiveHeadingCleanup: false

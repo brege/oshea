@@ -7,7 +7,7 @@ handler_script: index.js
 
 css_files:
   - "recipe.css"
-  - "recipe-book.css"
+  - "style.css"
 
 cover_page:
   enabled: true

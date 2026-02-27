@@ -1,11 +1,11 @@
-plugin_name: cv
+plugin_name: default
 version: 1.0.0
 protocol: v1
 
-description: "Plugin for Curriculum Vitae (CV) documents."
+description: "Default plugin for generic Markdown documents."
 handler_script: index.js
 css_files:
-  - "cv.css"
+  - "style.css"
 toc_options:
   enabled: false
 math:

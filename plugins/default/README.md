@@ -14,8 +14,8 @@ cli_help: |
     - date: (string or date) Document date. Used for PDF metadata.
     - (Any other front matter fields can be used as placeholders in Markdown content)
 
-  Configuration Notes (default.config.yaml):
-    - css_files: Specifies the CSS to use (e.g., "default.css").
+  Configuration Notes (default.yaml):
+    - css_files: Specifies the CSS to use (e.g., "style.css").
     - pdf_options: Controls page size (default Letter), margins, etc.
     - math: (object) KaTeX math rendering can be enabled/configured here.
     - toc_options: (object) Table of Contents generation can be enabled/configured.

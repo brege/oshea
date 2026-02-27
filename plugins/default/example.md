@@ -2,14 +2,14 @@
 title: "Default Plugin Example Document"
 author: "A User"
 date: "{{ .CurrentDateISO }}"
-oshea_plugin: "./default.config.yaml"
+oshea_plugin: "./default.yaml"
 # You can add other front matter fields used by your plugin/template.
 # example_param: "Hello from Default Example"
 ---
 
 # {{ title }}
 
-This is an example document to demonstrate the **`default`** plugin. It uses the `oshea_plugin: "./default.config.yaml"` key in its front matter, so it will automatically use the `default` plugin's configuration when you run `oshea default-example.md` from within the `plugins/default/` directory.
+This is an example document to demonstrate the **`default`** plugin. It uses the `oshea_plugin: "./default.yaml"` key in its front matter, so it will automatically use the `default` plugin's configuration when you run `oshea example.md` from within the `plugins/default/` directory.
 
 The `default` plugin is designed for general-purpose Markdown documents. It provides clean styling and supports standard Markdown features.
 

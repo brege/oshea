@@ -40,7 +40,7 @@ oshea plugin create my-plugin --from cv --outdir ./my-plugins
 
 A plugin is a self-contained directory that bundles all the necessary assets for a specific document type.
 
-### The Configuration File (`<plugin-name>.config.yaml`)
+### The Plugin Manifest (`default.yaml`)
 
 This is the plugin's manifest. It defines the plugin's identity and default behavior.
 

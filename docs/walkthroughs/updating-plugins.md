@@ -29,12 +29,12 @@ This creates `./my-flyer/` with boilerplate files.
 
 ```bash
 oshea plugin add ./my-flyer
-oshea convert my-flyer/my-flyer-example.md --plugin my-flyer --outdir ./output
+oshea convert my-flyer/example.md --plugin my-flyer --outdir ./output
 ```
 
 ### Step 3: Edit Plugin Source
 
-Update files in `./my-flyer/` (`my-flyer.css`, `index.js`, or config).
+Update files in `./my-flyer/` (`style.css`, `index.js`, or config).
 
 ### Step 4: Reinstall to Refresh Managed Copy
 
@@ -46,7 +46,7 @@ oshea plugin add ./my-flyer
 ### Step 5: Verify
 
 ```bash
-oshea convert my-flyer/my-flyer-example.md --plugin my-flyer --outdir ./output
+oshea convert my-flyer/example.md --plugin my-flyer --outdir ./output
 ```
 
 Open the new PDF and confirm the latest plugin changes are applied.

@@ -1,6 +1,7 @@
 // src/plugins/plugin-determiner.js
 
-const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
+const LOCAL_DOC_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 const { loggerPath } = require('@paths');
 const logger = require(loggerPath);
 
@@ -63,7 +64,7 @@ async function determinePluginToUse(
 
       const localConfigPath = path.resolve(
         path.dirname(markdownFilePathAbsolute),
-        `${path.basename(markdownFilePathAbsolute, path.extname(markdownFilePathAbsolute))}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+        `${path.basename(markdownFilePathAbsolute, path.extname(markdownFilePathAbsolute))}${LOCAL_DOC_CONFIG_FILENAME_SUFFIX}`,
       );
       localConfigFileNameForLogging = path.basename(localConfigPath);
       logger.debug('Checking for local config file', {
@@ -148,16 +149,16 @@ async function determinePluginToUse(
       determinationSource.startsWith('local'))
   ) {
     const markdownDir = path.dirname(markdownFilePathAbsolute);
-    // First, check for a plugin config within a sub-directory named after the plugin (e.g., /my-plugin/my-plugin.config.yaml)
+    // First, check for a plugin config within a sub-directory named after the plugin.
     const potentialPluginConfigPath = path.join(
       markdownDir,
       pluginSpec,
-      `${pluginSpec}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+      PLUGIN_CONFIG_FILENAME,
     );
-    // Second, check for a plugin config directly in the markdown file's directory (e.g., /my-plugin.config.yaml)
+    // Second, check for a plugin config directly in the markdown file's directory.
     const potentialPluginConfigPathDirect = path.join(
       markdownDir,
-      `${pluginSpec}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+      PLUGIN_CONFIG_FILENAME,
     );
 
     logger.debug(

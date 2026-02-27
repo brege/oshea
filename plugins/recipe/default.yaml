@@ -5,7 +5,7 @@ protocol: v1
 description: "Plugin for individual Recipe documents."
 handler_script: index.js
 css_files:
-  - "recipe.css"
+  - "style.css"
 toc_options:
   enabled: false
 math:

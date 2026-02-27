@@ -14,8 +14,8 @@ cli_help: |
     - date: (string or date) Date of last update. For PDF metadata.
     - (Other custom fields you might use in your CV Markdown that your template/CSS might expect)
 
-  Configuration Notes (cv.config.yaml):
-    - css_files: Specifies the CSS to use (e.g., "cv.css").
+  Configuration Notes (default.yaml):
+    - css_files: Specifies the CSS to use (e.g., "style.css").
     - pdf_options: Controls page size (default A4), margins, etc.
 
   Example Usage:

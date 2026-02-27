@@ -11,7 +11,7 @@ Quick examples and syntax for **oshea** commands and configurations.
 Uses the `default` plugin if no other is specified and auto-opens the PDF by default.
 
 ```bash
-oshea plugins/default/default-example.md --outdir ./output
+oshea plugins/default/example.md --outdir ./output
 ```
 
 ### Convert with a Specific Plugin
@@ -19,7 +19,7 @@ oshea plugins/default/default-example.md --outdir ./output
 Uses the `cv` plugin for specialized CV formatting.
 
 ```bash
-oshea convert plugins/cv/cv-example.md --plugin cv --outdir ./output
+oshea convert plugins/cv/example.md --plugin cv --outdir ./output
 ```
 
 ### Generate a Document (Complex Plugins)
@@ -35,7 +35,7 @@ oshea generate recipe-book --recipes-base-dir ./test/fixtures/hugo-example --out
 Automatically re-converts the document when the source file or its dependencies change.
 
 ```bash
-oshea convert plugins/recipe/recipe-example.md --plugin recipe --watch
+oshea convert plugins/recipe/example.md --plugin recipe --watch
 ```
 
 ## Plugin Management

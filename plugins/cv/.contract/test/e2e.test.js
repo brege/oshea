@@ -1,4 +1,4 @@
-// plugins/cv/.contract/test/cv-e2e.test.js
+// plugins/cv/.contract/test/e2e.test.js
 require('module-alias/register');
 const path = require('node:path');
 const os = require('node:os');
@@ -23,10 +23,10 @@ const TEST_OUTPUT_DIR = path.join(
   'oshea-test-output',
   'cv-plugin-e2e',
 );
-const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'cv-example.md');
+const EXAMPLE_MD_PATH = path.join(PLUGIN_ROOT, 'example.md');
 const MIN_PDF_SIZE = 1000;
 
-describe('plugins/cv (in-situ Self-Activation Test) .contract/test/cv-e2e.test.js', function () {
+describe('plugins/cv (in-situ Self-Activation Test) .contract/test/e2e.test.js', function () {
   this.timeout(20000);
 
   before(async () => {

@@ -5,6 +5,6 @@ protocol: v1
 description: "A new template-basic plugin for [describe your plugin's purpose here]."
 handler_script: index.js
 css_files:
-  - "template-basic.css"
+  - "style.css"
 math:
   enabled: false

@@ -24,12 +24,12 @@ module.exports = [
     setup: setupPluginScenario({
       files: {
         'index.js': false,
-        'missing-file-plugin.config.yaml': true,
-        'missing-file-plugin-example.md': false,
+        'default.yaml': true,
+        'example.md': false,
         'README.md': false,
       },
       yaml: {
-        'missing-file-plugin.config.yaml': {
+        'default.yaml': {
           plugin_name: 'missing-file-plugin',
           protocol: 'v1',
         },
@@ -39,7 +39,7 @@ module.exports = [
       isValid: false,
       errors: [
         "Missing required file: 'index.js'.",
-        "Missing required file: 'missing-file-plugin-example.md'.",
+        "Missing required file: 'example.md'.",
         "Missing required file: 'README.md'.",
       ],
     },
@@ -51,12 +51,12 @@ module.exports = [
     setup: setupPluginScenario({
       files: {
         'index.js': true,
-        'missing-protocol-plugin.config.yaml': true,
+        'default.yaml': true,
         'README.md': true,
-        'missing-protocol-plugin-example.md': true,
+        'example.md': true,
       },
       yaml: {
-        'missing-protocol-plugin.config.yaml': {
+        'default.yaml': {
           plugin_name: 'missing-protocol-plugin',
           version: '1.0.0',
         },
@@ -75,14 +75,14 @@ module.exports = [
     setup: setupPluginScenario({
       files: {
         'index.js': true,
-        'failing-test-plugin.config.yaml': true,
+        'default.yaml': true,
         'README.md': true,
-        'failing-test-plugin-example.md': true,
-        '.contract/test/failing-test-plugin-e2e.test.js': true,
-        '.contract/failing-test-plugin.schema.json': true,
+        'example.md': true,
+        '.contract/test/e2e.test.js': true,
+        '.contract/schema.json': true,
       },
       yaml: {
-        'failing-test-plugin.config.yaml': {
+        'default.yaml': {
           plugin_name: 'failing-test-plugin',
           protocol: 'v1',
           version: '1.0.0',
@@ -98,19 +98,16 @@ module.exports = [
       '2.4.2: Should FAIL validation for a plugin with an unsupported protocol',
     pluginName: 'unsupported-proto',
     setup: (pluginDir, pluginName, mocks) => {
-      const configPath = path.join(pluginDir, `${pluginName}.config.yaml`);
+      const configPath = path.join(pluginDir, 'default.yaml');
       const configYaml = `plugin_name: ${pluginName}\nprotocol: v99`;
       // Files exist
-      [
-        'index.js',
-        `${pluginName}.config.yaml`,
-        'README.md',
-        `${pluginName}-example.md`,
-      ].forEach((file) => {
-        mocks.mockFs.existsSync
-          .withArgs(path.join(pluginDir, file))
-          .returns(true);
-      });
+      ['index.js', 'default.yaml', 'README.md', 'example.md'].forEach(
+        (file) => {
+          mocks.mockFs.existsSync
+            .withArgs(path.join(pluginDir, file))
+            .returns(true);
+        },
+      );
       mocks.mockFs.readFileSync
         .withArgs(configPath, 'utf8')
         .returns(configYaml);
@@ -128,18 +125,15 @@ module.exports = [
       '2.4.3: Should FAIL validation if directory name mismatches metadata plugin_name',
     pluginName: 'dir-name',
     setup: (pluginDir, pluginName, mocks) => {
-      const configPath = path.join(pluginDir, `${pluginName}.config.yaml`);
-      const configYaml = 'plugin_name: mismatched-name\nprotocol: v1';
-      [
-        'index.js',
-        `${pluginName}.config.yaml`,
-        'README.md',
-        `${pluginName}-example.md`,
-      ].forEach((file) => {
-        mocks.mockFs.existsSync
-          .withArgs(path.join(pluginDir, file))
-          .returns(true);
-      });
+      const configPath = path.join(pluginDir, 'default.yaml');
+      const configYaml = `plugin_name: mismatched-name\nprotocol: v1\ndescription: ${pluginName}`;
+      ['index.js', 'default.yaml', 'README.md', 'example.md'].forEach(
+        (file) => {
+          mocks.mockFs.existsSync
+            .withArgs(path.join(pluginDir, file))
+            .returns(true);
+        },
+      );
       mocks.mockFs.readFileSync
         .withArgs(configPath, 'utf8')
         .returns(configYaml);
@@ -160,12 +154,12 @@ module.exports = [
     setup: setupPluginScenario({
       files: {
         'index.js': true,
-        'missing-optional.config.yaml': true,
+        'default.yaml': true,
         'README.md': true,
-        'missing-optional-example.md': true,
+        'example.md': true,
       },
       yaml: {
-        'missing-optional.config.yaml': {
+        'default.yaml': {
           plugin_name: 'missing-optional',
           protocol: 'v1',
         },

@@ -10,21 +10,21 @@ A plugin must follow a specific file structure to be considered valid. This stru
 
 ```
 plugins/my-plugin/
-├── my-plugin.config.yaml      # REQUIRED: The plugin's manifest and primary metadata.
+├── default.yaml               # REQUIRED: The plugin's manifest and primary metadata.
 ├── index.js                   # REQUIRED: The handler script.
 ├── README.md                  # REQUIRED: The primary human-readable documentation.
-├── my-plugin-example.md       # REQUIRED: A self-activating example file.
-├── my-plugin.css              # OPTIONAL: Core CSS, as defined in config.
+├── example.md                 # REQUIRED: A self-activating example file.
+├── style.css                  # OPTIONAL: Core CSS, as defined in config.
 │
 └── .contract/                 # OPTIONAL: Houses machine-readable/validation assets.
-    ├── my-plugin.schema.json  # OPTIONAL: The structural contract for the config.
+    ├── schema.json            # OPTIONAL: The structural contract for the config.
     └── test/                  # OPTIONAL: Co-located tests.
-        └── my-plugin-e2e.test.js
+        └── e2e.test.js
 ```
 
-## The Primary Manifest: `<plugin-name>.config.yaml`
+## The Primary Manifest: `default.yaml`
 
-The `.config.yaml` file is the heart of the plugin. It is the **single source of truth** for the plugin's identity and its default configuration.
+The `default.yaml` file is the heart of the plugin. It is the **single source of truth** for the plugin's identity and its default configuration.
 
 ### Required Metadata Properties
 
@@ -82,7 +82,7 @@ These are standard properties that plugins can use to hook into **oshea**'s func
 
 - **Type:** `array` of `string`s
 - **Purpose:** A list of CSS files to be applied to the document. Paths are resolved relative to the plugin's configuration file.
-- **Example:** `css_files: ["cv.css"]`
+- **Example:** `css_files: ["style.css"]`
 
 #### `math`
 
@@ -135,6 +135,6 @@ These are standard properties that plugins can use to hook into **oshea**'s func
 
 ## Extending the Contract
 
-Plugins can extend the base contract by providing their own schema file, located at `.contract/<plugin_name>.schema.json`. This allows plugins to define their own custom properties and enforce specific constraints.
+Plugins can extend the base contract by providing their own schema file, located at `.contract/schema.json`. This allows plugins to define their own custom properties and enforce specific constraints.
 
-When a plugin-specific schema is present, it is merged with the base schema. See `plugins/cv/.contract/cv.schema.json` for an example.
+When a plugin-specific schema is present, it is merged with the base schema. See `plugins/cv/.contract/schema.json` for an example.

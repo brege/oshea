@@ -20,7 +20,8 @@ const MainConfigLoader = require(mainConfigLoaderPath);
 const PluginConfigLoader = require(pluginConfigLoaderPath);
 const AssetResolver = require(assetResolverPath);
 
-const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
+const LOCAL_DOC_CONFIG_FILENAME_SUFFIX = '.config.yaml';
 
 class ConfigResolver {
   constructor(
@@ -109,7 +110,7 @@ class ConfigResolver {
     let specificSchema = {};
     const pluginSchemaPath = this.dependencies.path.join(
       this.dependencies.path.dirname(pluginConfigPath),
-      `.contract/${this.dependencies.path.basename(pluginConfigPath, '.config.yaml')}.schema.json`,
+      '.contract/schema.json',
     );
 
     if (this.dependencies.fs.existsSync(pluginSchemaPath)) {
@@ -356,25 +357,13 @@ class ConfigResolver {
         const dirName = this.dependencies.path.basename(actualPluginBasePath);
         pluginOwnConfigPath = this.dependencies.path.join(
           actualPluginBasePath,
-          `${dirName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+          PLUGIN_CONFIG_FILENAME,
         );
         nominalPluginNameForLookup = dirName;
         if (!this.dependencies.fs.existsSync(pluginOwnConfigPath)) {
-          const filesInDir =
-            this.dependencies.fs.readdirSync(actualPluginBasePath);
-          const alternativeConfig = filesInDir.find((f) =>
-            f.endsWith(PLUGIN_CONFIG_FILENAME_SUFFIX),
+          throw new Error(
+            `Plugin directory '${actualPluginBasePath}' specified, but '${PLUGIN_CONFIG_FILENAME}' was not found.`,
           );
-          if (alternativeConfig) {
-            pluginOwnConfigPath = this.dependencies.path.join(
-              actualPluginBasePath,
-              alternativeConfig,
-            );
-          } else {
-            throw new Error(
-              `Plugin directory '${actualPluginBasePath}' specified, but no *.config.yaml file found within it.`,
-            );
-          }
         }
       } else if (stats.isFile()) {
         pluginOwnConfigPath = resolvedPathSpec;
@@ -468,12 +457,12 @@ class ConfigResolver {
           currentCssPaths,
           localConfigOverrides.inheritCss === true,
           nominalPluginNameForLookup,
-          `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}.config.yaml`,
+          `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}${LOCAL_DOC_CONFIG_FILENAME_SUFFIX}`,
         );
       }
       const localConfigFilenameForLog = markdownFilePath
-        ? `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}.config.yaml`
-        : '<filename>.config.yaml';
+        ? `${this.dependencies.path.basename(markdownFilePath, this.dependencies.path.extname(markdownFilePath))}${LOCAL_DOC_CONFIG_FILENAME_SUFFIX}`
+        : `<filename>${LOCAL_DOC_CONFIG_FILENAME_SUFFIX}`;
       loadedConfigSourcePaths.pluginConfigPaths.push(
         `Local file override from '${localConfigFilenameForLog}'`,
       );

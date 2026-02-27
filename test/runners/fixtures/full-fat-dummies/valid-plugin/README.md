@@ -9,7 +9,7 @@ cli_help: >
   Features:
     - Basic Markdown to PDF conversion.
     - Uses DefaultHandler for standard processing.
-    - Customizable via its own .config.yaml and .css files.
+    - Customizable via its own default.yaml and CSS files.
 
   Expected Front Matter:
     - title: (string) Document title. Used for PDF metadata and often as the main H1 heading.
@@ -17,10 +17,9 @@ cli_help: >
     - date: (string or date, optional) Document date.
     - (Add any other front matter fields your 'valid-plugin' plugin will specifically use)
 
-  Configuration Notes (valid-plugin.config.yaml):
-    - css_files: Points to "valid-plugin.css". Modify this file for custom styling.
+  Configuration Notes (default.yaml):
+    - css_files: Points to "style.css". Modify this file for custom styling.
     - pdf_options: Adjust page size, margins, etc., as needed.
-    - inject_fm_title_as_h1: Set to true if you want the 'title' from front matter to be the main H1.
     - math: Configure KaTeX math rendering if required.
 
   Example Usage (after registration):
@@ -35,13 +34,13 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
 
 * **Functionality**
 
-  By default, this `valid-plugin` plugin uses the `DefaultHandler` from `oshea`'s core utilities. This means it will process standard Markdown, apply styling from `valid-plugin.css`, and use PDF generation options defined in `valid-plugin.config.yaml`.
+  By default, this `valid-plugin` plugin uses the `DefaultHandler` from `oshea`'s core utilities. This means it will process standard Markdown, apply styling from `style.css`, and use PDF generation options defined in `default.yaml`.
 
 * **Customization**
 
   You are encouraged to modify:
-    * `valid-plugin.config.yaml`: Adjust `description`, `pdf_options`, `css_files`, `math` settings, `params`, etc.
-    * `valid-plugin.css`: Add your custom CSS rules to style your documents.
+    * `default.yaml`: Adjust `description`, `pdf_options`, `css_files`, `math` settings, etc.
+    * `style.css`: Add your custom CSS rules to style your documents.
     * `index.js`: For more advanced behavior, you can modify the `ValidPluginHandler` class to implement custom logic, such as unique data processing or HTML generation, instead of just relying on `DefaultHandler`.
     * This `README.md`: Update the `cli_help` section above and the main content here to accurately describe your new plugin.
 
@@ -49,24 +48,24 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
 
 1. **Understand the Files**
 
-   * `valid-plugin.config.yaml`: Main configuration for your plugin.
+   * `default.yaml`: Main configuration for your plugin.
    * `index.js`: The Node.js handler script.
-   * `valid-plugin.css`: Stylesheet for your plugin.
+   * `style.css`: Stylesheet for your plugin.
    * `README.md`: This file – your plugin's documentation.
-   * `valid-plugin-example.md`: An example Markdown file.
+   * `example.md`: An example Markdown file.
 
 2. **Test the Example (Out-of-the-Box)** 
     
-   The generated `valid-plugin-example.md` is pre-configured to use your new plugin directly. Navigate into your new plugin's directory and run:
+   The generated `example.md` is pre-configured to use your new plugin directly. Navigate into your new plugin's directory and run:
    ```bash
-   oshea valid-plugin-example.md
+   oshea example.md
    ```
-   This works because the example Markdown file's front matter contains `oshea_plugin: "./valid-plugin.config.yaml"`, which explicitly tells `oshea` to use the sibling configuration file for that specific conversion.
+   This works because the example Markdown file's front matter contains `oshea_plugin: "./default.yaml"`, which explicitly tells `oshea` to use the sibling configuration file for that specific conversion.
 
 3. **Customize**
 
-   * Update the `description` in `valid-plugin.config.yaml`.
-   * Modify `valid-plugin.css` with your desired styles.
+   * Update the `description` in `default.yaml`.
+   * Modify `style.css` with your desired styles.
    * If needed, enhance `index.js` with custom processing logic.
    * Fill out the `cli_help` section and the rest of this `README.md`.
 
@@ -78,10 +77,10 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
    # In your main config.yaml
    plugins:
      # ... other plugins ...
-     valid-plugin: "/full/path/to/your/valid-plugin/valid-plugin.config.yaml"
+     valid-plugin: "/full/path/to/your/valid-plugin/default.yaml"
      # Or, if using plugin_directory_aliases:
      # my_plugins_alias: "/full/path/to/your/plugins_base_dir/"
-     # valid-plugin: "my_plugins_alias:valid-plugin/valid-plugin.config.yaml"
+     # valid-plugin: "my_plugins_alias:valid-plugin/default.yaml"
    ```
 
 5. **Use Your Plugin Generally**

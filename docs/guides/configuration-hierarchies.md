@@ -29,7 +29,7 @@ When you run `oshea convert <file>`, the tool determines which plugin to use bas
 1. **`--plugin` CLI Option** \
    Directly specifies a plugin by name or path.
 2. **`oshea_plugin` Front Matter** \
-   A key in the Markdown file's YAML front matter. This is the primary self-activation path for documents and may be a registered plugin name or plugin config path.
+   A key in the Markdown file's YAML front matter. This is the primary self-activation path for documents and may be a registered plugin name or a plugin path.
 3. **Local `<filename>.config.yaml`** \
    An accompanying config file (e.g., `my-doc.config.yaml` for `my-doc.md`) with a `plugin:` key.
 4. **`default` Plugin** \
@@ -46,7 +46,7 @@ Once a plugin is chosen (e.g., `cv`), its settings are merged from multiple laye
 3. **User-Global `config.yaml` Inline Overrides** \
   Same as above, but in the user's global config.
 4. **Plugin Defaults** (Lowest) \
-   The settings defined in the plugin's own `<plugin-name>.config.yaml`.
+   The settings defined in the plugin's own `default.yaml`.
 
 ---
 

@@ -1,7 +1,7 @@
 // src/config/plugin-config-loader.js
 const { configUtilsPath, assetResolverPath } = require('@paths');
 
-const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
 
 class PluginConfigLoader {
   constructor(
@@ -99,7 +99,7 @@ class PluginConfigLoader {
     const xdgPluginOverrideDir = this.path.join(this.xdgBaseDir, pluginName);
     const xdgPluginOverrideFilePath = this.path.join(
       xdgPluginOverrideDir,
-      `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
+      PLUGIN_CONFIG_FILENAME,
     );
 
     if (this.fs.existsSync(xdgPluginOverrideFilePath)) {

@@ -15,13 +15,13 @@ cli_help: |
     - qr_data: (string) Specific data for the QR code (e.g., mailto link, vCard info).
     - brandingColor: (string) Hex color code for custom branding elements.
 
-  Configuration Notes (advanced-card.config.yaml):
-    - css_files: Specifies CSS for the custom HTML structure (e.g., "advanced-card.css").
+  Configuration Notes (default.yaml):
+    - css_files: Specifies CSS for the custom HTML structure (e.g., "style.css").
     - pdf_options: Defines specific dimensions (width, height) for the card, small margins.
     - printBackground: true (important for card designs with background colors).
 
   Example Usage (assuming registered):
-    oshea convert path/to/advanced-card-example.md --plugin advanced-card
+    oshea convert path/to/example.md --plugin advanced-card
 ---
 
 # Advanced Card Plugin (`advanced-card`) - Example

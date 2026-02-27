@@ -1,4 +1,4 @@
-// plugins/advanced-card/.contract/test/advanced-card-e2e.test.js
+// plugins/advanced-card/.contract/test/e2e.test.js
 require('module-alias/register');
 const path = require('node:path');
 const os = require('node:os');
@@ -26,11 +26,11 @@ const TEST_OUTPUT_DIR = path.join(
   'oshea-test-output',
   `${PLUGIN_NAME}-plugin-e2e`,
 );
-const EXAMPLE_MD = path.join(PLUGIN_ROOT, `${PLUGIN_NAME}-example.md`);
+const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'example.md');
 const EXPECTED_PDF_BASENAME = 'dr-eleanor-vance.pdf';
 const MIN_PDF_SIZE = 1000;
 
-describe('plugins/advanced-card (in-situ Self-Activation Test) .contract/test/advanced-card-e2e.test.js', function () {
+describe('plugins/advanced-card (in-situ Self-Activation Test) .contract/test/e2e.test.js', function () {
   this.timeout(20000);
 
   before(async () => {

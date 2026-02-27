@@ -7,7 +7,7 @@ description: |-
   dynamic content from Markdown.
 handler_script: index.js
 css_files:
-  - "advanced-card.css"
-schema_file: .contract/advanced-card.schema.json
+  - "style.css"
+schema_file: .contract/schema.json
 math:
   enabled: false

@@ -15,7 +15,7 @@ cli_help: |
     - tags: (array of strings, optional) Keywords for the recipe.
     - (Other custom fields relevant to recipes can be used as placeholders)
 
-  Configuration Notes (recipe.config.yaml):
+  Configuration Notes (default.yaml):
     - css_files: Specifies the CSS to use (e.g., "recipe.css").
     - pdf_options: Controls page size, margins, etc.
     - remove_shortcodes_patterns: Can be used to clean Hugo-specific or other shortcodes.

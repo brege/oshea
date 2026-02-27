@@ -6,7 +6,7 @@ date: "{{ .CurrentDateISO }}"
 
 # Recipe Book Example
 
-This file, `recipe-book-example.md`, exists primarily to satisfy the `plugin validate` command's requirement that every plugin has an example file.
+This file, `example.md`, exists primarily to satisfy the `plugin validate` command's requirement that every plugin has an example file.
 
 The `recipe-book` plugin is a "generator" plugin and does not convert a single file. Instead, it is used with the `generate` command to compile a directory of recipes into a single PDF.
 

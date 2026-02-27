@@ -15,8 +15,8 @@ cli_help: |
   Required CLI Option for 'generate':
     --recipes-base-dir <path>: Specifies the directory containing subdirectories, where each subdirectory has an 'index.md' for a recipe.
 
-  Configuration Notes (recipe-book.config.yaml):
-    - css_files: Lists CSS files (e.g., "recipe.css", "recipe-book.css").
+  Configuration Notes (default.yaml):
+    - css_files: Lists CSS files (e.g., "recipe.css", "style.css").
     - pdf_options: Page size, margins for the book.
     - cover_page: (object) Settings to enable and customize the cover page (title, subtitle, author).
     - toc_options: (object) Settings to enable and customize the table of contents.

@@ -8,7 +8,7 @@ const { loadConfig: loadYamlConfig } = require(markdownUtilsPath);
 const yaml = require('js-yaml');
 
 const XDG_CONFIG_DIR_NAME = 'oshea';
-const PLUGIN_CONFIG_FILENAME_SUFFIX = '.config.yaml';
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
 const PLUGIN_MANIFEST_FILENAME = 'plugins.yaml';
 
 class PluginRegistryBuilder {
@@ -91,10 +91,7 @@ class PluginRegistryBuilder {
       const pluginDir = path.join(bundledPluginsPath, pluginName);
       if (!fs.statSync(pluginDir).isDirectory()) continue;
 
-      const configPath = path.join(
-        pluginDir,
-        `${pluginName}${PLUGIN_CONFIG_FILENAME_SUFFIX}`,
-      );
+      const configPath = path.join(pluginDir, PLUGIN_CONFIG_FILENAME);
       if (!fs.existsSync(configPath)) continue;
 
       registrations[pluginName] = {

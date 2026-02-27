@@ -9,6 +9,7 @@ const { spawn } = require('node:child_process');
 const { projectRoot } = require('@paths');
 
 const MANIFEST_FILENAME = 'plugins.yaml';
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
 
 function isValidPluginName(pluginName) {
   if (!pluginName || typeof pluginName !== 'string') {
@@ -135,19 +136,12 @@ class PluginInstaller {
 
   async _discoverSinglePlugin(dir) {
     const { fsPromises, path } = this.dependencies;
-    const entries = await fsPromises.readdir(dir, { withFileTypes: true });
-    const configFiles = entries
-      .filter((entry) => entry.isFile() && entry.name.endsWith('.config.yaml'))
-      .map((entry) => entry.name);
-
-    if (configFiles.length !== 1) {
-      throw new Error(
-        `Expected exactly one '*.config.yaml' file at '${dir}', found ${configFiles.length}.`,
-      );
+    const configPath = path.join(dir, PLUGIN_CONFIG_FILENAME);
+    if (!this.dependencies.fs.existsSync(configPath)) {
+      throw new Error(`Expected '${PLUGIN_CONFIG_FILENAME}' at '${dir}'.`);
     }
 
-    const configFile = configFiles[0];
-    const pluginId = configFile.replace(/\.config\.yaml$/, '');
+    const pluginId = path.basename(dir);
 
     if (!isValidPluginName(pluginId)) {
       throw new Error(
@@ -155,10 +149,9 @@ class PluginInstaller {
       );
     }
 
-    const configPath = path.join(dir, configFile);
     const raw = await fsPromises.readFile(configPath, 'utf8');
     const config = this.dependencies.yaml.load(raw) || {};
-    const handlerScript = config.handler_script;
+    const handlerScript = config.handler_script || 'index.js';
 
     if (typeof handlerScript !== 'string' || handlerScript.trim() === '') {
       throw new Error(
@@ -272,10 +265,7 @@ class PluginInstaller {
 
       await fsExtra.copy(resolved.basePath, targetDir);
 
-      const installedConfigPath = path.join(
-        targetDir,
-        `${resolved.pluginId}.config.yaml`,
-      );
+      const installedConfigPath = path.join(targetDir, PLUGIN_CONFIG_FILENAME);
       if (!fs.existsSync(installedConfigPath)) {
         throw new Error(
           `Installed plugin config missing at '${installedConfigPath}'.`,

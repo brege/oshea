@@ -19,8 +19,8 @@ cli_help: |
     - companyName: (string) Company you're applying to.
     - (Many other fields for recipient address, job title, etc. See example-cover-letter.md)
 
-  Configuration Notes (cover-letter.config.yaml):
-    - css_files: Specifies CSS (e.g., "cover-letter.css").
+  Configuration Notes (default.yaml):
+    - css_files: Specifies CSS (e.g., "style.css").
     - pdf_options: Standard page size (Letter/A4), margins suitable for formal letters.
 
   Example Usage:

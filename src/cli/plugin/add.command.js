@@ -20,7 +20,7 @@ module.exports = {
         type: 'string',
       })
       .epilogue(
-        'If --name is omitted, the plugin id from <plugin>.config.yaml is used as the invoke name.' +
+        'If --name is omitted, the plugin directory name is used as the invoke name.' +
           '\n' +
           "Tip: Use 'oshea plugin list' to see all currently enabled plugins.",
       );

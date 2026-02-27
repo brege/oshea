@@ -6,6 +6,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const yaml = require('js-yaml');
 
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
+
 // Load versioned validators
 const v1Validator = require(v1Path);
 
@@ -103,11 +105,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
     return null;
   };
 
-  // Check .config.yaml
-  const configPath = path.join(
-    pluginDirectoryPath,
-    `${pluginName}.config.yaml`,
-  );
+  const configPath = path.join(pluginDirectoryPath, PLUGIN_CONFIG_FILENAME);
   const configContent = readYamlFile(configPath);
   if (configContent) {
     logger.debug('Config file found and parsed', {
@@ -135,7 +133,7 @@ function getPluginMetadata(pluginDirectoryPath, pluginName, warnings) {
 
   // Final checks and defaults
   if (metadata.plugin_name.value === undefined) {
-    metadata.plugin_name.value = pluginName; // Default to directory name if not found anywhere
+    metadata.plugin_name.value = pluginName;
     metadata.plugin_name.source = 'default (directory name)';
     warnings.push(
       `Plugin name not found in config. Defaulting to directory name: '${pluginName}'.`,

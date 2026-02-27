@@ -1,4 +1,4 @@
-// plugins/template-basic/.contract/test/template-basic-e2e.test.js
+// plugins/recipe-book/.contract/test/e2e.test.js
 require('module-alias/register');
 const path = require('node:path');
 const os = require('node:os');
@@ -7,25 +7,28 @@ const {
   projectRoot,
   cliPath,
   testFileHelpersPath,
+  fixturesDir,
   loggerPath,
 } = require('@paths');
 
 const logger = require(loggerPath);
 
-const { runCliCommand, setupTestDirectory, cleanupTestDirectory } = require(
-  testFileHelpersPath,
-);
+const {
+  runCliCommand,
+  setupTestDirectory,
+  cleanupTestDirectory,
+  checkFile,
+} = require(testFileHelpersPath);
 
 const TEST_OUTPUT_DIR = path.join(
   os.tmpdir(),
   'oshea-test-output',
-  'template-basic-e2e',
+  'recipe-book-e2e',
 );
-const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
-const EXAMPLE_MD = path.join(PLUGIN_ROOT, 'template-basic-example.md');
+const HUGO_EXAMPLE_PATH = path.join(fixturesDir, 'hugo-example');
 
-describe('plugins/template-basic (in-situ Self-Activation Test) .contract/test/template-basic-e2e.test.js', function () {
-  this.timeout(15000);
+describe('plugins/recipe-book (in-situ Self-Activation Test) .contract/test/e2e.test.js', function () {
+  this.timeout(20000);
 
   before(async () => {
     await setupTestDirectory(TEST_OUTPUT_DIR);
@@ -35,9 +38,21 @@ describe('plugins/template-basic (in-situ Self-Activation Test) .contract/test/t
     await cleanupTestDirectory(TEST_OUTPUT_DIR);
   });
 
-  it('in-situ: should convert the example markdown using self-activation', async () => {
+  it('in-situ: should generate a recipe book from a directory of recipes', async () => {
+    const commandArgs = [
+      'generate',
+      'recipe-book',
+      '--recipes-base-dir',
+      HUGO_EXAMPLE_PATH,
+      '--outdir',
+      TEST_OUTPUT_DIR,
+      '--filename',
+      'MyBook.pdf',
+      '--no-open',
+    ];
+
     const { success, stdout, stderr } = await runCliCommand(
-      ['convert', EXAMPLE_MD, '--outdir', TEST_OUTPUT_DIR, '--no-open'],
+      commandArgs,
       cliPath,
       projectRoot,
     );
@@ -46,6 +61,8 @@ describe('plugins/template-basic (in-situ Self-Activation Test) .contract/test/t
       logger.error('CLI command failed. STDOUT:', stdout);
       logger.error('STDERR:', stderr);
     }
+
     expect(success, 'CLI command should succeed').to.be.true;
+    await checkFile(TEST_OUTPUT_DIR, 'MyBook.pdf', 10000);
   });
 });

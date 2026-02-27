@@ -9,6 +9,11 @@ const fsExtra = require('fs-extra');
 const yaml = require('js-yaml');
 const matter = require('gray-matter');
 
+const PLUGIN_CONFIG_FILENAME = 'default.yaml';
+const PLUGIN_SCHEMA_FILENAME = 'schema.json';
+const PLUGIN_E2E_TEST_FILENAME = 'e2e.test.js';
+const PLUGIN_EXAMPLE_FILENAME = 'example.md';
+
 async function createArchetype(
   dependencies,
   archetyperContext,
@@ -33,13 +38,12 @@ async function createArchetype(
     );
   }
   sourcePluginIdForReplacement = path.basename(resolvedSourcePath);
-  const configFileName = [
-    `${sourcePluginIdForReplacement}.config.yaml`,
-    `${sourcePluginIdForReplacement}.yaml`,
-  ].find((cfg) => fss.existsSync(path.join(resolvedSourcePath, cfg)));
+  const configFileName = [PLUGIN_CONFIG_FILENAME].find((cfg) =>
+    fss.existsSync(path.join(resolvedSourcePath, cfg)),
+  );
   if (!configFileName) {
     throw new Error(
-      `Config file (.config.yaml or .yaml) not found in source plugin directory "${resolvedSourcePath}".`,
+      `Config file '${PLUGIN_CONFIG_FILENAME}' not found in source plugin directory "${resolvedSourcePath}".`,
     );
   }
   sourcePluginInfo = {
@@ -96,7 +100,7 @@ async function createArchetype(
   const filesToProcessForStringReplacement = [];
   const processExtensions = ['.js', '.yaml', '.yml', '.css', '.md', '.json'];
 
-  const newConfigFilename = `${newArchetypeName}.config.yaml`;
+  const newConfigFilename = PLUGIN_CONFIG_FILENAME;
   const newConfigPathInArchetype = path.join(archetypePath, newConfigFilename);
   const originalConfigPathInArchetype = path.join(
     archetypePath,
@@ -169,27 +173,21 @@ async function createArchetype(
 
   const contractDirInArchetype = path.join(archetypePath, '.contract');
   if (fss.existsSync(contractDirInArchetype)) {
-    const oldSchemaName = `${sourcePluginIdForReplacement}.schema.json`;
-    const oldSchemaPath = path.join(contractDirInArchetype, oldSchemaName);
+    const oldSchemaPath = path.join(
+      contractDirInArchetype,
+      PLUGIN_SCHEMA_FILENAME,
+    );
     if (fss.existsSync(oldSchemaPath)) {
-      const newSchemaPath = path.join(
-        contractDirInArchetype,
-        `${newArchetypeName}.schema.json`,
-      );
-      await fs.rename(oldSchemaPath, newSchemaPath);
-      filesToProcessForStringReplacement.push(newSchemaPath);
+      filesToProcessForStringReplacement.push(oldSchemaPath);
     }
     const testDirInArchetype = path.join(contractDirInArchetype, 'test');
     if (fss.existsSync(testDirInArchetype)) {
-      const oldTestName = `${sourcePluginIdForReplacement}-e2e.test.js`;
-      const oldTestPath = path.join(testDirInArchetype, oldTestName);
+      const oldTestPath = path.join(
+        testDirInArchetype,
+        PLUGIN_E2E_TEST_FILENAME,
+      );
       if (fss.existsSync(oldTestPath)) {
-        const newTestPath = path.join(
-          testDirInArchetype,
-          `${newArchetypeName}-e2e.test.js`,
-        );
-        await fs.rename(oldTestPath, newTestPath);
-        filesToProcessForStringReplacement.push(newTestPath);
+        filesToProcessForStringReplacement.push(oldTestPath);
       }
     }
   }
@@ -260,18 +258,17 @@ async function createArchetype(
     await fs.writeFile(readmePath, newReadmeContent);
   }
 
-  const exampleMdPattern = new RegExp(
-    `^${sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([-_])example\\.md$`,
-    'i',
-  );
-  const newExampleMdName = `${newArchetypeName}-example.md`;
+  const exampleMdPattern = /example\.md$/i;
+  const newExampleMdName = PLUGIN_EXAMPLE_FILENAME;
   const finalListOfFiles = await fs.readdir(archetypePath);
   for (const fileName of finalListOfFiles) {
     if (exampleMdPattern.test(fileName)) {
-      await fs.rename(
-        path.join(archetypePath, fileName),
-        path.join(archetypePath, newExampleMdName),
-      );
+      if (fileName !== newExampleMdName) {
+        await fs.rename(
+          path.join(archetypePath, fileName),
+          path.join(archetypePath, newExampleMdName),
+        );
+      }
       break;
     }
   }

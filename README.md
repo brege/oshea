@@ -106,9 +106,9 @@ oshea plugin create --from cover-letter my-better-letter --target-dir 'my-plugin
 ```
 my-plugins/my-better-letter
 ├── .contract                       schema and in-situ testing
-├── my-better-letter.config.yaml    plugin configuration (page size, versioning, etc)
-├── my-better-letter.css            custom CSS properties
-├── my-better-letter-example.md     example file
+├── default.yaml                    plugin configuration (metadata and defaults)
+├── style.css                       custom CSS properties
+├── example.md                      example file
 ├── index.js                        handler
 └── README.md                       plugin description (embedded --help text)
 ```

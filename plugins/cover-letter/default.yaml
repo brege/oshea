@@ -5,7 +5,7 @@ protocol: v1
 description: "Plugin for Cover Letter documents."
 handler_script: index.js
 css_files:
-  - "cover-letter.css"
+  - "style.css"
 toc_options:
   enabled: false
 math:

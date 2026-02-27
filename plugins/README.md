@@ -92,7 +92,7 @@ oshea plugin create my-plugin --from cover-letter [options]
 ```bash
 oshea plugin validate my-plugin
 cd my-plugin
-oshea my-plugin-example.md
+oshea example.md
 ```
 
 ### Add a Plugin

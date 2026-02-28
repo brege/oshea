@@ -10,3 +10,21 @@ config.yaml
 
 # test artifacts
 test/runners/fixtures/
+
+# user plugins
+/plugins/*
+!/plugins/README.md
+!/plugins/advanced-card
+!/plugins/advanced-card/**
+!/plugins/cv
+!/plugins/cv/**
+!/plugins/cover-letter
+!/plugins/cover-letter/**
+!/plugins/default
+!/plugins/default/**
+!/plugins/recipe
+!/plugins/recipe/**
+!/plugins/recipe-book
+!/plugins/recipe-book/**
+!/plugins/template-basic
+!/plugins/template-basic/**

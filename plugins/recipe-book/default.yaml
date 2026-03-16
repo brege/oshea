@@ -4,6 +4,7 @@ protocol: v1
 
 description: "Plugin for creating a combined Recipe Book PDF."
 handler_script: index.js
+screenshot: false
 
 css_files:
   - "recipe.css"

@@ -26,6 +26,17 @@ cli_help: |
 
 # Advanced Card Plugin (`advanced-card`) - Example
 
+<div align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <img src="./screenshot.png" width="50%">
+        <br><strong>Advanced Card Sample</strong>
+      </td>
+    </tr>
+  </table>
+</div>
+
 This `advanced-card` plugin is a demonstration of advanced plugin capabilities within `oshea`. It showcases how to:
 
 1.  Read primary content directly from the Markdown body (e.g., using H1 for name, H2 for title).

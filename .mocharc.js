@@ -29,6 +29,7 @@ const paths = {
     'test/runners/integration/config/**/*.js',
     'test/runners/integration/plugins/plugin-determiner.*.js',
     'test/runners/integration/plugins/plugin-manager.*.js',
+    'test/runners/integration/plugins/plugin-installer.*.js',
     'test/runners/integration/plugins/plugin-validator.*.js',
   ],
 
@@ -43,6 +44,7 @@ const paths = {
 
   plugin_determiner:      'test/runners/integration/plugins/plugin-determiner.*.js',        // Rank 1
   plugin_manager:         'test/runners/integration/plugins/plugin-manager.*.js',           // Rank 2
+  plugin_installer:       'test/runners/integration/plugins/plugin-installer.*.js',         // Rank 2
   plugin_validator:       'test/runners/integration/plugins/plugin-validator.*.js',         // Rank 2
 
   // End-to-End Test Paths
@@ -68,6 +70,7 @@ const ranks = {
     paths.main_config_loader,
     paths.plugin_config_loader,
     paths.plugin_manager,
+    paths.plugin_installer,
     paths.math_integration,
   ]
 };
@@ -107,6 +110,7 @@ const commands = {
   plugins: [
     paths.plugin_determiner,
     paths.plugin_manager,
+    paths.plugin_installer,
     paths.plugin_validator
   ],
   collections: paths.integration,

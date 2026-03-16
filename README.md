@@ -72,6 +72,13 @@ oshea my-letter.md --plugin cover-letter
 
 
 ## Installation
+
+### From NPM
+```bash
+npm install -g oshea
+```
+
+### From GitHub
 ```bash
 git clone https://github.com/brege/oshea.git
 cd oshea

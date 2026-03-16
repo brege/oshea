@@ -41,25 +41,38 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
 
     const pluginBasePath = path.dirname(pluginRegistration.configPath);
     const readmePath = path.join(pluginBasePath, 'README.md');
+    let pluginConfig = null;
+
+    try {
+      const pluginConfigContent = await fs.readFile(
+        pluginRegistration.configPath,
+        'utf8',
+      );
+      pluginConfig = yaml.load(pluginConfigContent) || {};
+    } catch {
+      pluginConfig = null;
+    }
+
+    if (
+      pluginConfig?.cli_help &&
+      typeof pluginConfig.cli_help === 'string' &&
+      pluginConfig.cli_help.trim() !== ''
+    ) {
+      logger.info('\n--- Plugin Help ---\n');
+      logger.info(pluginConfig.cli_help.trim());
+      logger.info('\n-------------------\n');
+      return;
+    }
 
     if (!fss.existsSync(readmePath)) {
       logger.warn(
         `WARN: README.md not found for plugin "${pluginName}" at ${readmePath}.`,
       );
       logger.info('No specific help available. Description from config:');
-      try {
-        const pluginConfigContent = await fs.readFile(
-          pluginRegistration.configPath,
-          'utf8',
-        );
-        const pluginConfig = yaml.load(pluginConfigContent);
-        if (pluginConfig?.description) {
-          logger.info(`  ${pluginConfig.description}`);
-        } else {
-          logger.info("  No description found in plugin's config file either.");
-        }
-      } catch {
-        logger.info('  Could not load plugin description.');
+      if (pluginConfig?.description) {
+        logger.info(`  ${pluginConfig.description}`);
+      } else {
+        logger.info("  No description found in plugin's config file either.");
       }
       return;
     }
@@ -78,19 +91,10 @@ async function displayPluginHelp(pluginName, manager, cliArgs) {
       logger.info(
         'Displaying plugin description from its configuration file as fallback:',
       );
-      try {
-        const pluginConfigContent = await fs.readFile(
-          pluginRegistration.configPath,
-          'utf8',
-        );
-        const pluginConfig = yaml.load(pluginConfigContent);
-        if (pluginConfig?.description) {
-          logger.info(`  ${pluginConfig.description}`);
-        } else {
-          logger.info("  No description found in plugin's config file.");
-        }
-      } catch {
-        logger.info('  Could not load plugin description.');
+      if (pluginConfig?.description) {
+        logger.info(`  ${pluginConfig.description}`);
+      } else {
+        logger.info("  No description found in plugin's config file.");
       }
     }
   } catch (error) {

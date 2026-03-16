@@ -21,13 +21,13 @@ A third-party index of plugins can be found at [github.com/brege/oshea-plugins](
 
 ### Plugin Help
 
-Every plugin has its own README. Every README contains front matter that is rendered as that plugin's help text when you run:
+Every plugin has its own `default.yaml`. The `cli_help` field in that config is rendered as plugin help when you run:
 
 ```bash
 oshea plugin help <pluginName>
 ``` 
 
-Replace `<pluginName>` with the name of any plugin (e.g., `cv`, `recipe-book`).
+Replace `<pluginName>` with the name of any plugin (e.g., `cv`, `recipe-book`). README front matter is still supported as a fallback for older plugins.
 
 ### List Available Plugins
 

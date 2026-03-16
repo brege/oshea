@@ -3,6 +3,28 @@ version: 1.0.0
 protocol: v1
 
 description: "A new template-basic plugin for [describe your plugin's purpose here]."
+cli_help: |
+  Plugin: template-basic
+  Description: A new template-basic plugin for [describe your plugin's purpose here].
+
+  Features:
+    - Basic Markdown to PDF conversion.
+    - Uses DefaultHandler for standard processing.
+    - Customizable via its own default.yaml and CSS files.
+
+  Expected Front Matter:
+    - title: (string) Document title. Used for PDF metadata and often as the main H1 heading.
+    - author: (string, optional) Document author.
+    - date: (string or date, optional) Document date.
+    - (Add any other front matter fields your 'template-basic' plugin will specifically use)
+
+  Configuration Notes (default.yaml):
+    - css_files: Points to "style.css". Modify this file for custom styling.
+    - pdf_options: Adjust page size, margins, etc., as needed.
+    - math: Configure KaTeX math rendering if required.
+
+  Example Usage (after registration):
+    oshea convert my_document.md --plugin template-basic
 handler_script: index.js
 screenshot: false
 css_files:

@@ -178,22 +178,61 @@ module.exports = [
 
   makeValidatorScenario({
     description:
-      '2.4.10: Should report USABLE (with warnings) for malformed README.md front matter',
+      '2.4.10: Should report USABLE (with warnings) when README.md fallback front matter is malformed',
     pluginName: 'bad-readme',
-    setup: (pluginDir, pluginName, mocks) => {
-      // Use the well-formed helper, then override README.md YAML parsing to throw
-      setupWellFormedPlugin(pluginDir, pluginName, mocks);
-      const readmePath = path.join(pluginDir, 'README.md');
-      mocks.mockFs.readFileSync.withArgs(readmePath, 'utf8').returns('---:\n-');
-      mocks.mockYaml.load.withArgs(sinon.match.any).callThrough();
-      mocks.mockYaml.load.withArgs(':\n-').throws(new Error('bad yaml'));
-    },
+    setup: setupPluginScenario({
+      files: {
+        'index.js': true,
+        'default.yaml': true,
+        'README.md': { exists: true, content: '---:\n-' },
+        'example.md': true,
+        '.contract/test/e2e.test.js': true,
+        '.contract/schema.json': true,
+      },
+      yaml: {
+        'default.yaml': {
+          plugin_name: 'bad-readme',
+          protocol: 'v1',
+          version: '1.0.0',
+        },
+      },
+      exec: { returns: '' },
+    }),
     expectedResult: {
       isValid: true,
       warnings: [
-        "README.md for 'bad-readme' does not have a valid YAML front matter block.",
+        "Plugin 'bad-readme' does not define 'cli_help' in default.yaml, and README.md fallback does not have a valid YAML front matter block.",
       ],
     },
+  }),
+
+  makeValidatorScenario({
+    description:
+      '2.4.11: Should treat default.yaml cli_help as primary and not require README.md front matter',
+    pluginName: 'config-help-primary',
+    setup: setupPluginScenario({
+      files: {
+        'index.js': true,
+        'default.yaml': true,
+        'README.md': {
+          exists: true,
+          content: '# Plain README without front matter',
+        },
+        'example.md': true,
+        '.contract/test/e2e.test.js': true,
+        '.contract/schema.json': true,
+      },
+      yaml: {
+        'default.yaml': {
+          plugin_name: 'config-help-primary',
+          protocol: 'v1',
+          version: '1.0.0',
+          cli_help: 'Plugin: config-help-primary',
+        },
+      },
+      exec: { returns: '' },
+    }),
+    expectedResult: { isValid: true, errors: [], warnings: [] },
   }),
 
   makeValidatorScenario({

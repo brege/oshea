@@ -1,28 +1,3 @@
----
-cli_help: |
-  Plugin: template-basic
-  Description: A new template-basic plugin for [describe your plugin's purpose here].
-
-  Features:
-    - Basic Markdown to PDF conversion.
-    - Uses DefaultHandler for standard processing.
-    - Customizable via its own default.yaml and CSS files.
-
-  Expected Front Matter:
-    - title: (string) Document title. Used for PDF metadata and often as the main H1 heading.
-    - author: (string, optional) Document author.
-    - date: (string or date, optional) Document date.
-    - (Add any other front matter fields your 'template-basic' plugin will specifically use)
-
-  Configuration Notes (default.yaml):
-    - css_files: Points to "style.css". Modify this file for custom styling.
-    - pdf_options: Adjust page size, margins, etc., as needed.
-    - math: Configure KaTeX math rendering if required.
-
-  Example Usage (after registration):
-    oshea convert my_document.md --plugin template-basic
----
-
 # `template-basic` Plugin Template
 
 This is a basic template for creating new `oshea` plugins. It provides a starting point for common document conversion needs.
@@ -39,7 +14,7 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
     * `default.yaml`: Adjust `description`, `pdf_options`, `css_files`, `math` settings, etc.
     * `style.css`: Add your custom CSS rules to style your documents.
     * `index.js`: For more advanced behavior, you can modify the `TemplateBasicHandler` class to implement custom logic, such as unique data processing or HTML generation, instead of just relying on `DefaultHandler`.
-    * This `README.md`: Update the `cli_help` section above and the main content here to accurately describe your new plugin.
+    * This `README.md`: Update this main content to accurately describe your new plugin.
 
 ## Getting Started After Creation
 
@@ -64,7 +39,7 @@ This is a basic template for creating new `oshea` plugins. It provides a startin
    * Update the `description` in `default.yaml`.
    * Modify `style.css` with your desired styles.
    * If needed, enhance `index.js` with custom processing logic.
-   * Fill out the `cli_help` section and the rest of this `README.md`.
+   * Fill out `cli_help` in `default.yaml` and the rest of this `README.md`.
 
 4. **Register Your Plugin (For General Use)**
 

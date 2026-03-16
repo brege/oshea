@@ -18,13 +18,55 @@ const PLUGIN_EXAMPLE_FILENAME = 'example.md';
 const PLUGIN_SCHEMA_FILENAME = 'schema.json';
 const PLUGIN_E2E_TEST_FILENAME = 'e2e.test.js';
 
-function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
+function checkCliHelpMetadataV1(pluginDirectoryPath, pluginName, warnings) {
+  const configPath = path.join(pluginDirectoryPath, PLUGIN_CONFIG_FILENAME);
+  if (fs.existsSync(configPath)) {
+    try {
+      const config = yaml.load(fs.readFileSync(configPath, 'utf8'));
+      if (
+        config &&
+        typeof config === 'object' &&
+        typeof config.cli_help === 'string' &&
+        config.cli_help.trim() !== ''
+      ) {
+        return {
+          status: 'passed',
+          details: [
+            {
+              type: 'success',
+              message: "Found 'cli_help' in default.yaml",
+            },
+          ],
+        };
+      }
+    } catch (e) {
+      warnings.push(
+        `default.yaml for '${pluginName}' has malformed YAML while checking 'cli_help': ${e.message}`,
+      );
+      return {
+        status: 'warning',
+        details: [
+          {
+            type: 'warn',
+            message: `default.yaml has malformed YAML while checking 'cli_help': ${e.message}`,
+          },
+        ],
+      };
+    }
+  }
+
   const readmePath = path.join(pluginDirectoryPath, 'README.md');
 
   if (!fs.existsSync(readmePath)) {
     return {
       status: 'skipped',
-      details: [{ type: 'info', message: 'README.md not found' }],
+      details: [
+        {
+          type: 'info',
+          message:
+            "README.md not found (no fallback source for 'cli_help' after default.yaml)",
+        },
+      ],
     };
   }
 
@@ -34,14 +76,15 @@ function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
 
   if (parts.length < 3 || parts[0].trim() !== '') {
     warnings.push(
-      `README.md for '${pluginName}' does not have a valid YAML front matter block.`,
+      `Plugin '${pluginName}' does not define 'cli_help' in default.yaml, and README.md fallback does not have a valid YAML front matter block.`,
     );
     return {
       status: 'warning',
       details: [
         {
           type: 'warn',
-          message: 'README.md does not have a valid YAML front matter block',
+          message:
+            "default.yaml is missing 'cli_help', and README.md fallback does not have valid YAML front matter",
         },
       ],
     };
@@ -50,34 +93,59 @@ function checkReadmeFrontMatterV1(pluginDirectoryPath, pluginName, warnings) {
   try {
     const frontMatter = yaml.load(parts[1]);
     if (!frontMatter || typeof frontMatter !== 'object') {
-      warnings.push(`README.md for '${pluginName}' has invalid front matter.`);
+      warnings.push(
+        `Plugin '${pluginName}' does not define 'cli_help' in default.yaml, and README.md fallback has invalid front matter.`,
+      );
       return {
         status: 'warning',
         details: [
-          { type: 'warn', message: 'README.md has invalid front matter' },
+          {
+            type: 'warn',
+            message:
+              "default.yaml is missing 'cli_help', and README.md fallback has invalid front matter",
+          },
         ],
       };
     }
 
-    return {
-      status: 'passed',
-      details: [
-        {
-          type: 'success',
-          message: 'README.md has a valid front matter block',
-        },
-      ],
-    };
-  } catch (e) {
+    if (
+      typeof frontMatter.cli_help === 'string' &&
+      frontMatter.cli_help.trim() !== ''
+    ) {
+      return {
+        status: 'passed',
+        details: [
+          {
+            type: 'success',
+            message: "Found 'cli_help' in README.md front matter (fallback)",
+          },
+        ],
+      };
+    }
+
     warnings.push(
-      `README.md for '${pluginName}' has malformed YAML front matter: ${e.message}`,
+      `Plugin '${pluginName}' does not define 'cli_help' in default.yaml, and README.md fallback front matter has no 'cli_help'.`,
     );
     return {
       status: 'warning',
       details: [
         {
           type: 'warn',
-          message: `README.md has malformed YAML front matter: ${e.message}`,
+          message:
+            "default.yaml is missing 'cli_help', and README.md fallback front matter has no 'cli_help'",
+        },
+      ],
+    };
+  } catch (e) {
+    warnings.push(
+      `Plugin '${pluginName}' does not define 'cli_help' in default.yaml, and README.md fallback has malformed YAML front matter: ${e.message}`,
+    );
+    return {
+      status: 'warning',
+      details: [
+        {
+          type: 'warn',
+          message: `default.yaml is missing 'cli_help', and README.md fallback has malformed YAML front matter: ${e.message}`,
         },
       ],
     };
@@ -346,12 +414,12 @@ function validateV1(pluginDirectoryPath, pluginMetadata) {
   );
   displayValidationStep('plugin test setup', testResult);
 
-  const readmeResult = checkReadmeFrontMatterV1(
+  const pluginHelpResult = checkCliHelpMetadataV1(
     pluginDirectoryPath,
     pluginName,
     warnings,
   );
-  displayValidationStep('README.md front matter', readmeResult);
+  displayValidationStep('plugin help metadata', pluginHelpResult);
 
   if (errors.length === 0) {
     const selfActivationResult = runSelfActivationV1(
@@ -405,5 +473,5 @@ module.exports = {
   runInSituTestV1,
   runSelfActivationV1,
   checkOptionalFilesV1,
-  checkReadmeFrontMatterV1,
+  checkCliHelpMetadataV1,
 };

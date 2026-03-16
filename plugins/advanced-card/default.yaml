@@ -5,6 +5,29 @@ protocol: v1
 description: |- 
   An advanced card plugin demonstrating custom HTML generation and
   dynamic content from Markdown.
+cli_help: |
+  Plugin: advanced-card (Example Plugin)
+  Description: An advanced example plugin demonstrating custom HTML generation and dynamic content.
+
+  Features:
+    - Generates a business card PDF with a highly custom layout.
+    - Reads main card content (name, title) directly from the Markdown body (e.g., H1, H2).
+    - Uses front matter for auxiliary data (e.g., website URL for QR code, branding colors).
+    - Dynamically generates a QR code image URL.
+    - Bypasses DefaultHandler to construct its own HTML.
+
+  Front Matter Fields (Examples):
+    - website: (string) URL used for QR code if 'qr_data' is not set.
+    - qr_data: (string) Specific data for the QR code (e.g., mailto link, vCard info).
+    - brandingColor: (string) Hex color code for custom branding elements.
+
+  Configuration Notes (default.yaml):
+    - css_files: Specifies CSS for the custom HTML structure (e.g., "style.css").
+    - pdf_options: Defines specific dimensions (width, height) for the card, small margins.
+    - printBackground: true (important for card designs with background colors).
+
+  Example Usage (assuming registered):
+    oshea convert path/to/example.md --plugin advanced-card
 handler_script: index.js
 css_files:
   - "style.css"

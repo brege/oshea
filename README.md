@@ -20,7 +20,17 @@ Use a built-in plugin for styling
 ```bash
 oshea my-resume.md --plugin cv
 ```
-Create a cover letter with professional formatting
+Or through your Markdown's front matter
+```
+---
+yourName: "Jane Doe"
+oshea_plugin: cover-letter
+---
+
+**{{ yourName }}**  
+
+Creating a cover letter with professional formatting...
+```
 ```bash
 oshea my-letter.md --plugin cover-letter
 ```

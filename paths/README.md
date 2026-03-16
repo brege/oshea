@@ -60,7 +60,7 @@ const {
 ```
 
 ## Dependency Tree
-As a companion to [`path-finder.js`](path-finder.js), use [dep-tree.js](dep-tree.js) to generate the dependency tree from the path registry.
+As a companion to [`path-finder.js`](path-finder.js), use [`dep-tree.js`](dep-tree.js) to generate the dependency tree from the path registry.
 
 ### Command
 ```bash

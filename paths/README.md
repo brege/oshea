@@ -58,32 +58,3 @@ const {
 // File: src/completion/generate-completion-dynamic-cache.js
 // File: src/completion/tracker.js
 ```
-
-## Dependency Tree
-As a companion to [`path-finder.js`](path-finder.js), use [`dep-tree.js`](dep-tree.js) to generate the dependency tree from the path registry.
-
-### Command
-```bash
-node paths/dep-tree.js src/cli/plugin.command.js --tree
-```
-
-### Output
-```
-Tracing dependencies for: src/cli/plugin.command.js
-============================================================
-
-Dependency Tree:
-----------------------------------------
-└── src/cli/plugin.command.js (pluginCommandPath)
-    ├── paths/index.js (pathsPath)
-    │   ├── paths/scripts.js 
-    │   └── paths/tests.js 
-    └── src/cli/plugin/add.command.js (pluginAddCommandPath)
-        ├── paths/index.js  (collapsed)
-        └── src/utils/logger.js  (collapsed)
-```
-
-### Usage
-```bash
-node paths/dep-tree.js <file ...> [--export <dir>] [--include <path ...> | -P <path ...>] [options]
-```

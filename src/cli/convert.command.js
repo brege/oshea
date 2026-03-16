@@ -14,12 +14,14 @@ const cliOptionsForConvert = (yargs) => {
     })
     .option('outdir', {
       alias: 'o',
-      describe: 'output directory (defaults to system temp)',
+      describe:
+        'output directory (overrides --filename path; defaults to system temp)',
       type: 'string',
     })
     .option('filename', {
       alias: 'f',
-      describe: 'output pdf filename',
+      describe:
+        'output pdf filename or path (resolved from cwd when --outdir is omitted)',
       type: 'string',
     })
     .option('open', {

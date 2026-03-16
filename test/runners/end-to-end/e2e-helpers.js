@@ -158,6 +158,32 @@ const discoverers = {
   },
 };
 
+function replaceDiscoveryPlaceholders(value, replacements) {
+  if (typeof value === 'string') {
+    let output = value;
+    for (const [key, replacement] of Object.entries(replacements)) {
+      output = output.replaceAll(`{${key}}`, replacement);
+    }
+    return output;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      replaceDiscoveryPlaceholders(item, replacements),
+    );
+  }
+
+  if (value && typeof value === 'object') {
+    const output = {};
+    for (const [key, nestedValue] of Object.entries(value)) {
+      output[key] = replaceDiscoveryPlaceholders(nestedValue, replacements);
+    }
+    return output;
+  }
+
+  return value;
+}
+
 // Test workspace manager for isolated test environments
 class TestWorkspace {
   constructor(
@@ -212,23 +238,10 @@ function expandScenarios(testSuite) {
 
   for (const item of items) {
     for (const scenarioTemplate of testSuite.scenarios) {
-      const scenario = {
-        description: scenarioTemplate.description
-          .replace('{command}', item)
-          .replace('{item}', item),
-        args: scenarioTemplate.args
-          .replace('{command}', item)
-          .replace('{item}', item),
-        expect: scenarioTemplate.expect,
-      };
-
-      // Handle test_id expansion
-      if (scenarioTemplate.test_id) {
-        scenario.test_id = scenarioTemplate.test_id
-          .replace('{command}', item)
-          .replace('{item}', item);
-      }
-
+      const scenario = replaceDiscoveryPlaceholders(scenarioTemplate, {
+        command: item,
+        item,
+      });
       expandedScenarios.push(scenario);
     }
   }

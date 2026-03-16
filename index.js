@@ -123,10 +123,22 @@ async function executeConversion(args, configResolver) {
   const mainLoadedConfig = effectiveConfig.mainConfig;
 
   let outputDir;
+  let outputFilename = args.filename;
+  let usedTemporaryOutputDir = false;
   if (args.outdir) {
     outputDir = path.resolve(args.outdir);
+    if (args.filename) {
+      outputFilename = path.basename(args.filename);
+    }
+  } else if (args.filename) {
+    const resolvedOutputPath = path.isAbsolute(args.filename)
+      ? args.filename
+      : path.resolve(process.cwd(), args.filename);
+    outputDir = path.dirname(resolvedOutputPath);
+    outputFilename = path.basename(resolvedOutputPath);
   } else {
     outputDir = path.join(os.tmpdir(), 'oshea-output');
+    usedTemporaryOutputDir = true;
     if (!(args.isLazyLoad && pluginSource !== 'CLI option')) {
       logger.info(
         `No output directory specified. Defaulting to temporary directory: ${outputDir}`,
@@ -149,7 +161,7 @@ async function executeConversion(args, configResolver) {
     effectiveConfig,
     dataForPlugin,
     outputDir,
-    args.filename,
+    outputFilename,
   );
 
   if (generatedPdfPath) {
@@ -161,7 +173,7 @@ async function executeConversion(args, configResolver) {
       openPdf(generatedPdfPath, viewer);
     } else if (args.open && !viewer) {
       logger.warn(`PDF viewer not configured. PDF is at: ${generatedPdfPath}`);
-    } else if (!args.open && !args.outdir) {
+    } else if (!args.open && usedTemporaryOutputDir) {
       logger.info(`PDF saved to temporary directory: ${generatedPdfPath}`);
     }
   } else {

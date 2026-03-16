@@ -114,6 +114,48 @@ scenarios:
         - 1000
 ---
 name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.8
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+scenarios:
+  - description: should write to cwd when only --filename is provided
+    test_id: 3.1.8
+    args: convert {{paths.simpleMdFixture}} --filename f-only-relative.pdf --no-open
+    expect:
+      executes: true
+      contains: Processing
+      file_exists: f-only-relative.pdf
+      file_min_size:
+        - f-only-relative.pdf
+        - 1000
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
+test_id: 3.1.9
+base_command: oshea
+tags:
+  - convert
+  - cli
+  - smoke
+  - pdf
+scenarios:
+  - description: should honor absolute output path provided via --filename
+    test_id: 3.1.9
+    args: >-
+      convert {{paths.simpleMdFixture}} --filename {{tmpdir}}/f-only-absolute.pdf
+      --no-open
+    expect:
+      executes: true
+      contains: Processing
+      file_exists: "{{tmpdir}}/f-only-absolute.pdf"
+      file_min_size:
+        - "{{tmpdir}}/f-only-absolute.pdf"
+        - 1000
+---
+name: convert (End-to-End Test) src/cli/commands/convert.command.js
 test_id: 3.1.6
 base_command: oshea
 tags:

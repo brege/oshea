@@ -128,9 +128,9 @@ scenarios:
     expect:
       executes: true
       contains: Processing
-      file_exists: f-only-relative.pdf
+      file_exists: "{{tmpdir}}/f-only-relative.pdf"
       file_min_size:
-        - f-only-relative.pdf
+        - "{{tmpdir}}/f-only-relative.pdf"
         - 1000
 ---
 name: convert (End-to-End Test) src/cli/commands/convert.command.js

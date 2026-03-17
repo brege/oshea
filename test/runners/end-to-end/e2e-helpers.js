@@ -19,11 +19,13 @@ const {
 const logger = require(loggerPath);
 
 // Execute a shell command and return promise with result
-function executeCommand(command) {
+function executeCommand(command, options = {}) {
+  const { cwd } = options;
   return new Promise((resolve, reject) => {
     exec(
       command,
       {
+        cwd,
         env: {
           ...process.env,
           FORCE_COLOR: '0',
@@ -420,12 +422,14 @@ function parseArgs(args, options = {}) {
 }
 
 // Enhanced command execution that preserves colors for --show mode
-function executeCommandWithColors(command) {
+function executeCommandWithColors(command, options = {}) {
+  const { cwd } = options;
   return new Promise((resolve, reject) => {
     const { exec } = require('node:child_process');
     exec(
       command,
       {
+        cwd,
         env: {
           ...process.env,
           FORCE_COLOR: '1', // Ensure colors are preserved

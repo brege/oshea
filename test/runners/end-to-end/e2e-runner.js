@@ -247,9 +247,13 @@ class YamlTestRunner {
       }
 
       try {
+        const executionOptions =
+          this.needsWorkspace && workspace
+            ? { cwd: workspace.outdir }
+            : undefined;
         const result = await (showMode
-          ? executeCommandWithColors(fullCommand)
-          : executeCommand(fullCommand));
+          ? executeCommandWithColors(fullCommand, executionOptions)
+          : executeCommand(fullCommand, executionOptions));
         let testPassed = true;
         let failureReason = null;
 

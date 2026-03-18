@@ -22,6 +22,10 @@ const {
   enginePath,
 } = require('@paths');
 const logger = require(loggerPath);
+const configCommand = require(configCommandPath);
+const pluginCommand = require(pluginCommandPath);
+const convertCommandModule = require(convertCommandPath);
+const generateCommand = require(generateCommandPath);
 
 const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration =
@@ -78,24 +82,43 @@ function createBaseYargs() {
     );
 }
 
-if (argvRaw.includes('--help') || argvRaw.includes('-h')) {
-  createBaseYargs()
-    .command('completion', 'generate completion script')
-    .command(
-      '[markdownFile]',
-      'convert a markdown file to PDF (default command)',
-    )
-    .command('convert <markdownFile>', 'convert a markdown file to PDF')
-    .command(
-      'generate <pluginName>',
-      'generate a document from a complex plugin',
-    )
-    .command('plugin <command>', 'manage plugins')
-    .command('config', 'display active configuration settings')
-    .showHelp((output) => {
-      logger.info(output);
-      process.exit(0);
+function registerCliCommands(argvBuilder, handlers = {}) {
+  return argvBuilder
+    .command({
+      command: 'completion',
+      describe: 'generate completion script',
+      handler: handlers.completion || (() => {}),
+    })
+    .command({
+      ...convertCommandModule.defaultCommand,
+      handler:
+        handlers.defaultConvert || convertCommandModule.defaultCommand.handler,
+    })
+    .command({
+      ...convertCommandModule.explicitConvert,
+      handler:
+        handlers.explicitConvert ||
+        convertCommandModule.explicitConvert.handler,
+    })
+    .command({
+      ...generateCommand,
+      handler: handlers.generate || generateCommand.handler,
+    })
+    .command({
+      ...pluginCommand,
+      handler: handlers.plugin || pluginCommand.handler,
+    })
+    .command({
+      ...configCommand,
+      handler: handlers.config || configCommand.handler,
     });
+}
+
+if (argvRaw.includes('--help') || argvRaw.includes('-h')) {
+  registerCliCommands(createBaseYargs()).showHelp((output) => {
+    logger.info(output);
+    process.exit(0);
+  });
 }
 
 // Lightweight config display shim using proper formatter
@@ -187,11 +210,6 @@ const {
   executeGeneration,
 } = require('./index.js'); // relative-path-ok
 
-const configCommand = require(configCommandPath);
-const pluginCommand = require(pluginCommandPath);
-const convertCommandModule = require(convertCommandPath);
-const generateCommand = require(generateCommandPath);
-
 async function main() {
   let installerInstance;
 
@@ -274,54 +292,40 @@ async function main() {
     },
   });
 
-  argvBuilder
-    .command({
-      ...convertCommandModule.defaultCommand,
-      handler: async (args) => {
-        const potentialFile = args.markdownFile;
-        if (potentialFile) {
-          if (
-            !fs.existsSync(potentialFile) &&
-            !potentialFile.endsWith('.md') &&
-            !potentialFile.endsWith('.mdx')
-          ) {
-            logger.error(`Error: Unknown command: '${potentialFile}'`);
-            logger.warn(
-              '\nTo convert a file, provide a valid path. For other commands, see --help.',
-            );
-            process.exit(1);
-          }
-          args.isLazyLoad = true;
-          await commonCommandHandler(
-            args,
-            executeConversion,
-            'convert (implicit)',
+  registerCliCommands(argvBuilder, {
+    defaultConvert: async (args) => {
+      const potentialFile = args.markdownFile;
+      if (potentialFile) {
+        if (
+          !fs.existsSync(potentialFile) &&
+          !potentialFile.endsWith('.md') &&
+          !potentialFile.endsWith('.mdx')
+        ) {
+          logger.error(`Error: Unknown command: '${potentialFile}'`);
+          logger.warn(
+            '\nTo convert a file, provide a valid path. For other commands, see --help.',
           );
-        } else {
-          argvBuilder.showHelp();
+          process.exit(1);
         }
-      },
-    })
-    .command({
-      ...convertCommandModule.explicitConvert,
-      handler: async (args) => {
-        args.isLazyLoad = false;
+        args.isLazyLoad = true;
         await commonCommandHandler(
           args,
           executeConversion,
-          'convert (explicit)',
+          'convert (implicit)',
         );
-      },
-    })
-    .command({
-      ...generateCommand,
-      handler: async (args) => {
-        args.isLazyLoad = false;
-        await commonCommandHandler(args, executeGeneration, 'generate');
-      },
-    })
-    .command(pluginCommand)
-    .command(configCommand)
+      } else {
+        argvBuilder.showHelp();
+      }
+    },
+    explicitConvert: async (args) => {
+      args.isLazyLoad = false;
+      await commonCommandHandler(args, executeConversion, 'convert (explicit)');
+    },
+    generate: async (args) => {
+      args.isLazyLoad = false;
+      await commonCommandHandler(args, executeGeneration, 'generate');
+    },
+  })
     .strictCommands()
     .fail((msg, err, yargsInstance) => {
       if (err) {

@@ -12,19 +12,23 @@ scenarios:
     expect:
       executes: true
 ---
-name: "--help (End-to-End Test) cli.js src/cli/get-help.js"
+name: "--help (End-to-End Test) cli.js"
 test_id: 3.15.2
 base_command: oshea
 tags:
   - cli
   - help
   - smoke
+workflow: false
 scenarios:
-  - description: "--help (End-to-End Test) cli.js src/cli/get-help.js"
+  - description: should render the root help surface
     test_id: 3.15.2
-    args: "{command} --help"
+    args: "--help"
     expect:
-      executes: true
+      contains_all:
+        - "Usage: oshea <command_or_markdown_file> [options]"
+        - "oshea plugin <command>"
+        - "oshea config"
 ---
 name: asdf/--asdf (End-to-End Test) cli.js (unknown command/option)
 test_id: 3.15.3

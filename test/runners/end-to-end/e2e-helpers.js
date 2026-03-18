@@ -109,6 +109,29 @@ const discoverers = {
       return cmdString.split(' ')[0];
     }
 
+    function extractCommandDefinitions(commandModule) {
+      const commandDefinitions = [];
+
+      if (
+        commandModule?.command &&
+        (typeof commandModule.command === 'string' ||
+          Array.isArray(commandModule.command))
+      ) {
+        commandDefinitions.push(commandModule.command);
+      }
+
+      for (const value of Object.values(commandModule || {})) {
+        if (
+          value?.command &&
+          (typeof value.command === 'string' || Array.isArray(value.command))
+        ) {
+          commandDefinitions.push(value.command);
+        }
+      }
+
+      return commandDefinitions;
+    }
+
     function discoverCommands(dir, prefixParts = []) {
       const commands = [];
       const entries = fs.readdirSync(dir);
@@ -123,25 +146,25 @@ const discoverers = {
           );
         } else if (entry.endsWith('.command.js')) {
           const commandModule = require(fullPath);
-          if (!commandModule.command) continue;
+          const commandDefinitions = extractCommandDefinitions(commandModule);
+          if (commandDefinitions.length === 0) continue;
 
-          let commandDefinition = commandModule.command;
-          if (commandModule.explicitConvert?.command) {
-            commandDefinition = commandModule.explicitConvert.command;
+          for (const commandDefinition of commandDefinitions) {
+            const commandName = parseBaseCommand(commandDefinition);
+            if (config.exclude?.includes(commandName)) {
+              continue;
+            }
+            commands.push([...prefixParts, commandName]);
           }
-
-          const commandName = parseBaseCommand(commandDefinition);
-          if (config.exclude?.includes(commandName)) {
-            continue;
-          }
-          commands.push([...prefixParts, commandName]);
         }
       }
       return commands;
     }
 
     const commandPartsList = discoverCommands(cliRoot);
-    commandPartsList.push([]);
+    if (config.include_root) {
+      commandPartsList.push([]);
+    }
 
     return Array.from(new Set(commandPartsList.map((p) => p.join(' ')))).sort();
   },

@@ -86,6 +86,7 @@ npm install -g
 ```
 
 ## Documentation
+
 - [**Docs**](docs/README.md) for the main documentation index
   - [Guides](docs/guides)
   - [Walkthroughs](docs/walkthroughs)
@@ -114,20 +115,20 @@ Take a look at the [Bundled Plugins](plugins/README.md) page for more examples.
 
 ### Creating Custom Plugins
 
-To customize layouts, you can archetype from existing plugins or create a new one from scratch.
+To customize layouts, you can archetype from existing plugins.
 ```bash
-oshea plugin create --from cover-letter my-better-letter --target-dir 'my-plugins'
+oshea plugin create --from cover-letter academic-letter
 ```
 
 ### Plugin structure
 ```
-my-plugins/my-better-letter
-├── .contract                       schema and in-situ testing
-├── default.yaml                    plugin configuration (metadata and defaults)
-├── style.css                       custom CSS properties
-├── example.md                      example file
-├── index.js                        handler
-└── README.md                       plugin description (embedded --help text)
+my-plugins/academic-letter/
+├── .contract                 schema and in-situ testing
+├── default.yaml              plugin config, --help text, metadata
+├── style.css                 custom CSS properties
+├── example.md                self-activating example
+├── index.js                  handler
+└── README.md                 plugin description
 ```
 
 Plugins are portable and can be shared across projects. See [Bundled Plugins](plugins/README.md) index for more information.

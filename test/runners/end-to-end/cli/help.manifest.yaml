@@ -1,0 +1,77 @@
+name: completion help (End-to-End Test) cli.js
+test_id: 3.15.4
+base_command: oshea
+tags:
+  - cli
+  - help
+  - smoke
+workflow: false
+scenarios:
+  - description: should render help for the completion command
+    test_id: 3.15.4
+    args: completion --help
+    expect:
+      contains_all:
+        - "oshea completion"
+        - "generate completion script"
+        - "Options:"
+---
+name: targeted help coverage (End-to-End Test) cli.js src/cli/*.command.js
+test_id: 3.15.5
+base_command: oshea
+tags:
+  - cli
+  - help
+  - smoke
+workflow: false
+scenarios:
+  - description: should render convert-specific help options
+    test_id: 3.15.5.convert
+    args: convert --help
+    expect:
+      contains_all:
+        - "--plugin"
+        - "--outdir"
+        - "--filename"
+  - description: should render generate-specific help options
+    test_id: 3.15.5.generate
+    args: generate --help
+    expect:
+      contains_all:
+        - "--outdir"
+        - "--filename"
+        - "--watch"
+  - description: should render config-specific help options
+    test_id: 3.15.5.config
+    args: config --help
+    expect:
+      contains_all:
+        - "--plugin"
+        - "--pure"
+  - description: should render plugin group help with subcommands
+    test_id: 3.15.5.plugin
+    args: plugin --help
+    expect:
+      contains_all:
+        - "Commands:"
+        - "oshea plugin add <source>"
+        - "oshea plugin validate <pluginIdentifier>"
+---
+name: help surface visual smoke (End-to-End Test) cli.js
+test_id: 3.15.6
+base_command: oshea
+tags:
+  - cli
+  - help
+  - smoke
+workflow: false
+scenarios:
+  - description: should render help for {command}
+    test_id: 3.15.6.{command}
+    args: "{command} --help"
+    expect:
+      contains: "Options:"
+discovery:
+  type: cli_commands
+  exclude:
+    - "$0"

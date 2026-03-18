@@ -31,6 +31,15 @@ const argvRaw = hideBin(process.argv);
 const isCompletionScriptGeneration =
   argvRaw.includes('completion') &&
   !argvRaw.includes('--get-yargs-completions');
+const sharedHelpOptionKeys = [
+  'config',
+  'factory-defaults',
+  'plugins-root',
+  'debug',
+  'stack',
+];
+const sharedHelpEpilogue =
+  "See 'oshea --help' for global usage and shared options.";
 
 // Fast shims for simple operations using proper logging/formatting
 if (argvRaw.includes('--version') || argvRaw.includes('-v')) {
@@ -82,11 +91,20 @@ function createBaseYargs() {
     );
 }
 
+function collapseSharedHelp(yargs) {
+  for (const key of sharedHelpOptionKeys) {
+    yargs.hide(key);
+  }
+
+  return yargs.epilogue(sharedHelpEpilogue);
+}
+
 function registerCliCommands(argvBuilder, handlers = {}) {
   return argvBuilder
     .command({
       command: 'completion',
       describe: 'generate completion script',
+      builder: (yargs) => collapseSharedHelp(yargs),
       handler: handlers.completion || (() => {}),
     })
     .command({
@@ -96,12 +114,21 @@ function registerCliCommands(argvBuilder, handlers = {}) {
     })
     .command({
       ...convertCommandModule.explicitConvert,
+      builder: (yargs) => {
+        const builtYargs =
+          convertCommandModule.explicitConvert.builder(yargs) ?? yargs;
+        return collapseSharedHelp(builtYargs);
+      },
       handler:
         handlers.explicitConvert ||
         convertCommandModule.explicitConvert.handler,
     })
     .command({
       ...generateCommand,
+      builder: (yargs) => {
+        const builtYargs = generateCommand.builder(yargs) ?? yargs;
+        return collapseSharedHelp(builtYargs);
+      },
       handler: handlers.generate || generateCommand.handler,
     })
     .command({
@@ -110,6 +137,10 @@ function registerCliCommands(argvBuilder, handlers = {}) {
     })
     .command({
       ...configCommand,
+      builder: (yargs) => {
+        const builtYargs = configCommand.builder(yargs) ?? yargs;
+        return collapseSharedHelp(builtYargs);
+      },
       handler: handlers.config || configCommand.handler,
     });
 }

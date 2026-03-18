@@ -14,7 +14,9 @@ scenarios:
       contains_all:
         - "oshea completion"
         - "generate completion script"
-        - "Options:"
+        - "See 'oshea --help' for global usage and shared options."
+    expect_not:
+      contains: "path to a project-specific YAML config file"
 ---
 name: targeted help coverage (End-to-End Test) cli.js src/cli/*.command.js
 test_id: 3.15.5
@@ -33,6 +35,9 @@ scenarios:
         - "--plugin"
         - "--outdir"
         - "--filename"
+        - "See 'oshea --help' for global usage and shared options."
+    expect_not:
+      contains: "path to a project-specific YAML config file"
   - description: should render generate-specific help options
     test_id: 3.15.5.generate
     args: generate --help
@@ -41,6 +46,9 @@ scenarios:
         - "--outdir"
         - "--filename"
         - "--watch"
+        - "See 'oshea --help' for global usage and shared options."
+    expect_not:
+      contains: "path to a project-specific YAML config file"
   - description: should render config-specific help options
     test_id: 3.15.5.config
     args: config --help
@@ -48,6 +56,9 @@ scenarios:
       contains_all:
         - "--plugin"
         - "--pure"
+        - "See 'oshea --help' for global usage and shared options."
+    expect_not:
+      contains: "path to a project-specific YAML config file"
   - description: should render plugin group help with subcommands
     test_id: 3.15.5.plugin
     args: plugin --help
@@ -56,6 +67,9 @@ scenarios:
         - "Commands:"
         - "oshea plugin add <source>"
         - "oshea plugin validate <pluginIdentifier>"
+        - "See 'oshea --help' for global usage and shared options."
+    expect_not:
+      contains: "path to a project-specific YAML config file"
 ---
 name: help surface visual smoke (End-to-End Test) cli.js
 test_id: 3.15.6
@@ -70,7 +84,9 @@ scenarios:
     test_id: 3.15.6.{command}
     args: "{command} --help"
     expect:
-      contains: "Options:"
+      contains: "See 'oshea --help' for global usage and shared options."
+    expect_not:
+      contains: "path to a project-specific YAML config file"
 discovery:
   type: cli_commands
   exclude:

@@ -1,6 +1,6 @@
 {
   "name": "oshea",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "A Markdown-to-PDF convertor with an extensible plugin system.",
   "main": "cli.js",
   "bin": {
@@ -12,6 +12,7 @@
     "src/",
     "paths/",
     "plugins/",
+    "npm-shrinkwrap.json",
     "README.md",
     "LICENSE",
     "config.example.yaml"
@@ -19,7 +20,6 @@
   "scripts": {
     "start": "node cli.js",
     "paths": "node paths/generator.js",
-    "postinstall": "npx puppeteer browsers install chrome",
     "test": "mocha",
     "test:all": "npm run test",
     "test:last-fails": "node test/analytics/run-last-fails.js",
@@ -68,7 +68,7 @@
     "markdown-it-toc-done-right": "^4.2.0",
     "mocha": "^11.7.5",
     "module-alias": "^2.3.4",
-    "puppeteer": "^24.37.5",
+    "puppeteer": "24.37.5",
     "yargs": "^18.0.0"
   },
   "devDependencies": {

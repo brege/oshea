@@ -7,9 +7,8 @@ const os = require('node:os');
 const {
   projectRoot,
   cliPath,
-  mochaPath,
-  nodeModulesPath,
   loggerPath,
+  contractBootstrapPath,
 } = require('@paths');
 const logger = require(loggerPath);
 
@@ -17,6 +16,16 @@ const PLUGIN_CONFIG_FILENAME = 'default.yaml';
 const PLUGIN_EXAMPLE_FILENAME = 'example.md';
 const PLUGIN_SCHEMA_FILENAME = 'schema.json';
 const PLUGIN_E2E_TEST_FILENAME = 'e2e.test.js';
+function resolveMochaRuntime() {
+  const mochaBinPath = require.resolve('mocha/bin/mocha.js');
+  const mochaPackagePath = require.resolve('mocha/package.json');
+  const runtimeNodeModulesPath = path.dirname(path.dirname(mochaPackagePath));
+
+  return {
+    mochaBinPath,
+    runtimeNodeModulesPath,
+  };
+}
 
 function checkCliHelpMetadataV1(pluginDirectoryPath, pluginName, warnings) {
   const configPath = path.join(pluginDirectoryPath, PLUGIN_CONFIG_FILENAME);
@@ -259,13 +268,15 @@ const runInSituTestV1 = (pluginDirectoryPath, pluginName, errors, warnings) => {
   }
 
   try {
-    const command = `node "${mochaPath}" "${e2eTestPath}" --no-config --no-opts`;
+    const { mochaBinPath, runtimeNodeModulesPath } = resolveMochaRuntime();
+    const command = `node "${mochaBinPath}" --require "${contractBootstrapPath}" "${e2eTestPath}" --no-config --no-opts`;
     const result = execSync(command, {
       cwd: projectRoot,
       stdio: 'pipe',
       env: {
         ...process.env,
-        NODE_PATH: nodeModulesPath,
+        NODE_PATH: runtimeNodeModulesPath,
+        OSHEA_PROJECT_ROOT: projectRoot,
       },
     });
 
@@ -343,13 +354,14 @@ const runSelfActivationV1 = (pluginDirectoryPath, pluginName, errors) => {
   );
 
   try {
+    const { runtimeNodeModulesPath } = resolveMochaRuntime();
     const command = `node "${cliPath}" convert "${exampleMdPath}" --outdir "${tempOutputDir}" --no-open`;
     execSync(command, {
       cwd: projectRoot,
       stdio: 'pipe',
       env: {
         ...process.env,
-        NODE_PATH: nodeModulesPath,
+        NODE_PATH: runtimeNodeModulesPath,
       },
     });
 

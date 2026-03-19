@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-02-27T07:01:27.359Z
+// Generated: 2026-03-18T17:32:10.661Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -55,7 +55,7 @@ const fixtureBootstrapPath = path.join(e2eTestDir, 'create-fixtures.js');
 const setupFile = path.join(integrationTestDir, 'setup.js');
 const testSharedRoot = path.join(integrationTestDir, 'shared');
 const testConfigPath = path.join(testSharedRoot, 'config.test.yaml');
-const testFileHelpersPath = path.join(testSharedRoot, 'test-helpers.js');
+const testFileHelpersPath = path.join(srcRoot, 'validators', 'test', 'contract-helpers.js');
 
 // ==========================================
 // Features (by dependency rank)
@@ -76,6 +76,7 @@ const enableCommandPath = path.join(projectRoot, 'src/cli/plugin/enable.command.
 const helpCommandPath = path.join(projectRoot, 'src/cli/plugin/help.command.js');
 const pluginListCommandPath = path.join(projectRoot, 'src/cli/plugin/list.command.js');
 const pluginRemoveCommandPath = path.join(projectRoot, 'src/cli/plugin/remove.command.js');
+const updateCommandPath = path.join(projectRoot, 'src/cli/plugin/update.command.js');
 const validateCommandPath = path.join(projectRoot, 'src/cli/plugin/validate.command.js');
 
 // Core Module Integration Tests
@@ -131,6 +132,7 @@ const pluginsIntegrationRoot = path.join(projectRoot, 'test/runners/integration/
 const pluginDeterminerFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-determiner.factory.js');
 const pluginDeterminerManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-determiner.manifest.js');
 const pluginDeterminerTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-determiner.test.js');
+const pluginInstallerTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-installer.test.js');
 const pluginManagerFactoryPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.factory.js');
 const pluginManagerManifestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.manifest.js');
 const pluginManagerTestPath = path.join(projectRoot, 'test/runners/integration/plugins/plugin-manager.test.js');
@@ -144,12 +146,14 @@ const configManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/c
 const convertManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/convert.manifest.yaml');
 const generateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/generate.manifest.yaml');
 const globalFlagsManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/global-flags.manifest.yaml');
+const helpManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/help.manifest.yaml');
 const pluginAddManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-add.manifest.yaml');
 const pluginCreateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-create.manifest.yaml');
 const pluginDisableManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-disable.manifest.yaml');
 const pluginEnableManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-enable.manifest.yaml');
 const pluginListManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-list.manifest.yaml');
 const pluginRemoveManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-remove.manifest.yaml');
+const pluginUpdateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-update.manifest.yaml');
 const pluginValidateManifestYamlPath = path.join(projectRoot, 'test/runners/end-to-end/cli/plugin-validate.manifest.yaml');
 
 // --- Rank 2: supportive operations ---
@@ -167,6 +171,8 @@ const pluginValidatorPath = path.join(projectRoot, 'src/plugins/plugin-validator
 // Validation Framework
 const validatorsRoot = path.join(projectRoot, 'src/validators/');
 const v1Path = path.join(projectRoot, 'src/validators/v1.js');
+const contractBootstrapPath = path.join(projectRoot, 'src/validators/test/contract-bootstrap.js');
+const contractHelpersPath = path.join(projectRoot, 'src/validators/test/contract-helpers.js');
 
 // End-to-End Workflow Tests
 const e2eWorkflowTestsRoot = path.join(projectRoot, 'test/runners/end-to-end/workflows/');
@@ -271,6 +277,7 @@ module.exports = {
   helpCommandPath,
   pluginListCommandPath,
   pluginRemoveCommandPath,
+  updateCommandPath,
   validateCommandPath,
   coreIntegrationRoot,
   defaultHandlerFactoryPath,
@@ -316,6 +323,7 @@ module.exports = {
   pluginDeterminerFactoryPath,
   pluginDeterminerManifestPath,
   pluginDeterminerTestPath,
+  pluginInstallerTestPath,
   pluginManagerFactoryPath,
   pluginManagerManifestPath,
   pluginManagerTestPath,
@@ -327,12 +335,14 @@ module.exports = {
   convertManifestYamlPath,
   generateManifestYamlPath,
   globalFlagsManifestYamlPath,
+  helpManifestYamlPath,
   pluginAddManifestYamlPath,
   pluginCreateManifestYamlPath,
   pluginDisableManifestYamlPath,
   pluginEnableManifestYamlPath,
   pluginListManifestYamlPath,
   pluginRemoveManifestYamlPath,
+  pluginUpdateManifestYamlPath,
   pluginValidateManifestYamlPath,
 
   // --- supportive operations ---
@@ -346,6 +356,8 @@ module.exports = {
   pluginValidatorPath,
   validatorsRoot,
   v1Path,
+  contractBootstrapPath,
+  contractHelpersPath,
   e2eWorkflowTestsRoot,
   demoHugoBatchConvertManifestYamlPath,
   workflowsManifestYamlPath,

@@ -7,7 +7,6 @@ const {
   projectRoot,
   cliPath,
   testFileHelpersPath,
-  fixturesDir,
   loggerPath,
 } = require('@paths');
 
@@ -25,7 +24,13 @@ const TEST_OUTPUT_DIR = path.join(
   'oshea-test-output',
   'recipe-book-e2e',
 );
-const HUGO_EXAMPLE_PATH = path.join(fixturesDir, 'hugo-example');
+const PLUGIN_ROOT = path.resolve(__dirname, '../../'); // lint-skip-line no-relative-paths
+const HUGO_EXAMPLE_PATH = path.join(
+  PLUGIN_ROOT,
+  '.contract',
+  'fixtures',
+  'hugo-example',
+);
 
 describe('plugins/recipe-book (in-situ Self-Activation Test) .contract/test/e2e.test.js', function () {
   this.timeout(20000);

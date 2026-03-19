@@ -61,7 +61,7 @@ registries:
           setup_file: path.join(integrationTestDir, 'setup.js')
           test_shared_root: path.join(integrationTestDir, 'shared')
           test_config_path: path.join(testSharedRoot, 'config.test.yaml')
-          test_file_helpers_path: path.join(testSharedRoot, 'test-helpers.js')
+          test_file_helpers_path: path.join(srcRoot, 'validators', 'test', 'contract-helpers.js')
     features:
       cli:
         comment: Command Line Interface
@@ -133,6 +133,10 @@ registries:
       index.js:
         paths: paths_index
         src/utils/formatters: formatters_index
+      contract-test-bootstrap.js:
+        src/validators/test: contract_bootstrap
+      contract-test-helpers.js:
+        src/validators/test: contract_helpers
 rank_definitions:
   "0": user-facing interfaces
   "1": essential operations

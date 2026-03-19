@@ -117,8 +117,18 @@ async function createArchetype(
     const tempConfigData = yaml.load(
       await fs.readFile(newConfigPathInArchetype, 'utf8'),
     );
+    tempConfigData.plugin_name = newArchetypeName;
     tempConfigData.description =
       `Archetype of "${sourcePluginIdentifier}": ${originalPluginDescriptionFromSource}`.trim();
+    if (typeof tempConfigData.cli_help === 'string') {
+      tempConfigData.cli_help = tempConfigData.cli_help.replace(
+        new RegExp(
+          sourcePluginIdForReplacement.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+          'g',
+        ),
+        newArchetypeName,
+      );
+    }
 
     if (tempConfigData.css_files && Array.isArray(tempConfigData.css_files)) {
       tempConfigData.css_files = tempConfigData.css_files.map((cssFile) => {

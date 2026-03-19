@@ -29,7 +29,7 @@ oshea_plugin: cover-letter
 
 **{{ yourName }}**  
 
-Creating a cover letter with professional formatting...
+As a creator of cover letters with professional formatting...
 ```
 ```bash
 oshea my-letter.md --plugin cover-letter

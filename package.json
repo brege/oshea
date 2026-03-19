@@ -1,6 +1,6 @@
 {
   "name": "oshea",
-  "version": "0.12.8",
+  "version": "0.13.0",
   "description": "A Markdown-to-PDF convertor with an extensible plugin system.",
   "main": "cli.js",
   "bin": {
@@ -90,6 +90,6 @@
     "undici": "7.24.4"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0"
   }
 }

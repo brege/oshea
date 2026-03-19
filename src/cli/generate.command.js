@@ -10,21 +10,21 @@ module.exports = {
         type: 'string',
         completionKey: 'usablePlugins',
       })
-      .option('outdir', {
-        alias: 'o',
-        describe: 'output directory',
-        type: 'string',
-        default: '.',
-      })
       .option('filename', {
         alias: 'f',
         describe: 'output pdf filename',
         type: 'string',
       })
       .option('open', {
-        describe: 'open pdf after generation',
+        describe: 'open pdf after generation (use --no-open to disable)',
         type: 'boolean',
         default: true,
+      })
+      .option('outdir', {
+        alias: 'o',
+        describe: 'output directory',
+        type: 'string',
+        default: '.',
       })
       .option('watch', {
         alias: 'w',

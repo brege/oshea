@@ -11,7 +11,7 @@ scenarios:
     test_id: 3.4.1
     args: plugin list
     expect:
-      contains: usable by oshea
+      contains: Summary for all known plugins
   - description: should list only enabled plugins
     test_id: 3.4.2
     args: plugin list --enabled
@@ -31,12 +31,11 @@ scenarios:
       contains_any:
         - Installed plugins (enabled and disabled)
         - No installed plugins found.
-  - description: should list all plugins in a condensed table format
+  - description: should list all plugins in a detailed format
     test_id: 3.4.5
-    args: plugin list --short
+    args: plugin list --detailed
     expect:
-      contains_any:
-        - Summary for all known plugins
+      contains: usable by oshea
   - description: should handle empty-state scenarios gracefully
     test_id: 3.4.6
     args: plugin list --available

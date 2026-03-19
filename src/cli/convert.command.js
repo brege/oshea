@@ -6,18 +6,6 @@ const cliOptionsForConvert = (yargs) => {
       describe: 'path to the input markdown file',
       type: 'string',
     })
-    .option('plugin', {
-      alias: 'p',
-      describe: 'plugin to use (name or path)',
-      type: 'string',
-      completionKey: 'usablePlugins',
-    })
-    .option('outdir', {
-      alias: 'o',
-      describe:
-        'output directory (overrides --filename path; defaults to system temp)',
-      type: 'string',
-    })
     .option('filename', {
       alias: 'f',
       describe:
@@ -25,9 +13,21 @@ const cliOptionsForConvert = (yargs) => {
       type: 'string',
     })
     .option('open', {
-      describe: 'open pdf after generation',
+      describe: 'open pdf after generation (use --no-open to disable)',
       type: 'boolean',
       default: true,
+    })
+    .option('outdir', {
+      alias: 'o',
+      describe:
+        'output directory (overrides --filename path; defaults to system temp)',
+      type: 'string',
+    })
+    .option('plugin', {
+      alias: 'p',
+      describe: 'plugin to use (name or path)',
+      type: 'string',
+      completionKey: 'usablePlugins',
     })
     .option('watch', {
       alias: 'w',

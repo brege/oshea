@@ -39,7 +39,7 @@ function filterPlugins(allPlugins, args) {
     );
   }
 
-  if (!args.short) {
+  if (args.detailed) {
     return allPlugins.filter(
       (plugin) =>
         plugin.status?.startsWith('Registered') ||
@@ -65,8 +65,8 @@ module.exports = {
         type: 'boolean',
         default: false,
       })
-      .option('enabled', {
-        describe: 'list enabled plugins',
+      .option('detailed', {
+        describe: 'display the detailed plugin listing',
         type: 'boolean',
         default: false,
       })
@@ -75,8 +75,8 @@ module.exports = {
         type: 'boolean',
         default: false,
       })
-      .option('short', {
-        describe: 'display a condensed, one-line summary',
+      .option('enabled', {
+        describe: 'list enabled plugins',
         type: 'boolean',
         default: false,
       })
@@ -111,7 +111,7 @@ module.exports = {
 
       const listData = {
         type: determineListType(args),
-        format: args.short ? 'table' : 'detailed',
+        format: args.detailed ? 'detailed' : 'table',
         filter: null,
         plugins: filteredPlugins,
       };

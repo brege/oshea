@@ -18,6 +18,24 @@ function loadCache() {
   }
 }
 
+function formatOptionSuggestions(options) {
+  const suggestions = [];
+
+  for (const option of options) {
+    suggestions.push(`--${option.name}`);
+
+    for (const alias of option.aliases || []) {
+      suggestions.push(`-${alias}`);
+    }
+
+    if (option.type === 'boolean') {
+      suggestions.push(`--no-${option.name}`);
+    }
+  }
+
+  return suggestions;
+}
+
 // This helper function correctly identifies the true command path by
 // stopping when it encounters an argument that is not a defined
 // subcommand.
@@ -75,8 +93,8 @@ function getSuggestions(argv, current) {
   const suggestions = [];
 
   const globalNode = cache.find((n) => n.name === '$0');
-  const globalOptionsAsFlags = (globalNode?.options || []).map(
-    (opt) => `--${opt.name}`,
+  const globalOptionsAsFlags = formatOptionSuggestions(
+    globalNode?.options || [],
   );
 
   const currentNode = findNode(cache, commandPathParts);
@@ -115,9 +133,7 @@ function getSuggestions(argv, current) {
   }
 
   if (current.startsWith('-')) {
-    suggestions.push(
-      ...(currentNode.options || []).map((opt) => `--${opt.name}`),
-    );
+    suggestions.push(...formatOptionSuggestions(currentNode.options || []));
     suggestions.push(...globalOptionsAsFlags);
   } else {
     if (!targetCompletionKey && !targetChoices) {

@@ -8,15 +8,22 @@ const logger = require(loggerPath);
 
 // Dynamic Proxy Yargs Stub
 function createYargsStub() {
+  function normalizeAliases(aliasValue) {
+    if (!aliasValue) return [];
+    return Array.isArray(aliasValue) ? aliasValue : [aliasValue];
+  }
+
   const stub = new Proxy(
     {
       options: {},
       positionals: [],
       option(key, opt) {
         this.options[key] = {
-          ...opt,
+          aliases: normalizeAliases(opt.alias),
           completionKey: opt.completionKey,
           choices: opt.choices,
+          default: opt.default,
+          type: opt.type,
         };
         return stub;
       },
@@ -71,13 +78,13 @@ function discoverCommandTree(dir, prefixParts = []) {
 
   if (prefixParts.length === 0) {
     const globalOptionsList = [
-      'config',
-      'factory-defaults',
-      'plugins-root',
-      'help',
-      'version',
-      'h',
-      'v',
+      { name: 'config', aliases: ['C'] },
+      { name: 'debug', aliases: ['D'] },
+      { name: 'factory-defaults', aliases: ['F'] },
+      { name: 'help', aliases: ['h'] },
+      { name: 'plugins-root', aliases: ['R'] },
+      { name: 'stack', aliases: ['S'] },
+      { name: 'version', aliases: ['v'] },
     ];
     let defaultCommandPositionals = [];
     let defaultCommandOptions = [];
@@ -98,8 +105,11 @@ function discoverCommandTree(dir, prefixParts = []) {
       defaultCommandOptions = Object.keys(defaultCommandStub.options || {}).map(
         (optKey) => ({
           name: optKey,
+          aliases: defaultCommandStub.options[optKey].aliases || [],
           completionKey: defaultCommandStub.options[optKey].completionKey,
           choices: defaultCommandStub.options[optKey].choices,
+          default: defaultCommandStub.options[optKey].default,
+          type: defaultCommandStub.options[optKey].type,
         }),
       );
     } catch (builderError) {
@@ -110,12 +120,23 @@ function discoverCommandTree(dir, prefixParts = []) {
       });
     }
 
-    const globalOptionsFormatted = globalOptionsList.map((name) => ({ name }));
-    const allOptionsFor$0 = [
-      ...new Set([...globalOptionsFormatted, ...defaultCommandOptions]),
-    ];
-    const finalOptionsFor$0 = allOptionsFor$0.sort((a, b) =>
-      a.name.localeCompare(b.name),
+    const mergedGlobalOptions = new Map();
+    [...globalOptionsList, ...defaultCommandOptions].forEach((opt) => {
+      const existing = mergedGlobalOptions.get(opt.name);
+      if (!existing) {
+        mergedGlobalOptions.set(opt.name, opt);
+        return;
+      }
+      mergedGlobalOptions.set(opt.name, {
+        ...existing,
+        ...opt,
+        aliases: [
+          ...new Set([...(existing.aliases || []), ...(opt.aliases || [])]),
+        ],
+      });
+    });
+    const finalOptionsFor$0 = Array.from(mergedGlobalOptions.values()).sort(
+      (a, b) => a.name.localeCompare(b.name),
     );
     const finalPositionalsFor$0 = [...new Set([...defaultCommandPositionals])];
 
@@ -156,8 +177,11 @@ function discoverCommandTree(dir, prefixParts = []) {
         }
         const options = Object.keys(yargsStub.options || {}).map((optKey) => ({
           name: optKey,
+          aliases: yargsStub.options[optKey].aliases || [],
           completionKey: yargsStub.options[optKey].completionKey,
           choices: yargsStub.options[optKey].choices,
+          default: yargsStub.options[optKey].default,
+          type: yargsStub.options[optKey].type,
         }));
         const positionals = (yargsStub.positionals || []).map((p) => ({
           key: p.key,

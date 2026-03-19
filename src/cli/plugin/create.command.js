@@ -41,6 +41,11 @@ module.exports = {
         describe: 'name for the new plugin',
         type: 'string',
       })
+      .option('force', {
+        describe: 'overwrite target directory if it exists',
+        type: 'boolean',
+        default: false,
+      })
       .option('from', {
         describe: 'source to archetype from (registered plugin name or path)',
         type: 'string',
@@ -52,11 +57,6 @@ module.exports = {
         describe: 'directory to create the new plugin in',
         type: 'string',
         normalize: true,
-      })
-      .option('force', {
-        describe: 'overwrite target directory if it exists',
-        type: 'boolean',
-        default: false,
       })
       .epilogue(
         "If --from is omitted, a default template is used.\nIf --outdir is omitted, creates a 'my-plugins' directory in your project for development.",

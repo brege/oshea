@@ -33,9 +33,9 @@ const isCompletionScriptGeneration =
   !argvRaw.includes('--get-yargs-completions');
 const sharedHelpOptionKeys = [
   'config',
+  'debug',
   'factory-defaults',
   'plugins-root',
-  'debug',
   'stack',
 ];
 const sharedHelpEpilogue =
@@ -55,26 +55,31 @@ function createBaseYargs() {
     .scriptName('oshea')
     .usage('Usage: $0 <command_or_markdown_file> [options]')
     .option('config', {
+      alias: 'C',
       describe: 'path to a project-specific YAML config file',
       type: 'string',
       normalize: true,
     })
+    .option('debug', {
+      alias: 'D',
+      describe: 'enable detailed debug output with enhanced logging',
+      type: 'boolean',
+      default: false,
+    })
     .option('factory-defaults', {
+      alias: 'F',
       describe: 'use only bundled default config, ignores overrides',
       type: 'boolean',
       default: false,
     })
     .option('plugins-root', {
+      alias: 'R',
       describe: 'overrides the managed plugins directory',
       type: 'string',
       normalize: true,
     })
-    .option('debug', {
-      describe: 'enable detailed debug output with enhanced logging',
-      type: 'boolean',
-      default: false,
-    })
     .option('stack', {
+      alias: 'S',
       describe: 'show stack traces in debug output (implies --debug)',
       type: 'boolean',
       default: false,

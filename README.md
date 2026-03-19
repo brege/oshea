@@ -87,15 +87,15 @@ npm install -g
 
 ## Documentation
 
-- [**Docs**](docs/README.md) for the main documentation index
+- [**Docs**](docs/#readme) for the main documentation index
   - [Guides](docs/guides)
   - [Walkthroughs](docs/walkthroughs)
   - [References](docs/refs)
   - [Historical](docs/archive)
-- [**Paths**](paths/README.md) registry README used by all app and test modules
-- [**Plugins**](plugins/README.md) bundled in the app and how to use and build them
-- [**Scripts**](scripts/README.md) for an index of maintainer scripts
-- [**Tests**](test/README.md) for integration, end-to-end, and life-cycle tests with [Mocha](https://mochajs.org/)
+- [**Paths**](paths/#readme) registry README used by all app and test modules
+- [**Plugins**](plugins/#readme) bundled in the app and how to use and build them
+- [**Scripts**](scripts/#readme) for an index of maintainer scripts
+- [**Tests**](test/#readme) for integration, end-to-end, and life-cycle tests with [Mocha](https://mochajs.org/)
 
 ## Working with Plugins
 
@@ -104,7 +104,7 @@ Use any plugin with your markdown files:
 oshea convert my-resume.md --plugin cv
 ```
 
-Take a look at the [Bundled Plugins](plugins/README.md) page for more examples.
+Take a look at the [Bundled Plugins](plugins/#readme) page for more examples.
 
 ### Watch mode
 
@@ -131,7 +131,7 @@ my-plugins/academic-letter/
 └── README.md                 plugin description
 ```
 
-Plugins are portable and can be shared across projects. See [Bundled Plugins](plugins/README.md) index for more information.
+Plugins are portable and can be shared across projects. See [Bundled Plugins](plugins/#readme) index for more information.
 
 ### Creating Plugins with Claude and Codex Skills
 
@@ -168,13 +168,13 @@ Install a plugin from GitHub
 oshea plugin add https://github.com/user/my-plugin
 ```
 
-See the [Plugins Index](plugins/README.md) for more information. There is also an index of known external plugins at [github.com/brege/oshea-plugins](https://github.com/brege/oshea-plugins).
+See the [Plugins Index](plugins/#readme) for more information. There is also an index of known external plugins at [github.com/brege/oshea-plugins](https://github.com/brege/oshea-plugins).
 
 ## Testing
 
 This project has a rich testing framework based on its [`.mocharc.js`](.mocharc.js). In addition to the in-situ tests bundled with each plugin, there are over 300 tests, ranging from unit, integration, end-to-end, and lifecycle tests, in a declarative, manifest-driven harness and factory mocking system.
 
-See the [Test Index](test/README.md) for all test suite documentation.
+See the [Test Index](test/#readme) for all test suite documentation.
 
 ## License
 

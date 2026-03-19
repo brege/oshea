@@ -4,11 +4,11 @@ This document is a central index for all documentation within **oshea**'s repo. 
 
 ## Indexes
 * [Docs](README.md) centralizes user docs and project indexes (this README)
-* [Paths](../paths/README.md) registry is a framework for non-relative pathing
-* [Plugins](../plugins/README.md) bundled with oshea
-* [Scripts](../scripts/README.md) for standalone tools
-* [Tests](../test/README.md) & QA system overview
-* [Utils](../src/utils/README.md) like formatters, loggers, etc
+* [Paths](../paths/#readme) registry is a framework for non-relative pathing
+* [Plugins](../plugins/#readme) bundled with oshea
+* [Scripts](../scripts/#readme) for standalone tools
+* [Tests](../test/#readme) & QA system overview
+* [Utils](../src/utils/#readme) like formatters, loggers, etc
 
 ## Guides
 * [Claude Skills](guides/claude-skills.md): Examples of Claude and Codex plugin generation

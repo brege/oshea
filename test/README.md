@@ -87,7 +87,7 @@ Test analytics data is stored in `~/.local/share/oshea/test-analytics/test-resul
 
 All formation-era test documentation and deprecated tools are preserved in the archive.
 
-* [Archive Index](archive/README.md): Complete historical documentation
+* [Archive Index](archive/#readme): Complete historical documentation
 * [Legacy QA Tools](archive/scripts/): Deprecated analysis scripts  
 * [Original Checklists](archive/docs/): Markdown-based test checklists
 * [Test Generation Priority Order](archive/docs/test-generation-priority-order.md): Test roll out implementation strategy

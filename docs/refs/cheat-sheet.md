@@ -2,7 +2,7 @@
 
 Quick examples and syntax for **oshea** commands and configurations.
 
-**Index of all Documentation: [`docs/README.md`](../README.md).**
+**Index of all Documentation: [`docs/README.md`](../#readme).**
 
 ## Core Commands
 

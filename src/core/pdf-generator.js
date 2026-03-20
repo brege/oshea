@@ -1,8 +1,15 @@
 // src/core/pdf-generator.js
-const puppeteer = require('puppeteer');
 const path = require('node:path');
 
-const { loggerPath } = require('@paths');
+const { loggerPath, projectRoot } = require('@paths');
+
+process.env.PUPPETEER_CACHE_DIR ??= path.join(
+  projectRoot,
+  'node_modules',
+  '.puppeteer_cache',
+);
+
+const puppeteer = require('puppeteer');
 const logger = require(loggerPath);
 
 function parseViewportPixels(dimension) {

@@ -1,3 +1,4 @@
+// .puppeteerrc.cjs
 const { join } = require('node:path');
 
 // Keep the browser cache inside the installed package tree so repo and

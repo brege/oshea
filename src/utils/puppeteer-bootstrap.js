@@ -5,6 +5,14 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
+process.env.PUPPETEER_CACHE_DIR ??= path.join(
+  __dirname,
+  '..',
+  '..',
+  'node_modules',
+  '.puppeteer_cache',
+);
+
 const expectedBrowserPath = require('puppeteer').executablePath();
 
 if (!fs.existsSync(expectedBrowserPath)) {

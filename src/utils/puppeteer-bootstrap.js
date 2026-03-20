@@ -5,10 +5,20 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
+const projectRoot = process.cwd();
+const puppeteerPackageJsonPath = path.join(
+  projectRoot,
+  'node_modules',
+  'puppeteer',
+  'package.json',
+);
+
+if (!fs.existsSync(puppeteerPackageJsonPath)) {
+  process.exit(0);
+}
+
 process.env.PUPPETEER_CACHE_DIR ??= path.join(
-  __dirname,
-  '..',
-  '..',
+  projectRoot,
   'node_modules',
   '.puppeteer_cache',
 );
@@ -16,9 +26,8 @@ process.env.PUPPETEER_CACHE_DIR ??= path.join(
 const expectedBrowserPath = require('puppeteer').executablePath();
 
 if (!fs.existsSync(expectedBrowserPath)) {
-  const packageJsonPath = require.resolve('puppeteer/package.json');
   const installScriptPath = path.join(
-    path.dirname(packageJsonPath),
+    path.dirname(puppeteerPackageJsonPath),
     'install.mjs',
   );
   const result = spawnSync(process.execPath, [installScriptPath], {

@@ -19,7 +19,6 @@
     "config.example.yaml"
   ],
   "scripts": {
-    "prepare": "node src/utils/puppeteer-bootstrap.js",
     "start": "node cli.js",
     "paths": "node paths/generator.js",
     "test": "mocha",

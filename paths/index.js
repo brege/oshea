@@ -1,6 +1,6 @@
 // paths/index.js
 // index.js - Project Path Registry
-// Generated: 2026-03-18T17:32:10.661Z
+// Generated: 2026-07-19T15:20:35.226Z
 // Architecture: Feature-based with dependency ranking
 // Regenerate: npm run paths
 // Auto-generated - do not edit manually
@@ -207,6 +207,7 @@ const fileHelpersPath = path.join(projectRoot, 'src/utils/file-helpers.js');
 const loggerEnhancerPath = path.join(projectRoot, 'src/utils/logger-enhancer.js');
 const loggerSurfacerPath = path.join(projectRoot, 'src/utils/logger-surfacer.js');
 const loggerPath = path.join(projectRoot, 'src/utils/logger.js');
+const puppeteerBootstrapPath = path.join(projectRoot, 'src/utils/puppeteer-bootstrap.js');
 const appFormatterPath = path.join(projectRoot, 'src/utils/formatters/app.formatter.js');
 const colorThemePath = path.join(projectRoot, 'src/utils/formatters/color-theme.js');
 const configFormatterPath = path.join(projectRoot, 'src/utils/formatters/config.formatter.js');
@@ -382,6 +383,7 @@ module.exports = {
   loggerEnhancerPath,
   loggerSurfacerPath,
   loggerPath,
+  puppeteerBootstrapPath,
   appFormatterPath,
   colorThemePath,
   configFormatterPath,

@@ -3,6 +3,7 @@ require('module-alias/register');
 const {
   projectRoot,
   pdfGeneratorPath,
+  puppeteerBootstrapPath,
   captureLogsPath,
   pdfGeneratorManifestPath,
   allPaths,
@@ -47,6 +48,7 @@ describe(`pdf-generator (Subsystem Integration Tests) ${path.relative(projectRoo
     const testLoggerPath = captureLogsPath;
     const { generatePdf: proxiedGeneratePdf } = proxyquire(pdfGeneratorPath, {
       puppeteer: mockPuppeteer,
+      [puppeteerBootstrapPath]: { ensureBrowser: () => {} },
       '@paths': {
         ...allPaths, // Ensure other paths are preserved
         loggerPath: testLoggerPath,

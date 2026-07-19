@@ -1,7 +1,7 @@
 // src/core/pdf-generator.js
 const path = require('node:path');
 
-const { loggerPath, projectRoot } = require('@paths');
+const { loggerPath, projectRoot, puppeteerBootstrapPath } = require('@paths');
 
 process.env.PUPPETEER_CACHE_DIR ??= path.join(
   projectRoot,
@@ -10,6 +10,7 @@ process.env.PUPPETEER_CACHE_DIR ??= path.join(
 );
 
 const puppeteer = require('puppeteer');
+const { ensureBrowser } = require(puppeteerBootstrapPath);
 const logger = require(loggerPath);
 
 function parseViewportPixels(dimension) {
@@ -47,6 +48,7 @@ async function generatePdf(
   let browser = null;
   let page = null;
   try {
+    ensureBrowser();
     logger.debug('Launching Puppeteer browser', {
       context: 'PDFGenerator',
     });

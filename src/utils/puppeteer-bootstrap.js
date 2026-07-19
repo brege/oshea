@@ -1,31 +1,42 @@
-#!/usr/bin/env node
 // src/utils/puppeteer-bootstrap.js
 
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-const projectRoot = process.cwd();
-const puppeteerPackageJsonPath = path.join(
-  projectRoot,
-  'node_modules',
-  'puppeteer',
-  'package.json',
-);
+const { projectRoot } = require('@paths');
 
-if (!fs.existsSync(puppeteerPackageJsonPath)) {
-  process.exit(0);
-}
+let ensured = false;
 
-process.env.PUPPETEER_CACHE_DIR ??= path.join(
-  projectRoot,
-  'node_modules',
-  '.puppeteer_cache',
-);
+// Provision the Puppeteer browser on first use when it is missing, so no npm
+// install lifecycle script is needed. Honors .puppeteerrc.cjs via install.mjs.
+function ensureBrowser() {
+  if (ensured) {
+    return;
+  }
 
-const expectedBrowserPath = require('puppeteer').executablePath();
+  const puppeteerPackageJsonPath = path.join(
+    projectRoot,
+    'node_modules',
+    'puppeteer',
+    'package.json',
+  );
+  if (!fs.existsSync(puppeteerPackageJsonPath)) {
+    ensured = true;
+    return;
+  }
 
-if (!fs.existsSync(expectedBrowserPath)) {
+  process.env.PUPPETEER_CACHE_DIR ??= path.join(
+    projectRoot,
+    'node_modules',
+    '.puppeteer_cache',
+  );
+
+  if (fs.existsSync(require('puppeteer').executablePath())) {
+    ensured = true;
+    return;
+  }
+
   const installScriptPath = path.join(
     path.dirname(puppeteerPackageJsonPath),
     'install.mjs',
@@ -33,5 +44,10 @@ if (!fs.existsSync(expectedBrowserPath)) {
   const result = spawnSync(process.execPath, [installScriptPath], {
     stdio: 'inherit',
   });
-  process.exit(result.status || 1);
+  if (result.status !== 0) {
+    throw new Error('Puppeteer browser bootstrap failed');
+  }
+  ensured = true;
 }
+
+module.exports = { ensureBrowser };

@@ -1,5 +1,9 @@
 # oshea
 
+[![CI](https://github.com/brege/oshea/actions/workflows/ci.yml/badge.svg)](https://github.com/brege/oshea/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/oshea)](https://www.npmjs.com/package/oshea)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 A [Node.js](https://nodejs.org/) command-line tool that transforms [Markdown](https://daringfireball.net/projects/markdown/) files into beautifully styled PDFs.
 
 It features a powerful, extensible plugin system, making it incredibly versatile for creating anything from CVs and cover letters to recipe books and custom reports. Built on [markdown-it](https://github.com/markdown-it/markdown-it) for Markdown parsing and [puppeteer](https://pptr.dev/) for PDF generation.

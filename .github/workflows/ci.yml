@@ -27,8 +27,22 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
 
+    - name: Upgrade npm for hardened config
+      run: npm install --global npm@^11.10.0
+
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --ignore-scripts
+
+    - name: Provision Puppeteer browser
+      run: npx puppeteer browsers install chrome
+
+    - name: Audit dependencies (high+ severity)
+      run: npm audit --omit=dev --audit-level=high
+      continue-on-error: true
+
+    - name: Verify npm registry signatures
+      run: npm audit signatures
+      continue-on-error: true
 
     - name: Run linting
       run: npm run lint

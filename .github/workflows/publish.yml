@@ -24,7 +24,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Provision Puppeteer browser
+        run: npx puppeteer browsers install chrome
 
       - name: Run linting
         run: npm run lint
